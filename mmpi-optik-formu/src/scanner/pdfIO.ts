@@ -53,6 +53,16 @@ export function createSafePdfWorkerSource(source: string, version: string): stri
   })();\n`;
 }
 
+/**
+ * pdfjs-dist 6.3.289 emits `constructor({ name, port, verbosity }?: { name?: null; port?: null; ... })`
+ * in api.d.ts, while the same package documents `PDFWorkerParameters.port?: Worker` and its shipped
+ * runtime reads `params?.port`. The documented shape is asserted at this one call site so a real
+ * Worker port stays type-checked everywhere else.
+ */
+type PdfWorkerConstructor = new (params: {
+  name?: string; port?: Worker; verbosity?: number;
+}) => import('pdfjs-dist').PDFWorker;
+
 /** A dedicated, bundled worker per document: no CDN, upload or remote PDF fetch. */
 export async function* readPdfPages(file: File, signal: AbortSignal, remainingPages: number): AsyncGenerator<SourcePage> {
   checkFileSize(file);
@@ -109,8 +119,11 @@ export async function* readPdfPages(file: File, signal: AbortSignal, remainingPa
     port.addEventListener('error', workerError);
     port.addEventListener('messageerror', workerError);
     port.addEventListener('message', workerMessage);
-    worker = new pdfjs.PDFWorker({ port });
-    loading = pdfjs.getDocument({ data, worker, isEvalSupported: false, useWasm: false,
+    worker = new (pdfjs.PDFWorker as unknown as PdfWorkerConstructor)({ port });
+    // `isEvalSupported` was removed upstream: it is absent from pdfjs-dist 6.3.289's types and from
+    // its runtime, so passing it would be a silent no-op. The worker hardening above is what
+    // constrains parsing; do not read this option list as an "eval disabled" guarantee.
+    loading = pdfjs.getDocument({ data, worker, useWasm: false,
       useWorkerFetch: false, useSystemFonts: true, disableAutoFetch: true, stopAtErrors: true,
       isOffscreenCanvasSupported: false, isImageDecoderSupported: false, maxImageSize: 0 });
     const document = await wait(() => loading!.promise);

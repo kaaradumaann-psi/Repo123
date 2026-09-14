@@ -4,7 +4,8 @@ import type { PageReadFailure, PageReadResult } from '../results/scanResultTypes
 import { detectAlignmentMarks } from './alignmentDetector';
 import { assessImageQuality, QUALITY_THRESHOLDS, toGrayscale } from './imageQuality';
 import { detectItemMarks } from './markDetector';
-import { CANONICAL_PIXELS_PER_MM, fitHomography, inspectPageGeometry, mapPoint, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
+import { CANONICAL_PIXELS_PER_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
+import type { Homography } from './perspectiveCorrection';
 import { decodePageQr } from './qrDecoder';
 
 export const MAX_INPUT_PIXELS = 12_000_000;
@@ -47,12 +48,14 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
       return failure('INVALID_DEFINITION', 'Hizalama veya yan\u0131t alanlar\u0131 ge\u00e7ersiz.');
     }
     const qr = createPageQr(definition, identity.batchId, identity.pageNumber);
-    let initial;
-    try { initial = fitHomography(qr.innerCorners, decoded.corners); }
+    // Two predictions, tried in order: the projective fit tracks genuine perspective, the bounded
+    // similarity fit stays accurate on rotated sheets where the projective terms amplify QR noise.
+    let predictions: Homography[];
+    try { predictions = [fitHomography(qr.innerCorners, decoded.corners), fitSimilarity(qr.innerCorners, decoded.corners)]; }
     catch { return failure('INVALID_GEOMETRY', 'QR perspektifi hesaplanamad\u0131.'); }
     const qrCenter = { x: qr.area.x + qr.area.width / 2, y: qr.area.y + qr.area.height / 2 };
     let markers;
-    try { markers = detectAlignmentMarks(source, page.alignmentMarks, initial, qrCenter); }
+    try { markers = detectAlignmentMarks(source, page.alignmentMarks, predictions, qrCenter); }
     catch { return failure('INVALID_GEOMETRY', 'QR konum tahmini ge\u00e7ersiz; sayfay\u0131 daha dik a\u00e7\u0131dan \u00e7ekin.'); }
     if (!markers) return failure('ALIGNMENT_MISSING', 'D\u00f6rt siyah hizalama karesi ayr\u0131 ayr\u0131 bulunamad\u0131; sayfan\u0131n tamam\u0131 g\u00f6r\u00fcnmeli.');
     const physicalCenters = page.alignmentMarks.map(mark => ({ x: mark.x + mark.width / 2, y: mark.y + mark.height / 2 }));

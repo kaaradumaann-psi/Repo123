@@ -55,6 +55,34 @@ export function fitHomography(from: readonly Point[], to: readonly Point[]): Hom
   return result.map(value => value / result[8]) as Homography;
 }
 
+/**
+ * Least-squares similarity (uniform scale + rotation + translation) from N >= 2 correspondences.
+ * A full 8-DOF homography fitted to four corners confined to a 26 mm symbol cannot constrain its
+ * projective terms: sub-pixel corner noise is amplified into hundreds of pixels when extrapolated
+ * across the sheet. This bounded 4-DOF estimate is an alternative *prediction* for locating the
+ * printed squares, never the page transform itself, which stays fitted from the four detected
+ * centres. Throws on fewer than two, mismatched or degenerate correspondences.
+ */
+export function fitSimilarity(from: readonly Point[], to: readonly Point[]): Homography {
+  if (from.length !== to.length || from.length < 2) throw new Error('At least two matched correspondences required');
+  if (from.some(p => !Number.isFinite(p.x) || !Number.isFinite(p.y)) ||
+    to.some(p => !Number.isFinite(p.x) || !Number.isFinite(p.y))) throw new Error('Non-finite point');
+  const count = from.length;
+  const meanX = from.reduce((sum, p) => sum + p.x, 0) / count, meanY = from.reduce((sum, p) => sum + p.y, 0) / count;
+  const meanU = to.reduce((sum, p) => sum + p.x, 0) / count, meanV = to.reduce((sum, p) => sum + p.y, 0) / count;
+  let spread = 0, real = 0, imaginary = 0;
+  for (let index = 0; index < count; index++) {
+    const dx = from[index]!.x - meanX, dy = from[index]!.y - meanY;
+    const du = to[index]!.x - meanU, dv = to[index]!.y - meanV;
+    spread += dx * dx + dy * dy;
+    real += dx * du + dy * dv;
+    imaginary += dx * dv - dy * du;
+  }
+  if (spread < 1e-8) throw new Error('Degenerate points');
+  const a = real / spread, b = imaginary / spread;
+  return [a, -b, meanU - a * meanX + b * meanY, b, a, meanV - b * meanX - a * meanY, 0, 0, 1];
+}
+
 export function mapPoint(matrix: Homography, point: Point): Point {
   const [a, b, c, d, e, f, g, h, i] = matrix;
   const denominator = g * point.x + h * point.y + i;

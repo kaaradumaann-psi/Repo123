@@ -13,8 +13,8 @@ export function PageQr({ definition, batchId, pageNumber }: {
   const modules: { x: number; y: number }[] = [];
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dark = typeof data.get === 'function' ? data.get(x, y) : data[y * size + x];
-      if (dark) modules.push({ x, y });
+      // qrcode's BitMatrix stores modules row-major: get(row, col) === data[row * size + col].
+      if (data[y * size + x]) modules.push({ x, y });
     }
   }
   return <svg className="page-qr" viewBox={`0 0 ${box} ${box}`} aria-hidden="true"
