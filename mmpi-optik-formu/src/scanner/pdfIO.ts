@@ -33,7 +33,9 @@ export function createSafePdfWorkerSource(source: string, version: string): stri
     const makeFilter = Parser.prototype.makeFilter;
     Parser.prototype.makeFilter = function(stream, name, length, params, ...args) {
       if (!['Fl', 'FlateDecode'].includes(name) || params) {
-        fail('PDF sıkıştırma biçimi güvenli biçimde desteklenmiyor. JPG/PNG seçin.');
+        fail('PDF sıkıştırma biçimi (' + name + (params ? ', DecodeParms ile' : '') +
+          ') güvenli biçimde desteklenmiyor. Bu dosya büyük olasılıkla taranmış sayfa görüntüsü içeriyor; ' +
+          'sayfaları JPG veya PNG olarak kaydedip yükleyin.');
       }
       return makeFilter.call(this, stream, name, length, params, ...args);
     };
