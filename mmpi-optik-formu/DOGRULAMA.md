@@ -11,7 +11,7 @@ Bu rapor yalnızca bu ortamda çalıştırılan komutların gerçek çıktılar�
 | Komut | Sonuç |
 | --- | --- |
 | `npm run typecheck` (`tsc --noEmit`) | **exit 0**, hata yok |
-| `npm test` (`tsx --test tests/*.test.ts`) | **50 test, 50 geçti, 0 başarısız** |
+| `npm test` (`tsx --test tests/*.test.ts`) | **55 test, 55 geçti, 0 başarısız, 0 atlandı** |
 | `npm run build` | **exit 0** · `Built dist/index.html and ../optik-form.html (self-contained).` |
 | `npm run pdf` | **exit 0** · `4 sayfa · A4 dikey · 242 KB` |
 | `npm run verify:pdf` | **exit 0** (ayrıntı aşağıda) |
@@ -23,11 +23,12 @@ Test dağılımı:
 | --- | --- |
 | `tests/layout.test.ts` | 6 |
 | `tests/formIdentity.test.ts` | 2 |
-| `tests/omrPerspective.test.ts` | 6 |
-| `tests/omrEngine.test.ts` | 14 |
+| `tests/omrPerspective.test.ts` | 7 |
+| `tests/omrEngine.test.ts` | 16 |
 | `tests/omrSafety.test.ts` | 7 |
 | `tests/resultsSafety.test.ts` | 13 |
 | `tests/pdfForm.test.ts` | 1 (üret + dosyadan doğrula) |
+| `tests/pdfScanPipeline.test.ts` | 2 (PDF'i rasterleştir + gerçek OMR hattı) |
 | `tests/build.test.ts` | 1 |
 
 ## Yazdırılabilir optik form
@@ -168,7 +169,66 @@ düzlemsel olmaması nedeniyle QR tabanlı tahminin arama yarıçapını aşmas�
 olasılık sentetik testlerde ölçülmedi; bu yüzden **gerçek fotoğraf gerekir**.
 
 `tests/omrEngine.test.ts` içindeki yeni test, bulunamayan karenin adının ve
-elendiği ölçütün gerçekten mesajda geçtiğini doğruluyor (50/50 test).
+elendiği ölçütün gerçekten mesajda geçtiğini doğruluyor (55/55 test).
+
+## Tam kenarlı sayfa: PDF yüklemesi neden reddediliyordu (2026-09-14)
+
+Kullanıcı formu tarayıcıdan “PDF olarak kaydet” ile üretip yüklediğinde dört
+sayfanın tamamı şu hatayı verdi:
+
+```
+optik.pdf · PDF 1/4: Sayfa kabul edilmedi: Sayfanın kenarları kesilmiş;
+kâğıdın tamamını kadraja alın.
+```
+
+Kök neden tahmin edilmedi, ölçüldü. `inspectPageGeometry` sayfanın dört köşesini
+görüntüye izdüşürüyor ve bir köşe kenarın dışına taşıyorsa `PAGE_CROPPED`
+döndürüyordu; tolerans **sabit 1,5 pikseldi**. Oysa bir PDF rasteri veya kenar
+boşluksuz tarama **tam kenarlıdır**: kâğıt görüntünün sınırına birebir oturur.
+Depodaki PDF'in rasterinde ölçülen değer:
+
+```
+PDF rasteri (1680x2376) · px/mm 8.000 · köşeler -0.50 px · kalan pay 1.0 px
+```
+
+Yani tam kenarlı her sayfa, 2 piksellik (0,25 mm) bir kenar kaybında bile
+“kesilmiş” sayılıyordu — dört köşe karesi kenardan 10 mm içeride ve tamamen
+sağlam olmasına rağmen. Düzeltmeden önce ölçülen zarf:
+
+```
+  0 mm kenar kaybı -> KABUL
+0.25 mm ve sonrası -> RED [PAGE_CROPPED]
+```
+
+Düzeltme: tolerans artık sabit bir piksel değeri değil, **formun kendi
+yerleşiminden türetiliyor**. `analyzePage` kenardan en yakın basılı öğeye
+(hizalama karesi, QR, yanıt dairesi) olan uzaklığı buluyor ve yarısını tolerans
+yapıyor; bu form için 10 mm / 2 = **5 mm**, `MAX_CROP_TOLERANCE_MM` ile sınırlı.
+Bu kadarlık bir kayıpta okunabilir hiçbir şey yitirilmediği için kabul doğru
+davranıştır; gerçekten kesilmiş sayfalar çok daha büyük farkla reddedilmeye
+devam ediyor. Düzeltmeden sonra ölçülen zarf:
+
+```
+0 - 4 mm kenar kaybı -> KABUL
+6 mm -> RED [PAGE_CROPPED] yaklaşık 6,1 mm eksik
+8 mm -> RED [PAGE_CROPPED] yaklaşık 8,1 mm eksik
+```
+
+Mesaj da artık ölçülen kaybı ve gerçek nedeni söylüyor; bir PDF'e “kadraja alın”
+demek yerine yazdırma ayarlarını veriyor:
+
+```
+Sayfanın bir kenarı görüntüde yok; yaklaşık 6,1 mm eksik. Fotoğraflarda kâğıdın
+tamamını kadraja alın. PDF veya yazdırma çıktısında sayfa boyutunu A4, ölçeği
+%100, kenar boşluklarını "yok" yapın ve "sayfaya sığdır" seçeneğini kapatın.
+```
+
+Bu yol artık kalıcı olarak test ediliyor. `tests/pdfScanPipeline.test.ts`
+depodaki PDF'i `src/scanner/pdfIO.ts` ile aynı ölçekte rasterleştirip gerçek
+`analyzePage` hattından geçiriyor: 4 sayfa kabul ediliyor, 566 maddenin tamamı
+`blank` okunuyor, sayfalar **tek tek** kabul ediliyor, eksik sayfalar listede
+kalıyor ve dört sayfa aynı baskı setini paylaşıyor. Bu, PDF yükleme yolunun ilk
+uçtan uca testi; daha önce hiç yoktu.
 
 ## Doğrulanmayanlar
 
@@ -186,7 +246,13 @@ Bunlar bu ortamda **çalıştırılamadı**; yapılmış gibi gösterilmiyor.
   üzerinde okuma doğruluğu. Tüm OMR eşikleri sentetik raster örneklerle
   sınırlıdır; doğruluk yüzdesi iddia edilmez.
 - **Kamera ve `getUserMedia`.** Bu oturumda hiçbir tarayıcı çalıştırılmadı;
-  kamera akışı yalnızca kod düzeyinde incelendi.
+  kamera akışı yalnızca kod düzeyinde incelendi. Tarayıcı ayrıca kamerayı
+  yalnızca HTTPS veya `localhost` üzerinde açar; bu kural uygulama kodundan
+  aşılamaz.
+- **Tarayıcıdaki PDF işçisi.** `tests/pdfScanPipeline.test.ts` PDF'i Node'da
+  rasterleştirip OMR hattını doğruluyor; ancak `src/scanner/pdfIO.ts` içindeki
+  sıkılaştırılmış Web Worker, `createSafePdfWorkerSource` denetimi ve blob
+  işçisi bir tarayıcıda çalıştırılmadı.
 - **Safari/Firefox ve mobil işletim sistemleri.**
 - **Yetkili MMPI formu.** Madde düzeni, seçenek yapısı, sayfa sayısı ve
   numaralandırmanın lisanslı formla eşdeğerliği. Yetkili veri sağlanmadı.

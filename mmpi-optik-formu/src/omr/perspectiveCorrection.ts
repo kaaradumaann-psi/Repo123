@@ -96,8 +96,15 @@ export function pageCorners(widthMm: number, heightMm: number): Point[] {
   return [{ x: 0, y: 0 }, { x: widthMm, y: 0 }, { x: widthMm, y: heightMm }, { x: 0, y: heightMm }];
 }
 
+/** Page edge loss below this is raster rounding, not a missing strip of paper. A caller that knows
+ * the layout may widen it, but never past MAX_CROP_TOLERANCE_MM nor past half the distance from
+ * the page edge to the nearest printed feature. */
+export const CROP_TOLERANCE_MM = 2;
+export const MAX_CROP_TOLERANCE_MM = 6;
+
 /** Conservative provisional limits; rotations are allowed, reflections and strong foreshortening are not. */
-export function inspectPageGeometry(matrix: Homography, widthMm: number, heightMm: number, image: { width: number; height: number }) {
+export function inspectPageGeometry(matrix: Homography, widthMm: number, heightMm: number, image: { width: number; height: number },
+  cropToleranceMm: number = CROP_TOLERANCE_MM) {
   const sourceCorners = pageCorners(widthMm, heightMm).map(p => mapPoint(matrix, p));
   let minScale = Infinity, maxScale = 0, minDenominator = Infinity, maxDenominator = 0;
   for (let row = 0; row <= 4; row++) for (let col = 0; col <= 4; col++) {
@@ -119,9 +126,19 @@ export function inspectPageGeometry(matrix: Homography, widthMm: number, heightM
     maxScale = Math.max(maxScale, large);
   }
   if (maxScale / minScale > 2.5 || minDenominator / maxDenominator < .45) throw new Error('Extreme perspective');
-  // A subpixel margin accommodates raster-centre fitting, not a missing strip of paper.
-  const cropped = sourceCorners.some(p => p.x < -1.5 || p.y < -1.5 || p.x > image.width + .5 || p.y > image.height + .5);
-  return { sourceCorners, pixelsPerMm: minScale, maxPixelsPerMm: maxScale, cropped };
+  // The tolerance is physical, not a subpixel fudge. A full-bleed digital page - a rendered PDF or
+  // a borderless scan - puts the sheet edge exactly on the image border, so the fitted corner lands
+  // a fraction of a pixel outside it and a fixed 1.5 px margin left under 2 px of headroom: every
+  // such page was reported as cropped although nothing readable was missing. The tolerance is meant
+  // to stay below the distance to the nearest printed feature, so a loss inside it cannot remove
+  // anything readable, while genuinely cut sheets exceed it by a wide margin.
+  if (!Number.isFinite(cropToleranceMm) || cropToleranceMm < 0) throw new Error('Invalid crop tolerance');
+  // Measured against the true image border, so the reported loss is the real one; the tolerance only
+  // decides whether that loss is rounding or a strip of paper that is actually missing.
+  const overshoot = Math.max(0, ...sourceCorners.flatMap(p =>
+    [-p.x, -p.y, p.x - image.width, p.y - image.height]));
+  return { sourceCorners, pixelsPerMm: minScale, maxPixelsPerMm: maxScale,
+    cropped: overshoot > minScale * cropToleranceMm, cropOvershootMm: overshoot / minScale };
 }
 
 /** Bilinear inverse sampling: each canonical pixel centre is mapped into the source. No canvas. */

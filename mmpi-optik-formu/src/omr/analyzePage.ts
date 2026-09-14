@@ -5,7 +5,7 @@ import { describeAlignmentFailures, detectAlignmentMarks } from './alignmentDete
 import type { AlignmentFailure } from './alignmentDetector';
 import { assessImageQuality, QUALITY_THRESHOLDS, toGrayscale } from './imageQuality';
 import { detectItemMarks } from './markDetector';
-import { CANONICAL_PIXELS_PER_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
+import { CANONICAL_PIXELS_PER_MM, CROP_TOLERANCE_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, MAX_CROP_TOLERANCE_MM, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
 import type { Homography } from './perspectiveCorrection';
 import { decodePageQr } from './qrDecoder';
 
@@ -67,12 +67,22 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     if (!markers) return { ...failure('ALIGNMENT_MISSING', describeAlignmentFailures(alignmentFailures)),
       diagnostics: alignmentFailures };
     const physicalCenters = page.alignmentMarks.map(mark => ({ x: mark.x + mark.width / 2, y: mark.y + mark.height / 2 }));
+    // Only a strip wide enough to reach printed content is a real crop. Every mark, the QR and
+    // every bubble sit at least this far inside the page edge, so half of it cannot remove
+    // anything readable - which is what lets a rendered PDF or a borderless scan fill the frame
+    // instead of being reported as a cut sheet.
+    const contentInsetMm = Math.min(...rects.flatMap(rect => [rect.x, rect.y,
+      definition.pageWidthMm - (rect.x + rect.width), definition.pageHeightMm - (rect.y + rect.height)]));
+    const cropToleranceMm = Math.max(CROP_TOLERANCE_MM, Math.min(MAX_CROP_TOLERANCE_MM, contentInsetMm / 2));
     let transform, geometry;
     try {
       transform = fitHomography(physicalCenters, markers.map(mark => mark.center));
-      geometry = inspectPageGeometry(transform, definition.pageWidthMm, definition.pageHeightMm, source);
+      geometry = inspectPageGeometry(transform, definition.pageWidthMm, definition.pageHeightMm, source, cropToleranceMm);
     } catch { return failure('INVALID_GEOMETRY', 'Sayfa perspektifi a\u015f\u0131r\u0131 veya hizalama geometrisi tutars\u0131z.'); }
-    if (geometry.cropped) return failure('PAGE_CROPPED', 'Sayfan\u0131n kenarlar\u0131 kesilmi\u015f; k\u00e2\u011f\u0131d\u0131n tamam\u0131n\u0131 kadraja al\u0131n.');
+    if (geometry.cropped) return failure('PAGE_CROPPED',
+      `Sayfan\u0131n bir kenar\u0131 g\u00f6r\u00fcnt\u00fcde yok; yakla\u015f\u0131k ${geometry.cropOvershootMm.toFixed(1)} mm eksik. ` +
+      'Foto\u011fraflarda k\u00e2\u011f\u0131d\u0131n tamam\u0131n\u0131 kadraja al\u0131n. PDF veya yazd\u0131rma \u00e7\u0131kt\u0131s\u0131nda sayfa boyutunu A4, ' +
+      '\u00f6l\u00e7e\u011fi %100, kenar bo\u015fluklar\u0131n\u0131 "yok" yap\u0131n ve "sayfaya s\u0131\u011fd\u0131r" se\u00e7ene\u011fini kapat\u0131n.');
     if (geometry.pixelsPerMm < QUALITY_THRESHOLDS.minPixelsPerMm) {
       return failure('LOW_RESOLUTION', 'Sayfan\u0131n bir b\u00f6l\u00fcm\u00fcnde piksel yo\u011funlu\u011fu yetersiz; daha yak\u0131ndan ve dik \u00e7ekin.');
     }

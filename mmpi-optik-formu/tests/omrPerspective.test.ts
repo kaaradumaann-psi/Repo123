@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, pageCorners, warpPerspective } from '../src/omr/perspectiveCorrection';
+import { CROP_TOLERANCE_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, pageCorners, warpPerspective } from '../src/omr/perspectiveCorrection';
 import type { Homography } from '../src/omr/perspectiveCorrection';
 
 const distance = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -33,6 +33,22 @@ test('synthetic geometry allows rotation, detects cropping, rejects reflection a
   assert.equal(rotated.pixelsPerMm, 6);
   assert.throws(() => inspectPageGeometry([-6, 0, 1300, 0, 6, 32, 0, 0, 1], 210, 297, { width: 1324, height: 1846 }));
   assert.throws(() => inspectPageGeometry([6, 0, 32, 0, 6, 32, .02, 0, 1], 210, 297, { width: 1324, height: 1846 }));
+});
+
+test('synthetic full-bleed digital page is not reported as cropped', () => {
+  // A rendered PDF or a borderless scan puts the sheet edge exactly on the image border, so the
+  // fitted corner lands half a pixel outside it. This is the regression: a fixed 1.5 px margin
+  // rejected every such page, even for edge losses of a quarter of a millimetre.
+  const fullBleed: Homography = [8, 0, -.5, 0, 8, -.5, 0, 0, 1];
+  const page = inspectPageGeometry(fullBleed, 210, 297, { width: 1680, height: 2376 });
+  assert.equal(page.cropped, false);
+  assert.ok(page.cropOvershootMm < CROP_TOLERANCE_MM, `beklenenden buyuk: ${page.cropOvershootMm}`);
+  // 0.25 mm trimmed off every edge leaves all four marks and every answer bubble intact.
+  assert.equal(inspectPageGeometry(fullBleed, 210, 297, { width: 1676, height: 2372 }).cropped, false);
+  // 8 mm off every edge is a genuinely cut sheet: still rejected, with the loss measured.
+  const cut = inspectPageGeometry(fullBleed, 210, 297, { width: 1552, height: 2248 });
+  assert.equal(cut.cropped, true);
+  assert.ok(cut.cropOvershootMm > 8, `\u00f6l\u00e7\u00fclen kay\u0131p \u00e7ok k\u00fc\u00e7\u00fck: ${cut.cropOvershootMm}`);
 });
 
 test('synthetic similarity fit recovers rotation and scale, and extrapolates far better than a projective fit', () => {

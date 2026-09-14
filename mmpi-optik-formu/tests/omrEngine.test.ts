@@ -113,8 +113,30 @@ test('synthetic missing marker names the square and the rejecting filter', async
 });
 
 test('synthetic cropped page fails even when all four printed markers remain', async () => {
+  // 40 px of paper = 6.7 mm at the fixture scale: past the tolerance derived from the layout.
+  const image = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 40, 0, 0, 0);
+  const result = await analyzePage(image, formDefinition);
+  failed(result, 'PAGE_CROPPED');
+  if (!result.ok) assert.match(result.message, /mm eksik/, result.message);
+});
+
+test('synthetic narrow edge loss no longer masquerades as a cropped page', async () => {
+  // 20 px = 3.3 mm. The nearest mark, QR and bubble are 10 mm inside the edge, so nothing readable
+  // is lost and the page must be read. This is the behaviour that made every rendered PDF and every
+  // borderless scan fail with "the edges are cut" although the sheet was whole.
   const image = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 20, 0, 0, 0);
-  failed(await analyzePage(image, formDefinition), 'PAGE_CROPPED');
+  const result = await analyzePage(image, formDefinition);
+  assert.equal(result.ok, true, result.ok ? '' : `${result.code}: ${result.message}`);
+});
+
+test('synthetic near full-bleed page is read, as a PDF render or borderless scan is', async () => {
+  // Trim just past the printed margin: the sheet fills the frame, all four markers and every
+  // bubble remain, and the fitted corner overshoots the border by well under 2 mm.
+  const image = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 2, SYNTHETIC_MARGIN + 2,
+    SYNTHETIC_MARGIN + 2, SYNTHETIC_MARGIN + 2);
+  const result = await analyzePage(image, formDefinition);
+  assert.equal(result.ok, true, result.ok ? '' : `${result.code}: ${result.message}`);
+  if (result.ok) assert.equal(result.items.length, formDefinition.pages[0]!.items.length);
 });
 
 test('synthetic insufficient illumination and severe shadow fail without answer results', async () => {

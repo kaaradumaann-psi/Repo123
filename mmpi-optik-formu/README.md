@@ -60,7 +60,7 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 49 test
+npm test            # 55 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -71,7 +71,9 @@ npm run verify:pdf  # üretilen PDF'i doğrula
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
 sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
 çarpıklık), güvenlik red yolları, sonuç doğrulama/elle inceleme ve **üretilen
-PDF'in dosyadan geri okunup tanımla karşılaştırılması**.
+PDF'in dosyadan geri okunup tanımla karşılaştırılması** ve **depodaki PDF'in
+rasterleştirilip gerçek OMR hattından geçirilmesi** (4 sayfa kabul, 566 madde
+boş okunuyor, sayfalar tek tek kabul ediliyor).
 
 ## Kapsam ve sınırlamalar
 
@@ -172,6 +174,8 @@ tek bir yerde tutuluyor.
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 49/49 test geçiyor, derleme
-çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor. Gerçek kağıt, gerçek
-kamera, tarayıcı yazdırma diyaloğu ve lisanslı form düzeni doğrulanmadı.
+maddeleri listeler. Özet: tip kontrolü temiz, 55/55 test geçiyor, derleme
+çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
+rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
+kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form
+düzeni doğrulanmadı.
