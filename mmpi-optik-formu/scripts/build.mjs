@@ -1,6 +1,6 @@
 import { build } from 'esbuild';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -17,18 +17,24 @@ const result = await build({
   define: { 'process.env.NODE_ENV': '"production"' },
   legalComments: 'none',
   plugins: [{
-    name: 'raw-imports',
+    name: 'asset-imports',
     setup(plugin) {
-      plugin.onResolve({ filter: /\?raw$/ }, args => ({
-        path: args.path.replace(/\?raw$/, ''),
-        namespace: 'raw',
-        pluginData: { importer: args.importer },
+      const redirected = (suffix, namespace) => plugin.onResolve({ filter: suffix }, request => ({
+        path: request.path.replace(suffix, ''), namespace, pluginData: { importer: request.importer },
       }));
-      plugin.onLoad({ filter: /.*/, namespace: 'raw' }, async args => {
-        const resolved = await import.meta.resolve
-          ? fileURLToPath(import.meta.resolve(args.path, pathToFileURL(args.pluginData.importer)))
-          : join(dirname(args.pluginData.importer), args.path);
-        return { contents: await readFile(resolved, 'utf8'), loader: 'text' };
+      // import.meta.resolve ignores its parent argument on Node 20+, so relative paths must be
+      // resolved against the importer directly; only bare specifiers need package resolution.
+      const resolveFrom = args => args.path.startsWith('.') || isAbsolute(args.path)
+        ? resolve(dirname(args.pluginData.importer), args.path)
+        : fileURLToPath(import.meta.resolve(args.path, pathToFileURL(args.pluginData.importer)));
+      redirected(/\?raw$/, 'raw');
+      redirected(/\?inline$/, 'inline');
+      plugin.onLoad({ filter: /.*/, namespace: 'raw' }, async args =>
+        ({ contents: await readFile(resolveFrom(args), 'utf8'), loader: 'text' }));
+      // Vite turns `?inline` into a data URI; esbuild has no equivalent, so emit the same shape.
+      plugin.onLoad({ filter: /.*/, namespace: 'inline' }, async args => {
+        const base64 = (await readFile(resolveFrom(args))).toString('base64');
+        return { contents: `export default "data:application/pdf;base64,${base64}";`, loader: 'js' };
       });
     },
   }],

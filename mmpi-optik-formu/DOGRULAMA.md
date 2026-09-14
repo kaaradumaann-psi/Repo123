@@ -11,7 +11,7 @@ Bu rapor yalnızca bu ortamda çalıştırılan komutların gerçek çıktılar�
 | Komut | Sonuç |
 | --- | --- |
 | `npm run typecheck` (`tsc --noEmit`) | **exit 0**, hata yok |
-| `npm test` (`tsx --test tests/*.test.ts`) | **55 test, 55 geçti, 0 başarısız, 0 atlandı** |
+| `npm test` (`tsx --test tests/*.test.ts`) | **56 test, 56 geçti, 0 başarısız, 0 atlandı** |
 | `npm run build` | **exit 0** · `Built dist/index.html and ../optik-form.html (self-contained).` |
 | `npm run pdf` | **exit 0** · `4 sayfa · A4 dikey · 242 KB` |
 | `npm run verify:pdf` | **exit 0** (ayrıntı aşağıda) |
@@ -29,7 +29,7 @@ Test dağılımı:
 | `tests/resultsSafety.test.ts` | 13 |
 | `tests/pdfForm.test.ts` | 1 (üret + dosyadan doğrula) |
 | `tests/pdfScanPipeline.test.ts` | 2 (PDF'i rasterleştir + gerçek OMR hattı) |
-| `tests/build.test.ts` | 1 |
+| `tests/build.test.ts` | 2 (tek dosya derleme + gömülü PDF) |
 
 ## Yazdırılabilir optik form
 
@@ -169,7 +169,7 @@ düzlemsel olmaması nedeniyle QR tabanlı tahminin arama yarıçapını aşmas�
 olasılık sentetik testlerde ölçülmedi; bu yüzden **gerçek fotoğraf gerekir**.
 
 `tests/omrEngine.test.ts` içindeki yeni test, bulunamayan karenin adının ve
-elendiği ölçütün gerçekten mesajda geçtiğini doğruluyor (55/55 test).
+elendiği ölçütün gerçekten mesajda geçtiğini doğruluyor (56/56 test).
 
 ## Tam kenarlı sayfa: PDF yüklemesi neden reddediliyordu (2026-09-14)
 
@@ -229,6 +229,49 @@ depodaki PDF'i `src/scanner/pdfIO.ts` ile aynı ölçekte rasterleştirip gerçe
 `blank` okunuyor, sayfalar **tek tek** kabul ediliyor, eksik sayfalar listede
 kalıyor ve dört sayfa aynı baskı setini paylaşıyor. Bu, PDF yükleme yolunun ilk
 uçtan uca testi; daha önce hiç yoktu.
+
+## Sitenin kendi yazdırma çıktısı ve bayat kopya (2026-09-14)
+
+Kullanıcı, ana sayfadaki **“Tüm sayfaları yazdır”** düğmesiyle PDF üretip
+yüklediğinde yine aynı hatayı aldı:
+
+```
+123.pdf · PDF 1/4: Sayfa kabul edilmedi: Sayfanın kenarları kesilmiş;
+kâğıdın tamamını kadraja alın.
+```
+
+Bu metin **eski** metindir. Depoda arandığında hiçbir yerde yok:
+
+```
+grep -rn "kenarlar.. kesilmi" src/ dist/ ../optik-form.html   -> sonuc yok
+```
+
+Yeni metin (`analyzePage.ts:82`) hem `dist/index.html` hem `optik-form.html`
+içinde. Yani o hata ancak **güncellenmemiş bir kopyadan** gelebilir; tarayıcı
+sekmesi ya da daha önce indirilmiş `optik-form.html`.
+
+Bunun yanında gerçek bir eksik giderildi: sitenin ürettiği çıktı ile depodaki
+doğrulanmış PDF ayrı şeylerdi ve kullanıcı yalnızca tarayıcının yazdırma
+diyaloğuna bağlıydı. Artık form sayfasında **“Hazır PDF'i indir”** düğmesi var.
+`src/print/formPdf.ts` doğrulanmış PDF'i `?inline` ile içe aktarıyor; Vite bunu
+geliştirmede data URI olarak veriyor, `scripts/build.mjs` içindeki esbuild
+eklentisi aynı biçimi tek dosyalık derlemede üretiyor. İki yolda da çözülen
+baytlar dosyayla birebir aynı (sha256 `ab51f0b6383227ac`, 248 169 bayt):
+
+```
+derlemeden cozülen : 248169 bayt · %PDF-1.7
+Vite dev modulunden: 248169 bayt · %PDF-1.7
+dosya              : 248169 bayt · BIREBIR AYNI: True
+```
+
+`tests/build.test.ts` içindeki ikinci test, derlemeye gömülen kopyanın committed
+PDF'ten bayt bayt farklılaşmadığını doğruluyor; böylece okuyucuyla hiç
+sınanmamış bir form dağıtılamaz.
+
+**Yazdırma yolu hâlâ bir tarayıcıda çalıştırılmadı** — bu ortamda tarayıcı yok.
+`@page { size: A4 portrait; margin: 0 }` kuralı `src/styles/print.css:1` içinde
+mevcut; ancak tarayıcının diyaloğu kâğıt boyutunu veya ölçeği değiştirebilir.
+Bu yüzden önerilen yol indirilen PDF'tir.
 
 ## Doğrulanmayanlar
 

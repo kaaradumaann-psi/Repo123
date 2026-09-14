@@ -5,6 +5,7 @@ import { ScannerWorkspace } from './components/ScannerWorkspace';
 import { Icon } from './components/Icon';
 import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
 import { createBatchId } from './form/pageIdentity';
+import { downloadFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -33,8 +34,12 @@ export default function App() {
       <section className="page-intro" hidden={workspace !== 'form'}>
         <div><p className="eyebrow">BASILI FORM / {FORM.templateId}</p><h1 id="page-title">Optik cevap formu</h1>
           <p className="intro-description">Kimlik alanları yalnızca ilk sayfada. Her sayfada QR ve köşe işaretleri; D/Y daireleri tüm sayfalarda aynı milimetre ızgaradadır.</p></div>
-        <button type="button" className="print-button" onClick={() => window.print()}><Icon name="print" />
-          <span>Tüm sayfaları yazdır<small>{PAGE_COUNT} sayfa · A4 · aynı QR seti</small></span><Icon name="right" size={16} /></button>
+        <div className="intro-actions">
+          <button type="button" className="print-button" onClick={() => window.print()}><Icon name="print" />
+            <span>Tüm sayfaları yazdır<small>{PAGE_COUNT} sayfa · A4 · aynı QR seti</small></span><Icon name="right" size={16} /></button>
+          <button type="button" className="download-button" onClick={downloadFormPdf}><Icon name="download" />
+            <span>Hazır PDF'i indir<small>{FORM_PDF_FILE_NAME} · okuyucuyla doğrulandı</small></span></button>
+        </div>
       </section>
 
       <div className={`form-workspace${workspace === 'form' ? '' : ' is-screen-hidden'}`}>

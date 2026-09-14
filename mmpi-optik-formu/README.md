@@ -19,6 +19,14 @@ npm run dev         # geliştirme sunucusu -> http://localhost:5173
 Tarayıcıda `http://localhost:5173` adresini açın. İki sekme vardır:
 **Optik form** (önizleme + yazdırma) ve **Tara ve gözden geçir** (kamera/yükleme).
 
+Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (tarayıcı yazdırma
+diyaloğu) ve **Hazır PDF'i indir**. İkincisi `MMPI-566-optik-cevap-formu.pdf`
+dosyasını tek dosyalık derlemeye base64 olarak gömer; bu dosya hem dosyadan geri
+okunup geometrisi doğrulanan (`tests/pdfForm.test.ts`) hem de rasterleştirilip
+gerçek okuma hattından geçirilen (`tests/pdfScanPipeline.test.ts`) dosyadır.
+Tarayıcının yazdırma diyaloğu kâğıt boyutunu, ölçeği veya kenar boşluğunu
+değiştirebildiği için **indirilen PDF tercih edilmelidir**.
+
 ### Kendi sitenize koymak
 
 ```sh
@@ -60,7 +68,7 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 55 test
+npm test            # 56 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -174,7 +182,7 @@ tek bir yerde tutuluyor.
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 55/55 test geçiyor, derleme
+maddeleri listeler. Özet: tip kontrolü temiz, 56/56 test geçiyor, derleme
 çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
 kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form
