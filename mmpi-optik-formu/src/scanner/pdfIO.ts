@@ -1,0 +1,180 @@
+import type { PixelImage } from '../omr/omrTypes';
+import type { RenderTask } from 'pdfjs-dist';
+import { checkAborted, checkFileSize, SCAN_LIMITS, yieldToScreen } from './imageIO';
+
+export type SourcePage = { image: PixelImage; sourceName: string };
+
+const PDFJS_VERSION = '6.3.289';
+const PDF_OPERATION_MS = 30_000;
+const PDF_DESTROY_MS = 250;
+const PDF_BUDGET_ERROR = 'Bir işlemde 24 sayfa sınırına ulaşıldı. Kalan PDF sayfaları işlenmedi; kalanları ayrı seçin.';
+
+/** Audited against this exact worker, not its minified/private-name variant. */
+export function createSafePdfWorkerSource(source: string, version: string): string {
+  if (version !== PDFJS_VERSION) throw new Error('PDF güvenlik denetimi bu okuyucu sürümünü desteklemiyor. JPG/PNG seçin.');
+  // stopAtErrors does not cover asynchronous image failures or mask/codec allocations.
+  // Until those paths have a bounded preflight, accept only image-free PDFs with
+  // raw/Flate streams. Never decode a raster and then accept a missing-image page.
+  return `${source}\n;(() => {
+    const fail = message => {
+      self.postMessage({ scannerPdfError: message });
+      throw new Error(message);
+    };
+    const raster = () => fail('Gömülü görüntü içeren PDF güvenli biçimde desteklenmiyor. Sayfaları JPG/PNG olarak seçin.');
+    warn = info = () => fail('PDF içeriği kayıpsız okunamadı. Sayfaları JPG/PNG olarak seçin.');
+    Parser.prototype.makeInlineImage = raster;
+    PartialEvaluator.prototype.buildPaintImageXObject = raster;
+    PDFImage.buildImage = PDFImage.createMask = raster;
+    const makeStream = Parser.prototype.makeStream;
+    Parser.prototype.makeStream = function(dict, ...args) {
+      if (isName(dict.get('Subtype'), 'Image')) raster();
+      return makeStream.call(this, dict, ...args);
+    };
+    const makeFilter = Parser.prototype.makeFilter;
+    Parser.prototype.makeFilter = function(stream, name, length, params, ...args) {
+      if (!['Fl', 'FlateDecode'].includes(name) || params) {
+        fail('PDF sıkıştırma biçimi güvenli biçimde desteklenmiyor. JPG/PNG seçin.');
+      }
+      return makeFilter.call(this, stream, name, length, params, ...args);
+    };
+    const ensureBuffer = DecodeStream.prototype.ensureBuffer;
+    let allocated = 0;
+    DecodeStream.prototype.ensureBuffer = function(requested) {
+      if (!Number.isSafeInteger(requested) || requested < 0 || requested > 16 * 1024 * 1024 ||
+          this.minBufferLength > 16 * 1024 * 1024) fail('PDF açılmış içerik sınırını aşıyor. JPG/PNG seçin.');
+      let size = this.minBufferLength;
+      while (size < requested) size *= 2;
+      const growth = Math.max(0, size - this.buffer.byteLength);
+      if (allocated + growth > ${SCAN_LIMITS.batchBytes}) fail('PDF açılmış içerik sınırını aşıyor. JPG/PNG seçin.');
+      allocated += growth;
+      return ensureBuffer.call(this, requested);
+    };
+    self.addEventListener('unhandledrejection', () => fail('PDF çalışanı işlemi tamamlayamadı. JPG/PNG seçin.'));
+  })();\n`;
+}
+
+/** A dedicated, bundled worker per document: no CDN, upload or remote PDF fetch. */
+export async function* readPdfPages(file: File, signal: AbortSignal, remainingPages: number): AsyncGenerator<SourcePage> {
+  checkFileSize(file);
+  checkAborted(signal);
+  if (!Number.isInteger(remainingPages) || remainingPages < 1 || remainingPages > SCAN_LIMITS.batchPages) {
+    throw new Error(PDF_BUDGET_ERROR);
+  }
+  let workerUrl: string | undefined;
+  let port: Worker | undefined;
+  let worker: import('pdfjs-dist').PDFWorker | undefined;
+  let loading: import('pdfjs-dist').PDFDocumentLoadingTask | undefined;
+  let render: RenderTask | undefined;
+  let failure: Error | undefined;
+  let rejectFailure: (error: Error) => void = () => {};
+  const failed = new Promise<never>((_, reject) => { rejectFailure = reject; });
+  void failed.catch(() => {}); // An abort can arrive while the generator is suspended at yield.
+  let terminated = false;
+  const hardStop = () => {
+    try { if (!terminated && port) { terminated = true; port.terminate(); } }
+    finally { if (workerUrl) { URL.revokeObjectURL(workerUrl); workerUrl = undefined; } }
+  };
+  const fail = (error: Error) => {
+    if (failure) return;
+    failure = error;
+    rejectFailure(error);
+    try { render?.cancel(); } catch { /* Hard termination still runs if cancellation fails. */ }
+    hardStop();
+  };
+  const abort = () => fail(new DOMException('İşlem iptal edildi.', 'AbortError'));
+  const workerError = () => fail(new Error('PDF çalışanı başlatılamadı veya beklenmedik biçimde durdu. JPG/PNG seçin.'));
+  const workerMessage = (event: MessageEvent) => {
+    if (typeof event.data?.scannerPdfError === 'string') fail(new Error(event.data.scannerPdfError));
+  };
+  const check = () => {
+    checkAborted(signal);
+    if (failure) throw failure;
+  };
+  const wait = async <T,>(operation: () => T | PromiseLike<T>): Promise<T> => {
+    check();
+    const timer = setTimeout(() => fail(new Error('PDF işlemi 30 saniyede tamamlanamadı. Dosyayı bölün veya JPG/PNG seçin.')), PDF_OPERATION_MS);
+    try {
+      return await Promise.race([Promise.resolve().then(() => { check(); return operation(); }), failed]);
+    } finally { clearTimeout(timer); }
+  };
+  signal.addEventListener('abort', abort, { once: true });
+  try {
+    const [pdfjs, { default: workerCode }] = await wait(() => Promise.all([
+      import('pdfjs-dist'), import('pdfjs-dist/build/pdf.worker.mjs?raw'),
+    ]));
+    const data = new Uint8Array(await wait(() => file.arrayBuffer()));
+    check();
+    workerUrl = URL.createObjectURL(new Blob([createSafePdfWorkerSource(workerCode, pdfjs.version)], { type: 'text/javascript' }));
+    port = new Worker(workerUrl, { type: 'module' });
+    port.addEventListener('error', workerError);
+    port.addEventListener('messageerror', workerError);
+    port.addEventListener('message', workerMessage);
+    worker = new pdfjs.PDFWorker({ port });
+    loading = pdfjs.getDocument({ data, worker, isEvalSupported: false, useWasm: false,
+      useWorkerFetch: false, useSystemFonts: true, disableAutoFetch: true, stopAtErrors: true,
+      isOffscreenCanvasSupported: false, isImageDecoderSupported: false, maxImageSize: 0 });
+    const document = await wait(() => loading!.promise);
+    check();
+    if (document.numPages > SCAN_LIMITS.pdfPages) {
+      throw new Error(`PDF ${document.numPages} sayfa içeriyor. Dosya başına en çok ${SCAN_LIMITS.pdfPages} sayfa desteklenir; PDF'yi bölün.`);
+    }
+    for (let number = 1; number <= document.numPages; number++) {
+      if (number > remainingPages) throw new Error(PDF_BUDGET_ERROR);
+      await wait(() => yieldToScreen(signal));
+      const page = await wait(() => document.getPage(number));
+      let canvas: HTMLCanvasElement | undefined;
+      try {
+        // Finish strict worker parsing before allocating/rendering an OMR source image.
+        await wait(() => page.getOperatorList());
+        check();
+        const base = page.getViewport({ scale: 1 });
+        if (!Number.isFinite(base.width) || !Number.isFinite(base.height) || base.width <= 0 || base.height <= 0) {
+          throw new Error('PDF sayfa boyutları geçersiz.');
+        }
+        const scale = Math.min(SCAN_LIMITS.pdfWidth / base.width, SCAN_LIMITS.longSide / Math.max(base.width, base.height));
+        const viewport = page.getViewport({ scale });
+        canvas = window.document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(viewport.width));
+        canvas.height = Math.max(1, Math.round(viewport.height));
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) throw new Error('PDF için görüntü alanı açılamadı.');
+        render = page.render({ canvas, canvasContext: context, viewport, background: '#ffffff' });
+        await wait(() => render!.promise);
+        render = undefined;
+        check();
+        const image = { width: canvas.width, height: canvas.height,
+          data: context.getImageData(0, 0, canvas.width, canvas.height).data };
+        canvas.width = canvas.height = 0;
+        yield { image, sourceName: `${file.name} · PDF ${number}/${document.numPages}` };
+      } finally {
+        try { render?.cancel(); } catch { /* Do not mask the upload error. */ }
+        render = undefined;
+        if (canvas) canvas.width = canvas.height = 0;
+        try { page.cleanup(); } catch { /* Document teardown remains mandatory. */ }
+      }
+    }
+  } catch (error) {
+    checkAborted(signal);
+    if (error instanceof Error && error.name === 'PasswordException') {
+      throw new Error('PDF şifreli. Şifresiz bir kopya veya sayfa görüntüleri seçin.');
+    }
+    throw new Error(`PDF açılamadı: ${error instanceof Error ? error.message : 'Dosya bozuk veya desteklenmiyor.'}`);
+  } finally {
+    try { render?.cancel(); } catch { /* A broken worker must not prevent teardown. */ }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        Promise.resolve().then(() => loading?.destroy()).catch(() => {}),
+        new Promise<void>(resolve => { timer = setTimeout(resolve, PDF_DESTROY_MS); }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', abort);
+      port?.removeEventListener('error', workerError);
+      port?.removeEventListener('messageerror', workerError);
+      port?.removeEventListener('message', workerMessage);
+      try { worker?.destroy(); } catch { /* The native worker is terminated below regardless. */ }
+      finally { hardStop(); }
+    }
+  }
+}
