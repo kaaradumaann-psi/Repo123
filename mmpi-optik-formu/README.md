@@ -1,123 +1,99 @@
 # MMPI-566 Optik Cevap Formu ve OMR Okuyucu
 
-A4 optik cevap formu, tarayıcıda çalışan optik okuma (OMR) hattı, kamera/dosya
-yükleme ve sonuç inceleme ekranları. React 19 + TypeScript, Vite. Sunucu, CDN
-çalışma zamanı veya API anahtarı gerektirmez.
+A4 optik cevap formu (566 madde), tarayıcıda çalışan optik okuma (OMR) hattı,
+kamera/dosya yükleme, sonuç inceleme ekranları ve **hazır yazdırılabilir PDF**.
+React 19 + TypeScript + Vite. Sunucu, CDN çalışma zamanı veya API anahtarı
+gerektirmez; tüm okuma kullanıcının cihazında yapılır.
 
-Bu klasör projenin **tek** kaynağıdır: form tanımı, görsel tasarım, okuyucu
-algoritması, testler ve doğrulama raporları aynı yerde tutulur.
+Bu klasör projenin **tek** kaynağıdır.
+
+## Hızlı başlangıç
+
+Node.js 22 veya üzeri gerekir.
+
+```sh
+npm ci              # kilitlenmiş bağımlılıkları kurar
+npm run dev         # geliştirme sunucusu -> http://localhost:5173
+```
+
+Tarayıcıda `http://localhost:5173` adresini açın. İki sekme vardır:
+**Optik form** (önizleme + yazdırma) ve **Tara ve gözden geçir** (kamera/yükleme).
+
+### Kendi sitenize koymak
+
+```sh
+npm run build
+```
+
+İki çıktı üretir:
+
+| Çıktı | Ne işe yarar |
+| --- | --- |
+| `dist/index.html` | Kendi kendine yeterli tek dosya (React, CSS, pdf.js worker gömülü). Statik sunucuya atılır, backend gerekmez. |
+| `../optik-form.html` | Aynı dosyanın depo kökündeki kopyası. Çift tıklayarak da açılır. |
+
+Statik barındırmada çalışır (Netlify, Vercel, GitHub Pages, nginx, S3).
+Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli bağlam ister); localhost
+bunun dışındadır.
+
+## Yazdırılabilir optik form
+
+Hazır dosya depoda: **`MMPI-566-optik-cevap-formu.pdf`** — 4 sayfa, A4 dikey,
+242 KB, 1.132 boş D/Y dairesi.
+
+Yeniden üretmek ve doğrulamak:
+
+```sh
+npm run pdf           # MMPI-566-optik-cevap-formu.pdf üretir
+npm run verify:pdf    # üretilen dosyayı bağımsız olarak doğrular
+```
+
+PDF, tarayıcının CSS yazıcısından **bağımsız** bir üreticidir
+(`src/print/`), ama koordinatları aynı `FormDefinition`'dan okur. Yani basılı
+daire merkezleri ile okuyucunun beklediği koordinatlar aynı kaynaktan gelir.
+
+Yazdırma ayarları: **A4 · Dikey · %100 (Gerçek boyut) · Kenar boşluğu yok ·
+Üst/alt bilgi kapalı · Tek yüz · Siyah-beyaz.** “Sayfaya sığdır” seçeneğini
+açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
+
+## Nasıl kontrol edersiniz
+
+```sh
+npm run typecheck   # tsc --noEmit
+npm test            # 49 test
+npm run build       # tip kontrolü + tek dosya çıktı
+npm run pdf         # optik formu üret
+npm run verify:pdf  # üretilen PDF'i doğrula
+```
+
+`npm test` şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
+1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
+OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
+sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
+çarpıklık), güvenlik red yolları, sonuç doğrulama/elle inceleme ve **üretilen
+PDF'in dosyadan geri okunup tanımla karşılaştırılması**.
 
 ## Kapsam ve sınırlamalar
 
-Bunlar tasarım kararları değil, doğrulanmamış varsayımlardır. Okumadan kullanmayın.
+Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
 
 - Bu bir **yerleşim şablonudur** (`source: 'unverified-template'`). Yetkili MMPI
   formunun birebir kopyası değildir; lisanslı madde düzeniyle eşdeğerliği
   doğrulanmamıştır.
 - 1–566 madde **numaraları** ve boş D/Y daireleri vardır. Madde metni, cevap
   anahtarı veya klinik içerik yoktur ve uydurulmamıştır.
-- `D = Doğru / Y = Yanlış` iki seçenekli düzen bir varsayımdır. Yetkili materyal
-  ve uygulama yönergesiyle doğrulanmalıdır.
-- OMR eşikleri (`omr/markDetector.ts`, `omr/imageQuality.ts`) **yalnızca sentetik
-  raster örneklerle** sınanmıştır. Gerçek kamera, fotokopi, kalem veya baskı
-  üzerinde kalibre edilmemiştir; bu yüzden doğruluk yüzdesi iddia edilmez.
-- `confidence` sezgisel bir işaret gücüdür, olasılık değildir.
+- `D = Doğru / Y = Yanlış` iki seçenekli düzen bir varsayımdır; yetkili
+  materyalle doğrulanmalıdır.
+- OMR eşikleri yalnızca **sentetik raster örneklerle** sınanmıştır. Gerçek
+  kamera, fotokopi, kalem veya baskı üzerinde kalibre edilmemiştir; bu yüzden
+  doğruluk yüzdesi iddia edilmez. `confidence` sezgisel bir işaret gücüdür,
+  olasılık değildir.
 - Klinik puanlama, raporlama, veri tabanı ve API entegrasyonu **yoktur**.
   `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
+- Yalnızca `reliable` maddeler algoritma cevabı sayılır; `single` ve `ambiguous`
+  her zaman insan incelemesi ister.
 - Formda kişisel veri saklanmaz. Form kimliği, katılımcı kodu ve tarih yalnızca
-  basılı kağıda el yazısıyla girilir.
-
-## Kurulum
-
-Node.js 22 veya üzeri gerekir.
-
-```sh
-npm ci            # kilitlenmiş bağımlılıklar
-npm run dev       # Vite geliştirme sunucusu (0.0.0.0)
-npm run typecheck # tsc --noEmit
-npm test          # node:test, 48 test
-npm run build     # tsc --noEmit + dist/index.html + ../optik-form.html
-```
-
-`npm run build`, tip kontrolü başarısızsa derlemez. `dist/index.html` ve depo
-kökündeki `optik-form.html` kendi kendine yeterli tek dosyalık çıktılardır
-(React, CSS ve pdf.js worker'ı gömülüdür).
-
-## Kullanım
-
-Uygulama iki çalışma alanı açar:
-
-**1. Optik form** — A4 önizleme, yakınlaştırma, dört sayfaya doğrudan geçiş ve
-yazdırma.
-
-Yazdırma ayarları: **A4 · Dikey · %100 (Gerçek boyut) · Kenar boşluğu yok ·
-Üst/alt bilgi kapalı · Tek yüz · Siyah-beyaz.**
-
-“Sayfaya sığdır” seçeneğini açmayın. CSS ekran ölçeği yazdırmada kaldırılır
-(`print.css` içinde `transform: none`), ancak tarayıcının veya yazıcının kendi
-ölçeklendirme ayarı yazılımla engellenemez. İlk baskıda köşe karelerini
-kumpasla 5 mm olarak ölçün.
-
-**2. Tara ve gözden geçir** — `getUserMedia` ile kamera (arka kamera tercihli,
-2560×1920 hedefli) veya JPG/PNG/PDF yükleme. Her sayfa için:
-
-1. QR okunur ve form sürümü, yerleşim özeti, baskı seti ve sayfa numarası doğrulanır.
-2. Dört köşe karesi **gerçek piksel konumlarından** bulunur; tahminle değiştirilmez.
-3. Perspektif düzeltilir, sayfa 1680 × 2376 piksele (8 px/mm) normalize edilir.
-4. Işık, gölge, bulanıklık, halka kontrastı ve halka bütünlüğü denetlenir.
-5. Her madde için durum üretilir: `blank`, `single`, `reliable`, `multiple`,
-   `ambiguous`, `invalid`, `unread`.
-
-Yalnızca `reliable` maddeler algoritma cevabı olarak aktarılır; `single` ve
-`ambiguous` her zaman insan incelemesi ister. Eksik, yinelenen veya başka sete
-ait sayfalar kabul edilmez ve kullanıcıya gösterilir.
-
-## Mimari
-
-| Yol | Görev |
-| --- | --- |
-| `src/omr/omrTypes.ts` | Ortak veri modeli: `FormDefinition`, `PageDefinition`, `ItemDefinition`, `ResponseArea`, `AlignmentMark`. Tüm koordinatlar kağıdın sol üst köşesinden **milimetre**. |
-| `src/omr/formDefinition.ts` | Şablon sabitleri, sayfa/madde üretimi, SHA-256 yerleşim özeti, `getBubbleGeometry()`. |
-| `src/form/layout.ts` | Bileşenlerin kullandığı tek içe aktarma yüzeyi. |
-| `src/form/pageIdentity.ts` | Baskı seti kimliği, QR metni kodlama/çözümleme, QR modül geometrisi. |
-| `src/omr/qrDecoder.ts` | jsQR ile sınırlı (≤4 MP) sayfa kimliği okuma. |
-| `src/omr/perspectiveCorrection.ts` | `fitHomography`, `fitSimilarity`, `mapPoint`, `inspectPageGeometry`, `warpPerspective`. |
-| `src/omr/alignmentDetector.ts` | Köşe karelerini bağlı bileşen analiziyle bulma. |
-| `src/omr/imageQuality.ts` | Gri tonlama, aydınlık/gölge/bulanıklık/kontrast değerlendirmesi. |
-| `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu. |
-| `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; başarısızlıkta cevap üretmez. |
-| `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
-| `src/scanner/*` | Görüntü/PDF girişi, sınırlar, sayfa sırası ve elle inceleme kayıtları. |
-| `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
-
-Form tanımı ile okuyucu aynı `FormDefinition` örneğini paylaşır; görsel tasarım
-CSS değişkenlerini bu tanımdan alır. İkisi ayrı dosyalarda tutulur ama koordinat
-kaynağı tektir.
-
-### İstenen mimariyle eşleşme
-
-Önerilen klasör adları birebir kullanılmadı; her biri bu projedeki karşılığıyla
-tek bir yerde tutuluyor.
-
-| Önerilen | Bu projedeki karşılık |
-| --- | --- |
-| `components/OpticalFormPreview.tsx` | `components/FormPreview.tsx` |
-| `components/FormPage.tsx` / `ItemRow.tsx` / `ResponseArea.tsx` | `components/FormPage.tsx` ve `components/AnswerColumn.tsx` (satır ve işaretleme alanı aynı bileşende; koordinatlar `FormDefinition`'dan) |
-| `components/AlignmentMarks.tsx` | `components/RegistrationMarks.tsx` |
-| `components/ScanResultPreview.tsx` | aynı adla mevcut |
-| `omr/omrTypes.ts`, `formDefinition.ts`, `alignmentDetector.ts`, `perspectiveCorrection.ts`, `markDetector.ts` | aynı adlarla mevcut |
-| `omr/pageDetector.ts` | `omr/analyzePage.ts`: QR doğrulaması + `inspectPageGeometry` (kırpma, çözünürlük, yansıma, aşırı perspektif) |
-| `omr/itemMapper.ts` | `formDefinition.ts` içindeki `getBubbleGeometry()` + `scanner/reviewGeometry.ts` |
-| `omr/confidenceCalculator.ts`, `omr/validation.ts` | `markDetector.ts` eşikleri + `results/resultValidator.ts` |
-| `scanner/cameraScanner.ts` | `components/CameraCapture.tsx` + `scanner/imageIO.ts` |
-| `scanner/imageUploader.ts` | `scanner/imageIO.ts` ve `scanner/pdfIO.ts` |
-| `scanner/scanPipeline.ts` | `omr/analyzePage.ts` |
-| `scanner/pageSequence.ts` | aynı adla mevcut |
-| `results/*` | aynı adlarla mevcut |
-| `utils/coordinateUtils.ts` | `omr/perspectiveCorrection.ts` (mm ↔ piksel, homografi) |
-| `utils/imageUtils.ts` | `omr/imageQuality.ts` ve `scanner/imageIO.ts` |
-| `utils/printUtils.ts` | `styles/print.css` + `App.tsx` yazdırma düğmesi |
-| `pages/FormPreviewPage.tsx`, `ScannerPage.tsx`, `ScanResultsPage.tsx` | `App.tsx` içindeki iki çalışma alanı sekmesi |
+  basılı kağıda el yazısıyla girilir ve **yalnızca 1. sayfada** bulunur.
 
 ## Sabit form geometrisi
 
@@ -128,28 +104,74 @@ tek bir yerde tutuluyor.
 | Kağıt | A4, 210 × 297 mm, dikey |
 | Sayfa sayısı / aralıklar | 4 · 1–144, 145–288, 289–432, 433–566 |
 | Düzen | 3 sütun × 48 satır; son sütunda 38 madde |
-| İşaretleme dairesi | 3,5 mm çap; satır aralığı merkezden merkeze 4,25 mm |
-| D/Y yatay merkez aralığı | 16 mm (sütun içi 27 mm ve 43 mm) |
+| İşaretleme dairesi | 3,5 mm dış çap, 0,3 mm içe doğru siyah sınır |
+| Satır aralığı | Merkezden merkeze 4,25 mm |
+| D/Y yatay merkezleri | Sütun içinde 27 mm ve 43 mm (16 mm arayla) |
 | Cevap ızgarası | x = 20 mm, y = 60 mm; başlık 7 mm |
 | Sütun genişliği / aralığı | 51,333… mm / 8 mm |
 | Köşe işaretleri | 5 × 5 mm; sol üst köşeleri (10,10), (195,10), (195,282), (10,282) mm |
-| Sayfa QR alanı | x = 164, y = 18, 26 × 26 mm (her sayfada, cevap alanlarından ayrı) |
+| Sayfa QR alanı | x = 164, y = 18, 26 × 26 mm — her sayfada, cevap alanlarından ayrı |
 | Normalize görüntü | 8 px/mm → 1680 × 2376 piksel |
 | Toplam işaretleme alanı | 1.132 (566 madde × 2 seçenek) |
 
-Sayfalar sütun boyunca yukarıdan aşağı, sonra soldan sağa numaralandırılır.
-Son sayfadaki kullanılmayan satırlarda daire veya numara üretilmez.
+Sayfalar sütun boyunca yukarıdan aşağı, sonra soldan sağa numaralandırılır. Son
+sayfadaki kullanılmayan satırlarda daire veya numara üretilmez.
 
 ### Sayfa kimliği
 
 Her sayfanın QR metni: `M566:sürüm:yerleşim özeti:baskı seti:sayfa:toplam`.
-Aynı oturumda yazdırılan dört sayfa aynı baskı seti kimliğini taşır; bu sayede
-eksik, yinelenen veya başka bir sete ait sayfa reddedilir. El yazısı kimlik
-alanları (`FORM KİMLİĞİ`, `KATILIMCI KODU`, `TARİH`) makine kimliğinden ayrıdır
-ve **yalnızca 1. sayfada** bulunur.
+Aynı oturumda yazdırılan dört sayfa aynı baskı seti kimliğini taşır; eksik,
+yinelenen veya başka bir sete ait sayfa reddedilir. Depodaki hazır PDF sabit bir
+şablon seti kimliği kullanır (`npm run pdf <dosya> <24 haneli set kimliği>` ile
+değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini üretir.
+
+## Mimari
+
+| Yol | Görev |
+| --- | --- |
+| `src/omr/omrTypes.ts` | Ortak veri modeli: `FormDefinition`, `PageDefinition`, `ItemDefinition`, `ResponseArea`, `AlignmentMark`. Koordinatlar kağıdın sol üstünden **milimetre**. |
+| `src/omr/formDefinition.ts` | Şablon sabitleri, sayfa/madde üretimi, SHA-256 yerleşim özeti, `getBubbleGeometry()`. |
+| `src/form/layout.ts` | Bileşenlerin kullandığı tek içe aktarma yüzeyi. |
+| `src/form/pageIdentity.ts` | Baskı seti kimliği, QR metni kodlama/çözümleme, QR modül geometrisi. |
+| `src/omr/qrDecoder.ts` | jsQR ile sınırlı (≤4 MP) sayfa kimliği okuma. |
+| `src/omr/perspectiveCorrection.ts` | `fitHomography`, `fitSimilarity`, `mapPoint`, `inspectPageGeometry`, `warpPerspective`. |
+| `src/omr/alignmentDetector.ts` | Köşe karelerini bağlı bileşen analiziyle bulma; sıralı tahmin listesi. |
+| `src/omr/imageQuality.ts` | Gri tonlama; aydınlık, gölge, bulanıklık, kontrast, halka bütünlüğü. |
+| `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu. |
+| `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; başarısızlıkta cevap üretmez. |
+| `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
+| `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |
+| `src/print/*` | PDF yazıcısı, TrueType gömme ve form sayfası çizimi (tarayıcı gerektirmez). |
+| `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
+| `scripts/*` | Tek dosya derleme, PDF üretimi, PDF doğrulaması. |
+
+Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
+paylaşır; koordinat kaynağı tektir.
+
+### İstenen mimariyle eşleşme
+
+Önerilen klasör adları birebir kullanılmadı; her biri bu projedeki karşılığıyla
+tek bir yerde tutuluyor.
+
+| Önerilen | Bu projedeki karşılık |
+| --- | --- |
+| `components/OpticalFormPreview.tsx` | `components/FormPreview.tsx` |
+| `components/FormPage.tsx` / `ItemRow.tsx` / `ResponseArea.tsx` | `components/FormPage.tsx` ve `components/AnswerColumn.tsx` (koordinatlar `FormDefinition`'dan) |
+| `components/AlignmentMarks.tsx` | `components/RegistrationMarks.tsx` |
+| `omr/pageDetector.ts` | `omr/analyzePage.ts`: QR doğrulaması + `inspectPageGeometry` |
+| `omr/itemMapper.ts` | `formDefinition.ts` `getBubbleGeometry()` + `scanner/reviewGeometry.ts` |
+| `omr/confidenceCalculator.ts`, `omr/validation.ts` | `markDetector.ts` eşikleri + `results/resultValidator.ts` |
+| `scanner/cameraScanner.ts` | `components/CameraCapture.tsx` + `scanner/imageIO.ts` |
+| `scanner/imageUploader.ts` | `scanner/imageIO.ts` ve `scanner/pdfIO.ts` |
+| `scanner/scanPipeline.ts` | `omr/analyzePage.ts` |
+| `utils/coordinateUtils.ts` | `omr/perspectiveCorrection.ts` |
+| `utils/imageUtils.ts` | `omr/imageQuality.ts` ve `scanner/imageIO.ts` |
+| `utils/printUtils.ts` | `src/print/*` + `styles/print.css` |
+| `pages/FormPreviewPage.tsx`, `ScannerPage.tsx`, `ScanResultsPage.tsx` | `App.tsx` içindeki iki çalışma alanı sekmesi |
 
 ## Doğrulama
 
-`DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve doğrulanmayan
-maddeleri listeler. Özet: 48/48 test ve tip kontrolü geçiyor; gerçek kağıt,
-gerçek kamera ve lisanslı form düzeni doğrulanmadı.
+`DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
+maddeleri listeler. Özet: tip kontrolü temiz, 49/49 test geçiyor, derleme
+çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor. Gerçek kağıt, gerçek
+kamera, tarayıcı yazdırma diyaloğu ve lisanslı form düzeni doğrulanmadı.

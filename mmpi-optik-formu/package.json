@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "build": "tsc --noEmit && node scripts/build.mjs"
+    "build": "tsc --noEmit && node scripts/build.mjs",
+    "pdf": "tsx scripts/generate-pdf.ts",
+    "verify:pdf": "tsx scripts/verify-pdf.ts"
   },
   "dependencies": {
     "@noble/hashes": "2.4.0",
