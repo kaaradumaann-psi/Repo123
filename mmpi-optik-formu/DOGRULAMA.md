@@ -11,7 +11,7 @@ Bu rapor yalnızca bu ortamda çalıştırılan komutların gerçek çıktılar�
 | Komut | Sonuç |
 | --- | --- |
 | `npm run typecheck` (`tsc --noEmit`) | **exit 0**, hata yok |
-| `npm test` (`tsx --test tests/*.test.ts`) | **49 test, 49 geçti, 0 başarısız** |
+| `npm test` (`tsx --test tests/*.test.ts`) | **50 test, 50 geçti, 0 başarısız** |
 | `npm run build` | **exit 0** · `Built dist/index.html and ../optik-form.html (self-contained).` |
 | `npm run pdf` | **exit 0** · `4 sayfa · A4 dikey · 242 KB` |
 | `npm run verify:pdf` | **exit 0** (ayrıntı aşağıda) |
@@ -24,7 +24,7 @@ Test dağılımı:
 | `tests/layout.test.ts` | 6 |
 | `tests/formIdentity.test.ts` | 2 |
 | `tests/omrPerspective.test.ts` | 6 |
-| `tests/omrEngine.test.ts` | 13 |
+| `tests/omrEngine.test.ts` | 14 |
 | `tests/omrSafety.test.ts` | 7 |
 | `tests/resultsSafety.test.ts` | 13 |
 | `tests/pdfForm.test.ts` | 1 (üret + dosyadan doğrula) |
@@ -137,6 +137,38 @@ başlatılıyor.
 - `* { box-sizing: border-box }` geçerli; bu yüzden 3,5 mm daire çapı dış
   ölçüdür ve 0,3 mm sınır içe çizilir — PDF üreticisi de aynı modeli kullanır.
 - Şablon verisi: 4 sayfa, 144/144/144/134 madde, 1.132 işaretleme alanı.
+
+## İlk gerçek görüntü denemesi (2026-09-14)
+
+Kullanıcı gerçek bir fotoğraf yükledi (`1234_page-0001.jpg`) ve
+`ALIGNMENT_MISSING` aldı: “Dört siyah hizalama karesi ayrı ayrı bulunamadı”.
+
+Bu hata kodu hattaki sırası gereği önemli bir bilgi taşıyor: QR **okunmuş** ve
+sayfa kimliği **eşleşmiş** olmalı, çünkü `ALIGNMENT_MISSING` bu iki kontrolden
+sonra üretiliyor. Yani form doğru, kimlik doğru; sorun yalnızca dört köşe
+karesinin bulunmasında.
+
+Görüntü bu ortama ulaşmadığı için kök neden **belirlenemedi** ve hiçbir eşik
+değiştirilmedi — veri olmadan eşik gevşetmek tahmin olurdu. Bunun yerine hata
+artık teşhis edilebilir: `detectAlignmentMarks` her red yolunu raporluyor,
+`analyzePage` bunu mesaja taşıyor. Örnek gerçek çıktılar:
+
+```
+[ALIGNMENT_MISSING] ... Bulunamayan 1 kare var — sol üst kare: 1 aday boyut veya
+dolgunluk ölçütünü geçmedi. Kâğıdın dört köşesi de kadrajda olacak şekilde,
+gölgesiz ve sayfaya dik açıdan yeniden çekin.
+
+[ALIGNMENT_MISSING] ... Bulunamayan 1 kare var — sol alt kare: 6 aday boyut veya
+dolgunluk ölçütünü geçmedi. ...
+```
+
+Olası nedenler (henüz ayırt edilmedi): kâğıdın bir köşesinin kadraj dışında
+kalması, köşede gölge veya parlama, çok soluk baskı, ya da gerçek kâğıdın
+düzlemsel olmaması nedeniyle QR tabanlı tahminin arama yarıçapını aşması. Son
+olasılık sentetik testlerde ölçülmedi; bu yüzden **gerçek fotoğraf gerekir**.
+
+`tests/omrEngine.test.ts` içindeki yeni test, bulunamayan karenin adının ve
+elendiği ölçütün gerçekten mesajda geçtiğini doğruluyor (50/50 test).
 
 ## Doğrulanmayanlar
 

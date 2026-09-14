@@ -45,6 +45,8 @@ export type PageReadFailure = {
   code: string;
   message: string;
   quality?: QualityReport;
+  /** Present for ALIGNMENT_MISSING: which square failed and which filter rejected it. */
+  diagnostics?: readonly { markId: string; reason: string }[];
 };
 export type PageReadResult = PageReadSuccess | PageReadFailure;
 export type ManualReview = { choiceId: string | null; reviewedAt: string };

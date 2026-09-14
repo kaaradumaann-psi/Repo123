@@ -1,7 +1,8 @@
 import { createPageQr, parsePageIdentity } from '../form/pageIdentity';
 import type { FormDefinition, PixelImage } from './omrTypes';
 import type { PageReadFailure, PageReadResult } from '../results/scanResultTypes';
-import { detectAlignmentMarks } from './alignmentDetector';
+import { describeAlignmentFailures, detectAlignmentMarks } from './alignmentDetector';
+import type { AlignmentFailure } from './alignmentDetector';
 import { assessImageQuality, QUALITY_THRESHOLDS, toGrayscale } from './imageQuality';
 import { detectItemMarks } from './markDetector';
 import { CANONICAL_PIXELS_PER_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
@@ -54,10 +55,17 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     try { predictions = [fitHomography(qr.innerCorners, decoded.corners), fitSimilarity(qr.innerCorners, decoded.corners)]; }
     catch { return failure('INVALID_GEOMETRY', 'QR perspektifi hesaplanamad\u0131.'); }
     const qrCenter = { x: qr.area.x + qr.area.width / 2, y: qr.area.y + qr.area.height / 2 };
+    const alignmentFailures: AlignmentFailure[] = [];
     let markers;
-    try { markers = detectAlignmentMarks(source, page.alignmentMarks, predictions, qrCenter); }
+    try {
+      markers = detectAlignmentMarks(source, page.alignmentMarks, predictions, qrCenter,
+        entry => alignmentFailures.push(entry));
+    }
     catch { return failure('INVALID_GEOMETRY', 'QR konum tahmini ge\u00e7ersiz; sayfay\u0131 daha dik a\u00e7\u0131dan \u00e7ekin.'); }
-    if (!markers) return failure('ALIGNMENT_MISSING', 'D\u00f6rt siyah hizalama karesi ayr\u0131 ayr\u0131 bulunamad\u0131; sayfan\u0131n tamam\u0131 g\u00f6r\u00fcnmeli.');
+    // Name the missing square and the filter that rejected it: a real capture cannot be
+    // diagnosed from "not found" alone.
+    if (!markers) return { ...failure('ALIGNMENT_MISSING', describeAlignmentFailures(alignmentFailures)),
+      diagnostics: alignmentFailures };
     const physicalCenters = page.alignmentMarks.map(mark => ({ x: mark.x + mark.width / 2, y: mark.y + mark.height / 2 }));
     let transform, geometry;
     try {

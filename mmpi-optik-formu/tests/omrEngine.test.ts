@@ -93,6 +93,25 @@ test('synthetic missing or hollow alignment square is not replaced with a predic
   failed(await analyzePage(renderSyntheticPage({ hollowMarkers: ['bottom-left'] }), formDefinition), 'ALIGNMENT_MISSING');
 });
 
+test('synthetic missing marker names the square and the rejecting filter', async () => {
+  const result = await analyzePage(renderSyntheticPage({ missingMarkers: ['bottom-right'] }), formDefinition);
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.code, 'ALIGNMENT_MISSING');
+  assert.match(result.message, /sa\u011f alt kare/, result.message);
+  assert.match(result.message, /kadrajda/, result.message);
+  assert.ok(result.diagnostics?.some(entry => entry.markId === 'bottom-right' && entry.reason.length > 10),
+    JSON.stringify(result.diagnostics));
+  assert.equal(result.diagnostics?.length, 1, 'Yaln\u0131zca bulunamayan kare raporlanmal\u0131.');
+  // A hollow square is a different failure and must not be reported as a missing one.
+  const hollow = await analyzePage(renderSyntheticPage({ hollowMarkers: ['top-left'] }), formDefinition);
+  assert.equal(hollow.ok, false);
+  if (!hollow.ok) {
+    assert.equal(hollow.code, 'ALIGNMENT_MISSING');
+    assert.match(hollow.message, /sol \u00fcst kare/);
+  }
+});
+
 test('synthetic cropped page fails even when all four printed markers remain', async () => {
   const image = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 20, 0, 0, 0);
   failed(await analyzePage(image, formDefinition), 'PAGE_CROPPED');
