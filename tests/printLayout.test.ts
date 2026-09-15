@@ -121,8 +121,8 @@ test('the HTML header renders the same boxes the PDF writes', () => {
   }
   for (const text of ['MMPI-566', `OPTİK CEVAP FORMU / ${formDefinition.version}`, 'D: Doğru', 'Y: Yanlış',
     'Her maddede yalnızca bir dairenin içini tamamen doldurun.', 'El yazısı kimlik yalnızca bu sayfadadır.',
-    'Numaraları sütun boyunca aşağıya doğru izleyin.',
-    'Dört sayfayı aynı oturumda yazdırın; QR kodu sayfaları eşleştirir.', 'Örnek işaretleme']) {
+    'Numaraları sütun boyunca aşağıya doğru izleyin.', 'Dört sayfayı aynı oturumda yazdırın.',
+    'Sağ üstteki QR kodu sayfaları otomatik eşleştirir.', 'Örnek işaretleme']) {
     assert.ok(html.includes(text), `Başlıkta "${text}" yok.`);
   }
   // The instruction that used to be wider than the sheet is gone from both renderers.
@@ -130,7 +130,8 @@ test('the HTML header renders the same boxes the PDF writes', () => {
 });
 
 function jsonContainsLongReminder(html: string): boolean {
-  return html.includes('sağ üstteki QR kodu sayfaları otomatik eşleştirir');
+  // The original reminder as one sentence, which cannot fit the header on any sheet.
+  return html.includes('aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; sağ üstteki');
 }
 
 test('header geometry stays inside the sheet and the footer keeps the copyright line', () => {

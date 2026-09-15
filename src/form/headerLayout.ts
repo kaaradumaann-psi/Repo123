@@ -27,15 +27,15 @@ export const HEADER_LAYOUT = Object.freeze({
   titleRowHeightMm: 14,
   titleRuleHeightMm: .35,
   subtitleGapMm: 1.5,
-  identityTopMm: 37,
-  identityLabelBoxMm: 2.4,
-  identityRuleGapMm: .8,
-  identityRuleHeightMm: 4.5,
+  identityTopMm: 36.5,
+  identityLabelBoxMm: 2.2,
+  identityRuleGapMm: .7,
+  identityRuleHeightMm: 4,
   identityRuleThicknessMm: .2,
   identityColumnWidthMm: 51,
   identityColumnGapMm: 4,
   identityDateWidthMm: 30,
-  instructionsTopMm: 46,
+  instructionsTopMm: 44,
   exampleDiameterMm: 2.5,
   exampleLabelSizePt: 6.5,
   exampleGapMm: 1.5,
@@ -113,10 +113,12 @@ export function headerLines(page: HeaderPageInfo, definition: FormDefinition): H
     pushInstruction('marking-key', `D: Doğru${PAD} Y: Yanlış`, 7.5, true);
     pushInstruction('rule-fill', 'Her maddede yalnızca bir dairenin içini tamamen doldurun.', 6.5);
     pushInstruction('rule-handwriting', 'El yazısı kimlik yalnızca bu sayfadadır.', 6.5);
+    // The reminder was one 259 mm-long sentence at 6 pt, i.e. wider than the whole sheet, so the PDF
+    // drew it off the page and the browser wrapped it under the answer grid. The same words are
+    // printed on three lines instead (94.0 / 69.9 / 95.1 mm measured with the embedded font).
     pushInstruction('rule-order', 'Numaraları sütun boyunca aşağıya doğru izleyin.', 6);
-    // The original single sentence is 259 mm at 6 pt, i.e. wider than the sheet. It is split
-    // into two 6 pt lines that keep every instruction: order, one session, QR page matching.
-    pushInstruction('rule-session', 'Dört sayfayı aynı oturumda yazdırın; QR kodu sayfaları eşleştirir.', 6);
+    pushInstruction('rule-session', 'Dört sayfayı aynı oturumda yazdırın.', 6);
+    pushInstruction('rule-qr', 'Sağ üstteki QR kodu sayfaları otomatik eşleştirir.', 6);
   } else {
     instructions.push({ id: 'continuation-rule',
       spans: [{ text: 'Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.', sizePt: 7, bold: false }],

@@ -372,7 +372,8 @@ altındaki ızgaranın üstüne biniyordu. “Yazılar alta kaymış” görünt
 renderer'da iki ayrı kuralla yerleştiriliyordu (`renderFormPdf.drawHeader` ve `form.css` akış
 kuralları) ve HTML tarafı boşluk hesabı yapmıyordu.
 
-Düzeltme: **`src/form/headerLayout.ts`** başlığın tek kaynağı oldu; hem PDF yazıcısı hem
+Düzeltme: **`src/form/headerLayout.ts`** başlığın tek kaynağı oldu (kimlik satırları 36,5 mm'ye,
+yönergeler 44 mm'den başlıyor; önce kimlik satırı kesik görünüyordu); hem PDF yazıcısı hem
 `PaperHeader.tsx` (HTML) ondan çiziyor. Kapatılan ölçüler:
 
 | Satır | Punto | Ölçülen genişlik | Yerleşim |
@@ -382,14 +383,15 @@ Düzeltme: **`src/form/headerLayout.ts`** başlığın tek kaynağı oldu; hem P
 | `D: Doğru   Y: Yanlış` | 7,5 pt bold | 50,6 mm | 46 mm |
 | `Her maddede yalnızca bir dairenin içini tamamen doldurun.` | 6,5 pt | 122,7 mm | 47 mm |
 | `El yazısı kimlik yalnızca bu sayfadadır.` | 6,5 pt | 80,4 mm | 49,7 mm |
-| `Numaraları sütun boyunca aşağıya doğru izleyin.` | 6 pt | 94,0 mm | 52,4 mm |
-| `Dört sayfayı aynı oturumda yazdırın; QR kodu sayfaları eşleştirir.` | 6 pt | 124,3 mm | 54,3 mm |
+| `Numaraları sütun boyunca aşağıya doğru izleyin.` | 6 pt | 94,0 mm | 48,4 mm |
+| `Dört sayfayı aynı oturumda yazdırın.` | 6 pt | 69,9 mm | 51,2 mm |
+| `Sağ üstteki QR kodu sayfaları otomatik eşleştirir.` | 6 pt | 95,1 mm | 52,8 mm |
 | `Örnek işaretleme` + dolu daire | 6,5 pt | 35,8 mm + 2,5 mm | sağ |
 
-Kullanıcının istediği dört cümle de duruyor; tek uzun cümle iki satıra bölündü (order + session/QR)
-çünkü 259 mm'lik hâli hiçbir sayfaya sığmaz. Izgara koordinatlarına **dokunulmadı**: `gridTopMm`
-60 mm, madde numaraları ve 1.132 daire aynı yerde (`verify:pdf` sapması 0,028 mm / 0,000 mm).
-Başlık en alt 57,0 mm'de bitiyor, yani ızgaraya 3 mm kalıyor.
+Kullanıcının istediği **beş cümle de birebir** basılı; yalnızca 259 mm'lik tek cümle üç satıra
+bölündü, kelimeler değişmedi. Izgara koordinatlarına **dokunulmadı**: `gridTopMm` 60 mm, madde
+numaraları ve 1.132 daire aynı yerde (`verify:pdf` sapması 0,028 mm / 0,000 mm). Başlık en alt
+57,3 mm'de bitiyor, yani ızgaraya 2,7 mm kalıyor; test bunu 0,5 mm'lik güvenlik payıyla koruyor.
 
 Yeni koruma testi `tests/printLayout.test.ts` her satırı **gömülü yazı tipinin gerçek
 advance**'iyle ölçüyor: hiçbir satır 132 mm güvenlik sınırını, ızgarayı, QR alanını veya sayfa

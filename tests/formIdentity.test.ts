@@ -31,14 +31,16 @@ test('identity, participant code and date fields are rendered on the first page 
       assert.equal(html.split('data-line="date-slash-').length - 1, 2,
         'The date field must expose day/month/year separators.');
       assert.ok(html.includes('data-line="marking-example"'), 'The marking example belongs to the instructions on the cover.');
-      assert.ok(html.includes('data-line="rule-order"') && html.includes('data-line="rule-session"'),
-        'Cover instructions must keep the column-order reminder and the single-session QR note.');
+      assert.ok(html.includes('data-line="rule-order"') && html.includes('data-line="rule-session"') &&
+        html.includes('data-line="rule-qr"'),
+        'Cover instructions must keep the column-order reminder, the single-session note and the QR note.');
     } else {
       assert.equal(identityBlocks, 0, `Page ${index + 1} must not repeat the identity fields.`);
       assert.deepEqual(labels, [], `Page ${index + 1} must not repeat any identity label.`);
       assert.ok(html.includes('data-identity="continuation"'));
       assert.ok(!html.includes('marking-example'));
-      assert.ok(!html.includes('data-line="rule-order"') && !html.includes('data-line="rule-session"'),
+      assert.ok(!html.includes('data-line="rule-order"') && !html.includes('data-line="rule-session"') &&
+        !html.includes('data-line="rule-qr"'),
         'Continuation pages must not repeat the cover-only column-order reminder.');
     }
   });
