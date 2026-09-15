@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { FormDefinition, PageDefinition } from '../omr/omrTypes';
 import { FORM } from '../form/layout';
+import { FORM_COPYRIGHT_LINE } from '../form/attribution';
 import { AnswerColumn } from './AnswerColumn';
 import { PageQr } from './PageQr';
 import { RegistrationMarks } from './RegistrationMarks';
@@ -55,7 +56,7 @@ export function FormPage({ page, definition, batchId, active }: {
     <div className="answer-columns">{page.columns.map((column, index) =>
       <AnswerColumn key={index} column={column} />)}</div>
     <footer className="paper-footer">
-      <div><strong>{FORM.templateId}</strong></div>
+      <div><strong>{FORM.templateId}</strong><span className="paper-copyright">{FORM_COPYRIGHT_LINE}</span></div>
       <div><strong>Sayfa {page.pageNumber} / {definition.totalPages}</strong><span>A4 · 210 × 297 mm · Tek yüz</span></div>
     </footer>
   </article>;

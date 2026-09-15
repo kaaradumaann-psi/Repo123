@@ -5,6 +5,7 @@ import { FormPreview } from './components/FormPreview';
 import { ScannerWorkspace } from './components/ScannerWorkspace';
 import { Icon } from './components/Icon';
 import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
+import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
 import { createBatchId } from './form/pageIdentity';
 import { downloadFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
 
@@ -87,5 +88,14 @@ export default function App() {
         <ScannerWorkspace definition={formDefinition} />
       </div>
     </main>
+
+    <footer className="app-footer">
+      <span>© {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER}</span>
+      <nav className="app-footer-links" aria-label="Yazar bağlantıları">
+        <a href={SITE_URL} target="_blank" rel="noopener noreferrer">{SITE_LABEL}</a>
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </nav>
+    </footer>
   </>;
 }
+
