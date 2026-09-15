@@ -93,7 +93,7 @@ create table if not exists public.mmpi_records (
   application_date date not null,
   requested_by text not null,
   raw_omr_answers jsonb not null,
-  created_by uuid not null references public.profiles(id) on delete restrict,
+  created_by uuid not null references public.profiles(id) on delete cascade,
   created_at timestamptz not null default timezone('utc', now()),
   constraint mmpi_records_name_length check (char_length(client_first_name) between 1 and 80 and char_length(client_last_name) between 1 and 80),
   constraint mmpi_records_answers_object check (jsonb_typeof(raw_omr_answers) = 'array')
@@ -136,9 +136,18 @@ create policy profiles_select on public.profiles
 for select to authenticated
 using (auth.uid() = id or public.is_admin());
 
--- Profile writes are deliberately not exposed to the browser. Admin account
--- creation and active-state changes go through the verified Edge Function.
+-- Admin can update profile records (e.g. active toggle)
 drop policy if exists profiles_update on public.profiles;
+create policy profiles_update on public.profiles
+for update to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+-- Admin can delete psychologist profiles
+drop policy if exists profiles_delete on public.profiles;
+create policy profiles_delete on public.profiles
+for delete to authenticated
+using (public.is_admin());
 
 -- Psychologists can only read their own records; admins can read all records.
 drop policy if exists mmpi_records_select on public.mmpi_records;
@@ -164,10 +173,19 @@ for update to authenticated
 using (created_by = auth.uid() and public.is_active_user())
 with check (created_by = auth.uid() and public.is_active_user());
 
+-- Admin or owner can delete records
+drop policy if exists mmpi_records_delete on public.mmpi_records;
+create policy mmpi_records_delete on public.mmpi_records
+for delete to authenticated
+using (
+  public.is_admin() or
+  (created_by = auth.uid() and public.is_active_user())
+);
+
 revoke all on public.profiles from anon;
 revoke all on public.mmpi_records from anon;
-grant select on public.profiles to authenticated;
-grant select, insert, update on public.mmpi_records to authenticated;
+grant select, update, delete on public.profiles to authenticated;
+grant select, insert, update, delete on public.mmpi_records to authenticated;
 revoke all on function public.is_active_user() from public;
 revoke all on function public.is_admin() from public;
 grant execute on function public.is_active_user() to authenticated;

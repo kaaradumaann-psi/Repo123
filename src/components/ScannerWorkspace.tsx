@@ -12,10 +12,10 @@ import { CameraCapture } from './CameraCapture';
 import { ScanResultPreview } from './ScanResultPreview';
 import { RecordCapture } from './RecordCapture';
 import { MyRecordsPanel } from './MyRecordsPanel';
+import { Icon } from './Icon';
 import '../styles/scanner.css';
 
 export function ScannerWorkspace({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
-  // A different form definition must never inherit the previous form's scan set.
   return <ScannerSession key={definition.fingerprint} definition={definition} actor={actor} />;
 }
 
@@ -25,7 +25,7 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   const alive = useRef(true);
   const job = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('İlk kabul edilen sayfa, bu oturumun form setini belirler.');
+  const [status, setStatus] = useState('İlk yüklenen sayfa, bu oturumun form set kodunu belirler.');
   const [alerts, setAlerts] = useState<{ id: number; message: string }[]>([]);
   const alertId = useRef(0);
   const [source, setSource] = useState<'files' | 'camera'>('files');
@@ -39,11 +39,18 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   const summary = summarizeResults(definition, pages);
   const selected = pages.find(page => page.pageNumber === selectedNumber) ?? pages[0];
 
-  function commit(next: ScanSet) { current.current = next; if (alive.current) setScan(next); }
+  function commit(next: ScanSet) {
+    current.current = next;
+    if (alive.current) setScan(next);
+  }
+
   function notify(message: string) {
     if (alive.current) setAlerts(previous => [...previous, { id: ++alertId.current, message }]);
   }
-  function releaseImages(state: ScanSet) { sortedPages(state).forEach(page => URL.revokeObjectURL(page.previewUrl)); }
+
+  function releaseImages(state: ScanSet) {
+    sortedPages(state).forEach(page => URL.revokeObjectURL(page.previewUrl));
+  }
 
   useEffect(() => {
     alive.current = true;
@@ -56,42 +63,58 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   }, []);
 
   async function run(files: File[], capture?: SourcePage) {
-    if (job.current) { notify('Bir okuma işlemi sürüyor. Tamamlanmasını bekleyin veya iptal edin.'); return; }
+    if (job.current) {
+      notify('Bir okuma işlemi devam ediyor. Lütfen tamamlanmasını bekleyin.');
+      return;
+    }
     if (!capture && !files.length) return;
     if (files.length > SCAN_LIMITS.files || files.reduce((total, file) => total + file.size, 0) > SCAN_LIMITS.batchBytes) {
-      notify('Bir seçimde en çok 12 dosya ve toplam 96 MB desteklenir. Hiçbir dosya işlenmedi; daha küçük bir grup seçin.'); return;
+      notify('Bir seçimde en çok 12 dosya ve toplam 96 MB desteklenir. Lütfen daha küçük bir grup seçin.');
+      return;
     }
     const controller = new AbortController();
     job.current = controller;
     const { signal } = controller;
     setBusy(true);
-    let processed = 0, accepted = 0, rejected = 0;
+    let processed = 0,
+      accepted = 0,
+      rejected = 0;
     const process = async ({ image, sourceName }: SourcePage) => {
       checkAborted(signal);
       processed++;
-      setStatus(`${sourceName}: köşeler, kimlik, kalite ve işaretler okunuyor…`);
+      setStatus(`${sourceName}: köşe işaretleri, QR kimliği ve optik cevaplar taranıyor…`);
       await yieldToScreen(signal);
       let previewUrl: string | undefined;
       try {
         const result = await analyzePage(image, definition);
         checkAborted(signal);
         const candidate = acceptPage(current.current, result, definition, { sourceName, previewUrl: '' });
-        if (!candidate.ok) { rejected++; notify(`${sourceName}: ${candidate.message}`); return; }
+        if (!candidate.ok) {
+          rejected++;
+          notify(`${sourceName}: ${candidate.message}`);
+          return;
+        }
         if (!result.ok) return;
         previewUrl = await normalizedThumbnail(result.normalized, signal);
         checkAborted(signal);
         const decision = acceptPage(current.current, result, definition, { sourceName, previewUrl });
-        if (!decision.ok) { rejected++; notify(`${sourceName}: ${decision.message}`); return; }
+        if (!decision.ok) {
+          rejected++;
+          notify(`${sourceName}: ${decision.message}`);
+          return;
+        }
         commit(decision.state);
         previewUrl = undefined;
         accepted++;
         setSelectedNumber(result.pageNumber);
-        setStatus(`${sourceName}: ${result.pageNumber}. sayfa kabul edildi.`);
+        setStatus(`${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
       } catch (error) {
         checkAborted(signal);
         rejected++;
-        notify(`${sourceName}: Okuma tamamlanamadı. ${error instanceof Error ? error.message : 'Görüntüyü yeniden deneyin.'}`);
-      } finally { if (previewUrl) URL.revokeObjectURL(previewUrl); }
+        notify(`${sourceName}: Okuma tamamlanamadı. ${error instanceof Error ? error.message : 'Lütfen görseli tekrar deneyin.'}`);
+      } finally {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+      }
       await yieldToScreen(signal);
     };
     try {
@@ -99,9 +122,10 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
       for (const file of files) {
         checkAborted(signal);
         if (processed >= SCAN_LIMITS.batchPages) {
-          notify('Bir işlemde 24 sayfa sınırına ulaşıldı. Kalan dosyalar işlenmedi. Kalanları ayrı seçin.'); return;
+          notify('Bir işlemde 24 sayfa sınırına ulaşıldı. Kalan dosyalar işlenmedi.');
+          return;
         }
-        setStatus(`${file.name}: dosya açılıyor…`);
+        setStatus(`${file.name}: dosya hazırlanıyor…`);
         try {
           const kind = await identifyFile(file);
           checkAborted(signal);
@@ -115,18 +139,21 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
         } catch (error) {
           checkAborted(signal);
           rejected++;
-          notify(`${file.name}: ${error instanceof Error ? error.message : 'Dosya açılamadı.'} Bu dosyanın kalan sayfaları işlenmedi.`);
+          notify(`${file.name}: ${error instanceof Error ? error.message : 'Dosya açılamadı.'}`);
         }
       }
     } catch (error) {
-      if (!signal.aborted) notify(`İşlem durdu: ${error instanceof Error ? error.message : 'Beklenmeyen hata.'}`);
+      if (!signal.aborted) notify(`İşlem duraklatıldı: ${error instanceof Error ? error.message : 'Beklenmeyen hata.'}`);
     } finally {
       if (job.current === controller) {
         job.current = null;
         if (alive.current) {
           setBusy(false);
-          if (!signal.aborted) setStatus(`İşlem tamamlandı. ${accepted} sayfa kabul edildi; ${rejected} görüntü veya dosya reddedildi.`);
-          else if (signal.reason !== 'reset') setStatus('İşlem iptal edildi. Önceden kabul edilen sayfalar korundu; kalanlar işlenmedi.');
+          if (!signal.aborted) {
+            setStatus(`Tarama tamamlandı: ${accepted} sayfa onaylandı${rejected > 0 ? `, ${rejected} sayfa reddedildi` : ''}.`);
+          } else if (signal.reason !== 'reset') {
+            setStatus('İşlem iptal edildi.');
+          }
         }
       }
     }
@@ -140,78 +167,263 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
     setAlerts([]);
     setCameraKey(previous => previous + 1);
     setConfirmReset(false);
-    setStatus('Tüm görüntüler ve manuel incelemeler silindi. Yeni setin ilk sayfasını ekleyin.');
+    setStatus('Tarama oturumu sıfırlandı. Yeni form setinin ilk sayfasını yükleyebilirsiniz.');
   }
 
-  return <section className="scanner-workspace" aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
-    <header className="scan-section-heading">
-      <div><h2 id={`${id}-title`}>Tara ve gözden geçir</h2>
-        <p>Görüntüler yalnızca bu sekmede, cihazınızda işlenir.</p></div>
-      <button type="button" className="scan-danger" onClick={() => setConfirmReset(true)}>Yeni set / sıfırla</button>
-    </header>
-    {confirmReset && <section className="scan-reset-confirm" aria-label="Yeni set onayı">
-      <p>Tüm sayfalar, görüntüler ve manuel incelemeler silinecek; kamera ve devam eden okuma durdurulacak.</p>
-      <div className="scan-actions"><button type="button" className="scan-danger" onClick={reset}>Hepsini sil ve yeni set başlat</button>
-        <button type="button" onClick={() => setConfirmReset(false)}>Vazgeç</button></div>
-    </section>}
-    <div className="scan-input-panel">
-      <div className="scan-source-switch" role="group" aria-label="Sayfa ekleme yöntemi">
-        <button type="button" aria-pressed={source === 'files'} onClick={() => setSource('files')}>Dosya yükle</button>
-        <button type="button" aria-pressed={source === 'camera'} onClick={() => setSource('camera')}>Kamera</button>
+  return (
+    <div className="scanner-layout-container" aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
+      {/* Başlık ve Sıfırlama */}
+      <div className="scanner-hero-header">
+        <div>
+          <span className="section-badge badge-primary">Adım 1: Optik Okuma</span>
+          <h2 id={`${id}-title`}>Optik Form Tarama ve Değerlendirme</h2>
+          <p className="scanner-hero-sub">
+            Cihazınızın kamerasını kullanarak veya taranmış PDF/görselleri yükleyerek 4 sayfalık formu otomatik olarak okutun.
+          </p>
+        </div>
+        <div className="hero-actions">
+          {pages.length > 0 && (
+            <button type="button" className="btn-secondary btn-danger-soft" onClick={() => setConfirmReset(true)}>
+              <Icon name="refresh" size={15} />
+              <span>Yeni Set / Sıfırla</span>
+            </button>
+          )}
+        </div>
       </div>
-      {source === 'files' ? <div className="scan-file-picker">
-        <label htmlFor={`${id}-files`}><strong>JPG, PNG veya PDF seçin</strong><span>Birden fazla dosya seçilebilir. PDF sayfaları sırayla okunur.</span></label>
-        <input id={`${id}-files`} type="file" accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf" multiple disabled={busy}
-          aria-describedby={`${id}-limits`} onChange={event => {
-            const files = Array.from(event.currentTarget.files ?? []);
-            event.currentTarget.value = '';
-            void run(files);
-          }} />
-        <p id={`${id}-limits`} className="scan-muted">Dosya başına 24 MB; seçimde 12 dosya / 96 MB; PDF başına 12, işlem başına 24 sayfa.
-          {' '}Görseller en çok 40 MP; uzun kenar en çok 2800 px olarak işlenir. PDF genişliği yaklaşık 1680 px.</p>
-      </div> : <CameraCapture key={cameraKey} disabled={busy} onCapture={(image, sourceName) => run([], { image, sourceName })} />}
-      <div className="scan-progress"><p role="status" aria-live="polite">{status}</p>
-        {busy && <button type="button" onClick={() => { job.current?.abort('cancel'); setStatus('İptal ediliyor; devam eden hesaplama bitince yeni işlem açılacak…'); }}>Okumayı iptal et</button>}
+
+      {confirmReset && (
+        <div className="reset-confirm-box" role="dialog" aria-label="Sıfırlama Onayı">
+          <Icon name="alert" size={20} className="text-danger" />
+          <div className="confirm-text">
+            <strong>Mevcut tarama oturumu sıfırlansın mı?</strong>
+            <p>Okunmuş tüm sayfalar ve manuel düzeltmeler temizlenecektir.</p>
+          </div>
+          <div className="confirm-btn-group">
+            <button type="button" className="btn-danger btn-sm" onClick={reset}>
+              Evet, Sıfırla
+            </button>
+            <button type="button" className="btn-secondary btn-sm" onClick={() => setConfirmReset(false)}>
+              Vazgeç
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tarama Paneli: Yükleme & Kamera */}
+      <div className="scanner-input-card card-elevated">
+        <div className="scan-mode-tabs" role="tablist">
+          <button
+            type="button"
+            className={`mode-tab ${source === 'files' ? 'active' : ''}`}
+            onClick={() => setSource('files')}
+          >
+            <Icon name="file" size={16} />
+            <span>Dosya Yükle (PDF / JPG / PNG)</span>
+          </button>
+          <button
+            type="button"
+            className={`mode-tab ${source === 'camera' ? 'active' : ''}`}
+            onClick={() => setSource('camera')}
+          >
+            <Icon name="camera" size={16} />
+            <span>Kamera ile Canlı Çekim</span>
+          </button>
+        </div>
+
+        {source === 'files' ? (
+          <div className="dropzone-area">
+            <label htmlFor={`${id}-files`} className="dropzone-label">
+              <div className="dropzone-icon">
+                <Icon name="download" size={28} />
+              </div>
+              <strong className="dropzone-title">Taranmış Formları Buraya Yükleyin</strong>
+              <span className="dropzone-desc">JPG, PNG veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
+              <span className="btn-primary dropzone-btn">Dosya Seç</span>
+            </label>
+            <input
+              id={`${id}-files`}
+              type="file"
+              accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+              multiple
+              disabled={busy}
+              className="file-input-hidden"
+              onChange={event => {
+                const files = Array.from(event.currentTarget.files ?? []);
+                event.currentTarget.value = '';
+                void run(files);
+              }}
+            />
+            <p className="dropzone-hint">
+              En iyi sonuç için düz taranmış, dört köşe karesi ve QR kodu net görünen A4 sayfalarını kullanın.
+            </p>
+          </div>
+        ) : (
+          <CameraCapture key={cameraKey} disabled={busy} onCapture={(image, sourceName) => run([], { image, sourceName })} />
+        )}
+
+        {/* Canlı Durum ve İptal */}
+        <div className="scanner-status-strip">
+          <div className="status-live-indicator">
+            {busy ? <div className="spinner-sm" /> : <div className="live-dot" />}
+            <span role="status" aria-live="polite">
+              {status}
+            </span>
+          </div>
+          {busy && (
+            <button
+              type="button"
+              className="btn-secondary btn-sm"
+              onClick={() => {
+                job.current?.abort('cancel');
+                setStatus('İşlem durduruluyor...');
+              }}
+            >
+              Okumayı Durdur
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Uyarılar */}
+      {alerts.length > 0 && (
+        <div className="scanner-alerts-list">
+          {alerts.map(alert => (
+            <div className="status-banner warning-banner" key={alert.id} role="alert">
+              <Icon name="alert" size={18} />
+              <span style={{ flex: 1 }}>{alert.message}</span>
+              <button
+                type="button"
+                className="close-banner-btn"
+                onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}
+              >
+                <Icon name="close" size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* İlerleme ve Sayfa Durumu */}
+      <div className="scanner-progress-card card-elevated">
+        <div className="progress-top-row">
+          <div>
+            <h3 className="section-heading-sm">Set Tamamlanma Durumu</h3>
+            <p className="section-subtext">
+              {pages.length === 4 ? (
+                <span className="text-success font-semibold">Tüm 4 sayfa başarıyla okundu. Danışan bilgilerini kaydedebilirsiniz.</span>
+              ) : (
+                <span>Eksik sayfalar: {missingPages.length ? missingPages.map(p => `${p}. sayfa`).join(', ') : 'Yok'}.</span>
+              )}
+            </p>
+          </div>
+          <div className="batch-badge">
+            <span className="batch-label">Set Kodu</span>
+            <code className="batch-code">{scan.batchId ?? '—'}</code>
+          </div>
+        </div>
+
+        {/* 4 Sayfa Önizleme Kartları */}
+        <div className="scan-pages-grid">
+          {[...definition.pages]
+            .sort((a, b) => a.pageNumber - b.pageNumber)
+            .map(expected => {
+              const page = scan.pages[expected.pageNumber];
+              const isSelected = selected?.pageNumber === expected.pageNumber;
+
+              return (
+                <button
+                  type="button"
+                  key={expected.pageNumber}
+                  disabled={!page}
+                  className={`page-card-box ${page ? 'is-ready' : 'is-missing'} ${isSelected ? 'is-active' : ''}`}
+                  onClick={() => setSelectedNumber(expected.pageNumber)}
+                >
+                  <div className="page-card-thumb">
+                    {page ? (
+                      <img src={page.previewUrl} alt={`${expected.pageNumber}. sayfa önizleme`} />
+                    ) : (
+                      <div className="missing-page-placeholder">
+                        <Icon name="file" size={24} />
+                        <span>Eksik</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="page-card-meta">
+                    <strong>{expected.pageNumber}. Sayfa</strong>
+                    <small>
+                      {page ? (
+                        `${Object.keys(page.reviews).length ? `${Object.keys(page.reviews).length} manuel düzeltme` : 'Sorunsuz okundu'}`
+                      ) : (
+                        'Görsel bekleniyor'
+                      )}
+                    </small>
+                  </div>
+                  {page && <div className="card-check-pill"><Icon name="check" size={12} /></div>}
+                </button>
+              );
+            })}
+        </div>
+      </div>
+
+      {/* İstatistikler */}
+      {pages.length > 0 && (
+        <div className="scanner-metrics-strip">
+          <div className="stat-item">
+            <span className="stat-label">Okunan Madde</span>
+            <strong className="stat-val">{summary.readItems} / {summary.expectedItems}</strong>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Güvenilir Cevap</span>
+            <strong className="stat-val text-success">{summary.reliableAnswers}</strong>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">İnceleme Bekleyen</span>
+            <strong className="stat-val text-warning">{summary.ambiguous + summary.multiple}</strong>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Boş Bırakılan</span>
+            <strong className="stat-val">{summary.blank}</strong>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Manuel Düzeltilen</span>
+            <strong className="stat-val text-primary">{summary.manuallyReviewed}</strong>
+          </div>
+        </div>
+      )}
+
+      {/* Sayfa İnceleme ve Düzeltme Alanı */}
+      {selected ? (
+        <ScanResultPreview
+          key={selected.pageNumber}
+          page={selected}
+          definition={definition}
+          onReview={(itemId, review) => {
+            try {
+              commit(setManualReview(current.current, definition, selected.pageNumber, itemId, review));
+            } catch (error) {
+              notify(error instanceof Error ? error.message : 'İnceleme kaydedilemedi.');
+            }
+          }}
+          onRemove={() => {
+            const page = current.current.pages[selected.pageNumber];
+            if (page) URL.revokeObjectURL(page.previewUrl);
+            commit(removePage(current.current, selected.pageNumber));
+            setStatus(`${selected.pageNumber}. sayfa kaldırıldı. Yeniden tarayabilirsiniz.`);
+          }}
+        />
+      ) : null}
+
+      {/* Danışan Bilgileri Kaydetme */}
+      <RecordCapture
+        key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`}
+        definition={definition}
+        scan={scan}
+        actor={actor}
+        onSaved={() => setRecordsRefresh(prev => prev + 1)}
+      />
+
+      {/* Psikolog Arşivi */}
+      {actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
     </div>
-    {alerts.length > 0 && <section className="scan-alerts" aria-label="Reddedilen dosya ve sayfalar">
-      {alerts.map(alert => <div className="scan-alert" role="alert" key={alert.id}><p>{alert.message}</p>
-        <button type="button" aria-label="Bu uyarıyı kapat" onClick={() => setAlerts(previous => previous.filter(item => item.id !== alert.id))}>Kapat</button></div>)}
-    </section>}
-    <dl className="scan-stats" aria-label="Özgün optik okuma özeti">
-      {[
-        ['Sayfa', `${summary.acceptedPages} / ${summary.expectedPages}`], ['Ölçülen madde', `${summary.readItems} / ${summary.expectedItems}`],
-        ['Güvenilir yanıt', summary.reliableAnswers], ['Belirsiz / tek işaret', summary.ambiguous], ['Çoklu işaret', summary.multiple],
-        ['Boş', summary.blank], ['Eksik / okunamayan', summary.missingItems], ['Elle incelenen', summary.manuallyReviewed],
-      ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-    </dl>
-    <p className="scan-muted">Sayılar özgün ölçümlere aittir; manuel düzeltmeler bunları değiştirmez. Eksikler, henüz eklenmemiş sayfaları ve başarılı ölçümü olmayan maddeleri içerir.</p>
-    <div className="scan-set-info"><p><strong>Set:</strong> <span>{scan.batchId ?? 'Henüz kilitlenmedi'}</span></p>
-      <p><strong>Eksik sayfalar:</strong> {missingPages.length ? missingPages.join(', ') : 'Yok; tüm sayfalar eklendi.'}</p>
-      <p className="scan-muted">Sayfalar QR kimliğine göre sıralanır. Dosya sırası sayfa numarası değildir. Son sayfayı silmek set kilidini kaldırmaz.</p>
-    </div>
-    <nav className="scan-page-list" aria-label="Kabul edilen ve eksik sayfalar">
-      {[...definition.pages].sort((a, b) => a.pageNumber - b.pageNumber).map(expected => {
-        const page = scan.pages[expected.pageNumber];
-        return <button type="button" key={expected.pageNumber} disabled={!page} aria-pressed={selected?.pageNumber === expected.pageNumber}
-          onClick={() => setSelectedNumber(expected.pageNumber)} aria-label={`${expected.pageNumber}. sayfa, ${page ? 'kabul edildi, incele' : 'eksik'}`}>
-          {page ? <img src={page.previewUrl} alt="" /> : <span className="scan-missing-thumb" aria-hidden="true">?</span>}
-          <span><strong>{expected.pageNumber}. sayfa</strong><small>{page ? `${Object.keys(page.reviews).length} manuel inceleme` : 'Eksik · ekleyin'}</small></span>
-        </button>;
-      })}
-    </nav>
-    {selected ? <ScanResultPreview key={selected.pageNumber} page={selected} definition={definition}
-      onReview={(itemId, review) => {
-        try { commit(setManualReview(current.current, definition, selected.pageNumber, itemId, review)); }
-        catch (error) { notify(error instanceof Error ? error.message : 'İnceleme kaydedilemedi.'); }
-      }} onRemove={() => {
-        const page = current.current.pages[selected.pageNumber];
-        if (page) URL.revokeObjectURL(page.previewUrl);
-        commit(removePage(current.current, selected.pageNumber));
-        setStatus(`${selected.pageNumber}. sayfa ve incelemeleri silindi. Aynı setten yeniden çekin veya yükleyin.`);
-      }} /> : <div className="scan-empty">Henüz kabul edilen sayfa yok. Başlamak için basılı formun görüntüsünü veya PDF dosyasını ekleyin.</div>}
-    <RecordCapture key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`} definition={definition} scan={scan} actor={actor}
-      onSaved={() => setRecordsRefresh(previous => previous + 1)} />
-    {actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
-  </section>;
+  );
 }
