@@ -307,9 +307,9 @@ Bunlar bu ortamda **çalıştırılamadı**; yapılmış gibi gösterilmiyor.
 - Mevcut OMR, kamera, PDF, form geometrisi, 4 sayfalık tarama ve sonuç inceleme
   modülleri değiştirilmedi; yalnızca AuthGate, Admin paneli ve tarama sonrası
   kayıt bileşeni Supabase'e bağlandı.
-- `src/auth/supabaseClient.ts`, `persistSession: false` ile Supabase Auth oturumunu
-  frontend belleğinde tutar; uygulama kendi `localStorage/sessionStorage`
-  kullanıcı/kayıt store'unu kullanmaz.
+- `src/auth/supabaseClient.ts`, `persistSession: true` ve `sessionStorage` ile
+  aynı sekmede F5 sonrası oturumu korur; `localStorage` kullanılmaz. Rol/kayıt
+  erişimi RLS + `profiles.active` ile doğrulanır.
 - `supabase/migrations/20260915000000_initial_schema.sql` profilleri, roller,
   MMPI kayıtlarını, ilişkileri, Auth trigger'ını ve RLS politikalarını oluşturur.
   Aktif Psikolog yalnızca kendi kayıtlarını okuyup yazabilir; Admin tüm kayıt ve
@@ -326,6 +326,16 @@ Bunlar bu ortamda **çalıştırılamadı**; yapılmış gibi gösterilmiyor.
   proje URL'si, anon anahtarı ve Supabase CLI bağlantısı bulunmadığı için
   çalıştırılmadı. Kurulum/deploy adımları `supabase/README.md` içindedir; OMR
   testleri aşağıdaki kapsamla ayrıca çalıştırılmıştır.
+
+## 2026-09-15 — gerçek dünya girişi
+
+Kod, mimari karara göre tamamlandı: yazdırma gömülü 4 sayfalık PDF’dir
+(`printFormPdf`, HTML `window.print()` değil); oturum `sessionStorage`’dadır;
+JPEG/PNG/WEBP/HEIC ve bütçeli JPEG/CCITT tarama PDF kabul edilir; kağıt
+izolasyonu + çok ölçekli QR + çoklu hizalama eşiği (`squareFill` 0.84)
+kullanılır; kalite üç kademelidir (`reliable` yalnız `quality.ok`). Sentetik
+güvenlik testleri yanlış otomatik cevabı hâlâ yasaklar. Gerçek telefon
+fotoğrafı bu ortamda yine yok.
 
 ## Bir sonraki doğrulama adımı
 

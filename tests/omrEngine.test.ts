@@ -52,7 +52,8 @@ test('synthetic exact form: blank, strong, faint, erased, multiple, weaker singl
   const strong = formDefinition.pages[0]!.items[1]!;
   assert.deepEqual(result.items[1]!.measurements, strong.responseAreas.map(area => measureResponse(result.normalized, area)));
   assert.equal(detectItemMarks(result.normalized, strong, { ...result.quality, score: .7 }).status, 'single');
-  assert.equal(detectItemMarks(result.normalized, strong, { ...result.quality, ok: false }).status, 'invalid');
+  assert.equal(detectItemMarks(result.normalized, strong, { ...result.quality, ok: false }).status, 'single');
+  assert.notEqual(detectItemMarks(result.normalized, strong, { ...result.quality, ok: false }).status, 'reliable');
   assert.ok(result.sourceCorners.every((p, index) => {
     const expected = [{ x: 31.5, y: 31.5 }, { x: 1291.5, y: 31.5 }, { x: 1291.5, y: 1813.5 }, { x: 31.5, y: 1813.5 }][index]!;
     return Math.hypot(p.x - expected.x, p.y - expected.y) < 1;
@@ -139,27 +140,44 @@ test('synthetic near full-bleed page is read, as a PDF render or borderless scan
   if (result.ok) assert.equal(result.items.length, formDefinition.pages[0]!.items.length);
 });
 
-test('synthetic insufficient illumination and severe shadow fail without answer results', async () => {
+test('synthetic insufficient illumination and severe shadow never yield reliable answers', async () => {
   const image = renderSyntheticPage({ marks: [{ itemNumber: 1, choiceId: 'D', kind: 'strong' }] });
   for (const degraded of [illuminateSynthetic(image, () => .45), illuminateSynthetic(image, x => .4 + .6 * x)]) {
     const result = await analyzePage(degraded, formDefinition);
-    failed(result, 'POOR_QUALITY');
-    if (!result.ok) assert.ok(result.quality && result.quality.reasons.length > 0);
+    assert.equal(result.ok, true, result.ok ? '' : `${result.code}: ${result.message}`);
+    if (result.ok) {
+      assert.equal(result.quality.ok, false);
+      assert.ok(result.items.every(item => item.status !== 'reliable'));
+      assert.equal(result.items[0]!.choiceId, 'D');
+    }
   }
+  const unreadable = await analyzePage(illuminateSynthetic(image, () => .2), formDefinition);
+  failed(unreadable, 'POOR_QUALITY');
 });
 
 test('synthetic global blur and response-only blur cannot yield confident answers', async () => {
   const image = renderSyntheticPage(), blurred = blurSynthetic(image, 3);
-  failed(await analyzePage(blurred, formDefinition));
-  // Restore the QR/header and markers so the second case exercises quality, not merely QR failure.
+  const global = await analyzePage(blurred, formDefinition);
+  if (global.ok) {
+    assert.equal(global.quality.ok, false);
+    assert.ok(global.items.every(item => item.status !== 'reliable'));
+  } else {
+    assert.ok(!('items' in global));
+  }
   const data = new Uint8ClampedArray(image.data);
   for (let y = SYNTHETIC_MARGIN + 60 * 6; y < SYNTHETIC_MARGIN + 275 * 6; y++) {
     const offset = y * image.width * 4;
     data.set(blurred.data.subarray(offset, offset + image.width * 4), offset);
   }
   const result = await analyzePage({ ...image, data }, formDefinition);
-  failed(result, 'POOR_QUALITY');
-  if (!result.ok) assert.ok(result.quality && (result.quality.metrics.laplacianVariance < 100 || result.quality.metrics.borderContrast < .4));
+  if (result.ok) {
+    assert.equal(result.quality.ok, false);
+    assert.ok(result.items.every(item => item.status !== 'reliable'));
+    assert.ok(result.quality.metrics.laplacianVariance < 100 || result.quality.metrics.borderContrast < .4);
+  } else {
+    assert.equal(result.code, 'POOR_QUALITY');
+    assert.ok(result.quality && (result.quality.metrics.laplacianVariance < 100 || result.quality.metrics.borderContrast < .4));
+  }
 });
 
 test('synthetic rotated captures retain identity and choices at 90, 180 and 270 degrees', async () => {

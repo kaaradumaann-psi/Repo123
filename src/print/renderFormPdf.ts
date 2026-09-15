@@ -52,6 +52,19 @@ class Sheet {
       `${p(cx + kappa, cy - r)} ${p(cx + path, cy - kappa)} ${p(cx + path, cy)} c`, 'S');
   }
 
+  /** Filled disc for the marking example. Uses `f`, so verify-pdf does not count it as a bubble. */
+  fillCircle(cx: number, cyTop: number, diameter: number): void {
+    const radius = diameter / 2;
+    const cy = FORM.pageHeightMm - cyTop, kappa = 0.5522847498 * radius, r = round(radius);
+    const p = (x: number, y: number) => `${num(x)} ${num(y)}`;
+    this.ops.push('0 g',
+      `${p(cx + radius, cy)} m`,
+      `${p(cx + radius, cy + kappa)} ${p(cx + kappa, cy + r)} ${p(cx, cy + r)} c`,
+      `${p(cx - kappa, cy + r)} ${p(cx - radius, cy + kappa)} ${p(cx - radius, cy)} c`,
+      `${p(cx - radius, cy - kappa)} ${p(cx - kappa, cy - r)} ${p(cx, cy - r)} c`,
+      `${p(cx + kappa, cy - r)} ${p(cx + radius, cy - kappa)} ${p(cx + radius, cy)} c`, 'f');
+  }
+
   /** Rendered width of a label in millimetres. */
   width(value: string, sizePt: number, bold = false): number {
     const font = bold ? this.fonts.bold : this.fonts.regular;
@@ -127,19 +140,23 @@ function drawHeader(sheet: Sheet, page: PageDefinition, definition: FormDefiniti
     }
   }
 
-  const top = firstPage ? IDENTITY_TOP + IDENTITY_HEIGHT + 3 : HEADER_TOP + TITLE_ROW_HEIGHT + 4;
-  const ruleWidth = sheet.text('D: Doğru   Y: Yanlış', left, baseline(top, 7.5), 7.5, { bold: true });
-  sheet.text(firstPage
-    ? 'Her maddede yalnızca bir dairenin içini tamamen doldurun. El yazısı kimlik yalnızca bu sayfadadır.'
-    : 'Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.',
-  left + ruleWidth + 4, baseline(top, 7), 7);
+  const top = firstPage ? IDENTITY_TOP + IDENTITY_HEIGHT + 2 : HEADER_TOP + TITLE_ROW_HEIGHT + 4;
+  sheet.text('D: Doğru   Y: Yanlış', left, baseline(top, 7.5), 7.5, { bold: true });
   if (firstPage) {
     const caption = 'Örnek işaretleme';
     const captionWidth = sheet.width(caption, 6.5, false);
-    sheet.rect(right - captionWidth - 1.5 - 2.5, top + 0.3, 2.5, 2.5);
+    const exampleDiameter = 2.5;
+    sheet.fillCircle(right - captionWidth - 1.5 - exampleDiameter / 2, top + 1.35, exampleDiameter);
     sheet.text(caption, right, baseline(top, 6.5), 6.5, { align: 'right' });
+    sheet.text('Her maddede yalnızca bir dairenin içini tamamen doldurun.',
+      left, baseline(top + 3.8, 6.5), 6.5);
+    sheet.text('El yazısı kimlik yalnızca bu sayfadadır.',
+      left, baseline(top + 6.6, 6.5), 6.5);
     sheet.text('Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; ' +
-      'sağ üstteki QR kodu sayfaları otomatik eşleştirir.', left, baseline(top + 4.5, 6.5), 6.5);
+      'sağ üstteki QR kodu sayfaları otomatik eşleştirir.', left, baseline(top + 9.4, 6), 6);
+  } else {
+    sheet.text('Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.',
+      left, baseline(top + 3.8, 7), 7);
   }
 }
 

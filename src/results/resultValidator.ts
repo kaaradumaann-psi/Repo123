@@ -31,7 +31,7 @@ export function validatePageResult(value: unknown, definition: FormDefinition): 
     return reject('Form seti kimliği geçersiz. QR kodunu ve tüm köşe işaretlerini görüntüye alın.');
   }
   const quality = value.quality;
-  if (!record(quality) || quality.ok !== true || !unit(quality.score) || !strings(quality.reasons) ||
+  if (!record(quality) || typeof quality.ok !== 'boolean' || quality.fatal === true || !unit(quality.score) || !strings(quality.reasons) ||
     !record(quality.metrics) || !['brightness', 'shadowSpread', 'laplacianVariance', 'borderContrast', 'pixelsPerMm']
       .every(key => finite(quality.metrics && (quality.metrics as Record<string, unknown>)[key]) &&
         ((quality.metrics as Record<string, number>)[key] ?? -1) >= 0)) {

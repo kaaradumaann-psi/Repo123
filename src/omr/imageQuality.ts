@@ -2,11 +2,13 @@ import type { GrayImage, PageDefinition, PixelImage } from './omrTypes';
 import type { QualityReport } from '../results/scanResultTypes';
 import { CANONICAL_PIXELS_PER_MM } from './perspectiveCorrection';
 
-/** PROVISIONAL synthetic-fixture thresholds, not calibrated camera/photocopy acceptance limits. */
+/** Ideal-capture gates (`ok`) vs unreadable-page gates (`fatal`). Phone/scanner photos
+ * typically miss `ok` and must still be accepted for human review. */
 export const QUALITY_THRESHOLDS = Object.freeze({
   minPixelsPerMm: 4, minBrightness: 175, minTileBrightness: 130,
   maxShadowSpread: 65, minLaplacianVariance: 100, minBorderContrast: .4,
   cleanScore: .8,
+  fatalBrightness: 80, fatalTileBrightness: 50, fatalLaplacianVariance: 15,
 });
 
 export function toGrayscale(image: PixelImage): GrayImage {
@@ -91,7 +93,17 @@ export function assessImageQuality(image: GrayImage, page: PageDefinition, pixel
   if (!sharpness.length || sharpness.some(value => value < limits.minLaplacianVariance)) reasons.push('Yan\u0131t halkalar\u0131 bulan\u0131k; yeniden odaklay\u0131n.');
   if (!contrasts.length || contrasts.some(value => value < limits.minBorderContrast)) reasons.push('Bas\u0131l\u0131 yan\u0131t halkalar\u0131n\u0131n kontrast\u0131 yetersiz.');
   if (damagedOutlines) reasons.push(`${damagedOutlines} yan\u0131t halkas\u0131 eksik, hasarl\u0131 veya beklenen konumdan sapm\u0131\u015f; sayfay\u0131 yeniden \u00e7ekin.`);
+  const medianSharpness = percentile(sharpness, .5);
+  const fatal = brightness < limits.fatalBrightness || minimumBackground < limits.fatalTileBrightness
+    || !sharpness.length || medianSharpness < limits.fatalLaplacianVariance;
+  const fatalReasons: string[] = [];
+  if (brightness < limits.fatalBrightness || minimumBackground < limits.fatalTileBrightness) {
+    fatalReasons.push('Aydınlatma yetersiz; sayfa okunamadı. Daha aydınlık çekin.');
+  }
+  if (!sharpness.length || medianSharpness < limits.fatalLaplacianVariance) {
+    fatalReasons.push('Görüntü tamamen bulanık; yeniden odaklayıp çekin.');
+  }
   const score = Math.max(0, Math.min(1, brightness / 220, minimumBackground / 200, 1 - shadowSpread / 150,
     laplacianVariance / 300, borderContrast / .8, pixelsPerMm / 6));
-  return { ok: reasons.length === 0, reasons, score, metrics };
+  return { ok: reasons.length === 0, fatal, reasons: fatal ? fatalReasons : reasons, score, metrics };
 }

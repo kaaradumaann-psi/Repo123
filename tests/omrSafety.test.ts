@@ -23,6 +23,16 @@ function rejected(result: PageReadResult) {
   assert.ok(!('normalized' in result));
 }
 
+/** Hybrid quality: a damaged scene may be accepted for review, but never as `reliable`. */
+function noAutomaticAnswers(result: PageReadResult) {
+  if (!result.ok) {
+    rejected(result);
+    return;
+  }
+  assert.equal(result.quality.ok, false);
+  assert.ok(result.items.every(item => item.status !== 'reliable'), 'Damaged scenes must not produce reliable answers');
+}
+
 function paint(image: PixelImage, area: ResponseArea, inner: number, outer: number, value: number, offsetY = 0) {
   const cx = SYNTHETIC_MARGIN + (area.x + area.width / 2) * 6;
   const cy = SYNTHETIC_MARGIN + (area.y + area.height / 2 + offsetY) * 6;
@@ -50,7 +60,7 @@ test('safety: oversized ink or an opaque patch cannot become a blank or a reliab
     assert.equal(item.confidence, 0);
     assert.ok(measureResponse(canonical, page.items[0]!.responseAreas[1]!).darkness > .4);
     assert.equal(assessImageQuality(canonical, page, 6).ok, false);
-    rejected(await analyzePage(image, formDefinition));
+    noAutomaticAnswers(await analyzePage(image, formDefinition));
   }
 });
 
@@ -73,7 +83,7 @@ test('safety: every choice and row is checked, including a single formerly unsam
       if (removeAll || item.itemNumber === 2) paint(image, item.responseAreas[1]!, 0, 2, 248);
     }
     assert.equal(assessImageQuality(normalized(image), page, 6).ok, false);
-    rejected(await analyzePage(image, formDefinition));
+    noAutomaticAnswers(await analyzePage(image, formDefinition));
   }
 });
 
@@ -89,10 +99,10 @@ test('safety: a locally blurred Y outline cannot borrow sharpness from other res
     }
   }
   assert.equal(assessImageQuality(normalized(image), page, 6).ok, false);
-  rejected(await analyzePage(image, formDefinition));
+  noAutomaticAnswers(await analyzePage(image, formDefinition));
 });
 
-test('safety: a local one-pitch warp rejects the page instead of accepting the mark on the next item', async () => {
+test('safety: a local one-pitch warp cannot become the next item\'s automatic answer', async () => {
   const image = renderSyntheticPage();
   const column = page.items.filter(item => item.columnIndex === 0);
   for (const item of column) for (const area of item.responseAreas) paint(image, area, 0, 2, 248);
@@ -107,8 +117,10 @@ test('safety: a local one-pitch warp rejects the page instead of accepting the m
   const canonical = normalized(image), quality = assessImageQuality(canonical, page, 6);
   assert.equal(quality.ok, false);
   assert.ok(quality.reasons.length > 0);
-  assert.equal(detectItemMarks(canonical, page.items[20]!, quality).status, 'invalid');
-  rejected(await analyzePage(image, formDefinition));
+  assert.notEqual(detectItemMarks(canonical, page.items[20]!, quality).status, 'reliable');
+  const warped = await analyzePage(image, formDefinition);
+  noAutomaticAnswers(warped);
+  if (warped.ok) assert.notEqual(warped.items[20]!.status, 'reliable');
 });
 
 test('safety: same-area circular blobs cannot replace the four square markers', async () => {

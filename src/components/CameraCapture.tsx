@@ -10,9 +10,9 @@ export type CameraCaptureProps = {
 function cameraError(error: unknown): string {
   const name = error instanceof Error ? error.name : '';
   if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-    return 'Kamera izni verilmedi. Tarayıcının site izinlerinden kameraya izin verin veya JPG/PNG/PDF yükleyin.';
+    return 'Kamera izni verilmedi. Tarayıcının site izinlerinden kameraya izin verin veya JPG, PNG, WEBP, HEIC ya da PDF yükleyin.';
   }
-  if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'Kamera bulunamadı. Bir kamera bağlayın veya dosya yükleyin.';
+  if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'Kamera bulunamadı. Bir kamera bağlayın veya görüntü/PDF yükleyin.';
   if (name === 'NotReadableError' || name === 'TrackStartError') return 'Kamera başka bir uygulamada açık olabilir. Diğer uygulamayı kapatıp yeniden deneyin.';
   if (name === 'SecurityError') return 'Tarayıcı kamera erişimini engelliyor. HTTPS bağlantısı ve site izinlerini kontrol edin.';
   return 'Kamera başlatılamadı. Site izinlerini kontrol edin, tekrar deneyin veya dosya yükleyin.';

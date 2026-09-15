@@ -24,10 +24,16 @@ async function formPdfBytes(): Promise<Uint8Array<ArrayBuffer>> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
+function pdfBlob(bytes: Uint8Array): Blob {
+  const copy = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(copy).set(bytes);
+  return new Blob([copy], { type: 'application/pdf' });
+}
+
 /** Downloads through a Blob URL: a top-level navigation to a data URI is blocked by some browsers. */
 export async function downloadFormPdf(): Promise<void> {
   const bytes = await formPdfBytes();
-  const url = URL.createObjectURL(new Blob([bytes.buffer], { type: 'application/pdf' }));
+  const url = URL.createObjectURL(pdfBlob(bytes));
   const link = document.createElement('a');
   link.href = url;
   link.download = FORM_PDF_FILE_NAME;
@@ -35,4 +41,49 @@ export async function downloadFormPdf(): Promise<void> {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/**
+ * Prints the verified 4-page A4 PDF, never the HTML portal. Falls back to opening or
+ * downloading the same byte stream if the hidden-frame print path is blocked.
+ */
+export async function printFormPdf(): Promise<void> {
+  const bytes = await formPdfBytes();
+  const url = URL.createObjectURL(pdfBlob(bytes));
+  const frame = document.createElement('iframe');
+  frame.setAttribute('aria-hidden', 'true');
+  frame.title = 'MMPI-566 yazdırma';
+  Object.assign(frame.style, {
+    position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0',
+  });
+  const cleanup = () => {
+    window.setTimeout(() => {
+      frame.remove();
+      URL.revokeObjectURL(url);
+    }, 120_000);
+  };
+  try {
+    await new Promise<void>(resolve => {
+      const timer = window.setTimeout(() => {
+        window.open(url, '_blank', 'noopener');
+        resolve();
+      }, 8_000);
+      frame.onload = () => {
+        window.clearTimeout(timer);
+        try {
+          frame.contentWindow?.focus();
+          frame.contentWindow?.print();
+        } catch {
+          window.open(url, '_blank', 'noopener');
+        }
+        resolve();
+      };
+      document.body.append(frame);
+      frame.src = url;
+    });
+  } catch {
+    await downloadFormPdf();
+  } finally {
+    cleanup();
+  }
 }

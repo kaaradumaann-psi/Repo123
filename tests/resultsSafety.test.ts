@@ -45,6 +45,22 @@ function fixture(count = 1, status: ReadStatus = 'reliable') {
 
 const review = (choiceId: string | null): ManualReview => ({ choiceId, reviewedAt: '2026-09-14T10:00:00.000Z' });
 
+test('advisory quality (ok false, not fatal) remains a valid page result', () => {
+  const { raw, definition } = fixture();
+  const candidate = {
+    ...raw,
+    quality: { ...raw.quality, ok: false, reasons: ['Aydınlatma yetersiz; daha aydınlık bir görüntü gerekli.'] },
+    warnings: ['Aydınlatma yetersiz; daha aydınlık bir görüntü gerekli.'],
+  };
+  assert.ok(validatePageResult(candidate, definition).ok);
+});
+
+test('fatal quality is rejected at the result boundary', () => {
+  const { raw, definition } = fixture();
+  const candidate = { ...raw, quality: { ...raw.quality, ok: false, fatal: true, reasons: ['Sayfa okunamadı.'] } };
+  assert.equal(validatePageResult(candidate, definition).ok, false);
+});
+
 test('all primitive read statuses retain their valid boundary contracts', () => {
   for (const status of ['unread', 'blank', 'single', 'multiple', 'ambiguous', 'reliable', 'invalid'] as const) {
     const { raw, definition } = fixture(1, status);

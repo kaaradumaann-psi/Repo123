@@ -32,18 +32,16 @@ sayfalarını ve psikolog kimliğini Supabase'e yazar; klinik puanlama veya
 yorumlama çalışmaz.
 
 Kimlik oturumu Supabase Auth tarafından yönetilir ve bu frontend'de
-`persistSession: false` ile bellekte tutulur; uygulama kendi
-`localStorage/sessionStorage` yetkilendirme veya kayıt store'unu kullanmaz.
-Parolalar uygulama tablolarına yazılmaz. Profiller ve MMPI kayıtları RLS ile
-korunur; Admin hesap oluşturma/aktiflik değişikliği doğrulanmış Edge Function
-üzerinden yapılır.
-Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (tarayıcı yazdırma
-diyaloğu) ve **Hazır PDF'i indir**. İkincisi `MMPI-566-optik-cevap-formu.pdf`
-dosyasını tek dosyalık derlemeye base64 olarak gömer; bu dosya hem dosyadan geri
+`persistSession: true` ile **`sessionStorage`**'da tutulur: aynı sekmede F5
+oturumu korur, sekme kapanınca düşer. `localStorage` kullanılmaz. Rol ve kayıt
+erişimi hâlâ RLS + `profiles.active` ile doğrulanır. Parolalar uygulama
+tablolarına yazılmaz. Admin hesap oluşturma/aktiflik değişikliği doğrulanmış
+Edge Function üzerinden yapılır.
+Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (doğrulanmış 4
+sayfalık A4 PDF, HTML `window.print()` değil) ve **Hazır PDF'i indir**. İkisi de
+`MMPI-566-optik-cevap-formu.pdf` baytlarını kullanır; bu dosya hem dosyadan geri
 okunup geometrisi doğrulanan (`tests/pdfForm.test.ts`) hem de rasterleştirilip
 gerçek okuma hattından geçirilen (`tests/pdfScanPipeline.test.ts`) dosyadır.
-Tarayıcının yazdırma diyaloğu kâğıt boyutunu, ölçeği veya kenar boşluğunu
-değiştirebildiği için **indirilen PDF tercih edilmelidir**.
 
 ### Kendi sitenize koymak
 
@@ -88,13 +86,13 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 61 test
+npm test            # 73 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
 ```
 
-`npm test` (61 test) şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
+`npm test` şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
 1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
 sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
@@ -171,12 +169,13 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/omr/formDefinition.ts` | Şablon sabitleri, sayfa/madde üretimi, SHA-256 yerleşim özeti, `getBubbleGeometry()`. |
 | `src/form/layout.ts` | Bileşenlerin kullandığı tek içe aktarma yüzeyi. |
 | `src/form/pageIdentity.ts` | Baskı seti kimliği, QR metni kodlama/çözümleme, QR modül geometrisi. |
-| `src/omr/qrDecoder.ts` | jsQR ile sınırlı (≤4 MP) sayfa kimliği okuma. |
+| `src/omr/qrDecoder.ts` | jsQR ile çok ölçekli / invert sayfa kimliği okuma (≤4 MP). |
+| `src/omr/pageIsolation.ts` | Masa fotoğrafında kağıdı kırpma; tam kenarlı PDF'de no-op. |
 | `src/omr/perspectiveCorrection.ts` | `fitHomography`, `fitSimilarity`, `mapPoint`, `inspectPageGeometry`, `warpPerspective`. |
-| `src/omr/alignmentDetector.ts` | Köşe karelerini bağlı bileşen analiziyle bulma; sıralı tahmin listesi. |
-| `src/omr/imageQuality.ts` | Gri tonlama; aydınlık, gölge, bulanıklık, kontrast, halka bütünlüğü. |
-| `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu. |
-| `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; başarısızlıkta cevap üretmez. |
+| `src/omr/alignmentDetector.ts` | Köşe karelerini bağlı bileşen analiziyle bulma; çoklu eşik, karelik 0.84. |
+| `src/omr/imageQuality.ts` | Üç kademeli kalite: ideal / inceleme / okunamaz. |
+| `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu; `reliable` yalnız `quality.ok`. |
+| `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; fatal kalitede cevap üretmez. |
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
 | `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
 | `src/records/*` | Ham OMR maddelerini bozmadan Supabase kayıt payload'ı ve idempotent gönderim. |
@@ -192,8 +191,7 @@ paylaşır; koordinat kaynağı tektir.
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 61/61 test geçiyor, derleme
-çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
+maddeleri listeler. Özet: tip kontrolü temiz, sentetik + PDF testleri geçiyor,
+derleme çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
-kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form
-düzeni doğrulanmadı.
+kamera ve lisanslı form düzeni bu ortamda doğrulanmadı.

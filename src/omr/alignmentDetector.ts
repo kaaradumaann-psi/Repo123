@@ -10,6 +10,18 @@ export type AlignmentFailure = { markId: string; reason: string };
 type Candidate = DetectedAlignmentMark & { cost: number };
 type LocateResult = { ok: true; mark: DetectedAlignmentMark } | { ok: false; reason: string };
 
+function failReason(rejected: { size: number; shape: number; square: number; solid: number; distance: number }): string {
+  const found = rejected.size + rejected.shape + rejected.square + rejected.solid + rejected.distance;
+  if (!found) return 'beklenen konumda koyu bir alan yok (kare kadrajda değil, çok soluk veya gölge/parlama altında)';
+  const detail: string[] = [];
+  if (rejected.size) detail.push(`${rejected.size} aday boyut veya dolgunluk ölçütünü geçmedi`);
+  if (rejected.distance) detail.push(`${rejected.distance} aday tahmin edilen konuma çok uzaktı`);
+  if (rejected.square) detail.push(`${rejected.square} aday kare biçiminde değildi`);
+  if (rejected.solid) detail.push(`${rejected.solid} adayın içi yeterince dolu değildi`);
+  if (rejected.shape) detail.push(`${rejected.shape} aday biçim ölçütünü geçmedi`);
+  return detail.join('; ');
+}
+
 /**
  * Locates one printed square for one predicted transform; never substitutes a predicted centre.
  * Every rejection path reports why, so a real capture can be diagnosed instead of guessed at.
@@ -29,7 +41,6 @@ function locateMark(image: GrayImage, mark: AlignmentMark, prediction: Homograph
   if (!Number.isFinite(scale) || scale < 1.5 || scale > 30) {
     return { ok: false, reason: `kare görüntüde beklenen boyutta değil (ölçek ${scale.toFixed(1)})` };
   }
-  // Any prediction is least certain far from the small symbol. Search remains capped at 1 MP/mark.
   const distanceMm = Math.hypot(mmCenter.x - qrCenter.x, mmCenter.y - qrCenter.y);
   const radius = Math.min(500, Math.ceil(scale * (8 + distanceMm * .09)));
   const left = Math.max(0, Math.floor(predicted.x - radius)), top = Math.max(0, Math.floor(predicted.y - radius));
@@ -48,7 +59,38 @@ function locateMark(image: GrayImage, mark: AlignmentMark, prediction: Homograph
     cumulative += histogram[value]!;
     if (cumulative >= samples * .85) { background = value; break; }
   }
-  const threshold = Math.max(20, background * .55);
+  let otsu = 128, histSum = 0;
+  for (let i = 0; i < 256; i++) histSum += i * histogram[i]!;
+  let sumB = 0, wB = 0, maxVar = 0;
+  for (let t = 0; t < 256; t++) {
+    wB += histogram[t]!;
+    if (!wB) continue;
+    const wF = samples - wB;
+    if (!wF) break;
+    sumB += t * histogram[t]!;
+    const mB = sumB / wB, mF = (histSum - sumB) / wF;
+    const between = wB * wF * (mB - mF) ** 2;
+    if (between > maxVar) { maxVar = between; otsu = t; }
+  }
+  const thresholds = [...new Set([
+    Math.max(20, Math.round(background * .55)),
+    Math.max(20, Math.round(background * .70)),
+    Math.max(20, otsu),
+  ])];
+
+  let lastFail: LocateResult = { ok: false, reason: 'beklenen konumda koyu bir alan yok (kare kadrajda değil, çok soluk veya gölge/parlama altında)' };
+  for (const threshold of thresholds) {
+    const result = searchAtThreshold(image, mark, prediction, mmCenter, predicted, area, radius, left, top, width, height, threshold);
+    if (result.ok) return result;
+    lastFail = result;
+  }
+  return lastFail;
+}
+
+function searchAtThreshold(
+  image: GrayImage, mark: AlignmentMark, prediction: Homography, mmCenter: Point, predicted: Point,
+  area: number, radius: number, left: number, top: number, width: number, height: number, threshold: number,
+): LocateResult {
   const visited = new Uint8Array(width * height), queue = new Int32Array(width * height);
   const candidates: Candidate[] = [];
   const rejected = { size: 0, shape: 0, square: 0, solid: 0, distance: 0 };
@@ -81,7 +123,6 @@ function locateMark(image: GrayImage, mark: AlignmentMark, prediction: Homograph
     const center = { x: left + cx, y: top + cy };
     const predictionError = Math.hypot(center.x - predicted.x, center.y - predicted.y);
     if (predictionError > radius * .9) { rejected.distance++; continue; }
-    // Bounded observed-rectangle search: no prediction is certain enough to supply local edge angles.
     let squareFill = 0;
     for (let degrees = 0; degrees < 90; degrees += 2) {
       const angle = degrees * Math.PI / 180, cosine = Math.cos(angle), sine = Math.sin(angle);
@@ -109,17 +150,7 @@ function locateMark(image: GrayImage, mark: AlignmentMark, prediction: Homograph
   }
   candidates.sort((a, b) => a.cost - b.cost);
   const best = candidates[0];
-  if (!best) {
-    const found = rejected.size + rejected.shape + rejected.square + rejected.solid + rejected.distance;
-    if (!found) return { ok: false, reason: 'beklenen konumda koyu bir alan yok (kare kadrajda değil, çok soluk veya gölge/parlama altında)' };
-    const detail: string[] = [];
-    if (rejected.size) detail.push(`${rejected.size} aday boyut veya dolgunluk ölçütünü geçmedi`);
-    if (rejected.distance) detail.push(`${rejected.distance} aday tahmin edilen konuma çok uzaktı`);
-    if (rejected.square) detail.push(`${rejected.square} aday kare biçiminde değildi`);
-    if (rejected.solid) detail.push(`${rejected.solid} adayın içi yeterince dolu değildi`);
-    if (rejected.shape) detail.push(`${rejected.shape} aday biçim ölçütünü geçmedi`);
-    return { ok: false, reason: detail.join('; ') };
-  }
+  if (!best) return { ok: false, reason: failReason(rejected) };
   if (candidates[1] && candidates[1].cost - best.cost < .12) {
     return { ok: false, reason: 'birden çok benzer koyu alan var, doğru kare ayırt edilemedi' };
   }
@@ -149,7 +180,6 @@ export function detectAlignmentMarks(image: GrayImage, marks: readonly Alignment
         reasons.push(result.reason);
       } catch (error) { lastError = error; }
     }
-    // A throwing prediction keeps its original meaning when nothing else locates the square.
     if (!found) {
       if (lastError !== undefined && !reasons.length) throw lastError;
       onFailure?.({ markId: mark.id, reason: [...new Set(reasons)].join(' · ') || 'bulunamadı' });
