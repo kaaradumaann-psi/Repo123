@@ -6,6 +6,7 @@ import { isolatePaper } from '../src/omr/pageIsolation';
 import { toGrayscale } from '../src/omr/imageQuality';
 import { decodePageQr } from '../src/omr/qrDecoder';
 import type { PixelImage } from '../src/omr/omrTypes';
+import { acceptPage, createScanSet } from '../src/scanner/pageSequence';
 import { renderSyntheticPage, SYNTHETIC_MARGIN } from './fixtures/omrSynthetic';
 
 function padDark(image: PixelImage, pad: number): PixelImage {
@@ -50,8 +51,12 @@ test('a sheet photographed on a dark desk keeps identity and maps corners into t
   if (!result.ok) return;
   assert.equal(result.pageNumber, 1);
   assert.equal(result.items[0]!.choiceId, 'D');
+  assert.ok(['reliable', 'single'].includes(result.items[0]!.status));
+  assert.ok(result.items.slice(1).every(item => item.status === 'blank' && item.choiceId === null));
   assert.ok(Math.abs(result.sourceCorners[0]!.x - (pad + SYNTHETIC_MARGIN - 0.5)) < 4);
   assert.ok(Math.abs(result.sourceCorners[0]!.y - (pad + SYNTHETIC_MARGIN - 0.5)) < 4);
+  const accepted = acceptPage(createScanSet(), result, formDefinition, { sourceName: 'desk.png', previewUrl: '' });
+  assert.equal(accepted.ok, true, accepted.ok ? '' : accepted.message);
 });
 
 test('QR decode on an isolated desk crop still returns the page identity', () => {

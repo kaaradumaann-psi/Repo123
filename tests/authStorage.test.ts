@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { AUTH_STORAGE_KEY, createAuthStorage } from '../src/auth/supabaseClient';
+import { AUTH_STORAGE_KEY, createAuthStorage } from '../src/auth/authStorage';
 
 test('auth storage writes to the provided session-like store and survives a get after set', () => {
   const data = new Map<string, string>();

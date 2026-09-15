@@ -51,12 +51,12 @@ export function FormPage({ page, definition, batchId, active }: {
             ? <>
               <span>Her maddede yalnızca bir dairenin içini tamamen doldurun.</span>
               <span>El yazısı kimlik yalnızca bu sayfadadır.</span>
+              <span className="paper-reminder">Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; sağ üstteki QR kodu sayfaları otomatik eşleştirir.</span>
             </>
             : <span>Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.</span>}
         </div>
         {firstPage && <div className="marking-example"><span className="filled-example" aria-hidden="true" /><span>Örnek işaretleme</span></div>}
       </div>
-      {firstPage && <p className="paper-reminder">Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; sağ üstteki QR kodu sayfaları otomatik eşleştirir.</p>}
     </header>
     <div className="answer-columns">{page.columns.map((column, index) =>
       <AnswerColumn key={index} column={column} />)}</div>

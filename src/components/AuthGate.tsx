@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { AuthenticatedUser } from '../auth/authTypes';
-import { getSession, onAuthChange, signIn, userFromSession } from '../auth/supabaseAuth';
+import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
 import { Icon } from './Icon';
 
@@ -74,7 +74,7 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     return (
       <>
         {children(user, () => {
-          void supabase?.auth.signOut({ scope: 'local' });
+          void signOut().catch(() => {});
           setUser(null);
         })}
       </>

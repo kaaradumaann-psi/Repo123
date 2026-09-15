@@ -29,6 +29,7 @@ test('identity, participant code and date fields are rendered on the first page 
       assert.ok(html.includes('data-identity="cover"'));
       assert.equal(html.split('<b>/</b>').length - 1, 2, 'The date field must expose day/month/year separators.');
       assert.ok(html.includes('marking-example'), 'The marking example belongs to the instructions on the cover.');
+      assert.ok(html.includes('paper-reminder'), 'Cover instructions must keep the column-order reminder without overlapping the grid.');
     } else {
       assert.equal(identityBlocks, 0, `Page ${index + 1} must not repeat the identity fields.`);
       assert.deepEqual(labels, [], `Page ${index + 1} must not repeat any identity label.`);

@@ -220,7 +220,7 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
             onClick={() => setSource('files')}
           >
             <Icon name="file" size={16} />
-            <span>Dosya Yükle (PDF / JPG / PNG)</span>
+            <span>Dosya Yükle (PDF / görüntü)</span>
           </button>
           <button
             type="button"
@@ -353,11 +353,11 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
                   <div className="page-card-meta">
                     <strong>{expected.pageNumber}. Sayfa</strong>
                     <small>
-                      {page ? (
-                        `${Object.keys(page.reviews).length ? `${Object.keys(page.reviews).length} manuel düzeltme` : 'Sorunsuz okundu'}`
-                      ) : (
-                        'Görsel bekleniyor'
-                      )}
+                      {page
+                        ? Object.keys(page.reviews).length
+                          ? `${Object.keys(page.reviews).length} manuel düzeltme`
+                          : page.quality.ok ? 'Sorunsuz okundu' : 'İnceleme gerekli'
+                        : 'Görsel bekleniyor'}
                     </small>
                   </div>
                   {page && <div className="card-check-pill"><Icon name="check" size={12} /></div>}

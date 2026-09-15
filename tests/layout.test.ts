@@ -47,6 +47,7 @@ test('page and column transitions do not shift template coordinates', () => {
 });
 
 test('QR identity block is identical on every page and sits above the answer grid', () => {
+  assert.equal(FORM.gridTopMm, 60);
   for (const page of FORM_PAGES) {
     assert.deepEqual(page.qrArea, FORM.qrArea);
     assert.equal(page.alignmentMarks.length, 4);

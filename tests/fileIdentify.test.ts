@@ -20,4 +20,10 @@ test('sniffBytes accepts JPEG, PNG, WEBP, HEIC and PDF signatures', () => {
 
 test('sniffBytes rejects unknown bytes instead of guessing an image', () => {
   assert.deepEqual(sniffBytes(Uint8Array.of(0, 1, 2, 3, 4, 5, 6, 7)), { kind: 'unknown' });
+  const tiffLe = new Uint8Array(8);
+  tiffLe.set(Buffer.from('II*\0', 'latin1'));
+  assert.deepEqual(sniffBytes(tiffLe), { kind: 'unknown' });
+  const bmp = new Uint8Array(8);
+  bmp.set(Buffer.from('BM', 'latin1'));
+  assert.deepEqual(sniffBytes(bmp), { kind: 'unknown' });
 });
