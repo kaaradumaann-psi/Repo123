@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { COLUMN_WIDTH_MM, FORM } from '../src/omr/formDefinition';
 import { formDefinition } from '../src/omr/formDefinition';
+import { FORM_COPYRIGHT_LINE } from '../src/form/attribution';
 import { MM_PER_PT } from '../src/print/renderFormPdf';
 
 /**
@@ -129,6 +130,8 @@ for (let number = 1; number <= document.numPages; number++) {
     `Sayfa ${number} madde aralığı etiketi bulunamadı.`);
   check(text.includes(`Sayfa ${number} / ${formDefinition.totalPages}`),
     `Sayfa ${number} alt bilgi sayfa numarası bulunamadı.`);
+  const hasCopyright = text.includes(FORM_COPYRIGHT_LINE);
+  check(hasCopyright, `Sayfa ${number} alt bilgi telif satırı (${FORM_COPYRIGHT_LINE}) bulunamadı.`);
 
   const circles = bubbleCentres(pageContentStream(number));
   const wanted = expected.items.flatMap(item => item.responseAreas.map(area =>
@@ -143,6 +146,7 @@ for (let number = 1; number <= document.numPages; number++) {
     `Sayfa ${number}: ${wanted.length} işaretleme dairesinden yalnızca ${bubbles} tanesi dosyada tanımlı konumunda.`);
   console.log(`Sayfa ${number}: A4, ${matched}/${expected.items.length} madde numarası doğru koordinatta ` +
     `(en büyük sapma ${worst.toFixed(2)} pt = ${(worst * MM_PER_PT).toFixed(3)} mm), ` +
+    `telif satırı ${hasCopyright ? 'var' : 'yok'}, ` +
     `kimlik alanı ${identity.length ? 'var' : 'yok'}, ` +
     `${bubbles}/${wanted.length} işaretleme dairesi yerinde (en büyük sapma ${bubbleDrift.toFixed(3)} mm).`);
   page.cleanup();

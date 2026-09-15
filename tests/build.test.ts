@@ -16,6 +16,28 @@ test('standalone build contains one intact inline script and no source-file impo
   assert.ok(!html.includes('src="/src/main.tsx"'));
   assert.ok(html.includes('@page'));
   assert.ok(html.includes('lang="tr"'));
+  // The screen-only author bar and the document metadata travel with the single-file build
+  // (the class name lives both in the CSS and as the React className string).
+  assert.ok(html.includes('app-footer'), 'Ekran alt bilgi çubuğu derlemeye girmemiş');
+  assert.ok(html.includes('name="author" content="Halil Karaduman"'), 'Yazar meta etiketi derlemeye girmemiş');
+  assert.ok(html.includes('https://www.halilkaraduman.com.tr'), 'Yazar sitesi bağlantısı derlemeye girmemiş');
+  assert.ok(html.includes('mailto:'), 'E-posta bağlantısı şeması derlemeye girmemiş');
+  assert.ok(html.includes('contact@halilkaraduman.com.tr'), 'E-posta adresi derlemeye girmemiş');
+});
+
+test('standalone build hides the screen author bar from print while the sheet footer keeps the copyright', () => {
+  let html = readFileSync('dist/index.html', 'utf8');
+  // The print rule survives minification in the @media print rule list.
+  assert.ok(/\.app-footer[^{]*\{[^}]*display:\s*none\s*!important/.test(html),
+    'Ekran alt bilgi çubuğu yazdırmada gizlenmeli');
+  // esbuild encodes (C) and the middle dot as hex escapes inside the runtime template;
+  // decode them so the printable footer line can be matched as authored.
+  html = html.replace(/\\x[Aa]9/g, '©').replace(/\\x[Bb]7/g, '·');
+  // The printable sheet's own footer line (rendered on every page) and its parts.
+  assert.ok(html.includes('© 2026'), 'Basılı formun telif satırı başlangıcı derlemeye girmemiş');
+  assert.ok(html.includes('Halil Karaduman'), 'Telif sahibi derlemeye girmemiş');
+  assert.ok(html.includes('www.halilkaraduman.com.tr'), 'Yazar sitesi telif satırında yok');
+  assert.ok(html.includes('contact@halilkaraduman.com.tr'), 'E-posta telif satırında yok');
 });
 
 test('standalone build is offline and locked down by a script-hash CSP', () => {
