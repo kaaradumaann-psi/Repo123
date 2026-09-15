@@ -184,6 +184,38 @@ Zayıf parçalar:
 
 ---
 
+## 4.1. Uygulanan OMR geometrik izolasyon düzeltmesi (2026-09-15)
+
+Önceki peripheral threshold düzeltmesi sentetik halka bulaşmasını azaltıyordu; gerçek telefon fotoğrafındaki komşu bubble / basılı çizgi contamination problemini çözmek için ölçüm alanı ayrıca bubble geometrisine kapatıldı.
+
+`analyzePage`, mevcut sayfanın bütün `responseAreas` listesini `markDetector`a geçirir. Her cevap için detector:
+
+1. mevcut bubble merkezini ve eliptik geometrisini kullanır,
+2. central ölçümü ayrı tutar,
+3. peripheral measurement’ı bubble’ın iç ölçüm maskesiyle sınırlar,
+4. diğer response alanlarının bubble maskelerini dışlar,
+5. bubble dışındaki pikselleri ölçüme katmaz,
+6. background/reference halkalarında da komşu response alanlarını dışlar.
+
+Bu nedenle formun dışından geçen koyu yatay çizgi veya komşu satırdaki güçlü işaret current bubble’ın peripheral evidence’ı olamaz. Bunun karşılığında current bubble’ın kendi içindeki gerçek annular/peripheral ink hâlâ evidence’tır; safety davranışı kaldırılmamıştır.
+
+`markDetector.ts` içindeki `inspectResponse` ve `debugItemMarks` test/debug ölçümleri şunları görünür kılar:
+
+- `centralDarkness`, `centralCoverage`
+- `peripheralDarkness`, `peripheralCoverage`
+- `peripheralMaskPixelCount`
+- `excludedNeighborPixels`
+- `excludedOutsideBubblePixels`
+- `excludedBubbleBorderPixels`
+- `centralEvidence`, `peripheralEvidence`
+- final item status/choice/reason
+
+`tests/omrPeripheralIsolation.test.ts` maskesiz ve maskeli A/B varyantını aynı sentetik sahnede çalıştırır. Maskesiz varyantta komşu bubble `centralEvidence=false, peripheralEvidence=true` üretir; maskeli varyant komşu pikselleri dışlayıp mevcut bubble’ı blank bırakır. Aynı dosya bubble dışı koyu çizginin evidence oluşturmadığını da doğrular.
+
+Production yolu peripheral evidence’ı kapatmaz; testteki `isolatePeripheral: false` ve `disablePeripheralEvidence` seçenekleri yalnızca teşhis/A-B içindir. `strayPeripheralDarkness` eşiği değiştirilmemiştir. Local center refinement eklenmemiştir; en koyu noktaya snap komşu bubble’a kayabileceğinden dört fiducial kareden gelen page homography korunmuştur.
+
+Bu tur sonunda `npm test` **94/94**, `npm run typecheck` ve `npm run build` başarılıdır. Gerçek `image-1` fixture’ı checkout’ta bulunmadığı için gerçek fotoğrafın madde adetleri henüz doğrulanmış sayılmaz; sentetik geometri regresyonu ve mevcut safety testleri doğrulanmıştır.
+
 ## 5. Görüntü ön işleme gerekli mi?
 
 **Kısmen evet; genel filtre zinciri hayır.**
