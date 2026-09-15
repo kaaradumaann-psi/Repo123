@@ -821,8 +821,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .hero-cta-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+/* Outcome of the print action: the dialog opening is not observable from script, so the
+   browser either raises it or the user is told to use the explicit open-and-print path. */
+.print-status-note {
+  margin: -12px 0 24px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--slate-50, #f8fafc);
+  color: var(--slate-600);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .btn-print {

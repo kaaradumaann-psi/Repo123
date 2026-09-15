@@ -414,4 +414,28 @@ Gerçek JPEG/tarama PDF bu ortamda yoksa sentetik masa+aydınlatma önce; kullan
 - OCR ve dinamik ızgara daha kötü.
 - Kör eşik gevşetme güvenlik testlerini ve klinik doğruluğu bozar.
 
-Kod henüz değiştirilmedi. Onaydan sonra sıra §13’tür.
+## Uygulama durumu (2026-09-15)
+
+§13 sırası uygulandı ve sonraki turda gerçek kullanıcı girdileriyle gelen dört belirti için
+genişletildi:
+
+| §13 adımı | Durum |
+| --- | --- |
+| 1. Oturum `sessionStorage` | Uygulandı (`src/auth/supabaseClient.ts`) |
+| 2. Yazdır = doğrulanmış PDF | Uygulandı; ikinci turda gömülü okuyucu hazır olmadan `print()` çağrısı kaldırıldı (ilk basışta boş sayfa) |
+| 3. PDF başlığı iki satır + sağ rezerv | Uygulandı; başlık artık **tek kaynak** `src/form/headerLayout.ts` (PDF + HTML aynı mm kutuları). Ölçülen neden: 6 pt'lik tek yönergesi 259 mm, sığmıyor |
+| 4. HEIC/WEBP + tarama PDF süzgeçleri | Uygulandı (`imageIO.sniffBytes`, `pdfIO.createSafePdfWorkerSource`) |
+| 5. QR çok ölçek/invert; kâğıt izolasyonu | Uygulandı (`qrDecoder`, `pageIsolation`) |
+| 6. Hizalama çoklu eşik | Uygulandı; ikinci turda gölgeye/çizgiye bağlı kare için kare pencere başı ve sayılı ret nedenleri eklendi |
+| 7. Kalite üç kademe | Uygulandı (`imageQuality`, `resultValidator`) |
+| 8. Testler | Uygulandı + `printLayout`, `captureGates` eklendi; 85/85 |
+
+Ek karar (set kimliği): §9'un gerekçesi “HTML önizleme her oturumda yeni set üretir” idi. Bu, set
+kodu **tek kaynağa** alınarak kapatıldı: `src/form/formSet.ts` → `FORM_SET_CODE`; PDF QR'ı, PDF alt
+bilgisi, HTML önizlemesi ve uygulamanın yazdırma yolu aynı kodu taşır. Yeni katılımcı için “Yeni Set
+/ Sıfırla” kullanılır, form yeniden yazdırılmaz.
+
+Ek karar (bu belgede §4 “zayıf parçalar” olarak işaretlenenlerden): QR–kare tutarlılığı **fiziksel
+bütçeye** çevrildi (3 mm, 4–24 px) ve sayfa kırpma ölçütü “kâğıt çerçevesi” yerine “her basılı
+öğe kadrajda mı” oldu (`alignmentVerification.ts`, `inspectFeatureContainment`). Kare bulmada
+`squareFill ≥ 0.84` ve “tahmin ikame edilmez” değişmezleri korundu.

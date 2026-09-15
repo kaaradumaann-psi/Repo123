@@ -347,3 +347,124 @@ fotoğrafı bu ortamda yine yok.
    fotokopi senaryolarını gerçek kağıtla tekrarlayın ve eşikleri kalibre edin.
 
 Bu dört adım tamamlanmadan okuma doğruluğu hakkında iddiada bulunulmamalıdır.
+
+## 2026-09-15 (ikinci tur) — başlık yerleşimi, yazdırma ve tarama kabulü
+
+Kullanıcı dört ayrı belirti bildirdi: (1) “A4 önizleme” kutusundaki yönergeler alta kaymış,
+(2) dört sayfa değil **7 sayfalık** bir PDF yükledi ve sayfalar farklı nedenlerle reddedildi,
+(3) üç taranmış JPG “QR ve gerçek hizalama karelerinin konumları tutarsız” diye reddedildi,
+(4) “Tüm sayfaları yazdır” ilk basışta boş sayfa veriyor, kapatıp yeniden yazdırınca düzeliyor.
+Bu bölüm yalnızca ölçülen ve koşulan şeyleri yazar.
+
+### 1. Başlık neden kaymıştı — ölçüldü
+
+Kullanıcının okuduğu cümlelerin tamamı başlık bloğunun tek satırlık yönergesindeydi:
+
+```
+Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın;
+sağ üstteki QR kodu sayfaları otomatik eşleştirir.
+```
+
+Bu cümle 6 pt'te **259,0 mm** yer kaplıyor; kâğıt 210 mm. Ölçüm, PDF'e gömülen yazı tipinin gerçek
+advance değerleriyle yapıldı (`tmpmeasure/measure.ts`, Liberation Sans). Sonuç: PDF'te cümle QR
+alanının ve sayfanın dışına taşıyordu; HTML'de ise kırpılmıyor, akış düzeninde 4 satıra sarıp
+altındaki ızgaranın üstüne biniyordu. “Yazılar alta kaymış” görüntüsünün nedeni bu — blok iki
+renderer'da iki ayrı kuralla yerleştiriliyordu (`renderFormPdf.drawHeader` ve `form.css` akış
+kuralları) ve HTML tarafı boşluk hesabı yapmıyordu.
+
+Düzeltme: **`src/form/headerLayout.ts`** başlığın tek kaynağı oldu; hem PDF yazıcısı hem
+`PaperHeader.tsx` (HTML) ondan çiziyor. Kapatılan ölçüler:
+
+| Satır | Punto | Ölçülen genişlik | Yerleşim |
+| --- | --- | --- | --- |
+| `MMPI-566` | 20 pt bold | 66,6 mm | 20 mm |
+| `OPTİK CEVAP FORMU / 2.0.0` | 8 pt bold | 79,6 mm | başlık altı |
+| `D: Doğru   Y: Yanlış` | 7,5 pt bold | 50,6 mm | 46 mm |
+| `Her maddede yalnızca bir dairenin içini tamamen doldurun.` | 6,5 pt | 122,7 mm | 47 mm |
+| `El yazısı kimlik yalnızca bu sayfadadır.` | 6,5 pt | 80,4 mm | 49,7 mm |
+| `Numaraları sütun boyunca aşağıya doğru izleyin.` | 6 pt | 94,0 mm | 52,4 mm |
+| `Dört sayfayı aynı oturumda yazdırın; QR kodu sayfaları eşleştirir.` | 6 pt | 124,3 mm | 54,3 mm |
+| `Örnek işaretleme` + dolu daire | 6,5 pt | 35,8 mm + 2,5 mm | sağ |
+
+Kullanıcının istediği dört cümle de duruyor; tek uzun cümle iki satıra bölündü (order + session/QR)
+çünkü 259 mm'lik hâli hiçbir sayfaya sığmaz. Izgara koordinatlarına **dokunulmadı**: `gridTopMm`
+60 mm, madde numaraları ve 1.132 daire aynı yerde (`verify:pdf` sapması 0,028 mm / 0,000 mm).
+Başlık en alt 57,0 mm'de bitiyor, yani ızgaraya 3 mm kalıyor.
+
+Yeni koruma testi `tests/printLayout.test.ts` her satırı **gömülü yazı tipinin gerçek
+advance**'iyle ölçüyor: hiçbir satır 132 mm güvenlik sınırını, ızgarayı, QR alanını veya sayfa
+kenarını aşamaz; PDF taban çizgisi ile tarayıcı satır kutusu aynı formülden gelir; HTML kutuları
+PDF kutularıyla aynıdır. Eski 259 mm'lik cümle geri gelirse test kırmızı olur.
+
+### 2. Yazdırma: ilk basışta boş sayfa
+
+`printFormPdf` gizli bir iframe'e doğrulanmış PDF'i yükleyip `print()` çağırıyordu; iframe
+`width: 0; height: 0` idi. Sıfır boyutlu çerçeve yerleştirilmediği için gömülü PDF okuyucusu
+geç (veya hiç) yükleniyor, `print()` boş belgeyi basıyordu; ikinci denemede okuyucu hazır olduğu
+için çıktı doğru geliyordu — kullanıcının tarif ettiği tam bu.
+
+Düzeltme: çerçeve ekran dışına 794×1123 px olarak konuyor, `print()` ancak gömülü okuyucu
+belgeyi yükledikten sonra (Chrome `<embed type="application/pdf">`, Firefox pdf.js işaretleri)
+ve 400 ms oturmadan sonra çağrılıyor; okuyucuya erişilemeyen tarayıcıda sabit gecikmeyle
+basılıyor; hiç doğrulanamazsa sonuç `viewer-timeout` dönüyor ve arayüz **“PDF'i Aç ve Yazdır”**
+düğmesini + `A4, %100, kenar boşluğu yok` hatırlatmasını gösteriyor. Böylece düğme sessiz kalmıyor.
+
+### 3. Tarama kabulü: reddedilen gerçek girdiler için üç değişiklik
+
+- **QR–kare tutarlılığı artık fiziksel bir bütçe.** Eski kontrol `error > max(4, 1.5 mm)`, yani
+  6 px/mm'lik bir fotoğrafta 9 px, 300 dpi taramada 17,7 px istiyordu. 26 mm'lik QR'ın köşeleri
+  gerçek görüntüde yarım piksel gürültü taşır; bu yüzden üç JPG “QR ve gerçek hizalama karelerinin
+  konumları tutarsız” aldı. Yeni kural `3 mm` bütçesini sayfanın kendi ölçeğiyle çarpıyor
+  (4–24 px arası), yani çözünürlükten bağımsız. Yapısal bir uyuşmazlık (yanlış kare eşlemesi,
+  onlarca mm) hâlâ reddediliyor ve mesaj **ölçülen** sapmayı mm ve px olarak yazıyor.
+- **Kırpma ölçütü kâğıt çerçevesi değil, basılı içerik.** Kullanıcının “yaklaşık 6,2 mm eksik”
+  sayfası, kenardan 10 mm içerideki dört kare ve QR sağlamken reddediliyordu. Artık her basılı
+  öğenin (kare, QR, 1.132 daire) görüntü içinde olup olmadığı ölçülüyor; boş kenar payının
+  eksilmesi zararsız (tam kenarlı tarama, PDF rasteri, %3 ölçekli baskı), basılı bir öğenin
+  kadraj dışına çıkması ölümcül. Ayrıca çerçeve görüntüden 20 mm'den fazla taşarsa (dört kare bu
+  kâğıdı tarif etmiyor demektir) sayfa yine reddediliyor.
+- **Gölgeye/çizgiye bağlı hizalama karesi.** Kare, eşikte bir gölge bandına, ayırıcı çizgiye veya
+  kâğıt kenarına bağlanırsa eski kod adayı tamamen atıyordu. Yeni kod bileşenin **kare pencere**
+  başını (merkez çevresinde, kısa kenardan türetilen) çıkarıp kare dolgunluk (≥ 0,84), asgari
+  yarıçap dolgunluğu (%,92) ve “karenin çevresi kâğıt olmalı” denetimlerini yine uyguluyor.
+  Ayırt edilemeyen bir aday (geniş gölge bandı, dolu yuvarlak leke) **sayfa çapası olamıyor**;
+  red nedeni artık sayılıyor: “aday gölgeye veya çizgiye bağlıydı”, “aday sayfadaki koyu bölgeyle
+  birleşiyordu”. Bu, kullanıcının “1 aday tahmin edilen konuma çok uzaktı / 4 aday ölçütü geçmedi”
+  mesajındaki belirsizliği de kaldırıyor.
+- **Set kodu artık tek ve basılı.** 7 sayfalık PDF'te sayfaların farklı set kodları taşımasının
+  nedeni, HTML önizlemesinin her tarayıcı oturumunda yeni bir set üretmesiydi; gömülü PDF ise tek
+  set kodu taşıyordu. Artık her yol aynı kodu kullanıyor: `src/form/formSet.ts` içindeki
+  `FORM_SET_CODE` (= `formDefinition.fingerprint` ilk 24 hane). PDF'in hem QR'ına hem **alt
+  bilgisine** basılıyor (“Set kodu 1F49F315B2636DCB4C18C2E4” + “Dört sayfa aynı set kodunu
+  taşır.”), HTML önizlemesinin alt bilgisi aynı satırları taşıyor, uygulamanın yazdırma/indirme
+  yolu aynı kodu kullanıyor (`App.tsx` artık `createBatchId()` üretmiyor). `npm run verify:pdf`
+  bu satırı dosyadan okuyup dört sayfada aynı olduğunu ve `FORM_SET_CODE` ile eşleştiğini
+  doğruluyor. Set uyuşmazlığı reddi de ne yapılacağını söylüyor: “Aynı 4 sayfayı birlikte
+  yükleyin; yeni bir set taranacaksa ‘Yeni Set / Sıfırla’.”
+
+### 4. Bu turda çalıştırılan kontroller
+
+| Komut | Sonuç |
+| --- | --- |
+| `npx tsc --noEmit` | **exit 0** |
+| `npm test` | **86 test, 86 geçti, 0 başarısız** (önceki tur 73) |
+| `npm run build` | **exit 0** · `Built dist/index.html and optik-form.html (self-contained).` |
+| `npm run pdf` | **exit 0** · `4 sayfa · A4 dikey · 242 KB` |
+| `npm run verify:pdf` | **exit 0** · kimlik alanları yalnızca 1. sayfada; madde sapması 0,028 mm; daire sapması 0,000 mm; set kodu dört sayfada aynı |
+| `tmpmeasure/render.ts` + `crop.ts` | 1. ve 2. sayfa 3× rasterlendi (`tmpmeasure/page1.png`, `header1.png`, `header2.png`); başlık şeridi gözle doğrulandı: taşma, çakışma ve ızgaraya iniş yok |
+
+Yeni testler: `tests/printLayout.test.ts` (8 test; son test set kodunun her baskı yolunda aynı
+olduğunu doğrular), `tests/captureGates.test.ts` (5 test:
+QR bütçesi, içerik kapsama, ince gölge köprüsü kabulü, geniş gölge bandı reddi, boş kenar payı
+kaybı). `tests/omrEngine.test.ts` içindeki kırpma testi yeni siyasete göre yazıldı: 6,7 mm boş
+kenar payı kaybı **okunur**, 12 mm kayıp (kareyi kesen) reddedilir.
+
+### 5. Hâlâ doğrulanmayan
+
+- Kullanıcının üç JPG'si ve 7 sayfalık PDF'i bu ortamda yok; bu yüzden yukarıdaki üç değişikliğin
+  o dosyaları kabul ettirdiği **iddia edilmiyor**. Yeni mesajlar ölçülen değeri yazdığı için aynı
+  dosyalar yeniden yüklendiğinde kalan red nedeni doğrudan okunabilir (örn. “ölçülen sapma 4,8 mm
+  ≈ 29 px, izin verilen 24 px”).
+- Tarayıcı yazdırma penceresi bu ortamda açılamadı: iframe/okuyucu hazırlık mantığı kod düzeyinde
+  doğrulandı (`tests/printPath.test.ts`), gerçek bir Chromium'da basılmadı.
+- Gölge toleransı sentetik bantlarla sınandı; gerçek kamera/gölge örneği yok.

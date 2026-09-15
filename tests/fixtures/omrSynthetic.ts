@@ -79,6 +79,27 @@ export function renderSyntheticPage(options: SyntheticOptions = {}): PixelImage 
   return image;
 }
 
+/**
+ * Paints an axis-aligned band of uniform grey over the sheet, in millimetres from the sheet's
+ * top-left corner. Used to reproduce a shadow reaching a printed alignment square: at a low enough
+ * value the band and the square become one connected component at the search threshold.
+ */
+export function shadowBandSynthetic(image: PixelImage, band: {
+  xMm: number; yMm: number; widthMm: number; heightMm: number; value: number;
+}, margin = SYNTHETIC_MARGIN, ppm = 6): PixelImage {
+  const data = new Uint8ClampedArray(image.data);
+  const left = margin + band.xMm * ppm, top = margin + band.yMm * ppm;
+  const right = left + band.widthMm * ppm, bottom = top + band.heightMm * ppm;
+  for (let y = Math.max(0, Math.floor(top)); y < Math.min(image.height, Math.ceil(bottom)); y++) {
+    for (let x = Math.max(0, Math.floor(left)); x < Math.min(image.width, Math.ceil(right)); x++) {
+      const at = (y * image.width + x) * 4;
+      if (data[at]! <= band.value) continue;
+      data[at] = data[at + 1] = data[at + 2] = band.value;
+    }
+  }
+  return { ...image, data };
+}
+
 export function illuminateSynthetic(image: PixelImage, factor: (x: number, y: number) => number): PixelImage {
   const data = new Uint8ClampedArray(image.data);
   for (let y = 0; y < image.height; y++) for (let x = 0; x < image.width; x++) {

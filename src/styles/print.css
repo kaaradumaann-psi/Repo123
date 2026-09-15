@@ -9,7 +9,7 @@
     color: #000;
   }
   .app-header, .form-prep-hero, .form-sidebar-panel, .page-navigation, .print-guide-card,
-  .preview-toolbar, .preview-bottom, .document-meta-strip, .app-footer,
+  .preview-toolbar, .preview-bottom, .document-meta-strip, .app-footer, .print-status-note,
   .workspace-tabs, .scanner-layout-container, .hero-cta-group, .is-screen-hidden {
     display: none !important;
   }

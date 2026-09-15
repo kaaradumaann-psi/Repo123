@@ -8,8 +8,8 @@ import { ScannerWorkspace } from './components/ScannerWorkspace';
 import { Icon } from './components/Icon';
 import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
-import { createBatchId } from './form/pageIdentity';
-import { downloadFormPdf, printFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
+import { downloadFormPdf, openFormPdf, printFormPdf, FORM_PDF_FILE_NAME, PRINT_SETTINGS_HINT } from './print/formPdf';
+import { FORM_SET_CODE } from './form/formSet';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { displayName } from './auth/userDisplay';
 
@@ -23,8 +23,11 @@ export default function App() {
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
   const [currentPage, setCurrentPage] = useState(0);
+  const [printNote, setPrintNote] = useState<'' | 'busy' | 'opened' | 'manual'>('');
   const [workspace, setWorkspace] = useState<Workspace>('scan');
-  const [batchId] = useState(createBatchId);
+  // One set code for everything this workspace prints, so pages printed at different times still
+  // match each other in the scanner; the embedded PDF carries the same code (see print/formPdf.ts).
+  const [batchId] = useState(FORM_SET_CODE);
   const tabs: Workspace[] = user.role === 'ADMIN' ? ['scan', 'form', 'admin'] : ['scan', 'form'];
   const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
 
@@ -153,7 +156,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               </p>
             </div>
             <div className="hero-cta-group">
-              <button type="button" className="btn-primary btn-print" onClick={() => { void printFormPdf(); }}>
+              <button type="button" className="btn-primary btn-print" onClick={() => {
+                setPrintNote('busy');
+                void printFormPdf().then(outcome => setPrintNote(outcome === 'printed' ? 'opened' : 'manual'));
+              }}>
                 <Icon name="print" size={18} />
                 <div className="btn-multiline">
                   <span>Tüm Sayfaları Yazdır</span>
@@ -167,8 +173,25 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   <small>{FORM_PDF_FILE_NAME}</small>
                 </div>
               </button>
+              <button type="button" className="btn-secondary download-button" onClick={() => { void openFormPdf(); }}>
+                <Icon name="sheet" size={18} />
+                <div className="btn-multiline">
+                  <span>PDF'i Aç ve Yazdır</span>
+                  <small>Tarayıcı yazdırma penceresi açılmazsa</small>
+                </div>
+              </button>
             </div>
           </section>
+
+          {printNote !== '' && (
+            <p className="print-status-note" role="status" aria-live="polite">
+              {printNote === 'busy'
+                ? 'Doğrulanmış 4 sayfalık PDF yazdırma için hazırlanıyor…'
+                : printNote === 'opened'
+                  ? `Yazdırma penceresi açıldı. Ayarlar: ${PRINT_SETTINGS_HINT}.`
+                  : `Yazdırma penceresi açılamadı. “PDF'i Aç ve Yazdır” ile açıp şu ayarlarla yazdırın: ${PRINT_SETTINGS_HINT}.`}
+            </p>
+          )}
 
           <div className="form-workspace-grid">
             <aside className="form-sidebar-panel" aria-label="Form bilgisi ve sayfa seçimi">
@@ -198,7 +221,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   </div>
                 </dl>
                 <p className="guide-note">
-                  "Sayfaya sığdır" seçeneğini işaretlemeyiniz. Köşe hizalama karelerinin ve QR kodun net çıkması optik okuyucunun hatasız çalışmasını sağlar.
+                  "Sayfaya sığdır" seçeneğini işaretlemeyiniz. Köşe hizalama karelerinin ve QR kodun net çıkması optik okuyucunun hatasız çalışmasını sağlar. Dört sayfanın altında aynı set kodu yazılıdır; aynı katılımcının sayfalarını birlikte yükleyin, yeni katılımcı için “Yeni Set / Sıfırla” düğmesini kullanın.
                 </p>
               </div>
             </aside>
@@ -211,6 +234,8 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                 batchId={batchId}
               />
               <div className="document-meta-strip">
+                <span>Set kodu <strong>{FORM_SET_CODE}</strong></span>
+                <span>•</span>
                 <span>{FORM.totalItems} Madde Alanı</span>
                 <span>•</span>
                 <span>{PAGE_COUNT} Sayfalık A4 Form Seti</span>
