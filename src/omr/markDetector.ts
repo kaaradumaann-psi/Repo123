@@ -7,6 +7,18 @@ import { CANONICAL_PIXELS_PER_MM } from './perspectiveCorrection';
 export const MARK_THRESHOLDS = Object.freeze({
   blankDarkness: .045, blankCoverage: .035, pixelDarkness: .3,
   markDarkness: .25, markCoverage: .38, strongDarkness: .62, strongCoverage: .75,
+  /**
+   * Separates a faint *trace* from the smear that a phone lens, mild motion blur and JPEG
+   * quantization leave imprinted just inside the printed bubble border on a hand-held photo.
+   * A real pencil fill — however faint or half-erased — darkens the circle *core*, which the
+   * blank-darkness clause already reports. Border smear, by contrast, brightens only the thin
+   * annulus hugging the ring while leaving the core clean, so it must never flood every empty
+   * bubble with "silik/silinmiş iz" evidence. A periphery this dark still counts without core
+   * ink, so a genuinely dark ring, scribble or stray mark is never silently downgraded to blank
+   * paper. Measured on synthetic raster scenes: border smear stayed below 0.15 even when heavy;
+   * real strays (ring outlines vs. an inserted dark disc) reach ≈0.9.
+   */
+  strayPeripheralDarkness: .2,
 });
 
 function inspectResponse(image: GrayImage, area: ResponseArea) {
@@ -33,7 +45,7 @@ function inspectResponse(image: GrayImage, area: ResponseArea) {
     peripheralDarkness += normalized;
     if (normalized >= MARK_THRESHOLDS.pixelDarkness) peripheralCovered++;
   }
-  const peripheralEvidence = peripheral.length > 0 && (peripheralDarkness / peripheral.length > MARK_THRESHOLDS.blankDarkness ||
+  const peripheralEvidence = peripheral.length > 0 && (peripheralDarkness / peripheral.length > MARK_THRESHOLDS.strayPeripheralDarkness ||
     peripheralCovered / peripheral.length > MARK_THRESHOLDS.blankCoverage);
   const measurement: ResponseMeasurement = { responseId: area.responseId, choiceId: area.choiceId,
     darkness: disk.length ? darkness / disk.length : 0, coverage: disk.length ? covered / disk.length : 0 };

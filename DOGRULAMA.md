@@ -461,6 +461,44 @@ QR bütçesi, içerik kapsama, ince gölge köprüsü kabulü, geniş gölge ban
 kaybı). `tests/omrEngine.test.ts` içindeki kırpma testi yeni siyasete göre yazıldı: 6,7 mm boş
 kenar payı kaybı **okunur**, 12 mm kayıp (kareyi kesen) reddedilir.
 
+### 4b. Yeni set: “eğik çekimde tüm daireler Belirsiz” (2026-09-15)
+
+Belirti: kullanıcı el kamerasıyla hafif yamuk çekilen fotoğrafı yüklediğinde QR ve
+dört köşe karesi okunuyor, sayfa kabul ediliyor, ancak **boş dâhil neredeyse bütün
+maddeler `ambiguous` (Belirsiz)** olarak işaretleniyordu. Kullanıcının görüntüsü yine
+ortama ulaşmadı; kök neden sentetik raster sahnelerle ölçülerek izole edildi.
+
+Mekanizma: lens bulanıklığı + JPEG kuantizasyonu, her dairenin basılı 0,3 mm'lik
+çerçevesini iç kenarına bulaştırarak **çekirdeği temiz, halkanın iç çeperinde hafif
+koyu bir iz** bırakır (ölçülen çeper karanlığı 0,05–0,14). `markDetector` bu çeperi
+“silik/silinmiş iz” kanıtı saydığından boş daireler `ambiguous` oluyordu; çerçeve
+bulaşması **tüm** dairelerde eşit olduğundan sayfanın tamamı tek tip Belirsiz
+raporluyordu. Gerçek kalem izi bunun tersine dairenin **çekirdeğini** koyultuyor
+(ölçülen 0,13–0,17); mevcut boşluk eşiği bunu zaten yakalıyor. Ölçülen ayrım:
+
+| Boş dairedeki sahne | çekirdek karanlığı | çeper karanlığı | eski | şimdi |
+| --- | --- | --- | --- | --- |
+| Temiz baskı, resampling | 0 | 0 | boş | boş |
+| Çerçeve bulaşması (yamuk telefon çekimi) | 0 | 0,05–0,14 | **belirsiz** | boş |
+| Silik/silinmiş kalem izi | 0,13–0,17 | ≥ 0,089 | belirsiz | belirsiz |
+| Koyu karalama/kaymış daire | ~0,9 | ~0,9 | belirsiz | belirsiz |
+
+Değişiklik: `markDetector` çeper kanıtına yeni `strayPeripheralDarkness` (.2) eşiği
+eklendi; çekirdekte iz olmayan çeper mürekkebi ancak bu eşiği aşarsa kanıt sayılıyor.
+Gerçek karalama/kayma izleri ~0,9'la bu eşiğin çok üstünde; çerçeve bulaşması en ağır
+sahnede bile 0,15'i geçmedi. İki seçenekli “güçlü işaret + karşı seçeneğe çerçeve
+bulaşması” senaryosu da artık `single` okunarak yalnızca gerçek karşıt iz kaldığında
+`ambiguous` kalıyor.
+
+Kalıcı test: `tests/handheldBleed.test.ts` (4 test) — çerçeve bulaşması sayfayı
+belirsize boğmamalı, silik/silinmiş iz ve koyu halka karalamaları `ambiguous` kalmalı.
+
+| Komut | Sonuç |
+| --- | --- |
+| `npx tsc --noEmit` | **exit 0** |
+| `npm test` | **90 test, 90 geçti, 0 başarısız** |
+| `npm run build` | **exit 0** · `Built dist/index.html and optik-form.html (self-contained).` |
+
 ### 5. Hâlâ doğrulanmayan
 
 - Kullanıcının üç JPG'si ve 7 sayfalık PDF'i bu ortamda yok; bu yüzden yukarıdaki üç değişikliğin
