@@ -9,7 +9,7 @@ import { Icon } from './components/Icon';
 import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
 import { createBatchId } from './form/pageIdentity';
-import { downloadFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
+import { downloadFormPdf, printFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { displayName } from './auth/userDisplay';
 
@@ -153,7 +153,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               </p>
             </div>
             <div className="hero-cta-group">
-              <button type="button" className="btn-primary btn-print" onClick={() => window.print()}>
+              <button type="button" className="btn-primary btn-print" onClick={() => { void printFormPdf(); }}>
                 <Icon name="print" size={18} />
                 <div className="btn-multiline">
                   <span>Tüm Sayfaları Yazdır</span>

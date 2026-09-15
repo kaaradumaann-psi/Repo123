@@ -107,7 +107,9 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
         previewUrl = undefined;
         accepted++;
         setSelectedNumber(result.pageNumber);
-        setStatus(`${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
+        setStatus(result.warnings.length
+          ? `${sourceName}: ${result.pageNumber}. sayfa kabul edildi; otomatik güvenilir cevap yok. ${result.warnings[0]}`
+          : `${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
       } catch (error) {
         checkAborted(signal);
         rejected++;
@@ -237,13 +239,13 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
                 <Icon name="download" size={28} />
               </div>
               <strong className="dropzone-title">Taranmış Formları Buraya Yükleyin</strong>
-              <span className="dropzone-desc">JPG, PNG veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
+              <span className="dropzone-desc">JPG, PNG, WEBP, HEIC veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
               <span className="btn-primary dropzone-btn">Dosya Seç</span>
             </label>
             <input
               id={`${id}-files`}
               type="file"
-              accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+              accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.pdf"
               multiple
               disabled={busy}
               className="file-input-hidden"

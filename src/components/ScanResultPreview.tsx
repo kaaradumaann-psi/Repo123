@@ -199,6 +199,13 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
             )}
           </div>
 
+          {!page.quality.ok && page.quality.reasons.length > 0 && (
+            <div className="status-banner warning-banner" role="status">
+              <p>Otomatik güvenilir cevap üretilmedi; maddeleri elle doğrulayın.</p>
+              {page.quality.reasons.map(reason => <p key={reason}>{reason}</p>)}
+            </div>
+          )}
+
           <details className="quality-dropdown">
             <summary>
               <Icon name="sparkles" size={15} />

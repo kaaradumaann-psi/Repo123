@@ -17,8 +17,8 @@ function inspectResponse(image: GrayImage, area: ResponseArea) {
   const background = percentile(sampleRing(image, cx, cy, (radiusMm + .35) * ppm, (radiusMm + .95) * ppm), .8);
   const paper = percentile(sampleRing(image, cx, cy, (radiusMm + 1.25) * ppm, (radiusMm + 1.85) * ppm), .8);
   const reference = Math.max(background, paper);
-  const invalid = !disk.length || background < QUALITY_THRESHOLDS.minTileBrightness ||
-    paper < QUALITY_THRESHOLDS.minTileBrightness || background < paper * .75;
+  const invalid = !disk.length || background < QUALITY_THRESHOLDS.fatalTileBrightness ||
+    paper < QUALITY_THRESHOLDS.fatalTileBrightness || background < paper * .75;
   let darkness = 0, covered = 0;
   for (const value of disk) {
     const normalized = Math.max(0, Math.min(1, (reference - value) / Math.max(1, reference)));
@@ -50,7 +50,7 @@ export function detectItemMarks(image: GrayImage, item: ItemDefinition, quality:
   const base = { itemId: item.itemId, itemNumber: item.itemNumber, measurements };
   const result = (status: ItemReadResult['status'], choiceId: string | null, confidence: number, reason: string): ItemReadResult =>
     ({ ...base, status, choiceId, confidence: Math.max(0, Math.min(1, confidence)), reason });
-  if (!quality.ok || !measurements.length) return result('invalid', null, 0, 'Görüntü kalitesi uygun değil.');
+  if (!measurements.length) return result('invalid', null, 0, 'Görüntü kalitesi uygun değil.');
   if (inspected.some(response => response.invalid)) return result('invalid', null, 0,
     'Yanıt alanının zemini kirli; yanıt kabul edilmedi.');
   const marked = measurements.filter(m => m.darkness >= limits.markDarkness && m.coverage >= limits.markCoverage);
@@ -62,7 +62,8 @@ export function detectItemMarks(image: GrayImage, item: ItemDefinition, quality:
     const selected = marked[0]!;
     if (evidence.length > 1) return result('ambiguous', null, .25, 'Di\u011fer se\u00e7enekte de silik veya silinmi\u015f iz var; elle inceleyin.');
     const strength = Math.min(selected.darkness, selected.coverage);
-    if (selected.darkness >= limits.strongDarkness && selected.coverage >= limits.strongCoverage && quality.score >= QUALITY_THRESHOLDS.cleanScore) {
+    if (quality.ok && selected.darkness >= limits.strongDarkness && selected.coverage >= limits.strongCoverage
+      && quality.score >= QUALITY_THRESHOLDS.cleanScore) {
       return result('reliable', selected.choiceId, Math.min(.98, strength * quality.score),
         'Tek ve belirgin işaret.');
     }

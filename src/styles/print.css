@@ -8,10 +8,12 @@
     background: #fff;
     color: #000;
   }
-  .app-header, .page-intro, .intro-actions, .form-sidebar, .page-navigation, .print-guide,
-  .preview-toolbar, .preview-bottom, .document-meta, .app-footer,
-  .workspace-tabs, .scanner-workspace { display: none !important; }
-  .app-main, .form-workspace, .preview-column, .preview-panel, .paper-stage,
+  .app-header, .form-prep-hero, .form-sidebar-panel, .page-navigation, .print-guide-card,
+  .preview-toolbar, .preview-bottom, .document-meta-strip, .app-footer,
+  .workspace-tabs, .scanner-layout-container, .hero-cta-group, .is-screen-hidden {
+    display: none !important;
+  }
+  .app-main, .form-workspace-grid, .form-preview-column, .preview-panel, .paper-stage,
   .scaled-paper, .paper-stack {
     display: block !important;
     position: static !important;

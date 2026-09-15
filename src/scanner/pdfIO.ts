@@ -9,33 +9,28 @@ const PDF_OPERATION_MS = 30_000;
 const PDF_DESTROY_MS = 250;
 const PDF_BUDGET_ERROR = 'Bir işlemde 24 sayfa sınırına ulaşıldı. Kalan PDF sayfaları işlenmedi; kalanları ayrı seçin.';
 
-/** Audited against this exact worker, not its minified/private-name variant. */
+/**
+ * Hardens the bundled pdf.js worker: whitelist stream filters, cap decoded buffers,
+ * and refuse JPEG2000/JBIG2/encryption. Embedded JPEG/Flate/CCITT images (phone and
+ * scanner PDFs) are accepted within SCAN_LIMITS; vector form PDFs keep working.
+ */
 export function createSafePdfWorkerSource(source: string, version: string): string {
   if (version !== PDFJS_VERSION) throw new Error('PDF güvenlik denetimi bu okuyucu sürümünü desteklemiyor. JPG/PNG seçin.');
-  // stopAtErrors does not cover asynchronous image failures or mask/codec allocations.
-  // Until those paths have a bounded preflight, accept only image-free PDFs with
-  // raw/Flate streams. Never decode a raster and then accept a missing-image page.
   return `${source}\n;(() => {
     const fail = message => {
       self.postMessage({ scannerPdfError: message });
       throw new Error(message);
     };
-    const raster = () => fail('Gömülü görüntü içeren PDF güvenli biçimde desteklenmiyor. Sayfaları JPG/PNG olarak seçin.');
-    warn = info = () => fail('PDF içeriği kayıpsız okunamadı. Sayfaları JPG/PNG olarak seçin.');
-    Parser.prototype.makeInlineImage = raster;
-    PartialEvaluator.prototype.buildPaintImageXObject = raster;
-    PDFImage.buildImage = PDFImage.createMask = raster;
-    const makeStream = Parser.prototype.makeStream;
-    Parser.prototype.makeStream = function(dict, ...args) {
-      if (isName(dict.get('Subtype'), 'Image')) raster();
-      return makeStream.call(this, dict, ...args);
-    };
+    const allowed = ['Fl', 'FlateDecode', 'DCT', 'DCTDecode', 'CCF', 'CCITTFaxDecode',
+      'RL', 'RunLengthDecode', 'AHx', 'ASCIIHexDecode', 'A85', 'ASCII85Decode'];
+    const blocked = ['JPXDecode', 'JPX', 'JBIG2Decode', 'JBIG2', 'Crypt'];
     const makeFilter = Parser.prototype.makeFilter;
     Parser.prototype.makeFilter = function(stream, name, length, params, ...args) {
-      if (!['Fl', 'FlateDecode'].includes(name) || params) {
-        fail('PDF sıkıştırma biçimi (' + name + (params ? ', DecodeParms ile' : '') +
-          ') güvenli biçimde desteklenmiyor. Bu dosya büyük olasılıkla taranmış sayfa görüntüsü içeriyor; ' +
-          'sayfaları JPG veya PNG olarak kaydedip yükleyin.');
+      if (blocked.includes(name)) {
+        fail('PDF görüntü kodlaması (' + name + ') bu tarayıcıda desteklenmiyor. Sayfayı JPG veya PNG olarak kaydedip yükleyin.');
+      }
+      if (name && !allowed.includes(name)) {
+        fail('PDF sıkıştırma biçimi (' + name + ') güvenli biçimde desteklenmiyor. Sayfayı JPG veya PNG olarak kaydedip yükleyin.');
       }
       return makeFilter.call(this, stream, name, length, params, ...args);
     };
@@ -80,7 +75,7 @@ export async function* readPdfPages(file: File, signal: AbortSignal, remainingPa
   let failure: Error | undefined;
   let rejectFailure: (error: Error) => void = () => {};
   const failed = new Promise<never>((_, reject) => { rejectFailure = reject; });
-  void failed.catch(() => {}); // An abort can arrive while the generator is suspended at yield.
+  void failed.catch(() => {});
   let terminated = false;
   const hardStop = () => {
     try { if (!terminated && port) { terminated = true; port.terminate(); } }
@@ -122,12 +117,9 @@ export async function* readPdfPages(file: File, signal: AbortSignal, remainingPa
     port.addEventListener('messageerror', workerError);
     port.addEventListener('message', workerMessage);
     worker = new (pdfjs.PDFWorker as unknown as PdfWorkerConstructor)({ port });
-    // `isEvalSupported` was removed upstream: it is absent from pdfjs-dist 6.3.289's types and from
-    // its runtime, so passing it would be a silent no-op. The worker hardening above is what
-    // constrains parsing; do not read this option list as an "eval disabled" guarantee.
     loading = pdfjs.getDocument({ data, worker, useWasm: false,
       useWorkerFetch: false, useSystemFonts: true, disableAutoFetch: true, stopAtErrors: true,
-      isOffscreenCanvasSupported: false, isImageDecoderSupported: false, maxImageSize: 0 });
+      isOffscreenCanvasSupported: false, isImageDecoderSupported: false, maxImageSize: SCAN_LIMITS.sourcePixels });
     const document = await wait(() => loading!.promise);
     check();
     if (document.numPages > SCAN_LIMITS.pdfPages) {
@@ -139,7 +131,6 @@ export async function* readPdfPages(file: File, signal: AbortSignal, remainingPa
       const page = await wait(() => document.getPage(number));
       let canvas: HTMLCanvasElement | undefined;
       try {
-        // Finish strict worker parsing before allocating/rendering an OMR source image.
         await wait(() => page.getOperatorList());
         check();
         const base = page.getViewport({ scale: 1 });

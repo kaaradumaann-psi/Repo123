@@ -30,11 +30,12 @@
 .identity-fields i { display: block; height: 5mm; border-bottom: .2mm solid #000; font-style: normal; }
 .date-field i { display: flex; justify-content: space-evenly; align-items: end; }
 .date-field b { font-size: 8pt; font-weight: 400; }
-.paper-instructions { display: flex; align-items: center; justify-content: space-between; gap: 4mm; margin-top: 3mm; font-size: 7pt; line-height: 1.3; }
+.paper-instructions { display: flex; align-items: flex-start; justify-content: space-between; gap: 3mm; margin-top: 2mm; font-size: 6.5pt; line-height: 1.25; }
 .paper-instructions.is-compact { margin-top: 4mm; }
-.paper-instructions > div:first-child { display: flex; gap: 4mm; align-items: center; }
-.paper-instructions strong { white-space: nowrap; font-size: 7.5pt; }
-.marking-example { display: flex; gap: 1.5mm; align-items: center; white-space: nowrap; font-size: 6.5pt; }
+.instruction-copy { display: flex; flex-direction: column; gap: 0.5mm; min-width: 0; flex: 1; }
+.instruction-copy strong { white-space: nowrap; font-size: 7.5pt; }
+.instruction-copy span { white-space: normal; }
+.marking-example { display: flex; gap: 1.5mm; align-items: center; white-space: nowrap; font-size: 6.5pt; flex: 0 0 auto; margin-top: 0.4mm; }
 .filled-example { width: 2.5mm; height: 2.5mm; border: 1.25mm solid #000; border-radius: 50%; flex: 0 0 auto; }
 .paper-reminder { margin: 1.5mm 0 0; font-size: 6.5pt; line-height: 1.25; }
 .answer-columns { position: absolute; left: var(--content-left); top: var(--grid-top); width: var(--content-width); display: grid; grid-template-columns: repeat(var(--column-count), minmax(0, 1fr)); gap: var(--column-gap); }

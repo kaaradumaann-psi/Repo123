@@ -45,10 +45,15 @@ export function FormPage({ page, definition, batchId, active }: {
         <div className="date-field"><span>TARİH</span><i><b>/</b><b>/</b></i></div>
       </div>}
       <div className={`paper-instructions${firstPage ? '' : ' is-compact'}`}>
-        <div><strong>D: Doğru&nbsp;&nbsp; Y: Yanlış</strong>
-          <span>{firstPage
-            ? 'Her maddede yalnızca bir dairenin içini tamamen doldurun. El yazısı kimlik yalnızca bu sayfadadır.'
-            : 'Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.'}</span></div>
+        <div className="instruction-copy">
+          <strong>D: Doğru&nbsp;&nbsp; Y: Yanlış</strong>
+          {firstPage
+            ? <>
+              <span>Her maddede yalnızca bir dairenin içini tamamen doldurun.</span>
+              <span>El yazısı kimlik yalnızca bu sayfadadır.</span>
+            </>
+            : <span>Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.</span>}
+        </div>
         {firstPage && <div className="marking-example"><span className="filled-example" aria-hidden="true" /><span>Örnek işaretleme</span></div>}
       </div>
       {firstPage && <p className="paper-reminder">Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; sağ üstteki QR kodu sayfaları otomatik eşleştirir.</p>}

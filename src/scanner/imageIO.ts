@@ -5,6 +5,12 @@ export const SCAN_LIMITS = {
   sourcePixels: 40_000_000, sourceDimension: 16_000, longSide: 2800, pdfWidth: 1680, pdfPages: 12, batchPages: 24,
 } as const;
 
+export type ImageCodec = 'jpeg' | 'png' | 'webp' | 'heic' | 'gif' | 'unknown';
+export type SniffResult =
+  | { kind: 'image'; codec: ImageCodec }
+  | { kind: 'pdf' }
+  | { kind: 'unknown' };
+
 export function checkAborted(signal: AbortSignal): void {
   if (signal.aborted) throw new DOMException('İşlem iptal edildi.', 'AbortError');
 }
@@ -40,25 +46,66 @@ export function capturePixels(source: CanvasImageSource, width: number, height: 
 }
 
 export function checkFileSize(file: Pick<File, 'size'>): void {
-  if (file.size === 0) throw new Error('Dosya boş. Başka bir JPG, PNG veya PDF seçin.');
+  if (file.size === 0) throw new Error('Dosya boş. Başka bir JPG, PNG, WEBP, HEIC veya PDF seçin.');
   if (file.size > SCAN_LIMITS.fileBytes) throw new Error('Dosya 24 MB sınırını aşıyor. Daha küçük bir dosya seçin.');
+}
+
+function ascii(bytes: Uint8Array, start: number, length: number): string {
+  return String.fromCharCode(...bytes.subarray(start, Math.min(bytes.length, start + length)));
+}
+
+/** Magic-byte sniff used by both the upload path and unit tests. */
+export function sniffBytes(bytes: Uint8Array): SniffResult {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8) return { kind: 'image', codec: 'jpeg' };
+  if (bytes.length >= 8 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) {
+    return { kind: 'image', codec: 'png' };
+  }
+  if (bytes.length >= 12 && ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 4) === 'WEBP') {
+    return { kind: 'image', codec: 'webp' };
+  }
+  if (bytes.length >= 6 && ascii(bytes, 0, 3) === 'GIF') return { kind: 'image', codec: 'gif' };
+  if (bytes.length >= 12 && ascii(bytes, 4, 4) === 'ftyp') {
+    const brands = ascii(bytes, 8, Math.min(32, bytes.length - 8)).toLowerCase();
+    if (['heic', 'heix', 'heif', 'hevc', 'heim', 'heis', 'mif1', 'msf1'].some(brand => brands.includes(brand))) {
+      return { kind: 'image', codec: 'heic' };
+    }
+    if (brands.includes('avif') || brands.includes('avis')) return { kind: 'image', codec: 'unknown' };
+  }
+  const signature = [0x25, 0x50, 0x44, 0x46, 0x2d];
+  for (let at = 0; at + signature.length <= Math.min(bytes.length, 1024); at++) {
+    if (signature.every((value, index) => bytes[at + index] === value)) return { kind: 'pdf' };
+  }
+  return { kind: 'unknown' };
 }
 
 export async function identifyFile(file: File): Promise<'image' | 'pdf'> {
   checkFileSize(file);
   const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 ||
-    bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) return 'image';
-  // The PDF spec allows the %PDF- signature anywhere in the first 1024 bytes
-  // (some producers prepend whitespace or a BOM), so search instead of pinning byte 0.
-  const signature = [0x25, 0x50, 0x44, 0x46, 0x2d];
-  for (let at = 0; at + signature.length <= bytes.length; at++) {
-    if (signature.every((value, index) => bytes[at + index] === value)) return 'pdf';
-  }
-  throw new Error('Dosya biçimi desteklenmiyor. Yalnızca gerçek JPG, PNG veya PDF dosyaları açılabilir.');
+  const sniffed = sniffBytes(bytes);
+  if (sniffed.kind === 'image' || sniffed.kind === 'pdf') return sniffed.kind;
+  if (file.type.toLowerCase().startsWith('image/')) return 'image';
+  throw new Error('Dosya biçimi desteklenmiyor. JPG, PNG, WEBP, HEIC veya PDF yükleyin.');
 }
 
-/** Check encoded dimensions before allocating the decoded bitmap. */
+function codecMime(codec: ImageCodec): string {
+  return ({
+    jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic',
+    gif: 'image/gif', unknown: 'application/octet-stream',
+  })[codec];
+}
+
+function decodeFailureMessage(codec: ImageCodec, cause: unknown): string {
+  const detail = cause instanceof Error && cause.message ? ` ${cause.message}` : '';
+  if (codec === 'heic') {
+    return 'Bu görüntü HEIC/HEIF biçiminde ve bu tarayıcı açamadı. iPhone’dan gönderirken “En Uyumlu” (JPG) seçin veya fotoğrafı JPG olarak kaydedin.';
+  }
+  if (codec === 'webp') {
+    return 'WEBP görüntüsü açılamadı. Dosyayı JPG veya PNG olarak kaydedip yeniden yükleyin.';
+  }
+  return `Görüntü açılamadı. Standart JPG, PNG, WEBP veya HEIC kullanın.${detail}`;
+}
+
+/** Check encoded dimensions before allocating the decoded bitmap. JPEG/PNG only. */
 export function encodedImageSize(bytes: Uint8Array): { width: number; height: number } {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   if (bytes.length >= 24 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) {
@@ -81,30 +128,44 @@ export function encodedImageSize(bytes: Uint8Array): { width: number; height: nu
       offset += length;
     }
   }
-  throw new Error('Görüntü başlığı okunamadı. Dosyayı standart JPG veya PNG olarak yeniden kaydedin.');
+  throw new Error('ENCODED_SIZE_UNKNOWN');
+}
+
+function guardDimensions(width: number, height: number): void {
+  if (width < 1 || height < 1 || width * height > SCAN_LIMITS.sourcePixels ||
+    Math.max(width, height) > SCAN_LIMITS.sourceDimension) {
+    throw new Error('Görüntü çok büyük veya boyutu geçersiz. En çok 40 megapiksel ve 16.000 piksel kenar uzunluğu desteklenir.');
+  }
 }
 
 export async function readImageFile(file: File, signal: AbortSignal): Promise<PixelImage> {
   checkFileSize(file);
   checkAborted(signal);
-  // The buffer is read once: the same bytes feed the encoded-size preflight and,
-  // wrapped in a Blob, the decoder, so the file is never loaded from disk twice.
   const bytes = new Uint8Array(await file.arrayBuffer());
   checkAborted(signal);
-  const size = encodedImageSize(bytes);
-  if (size.width < 1 || size.height < 1 || size.width * size.height > SCAN_LIMITS.sourcePixels ||
-    Math.max(size.width, size.height) > SCAN_LIMITS.sourceDimension) {
-    throw new Error('Görüntü çok büyük veya boyutu geçersiz. En çok 40 megapiksel ve 16.000 piksel kenar uzunluğu desteklenir.');
+  const sniffed = sniffBytes(bytes);
+  const codec: ImageCodec = sniffed.kind === 'image' ? sniffed.codec : 'unknown';
+  if (codec === 'jpeg' || codec === 'png') {
+    try {
+      const size = encodedImageSize(bytes);
+      guardDimensions(size.width, size.height);
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== 'ENCODED_SIZE_UNKNOWN') throw error;
+    }
   }
   checkAborted(signal);
+  const mime = codecMime(codec);
+  const blob = new Blob([bytes], { type: mime === 'application/octet-stream' ? file.type || mime : mime });
   let bitmap: ImageBitmap | undefined;
   try {
-    bitmap = await createImageBitmap(new Blob([bytes]), { imageOrientation: 'from-image' });
+    bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
     checkAborted(signal);
+    guardDimensions(bitmap.width, bitmap.height);
     return capturePixels(bitmap, bitmap.width, bitmap.height);
   } catch (error) {
     checkAborted(signal);
-    throw new Error(`Görüntü açılamadı. Standart JPG/PNG kullanın. ${error instanceof Error ? error.message : ''}`);
+    if (error instanceof Error && error.message.includes('megapiksel')) throw error;
+    throw new Error(decodeFailureMessage(codec, error));
   } finally { bitmap?.close(); }
 }
 

@@ -18,6 +18,8 @@ export type ItemReadResult = {
 };
 export type QualityReport = {
   ok: boolean;
+  /** Unreadable capture. Absent/false means the page can still be accepted for review. */
+  fatal?: boolean;
   reasons: string[];
   score: number;
   metrics: {
