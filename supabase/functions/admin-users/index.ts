@@ -8,7 +8,8 @@ const adminClient = createClient(supabaseUrl, serviceRoleKey, {
 
 type ActionBody =
   | { action: 'create'; firstName: string; lastName: string; email: string; password: string }
-  | { action: 'set_active'; userId: string; active: boolean };
+  | { action: 'set_active'; userId: string; active: boolean }
+  | { action: 'delete'; userId: string };
 
 type Profile = { id: string; email: string | null; first_name: string; last_name: string; role: 'ADMIN' | 'PSYCHOLOG'; active: boolean };
 
@@ -87,7 +88,7 @@ Deno.serve(async request => {
         email_confirm: true,
         user_metadata: { first_name: firstName, last_name: lastName },
       });
-      if (error || !data.user) return response(request, 400, { error: 'Auth kullanıcısı oluşturulamadı' });
+      if (error || !data.user) return response(request, 400, { error: 'Kullanıcı hesabı oluşturulamadı' });
       const { data: profileRow, error: profileError } = await adminClient.from('profiles')
         .select('id,email,first_name,last_name,role,active').eq('id', data.user.id).single();
       if (profileError || !profileRow) {
@@ -105,11 +106,27 @@ Deno.serve(async request => {
       const { error: authUpdateError } = await adminClient.auth.admin.updateUserById(body.userId, {
         ban_duration: body.active ? 'none' : '876000h',
       });
-      if (authUpdateError) return response(request, 400, { error: 'Auth account state could not be changed' });
+      if (authUpdateError) return response(request, 400, { error: 'Auth hesabı durumu güncellenemedi' });
       const { data: profileRow, error: profileError } = await adminClient.from('profiles').update({ active: body.active })
         .eq('id', body.userId).select('id,email,first_name,last_name,role,active').single();
-      if (profileError || !profileRow) return response(request, 500, { error: 'Profile state could not be changed' });
+      if (profileError || !profileRow) return response(request, 500, { error: 'Profil durumu güncellenemedi' });
       return response(request, 200, { profile: safeProfile(profileRow) });
+    }
+
+    if (body.action === 'delete') {
+      if (typeof body.userId !== 'string') return response(request, 400, { error: 'Invalid user ID' });
+      const { data: target, error: targetError } = await adminClient.from('profiles')
+        .select('id,role').eq('id', body.userId).maybeSingle();
+      if (targetError || !target || target.role !== 'PSYCHOLOG') return response(request, 404, { error: 'Psychologist not found' });
+
+      // First delete associated mmpi records if desired, or let profile cascade handle it
+      await adminClient.from('mmpi_records').delete().eq('created_by', body.userId);
+      await adminClient.from('profiles').delete().eq('id', body.userId);
+      const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(body.userId);
+      if (deleteAuthError) {
+        return response(request, 400, { error: 'Kullanıcı silinirken hata oluştu: ' + deleteAuthError.message });
+      }
+      return response(request, 200, { ok: true });
     }
 
     return response(request, 400, { error: 'Unknown action' });

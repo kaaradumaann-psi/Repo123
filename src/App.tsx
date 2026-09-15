@@ -23,9 +23,9 @@ export default function App() {
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const [workspace, setWorkspace] = useState<Workspace>('form');
+  const [workspace, setWorkspace] = useState<Workspace>('scan');
   const [batchId] = useState(createBatchId);
-  const tabs: Workspace[] = user.role === 'ADMIN' ? ['form', 'scan', 'admin'] : ['form', 'scan'];
+  const tabs: Workspace[] = user.role === 'ADMIN' ? ['scan', 'form', 'admin'] : ['scan', 'form'];
   const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
 
   function activateTab(next: Workspace) {
@@ -35,75 +35,219 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
 
   function onTablistKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const current = Math.max(0, tabs.indexOf(workspace));
-    const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
-      : event.key === 'ArrowRight' || event.key === 'ArrowDown' ? (current + 1) % tabs.length
-      : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? (current - 1 + tabs.length) % tabs.length : -1;
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+        ? tabs.length - 1
+        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+        ? (current + 1) % tabs.length
+        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+        ? (current - 1 + tabs.length) % tabs.length
+        : -1;
     if (nextIndex < 0) return;
     event.preventDefault();
     activateTab(tabs[nextIndex]!);
   }
 
-  function logout() {
-    onLogout();
-  }
+  return (
+    <div className="portal-layout">
+      {/* Üst Navigasyon Barı */}
+      <header className="app-header">
+        <div className="header-inner">
+          <div className="header-left">
+            <a className="brand" href="#main" aria-label="MMPI-566 Ana Sayfa">
+              <span className="brand-mark">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                  <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
+                  <circle cx="10" cy="10" r="1.8" fill="currentColor" />
+                  <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+                  <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+                  <circle cx="16" cy="16" r="1.8" fill="currentColor" />
+                </svg>
+              </span>
+              <div className="brand-text">
+                <strong className="brand-title">MMPI-566</strong>
+                <span className="brand-subtitle">Optik Okuma Portalı</span>
+              </div>
+            </a>
 
-  return <>
-    <header className="app-header">
-      <a className="brand" href="#main" aria-label="MMPI-566 optik cevap formuna git">
-        <span className="brand-mark"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2" />
-          <circle cx="10" cy="10" r="1.8" fill="currentColor" /><circle cx="16" cy="10" r="1.8" stroke="currentColor" />
-          <circle cx="10" cy="16" r="1.8" stroke="currentColor" /><circle cx="16" cy="16" r="1.8" fill="currentColor" />
-        </svg></span>
-        <span><strong>MMPI-566</strong><small>Akıllı Optik Okuyucu</small></span>
-      </a>
-      <span className="header-divider" /><span className="header-section">{workspace === 'form' ? 'Form hazırlığı' : workspace === 'scan' ? 'Tara ve incele' : 'Admin paneli'}</span>
-      <div className="header-user"><span><strong>{displayName(user)}</strong><small>{user.role === 'ADMIN' ? 'Admin' : 'Psikolog'}</small></span><button type="button" onClick={logout}>Çıkış yap</button></div>
-    </header>
-
-    <main className="app-main" id="main">
-      <div className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
-        {tabs.map(tab => <button type="button" role="tab" key={tab} id={`tab-${tab}`} ref={element => { tabRefs.current[tab] = element; }}
-          aria-selected={workspace === tab} aria-controls={`panel-${tab}`} tabIndex={workspace === tab ? 0 : -1}
-          onClick={() => activateTab(tab)}>{tab === 'form' ? 'Optik form' : tab === 'scan' ? 'Tara ve gözden geçir' : 'Admin paneli'}</button>)}
-      </div>
-
-      <div role="tabpanel" id="panel-form" aria-labelledby="tab-form" className={workspace === 'form' ? '' : 'is-screen-hidden'}>
-        <section className="page-intro">
-          <div><h1 id="page-title">Optik cevap formu</h1><p className="intro-description">Kimlik alanları yalnızca ilk sayfada; tüm sayfalar aynı ızgara düzenini kullanır.</p></div>
-          <div className="intro-actions">
-            <button type="button" className="print-button" onClick={() => window.print()}><Icon name="print" />
-              <span>Tüm sayfaları yazdır<small>{PAGE_COUNT} sayfa · A4 · aynı QR seti</small></span><Icon name="right" size={16} /></button>
-            <button type="button" className="download-button" onClick={downloadFormPdf}><Icon name="download" />
-              <span>Hazır PDF'i indir<small>{FORM_PDF_FILE_NAME} · okuyucuyla doğrulandı</small></span></button>
+            {/* Çalışma Alanı Navigasyonu */}
+            <nav className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
+              {tabs.map(tab => (
+                <button
+                  type="button"
+                  role="tab"
+                  key={tab}
+                  id={`tab-${tab}`}
+                  ref={element => {
+                    tabRefs.current[tab] = element;
+                  }}
+                  aria-selected={workspace === tab}
+                  aria-controls={`panel-${tab}`}
+                  tabIndex={workspace === tab ? 0 : -1}
+                  onClick={() => activateTab(tab)}
+                  className={`portal-tab ${workspace === tab ? 'active' : ''}`}
+                >
+                  <Icon
+                    name={tab === 'scan' ? 'scan' : tab === 'form' ? 'sheet' : 'shield'}
+                    size={16}
+                  />
+                  <span>
+                    {tab === 'scan'
+                      ? 'Test Değerlendirme'
+                      : tab === 'form'
+                      ? 'Optik Form Hazırla'
+                      : 'Yönetim Paneli'}
+                  </span>
+                </button>
+              ))}
+            </nav>
           </div>
-        </section>
-        <div className="form-workspace">
-          <aside className="form-sidebar" aria-label="Form bilgisi ve sayfa seçimi">
-            <PageNavigation current={currentPage} onChange={setCurrentPage} />
-            <section className="print-guide" aria-labelledby="print-guide-title">
-              <h2 id="print-guide-title"><Icon name="print" size={17} />Yazdırma ayarları</h2>
-              <dl><div><dt>Kağıt / yön</dt><dd>A4 / Dikey</dd></div><div><dt>Ölçek</dt><dd>%100 · Gerçek boyut</dd></div><div><dt>Kenar boşlukları</dt><dd>Yok</dd></div><div><dt>Üst / alt bilgi</dt><dd>Kapalı</dd></div><div><dt>Baskı</dt><dd>Tek yüz · Siyah-beyaz</dd></div></dl>
-              <p>Beyaz, temiz kağıt kullanın. “Sayfaya sığdır” seçeneğini açmayın; köşe işaretleri ve QR kesilmemelidir. Dört sayfayı aynı oturumda yazdırın.</p>
-            </section>
-          </aside>
-          <div className="preview-column"><FormPreview current={currentPage} onChange={setCurrentPage} definition={formDefinition} batchId={batchId} />
-            <div className="document-meta"><span>{FORM.totalItems} madde alanı <b>·</b> {PAGE_COUNT} ayrı A4 sayfa <b>·</b> Ø {String(FORM.bubbleDiameterMm).replace('.', ',')} mm daire</span></div>
+
+          {/* Sağ Kullanıcı Profili & Çıkış */}
+          <div className="header-user">
+            <div className="user-profile-summary">
+              <div className="user-avatar-circle">
+                {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+              </div>
+              <div className="user-info-text">
+                <strong className="user-full-name">{displayName(user)}</strong>
+                <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
+                  {user.role === 'ADMIN' ? 'Yönetici' : 'Klinik Psikolog'}
+                </span>
+              </div>
+            </div>
+            <button type="button" className="btn-logout" onClick={onLogout} title="Oturumu Kapat">
+              <span>Çıkış</span>
+            </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div role="tabpanel" id="panel-scan" aria-labelledby="tab-scan" className={workspace === 'scan' ? '' : 'is-screen-hidden'}>
-        <ScannerWorkspace definition={formDefinition} actor={user} />
-      </div>
+      {/* Ana İçerik */}
+      <main className="app-main" id="main">
+        {/* PANEL 1: TARA VE İNCELE (TEST DEĞERLENDİRME) */}
+        <div
+          role="tabpanel"
+          id="panel-scan"
+          aria-labelledby="tab-scan"
+          className={workspace === 'scan' ? 'tab-content-active' : 'is-screen-hidden'}
+        >
+          <ScannerWorkspace definition={formDefinition} actor={user} />
+        </div>
 
-      {user.role === 'ADMIN' && <div role="tabpanel" id="panel-admin" aria-labelledby="tab-admin" className={workspace === 'admin' ? '' : 'is-screen-hidden'}>
-        <AdminPanel admin={user} />
-      </div>}
-    </main>
+        {/* PANEL 2: OPTİK FORM VE YAZDIRMA */}
+        <div
+          role="tabpanel"
+          id="panel-form"
+          aria-labelledby="tab-form"
+          className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
+        >
+          <section className="form-prep-hero">
+            <div className="hero-text-side">
+              <span className="section-badge badge-primary">Form Hazırlığı</span>
+              <h1>MMPI-566 Optik Cevap Formu</h1>
+              <p>
+                A4 standartlarında basılı optik form setini yazdırabilir veya yüksek kaliteli orijinal PDF dosyasını indirebilirsiniz.
+              </p>
+            </div>
+            <div className="hero-cta-group">
+              <button type="button" className="btn-primary btn-print" onClick={() => window.print()}>
+                <Icon name="print" size={18} />
+                <div className="btn-multiline">
+                  <span>Tüm Sayfaları Yazdır</span>
+                  <small>{PAGE_COUNT} Sayfa · A4 Tek Yüz</small>
+                </div>
+              </button>
+              <button type="button" className="btn-secondary btn-download download-button" onClick={downloadFormPdf}>
+                <Icon name="download" size={18} />
+                <div className="btn-multiline">
+                  <span>PDF Olarak İndir</span>
+                  <small>{FORM_PDF_FILE_NAME}</small>
+                </div>
+              </button>
+            </div>
+          </section>
 
-    <footer className="app-footer"><span>© {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER}</span><nav className="app-footer-links" aria-label="Yazar bağlantıları">
-      <a href={SITE_URL} target="_blank" rel="noopener noreferrer">{SITE_LABEL}</a><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-    </nav></footer>
-  </>;
+          <div className="form-workspace-grid">
+            <aside className="form-sidebar-panel" aria-label="Form bilgisi ve sayfa seçimi">
+              <PageNavigation current={currentPage} onChange={setCurrentPage} />
+
+              <div className="print-guide-card card-elevated">
+                <h3 className="guide-title">
+                  <Icon name="print" size={18} />
+                  <span>Yazdırma Rehberi</span>
+                </h3>
+                <dl className="guide-spec-list">
+                  <div>
+                    <dt>Kağıt Boyutu:</dt>
+                    <dd>A4 (210 × 297 mm)</dd>
+                  </div>
+                  <div>
+                    <dt>Ölçek Ayarı:</dt>
+                    <dd>%100 (Gerçek Boyut)</dd>
+                  </div>
+                  <div>
+                    <dt>Kenar Boşluğu:</dt>
+                    <dd>Yok (Sıfır)</dd>
+                  </div>
+                  <div>
+                    <dt>Baskı Şekli:</dt>
+                    <dd>Tek Yüz · Siyah Beyaz</dd>
+                  </div>
+                </dl>
+                <p className="guide-note">
+                  "Sayfaya sığdır" seçeneğini işaretlemeyiniz. Köşe hizalama karelerinin ve QR kodun net çıkması optik okuyucunun hatasız çalışmasını sağlar.
+                </p>
+              </div>
+            </aside>
+
+            <div className="form-preview-column">
+              <FormPreview
+                current={currentPage}
+                onChange={setCurrentPage}
+                definition={formDefinition}
+                batchId={batchId}
+              />
+              <div className="document-meta-strip">
+                <span>{FORM.totalItems} Madde Alanı</span>
+                <span>•</span>
+                <span>{PAGE_COUNT} Sayfalık A4 Form Seti</span>
+                <span>•</span>
+                <span>Ø {String(FORM.bubbleDiameterMm).replace('.', ',')} mm Optik Kabarcık</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PANEL 3: ADMİN YÖNETİM PANELİ */}
+        {user.role === 'ADMIN' && (
+          <div
+            role="tabpanel"
+            id="panel-admin"
+            aria-labelledby="tab-admin"
+            className={workspace === 'admin' ? 'tab-content-active' : 'is-screen-hidden'}
+          >
+            <AdminPanel admin={user} />
+          </div>
+        )}
+      </main>
+
+      {/* Alt Bilgi */}
+      <footer className="app-footer">
+        <div className="footer-inner">
+          <span className="copyright-text">
+            © {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER} · Tüm hakları saklıdır.
+          </span>
+          <nav className="app-footer-links" aria-label="Yazar bağlantıları">
+            <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
+              {SITE_LABEL}
+            </a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  );
 }
