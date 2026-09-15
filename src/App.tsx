@@ -10,7 +10,8 @@ import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
 import { createBatchId } from './form/pageIdentity';
 import { downloadFormPdf, FORM_PDF_FILE_NAME } from './print/formPdf';
-import { clearSession, displayName, type AuthenticatedUser } from './auth/authStore';
+import type { AuthenticatedUser } from './auth/authTypes';
+import { displayName } from './auth/userDisplay';
 
 type Workspace = 'form' | 'scan' | 'admin';
 
@@ -43,7 +44,6 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
   }
 
   function logout() {
-    clearSession();
     onLogout();
   }
 

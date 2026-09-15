@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormDefinition } from '../omr/omrTypes';
-import type { AuthenticatedUser } from '../auth/authStore';
+import type { AuthenticatedUser } from '../auth/authTypes';
 import { analyzePage } from '../omr/analyzePage';
 import { summarizeResults } from '../results/resultNormalizer';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
@@ -11,6 +11,7 @@ import type { SourcePage } from '../scanner/pdfIO';
 import { CameraCapture } from './CameraCapture';
 import { ScanResultPreview } from './ScanResultPreview';
 import { RecordCapture } from './RecordCapture';
+import { MyRecordsPanel } from './MyRecordsPanel';
 import '../styles/scanner.css';
 
 export function ScannerWorkspace({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
@@ -31,6 +32,7 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   const [cameraKey, setCameraKey] = useState(0);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [recordsRefresh, setRecordsRefresh] = useState(0);
   const id = useId();
   const pages = sortedPages(scan);
   const missingPages = missingPageNumbers(scan, definition);
@@ -208,6 +210,8 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
         commit(removePage(current.current, selected.pageNumber));
         setStatus(`${selected.pageNumber}. sayfa ve incelemeleri silindi. Aynı setten yeniden çekin veya yükleyin.`);
       }} /> : <div className="scan-empty">Henüz kabul edilen sayfa yok. Başlamak için basılı formun görüntüsünü veya PDF dosyasını ekleyin.</div>}
-    <RecordCapture key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`} definition={definition} scan={scan} actor={actor} />
+    <RecordCapture key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`} definition={definition} scan={scan} actor={actor}
+      onSaved={() => setRecordsRefresh(previous => previous + 1)} />
+    {actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
   </section>;
 }
