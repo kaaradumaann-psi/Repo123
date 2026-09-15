@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormDefinition } from '../omr/omrTypes';
+import type { AuthenticatedUser } from '../auth/authStore';
 import { analyzePage } from '../omr/analyzePage';
 import { summarizeResults } from '../results/resultNormalizer';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
@@ -9,14 +10,15 @@ import { readPdfPages } from '../scanner/pdfIO';
 import type { SourcePage } from '../scanner/pdfIO';
 import { CameraCapture } from './CameraCapture';
 import { ScanResultPreview } from './ScanResultPreview';
+import { RecordCapture } from './RecordCapture';
 import '../styles/scanner.css';
 
-export function ScannerWorkspace({ definition }: { definition: FormDefinition }) {
+export function ScannerWorkspace({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
   // A different form definition must never inherit the previous form's scan set.
-  return <ScannerSession key={definition.fingerprint} definition={definition} />;
+  return <ScannerSession key={definition.fingerprint} definition={definition} actor={actor} />;
 }
 
-function ScannerSession({ definition }: { definition: FormDefinition }) {
+function ScannerSession({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
   const [scan, setScan] = useState(createScanSet);
   const current = useRef(scan);
   const alive = useRef(true);
@@ -206,5 +208,6 @@ function ScannerSession({ definition }: { definition: FormDefinition }) {
         commit(removePage(current.current, selected.pageNumber));
         setStatus(`${selected.pageNumber}. sayfa ve incelemeleri silindi. Aynı setten yeniden çekin veya yükleyin.`);
       }} /> : <div className="scan-empty">Henüz kabul edilen sayfa yok. Başlamak için basılı formun görüntüsünü veya PDF dosyasını ekleyin.</div>}
+    <RecordCapture key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`} definition={definition} scan={scan} actor={actor} />
   </section>;
 }

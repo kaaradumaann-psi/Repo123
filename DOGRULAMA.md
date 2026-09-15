@@ -302,6 +302,23 @@ Bunlar bu ortamda **çalıştırılamadı**; yapılmış gibi gösterilmiyor.
 - **Klinik puanlama.** Bu sürümde yoktur; `clinicalTransferAllowed` her zaman
   `false` döner.
 
+## Eklenen kullanıcı ve kayıt akışı (kod düzeyi kapsam)
+
+- Mevcut OMR, kamera, PDF, form geometrisi ve sonuç inceleme modülleri değiştirilmedi;
+  yalnızca giriş kapısı, Admin paneli ve tarama sonrası kayıt bileşeni eklendi.
+- `src/auth/authStore.ts` parola metni saklamaz; tarayıcı Web Crypto PBKDF2-SHA-256
+  ile tuzlu özet üretir, aktif/pasif kullanıcı ve Admin/Psikolog rolü yönetir.
+- `src/records/recordStore.ts` dört kabul edilmiş sayfayı zorunlu tutar; mevcut
+  `ItemReadResult` maddelerini ve özgün ölçümleri dönüştürmeden danışan alanları,
+  kayıt ID'si ve işlemi yapan kullanıcıyla birlikte yerel store'a yazar.
+- Bu iki store yalnızca `localStorage` / `sessionStorage` kullanır. Sunucu tarafı
+  yetkilendirme veya merkezi veritabanı yoktur; kullanıcı kendi tarayıcısındaki
+  veriyi değiştirebileceği için klinik üretim güvenliği iddia edilmez. Gerçek
+  dağıtım için backend, HttpOnly/SameSite oturumu, server-side RBAC ve şifreli
+  veritabanı ayrıca uygulanmalıdır.
+- Bu akış için henüz gerçek tarayıcı, çoklu kullanıcı ve backend entegrasyon testi
+  çalıştırılmadı; aşağıdaki klinik/OMR doğrulama sonuçları mevcut kapsamını korur.
+
 ## Bir sonraki doğrulama adımı
 
 1. `MMPI-566-optik-cevap-formu.pdf` dosyasını A4, %100, tek yüz yazdırın.

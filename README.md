@@ -1,9 +1,10 @@
 # MMPI-566 Optik Cevap Formu ve OMR Okuyucu
 
 A4 optik cevap formu (566 madde), tarayıcıda çalışan optik okuma (OMR) hattı,
-kamera/dosya yükleme, sonuç inceleme ekranları ve **hazır yazdırılabilir PDF**.
-React 19 + TypeScript + Vite. Sunucu, CDN çalışma zamanı veya API anahtarı
-gerektirmez; tüm okuma kullanıcının cihazında yapılır.
+kamera/dosya yükleme, sonuç inceleme ekranları, yetkili kullanıcı akışı ve
+**hazır yazdırılabilir PDF**. React 19 + TypeScript + Vite. OMR hattı hâlâ
+sunucu, CDN çalışma zamanı veya API anahtarı gerektirmez; tüm okuma kullanıcının
+cihazında yapılır.
 
 Bu depo projenin **tek** kaynağıdır; uygulama kök dizinde yaşar.
 
@@ -16,8 +17,30 @@ npm ci              # kilitlenmiş bağımlılıkları kurar
 npm run dev         # geliştirme sunucusu -> http://localhost:5173
 ```
 
-Tarayıcıda `http://localhost:5173` adresini açın. İki sekme vardır:
-**Optik form** (önizleme + yazdırma) ve **Tara ve gözden geçir** (kamera/yükleme).
+Tarayıcıda `http://localhost:5173` adresini açın. İlk açılışta bu tarayıcı için
+bir Admin hesabı oluşturulur; sonrasında açık bir kayıt ekranı yoktur ve yeni
+Psikolog hesaplarını yalnızca Admin paneli oluşturabilir. Oturum açıldıktan sonra
+üç çalışma alanı olabilir: **Optik form** (önizleme + yazdırma), **Tara ve gözden
+geçir** (kamera/yükleme) ve yalnızca Admin için **Admin paneli**.
+
+Tarama oturumunda dört sayfa kabul edildiğinde Psikolog için danışan bilgi formu
+(ad, soyad, cinsiyet, yaş, meslek, eğitim, uygulanma tarihi, istekte bulunan)
+açılır. Kaydetme, mevcut `ItemReadResult` OMR maddelerini dönüştürmeden ham cevap
+sayfalarıyla birlikte bir kayıt ID'si üretir; klinik puanlama veya yorumlama
+çalışmaz.
+
+### Güvenlik sınırı — dağıtımdan önce bilinmeli
+
+Bu depo başlangıçta tamamen statik ve çevrimdışı tasarlandığı için gerçek bir
+sunucu, veritabanı veya API yoktur. Eklenen giriş, rol kontrolü ve kayıt akışı bu
+sürümde **tarayıcı yerel depolamasında çalışan bir prototiptir**: parolalar Web
+Crypto PBKDF2 ile düz metin olmadan saklansa da kullanıcı, rol ve kayıt verilerini
+kendi tarayıcısında değiştirebilir. Bu nedenle klinik/çok kullanıcılı üretim
+dağıtımında güvenli kabul edilemez. Gerçek güvenlik için aynı arayüzün backend'e
+bağlanması; parola hash'inin sunucuda tutulması, HttpOnly/SameSite oturum çerezi,
+server-side RBAC, erişim günlükleri ve şifreli bir veritabanı eklenmesi gerekir.
+Bu değişiklik, çalışan kamera/OMR hattını değiştirmeden sonraki entegrasyon için
+bilinçli olarak ayrı bırakıldı.
 
 Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (tarayıcı yazdırma
 diyaloğu) ve **Hazır PDF'i indir**. İkincisi `MMPI-566-optik-cevap-formu.pdf`
@@ -73,13 +96,13 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 60 test
+npm test            # 61 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
 ```
 
-`npm test` şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
+`npm test` (61 test) şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
 1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
 sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
@@ -109,7 +132,8 @@ Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
   kamera, fotokopi, kalem veya baskı üzerinde kalibre edilmemiştir; bu yüzden
   doğruluk yüzdesi iddia edilmez. `confidence` sezgisel bir işaret gücüdür,
   olasılık değildir.
-- Klinik puanlama, raporlama, veri tabanı ve API entegrasyonu **yoktur**.
+- Klinik puanlama, raporlama ve API entegrasyonu **yoktur**. Kayıt akışı yalnızca
+  tarayıcı yerel depolamasındaki prototip store'a yazar; merkezi veritabanı değildir.
   `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
 - Yalnızca `reliable` maddeler algoritma cevabı sayılır; `single` ve `ambiguous`
   her zaman insan incelemesi ister.
@@ -161,6 +185,8 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu. |
 | `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; başarısızlıkta cevap üretmez. |
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
+| `src/auth/*` | Yerel prototip giriş, Admin/Psikolog rolleri, PBKDF2 parola özeti ve oturum. |
+| `src/records/*` | Ham OMR maddelerini bozmadan yerel kayıt ID'si ve danışan bilgisi store'u. |
 | `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |
 | `src/print/*` | PDF yazıcısı, TrueType gömme ve form sayfası çizimi (tarayıcı gerektirmez). |
 | `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
@@ -172,7 +198,7 @@ paylaşır; koordinat kaynağı tektir.
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 60/60 test geçiyor, derleme
+maddeleri listeler. Özet: tip kontrolü temiz, 61/61 test geçiyor, derleme
 çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
 kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form
