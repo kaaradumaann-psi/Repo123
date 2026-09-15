@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { PageNavigation } from './components/PageNavigation';
 import { FormPreview } from './components/FormPreview';
 import { ScannerWorkspace } from './components/ScannerWorkspace';
@@ -11,6 +12,20 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(0);
   const [workspace, setWorkspace] = useState<'form' | 'scan'>('form');
   const [batchId] = useState(createBatchId);
+  const tabRefs = useRef<{ form: HTMLButtonElement | null; scan: HTMLButtonElement | null }>({ form: null, scan: null });
+  function activateTab(next: 'form' | 'scan') {
+    setWorkspace(next);
+    tabRefs.current[next]?.focus();
+  }
+  function onTablistKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const next = event.key === 'Home' ? 'form' : event.key === 'End' ? 'scan'
+      : event.key === 'ArrowRight' || event.key === 'ArrowDown' ? (workspace === 'form' ? 'scan' : 'form')
+      : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? (workspace === 'scan' ? 'form' : 'scan')
+      : null;
+    if (!next) return;
+    event.preventDefault();
+    activateTab(next);
+  }
   return <>
     <header className="app-header">
       <a className="brand" href="#main" aria-label="MMPI-566 optik cevap formuna git">
@@ -26,12 +41,18 @@ export default function App() {
     </header>
 
     <main className="app-main" id="main">
-      <div className="workspace-tabs" role="tablist" aria-label="Çalışma alanı">
-        <button type="button" role="tab" aria-selected={workspace === 'form'} onClick={() => setWorkspace('form')}>Optik form</button>
-        <button type="button" role="tab" aria-selected={workspace === 'scan'} onClick={() => setWorkspace('scan')}>Tara ve gözden geçir</button>
+      <div className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
+        <button type="button" role="tab" id="tab-form" ref={element => { tabRefs.current.form = element; }}
+          aria-selected={workspace === 'form'} aria-controls="panel-form" tabIndex={workspace === 'form' ? 0 : -1}
+          onClick={() => activateTab('form')}>Optik form</button>
+        <button type="button" role="tab" id="tab-scan" ref={element => { tabRefs.current.scan = element; }}
+          aria-selected={workspace === 'scan'} aria-controls="panel-scan" tabIndex={workspace === 'scan' ? 0 : -1}
+          onClick={() => activateTab('scan')}>Tara ve gözden geçir</button>
       </div>
 
-      <section className="page-intro" hidden={workspace !== 'form'}>
+      <div role="tabpanel" id="panel-form" aria-labelledby="tab-form"
+        className={workspace === 'form' ? '' : 'is-screen-hidden'}>
+      <section className="page-intro">
         <div><p className="eyebrow">BASILI FORM / {FORM.templateId}</p><h1 id="page-title">Optik cevap formu</h1>
           <p className="intro-description">Kimlik alanları yalnızca ilk sayfada. Her sayfada QR ve köşe işaretleri; D/Y daireleri tüm sayfalarda aynı milimetre ızgaradadır.</p></div>
         <div className="intro-actions">
@@ -42,7 +63,7 @@ export default function App() {
         </div>
       </section>
 
-      <div className={`form-workspace${workspace === 'form' ? '' : ' is-screen-hidden'}`}>
+      <div className="form-workspace">
         <aside className="form-sidebar" aria-label="Form bilgisi ve sayfa seçimi">
           <PageNavigation current={currentPage} onChange={setCurrentPage} />
           <section className="print-guide" aria-labelledby="print-guide-title">
@@ -64,8 +85,10 @@ export default function App() {
             <span>Şablon: {FORM.templateId}</span></div>
         </div>
       </div>
+      </div>
 
-      <div className={workspace === 'scan' ? '' : 'is-screen-hidden'}>
+      <div role="tabpanel" id="panel-scan" aria-labelledby="tab-scan"
+        className={workspace === 'scan' ? '' : 'is-screen-hidden'}>
         <ScannerWorkspace definition={formDefinition} />
       </div>
 

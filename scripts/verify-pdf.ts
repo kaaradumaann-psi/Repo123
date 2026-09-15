@@ -25,8 +25,9 @@ const numberBaseline = (rowIndex: number) => {
   return top + (FORM.rowPitchMm - sizeMm * CONTENT_RATIO) / 2 + sizeMm * ASCENT_RATIO;
 };
 
+// `raw` is already the whole file; pdf.js transfers the buffer it is given, so hand it a copy.
 const loadingTask = getDocument({
-  data: new Uint8Array(await readFile(file)),
+  data: new Uint8Array(raw),
   useSystemFonts: true, useWorkerFetch: false, disableAutoFetch: true, stopAtErrors: true,
   isOffscreenCanvasSupported: false, isImageDecoderSupported: false,
 });

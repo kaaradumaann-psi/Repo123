@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Script } from 'node:vm';
 import test from 'node:test';
@@ -15,6 +16,22 @@ test('standalone build contains one intact inline script and no source-file impo
   assert.ok(!html.includes('src="/src/main.tsx"'));
   assert.ok(html.includes('@page'));
   assert.ok(html.includes('lang="tr"'));
+});
+
+test('standalone build is offline and locked down by a script-hash CSP', () => {
+  const html = readFileSync('dist/index.html', 'utf8');
+  // The deliverable must never call out to a CDN or font service at runtime.
+  assert.ok(!html.includes('fonts.googleapis.com'));
+  assert.ok(!html.includes('fonts.gstatic.com'));
+  const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]+)">/.exec(html);
+  assert.ok(csp, 'CSP meta etiketi eksik');
+  assert.ok(csp![1].includes("default-src 'none'"));
+  assert.ok(csp![1].includes("font-src 'none'"));
+  // The hash must match the exact script body in the document, otherwise the page would not run.
+  const script = /<script type="module">([\s\S]*?)<\/script>/.exec(html)?.[1];
+  assert.ok(script, 'Satır içi betik bulunamadı');
+  const hash = createHash('sha256').update(script!).digest('base64');
+  assert.ok(csp![1].includes(`script-src 'sha256-${hash}'`), 'CSP script hashi belgedeki betikle eslesmiyor');
 });
 
 test('standalone build embeds the verified form PDF byte for byte', () => {

@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -42,15 +43,25 @@ const result = await build({
 const js = result.outputFiles.find(file => file.path.endsWith('.js')).text;
 const css = result.outputFiles.find(file => file.path.endsWith('.css')).text;
 const shell = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+// Hash the script exactly as it will appear in the document (after the `</script`
+// escape), because the browser computes the CSP hash over that literal content.
+const scriptBody = js.replaceAll('</script', '<\\/script');
+const scriptHash = createHash('sha256').update(scriptBody).digest('base64');
+// The single-file build runs fully offline: no connects, no remote fonts or scripts,
+// one hash-pinned inline script, inline styles, and blob URLs for previews and the
+// hardened pdf.js worker.
+const csp = `default-src 'none'; script-src 'sha256-${scriptHash}'; style-src 'unsafe-inline'; ` +
+  `img-src blob: data:; worker-src blob:; child-src blob:; font-src 'none'; ` +
+  `object-src 'none'; base-uri 'none'; form-action 'none'`;
 const licenses = await Promise.all(['react', 'react-dom', 'scheduler'].map(async name =>
   `${name}\n${await readFile(new URL(`../node_modules/${name}/LICENSE`, import.meta.url), 'utf8')}`,
 ));
 const html = shell
   .replace('<!doctype html>', () => `<!doctype html>\n<!-- Bundled library notices\n${licenses.join('\n')}-->`)
-  .replace('</head>', () => `<style>${css}</style></head>`)
+  .replace('</head>', () => `<meta http-equiv="Content-Security-Policy" content="${csp}">\n<style>${css}</style></head>`)
   .replace('<script type="module" src="/src/main.tsx"></script>',
-    () => `<script type="module">${js.replaceAll('</script', '<\\/script')}</script>`);
+    () => `<script type="module">${scriptBody}</script>`);
 await mkdir(new URL('../dist/', import.meta.url), { recursive: true });
 await writeFile(new URL('../dist/index.html', import.meta.url), html);
-await writeFile(new URL('../../optik-form.html', import.meta.url), html);
-console.log('Built dist/index.html and ../optik-form.html (self-contained).');
+await writeFile(new URL('../optik-form.html', import.meta.url), html);
+console.log('Built dist/index.html and optik-form.html (self-contained).');

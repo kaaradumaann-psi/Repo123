@@ -5,7 +5,7 @@ kamera/dosya yükleme, sonuç inceleme ekranları ve **hazır yazdırılabilir P
 React 19 + TypeScript + Vite. Sunucu, CDN çalışma zamanı veya API anahtarı
 gerektirmez; tüm okuma kullanıcının cihazında yapılır.
 
-Bu klasör projenin **tek** kaynağıdır.
+Bu depo projenin **tek** kaynağıdır; uygulama kök dizinde yaşar.
 
 ## Hızlı başlangıç
 
@@ -38,11 +38,16 @@ npm run build
 | Çıktı | Ne işe yarar |
 | --- | --- |
 | `dist/index.html` | Kendi kendine yeterli tek dosya (React, CSS, pdf.js worker gömülü). Statik sunucuya atılır, backend gerekmez. |
-| `../optik-form.html` | Aynı dosyanın depo kökündeki kopyası. Çift tıklayarak da açılır. |
+| `optik-form.html` | Aynı dosyanın depo kökündeki kopyası. Çift tıklayarak da açılır; commit'li sürümün bayt-bayt aynı kalmasını CI ve derleme testi denetler. |
 
 Statik barındırmada çalışır (Netlify, Vercel, GitHub Pages, nginx, S3).
 Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli bağlam ister); localhost
 bunun dışındadır.
+
+Tek dosya tamamen **çevrimdışıdır**: çalışma zamanında hiçbir dış kaynağa
+(CDN, web font, telemetri) istek gitmez ve derleme, inline betiğin SHA-256
+hash'ine bağlı bir `Content-Security-Policy` meta etiketiyle kilitlenir
+(`default-src 'none'`).
 
 ## Yazdırılabilir optik form
 
@@ -68,7 +73,7 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 56 test
+npm test            # 60 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -78,10 +83,16 @@ npm run verify:pdf  # üretilen PDF'i doğrula
 1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
 sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
-çarpıklık), güvenlik red yolları, sonuç doğrulama/elle inceleme ve **üretilen
-PDF'in dosyadan geri okunup tanımla karşılaştırılması** ve **depodaki PDF'in
+çarpıklık), güvenlik red yolları, sonuç doğrulama/elle inceleme, **üretilen
+PDF'in dosyadan geri okunup tanımla karşılaştırılması**, **depodaki PDF'in
 rasterleştirilip gerçek OMR hattından geçirilmesi** (4 sayfa kabul, 566 madde
-boş okunuyor, sayfalar tek tek kabul ediliyor).
+boş okunuyor, sayfalar tek tek kabul ediliyor), **pdf.js worker sertleştirmesinin
+pin'lenmiş sürümde başvurduğu sembollerin varlığı** ve **tek dosya derlemenin
+çevrimdışı (dış kaynak yok) + CSP hash doğrulaması**.
+
+Ayrıca GitHub Actions CI (`.github/workflows/ci.yml`) her push/PR'da tip kontrolü,
+testler, PDF doğrulaması ve derlemeyi çalıştırır; commit'li `optik-form.html`'in
+derleme çıktısından sapmasını reddeder.
 
 ## Kapsam ve sınırlamalar
 
@@ -158,31 +169,10 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
 paylaşır; koordinat kaynağı tektir.
 
-### İstenen mimariyle eşleşme
-
-Önerilen klasör adları birebir kullanılmadı; her biri bu projedeki karşılığıyla
-tek bir yerde tutuluyor.
-
-| Önerilen | Bu projedeki karşılık |
-| --- | --- |
-| `components/OpticalFormPreview.tsx` | `components/FormPreview.tsx` |
-| `components/FormPage.tsx` / `ItemRow.tsx` / `ResponseArea.tsx` | `components/FormPage.tsx` ve `components/AnswerColumn.tsx` (koordinatlar `FormDefinition`'dan) |
-| `components/AlignmentMarks.tsx` | `components/RegistrationMarks.tsx` |
-| `omr/pageDetector.ts` | `omr/analyzePage.ts`: QR doğrulaması + `inspectPageGeometry` |
-| `omr/itemMapper.ts` | `formDefinition.ts` `getBubbleGeometry()` + `scanner/reviewGeometry.ts` |
-| `omr/confidenceCalculator.ts`, `omr/validation.ts` | `markDetector.ts` eşikleri + `results/resultValidator.ts` |
-| `scanner/cameraScanner.ts` | `components/CameraCapture.tsx` + `scanner/imageIO.ts` |
-| `scanner/imageUploader.ts` | `scanner/imageIO.ts` ve `scanner/pdfIO.ts` |
-| `scanner/scanPipeline.ts` | `omr/analyzePage.ts` |
-| `utils/coordinateUtils.ts` | `omr/perspectiveCorrection.ts` |
-| `utils/imageUtils.ts` | `omr/imageQuality.ts` ve `scanner/imageIO.ts` |
-| `utils/printUtils.ts` | `src/print/*` + `styles/print.css` |
-| `pages/FormPreviewPage.tsx`, `ScannerPage.tsx`, `ScanResultsPage.tsx` | `App.tsx` içindeki iki çalışma alanı sekmesi |
-
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 56/56 test geçiyor, derleme
+maddeleri listeler. Özet: tip kontrolü temiz, 60/60 test geçiyor, derleme
 çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
 kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form

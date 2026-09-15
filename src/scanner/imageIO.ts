@@ -46,10 +46,15 @@ export function checkFileSize(file: Pick<File, 'size'>): void {
 
 export async function identifyFile(file: File): Promise<'image' | 'pdf'> {
   checkFileSize(file);
-  const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
   if (bytes[0] === 0xff && bytes[1] === 0xd8 ||
     bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) return 'image';
-  if (new TextDecoder().decode(bytes).startsWith('%PDF-')) return 'pdf';
+  // The PDF spec allows the %PDF- signature anywhere in the first 1024 bytes
+  // (some producers prepend whitespace or a BOM), so search instead of pinning byte 0.
+  const signature = [0x25, 0x50, 0x44, 0x46, 0x2d];
+  for (let at = 0; at + signature.length <= bytes.length; at++) {
+    if (signature.every((value, index) => bytes[at + index] === value)) return 'pdf';
+  }
   throw new Error('Dosya biçimi desteklenmiyor. Yalnızca gerçek JPG, PNG veya PDF dosyaları açılabilir.');
 }
 
@@ -82,8 +87,8 @@ export function encodedImageSize(bytes: Uint8Array): { width: number; height: nu
 export async function readImageFile(file: File, signal: AbortSignal): Promise<PixelImage> {
   checkFileSize(file);
   checkAborted(signal);
-  // SOF may follow multiple large APP/COM segments. The full encoded read is
-  // bounded by checkFileSize, unlike the decoded bitmap allocation below.
+  // The buffer is read once: the same bytes feed the encoded-size preflight and,
+  // wrapped in a Blob, the decoder, so the file is never loaded from disk twice.
   const bytes = new Uint8Array(await file.arrayBuffer());
   checkAborted(signal);
   const size = encodedImageSize(bytes);
@@ -94,7 +99,7 @@ export async function readImageFile(file: File, signal: AbortSignal): Promise<Pi
   checkAborted(signal);
   let bitmap: ImageBitmap | undefined;
   try {
-    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    bitmap = await createImageBitmap(new Blob([bytes]), { imageOrientation: 'from-image' });
     checkAborted(signal);
     return capturePixels(bitmap, bitmap.width, bitmap.height);
   } catch (error) {
