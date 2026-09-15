@@ -1,9 +1,10 @@
 # MMPI-566 Optik Cevap Formu ve OMR Okuyucu
 
 A4 optik cevap formu (566 madde), tarayıcıda çalışan optik okuma (OMR) hattı,
-kamera/dosya yükleme, sonuç inceleme ekranları ve **hazır yazdırılabilir PDF**.
-React 19 + TypeScript + Vite. Sunucu, CDN çalışma zamanı veya API anahtarı
-gerektirmez; tüm okuma kullanıcının cihazında yapılır.
+kamera/dosya yükleme, sonuç inceleme ekranları, Supabase Auth/RLS tabanlı
+kullanıcı akışı ve **hazır yazdırılabilir PDF**. React 19 + TypeScript + Vite.
+OMR hesaplaması kullanıcının cihazında yapılır; kimlik ve kayıt yetkisi Supabase
+backend'inde doğrulanır.
 
 Bu depo projenin **tek** kaynağıdır; uygulama kök dizinde yaşar.
 
@@ -12,13 +13,30 @@ Bu depo projenin **tek** kaynağıdır; uygulama kök dizinde yaşar.
 Node.js 22 veya üzeri gerekir.
 
 ```sh
-npm ci              # kilitlenmiş bağımlılıkları kurar
-npm run dev         # geliştirme sunucusu -> http://localhost:5173
+npm ci
+cp .env.example .env   # Supabase URL ve publishable/anon anahtarını doldurun
+npm run dev             # geliştirme sunucusu -> http://localhost:5173
 ```
 
-Tarayıcıda `http://localhost:5173` adresini açın. İki sekme vardır:
-**Optik form** (önizleme + yazdırma) ve **Tara ve gözden geçir** (kamera/yükleme).
+Supabase migration ve Edge Function kurulumu için [`supabase/README.md`](supabase/README.md)
+izlenmelidir. Uygulamada public kayıt ekranı yoktur. İlk Admin, Supabase
+Dashboard/SQL ile bir kez oluşturulur; sonraki Psikolog hesaplarını yalnızca
+aktif Admin paneli oluşturabilir. Oturum açıldıktan sonra üç çalışma alanı
+olabilir: **Optik form**, **Tara ve gözden geçir**, Psikolog için Supabase'den
+kendi **Kayıtlarım** listesi ve yalnızca Admin için **Admin paneli**.
 
+Tarama oturumunda dört sayfa kabul edildiğinde Psikolog için danışan bilgi formu
+(ad, soyad, cinsiyet, yaş, meslek, eğitim, uygulanma tarihi, istekte bulunan)
+açılır. Kaydetme, mevcut `ItemReadResult` OMR maddelerini dönüştürmeden ham cevap
+sayfalarını ve psikolog kimliğini Supabase'e yazar; klinik puanlama veya
+yorumlama çalışmaz.
+
+Kimlik oturumu Supabase Auth tarafından yönetilir ve bu frontend'de
+`persistSession: false` ile bellekte tutulur; uygulama kendi
+`localStorage/sessionStorage` yetkilendirme veya kayıt store'unu kullanmaz.
+Parolalar uygulama tablolarına yazılmaz. Profiller ve MMPI kayıtları RLS ile
+korunur; Admin hesap oluşturma/aktiflik değişikliği doğrulanmış Edge Function
+üzerinden yapılır.
 Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (tarayıcı yazdırma
 diyaloğu) ve **Hazır PDF'i indir**. İkincisi `MMPI-566-optik-cevap-formu.pdf`
 dosyasını tek dosyalık derlemeye base64 olarak gömer; bu dosya hem dosyadan geri
@@ -37,17 +55,14 @@ npm run build
 
 | Çıktı | Ne işe yarar |
 | --- | --- |
-| `dist/index.html` | Kendi kendine yeterli tek dosya (React, CSS, pdf.js worker gömülü). Statik sunucuya atılır, backend gerekmez. |
-| `optik-form.html` | Aynı dosyanın depo kökündeki kopyası. Çift tıklayarak da açılır; commit'li sürümün bayt-bayt aynı kalmasını CI ve derleme testi denetler. |
+| `dist/index.html` | React, CSS ve pdf.js worker'ı gömülü statik çıktı. Supabase URL/anon anahtarı build sırasında `.env`'den alınır. |
+| `optik-form.html` | Aynı dosyanın depo kökündeki kopyası. OMR/form önizlemesi çevrimdışı çalışabilir; giriş ve kayıt için Supabase erişimi gerekir. |
 
-Statik barındırmada çalışır (Netlify, Vercel, GitHub Pages, nginx, S3).
-Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli bağlam ister); localhost
-bunun dışındadır.
-
-Tek dosya tamamen **çevrimdışıdır**: çalışma zamanında hiçbir dış kaynağa
-(CDN, web font, telemetri) istek gitmez ve derleme, inline betiğin SHA-256
-hash'ine bağlı bir `Content-Security-Policy` meta etiketiyle kilitlenir
-(`default-src 'none'`).
+Statik frontend barındırmada çalışır (Netlify, Vercel, nginx, S3); Supabase
+backend ayrıca çalışır. Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli
+bağlam ister); localhost bunun dışındadır. Build, inline betiğin SHA-256
+hash'ine bağlı CSP'yi korur; Supabase çağrıları için yayınlanan origin'in
+Edge Function `ALLOWED_ORIGINS` ayarına eklenmesi gerekir.
 
 ## Yazdırılabilir optik form
 
@@ -73,13 +88,13 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 60 test
+npm test            # 61 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
 ```
 
-`npm test` şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
+`npm test` (61 test) şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
 1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
 sayfa, düşük ışık, gölge, bulanıklık, 90/180/270° ve 17° dönüş, projektif
@@ -88,7 +103,8 @@ PDF'in dosyadan geri okunup tanımla karşılaştırılması**, **depodaki PDF'i
 rasterleştirilip gerçek OMR hattından geçirilmesi** (4 sayfa kabul, 566 madde
 boş okunuyor, sayfalar tek tek kabul ediliyor), **pdf.js worker sertleştirmesinin
 pin'lenmiş sürümde başvurduğu sembollerin varlığı** ve **tek dosya derlemenin
-çevrimdışı (dış kaynak yok) + CSP hash doğrulaması**.
+CSP hash doğrulaması**. Supabase Auth ve kayıt çağrıları doğal olarak backend'e
+HTTPS bağlantısı gerektirir.
 
 Ayrıca GitHub Actions CI (`.github/workflows/ci.yml`) her push/PR'da tip kontrolü,
 testler, PDF doğrulaması ve derlemeyi çalıştırır; commit'li `optik-form.html`'in
@@ -109,8 +125,9 @@ Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
   kamera, fotokopi, kalem veya baskı üzerinde kalibre edilmemiştir; bu yüzden
   doğruluk yüzdesi iddia edilmez. `confidence` sezgisel bir işaret gücüdür,
   olasılık değildir.
-- Klinik puanlama, raporlama, veri tabanı ve API entegrasyonu **yoktur**.
-  `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
+- Klinik puanlama, raporlama ve sonuç API'si **yoktur**. Kayıt akışı Supabase
+  `mmpi_records` tablosuna yalnızca ham OMR cevaplarını ve danışan metadata'sını
+  yazar; `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
 - Yalnızca `reliable` maddeler algoritma cevabı sayılır; `single` ve `ambiguous`
   her zaman insan incelemesi ister.
 - Formda kişisel veri saklanmaz. Form kimliği, katılımcı kodu ve tarih yalnızca
@@ -161,6 +178,9 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu. |
 | `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; başarısızlıkta cevap üretmez. |
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
+| `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
+| `src/records/*` | Ham OMR maddelerini bozmadan Supabase kayıt payload'ı ve idempotent gönderim. |
+| `supabase/*` | Migration, ilişkiler, RLS politikaları, Auth trigger'ı ve Admin Edge Function. |
 | `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |
 | `src/print/*` | PDF yazıcısı, TrueType gömme ve form sayfası çizimi (tarayıcı gerektirmez). |
 | `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
@@ -172,7 +192,7 @@ paylaşır; koordinat kaynağı tektir.
 ## Doğrulama
 
 `DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, 60/60 test geçiyor, derleme
+maddeleri listeler. Özet: tip kontrolü temiz, 61/61 test geçiyor, derleme
 çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
 kamera, tarayıcı yazdırma diyaloğu, tarayıcıdaki PDF işçisi ve lisanslı form

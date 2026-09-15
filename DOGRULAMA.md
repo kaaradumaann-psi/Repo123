@@ -302,6 +302,31 @@ Bunlar bu ortamda **çalıştırılamadı**; yapılmış gibi gösterilmiyor.
 - **Klinik puanlama.** Bu sürümde yoktur; `clinicalTransferAllowed` her zaman
   `false` döner.
 
+## Supabase kullanıcı ve kayıt akışı (kod düzeyi kapsam)
+
+- Mevcut OMR, kamera, PDF, form geometrisi, 4 sayfalık tarama ve sonuç inceleme
+  modülleri değiştirilmedi; yalnızca AuthGate, Admin paneli ve tarama sonrası
+  kayıt bileşeni Supabase'e bağlandı.
+- `src/auth/supabaseClient.ts`, `persistSession: false` ile Supabase Auth oturumunu
+  frontend belleğinde tutar; uygulama kendi `localStorage/sessionStorage`
+  kullanıcı/kayıt store'unu kullanmaz.
+- `supabase/migrations/20260915000000_initial_schema.sql` profilleri, roller,
+  MMPI kayıtlarını, ilişkileri, Auth trigger'ını ve RLS politikalarını oluşturur.
+  Aktif Psikolog yalnızca kendi kayıtlarını okuyup yazabilir; Admin tüm kayıt ve
+  psikolog profillerini yönetebilir.
+- `supabase/functions/admin-users` service role anahtarını yalnızca Supabase
+  sunucusunda kullanır. Frontend service role görmez; Admin çağrısı access token
+  ile doğrulanır. Hesap oluşturma ve pasifleştirme Auth hesabı ile profil
+  durumunu birlikte günceller.
+- `src/records/supabaseRecords.ts` dört kabul edilmiş sayfayı zorunlu tutar;
+  mevcut `ItemReadResult` maddelerini dönüştürmeden ham cevapları, danışan
+  alanlarını ve işlemi yapan psikolog kimliğini `mmpi_records.raw_omr_answers`
+  alanına gönderir. UUID idempotency key ve buton kilidi çift gönderimi engeller.
+- Gerçek Supabase projesine deploy ve gerçek Auth/RLS uçtan uca testi bu ortamda
+  proje URL'si, anon anahtarı ve Supabase CLI bağlantısı bulunmadığı için
+  çalıştırılmadı. Kurulum/deploy adımları `supabase/README.md` içindedir; OMR
+  testleri aşağıdaki kapsamla ayrıca çalıştırılmıştır.
+
 ## Bir sonraki doğrulama adımı
 
 1. `MMPI-566-optik-cevap-formu.pdf` dosyasını A4, %100, tek yüz yazdırın.

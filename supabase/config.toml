@@ -1,0 +1,7 @@
+project_id = "replace-with-your-project-ref"
+
+[auth]
+enable_signup = false
+
+[functions.admin-users]
+verify_jwt = true

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormDefinition } from '../omr/omrTypes';
+import type { AuthenticatedUser } from '../auth/authTypes';
 import { analyzePage } from '../omr/analyzePage';
 import { summarizeResults } from '../results/resultNormalizer';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
@@ -9,14 +10,16 @@ import { readPdfPages } from '../scanner/pdfIO';
 import type { SourcePage } from '../scanner/pdfIO';
 import { CameraCapture } from './CameraCapture';
 import { ScanResultPreview } from './ScanResultPreview';
+import { RecordCapture } from './RecordCapture';
+import { MyRecordsPanel } from './MyRecordsPanel';
 import '../styles/scanner.css';
 
-export function ScannerWorkspace({ definition }: { definition: FormDefinition }) {
+export function ScannerWorkspace({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
   // A different form definition must never inherit the previous form's scan set.
-  return <ScannerSession key={definition.fingerprint} definition={definition} />;
+  return <ScannerSession key={definition.fingerprint} definition={definition} actor={actor} />;
 }
 
-function ScannerSession({ definition }: { definition: FormDefinition }) {
+function ScannerSession({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
   const [scan, setScan] = useState(createScanSet);
   const current = useRef(scan);
   const alive = useRef(true);
@@ -29,6 +32,7 @@ function ScannerSession({ definition }: { definition: FormDefinition }) {
   const [cameraKey, setCameraKey] = useState(0);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [recordsRefresh, setRecordsRefresh] = useState(0);
   const id = useId();
   const pages = sortedPages(scan);
   const missingPages = missingPageNumbers(scan, definition);
@@ -206,5 +210,8 @@ function ScannerSession({ definition }: { definition: FormDefinition }) {
         commit(removePage(current.current, selected.pageNumber));
         setStatus(`${selected.pageNumber}. sayfa ve incelemeleri silindi. Aynı setten yeniden çekin veya yükleyin.`);
       }} /> : <div className="scan-empty">Henüz kabul edilen sayfa yok. Başlamak için basılı formun görüntüsünü veya PDF dosyasını ekleyin.</div>}
+    <RecordCapture key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`} definition={definition} scan={scan} actor={actor}
+      onSaved={() => setRecordsRefresh(previous => previous + 1)} />
+    {actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
   </section>;
 }

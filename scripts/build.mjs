@@ -1,10 +1,12 @@
 import { build } from 'esbuild';
+import { loadEnv } from 'vite';
 import { createHash } from 'node:crypto';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const buildEnv = loadEnv('production', root, 'VITE_');
 
 const result = await build({
   absWorkingDir: root,
@@ -15,7 +17,11 @@ const result = await build({
   outdir: 'dist',
   jsx: 'automatic',
   target: 'es2022',
-  define: { 'process.env.NODE_ENV': '"production"' },
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(buildEnv.VITE_SUPABASE_URL ?? ''),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(buildEnv.VITE_SUPABASE_ANON_KEY ?? ''),
+  },
   legalComments: 'none',
   plugins: [{
     name: 'asset-imports',
