@@ -108,7 +108,8 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     if (quality.fatal) {
       return { ...failure('POOR_QUALITY', quality.reasons.join(' ') || 'Görüntü kalitesi yetersiz; yanıtlar okunmadı.'), quality };
     }
-    const items = page.items.map(item => detectItemMarks(normalized, item, quality));
+    const allResponseAreas = page.items.flatMap(item => item.responseAreas);
+    const items = page.items.map(item => detectItemMarks(normalized, item, quality, allResponseAreas));
     return {
       ok: true, pageId: page.pageId, pageNumber: page.pageNumber, batchId: identity.batchId,
       fingerprint: identity.fingerprint, items, quality, normalized,

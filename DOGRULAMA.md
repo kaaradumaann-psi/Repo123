@@ -499,6 +499,84 @@ belirsize boğmamalı, silik/silinmiş iz ve koyu halka karalamaları `ambiguous
 | `npm test` | **90 test, 90 geçti, 0 başarısız** |
 | `npm run build` | **exit 0** · `Built dist/index.html and optik-form.html (self-contained).` |
 
+### 4c. Yeni düzeltme: komşu bubble / basılı çizgi peripheral contamination (2026-09-15)
+
+Önceki `strayPeripheralDarkness` düzeltmesi, sentetik halka bulaşmasını azaltıyordu; ancak gerçek telefonda görülen “boş maddelerin tamamı Belirsiz” belirtisini tek başına açıklamaya ve çözmeye yetmiyordu. Bu turda threshold değiştirilmedi. Kök neden, `markDetector` içindeki periferik örnekleme alanının bubble sahipliğiyle sınırlandırılmaması olarak doğrulandı.
+
+#### Teşhis A/B
+
+`tests/omrPeripheralIsolation.test.ts` aynı sentetik sahnede iki yolu karşılaştırır:
+
+- A — eski davranış: `isolatePeripheral: false`
+- B — yeni production davranışı: bubble geometry maskesi açık
+
+Komşu D veya Y bubble’ı mevcut bubble’ın peripheral probe alanına taşındığında A yolunda:
+
+```text
+centralEvidence = false
+peripheralEvidence = true
+```
+
+B yolunda komşu pikseller maskeden çıkarılır:
+
+```text
+centralEvidence = false
+peripheralEvidence = false
+excludedNeighborPixels > 0
+```
+
+Mevcut karşı seçenek bu durumda tekrar `reliable` olarak okunur; komşu bubble nedeniyle `ambiguous` olmaz. Test, periferik kanıtı geçici olarak kapatan A/B varyantını yalnızca teşhis amacıyla çalıştırır. Production scanner varsayılan olarak peripheral evidence’ı kapatmaz.
+
+#### Uygulanan geometrik izolasyon
+
+`src/omr/markDetector.ts` içinde:
+
+- `ResponseArea` ölçülerinden bubble’a ait eliptik geometri maskesi oluşturuldu.
+- Peripheral measurement yalnızca mevcut bubble’ın iç ölçüm bölgesindeki pikselleri kullanıyor.
+- Sayfadaki tüm response alanları detector’a veriliyor (`src/omr/analyzePage.ts`).
+- Komşu bubble maskeleri peripheral ve background/reference örneklerinden çıkarılıyor.
+- Bubble dışındaki koyu yatay çizgi veya form elemanı ölçüme giremiyor.
+- Central measurement ve mevcut karar eşikleri korundu.
+- Debug ölçümleri eklendi: merkez, central/peripheral darkness ve coverage, mask pixel sayısı, dışlanan komşu pixel sayısı, dışlanan bubble-dışı pixel sayısı ve son evidence/karar.
+
+Bubble dışındaki çizgi için ayrıca test var: çizgi debug probe’a değse bile `excludedOutsideBubblePixels > 0` olur, `peripheralEvidence` oluşmaz ve temiz bubble `blank` kalır.
+
+#### Safety regresyonları
+
+Aşağıdaki davranışlar korundu:
+
+| Senaryo | Beklenen / gerçekleşen |
+| --- | --- |
+| Temiz boş bubble | `blank` |
+| Strong D / Strong Y | doğru seçenek (`reliable` veya kaliteye göre `single`) |
+| Faint mark | `ambiguous` |
+| Erased mark | `ambiguous` |
+| Strong + erased opposing mark | `ambiguous` |
+| Strong + strong | `multiple` |
+| Gerçek annular peripheral ink | `ambiguous`, kesinlikle sessiz `blank` değil |
+| Camera ring/halo bleed | temiz komşu bubble’ları topluca `ambiguous` yapmıyor |
+| Bubble dışı basılı çizgi | current bubble evidence’ı değil |
+
+Bu çözüm `peripheralEvidence`’ı tamamen kapatmıyor ve `strayPeripheralDarkness: .2` değerini körlemesine yükseltmiyor. Local center refinement de eklenmedi; “en koyu bölgeye snap” komşu bubble’a kayabileceği için mevcut fiducial homography korundu.
+
+#### Test ve build sonucu
+
+Fix öncesi baseline (kilitli bağımlılıklar kurulduktan sonra): **90 test geçti**.
+
+Fix sonrası:
+
+| Komut | Sonuç |
+| --- | --- |
+| `npm test` | **94 test, 94 geçti, 0 başarısız, 0 atlandı** |
+| `npm run typecheck` | **exit 0** |
+| `npm run build` | **exit 0** · `dist/index.html` ve `optik-form.html` yeniden üretildi |
+
+Yeni test dosyası: `tests/omrPeripheralIsolation.test.ts` (4 test). Mevcut `handheldBleed`, `omrEngine` ve `omrSafety` testleri de aynı koşuda geçti.
+
+#### Gerçek telefon fotoğrafı sınırı
+
+Kullanıcının bahsettiği `image-1`/telefon fotoğrafı bu checkout içinde fixture olarak bulunmadı; bu nedenle gerçek fotoğraf için Blank/D/Y/Belirsiz adetleri bu turda iddia edilmiyor. Sentetik fixture, tarif edilen komşu bubble ve bubble dışı çizgi geometrisini doğrudan test ediyor. Gerçek görüntü repoya eklendiğinde `debugItemMarks` çıktısı ile her problemli madde için `centralEvidence`, `peripheralEvidence`, `excludedNeighborPixels` ve darkness/coverage değerleri raporlanabilir.
+
 ### 5. Hâlâ doğrulanmayan
 
 - Kullanıcının üç JPG'si ve 7 sayfalık PDF'i bu ortamda yok; bu yüzden yukarıdaki üç değişikliğin

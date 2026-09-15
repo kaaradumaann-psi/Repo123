@@ -86,7 +86,7 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 90 test
+npm test            # 94 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -174,7 +174,7 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/omr/perspectiveCorrection.ts` | `fitHomography`, `fitSimilarity`, `mapPoint`, `inspectPageGeometry`, `warpPerspective`. |
 | `src/omr/alignmentDetector.ts` | Köşe karelerini bağlı bileşen analiziyle bulma; çoklu eşik, karelik 0.84. |
 | `src/omr/imageQuality.ts` | Üç kademeli kalite: ideal / inceleme / okunamaz. |
-| `src/omr/markDetector.ts` | Merkez, çevre ve zemin örneklemesiyle madde durumu; `reliable` yalnız `quality.ok`. |
+| `src/omr/markDetector.ts` | Bubble geometri maskeli merkez/peripheral/zemin örneklemesi, komşu bubble izolasyonu ve debug ölçümleriyle madde durumu; `reliable` yalnız `quality.ok`. |
 | `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; fatal kalitede cevap üretmez. |
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
 | `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
