@@ -78,12 +78,14 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
   async function start() {
     if (disabled || requesting || active) return;
     setError('');
-    if (!window.isSecureContext) {
-      setError('Kamera için güvenli HTTPS bağlantısı gerekir. Dosya yükleme seçeneğini kullanabilirsiniz.');
-      return;
-    }
+    // The capability check comes first: on an insecure origin the browser does not
+    // expose navigator.mediaDevices at all, and no web page can change that.
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Bu tarayıcı kamera erişimini desteklemiyor. Güncel bir tarayıcı veya dosya yükleme kullanın.');
+      setError(window.isSecureContext
+        ? 'Bu tarayıcı kamera erişimini desteklemiyor. Güncel bir tarayıcı veya dosya yükleme kullanın.'
+        : 'Tarayıcı kamerayı yalnızca HTTPS veya localhost üzerinde açar; bu kural tarayıcıya aittir, ' +
+          'uygulama aşamaz. Siteyi HTTPS ile yayınlayın ya da http://localhost üzerinden açın. ' +
+          'Şimdilik dosya yükleme ile devam edebilirsiniz.');
       return;
     }
     const ticket = ++attempt.current;

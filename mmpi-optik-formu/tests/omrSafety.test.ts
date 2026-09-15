@@ -116,9 +116,9 @@ test('safety: same-area circular blobs cannot replace the four square markers', 
   for (const mark of page.alignmentMarks) {
     paint(image, { ...mark, responseId: mark.id, choiceId: '', label: '' }, 0, Math.sqrt(25 / Math.PI), 12);
   }
-  assert.equal(detectAlignmentMarks(toGrayscale(image), page.alignmentMarks, [...sourceTransform], { x: 177, y: 31 }), null);
+  assert.equal(detectAlignmentMarks(toGrayscale(image), page.alignmentMarks, [sourceTransform], { x: 177, y: 31 }), null);
   rejected(await analyzePage(image, formDefinition));
-  assert.equal(detectAlignmentMarks(toGrayscale(renderSyntheticPage()), page.alignmentMarks, [...sourceTransform], { x: 177, y: 31 })?.length, 4);
+  assert.equal(detectAlignmentMarks(toGrayscale(renderSyntheticPage()), page.alignmentMarks, [sourceTransform], { x: 177, y: 31 })?.length, 4);
 });
 
 test('safety: inward CSS borders with raster interpolation stay blank while strong centres remain readable', () => {
