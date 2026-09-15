@@ -113,12 +113,19 @@ test('synthetic missing marker names the square and the rejecting filter', async
   }
 });
 
-test('synthetic cropped page fails even when all four printed markers remain', async () => {
-  // 40 px of paper = 6.7 mm at the fixture scale: past the tolerance derived from the layout.
-  const image = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 40, 0, 0, 0);
-  const result = await analyzePage(image, formDefinition);
-  failed(result, 'PAGE_CROPPED');
-  if (!result.ok) assert.match(result.message, /mm eksik/, result.message);
+test('synthetic cut that removes blank margin only is read; a cut into printed content is not', async () => {
+  // 40 px of paper = 6.7 mm at the fixture scale. Nothing printable is lost (the nearest mark, QR
+  // and bubble are 10 mm inside the edge) and the page frame is fitted from the printed squares, so
+  // the page has to be read. This is the reported "≈6 mm missing" print output.
+  const marginLoss = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 40, 0, 0, 0);
+  const read = await analyzePage(marginLoss, formDefinition);
+  assert.equal(read.ok, true, read.ok ? '' : `${read.code}: ${read.message}`);
+  // 12 mm of paper removes the left alignment square itself: the page is refused, and the message
+  // says which square is missing instead of blaming the sheet outline.
+  const contentLoss = cropSynthetic(renderSyntheticPage(), SYNTHETIC_MARGIN + 72, 0, 0, 0);
+  const refused = await analyzePage(contentLoss, formDefinition);
+  assert.equal(refused.ok, false);
+  if (!refused.ok) assert.match(refused.message, /sol (üst|alt) kare/, refused.message);
 });
 
 test('synthetic narrow edge loss no longer masquerades as a cropped page', async () => {

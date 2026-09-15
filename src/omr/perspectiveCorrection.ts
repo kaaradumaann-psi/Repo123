@@ -170,3 +170,49 @@ export function warpPerspective(source: GrayImage, physicalToSource: Homography,
   }
   return { width, height, data };
 }
+
+/** A printed feature (mark, QR symbol or answer bubble) and its identity, for containment checks. */
+export type PrintedFeature = { id: string; x: number; y: number; width: number; height: number };
+
+export type FeatureContainment = {
+  /** Smallest distance from any printed feature to the image border, in millimetres. Negative when
+   * a printed feature reaches outside the capture, which is the only way page content can be lost. */
+  minMarginMm: number;
+  minMarginPx: number;
+  /** The feature closest to (or outside) the border, or null when there are no features. */
+  featureId: string | null;
+  /** `left`, `right`, `top` or `bottom`, in image coordinates. */
+  side: string | null;
+};
+
+/**
+ * Whether every printed feature is inside the capture.
+ *
+ * This replaces "the sheet outline must fit in the frame" as the cropping test. A printed sheet can
+ * legitimately lose a strip of *blank* margin — a borderless scan, a rendered PDF, a printer that
+ * scales by 3% — and every item, bubble, corner square and QR code is still where the page frame
+ * says it is, because the frame is fitted from those very squares. What must never happen is a
+ * printed feature leaving the frame, so that is what is measured here, in millimetres so the result
+ * does not depend on the capture resolution.
+ */
+export function inspectFeatureContainment(matrix: Homography, features: readonly PrintedFeature[],
+  image: { width: number; height: number }, pixelsPerMm: number): FeatureContainment {
+  const scale = Number.isFinite(pixelsPerMm) && pixelsPerMm > 0 ? pixelsPerMm : 1;
+  let minMarginPx = Infinity, featureId: string | null = null, side: string | null = null;
+  for (const feature of features) {
+    const corners = [
+      { x: feature.x, y: feature.y }, { x: feature.x + feature.width, y: feature.y },
+      { x: feature.x + feature.width, y: feature.y + feature.height }, { x: feature.x, y: feature.y + feature.height },
+    ].map(point => mapPoint(matrix, point));
+    for (const corner of corners) {
+      const distances: [string, number][] = [['left', corner.x], ['top', corner.y],
+        ['right', image.width - corner.x], ['bottom', image.height - corner.y]];
+      for (const [name, distance] of distances) {
+        if (distance >= minMarginPx) continue;
+        minMarginPx = distance; featureId = feature.id; side = name;
+      }
+    }
+  }
+  if (!Number.isFinite(minMarginPx)) return { minMarginMm: Infinity, minMarginPx: Infinity, featureId: null, side: null };
+  return { minMarginMm: minMarginPx / scale, minMarginPx, featureId, side };
+}

@@ -1,4 +1,5 @@
 import { createPageQr } from '../form/pageIdentity';
+import { baselineMm, headerExample, headerLines, headerRules, MM_PER_PT } from '../form/headerLayout';
 import { FORM_COPYRIGHT_LINE } from '../form/attribution';
 import { COLUMN_WIDTH_MM, FORM } from '../omr/formDefinition';
 import type { FormDefinition, PageDefinition } from '../omr/omrTypes';
@@ -6,17 +7,10 @@ import { addStream, embedTrueType, PdfDocument } from './pdfDocument';
 import type { EmbeddedFont } from './pdfDocument';
 import { parseTtf } from './ttfFont';
 
-export const MM_PER_PT = 25.4 / 72;
+// Re-exported so the verifier and the tests keep reading one definition of the point size.
+export { MM_PER_PT };
 const PT_PER_MM = 72 / 25.4;
-/** Liberation Sans metrics used to place baselines the way the CSS line box does. */
-const ASCENT_RATIO = 1854 / 2048, CONTENT_RATIO = (1854 + 434) / 2048;
 
-const HEADER_TOP = 20;
-const HEADER_WIDTH = FORM.qrArea.x - FORM.contentLeftMm - 4;
-const TITLE_ROW_HEIGHT = 14;
-const LABEL_HEIGHT = 2.6;
-const IDENTITY_TOP = HEADER_TOP + TITLE_ROW_HEIGHT + 3;
-const IDENTITY_HEIGHT = LABEL_HEIGHT + 1 + 5;
 const FOOTER_TOP = 277;
 
 const round = (value: number) => Math.round(value * 1000) / 1000;
@@ -24,9 +18,7 @@ const num = (value: number) => round(value).toString();
 
 /** Baseline of a single line whose CSS line box starts at `top`. */
 function baseline(top: number, sizePt: number, lineHeightMm?: number): number {
-  const sizeMm = sizePt * MM_PER_PT;
-  const box = lineHeightMm ?? sizeMm * CONTENT_RATIO;
-  return top + (box - sizeMm * CONTENT_RATIO) / 2 + sizeMm * ASCENT_RATIO;
+  return baselineMm(top, sizePt, lineHeightMm);
 }
 
 class Sheet {
@@ -110,53 +102,33 @@ function drawRegistrationMarks(sheet: Sheet): void {
   sheet.rect(inset + size + 2, inset, 1.5, size);
 }
 
-function drawHeader(sheet: Sheet, page: PageDefinition, definition: FormDefinition, firstPage: boolean): void {
-  const left = FORM.contentLeftMm, right = left + HEADER_WIDTH;
-  sheet.text('MMPI-566', left, baseline(HEADER_TOP, 20, 20 * MM_PER_PT), 20, { bold: true });
-  sheet.text(`OPTİK CEVAP FORMU / ${definition.version}`, left, baseline(HEADER_TOP + 20 * MM_PER_PT + 1.5, 8), 8, { bold: true });
-  sheet.rect(left, HEADER_TOP + TITLE_ROW_HEIGHT - 0.35, HEADER_WIDTH, 0.35);
-
-  const number = String(page.pageNumber).padStart(2, '0'), total = String(definition.totalPages).padStart(2, '0');
-  const pairWidth = sheet.width(number, 18, true) + sheet.width(` / ${total}`, 11, false);
-  const numberX = right - pairWidth;
-  sheet.text(number, numberX, baseline(HEADER_TOP, 18, 18 * MM_PER_PT), 18, { bold: true });
-  sheet.text(` / ${total}`, numberX + sheet.width(number, 18, true), baseline(HEADER_TOP, 18, 18 * MM_PER_PT), 11);
-  sheet.text(`${page.firstItem}\u2013${page.lastItem}. maddeler`, right,
-    baseline(HEADER_TOP + 18 * MM_PER_PT + 1.5, 7.5), 7.5, { align: 'right' });
-
-  if (firstPage) {
-    const columns = [
-      { x: left, width: (HEADER_WIDTH - 8 - 30) / 2, label: 'FORM KİMLİĞİ' },
-      { x: left + (HEADER_WIDTH - 8 - 30) / 2 + 4, width: (HEADER_WIDTH - 8 - 30) / 2, label: 'KATILIMCI KODU' },
-      { x: right - 30, width: 30, label: 'TARİH' },
-    ];
-    for (const column of columns) {
-      sheet.text(column.label, column.x, baseline(IDENTITY_TOP, 6), 6, { bold: true });
-      sheet.rect(column.x, IDENTITY_TOP + LABEL_HEIGHT + 1 + 5 - 0.2, column.width, 0.2);
-    }
-    const date = columns[2]!;
-    for (const offset of [1, 2]) {
-      sheet.text('/', date.x + date.width * offset / 3, IDENTITY_TOP + LABEL_HEIGHT + 1 + 4.4, 8, { align: 'center' });
-    }
+/**
+ * Draws the paper header from `src/form/headerLayout.ts`, the same millimetre boxes the HTML
+ * preview uses. The former hand-written offsets disagreed with the browser's flow layout and
+ * one instruction line was wider than the sheet, so both renderers now read one layout.
+ */
+function drawHeader(sheet: Sheet, page: PageDefinition, definition: FormDefinition): void {
+  for (const rule of headerRules(page, definition)) {
+    sheet.rect(rule.xMm, rule.topMm, rule.widthMm, rule.heightMm);
   }
-
-  const top = firstPage ? IDENTITY_TOP + IDENTITY_HEIGHT + 2 : HEADER_TOP + TITLE_ROW_HEIGHT + 4;
-  sheet.text('D: Doğru   Y: Yanlış', left, baseline(top, 7.5), 7.5, { bold: true });
-  if (firstPage) {
-    const caption = 'Örnek işaretleme';
-    const captionWidth = sheet.width(caption, 6.5, false);
-    const exampleDiameter = 2.5;
-    sheet.fillCircle(right - captionWidth - 1.5 - exampleDiameter / 2, top + 1.35, exampleDiameter);
-    sheet.text(caption, right, baseline(top, 6.5), 6.5, { align: 'right' });
-    sheet.text('Her maddede yalnızca bir dairenin içini tamamen doldurun.',
-      left, baseline(top + 3.8, 6.5), 6.5);
-    sheet.text('El yazısı kimlik yalnızca bu sayfadadır.',
-      left, baseline(top + 6.6, 6.5), 6.5);
-    sheet.text('Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; ' +
-      'sağ üstteki QR kodu sayfaları otomatik eşleştirir.', left, baseline(top + 9.4, 6), 6);
-  } else {
-    sheet.text('Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.',
-      left, baseline(top + 3.8, 7), 7);
+  // Every span of a line shares one baseline, exactly as inline boxes with a common line-height do.
+  for (const line of headerLines(page, definition)) {
+    const baseline = baselineMm(line.topMm, line.sizePt, line.boxMm);
+    const widths = line.spans.map(span => sheet.width(span.text, span.sizePt, span.bold));
+    const total = widths.reduce((sum, width) => sum + width, 0);
+    let x = line.align === 'right' ? line.xMm - total : line.align === 'center' ? line.xMm - total / 2 : line.xMm;
+    line.spans.forEach((span, index) => {
+      sheet.text(span.text, x, baseline, span.sizePt, { bold: span.bold });
+      x += widths[index]!;
+    });
+  }
+  const example = headerExample(page, definition);
+  if (example) {
+    const { label, cyMm, diameterMm, gapMm, rightMm } = example;
+    const caption = label.spans[0]!.text;
+    const captionWidth = sheet.width(caption, label.sizePt, false);
+    sheet.text(caption, rightMm, baselineMm(label.topMm, label.sizePt, label.boxMm), label.sizePt, { align: 'right' });
+    sheet.fillCircle(rightMm - captionWidth - gapMm - diameterMm / 2, cyMm, diameterMm);
   }
 }
 
@@ -194,14 +166,17 @@ function drawGrid(sheet: Sheet, page: PageDefinition): void {
   });
 }
 
-function drawFooter(sheet: Sheet, page: PageDefinition, definition: FormDefinition): void {
+function drawFooter(sheet: Sheet, page: PageDefinition, definition: FormDefinition, batchId: string): void {
   const left = FORM.contentLeftMm, right = left + FORM.contentWidthMm;
   sheet.rect(left, FOOTER_TOP, FORM.contentWidthMm, 0.25);
   const top = FOOTER_TOP + 0.25 + 2;
   sheet.text(FORM.templateId, left, baseline(top, 6.5), 6.5);
   sheet.text(FORM_COPYRIGHT_LINE, left, baseline(top + 3.6, 6.5), 6.5);
+  // Printed on paper so four sheets of one set can be checked by eye before scanning.
+  sheet.text(`Set kodu ${batchId}`, left, baseline(top + 7.2, 6.5), 6.5);
   sheet.text(`Sayfa ${page.pageNumber} / ${definition.totalPages}`, right, baseline(top, 6.5), 6.5, { align: 'right' });
   sheet.text('A4 · 210 × 297 mm · Tek yüz', right, baseline(top + 3.6, 6.5), 6.5, { align: 'right' });
+  sheet.text('Dört sayfa aynı set kodunu taşır.', right, baseline(top + 7.2, 6.5), 6.5, { align: 'right' });
 }
 
 /** Renders one page as a PDF content stream in a millimetre user space. */
@@ -209,9 +184,9 @@ function renderPage(sheet: Sheet, page: PageDefinition, definition: FormDefiniti
   sheet.ops.push('0 g', '1 J', '1 j');
   drawRegistrationMarks(sheet);
   drawQr(sheet, definition, batchId, page.pageNumber);
-  drawHeader(sheet, page, definition, page.pageNumber === 1);
+  drawHeader(sheet, page, definition);
   drawGrid(sheet, page);
-  drawFooter(sheet, page, definition);
+  drawFooter(sheet, page, definition, batchId);
 }
 
 export type RenderedFormPdf = { bytes: Uint8Array; missingGlyphs: string[]; pages: number };

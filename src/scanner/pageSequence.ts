@@ -29,7 +29,8 @@ export function acceptPage(state: ScanSet, result: unknown, definition: FormDefi
   if (!valid.ok) return valid;
   const page = valid.result;
   if (state.batchId !== null && state.batchId !== page.batchId) {
-    return { ok: false, message: 'Bu sayfa başka bir form setine ait. Mevcut set değişmedi. Başka set için “Yeni set / sıfırla” düğmesini kullanın.' };
+    return { ok: false, message: 'Bu sayfa başka bir form setine ait. Mevcut set değişmedi. ' +
+      'Aynı 4 sayfayı birlikte yükleyin; yeni bir set taranacaksa “Yeni Set / Sıfırla” düğmesini kullanın.' };
   }
   if (state.pages[page.pageNumber]) {
     return { ok: false, message: `${page.pageNumber}. sayfa zaten eklendi; üzerine yazılmadı. Yeniden taramak için önce bu sayfayı silin.` };

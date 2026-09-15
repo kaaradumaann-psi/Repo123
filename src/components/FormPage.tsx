@@ -4,6 +4,7 @@ import { FORM } from '../form/layout';
 import { FORM_COPYRIGHT_LINE } from '../form/attribution';
 import { AnswerColumn } from './AnswerColumn';
 import { PageQr } from './PageQr';
+import { PaperHeader } from './PaperHeader';
 import { RegistrationMarks } from './RegistrationMarks';
 
 const geometryStyle = {
@@ -27,42 +28,19 @@ export function FormPage({ page, definition, batchId, active }: {
   batchId: string;
   active: boolean;
 }) {
-  const firstPage = page.pageNumber === 1;
   return <article className={`form-page${active ? ' is-active' : ''}`} style={geometryStyle}
-    data-page={page.pageNumber} data-identity={firstPage ? 'cover' : 'continuation'}
+    data-page={page.pageNumber} data-identity={page.pageNumber === 1 ? 'cover' : 'continuation'}
     aria-label={`Cevap formu, sayfa ${page.pageNumber}, ${page.firstItem}–${page.lastItem}. maddeler`}>
     <RegistrationMarks />
     <PageQr definition={definition} batchId={batchId} pageNumber={page.pageNumber} />
-    <header className="paper-header">
-      <div className="paper-title-row">
-        <div><h2>MMPI-566</h2><p>OPTİK CEVAP FORMU <span>/ {definition.version}</span></p></div>
-        <div className="paper-page-number"><strong>{String(page.pageNumber).padStart(2, '0')}<span> / {String(definition.totalPages).padStart(2, '0')}</span></strong>
-          <span>{page.firstItem}–{page.lastItem}. maddeler</span></div>
-      </div>
-      {firstPage && <div className="identity-fields">
-        <div><span>FORM KİMLİĞİ</span><i /></div>
-        <div><span>KATILIMCI KODU</span><i /></div>
-        <div className="date-field"><span>TARİH</span><i><b>/</b><b>/</b></i></div>
-      </div>}
-      <div className={`paper-instructions${firstPage ? '' : ' is-compact'}`}>
-        <div className="instruction-copy">
-          <strong>D: Doğru&nbsp;&nbsp; Y: Yanlış</strong>
-          {firstPage
-            ? <>
-              <span>Her maddede yalnızca bir dairenin içini tamamen doldurun.</span>
-              <span>El yazısı kimlik yalnızca bu sayfadadır.</span>
-              <span className="paper-reminder">Numaraları sütun boyunca aşağıya doğru izleyin. Dört sayfayı aynı oturumda yazdırın; sağ üstteki QR kodu sayfaları otomatik eşleştirir.</span>
-            </>
-            : <span>Devam sayfası. İşaretleme kuralı ilk sayfadakiyle aynıdır.</span>}
-        </div>
-        {firstPage && <div className="marking-example"><span className="filled-example" aria-hidden="true" /><span>Örnek işaretleme</span></div>}
-      </div>
-    </header>
+    <PaperHeader page={page} definition={definition} />
     <div className="answer-columns">{page.columns.map((column, index) =>
       <AnswerColumn key={index} column={column} />)}</div>
     <footer className="paper-footer">
-      <div><strong>{FORM.templateId}</strong><span className="paper-copyright">{FORM_COPYRIGHT_LINE}</span></div>
-      <div><strong>Sayfa {page.pageNumber} / {definition.totalPages}</strong><span>A4 · 210 × 297 mm · Tek yüz</span></div>
+      <div><strong>{FORM.templateId}</strong><span className="paper-copyright">{FORM_COPYRIGHT_LINE}</span>
+        <span>Set kodu {batchId}</span></div>
+      <div><strong>Sayfa {page.pageNumber} / {definition.totalPages}</strong><span>A4 · 210 × 297 mm · Tek yüz</span>
+        <span>Dört sayfa aynı set kodunu taşır.</span></div>
     </footer>
   </article>;
 }

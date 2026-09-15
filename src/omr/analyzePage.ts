@@ -5,12 +5,15 @@ import { describeAlignmentFailures, detectAlignmentMarks } from './alignmentDete
 import type { AlignmentFailure } from './alignmentDetector';
 import { assessImageQuality, QUALITY_THRESHOLDS, toGrayscale } from './imageQuality';
 import { detectItemMarks } from './markDetector';
-import { CANONICAL_PIXELS_PER_MM, CROP_TOLERANCE_MM, fitHomography, fitSimilarity, inspectPageGeometry, mapPoint, MAX_CROP_TOLERANCE_MM, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
+import { CANONICAL_PIXELS_PER_MM, CROP_TOLERANCE_MM, fitHomography, fitSimilarity, inspectFeatureContainment, inspectPageGeometry, MAX_CROP_TOLERANCE_MM, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
 import type { Homography } from './perspectiveCorrection';
+import { describeQrDisagreement, evaluateQrConsistency } from './alignmentVerification';
 import { decodePageQr } from './qrDecoder';
 import { isolatePaper } from './pageIsolation';
 
 export const MAX_INPUT_PIXELS = 12_000_000;
+/** Beyond this much implied blank margin the page frame itself is not trustworthy any more. */
+export const PAGE_MARGIN_OVERSHOOT_LIMIT_MM = 20;
 
 const failure = (code: string, message: string): PageReadFailure => ({ ok: false, code, message });
 
@@ -43,6 +46,9 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     catch { return failure('QR_MISMATCH', 'QR kimliği, form sürümü, yerleşim veya sayfa bilgisi eşleşmiyor.'); }
     const page = definition.pages.find(candidate => candidate.pageNumber === identity.pageNumber)!;
     const rects = [...page.alignmentMarks, page.qrArea, ...page.items.flatMap(item => item.responseAreas)];
+    const printedFeatures = [...page.alignmentMarks,
+      { ...page.qrArea, id: 'qr-area' },
+      ...page.items.flatMap(item => item.responseAreas.map(area => ({ ...area, id: area.responseId })))];
     if (page.alignmentMarks.length !== 4 || page.items.length < 1 || page.items.length > 1_000 ||
       page.items.some(item => item.responseAreas.length < 2 || item.responseAreas.length > 10) ||
       rects.some(rect => ![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) || rect.x < 0 || rect.y < 0 ||
@@ -72,20 +78,31 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
       transform = fitHomography(physicalCenters, markers.map(mark => mark.center));
       geometry = inspectPageGeometry(transform, definition.pageWidthMm, definition.pageHeightMm, source, cropToleranceMm);
     } catch { return failure('INVALID_GEOMETRY', 'Sayfa perspektifi aşırı veya hizalama geometrisi tutarsız.'); }
-    if (geometry.cropped) return failure('PAGE_CROPPED',
-      `Sayfanın bir kenarı görüntüde yok; yaklaşık ${geometry.cropOvershootMm.toFixed(1)} mm eksik. ` +
-      'Fotoğraflarda kâğıdın tamamını kadraja alın. PDF veya yazdırma çıktısında sayfa boyutunu A4, ' +
-      'ölçeği %100, kenar boşluklarını "yok" yapın ve "sayfaya sığdır" seçeneğini kapatın.');
+    // Blank margin may be missing without harming anything: the frame is fitted from the printed
+    // squares, so every item, bubble and the QR code keep their place. Only a printed feature
+    // reaching outside the capture, or a frame that is wildly larger than the image, is fatal.
+    const containment = inspectFeatureContainment(transform, printedFeatures, source, geometry.pixelsPerMm);
+    if (containment.minMarginMm < 0) {
+      return failure('PAGE_CROPPED',
+        `Yazdırılmış bir öğe görüntünün dışında kalıyor: en yakın öğe ${containment.side} kenarından ` +
+        `${Math.abs(containment.minMarginMm).toFixed(1)} mm dışarıda. ` +
+        'Fotoğraflarda kâğıdın tamamını kadraja alın. PDF veya yazdırma çıktısında sayfa boyutunu A4, ' +
+        'ölçeği %100, kenar boşluklarını "yok" yapın ve "sayfaya sığdır" seçeneğini kapatın.');
+    }
+    if (geometry.cropOvershootMm > PAGE_MARGIN_OVERSHOOT_LIMIT_MM) {
+      return failure('PAGE_CROPPED',
+        `Sayfa çerçevesi görüntüye göre tutarsız; yaklaşık ${geometry.cropOvershootMm.toFixed(1)} mm taşıyor. ` +
+        'Kâğıdın dört köşesi de kadrajda olacak şekilde yeniden çekin veya PDF\'i A4 ölçeğinde yeniden üretin.');
+    }
     if (geometry.pixelsPerMm < QUALITY_THRESHOLDS.minPixelsPerMm) {
       return failure('LOW_RESOLUTION', 'Sayfanın bir bölümünde piksel yoğunluğu yetersiz; daha yakından ve dik çekin.');
     }
-    const qrError = Math.max(...qr.innerCorners.map((corner, i) => {
-      const mapped = mapPoint(transform, corner), observed = decoded.corners[i]!;
-      return Math.hypot(mapped.x - observed.x, mapped.y - observed.y);
-    }));
-    if (qrError > Math.max(4, geometry.pixelsPerMm * 1.5)) {
-      return failure('INVALID_GEOMETRY', 'QR ve gerçek hizalama karelerinin konumları tutarsız.');
-    }
+    // The page transform is fitted from the four observed squares, so asking the QR symbol to agree
+    // with it is not circular: a mismatched square changes the prediction. The budget is physical
+    // (millimetres), because a 26 mm symbol decoded from a 4 MP photo carries sub-pixel corner noise
+    // that a fixed 4 px limit rejected outright.
+    const agreement = evaluateQrConsistency(transform, qr.innerCorners, decoded.corners, geometry.pixelsPerMm);
+    if (!agreement.ok) return failure('INVALID_GEOMETRY', describeQrDisagreement(agreement.agreement));
     const normalized = warpPerspective(source, transform, definition.pageWidthMm, definition.pageHeightMm);
     const quality = assessImageQuality(normalized, page, geometry.pixelsPerMm);
     if (quality.fatal) {

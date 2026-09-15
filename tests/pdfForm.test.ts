@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { FORM_SET_CODE } from '../src/form/formSet';
 
 const tsx = join(process.cwd(), 'node_modules', '.bin', 'tsx');
 
@@ -30,6 +31,10 @@ test('printed sheet is generated from the shared definition and verified from th
     assert.equal(report.match(/288\/288 işaretleme dairesi yerinde/g)?.length, 3);
     assert.match(report, /268\/268 işaretleme dairesi yerinde/);
     assert.match(report, /en büyük sapma 0\.000 mm/g);
+    // The printed sheets carry the same set code the app's own print path uses, so pages printed
+    // on different days belong to one set instead of refusing each other in the scanner.
+    assert.ok(report.includes(`Set kodu: ${FORM_SET_CODE} (dört sayfada aynı`),
+      `Basılı set kodu ${FORM_SET_CODE} olmalı, rapor: ${report}`);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

@@ -7,6 +7,7 @@ import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { COLUMN_WIDTH_MM, FORM } from '../src/omr/formDefinition';
 import { formDefinition } from '../src/omr/formDefinition';
 import { FORM_COPYRIGHT_LINE } from '../src/form/attribution';
+import { FORM_SET_CODE } from '../src/form/formSet';
 import { MM_PER_PT } from '../src/print/renderFormPdf';
 
 /**
@@ -91,6 +92,7 @@ function bubbleCentres(content: string): { x: number; y: number; diameter: numbe
 
 const failures: string[] = [];
 const check = (condition: boolean, message: string) => { if (!condition) failures.push(message); };
+const setCodes = new Set<string>();
 check(document.numPages === formDefinition.totalPages,
   `Sayfa sayısı ${document.numPages}, beklenen ${formDefinition.totalPages}.`);
 
@@ -132,6 +134,11 @@ for (let number = 1; number <= document.numPages; number++) {
     `Sayfa ${number} alt bilgi sayfa numarası bulunamadı.`);
   const hasCopyright = text.includes(FORM_COPYRIGHT_LINE);
   check(hasCopyright, `Sayfa ${number} alt bilgi telif satırı (${FORM_COPYRIGHT_LINE}) bulunamadı.`);
+  // The set code is printed on paper so four sheets of one set can be checked by eye. It is also
+  // what the QR encodes and what the scanner compares, so it has to be present and identical.
+  const setCode = /Set kodu ([A-F0-9]{24})/.exec(text)?.[1];
+  check(!!setCode, `Sayfa ${number} alt bilgisinde set kodu bulunamadı.`);
+  if (setCode) setCodes.add(setCode);
 
   const circles = bubbleCentres(pageContentStream(number));
   const wanted = expected.items.flatMap(item => item.responseAreas.map(area =>
@@ -153,11 +160,16 @@ for (let number = 1; number <= document.numPages; number++) {
 }
 await loadingTask.destroy();
 
+check(setCodes.size === 1, `Sayfalar farklı set kodları taşıyor: ${[...setCodes].join(', ')}.`);
+const [printedSetCode] = [...setCodes];
+check(printedSetCode === FORM_SET_CODE,
+  `Basılı set kodu ${printedSetCode ?? 'yok'}, uygulamanın kullandığı kod ${FORM_SET_CODE} değil.`);
 const totalItems = formDefinition.pages.reduce((count, page) => count + page.items.length, 0);
 check(totalItems === FORM.totalItems, `Toplam madde ${totalItems}, beklenen ${FORM.totalItems}.`);
 if (failures.length) {
   console.error('PDF doğrulanamadı:\n' + failures.map(message => ' - ' + message).join('\n'));
   process.exit(1);
 }
+console.log(`Set kodu: ${printedSetCode ?? 'yok'} (dört sayfada aynı, QR ile aynı kaynaktan).`);
 console.log(`Doğrulandı: ${document.numPages} A4 sayfa, ${totalItems} madde numarası tanımlı koordinatlarında, ` +
   'kimlik alanları yalnızca 1. sayfada.');
