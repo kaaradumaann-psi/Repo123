@@ -59,14 +59,20 @@ function ItemCrop({ item, page, definition, onRendered }: {
         width: `${area.width / rect.width * 100}%`, height: `${area.height / rect.height * 100}%`,
       }} />)}
     </div>
-    <figcaption>Madde {item.itemNumber} · Sütun {item.columnIndex + 1}, satır {item.rowIndex + 1}. Mavi çerçeveler tanımdaki yanıt alanlarıdır; yanıt eklemez.</figcaption>
+    <figcaption>Madde {item.itemNumber} · Sütun {item.columnIndex + 1}, satır {item.rowIndex + 1}</figcaption>
     {error && <p className="scan-alert" role="alert">{error}</p>}
   </figure>;
 }
 
+const STATUS_OPTIONS = [
+  ['all', 'Tüm durumlar'], ['reliable', 'Güvenilir'], ['single', 'Tek işaret'], ['ambiguous', 'Belirsiz'],
+  ['multiple', 'Çoklu işaret'], ['blank', 'Boş'], ['invalid', 'Geçersiz'], ['unread', 'Sonuç yok'],
+] as const;
+
 export function ScanResultPreview({ definition, page, onReview, onRemove }: ScanResultPreviewProps) {
   const expected = definition.pages.find(p => p.pageNumber === page.pageNumber)!;
   const [filter, setFilter] = useState<'unresolved' | 'all' | 'reviewed'>('unresolved');
+  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_OPTIONS)[number][0]>('all');
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [offset, setOffset] = useState(0);
@@ -75,7 +81,9 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
   const unresolved = expected.items.filter(item => resolveItem(item, page).unresolved);
   const filtered = expected.items.filter(item => {
     const resolved = resolveItem(item, page);
+    const status = resolved.original?.status ?? 'unread';
     return (filter === 'all' || (filter === 'reviewed' ? !!resolved.review : resolved.unresolved)) &&
+      (statusFilter === 'all' || status === statusFilter) &&
       String(item.itemNumber).includes(query.trim());
   });
   const pageSize = 18;
@@ -98,7 +106,6 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
       <div><h3 id={`${id}-title`}>{page.pageNumber}. sayfayı incele</h3><p className="scan-source">{page.sourceName}</p></div>
       <button type="button" className="scan-danger" onClick={onRemove}>Sayfayı sil / yeniden tara</button>
     </div>
-    {page.warnings.length > 0 && <div className="scan-notice" role="status"><strong>Okuyucu uyarıları</strong><ul>{page.warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul></div>}
     <div className="scan-review-layout">
       <aside className="scan-page-overview">
         <div className="scan-normalized-page">
@@ -106,7 +113,6 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
           {row && <span className="scan-row-location" aria-hidden="true" style={{ left: `${row.x / definition.pageWidthMm * 100}%`,
             top: `${row.y / definition.pageHeightMm * 100}%`, width: `${row.width / definition.pageWidthMm * 100}%`, height: `${row.height / definition.pageHeightMm * 100}%` }} />}
         </div>
-        <p className="scan-muted">Mavi şerit, seçili maddenin sayfadaki konumudur.</p>
         <details className="scan-quality"><summary>Teknik kalite ölçümleri</summary>
           <dl><div><dt>Kalite indeksi</dt><dd>{page.quality.score.toFixed(2)} / 1</dd></div>
             <div><dt>Parlaklık</dt><dd>{page.quality.metrics.brightness.toFixed(1)}</dd></div>
@@ -121,6 +127,9 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
             setFilter(event.target.value as typeof filter); setSelectedId(null); setOffset(0);
           }}><option value="unresolved">İnceleme bekleyen ({unresolved.length})</option><option value="all">Tüm maddeler ({expected.items.length})</option>
             <option value="reviewed">Elle incelenenler</option></select></label>
+          <label htmlFor={`${id}-status`}>Okuma durumu<select id={`${id}-status`} value={statusFilter} onChange={event => {
+            setStatusFilter(event.target.value as typeof statusFilter); setSelectedId(null); setOffset(0);
+          }}>{STATUS_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
           <label htmlFor={`${id}-search`}>Madde numarası<input id={`${id}-search`} type="search" inputMode="numeric" value={query}
             placeholder="Örn. 145" onChange={event => { setQuery(event.target.value); setOffset(0); setSelectedId(null); }} /></label>
         </div>
@@ -144,7 +153,6 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
           <h4 id={`${id}-item`}>Madde {selected.itemNumber} <span>{readStatusLabel(resolved.original)}</span></h4>
           <ItemCrop item={selected} page={page} definition={definition} onRendered={setRenderedCrop} />
           <p><strong>Özgün okuma:</strong> {resolved.original ? `${resolved.original.choiceId ?? 'Yanıt seçilmedi'} · ${resolved.original.reason}` : 'Algoritma bu madde için sonuç üretmedi.'}</p>
-          {resolved.original && <p className="scan-muted">Sezgisel güven indeksi: {resolved.original.confidence.toFixed(2)} / 1. Doğruluk olasılığı değildir.</p>}
           <fieldset className="scan-review-controls" disabled={!canReview}><legend>Görüntüye göre manuel inceleme</legend>
             {choices.map(area => <button type="button" key={area.responseId} aria-pressed={!!resolved.review && resolved.review.choiceId === area.choiceId}
               onClick={() => choose(area.choiceId)} aria-label={`Madde ${selected.itemNumber}: ${area.choiceId}, ${area.label} olarak incele`}>{area.choiceId} · {area.label}</button>)}

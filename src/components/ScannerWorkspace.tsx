@@ -141,12 +141,10 @@ function ScannerSession({ definition }: { definition: FormDefinition }) {
 
   return <section className="scanner-workspace" aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
     <header className="scan-section-heading">
-      <div><p className="scan-eyebrow">YEREL OPTİK OKUMA · TEKNİK DOĞRULAMA</p><h2 id={`${id}-title`}>Tara ve gözden geçir</h2>
-        <p>Görüntüler yalnızca bu sekmenin belleğinde işlenir. Sunucuya gönderilmez ve kalıcı kaydedilmez.</p></div>
+      <div><h2 id={`${id}-title`}>Tara ve gözden geçir</h2>
+        <p>Görüntüler yalnızca bu sekmede, cihazınızda işlenir.</p></div>
       <button type="button" className="scan-danger" onClick={() => setConfirmReset(true)}>Yeni set / sıfırla</button>
     </header>
-    <div className="scan-notice"><strong>Klinik kullanıma açık değildir.</strong> Bu bir teknik doğrulama sürümüdür; gerçek basılı kağıtlarla testler henüz tamamlanmamıştır.
-      {' '}Sezgisel güven değerleri doğruluk olasılığı değildir. Puanlama, klinik rapor, dışa aktarma ve veri tabanı bağlantısı yoktur.</div>
     {confirmReset && <section className="scan-reset-confirm" aria-label="Yeni set onayı">
       <p>Tüm sayfalar, görüntüler ve manuel incelemeler silinecek; kamera ve devam eden okuma durdurulacak.</p>
       <div className="scan-actions"><button type="button" className="scan-danger" onClick={reset}>Hepsini sil ve yeni set başlat</button>
@@ -208,6 +206,5 @@ function ScannerSession({ definition }: { definition: FormDefinition }) {
         commit(removePage(current.current, selected.pageNumber));
         setStatus(`${selected.pageNumber}. sayfa ve incelemeleri silindi. Aynı setten yeniden çekin veya yükleyin.`);
       }} /> : <div className="scan-empty">Henüz kabul edilen sayfa yok. Başlamak için basılı formun görüntüsünü veya PDF dosyasını ekleyin.</div>}
-    <p className="scan-local-footer">Sekmeyi kapatmak veya başka ekrana geçmek bu çalışma alanını silebilir. Hiçbir yanıt klinik aktarım için onaylanmaz.</p>
   </section>;
 }

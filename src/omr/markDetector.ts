@@ -50,26 +50,26 @@ export function detectItemMarks(image: GrayImage, item: ItemDefinition, quality:
   const base = { itemId: item.itemId, itemNumber: item.itemNumber, measurements };
   const result = (status: ItemReadResult['status'], choiceId: string | null, confidence: number, reason: string): ItemReadResult =>
     ({ ...base, status, choiceId, confidence: Math.max(0, Math.min(1, confidence)), reason });
-  if (!quality.ok || !measurements.length) return result('invalid', null, 0, 'G\u00f6r\u00fcnt\u00fc kalitesi uygun de\u011fil; yan\u0131t okunmad\u0131.');
+  if (!quality.ok || !measurements.length) return result('invalid', null, 0, 'Görüntü kalitesi uygun değil.');
   if (inspected.some(response => response.invalid)) return result('invalid', null, 0,
-    'Yan\u0131t alan\u0131n\u0131n zemini karanl\u0131k veya kirli; bo\u015f ya da tek yan\u0131t kabul edilmedi.');
+    'Yanıt alanının zemini kirli; yanıt kabul edilmedi.');
   const marked = measurements.filter(m => m.darkness >= limits.markDarkness && m.coverage >= limits.markCoverage);
   const evidence = inspected.filter(({ measurement: m, peripheralEvidence }) =>
     peripheralEvidence || m.darkness > limits.blankDarkness || m.coverage > limits.blankCoverage);
   if (marked.length > 1) return result('multiple', null, Math.min(...marked.map(m => Math.min(m.darkness, m.coverage))),
-    'Birden fazla se\u00e7enek i\u015faretli; hi\u00e7bir se\u00e7enek otomatik se\u00e7ilmedi.');
+    'Birden fazla seçenek işaretli.');
   if (marked.length === 1) {
     const selected = marked[0]!;
     if (evidence.length > 1) return result('ambiguous', null, .25, 'Di\u011fer se\u00e7enekte de silik veya silinmi\u015f iz var; elle inceleyin.');
     const strength = Math.min(selected.darkness, selected.coverage);
     if (selected.darkness >= limits.strongDarkness && selected.coverage >= limits.strongCoverage && quality.score >= QUALITY_THRESHOLDS.cleanScore) {
       return result('reliable', selected.choiceId, Math.min(.98, strength * quality.score),
-        'Tek ve belirgin i\u015faret; yaln\u0131zca sezgisel teknik okuma, klinik de\u011ferlendirme de\u011fildir.');
+        'Tek ve belirgin işaret.');
     }
     return result('single', selected.choiceId, Math.min(.69, strength * quality.score),
-      'Tek i\u015faret aday\u0131 var ancak koyuluk veya kalite s\u0131n\u0131rda; elle do\u011frulay\u0131n.');
+      'Tek işaret; elle doğrulayın.');
   }
-  if (evidence.length) return result('ambiguous', null, .2, 'Silik, k\u0131smi veya silinmi\u015f i\u015faret olas\u0131; elle inceleyin.');
+  if (evidence.length) return result('ambiguous', null, .2, 'Silik veya silinmiş iz var; elle inceleyin.');
   return result('blank', null, Math.min(.95, quality.score * (1 - Math.max(...measurements.map(m => m.darkness)))),
-    'Merkezlerde belirgin i\u015faret bulunamad\u0131.');
+    'Belirgin işaret yok.');
 }

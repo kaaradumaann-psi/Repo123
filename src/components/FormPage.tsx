@@ -55,7 +55,7 @@ export function FormPage({ page, definition, batchId, active }: {
     <div className="answer-columns">{page.columns.map((column, index) =>
       <AnswerColumn key={index} column={column} />)}</div>
     <footer className="paper-footer">
-      <div><strong>{FORM.templateId}</strong><span>Yerleşim şablonu; yetkili test materyali değildir.</span></div>
+      <div><strong>{FORM.templateId}</strong></div>
       <div><strong>Sayfa {page.pageNumber} / {definition.totalPages}</strong><span>A4 · 210 × 297 mm · Tek yüz</span></div>
     </footer>
   </article>;

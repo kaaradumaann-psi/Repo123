@@ -181,7 +181,6 @@ function drawFooter(sheet: Sheet, page: PageDefinition, definition: FormDefiniti
   sheet.rect(left, FOOTER_TOP, FORM.contentWidthMm, 0.25);
   const top = FOOTER_TOP + 0.25 + 2;
   sheet.text(FORM.templateId, left, baseline(top, 6.5), 6.5);
-  sheet.text('Yerleşim şablonu; yetkili test materyali değildir.', left, baseline(top + 3.6, 6.5), 6.5);
   sheet.text(`Sayfa ${page.pageNumber} / ${definition.totalPages}`, right, baseline(top, 6.5), 6.5, { align: 'right' });
   sheet.text('A4 · 210 × 297 mm · Tek yüz', right, baseline(top + 3.6, 6.5), 6.5, { align: 'right' });
 }

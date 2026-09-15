@@ -16,12 +16,9 @@
 .scanner-workspace .scan-danger { color: #9d3333; border-color: #dfb9b9; }
 .scanner-workspace .scan-danger:hover { background: #fff5f5; border-color: #a44747; }
 .scanner-workspace .scan-muted { color: #5c6f84; font-size: 12px; }
-.scanner-workspace .scan-eyebrow { font-size: 10px; color: #0047ab; font-weight: 700; letter-spacing: 1.2px; }
 .scanner-workspace .scan-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
 .scanner-workspace .scan-section-heading > div { min-width: 0; }
 .scanner-workspace .scan-section-heading > button { flex-shrink: 0; }
-.scanner-workspace .scan-notice { padding: 14px 16px; color: #3c546c; background: #edf2f7; border-left: 3px solid #748fa9; border-radius: 4px; margin: 16px 0; font-size: 13px; }
-.scanner-workspace .scan-notice ul { margin: 8px 0 0; padding-left: 20px; }
 .scanner-workspace .scan-reset-confirm { padding: 16px; background: #fff4ed; border: 1px solid #e6c5ae; border-radius: 7px; margin: 14px 0; }
 .scanner-workspace .scan-input-panel { padding: 20px; border: 1px solid #dbe3ed; border-radius: 9px; background: #fff; }
 .scanner-workspace .scan-source-switch { display: flex; gap: 8px; border-bottom: 1px solid #e2e7ef; padding-bottom: 15px; margin-bottom: 18px; }
@@ -88,7 +85,6 @@
 .scanner-workspace .scan-measurements table { border-collapse: collapse; width: 100%; text-align: left; }
 .scanner-workspace .scan-measurements th, .scanner-workspace .scan-measurements td { padding: 7px; border-bottom: 1px solid #e1e7ef; }
 .scanner-workspace .scan-empty { padding: 24px 16px; background: #f1f5fa; color: #566e87; border: 1px dashed #c4d1e0; border-radius: 7px; font-size: 13px; text-align: center; }
-.scanner-workspace .scan-local-footer { margin-top: 20px; font-size: 11px; color: #65778c; }
 .scanner-workspace .scan-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .scanner-workspace .scan-camera-stage { width: 100%; max-width: 600px; position: relative; background: #172a40; overflow: hidden; border-radius: 7px; margin: 14px auto; }
 .scanner-workspace .scan-camera-stage[hidden] { display: none; }

@@ -9,7 +9,7 @@
     color: #000;
   }
   .app-header, .page-intro, .intro-actions, .form-sidebar, .page-navigation, .print-guide,
-  .scope-note, .preview-toolbar, .preview-bottom, .document-meta, .app-footer,
+  .preview-toolbar, .preview-bottom, .document-meta,
   .workspace-tabs, .scanner-workspace { display: none !important; }
   .app-main, .form-workspace, .preview-column, .preview-panel, .paper-stage,
   .scaled-paper, .paper-stack {

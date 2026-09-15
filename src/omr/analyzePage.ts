@@ -100,11 +100,7 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     return {
       ok: true, pageId: page.pageId, pageNumber: page.pageNumber, batchId: identity.batchId,
       fingerprint: identity.fingerprint, items, quality, normalized, sourceCorners: geometry.sourceCorners,
-      warnings: [
-        'Yaln\u0131zca teknik i\u015faret okuma; klinik puanlama veya yorum yap\u0131lmaz.',
-        'E\u015fikler ge\u00e7icidir ve yaln\u0131zca sentetik \u00f6rneklerle s\u0131nanm\u0131\u015ft\u0131r; g\u00fcven de\u011ferleri olas\u0131l\u0131k de\u011fildir.',
-        ...(quality.score < QUALITY_THRESHOLDS.cleanScore ? ['Kalite s\u0131n\u0131rda; tek i\u015faretler de elle do\u011frulanmal\u0131.'] : []),
-      ],
+      warnings: [],
     };
   } catch {
     return failure('ANALYSIS_FAILED', 'G\u00f6r\u00fcnt\u00fc g\u00fcvenli bi\u00e7imde \u00e7\u00f6z\u00fcmlenemedi; yeniden \u00e7ekin.');

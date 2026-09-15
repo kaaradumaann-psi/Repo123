@@ -37,7 +37,6 @@ export default function App() {
         <span><strong>MMPI-566</strong><small>Akıllı Optik Okuyucu</small></span>
       </a>
       <span className="header-divider" /><span className="header-section">{workspace === 'form' ? 'Form hazırlığı' : 'Tara ve incele'}</span>
-      <span className="template-badge">YERLEŞİM ŞABLONU <span>{formDefinition.version}</span></span>
     </header>
 
     <main className="app-main" id="main">
@@ -53,8 +52,8 @@ export default function App() {
       <div role="tabpanel" id="panel-form" aria-labelledby="tab-form"
         className={workspace === 'form' ? '' : 'is-screen-hidden'}>
       <section className="page-intro">
-        <div><p className="eyebrow">BASILI FORM / {FORM.templateId}</p><h1 id="page-title">Optik cevap formu</h1>
-          <p className="intro-description">Kimlik alanları yalnızca ilk sayfada. Her sayfada QR ve köşe işaretleri; D/Y daireleri tüm sayfalarda aynı milimetre ızgaradadır.</p></div>
+        <div><h1 id="page-title">Optik cevap formu</h1>
+          <p className="intro-description">Kimlik alanları yalnızca ilk sayfada; tüm sayfalar aynı ızgara düzenini kullanır.</p></div>
         <div className="intro-actions">
           <button type="button" className="print-button" onClick={() => window.print()}><Icon name="print" />
             <span>Tüm sayfaları yazdır<small>{PAGE_COUNT} sayfa · A4 · aynı QR seti</small></span><Icon name="right" size={16} /></button>
@@ -75,14 +74,10 @@ export default function App() {
               <div><dt>Baskı</dt><dd>Tek yüz · Siyah-beyaz</dd></div></dl>
             <p>Beyaz, temiz kağıt kullanın. “Sayfaya sığdır” seçeneğini açmayın; köşe işaretleri ve QR kesilmemelidir. Dört sayfayı aynı oturumda yazdırın.</p>
           </section>
-          <section className="scope-note" aria-labelledby="scope-title"><Icon name="info" size={17} />
-            <div><h2 id="scope-title">Teknik şablon</h2><p>Madde metni veya cevap anahtarı içermez. D/Y düzeni yetkili form ve uygulama yönergesiyle doğrulanmalıdır. Klinik puanlama bu sürümde yoktur.</p></div>
-          </section>
         </aside>
         <div className="preview-column">
           <FormPreview current={currentPage} onChange={setCurrentPage} definition={formDefinition} batchId={batchId} />
-          <div className="document-meta"><span>{FORM.totalItems} madde alanı <b>·</b> {PAGE_COUNT} ayrı A4 sayfa <b>·</b> Ø {String(FORM.bubbleDiameterMm).replace('.', ',')} mm daire</span>
-            <span>Şablon: {FORM.templateId}</span></div>
+          <div className="document-meta"><span>{FORM.totalItems} madde alanı <b>·</b> {PAGE_COUNT} ayrı A4 sayfa <b>·</b> Ø {String(FORM.bubbleDiameterMm).replace('.', ',')} mm daire</span></div>
         </div>
       </div>
       </div>
@@ -91,9 +86,6 @@ export default function App() {
         className={workspace === 'scan' ? '' : 'is-screen-hidden'}>
         <ScannerWorkspace definition={formDefinition} />
       </div>
-
-      <footer className="app-footer"><span>Köşe referansları, sayfa QR’si ve sabit işaretleme koordinatları ortak form tanımından üretilir.</span>
-        <span>Gerçek kağıt doğrulaması tamamlanmadan klinik kullanıma açık değildir.</span></footer>
     </main>
   </>;
 }

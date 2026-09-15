@@ -144,7 +144,6 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
       Işık: {advice.brightness < 80 ? 'düşük; aydınlatın' : advice.brightness > 235 ? 'çok parlak; yansımayı kontrol edin' : 'uygun görünüyor'}.
       {' '}Netlik: {advice.blur < 55 ? 'düşük olabilir; sabit tutun' : 'yeterli görünüyor'}.
     </p>}
-    <p className="scan-muted">Canlı ışık/netlik tahminleri yalnızca öneridir. Her çekim ayrıca zorunlu optik okuma ve kalite kontrolünden geçer.</p>
     <div className="scan-actions">
       {!active && !requesting && <button type="button" className="scan-primary" onClick={() => void start()} disabled={disabled}>Kamerayı başlat</button>}
       {(active || requesting) && <button type="button" onClick={stop}>Kamerayı durdur</button>}
