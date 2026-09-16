@@ -33,12 +33,16 @@
  * with a two-stage estimator:
  *
  *   1. **Translation search** (the OMRChecker block-shift idea at bubble
- *      granularity): candidate offsets over a 1.6 mm disk are scored by how
+ *      granularity): candidate offsets over a 2.5 mm disk are scored by how
  *      well the dark pixels around the candidate form a circle of the printed
  *      ring radius (per-sector radial argmax, |r−1.60| ≤ 0.30).  A separator
  *      rule line only darkens a few sectors; a pen blob sits at the centre,
  *      not on the ring band; a neighbour ring is 4.25 mm away — none of them
  *      can fake a complete circle, so the search locks on the printed ring.
+ *      Neighbour-disc pixels stay excluded; a winner whose centre falls inside
+ *      a neighbour ellipse is rejected.  2.5 mm is the measured C-series
+ *      residual (mean unconstrained offset 2.13 mm, 146/147 NOT_FOUND rings
+ *      recovered with exclusion still on and zero neighbour chases).
  *   2. **Huber IRLS sub-pixel fit** of r(θ)=R+dx·cosθ+dy·sinθ initialised at
  *      the search winner, with the same safety interlocks as before (radius
  *      plausibility, RMS residual, angular completeness) — so a real pencil
@@ -68,12 +72,15 @@ export const RING_REFINE = Object.freeze({
   /** Pixels darker than this (normalised against local paper) count as ring. */
   darknessThreshold: 0.28,
   /**
-   * Translation-search budget.  Planar-homography residuals on a curled phone
-   * photo reach ~1.5 mm mid-page; 1.6 stays far below half the 4.25 mm row
-   * pitch, and the circular-completeness score (not a darkness argmax) is what
-   * keeps the search from ever chasing a neighbour bubble or a pen mark.
+   * Translation-search budget.  C-series phone photos of a curled sheet leave
+   * a measured local residual of 1.75–2.50 mm (mean 2.13).  The previous 1.6
+   * mm cap sat below that residual, so the search never saw a complete 1.60 mm
+   * circle and reported "halka bulunamadı".  2.5 mm covers the measured band.
+   * Neighbour exclusion stays on; a winner inside a neighbour ellipse is
+   * rejected.  Completeness ≥ 0.7, not a darkness argmax, is still what stops
+   * the search chasing a pen mark or an adjacent-row ring.
    */
-  maxOffsetMm: 1.6,
+  maxOffsetMm: 2.5,
   /**
    * RMS residual of the fitted circle. 0.28 mm still rejects a thick annular
    * scribble *as a translation* (that case is already defused earlier: the
@@ -83,7 +90,7 @@ export const RING_REFINE = Object.freeze({
    */
   maxResidualMm: 0.28,
   /** Search candidates lie on these radii (mm) around the nominal centre. */
-  searchRadiiMm: [0, 0.25, 0.5, 0.75, 1, 1.3, 1.6],
+  searchRadiiMm: [0, 0.25, 0.5, 0.75, 1, 1.3, 1.6, 1.9, 2.2, 2.5],
   /** Radial probe band for the per-sector ring argmax (mm). */
   searchBandInnerMm: 1.2,
   searchBandOuterMm: 2.05,
@@ -333,6 +340,18 @@ export function fitRingCenter(
       reason: `kayma çok büyük (${searchOffset.toFixed(2)} mm > ${cfg.maxOffsetMm} mm)`,
     };
   }
+  if (isCoveredByNeighbour(c.x + hit.dx, c.y + hit.dy, neighbours)) {
+    return {
+      ok: false,
+      dx: hit.dx,
+      dy: hit.dy,
+      radius: NOMINAL_RADIUS_MM,
+      residual: hit.rms,
+      completeness: hit.completeness,
+      darkPixelCount: 0,
+      reason: 'komşu balonun içine kilitlenme',
+    };
+  }
 
   // Stage 2 — gather dark ring candidates in the annulus around the *found* centre.
   const scx = cx + hit.dx * ppm;
@@ -449,6 +468,18 @@ export function fitRingCenter(
       completeness: hit.completeness,
       darkPixelCount: samples.length,
       reason: `kayma çok büyük (${offset.toFixed(2)} mm > ${cfg.maxOffsetMm} mm)`,
+    };
+  }
+  if (isCoveredByNeighbour(c.x + dx, c.y + dy, neighbours)) {
+    return {
+      ok: false,
+      dx,
+      dy,
+      radius: R,
+      residual: Infinity,
+      completeness: hit.completeness,
+      darkPixelCount: samples.length,
+      reason: 'komşu balonun içine kilitlenme',
     };
   }
   if (Math.abs(R - NOMINAL_RADIUS_MM) > cfg.maxRadiusDeviationMm + 1e-9) {

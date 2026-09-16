@@ -412,3 +412,58 @@ ile komşu balonların alanına düşen prob noktaları **atlanıyor**. Aday ofs
 - **HİPOTEZ (enstrümanla doğrulanmadı):** banttaki gerçek lokal kaymanın büyüklüğü. `probe-c-ring.mts` ile geniş arama yapıldı ancak **bu enstrüman güvenilir değil**: dolu (işaretli) bir balonun merkezi koyu olduğu için şablon skoru ~0 çıkıyor ve arama komşu boş balonun daha temiz halkasına atlayabiliyor (kontrol maddelerinde de 0.6–3.4 mm arası tutarsız sonuçlar verdi). Bu yüzden oradaki 2.0–2.6 mm sayıları **gerçek kayma olarak alınmamalıdır**.
 - **AÇIK:** 22–29 ambiguous'un kalıcı düzeltmesi yapılmadı. Yönü: ya daha iyi bir geometri modeli (lokal ~2 mm kaymanın fiziksel nedeni hâlâ belirsiz), ya da bu maddelerin gerçek "elle inceleme" kalemi olarak kabulü.
 - **AÇIK:** komşu-alanı dışlamasının tamamlık üzerindeki nicel etkisi enstrümante edilmedi (bir sonraki adım).
+
+## F. C-serisi — kök neden düzeltmesi (ölçüldü, uygulandı, doğrulandı)
+
+Ham çıktı: `C-SERISI-FIX-RAPORU.txt`. Üreticiler: `scripts/probe-neighbour-exclusion.mts`, `scripts/probe-why-notfound.mts`, `scripts/probe-budget-safety.mts`, `scripts/run-photos.mts`.
+
+### F.1 E.2 ve E.3 düzeltmesi
+
+E.2 tablosu **nominal-merkezli** bant içindir (1.2–2.05 mm drawn around the printed centre). `searchRingOffset` ise **aday-merkezli** tarar: her aday için 1.60 mm çember o adayın etrafında aranır. Bu yüzden "bütçeyi yükseltmek NOT_FOUND'u kurtaramaz" iddiası arama için **yanlıştır**. E.3'teki komşu dışlama da nicel olarak kök neden değildir:
+
+| Koşul | mean tamamlık | ≥70% |
+|---|---|---|
+| ≤1.6 mm, exclusion ON | 34.4% | 0/147 |
+| ≤1.6 mm, exclusion OFF | 35.6% | 1/147 |
+| ≤3.0 mm, exclusion ON | 77.8% | **146/147** |
+| unconstrained winner inside neighbour disc | — | **0** |
+
+Offset of ≤3.0 winner: (1.6,2.0] n=66 · (2.0,2.5] n=79 · (2.5,3.0] n=2. Mean offset **2.13 mm**, mean |nearest neighbour| **2.62 mm**.
+
+`probe-c-ring.mts` hâlâ güvensizdir; bu sayılar aday-merkezli dairesel tamamlık aramasındandır, şablon skorundan değil.
+
+### F.2 Minimum production fix
+
+`src/omr/bubbleRingRefinement.ts`:
+- `maxOffsetMm` 1.6 → **2.5**
+- `searchRadiiMm` += 1.9, 2.2, 2.5
+- `isCoveredByNeighbour` **duruyor**
+- `minSearchCompleteness` 0.7 **duruyor**
+- ekstra geometrik kapı: kazanan merkez komşu elipsin içindeyse ret (`komşu balonun içine kilitlenme`)
+
+2.5 mm güvenlik fixture'ları (exclusion ON): clean/faint/adj-row/hairline/annular/strong-fill **1.6 ile birebir**; silinmiş hedef + komşu halka 8% ve chase yok; true dy=1.5 mm hâlâ 83% pass.
+
+### F.3 11 fotoğraf (SCAN_LIMITS.longSide)
+
+| Foto | Sonuç | vs 9b0140c |
+|---|---|---|
+| 1a | blank 130, multiple 3, single 4, reliable 7, w=0 | aynı |
+| 2a | blank 130, multiple 3, single 4, reliable 7, w=0 | aynı |
+| 3a | reliable 17, blank 120, multiple 2, amb 1, single 4, w=0 | aynı |
+| 4a | reliable 12, blank 120, single 9, multiple 2, amb 1, w=0 | aynı |
+| 5a | FAIL QR_UNREADABLE | aynı |
+| 6a | single 21, blank 120, multiple 2, amb 1, w=1 | aynı; 6a ≡ 7a status+choice |
+| 7a | single 21, blank 120, multiple 2, amb 1, w=1 | aynı |
+| c1 | single 20, blank 114, multiple 2, **amb 8**, w=2 | amb 27→8 |
+| c2 | single 20, blank 112, multiple 2, invalid 4, **amb 6**, w=2 | amb 29→6 |
+| c3 | single 20, blank 118, multiple 2, **amb 2**, invalid 2, w=2 | amb 25→2 |
+| c4 | single 21, blank 118, multiple 2, **amb 1**, invalid 2, w=1 | amb 22→1 |
+
+C-serisi amb 103 → **17**. Kalanlar sayfa altı (97–116) + #90 (gerçek silik). 8 yeni `invalid` (zemini kirli) daha önce NOT_FOUND/ambiguous idi; fail-closed, kalite eşiği açılmadı.
+
+### F.4 Test / tsc / build
+
+- `npx tsx --test tests/*.test.ts` → **101 pass / 0 fail**
+- `npx tsc --noEmit` → temiz
+- `npm run build` → `dist/index.html` + `optik-form.html`
+- `clinicalTransferAllowed` false. Runtime OMRChecker'a bağlı değil.

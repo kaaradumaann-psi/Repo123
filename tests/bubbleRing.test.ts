@@ -163,7 +163,73 @@ test('OMRChecker auto_align analogy: ring fit never follows darkest pixel', () =
   const fitY = fitRingCenter(image, areaY, all);
   // Y is blank and correctly centred → no correction
   assert.equal(fitY.ok, false);
-  // Even if Y’s ring were faintly bleeded toward D, the fit must stay within OMRChecker’s
-  // block-search budget (≤0.55 mm) and never jump 16 mm to the neighbouring bubble.
-  assert.ok(Math.hypot(fitY.dx, fitY.dy) < 0.55);
+  // Even if Y’s ring were faintly bleeded toward D, the fit must stay within the
+  // search budget and never jump 16 mm to the neighbouring bubble.
+  assert.ok(Math.hypot(fitY.dx, fitY.dy) < RING_REFINE.maxOffsetMm);
+});
+
+test('2.06 mm mixed translation (C-series residual) is recovered without chasing the neighbour', () => {
+  // C-series NOT_FOUND rings sit at 1.75–2.50 mm with a lateral component, not a
+  // pure row-pitch slide.  A purely-vertical 2.1 mm slide clips the far arc
+  // against the next-row disc and can land at 67% completeness; the measured
+  // residuals do not look like that.
+  const ppm = 8, width = Math.round(210 * ppm), height = Math.round(297 * ppm);
+  const data = new Uint8Array(width * height).fill(250);
+  const page = formDefinition.pages[0]!;
+  const item = page.items.find(i => i.itemNumber === 21)!;
+  const target = item.responseAreas.find(a => a.choiceId === 'Y')!;
+  const all = page.items.flatMap(i => i.responseAreas);
+  for (const area of all) paintRing(data, width, height, area.x + area.width / 2, area.y + area.height / 2);
+  const dx = -1.00, dy = 1.80;
+  eraseRing(data, width, height, target.x + target.width / 2, target.y + target.height / 2);
+  paintRing(data, width, height, target.x + target.width / 2 + dx, target.y + target.height / 2 + dy);
+  const image: GrayImage = { width, height, data };
+  const fit = fitRingCenter(image, target, all);
+  assert.equal(fit.ok, true, fit.reason ?? '2.06 mm translated ring must be recovered');
+  assert.ok(Math.hypot(fit.dx - dx, fit.dy - dy) < 0.30, `offset error (${fit.dx.toFixed(2)},${fit.dy.toFixed(2)}) vs (${dx},${dy})`);
+  const neighbour = page.items.find(i => i.itemNumber === 22)!.responseAreas.find(a => a.choiceId === 'Y')!;
+  const distToNeighbour = Math.hypot(
+    (target.x + target.width / 2 + fit.dx) - (neighbour.x + neighbour.width / 2),
+    (target.y + target.height / 2 + fit.dy) - (neighbour.y + neighbour.height / 2),
+  );
+  assert.ok(distToNeighbour > 1.75, 'refined centre must stay outside the next-row bubble');
+  const refined = inspectResponse(image, target, all, { centreOffset: { dx: fit.dx, dy: fit.dy } });
+  assert.equal(refined.peripheralEvidence, false);
+  assert.equal(refined.centralEvidence, false);
+});
+
+test('erased ring plus a live neighbour ring is not a translation', () => {
+  const ppm = 8, width = Math.round(210 * ppm), height = Math.round(297 * ppm);
+  const data = new Uint8Array(width * height).fill(250);
+  const page = formDefinition.pages[0]!;
+  const item = page.items.find(i => i.itemNumber === 21)!;
+  const target = item.responseAreas.find(a => a.choiceId === 'Y')!;
+  const all = page.items.flatMap(i => i.responseAreas);
+  for (const area of all) paintRing(data, width, height, area.x + area.width / 2, area.y + area.height / 2);
+  eraseRing(data, width, height, target.x + target.width / 2, target.y + target.height / 2);
+  const image: GrayImage = { width, height, data };
+  const fit = fitRingCenter(image, target, all);
+  assert.equal(fit.ok, false, 'a missing ring must not snap to the next-row ring');
+  assert.ok(Math.hypot(fit.dx, fit.dy) < 2.6);
+});
+
+test('adjacent-row fill does not pull a blank ring off its centre', () => {
+  const ppm = 8, width = Math.round(210 * ppm), height = Math.round(297 * ppm);
+  const data = new Uint8Array(width * height).fill(250);
+  const page = formDefinition.pages[0]!;
+  const item = page.items.find(i => i.itemNumber === 21)!;
+  const target = item.responseAreas.find(a => a.choiceId === 'Y')!;
+  const below = page.items.find(i => i.itemNumber === 22)!.responseAreas.find(a => a.choiceId === 'Y')!;
+  const all = page.items.flatMap(i => i.responseAreas);
+  for (const area of all) paintRing(data, width, height, area.x + area.width / 2, area.y + area.height / 2);
+  {
+    const cx = (below.x + below.width / 2) * ppm, cy = (below.y + below.height / 2) * ppm;
+    for (let y = Math.floor(cy - 1.22 * ppm - 1); y <= Math.ceil(cy + 1.22 * ppm + 1); y++)
+      for (let x = Math.floor(cx - 1.22 * ppm - 1); x <= Math.ceil(cx + 1.22 * ppm + 1); x++)
+        if (Math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= 1.22 * ppm) data[y * width + x] = 20;
+  }
+  const image: GrayImage = { width, height, data };
+  const fit = fitRingCenter(image, target, all);
+  assert.equal(fit.ok, false, 'blank ring with a filled neighbour must stay nominal');
+  assert.match(fit.reason ?? '', /kayma çok küçük|nominal/i);
 });

@@ -130,7 +130,7 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     const normalized = warpPerspective(source, transform, definition.pageWidthMm, definition.pageHeightMm);
     const allResponseAreas = page.items.flatMap(item => item.responseAreas);
     // Per-bubble ring refinement — OMRChecker auto_align’s bubble-level analogue.
-    // Stage 1: a translation search over a 1.6 mm disk scores candidates by how
+    // Stage 1: a translation search over a 2.5 mm disk scores candidates by how
     // fully they explain the printed ring as a circle (per-sector radial argmax).
     // Stage 2: a Huber IRLS sub-pixel fit of r(θ)=R+dx·cos+dy·sin validated by
     // RMS residual, radius plausibility and sector completeness.  Offsets fall
