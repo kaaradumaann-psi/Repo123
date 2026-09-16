@@ -61,21 +61,22 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           <div className="header-left">
             <a className="brand" href="#main" aria-label="MMPI-566 Ana Sayfa">
               <span className="brand-mark">
-                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-                  <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
-                  <circle cx="10" cy="10" r="1.8" fill="currentColor" />
-                  <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="16" cy="16" r="1.8" fill="currentColor" />
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </span>
               <div className="brand-text">
-                <strong className="brand-title">MMPI-566</strong>
-                <span className="brand-subtitle">Optik Okuma Portalı</span>
+                <strong className="brand-title">MMPI-566 OMR</strong>
+                <span className="brand-subtitle">Klinik optik okuma</span>
               </div>
             </a>
 
-            {/* Çalışma Alanı Navigasyonu */}
             <nav className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
               {tabs.map(tab => (
                 <button
@@ -92,23 +93,18 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   onClick={() => activateTab(tab)}
                   className={`portal-tab ${workspace === tab ? 'active' : ''}`}
                 >
-                  <Icon
-                    name={tab === 'scan' ? 'scan' : tab === 'form' ? 'sheet' : 'shield'}
-                    size={16}
-                  />
                   <span>
                     {tab === 'scan'
-                      ? 'Test Değerlendirme'
+                      ? 'Kamera Tarama'
                       : tab === 'form'
-                      ? 'Optik Form Hazırla'
-                      : 'Yönetim Paneli'}
+                      ? 'Formu Yazdır'
+                      : 'Yönetim'}
                   </span>
                 </button>
               ))}
             </nav>
           </div>
 
-          {/* Sağ Kullanıcı Profili & Çıkış */}
           <div className="header-user">
             <div className="user-profile-summary">
               <div className="user-avatar-circle">
@@ -149,10 +145,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         >
           <section className="form-prep-hero">
             <div className="hero-text-side">
-              <span className="section-badge badge-primary">Form Hazırlığı</span>
+              <span className="section-badge badge-primary">Cevap kağıdı</span>
               <h1>MMPI-566 Optik Cevap Formu</h1>
               <p>
-                A4 standartlarında basılı optik form setini yazdırabilir veya yüksek kaliteli orijinal PDF dosyasını indirebilirsiniz.
+                Dört sayfalık A4 formu yazdırın veya indirin. Hemen başlamak için ücretsiz cevap kağıdı şablonunu kullanın.
               </p>
             </div>
             <div className="hero-cta-group">
@@ -162,22 +158,22 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               }}>
                 <Icon name="print" size={18} />
                 <div className="btn-multiline">
-                  <span>Tüm Sayfaları Yazdır</span>
-                  <small>{PAGE_COUNT} Sayfa · A4 Tek Yüz</small>
+                  <span>Formu Yazdır</span>
+                  <small>{PAGE_COUNT} sayfa · A4 tek yüz</small>
                 </div>
               </button>
               <button type="button" className="btn-secondary btn-download download-button" onClick={downloadFormPdf}>
                 <Icon name="download" size={18} />
                 <div className="btn-multiline">
-                  <span>PDF Olarak İndir</span>
+                  <span>Optik Formu İndir</span>
                   <small>{FORM_PDF_FILE_NAME}</small>
                 </div>
               </button>
               <button type="button" className="btn-secondary download-button" onClick={() => { void openFormPdf(); }}>
                 <Icon name="sheet" size={18} />
                 <div className="btn-multiline">
-                  <span>PDF'i Aç ve Yazdır</span>
-                  <small>Tarayıcı yazdırma penceresi açılmazsa</small>
+                  <span>PDF'i Aç</span>
+                  <small>Yazdırma penceresi açılmazsa</small>
                 </div>
               </button>
             </div>
@@ -186,10 +182,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           {printNote !== '' && (
             <p className="print-status-note" role="status" aria-live="polite">
               {printNote === 'busy'
-                ? 'Doğrulanmış 4 sayfalık PDF yazdırma için hazırlanıyor…'
+                ? 'Dört sayfalık form yazdırma için hazırlanıyor…'
                 : printNote === 'opened'
                   ? `Yazdırma penceresi açıldı. Ayarlar: ${PRINT_SETTINGS_HINT}.`
-                  : `Yazdırma penceresi açılamadı. “PDF'i Aç ve Yazdır” ile açıp şu ayarlarla yazdırın: ${PRINT_SETTINGS_HINT}.`}
+                  : `Yazdırma penceresi açılamadı. “PDF'i Aç” ile açıp şu ayarlarla yazdırın: ${PRINT_SETTINGS_HINT}.`}
             </p>
           )}
 
@@ -200,7 +196,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               <div className="print-guide-card card-elevated">
                 <h3 className="guide-title">
                   <Icon name="print" size={18} />
-                  <span>Yazdırma Rehberi</span>
+                  <span>Yazdırma</span>
                 </h3>
                 <dl className="guide-spec-list">
                   <div>
@@ -221,7 +217,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   </div>
                 </dl>
                 <p className="guide-note">
-                  "Sayfaya sığdır" seçeneğini işaretlemeyiniz. Köşe hizalama karelerinin ve QR kodun net çıkması optik okuyucunun hatasız çalışmasını sağlar. Dört sayfanın altında aynı set kodu yazılıdır; aynı katılımcının sayfalarını birlikte yükleyin, yeni katılımcı için “Yeni Set / Sıfırla” düğmesini kullanın.
+                  “Sayfaya sığdır”ı kapatın. Köşe kareleri ve kare kod net çıksın. Aynı danışanın dört sayfasını birlikte yükleyin; yeni danışan için “Yeni Set / Sıfırla” kullanın.
                 </p>
               </div>
             </aside>
@@ -262,15 +258,29 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
       {/* Alt Bilgi */}
       <footer className="app-footer">
         <div className="footer-inner">
-          <span className="copyright-text">
-            © {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER} · Tüm hakları saklıdır.
-          </span>
+          <div className="footer-brand">
+            <span className="footer-brand-mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            <span>MMPI-566 Akıllı OMR</span>
+          </div>
           <nav className="app-footer-links" aria-label="Yazar bağlantıları">
             <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
               {SITE_LABEL}
             </a>
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>Destek</a>
           </nav>
+          <span className="copyright-text">
+            © {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER} · Tüm hakları saklıdır.
+          </span>
         </div>
       </footer>
     </div>

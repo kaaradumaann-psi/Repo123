@@ -4,14 +4,16 @@ import type { AuthenticatedUser } from '../auth/authTypes';
 import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
 import { Icon } from './Icon';
+import { BrandMark } from './BrandMark';
+import { LandingPage } from './LandingPage';
 
 export function AuthGate({ children }: { children: (user: AuthenticatedUser, onLogout: () => void) => ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
-  const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
+  const [screen, setScreen] = useState<'landing' | 'login'>('landing');
 
   useEffect(() => {
-    if (!supabase) { setChecking(false); return; }
+    if (!supabase) return;
     let alive = true;
     async function hydrate() {
       try {
@@ -20,16 +22,16 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
         if (alive) { setUser(profile); setError(''); }
       } catch (cause) {
         if (alive) setError(cause instanceof Error ? cause.message : 'Kullanıcı oturumu doğrulanamadı.');
-      } finally { if (alive) setChecking(false); }
+      }
     }
     void hydrate();
     const { data } = onAuthChange((_event, session) => {
       if (!session) { if (alive) setUser(null); return; }
       window.setTimeout(() => {
         void userFromSession(session).then(profile => {
-          if (alive) { setUser(profile); setError(''); setChecking(false); }
+          if (alive) { setUser(profile); setError(''); }
         }).catch(cause => {
-          if (alive) { setUser(null); setError(cause instanceof Error ? cause.message : 'Kullanıcı yetkisi doğrulanamadı.'); setChecking(false); }
+          if (alive) { setUser(null); setError(cause instanceof Error ? cause.message : 'Kullanıcı yetkisi doğrulanamadı.'); }
         });
       }, 0);
     });
@@ -59,62 +61,74 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     setError('');
   }
 
-  if (!supabaseConfig.configured) return <SystemSetupScreen />;
-  if (checking) {
-    return (
-      <main className="auth-shell">
-        <div className="auth-card auth-loading">
-          <div className="spinner" />
-          <p>Oturum doğrulanıyor, lütfen bekleyin...</p>
-        </div>
-      </main>
-    );
-  }
   if (user) {
     return (
       <>
         {children(user, () => {
           void signOut().catch(() => {});
           setUser(null);
+          setScreen('landing');
         })}
       </>
     );
   }
-  return <AuthScreen onSignIn={handleSignIn} error={error} />;
+
+  if (screen === 'landing') {
+    return <LandingPage onLogin={() => setScreen('login')} />;
+  }
+
+  if (!supabaseConfig.configured) {
+    return <SystemSetupScreen onBack={() => setScreen('landing')} />;
+  }
+
+  return (
+    <AuthScreen
+      onSignIn={handleSignIn}
+      error={error}
+      onBack={() => setScreen('landing')}
+    />
+  );
 }
 
-function SystemSetupScreen() {
+function SystemSetupScreen({ onBack }: { onBack: () => void }) {
   return (
     <main className="auth-shell">
       <section className="auth-card" aria-labelledby="config-title">
         <div className="auth-brand">
           <span className="auth-brand-mark" aria-hidden="true">
-            <Icon name="scan" size={24} />
+            <BrandMark />
           </span>
           <div>
-            <strong>MMPI-566</strong>
-            <small>Optik Değerlendirme Sistemi</small>
+            <strong>MMPI-566 OMR</strong>
+            <small>Klinik optik okuma</small>
           </div>
         </div>
+        <button type="button" className="lp-auth-back" onClick={onBack}>
+          ← Ana sayfa
+        </button>
         <div className="auth-heading">
-          <p className="auth-eyebrow">Sistem Kurulumu</p>
-          <h1 id="config-title">Bağlantı Ayarları Gerekli</h1>
+          <p className="auth-eyebrow">Klinik standartlarda güvenilirlik</p>
+          <h1 id="config-title">Giriş henüz açık değil</h1>
           <p>
-            Uygulamayı başlatabilmek için ortam değişkenlerinin (VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY) yapılandırılması gerekmektedir.
+            Tarama ve arşiv için hesabınızı yöneticiniz açar. Ana sayfadan formu indirebilir, yazdırabilirsiniz.
           </p>
         </div>
         <div className="status-banner info-banner" role="alert">
           <Icon name="alert" size={18} />
-          <span>Güvenlik gereği yalnızca yayınlanabilir erişim anahtarını yapılandırın.</span>
+          <span>Hesap açılışı yalnızca yönetici tarafından yapılır.</span>
         </div>
       </section>
     </main>
   );
 }
 
-type AuthScreenProps = { onSignIn: (email: string, password: string) => Promise<void>; error: string };
+type AuthScreenProps = {
+  onSignIn: (email: string, password: string) => Promise<void>;
+  error: string;
+  onBack: () => void;
+};
 
-function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
+function AuthScreen({ onSignIn, error: externalError, onBack }: AuthScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -139,24 +153,21 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
         <section className="auth-card" aria-labelledby="auth-title">
           <div className="auth-brand">
             <span className="auth-brand-mark" aria-hidden="true">
-              <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
-                <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
-                <circle cx="10" cy="10" r="1.8" fill="currentColor" />
-                <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                <circle cx="16" cy="16" r="1.8" fill="currentColor" />
-              </svg>
+              <BrandMark />
             </span>
             <div>
-              <strong>MMPI-566</strong>
-              <small>Akıllı Optik Değerlendirme Sistemi</small>
+              <strong>MMPI-566 OMR</strong>
+              <small>Klinik optik okuma</small>
             </div>
           </div>
 
+          <button type="button" className="lp-auth-back" onClick={onBack}>
+            ← Ana sayfa
+          </button>
           <div className="auth-heading">
-            <span className="section-badge badge-primary">Güvenli Giriş</span>
-            <h1 id="auth-title">Uzman Paneline Giriş</h1>
-            <p>MMPI formlarını okumak ve arşivlemek için hesabınızla giriş yapın.</p>
+            <span className="section-badge badge-primary">Klinik standartlarda güvenilirlik</span>
+            <h1 id="auth-title">Uzman girişi</h1>
+            <p>Kağıt formları tarayın, kayıtları arşivleyin. Manuel veri girişine son verin.</p>
           </div>
 
           {(error || externalError) && (
@@ -195,7 +206,7 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
               {busy ? (
                 <>
                   <div className="spinner-inline" />
-                  <span>Giriş Yapılıyor...</span>
+                  <span>Giriş yapılıyor…</span>
                 </>
               ) : (
                 <>

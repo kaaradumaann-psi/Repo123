@@ -72,9 +72,9 @@ export function MyRecordsPanel() {
     <section className="dashboard-section" aria-labelledby="saved-records-title">
       <div className="section-header-row">
         <div>
-          <span className="section-badge">Arşiv</span>
-          <h3 id="saved-records-title" className="section-heading">Tamamlanan Test Kayıtlarım</h3>
-          <p className="section-subtext">Gerçekleştirdiğiniz test uygulamalarını inceleyebilir, detaylı cevap tablosuna ulaşabilirsiniz.</p>
+          <span className="section-badge badge-primary">Arşiv</span>
+          <h3 id="saved-records-title" className="section-heading">Tamamlanan testlerim</h3>
+          <p className="section-subtext">Uyguladığınız testleri açın, cevapları inceleyin veya kaydı kaldırın.</p>
         </div>
         <div className="section-header-actions">
           <button type="button" className="btn-secondary btn-sm" onClick={fetchRecords} disabled={loading}>

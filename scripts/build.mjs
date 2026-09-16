@@ -23,6 +23,12 @@ const result = await build({
     'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(buildEnv.VITE_SUPABASE_ANON_KEY ?? ''),
   },
   legalComments: 'none',
+  loader: {
+    '.jpg': 'dataurl',
+    '.jpeg': 'dataurl',
+    '.png': 'dataurl',
+    '.webp': 'dataurl',
+  },
   plugins: [{
     name: 'asset-imports',
     setup(plugin) {

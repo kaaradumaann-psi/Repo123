@@ -166,12 +166,12 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
     <section className="scan-review-panel card-elevated" aria-labelledby={`${id}-title`}>
       <div className="section-header-row">
         <div>
-          <span className="section-badge badge-primary">Sayfa İnceleme</span>
+          <span className="section-badge badge-primary">Sayfa inceleme</span>
           <h3 id={`${id}-title`} className="section-heading">
-            {page.pageNumber}. Sayfa Cevap Detayları
+            {page.pageNumber}. sayfa cevapları
           </h3>
           <p className="section-subtext">
-            Kaynak dosya: <strong>{page.sourceName}</strong> · Şüpheli veya belirsiz okumaları doğrudan optik görsel üzerinden kontrol edin.
+            Kaynak: <strong>{page.sourceName}</strong> · Belirsiz işaretleri görsel üzerinden kontrol edin.
           </p>
         </div>
         <button type="button" className="btn-secondary btn-danger-soft btn-sm" onClick={onRemove}>

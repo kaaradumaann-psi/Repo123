@@ -226,11 +226,11 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
       <header className="admin-header-hero">
         <div className="hero-text-side">
           <div className="badge-chip badge-primary">
-            <Icon name="shield" size={14} /> Sistem Yönetim Paneli
+            <Icon name="shield" size={14} /> Yönetim
           </div>
-          <h1>Yönetici Denetim Merkezi</h1>
+          <h1>Klinik yönetim</h1>
           <p>
-            Psikolog hesaplarını yönetin, sisteme kayıtlı tüm test uygulamalarını inceleyin ve sistem güvenliğini kontrol edin.
+            Psikolog hesaplarını yönetin, uygulanan testleri inceleyin ve kayıtları arşivleyin.
           </p>
         </div>
         <div className="hero-account-badge">

@@ -128,8 +128,8 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
   }
 
   return <section className="scan-camera" aria-labelledby={labelId}>
-    <h3 id={labelId}>Kamerayla sayfa ekle</h3>
-    <p>Kağıdı düz tutun; dört köşe işareti ve QR kodu görünür olsun. Çerçeve yalnızca rehberdir; görüntü kırpılmaz.</p>
+    <h3 id={labelId}>Kamera tarama</h3>
+    <p>Formu ekrandaki kılavuza hizalayın. Köşeler görünsün; çerçeve yalnızca rehberdir, görüntü kırpılmaz.</p>
     <div className="scan-camera-stage" hidden={!active && !requesting} style={{ aspectRatio: aspect }}>
       <video ref={video} playsInline muted autoPlay aria-label="Canlı kamera görüntüsü"
         onLoadedData={() => {
@@ -137,8 +137,22 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
             setReady(true); setAspect(video.current.videoWidth / video.current.videoHeight);
           }
         }} />
-      <div className="scan-camera-overlay" aria-hidden="true"><span>A4 · tüm sayfa</span></div>
-      {requesting && <span className="scan-camera-wait">Kamera izni / görüntü bekleniyor…</span>}
+      <div className="scan-camera-overlay" aria-hidden="true">
+        <div className="scan-guide-frame">
+          <span className="guide-corner tl" />
+          <span className="guide-corner tr" />
+          <span className="guide-corner bl" />
+          <span className="guide-corner br" />
+          <span className="scanning-line" />
+        </div>
+      </div>
+      {(active || requesting) && (
+        <div className="scan-camera-livebar">
+          <span><span className="live-ping" /> Canlı tarama</span>
+          <span>Sayfayı kılavuza hizalayın</span>
+        </div>
+      )}
+      {requesting && <span className="scan-camera-wait">Kamera bekleniyor…</span>}
     </div>
     {advice && <p className="scan-camera-advice" role="status">
       Işık: {advice.brightness < 80 ? 'düşük; aydınlatın' : advice.brightness > 235 ? 'çok parlak; yansımayı kontrol edin' : 'uygun görünüyor'}.

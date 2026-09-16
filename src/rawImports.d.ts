@@ -17,3 +17,18 @@ declare module '*.pdf?inline' {
   const dataUrl: string;
   export default dataUrl;
 }
+
+declare module '*.jpg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.jpeg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.png' {
+  const src: string;
+  export default src;
+}

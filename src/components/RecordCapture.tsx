@@ -82,10 +82,10 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
           <Icon name="scan" size={24} />
         </div>
         <div className="locked-content">
-          <span className="section-badge badge-warning">Adım 2: Danışan Kaydı</span>
-          <h3 id="record-title">Test Kaydı İçin 4 Sayfayı Tamamlayın</h3>
+          <span className="section-badge badge-warning">Danışan kaydı</span>
+          <h3 id="record-title">Kayıt için dört sayfayı tamamlayın</h3>
           <p>
-            Danışan bilgileri formu, form setinin 4 sayfası başarıyla okunduktan sonra aktifleşir.
+            Dört sayfa okunduğunda danışan bilgileri açılır.
             Şu ana kadar {pages.length} / {definition.totalPages} sayfa onaylandı.
           </p>
         </div>
@@ -119,10 +119,10 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
     <section className="dashboard-section card-elevated" aria-labelledby="record-title">
       <div className="section-header-row">
         <div>
-          <span className="section-badge badge-primary">Adım 2: Danışan Bilgileri</span>
-          <h3 id="record-title" className="section-heading">Danışan Bilgilerini Kaydet</h3>
+          <span className="section-badge badge-primary">Danışan bilgileri</span>
+          <h3 id="record-title" className="section-heading">Danışan bilgilerini kaydedin</h3>
           <p className="section-subtext">
-            Tüm sayfalar eksiksiz okundu. Danışan profilini girerek testi arşive kaydedebilirsiniz.
+            Dört sayfa hazır. Danışan profilini girerek testi arşive alın.
           </p>
         </div>
         <span className="stats-pill ready-pill">

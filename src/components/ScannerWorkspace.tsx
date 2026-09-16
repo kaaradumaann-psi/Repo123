@@ -177,10 +177,10 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
       {/* Başlık ve Sıfırlama */}
       <div className="scanner-hero-header">
         <div>
-          <span className="section-badge badge-primary">Adım 1: Optik Okuma</span>
-          <h2 id={`${id}-title`}>Optik Form Tarama ve Değerlendirme</h2>
+          <span className="section-badge badge-primary">Kamera tarama</span>
+          <h2 id={`${id}-title`}>Kağıt formları saniyeler içinde tarayın</h2>
           <p className="scanner-hero-sub">
-            Cihazınızın kamerasını kullanarak veya taranmış PDF/görselleri yükleyerek 4 sayfalık formu otomatik olarak okutun.
+            Kamerayla çekin veya dosya yükleyin. Dört sayfa tamamlandığında danışan kaydını oluşturabilirsiniz.
           </p>
         </div>
         <div className="hero-actions">
@@ -238,8 +238,8 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
               <div className="dropzone-icon">
                 <Icon name="download" size={28} />
               </div>
-              <strong className="dropzone-title">Taranmış Formları Buraya Yükleyin</strong>
-              <span className="dropzone-desc">JPG, PNG, WEBP, HEIC veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
+              <strong className="dropzone-title">Formları buraya bırakın</strong>
+              <span className="dropzone-desc">Fotoğraf veya PDF yükleyin. Dört köşesi görünen, düz duran sayfalar en net sonucu verir.</span>
               <span className="btn-primary dropzone-btn">Dosya Seç</span>
             </label>
             <input
@@ -256,7 +256,7 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
               }}
             />
             <p className="dropzone-hint">
-              En iyi sonuç için düz taranmış, dört köşe karesi ve QR kodu net görünen A4 sayfalarını kullanın.
+              Sayfayı düz tutun; köşe işaretleri ve üstteki kare kod net görünsün.
             </p>
           </div>
         ) : (
