@@ -38,8 +38,12 @@ export function sampleRing(image: GrayImage, cx: number, cy: number, inner: numb
   return values;
 }
 
-/** Brightness/spread use 0..255 levels; contrast uses 0..1; Laplacian variance is level squared at 8 px/mm. */
-export function assessImageQuality(image: GrayImage, page: PageDefinition, pixelsPerMm: number): QualityReport {
+/** Brightness/spread use 0..255 levels; contrast uses 0..1; Laplacian variance is level squared at 8 px/mm.
+ * `centreOffsets` (per-bubble ring refinement) keeps the per-bubble outline
+ * checks honest on curled phone photos where the planar warp leaves local
+ * residuals of about a millimetre. */
+export function assessImageQuality(image: GrayImage, page: PageDefinition, pixelsPerMm: number,
+  centreOffsets?: ReadonlyMap<string, { dx: number; dy: number }>): QualityReport {
   const backgrounds: number[] = [];
   for (let row = 0; row < 9; row++) for (let col = 0; col < 6; col++) {
     const values: number[] = [];
@@ -54,7 +58,8 @@ export function assessImageQuality(image: GrayImage, page: PageDefinition, pixel
   const ppm = CANONICAL_PIXELS_PER_MM;
   let damagedOutlines = 0;
   for (const area of areas) {
-    const cx = (area.x + area.width / 2) * ppm, cy = (area.y + area.height / 2) * ppm;
+    const offset = centreOffsets?.get(area.responseId);
+    const cx = (area.x + area.width / 2 + (offset?.dx ?? 0)) * ppm, cy = (area.y + area.height / 2 + (offset?.dy ?? 0)) * ppm;
     const radius = Math.min(area.width, area.height) * ppm / 2;
     const background = percentile(sampleRing(image, cx, cy, radius + 3, radius + 7), .8);
     const border = percentile(sampleRing(image, cx, cy, radius - 3, radius + 2), .15);

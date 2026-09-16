@@ -56,6 +56,53 @@ export function fitHomography(from: readonly Point[], to: readonly Point[]): Hom
 }
 
 /**
+ * Least-squares projective fit from N >= 4 correspondences (normalized DLT).
+ * Used to *predict* the remaining alignment squares once some are detected:
+ * the detected 5 mm squares span the whole sheet, so unlike a QR-only fit they
+ * constrain the projective terms, and the QR corners still anchor the far end.
+ * Never used as the page transform itself — that stays fitted from the four
+ * detected centres. Throws on fewer than four, mismatched or degenerate points.
+ */
+export function fitHomographyLeastSquares(from: readonly Point[], to: readonly Point[]): Homography {
+  if (from.length !== to.length || from.length < 4) throw new Error('At least four correspondences required');
+  const source = normalize(from), target = normalize(to);
+  const rows: number[][] = [];
+  source.points.forEach(({ x, y }, i) => {
+    const { x: u, y: v } = target.points[i]!;
+    rows.push([x, y, 1, 0, 0, 0, -u * x, -u * y, u]);
+    rows.push([0, 0, 0, x, y, 1, -v * x, -v * y, v]);
+  });
+  const n = 8;
+  const normal = Array.from({ length: n }, () => new Array<number>(n + 1).fill(0));
+  for (const row of rows) {
+    for (let a = 0; a < n; a++) {
+      const ra = row[a]!;
+      if (!ra) continue;
+      const line = normal[a]!;
+      for (let b = 0; b < n; b++) line[b] = line[b]! + ra * row[b]!;
+      line[n] = line[n]! + ra * row[n]!;
+    }
+  }
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let row = col + 1; row < n; row++) if (Math.abs(normal[row]![col]!) > Math.abs(normal[pivot]![col]!)) pivot = row;
+    if (Math.abs(normal[pivot]![col]!) < 1e-9) throw new Error('Singular homography');
+    [normal[col], normal[pivot]] = [normal[pivot]!, normal[col]!];
+    const divisor = normal[col]![col]!;
+    for (let j = col; j <= n; j++) normal[col]![j] = normal[col]![j]! / divisor;
+    for (let row = 0; row < n; row++) {
+      if (row === col) continue;
+      const factor = normal[row]![col]!;
+      for (let j = col; j <= n; j++) normal[row]![j] = normal[row]![j]! - factor * normal[col]![j]!;
+    }
+  }
+  const fitted = [...normal.map(row => row[n]!), 1] as Homography;
+  const result = multiply(multiply(target.inverse, fitted), source.matrix);
+  if (Math.abs(result[8]) < 1e-10) throw new Error('Projective horizon at origin');
+  return result.map(value => value / result[8]) as Homography;
+}
+
+/**
  * Least-squares similarity (uniform scale + rotation + translation) from N >= 2 correspondences.
  * A full 8-DOF homography fitted to four corners confined to a 26 mm symbol cannot constrain its
  * projective terms: sub-pixel corner noise is amplified into hundreds of pixels when extrapolated
