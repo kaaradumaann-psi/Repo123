@@ -211,3 +211,88 @@ Aşağıdakilerin tümü bu oturumda yeniden uygulandı ve ağaçta mevcut (`git
 | Tam test paketi + build | **açık** — bu oturumda henüz koşulmadı |
 | PR | **açık** |
 | `123.md` | **açık** — çalışma alanında yok |
+
+## C. 6a — VERİ RAPORU (kullanıcının zorunlu listesi, §10)
+
+**Durum: TAMAMLANDI. Ölçüm yapıldı, kök neden kanıtlandı. Bu bölümde hiçbir eşik değiştirilmedi, hiçbir fallback eklenmedi.**
+Ham çıktı: `6A-OLCUM-RAPORU.txt` (üretici: `scripts/report-6a.mts`, üretikten sonra hiçbir production modülü değiştirilmedi).
+
+### C.1 Kullanıcının istediği alanlar
+
+| İstenen | Ölçülen |
+|---|---|
+| **Orijinal boyut** | **2550×1507** (JPEG'in kendi boyutu; tarayıcı beslemesi de aynı, çünkü 2550 < `SCAN_LIMITS.longSide`=2800 → küçültme yok) |
+| **Orientation** | `identify`: **EXIF Orientation = Undefined** (etiket yok) — piksel gerçekten landscape saklanmış. EXIF ile düzeltilemez; boru hattının çevirmesi şart. |
+| **Uygulanan rotation** | `rotateGray90(gray, 1)` = **1 saat yönü çeyrek dönüş**. (QR, döndürülmemiş görüntüde de decode oluyor çünkü jsQR 90° döndürülmüş sembolü çözebiliyor; yön `quarterTurnsToUpright(corners)` ile bulunuyor: `turns=0`, `quarterTurnsToUpright=1`, `totalTurns=1`. `turns` = 0 ama sonuç dik — kullanıcı talimatındaki "6a bilinçli landscape, bu hata değil" ile tutarlı.) |
+| **Final dik boyut** | **1507×2550** (`isolatePaper` origin 0,0 — kırpma yok) |
+
+### C.2 Rotation koordinat dönüşümünün matematiksel doğrulaması — DOĞRULANDI
+
+| Test | Sonuç |
+|---|---|
+| A1: `rotateGray90(1)` eşleme yasası | Destek (stored) `(xs,ys)` → dik `(xu, yu) = (H−1−ys, xs)`; **28/28 piksel** birebir, `7×4 → 4×7` |
+| A2: `unrotatePoint` tersliği | Tüm 28 pikselde ileri yasanın tersini veriyor → **YES** |
+| A3: Yön (siyah köşe probu) | `rotateGray90(1)` → `(1,0),(1,3)`; **ImageMagick `-rotate 90` → aynı**; `-transpose` → farklı (kontrol). İkisi de **saat yönü**. |
+| A4: Gerçek 6a üzerinde birebir karşılaştırma (PGM, kayıpsız, renk profili yok) | 1507×2550 vs 1507×2550 → **farklı piksel 0, max |Δ| = 0 → BIT-EXACT** |
+| A5: Diğer üç dönüş | 90° / 180° / 270° üçü de ImageMagick'e karşı **BIT-EXACT** |
+| A6: `quarterTurnsToUpright` dört kardinal poz | +x→k=0, +y→k=3, −x→k=2, −y→k=1 → **hepsi doğru** |
+
+> Not: ilk denemede A6 beklentilerim yanlıştı (+y için k=1 sanmıştım); doğrusu **k=3**'tür çünkü bir saat yönü dönüş y-down koordinatta vektör açısına **+90° ekler**. Hata testteydi, kodda değil; düzeltildi ve doğrulandı.
+> Not: ilk karşılaştırma PNG üzerinden yapıldığında 172 594 piksel fark çıktı; sebebi ImageMagick'in renk yönetimi round-trip'i. PGM (ham 8-bit) ile karşılaştırıldığında fark **0**.
+
+### C.3 Sol-alt aday census'u (production'ın gördüğüyle birebir)
+
+**Enstrüman doğrulaması (kritik):** `scripts/report-6a.mts`, `alignmentDetector.ts` filtrelerini sabitleriyle birebir kopyalar. Ürettiği ret sayıları, production'ın canlı hata mesajındaki sayılarla **tıpatıp aynı**:
+
+| Geçiş | Enstrüman | Production mesajı | |
+|---|---|---|---|
+| similarity, son eşik | size 36, unstable 130 (window 129 + margin 1) | "36 aday boyut veya dolgunluk…; 130 aday gölgeye veya çizgiye bağlıydı" | ✅ |
+| salvage refit, son eşik | size 20, unstable 114 (window 113 + margin 1) | "20 aday boyut…; 114 aday gölgeye…" | ✅ |
+
+→ Enstrüman production'ın gördüğünü görüyor; aşağıdaki aday ölçümleri güvenilir.
+
+**Tahminler (dik çerçevede):**
+
+| Tahmin | Merkez (px) | Örtük kare alanı | Ölçek | Gerçek kareye uzaklık |
+|---|---|---|---|---|
+| homography (QR) | (−573.7, 3572.5) | 5794 px² | 15.22 px/mm | **1392 px** (pencere görüntü dışı → "karenin bulunması gereken alan görüntünün dışında") |
+| similarity (QR) | (9.2, 2132.7) | 1301 px² | 7.21 px/mm | **258 px** |
+| **salvage refit** (4 QR köşesi + 3 bulunan kare) | **(79.0, 2417.6)** | 1506 px² | 7.76 px/mm | **66 px** |
+
+**İlk geçişte bulunan kareler:** sol üst (138.1, 170.8) · sağ üst (1357.4, 185.0) · sağ alt (1339.2, 2345.2). Eksik olan **sol alt** (fiziksel merkez 12.5, 284.5 mm).
+
+**Gerçek sol-alt karesi (filtresiz flood fill, x≤400 y≥2200 thr 140):** merkez **(120, 2366)**, bbox **33×41 px**, mürekkep **1328 px** (thr 174'te 1363). Eşikler arası **stabil**: thr 100 → 33×40/1254, thr 140 → 33×41/1328, thr 175 → 34×41/1368 (bbox ±1 px).
+
+**Adayın filtre yolculuğu (component containing the true centre):**
+
+| Ölçüt | Değer | Bütçe | Sonuç |
+|---|---|---|---|
+| head ink | 1089 | [area·0.5, area·1.8] = [651, 2342] | ✅ |
+| windowFill | **1.000** | ≥ 0.43 | ✅ |
+| clipped | false | değil | ✅ |
+| boyut/şekil (bbox oranı) | 33×33 pencerede tam dolu | ≥ 0.85 | ✅ |
+| squareFill (en iyi yönelim) | **1.000** | ≥ **0.84** | ✅ **(bu testi GEÇİYOR)** |
+| solid | 1.000 | ≥ 0.92 | ✅ |
+| dPred | 258 px (similarity) / 66 px (refit) | ≤ 450 px | ✅ |
+| **margin ink** | **%40** (thr 174) / %24 (thr 140) | ≤ %15 | ❌ **RED** |
+| `isPrintedSquare` kurtarması | — | dPred ≤ 0.25·500 = 125 px **ve** head ≥ 0.8·area = 1205 | ❌ similarity: 258 > 125 · refit: 1089 < 1205 |
+
+**Red nedeni tek bir satırda:** `reject-margin` → "unstable: margin ink 40% > 15% and not the unmistakable printed square".
+
+### C.4 Kök neden (ölçümle kanıtlandı)
+
+`squareWindow()` **kare** bir pencere kurar; kenarı `side = max(span·0.8, min(box, span·2.2))` ve `box = min(bboxW, bboxH)` = bileşenin **kısa** kenarı. Bileşen **anizotropik** olduğunda pencere uzun ekseni **kaçınılmaz olarak keser**.
+
+Ölçülen kanıt (adım adım):
+
+1. **Bileşen** bbox x 104..136 (33 px) × y 2346..2386 (41 px).
+2. **Seçilen kare pencere** x 104..136 (33 px) × y 2350..2382 (33 px) → bileşenin **8 satırı pencerenin dışında** kalıyor (üstten 4, alttan 4); kolon taşması 0.
+3. Bu 8 satır, 4 px'lik **margin çerçevesine** düşüyor. Çerçeve: 84 örnek, 34 koyu → **21'i bu işaretin KENDİ pikseli**, 13'ü kendi kenar anti-aliasing'i (v142–175, `threshold·1.25`'in altında kaldığı için "foreign" sayılıyor).
+4. Yani **ortada kapatan bir çizgi/gölge YOK**; ret, işaretin kendi kesilmiş satırlarından doğuyor. Görsel doğrulama: kare, tertemiz beyaz zeminde, izole (6× zoom kırpması).
+5. Kurtarma yolu da bu yüzden çalışmıyor: kesme sonucu `head.count` = 1089 = 33×33, ama kurtarma ≥ 0.8·area = 1205 istiyor → **kesilmiş pencere kendi kurtarmasını da engelliyor.**
+
+**Anizotropi sistematik (tesadüf değil).** Dört karenin de bbox'ı dikeyde ~1.2 uzun: sol üst 35×42, sağ üst 32×39, sağ alt 34×40, sol alt 33×41. Bağımsız teyit: **QR sembolü de** dik çerçevede 138.7 × 170.6 px = **1.23** oranı. QR fiziksel olarak 26×26 mm karedir, yani bu, sayfanın **global ~%21 dikey anizotropik gerilmesi**dir (tutulan telefonun öne/arkaya eğimi). Bütün kareler kesiliyor; diğer üçü margin testinden **şans eseri** geçiyor (marj sırasıyla %0, %8, %11 — pencerenin seçtiği ±0.3·side offsetine bağlı).
+
+**Çürütülen hipotez:** §10'daki "anizotropik perspektif kareyi 24w×36h yapmış → squareFill ≈ 0.81 < 0.84" **YANLIŞ**. Ölçülen: squareFill = **1.000** (testi geçiyor), gerçek bbox 33×41 (24×36 değil). Başarısızlık squareFill'de değil, **margin**'da.
+
+**Doğrulananlar (özet):** 6a'nın landscape saklanması hata değil ✅ · yön normalizasyonu matematiksel ve ampirik olarak doğru ✅ · salvage refit mekanizması **tasarlandığı gibi çalışıyor** (66 px'e iniyor) ✅ · sorun **filtre düzeyinde** ve tam olarak `squareWindow`'un izotropik olmasında ✅ · arama yarıçapını büyütmek çözmez (§12'de doğru tahmin edilmiş; kare artık pencerenin içinde ve yine de reddediliyor) ✅
