@@ -1,7 +1,11 @@
 # ENGINEERING HANDOFF — 2026-09-16
 
+> **Güncel durum (PR #11):** [`Örnek Telefon Görüntüleri/son yapılanlar - yapılması gerekenler.md`](Örnek%20Telefon%20Görüntüleri/son%20yapılanlar%20-%20yapılması%20gerekenler.md)
+>
+> 6a **ÇÖZÜLDÜ** (≡ 7a, 144/144). C-serisi ambiguous **103→17**. `maxOffsetMm = 2.5`. 5a `QR_UNREADABLE`. Safety 27/27, chase=0. Aşağıdaki §1–§11 tarihsel oturum notudur; eski 6a `ALIGNMENT_MISSING` / C-serisi 22–29 iddiaları §D ve §F ile güncellenmiştir.
+
 **Repo:** `kaaradumaann-psi/Repo123` (MMPI-566 optik cevap formu tarayıcı)
-**Branch:** `arena/01a0a9d7-repo123` (baz commit `06425c8`)
+**Branch:** `arena/01a0aa3d-repo123` (baz commit `06425c8`, PR #11)
 **Amaç:** Bu dosya, 2026-09-16 oturumunun mühendislik durumunu eksiksiz ve dürüstçe özetler; yarın başka bir mühendis buradan devam edebilsin. "Çözüldü" yazılan her şey bu oturumda doğrulanmıştır; doğrulanmamış olanlar açıkça işaretlidir.
 
 ---

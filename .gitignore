@@ -13,3 +13,9 @@ dist/
 !.env.example
 supabase/.temp/
 *.tsbuildinfo
+
+# Local diagnostic dumps — never commit
+*.pgm
+/crops/
+/debug-out/
+.DS_Store

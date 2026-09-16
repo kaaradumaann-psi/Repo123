@@ -1,9 +1,8 @@
 /**
- * Diagnostic harness: runs the REAL analyzePage pipeline over the phone photos in
- * "Örnek Telefon Görüntüleri" exactly the way the browser scanner feeds it
- * (bounded to SCAN_LIMITS.longSide, RGBA pixels). Prints per-page summaries and
- * every item that did not come back 'blank' or 'reliable' so we can see where the
- * printed separator lines collide with the detector.
+ * Photo regression harness: runs the REAL analyzePage pipeline over the phone
+ * photos in "Örnek Telefon Görüntüleri" exactly the way the browser scanner
+ * feeds it (bounded to SCAN_LIMITS.longSide, RGBA). Prints per-page summaries
+ * and every item that is not blank/reliable. Not imported by production.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';

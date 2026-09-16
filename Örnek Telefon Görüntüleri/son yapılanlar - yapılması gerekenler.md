@@ -2,7 +2,7 @@
 
 Bu dosya artık **güncel mühendislik durumudur**. Eski oturum dökümü (8664 satır sohbet logu) burada tutulmuyordu çünkü 6a `ALIGNMENT_MISSING`, C-serisi 70–83 ambiguous, “düz çizgi belirsiz yapıyor” ve E.2 “bütçeyi yükseltmek kurtarmaz” iddiaları **güncel gerçekleri yansıtmıyordu**.
 
-Kaynaklar: PR #11 (`arena/01a0aa3d-repo123` @ `9049673`), `ENGINEERING_HANDOFF_2026-09-16.md` §F, `C-SERISI-FIX-RAPORU.txt`, `scripts/run-photos.mts` / final-review koşuları.
+Kaynaklar: PR #11 (`arena/01a0aa3d-repo123`), `ENGINEERING_HANDOFF_2026-09-16.md` §F, `C-SERISI-FIX-RAPORU.txt`, `scripts/run-photos.mts`.
 
 Kategoriler: **ÇÖZÜLDÜ** · **DOĞRULANDI** · **ÇÜRÜTÜLDÜ** · **BAŞARISIZ** · **HİPOTEZ** · **AÇIK**
 
@@ -233,3 +233,18 @@ Kalite eşiği açılmadı. Bu 8’i “düzeltmek” için dirty-floor gevşetm
 - E.2 nominal-bant tablosunu arama bütçesi yasağı sanma
 - körlemesine `maxOffsetMm` 2.2 / 2.6 / 3.0
 - completeness düşürme, margin/squareFill gevşetme, rastgele fallback
+
+---
+
+## 15. Production tree temizliği (bu teslim)
+
+Oturum diagnostikleri production import zincirinde **yoktu**; runtime'a dahil değillerdi. Tree'den kaldırıldılar (ölçümler raporlarda duruyor):
+
+- `scripts/probe*.mts`, `probe2.mts`, `probe3.mts`
+- `scripts/dump-crops.mts`, `dump-items.mts`, `dbg-span.mts`
+- `scripts/analyze-c-series.mts`, `report-6a.mts`
+- commit edilmemiş `final-review*.mts`
+
+**Korunan:** `scripts/build.mjs`, `generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts`, `run-photos.mts` · tüm `src/` · `tests/` · `Örnek Telefon Görüntüleri/{1a–7a,c1–c4}.jpg` · bu dosya · `ENGINEERING_HANDOFF_2026-09-16.md` · `6A-OLCUM-RAPORU.txt` · `C-SERISI-OLCUM-RAPORU.txt` · `C-SERISI-FIX-RAPORU.txt` · `DOGRULAMA.md` · `MIMARI-ANALIZ.md` · `README.md` · OMRChecker referans kopyası.
+
+Production algoritması, eşikler, `maxOffsetMm=2.5`, `clinicalTransferAllowed: false` **değişmedi**.
