@@ -155,3 +155,59 @@ Aşağıdakilerin tümü bu oturumda yeniden uygulandı ve ağaçta mevcut (`git
   - `npx tsx scripts/probe-offsets.mts c4.jpg 97 104 117` (geniş arama tanısı)
   - `npx tsx scripts/dbg-span.mts` (mm→foto px eşleme doğrulaması)
   - `npx tsx --test tests/*.test.ts` ve `npm run build` (PR öncesi)
+
+---
+
+# OTURUM GÜNLÜĞÜ — 2026-09-16 (ikinci oturum)
+
+> Bu bölüm aşağıya doğru büyür. Her adımda güncellenir ve commit edilir.
+> Kural: yalnızca **ölçülmüş** olan "doğrulandı" yazılır; olmayan "hipotez"/"açık" kalır.
+
+## A. Ortam ve devralma (ADIM 0) — DOĞRULANDI
+
+**Repo durumu (ölçüldü):**
+
+- Bu oturumun branch'i: `arena/01a0aa23-repo123`, taban commit `06425c8` (= `main`).
+- Handoff'ın branch'i: `arena/01a0a9d7-repo123`, tek commit `46edee1`, `main`'in **doğrudan torunu**.
+- `git log origin/main..origin/arena/01a0a9d7-repo123` → **tek commit, tek ebeveyn**. Yani önceki oturumun işi kayıp değil, tek commit'te duruyor ve `main`'den yalnızca bir fast-forward uzakta.
+- Devralma: `git merge --ff-only arena/01a0a9d7-repo123` → **temiz fast-forward**, çakışma yok, kayıp yok. Ağaç şimdi `46edee1`.
+- Devralınan diff (§3 tablosuyla birebir): 15 dosya, +1270/−85 (`src/omr/orientation.ts` yeni, `alignmentDetector`, `analyzePage`, `bubbleRingRefinement`, `imageQuality`, `perspectiveCorrection`, 8 diagnostik script, handoff).
+- `node_modules` **yoktu** → `npm ci` ile kuruldu (74 paket, 0 zafiyet).
+- 11 fotoğrafın tamamı ve `son yapılanlar - yapılması gerekenler.md` yerinde.
+
+**§3 tablosunun bağımsız doğrulaması (bu oturumda):**
+
+| §8'de iddia edilen | Bu oturumda ölçülen | Sonuç |
+|---|---|---|
+| `npx tsc --noEmit` temiz | çıkış kodu 0, hata yok | ✅ doğrulandı |
+| 1a: blank 130, multiple 3, single 4, reliable 7, w=0 | **birebir aynı** | ✅ |
+| 2a: blank 130, multiple 3, single 4, reliable 7, w=0 | **birebir aynı** | ✅ |
+| 3a: reliable 17, single 4, blank 120, multiple 2, ambiguous 1, w=0 | **birebir aynı** | ✅ |
+| 4a: reliable 12, single 9, blank 120, multiple 2, ambiguous 1, w=0 | **birebir aynı** | ✅ |
+| 5a: FAIL `QR_UNREADABLE` | **birebir aynı** | ✅ |
+| 6a: FAIL `ALIGNMENT_MISSING`, yalnız sol alt | **birebir aynı** | ✅ |
+| 7a: single 21, blank 120, multiple 2, ambiguous 1, w=1 | **birebir aynı** | ✅ |
+| c1: single 17, blank 97, multiple 3, ambiguous 27, w=2 | **birebir aynı** | ✅ |
+| c2: single 16, blank 95, multiple 4, ambiguous 29, w=2 | **birebir aynı** | ✅ |
+| c3: single 17, blank 99, multiple 3, ambiguous 25, w=2 | **birebir aynı** | ✅ |
+| c4: single 18, blank 101, multiple 3, ambiguous 22, w=2 | **birebir aynı** | ✅ |
+
+**Sonuç:** Önceki oturumun son durumu **birebir** tekrarlandı. Regresyon yok. Başlangıç çizgisi güvenilir; §8 tablosu referans alınabilir.
+
+**6a'nın bu oturumdaki tam hata metni (kanıt):**
+`ALIGNMENT_MISSING … Bulunamayan 1 kare var — sol alt kare: karenin bulunması gereken alan görüntünün dışında · 36 aday boyut veya dolgunluk ölçütünü geçmedi; 130 aday gölgeye veya çizgiye bağlıydı · 20 aday boyut veya dolgunluk ölçütünü geçmedi; 114 aday gölgeye veya çizgiye bağlıydı.`
+
+→ İlk cümle similarity tahmininin (`(9,2133)`) pencere kenarını görüntü dışına taşırdığını, sonraki iki grup ise similarity + salvage refit geçişlerinin ret sayılarını gösterir. **Bu, §10'daki ret dağılımıyla birebir aynıdır** (36/130 ve 20/114).
+
+## B. Durum özeti (bu oturumun başında)
+
+| Konu | Durum |
+|---|---|
+| Önceki oturumun kodu | **doğrulandı** — fast-forward ile devralındı, çalışıyor |
+| 9/11 foto uçtan uca | **doğrulandı** |
+| 5a `QR_UNREADABLE` | **doğrulandı** — foto kalitesi, kod sorunu değil |
+| 6a `ALIGNMENT_MISSING` | **açık** — veri raporu başlanmadı |
+| C-serisi 22–29 ambiguous | **açık** — kök neden doğrulanmış, kalıcı düzeltme yok |
+| Tam test paketi + build | **açık** — bu oturumda henüz koşulmadı |
+| PR | **açık** |
+| `123.md` | **açık** — çalışma alanında yok |
