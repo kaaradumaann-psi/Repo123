@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { FormDefinition, PageDefinition } from '../omr/omrTypes';
 import { FORM } from '../omr/formDefinition';
-import { HEADER_WIDTH_MM, headerExample, headerLines, headerRules } from '../form/headerLayout';
+import { HEADER_WIDTH_MM, headerLines, headerRules } from '../form/headerLayout';
 import type { HeaderLine } from '../form/headerLayout';
 
 /**
@@ -27,7 +27,7 @@ function lineStyle(line: HeaderLine): CSSProperties {
 export function PaperHeader({ page, definition }: { page: PageDefinition; definition: FormDefinition }) {
   const lines = headerLines(page, definition);
   const rules = headerRules(page, definition);
-  const example = headerExample(page, definition);
+  // “Örnek işaretleme” kaldırıldı — kayma yaratıyordu, artık çizilmiyor.
   return <div className="paper-header" data-header-width={HEADER_WIDTH_MM}>
     {rules.map(rule => <span key={rule.id} className="paper-rule" style={{ left: `${rule.xMm}mm`,
       top: `${rule.topMm}mm`, width: `${rule.widthMm}mm`, height: `${rule.heightMm}mm` }} />)}
@@ -35,13 +35,5 @@ export function PaperHeader({ page, definition }: { page: PageDefinition; defini
       {line.spans.map((span, index) => <span key={index} style={{ fontSize: `${span.sizePt}pt`,
         fontWeight: span.bold ? 700 : 400 }}>{span.text}</span>)}
     </span>)}
-    {example && <span className="paper-example" data-line="marking-example" style={{
-      right: `${FORM.pageWidthMm - example.rightMm}mm`, top: `${example.label.topMm}mm`,
-      lineHeight: `${example.label.boxMm}mm`, fontSize: `${example.label.sizePt}pt`, gap: `${example.gapMm}mm` }}>
-      <span className="paper-example-disc" aria-hidden="true" style={{
-        width: `${example.diameterMm}mm`, height: `${example.diameterMm}mm`,
-        marginTop: `${example.cyMm - example.diameterMm / 2 - example.label.topMm}mm` }} />
-      <span>{example.label.spans[0]?.text}</span>
-    </span>}
   </div>;
 }

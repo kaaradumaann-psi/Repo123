@@ -5,6 +5,7 @@ import { describeAlignmentFailures, detectAlignmentMarks } from './alignmentDete
 import type { AlignmentFailure } from './alignmentDetector';
 import { assessImageQuality, QUALITY_THRESHOLDS, toGrayscale } from './imageQuality';
 import { detectItemMarks } from './markDetector';
+import { refinePageCentres } from './bubbleRingRefinement';
 import { CANONICAL_PIXELS_PER_MM, CROP_TOLERANCE_MM, fitHomography, fitSimilarity, inspectFeatureContainment, inspectPageGeometry, MAX_CROP_TOLERANCE_MM, MAX_WARP_PIXELS, warpPerspective } from './perspectiveCorrection';
 import type { Homography } from './perspectiveCorrection';
 import { describeQrDisagreement, evaluateQrConsistency } from './alignmentVerification';
@@ -109,7 +110,20 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
       return { ...failure('POOR_QUALITY', quality.reasons.join(' ') || 'Görüntü kalitesi yetersiz; yanıtlar okunmadı.'), quality };
     }
     const allResponseAreas = page.items.flatMap(item => item.responseAreas);
-    const items = page.items.map(item => detectItemMarks(normalized, item, quality, allResponseAreas));
+    // Per-bubble ring refinement — OMRChecker auto_align’s bubble-level analogue.
+    // Each bubble’s printed ring (1.05–2.05 mm) is fitted with r(θ)=R+dx·cos+dy·sin.
+    // Offsets are small (≤0.55 mm), validated by RMS residual and sector completeness,
+    // and gracefully fall back to the nominal centre when the ring is missing,
+    // occluded, or dominated by real ink — so “en koyu pikseli bul → kaydır”
+    // never happens.  Mirrors OMRChecker’s block-shift search but at bubble
+    // granularity and with geometric, not photometric, evidence.
+    let ringOffsets: Map<string, { dx: number; dy: number }> | undefined;
+    try {
+      ringOffsets = refinePageCentres(normalized, allResponseAreas);
+      // If nothing refined, keep undefined to avoid map lookups in the hot loop.
+      if (ringOffsets.size === 0) ringOffsets = undefined;
+    } catch { ringOffsets = undefined; }
+    const items = page.items.map(item => detectItemMarks(normalized, item, quality, allResponseAreas, {}, ringOffsets));
     return {
       ok: true, pageId: page.pageId, pageNumber: page.pageNumber, batchId: identity.batchId,
       fingerprint: identity.fingerprint, items, quality, normalized,

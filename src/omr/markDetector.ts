@@ -20,9 +20,15 @@ const BUBBLE_BORDER_INSET_MM = .6;
 const OUTSIDE_BUBBLE_PROBE_MM = .45;
 const REFERENCE_RINGS = { backgroundInner: .35, backgroundOuter: .95, paperInner: 1.25, paperOuter: 1.85 };
 
+export type CentreOffset = { dx: number; dy: number };
+
 type InspectionOptions = {
   /** Diagnostic A/B switch only. Scanner code always uses the default isolated mask. */
   isolatePeripheral?: boolean;
+  /** Per-bubble ring-centre refinement (mm) from fitRingCenter; shifts all sampling coordinates. */
+  centreOffset?: CentreOffset;
+  /** Offsets of *neighbouring* bubbles, used to mask neighbour interiors at their refined positions. */
+  neighbourOffsets?: ReadonlyMap<string, CentreOffset>;
 };
 
 type SampledPixels = {
@@ -62,36 +68,44 @@ function radiusMm(area: ResponseArea) {
   return Math.min(area.width, area.height) / 2;
 }
 
-function centreMm(area: ResponseArea) {
-  return { x: area.x + area.width / 2, y: area.y + area.height / 2 };
+function centreMm(area: ResponseArea, offset?: CentreOffset) {
+  const base = { x: area.x + area.width / 2, y: area.y + area.height / 2 };
+  if (!offset) return base;
+  return { x: base.x + offset.dx, y: base.y + offset.dy };
 }
 
 /** Elliptical containment keeps the mask tied to the declared bubble geometry, not a loose ROI. */
-function insideBubble(area: ResponseArea, xMm: number, yMm: number, insetMm = 0) {
+function insideBubble(area: ResponseArea, xMm: number, yMm: number, insetMm = 0, offset?: CentreOffset) {
   const rx = Math.max(.05, area.width / 2 - insetMm), ry = Math.max(.05, area.height / 2 - insetMm);
-  const centre = centreMm(area);
+  const centre = centreMm(area, offset);
   return ((xMm - centre.x) / rx) ** 2 + ((yMm - centre.y) / ry) ** 2 <= 1;
 }
 
-function nearbyResponseAreas(area: ResponseArea, allAreas: readonly ResponseArea[]) {
-  const centre = centreMm(area), samplingRadius = radiusMm(area) + OUTSIDE_BUBBLE_PROBE_MM;
+function offsetFor(area: ResponseArea, offsets?: ReadonlyMap<string, CentreOffset>): CentreOffset | undefined {
+  return offsets?.get(area.responseId);
+}
+
+function nearbyResponseAreas(area: ResponseArea, allAreas: readonly ResponseArea[], centreOffset?: CentreOffset,
+  neighbourOffsets?: ReadonlyMap<string, CentreOffset>) {
+  const centre = centreMm(area, centreOffset), samplingRadius = radiusMm(area) + OUTSIDE_BUBBLE_PROBE_MM;
   const referenceRadius = radiusMm(area) + REFERENCE_RINGS.paperOuter;
   return allAreas.filter(candidate => {
     if (candidate.responseId === area.responseId) return false;
-    const other = centreMm(candidate);
+    const other = centreMm(candidate, offsetFor(candidate, neighbourOffsets));
     return Math.hypot(other.x - centre.x, other.y - centre.y) <= samplingRadius + referenceRadius + radiusMm(candidate);
   });
 }
 
-function isCoveredByNeighbour(xMm: number, yMm: number, neighbours: readonly ResponseArea[]) {
-  return neighbours.some(neighbour => insideBubble(neighbour, xMm, yMm));
+function isCoveredByNeighbour(xMm: number, yMm: number, neighbours: readonly ResponseArea[],
+  neighbourOffsets?: ReadonlyMap<string, CentreOffset>) {
+  return neighbours.some(neighbour => insideBubble(neighbour, xMm, yMm, 0, offsetFor(neighbour, neighbourOffsets)));
 }
 
 function collectRing(image: GrayImage, area: ResponseArea, allAreas: readonly ResponseArea[],
   innerRadiusMm: number, outerRadiusMm: number, kind: 'central' | 'peripheral' | 'reference',
-  isolate: boolean): SampledPixels {
-  const ppm = CANONICAL_PIXELS_PER_MM, centre = centreMm(area);
-  const neighbours = isolate ? nearbyResponseAreas(area, allAreas) : [];
+  isolate: boolean, centreOffset?: CentreOffset, neighbourOffsets?: ReadonlyMap<string, CentreOffset>): SampledPixels {
+  const ppm = CANONICAL_PIXELS_PER_MM, centre = centreMm(area, centreOffset);
+  const neighbours = isolate ? nearbyResponseAreas(area, allAreas, centreOffset, neighbourOffsets) : [];
   const cx = centre.x * ppm, cy = centre.y * ppm;
   const values: number[] = [];
   let excludedNeighborPixels = 0, excludedOutsideBubblePixels = 0, excludedBubbleBorderPixels = 0;
@@ -101,11 +115,11 @@ function collectRing(image: GrayImage, area: ResponseArea, allAreas: readonly Re
       const distance = Math.hypot(xMm - centre.x, yMm - centre.y);
       if (distance < innerRadiusMm || distance > outerRadiusMm) continue;
       if (kind === 'reference') {
-        if (isolate && isCoveredByNeighbour(xMm, yMm, neighbours)) excludedNeighborPixels++;
+        if (isolate && isCoveredByNeighbour(xMm, yMm, neighbours, neighbourOffsets)) excludedNeighborPixels++;
         else values.push(image.data[y * image.width + x]!);
         continue;
       }
-      if (isolate && isCoveredByNeighbour(xMm, yMm, neighbours)) {
+      if (isolate && isCoveredByNeighbour(xMm, yMm, neighbours, neighbourOffsets)) {
         excludedNeighborPixels++;
         continue;
       }
@@ -114,7 +128,7 @@ function collectRing(image: GrayImage, area: ResponseArea, allAreas: readonly Re
           excludedOutsideBubblePixels++;
           continue;
         }
-        if (!insideBubble(area, xMm, yMm, BUBBLE_BORDER_INSET_MM)) {
+        if (!insideBubble(area, xMm, yMm, BUBBLE_BORDER_INSET_MM, centreOffset)) {
           excludedBubbleBorderPixels++;
           continue;
         }
@@ -139,15 +153,17 @@ function normalizedDarkness(value: number, reference: number) {
 export function inspectResponse(image: GrayImage, area: ResponseArea,
   allResponseAreas: readonly ResponseArea[] = [area], options: InspectionOptions = {}): ResponseInspection {
   const isolatePeripheral = options.isolatePeripheral !== false;
+  const centreOffset = options.centreOffset;
+  const neighbourOffsets = options.neighbourOffsets;
   const radius = radiusMm(area);
   const centralRadius = Math.min(.9, radius * .55);
   const background = collectRing(image, area, allResponseAreas, radius + REFERENCE_RINGS.backgroundInner,
-    radius + REFERENCE_RINGS.backgroundOuter, 'reference', true).values;
+    radius + REFERENCE_RINGS.backgroundOuter, 'reference', true, centreOffset, neighbourOffsets).values;
   const paper = collectRing(image, area, allResponseAreas, radius + REFERENCE_RINGS.paperInner,
-    radius + REFERENCE_RINGS.paperOuter, 'reference', true).values;
+    radius + REFERENCE_RINGS.paperOuter, 'reference', true, centreOffset, neighbourOffsets).values;
   const backgroundLevel = percentile(background, .8), paperLevel = percentile(paper, .8);
   const reference = Math.max(backgroundLevel, paperLevel);
-  const disk = collectRing(image, area, allResponseAreas, 0, centralRadius, 'central', true).values;
+  const disk = collectRing(image, area, allResponseAreas, 0, centralRadius, 'central', true, centreOffset, neighbourOffsets).values;
   const invalid = !disk.length || !background.length || !paper.length ||
     backgroundLevel < QUALITY_THRESHOLDS.fatalTileBrightness || paperLevel < QUALITY_THRESHOLDS.fatalTileBrightness ||
     backgroundLevel < paperLevel * .75;
@@ -166,10 +182,10 @@ export function inspectResponse(image: GrayImage, area: ResponseArea,
   const peripheralOuter = Math.max(centralRadius, radius - BUBBLE_BORDER_INSET_MM);
   const peripheralProbeOuter = isolatePeripheral ? radius + OUTSIDE_BUBBLE_PROBE_MM : peripheralOuter;
   const peripheral = collectRing(image, area, allResponseAreas, centralRadius, peripheralProbeOuter,
-    'peripheral', isolatePeripheral);
+    'peripheral', isolatePeripheral, centreOffset, neighbourOffsets);
   // In diagnostic unmasked mode, preserve the historical band exactly; the probe is not measured.
   const peripheralValues = isolatePeripheral ? peripheral.values : collectRing(image, area, allResponseAreas,
-    centralRadius, peripheralOuter, 'central', false).values;
+    centralRadius, peripheralOuter, 'central', false, centreOffset, neighbourOffsets).values;
   let peripheralDarknessTotal = 0, peripheralCovered = 0;
   for (const value of peripheralValues) {
     const darkness = normalizedDarkness(value, reference);
@@ -188,13 +204,16 @@ export function inspectResponse(image: GrayImage, area: ResponseArea,
     excludedBubbleBorderPixels: peripheral.excludedBubbleBorderPixels, centralEvidence, peripheralEvidence };
 }
 
-export function measureResponse(image: GrayImage, area: ResponseArea): ResponseMeasurement {
-  return inspectResponse(image, area).measurement;
+export function measureResponse(image: GrayImage, area: ResponseArea, offset?: CentreOffset,
+  neighbourOffsets?: ReadonlyMap<string, CentreOffset>): ResponseMeasurement {
+  return inspectResponse(image, area, [area], { centreOffset: offset, neighbourOffsets }).measurement;
 }
 
 export function inspectItemResponses(image: GrayImage, item: ItemDefinition,
-  allResponseAreas: readonly ResponseArea[] = item.responseAreas): ResponseInspection[] {
-  return item.responseAreas.map(area => inspectResponse(image, area, allResponseAreas));
+  allResponseAreas: readonly ResponseArea[] = item.responseAreas,
+  offsets?: ReadonlyMap<string, CentreOffset>): ResponseInspection[] {
+  return item.responseAreas.map(area => inspectResponse(image, area, allResponseAreas,
+    { centreOffset: offsets?.get(area.responseId), neighbourOffsets: offsets }));
 }
 
 function decideItemMarks(inspected: readonly ResponseInspection[], item: ItemDefinition, quality: QualityReport,
@@ -230,13 +249,15 @@ function decideItemMarks(inspected: readonly ResponseInspection[], item: ItemDef
 }
 
 export function detectItemMarks(image: GrayImage, item: ItemDefinition, quality: QualityReport,
-  allResponseAreas: readonly ResponseArea[] = item.responseAreas, options: MarkDetectionOptions = {}): ItemReadResult {
-  return decideItemMarks(inspectItemResponses(image, item, allResponseAreas), item, quality, options);
+  allResponseAreas: readonly ResponseArea[] = item.responseAreas, options: MarkDetectionOptions = {},
+  offsets?: ReadonlyMap<string, CentreOffset>): ItemReadResult {
+  return decideItemMarks(inspectItemResponses(image, item, allResponseAreas, offsets), item, quality, options);
 }
 
 /** Test/debug-only structured output; the UI does not render these diagnostics. */
 export function debugItemMarks(image: GrayImage, item: ItemDefinition, quality: QualityReport,
-  allResponseAreas: readonly ResponseArea[] = item.responseAreas): MarkDebugReport {
-  const responses = inspectItemResponses(image, item, allResponseAreas);
+  allResponseAreas: readonly ResponseArea[] = item.responseAreas,
+  offsets?: ReadonlyMap<string, CentreOffset>): MarkDebugReport {
+  const responses = inspectItemResponses(image, item, allResponseAreas, offsets);
   return { responses, item: decideItemMarks(responses, item, quality) };
 }

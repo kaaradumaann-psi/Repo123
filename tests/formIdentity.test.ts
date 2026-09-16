@@ -30,7 +30,7 @@ test('identity, participant code and date fields are rendered on the first page 
       assert.ok(html.includes('data-identity="cover"'));
       assert.equal(html.split('data-line="date-slash-').length - 1, 2,
         'The date field must expose day/month/year separators.');
-      assert.ok(html.includes('data-line="marking-example"'), 'The marking example belongs to the instructions on the cover.');
+      assert.ok(!html.includes('data-line="marking-example"'), 'The marking example was removed (was shifted) — no page should carry it.');
       assert.ok(html.includes('data-line="rule-order"') && html.includes('data-line="rule-session"') &&
         html.includes('data-line="rule-qr"'),
         'Cover instructions must keep the column-order reminder, the single-session note and the QR note.');
