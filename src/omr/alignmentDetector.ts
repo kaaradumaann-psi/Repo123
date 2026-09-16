@@ -189,8 +189,16 @@ function searchAtThreshold(
     // kept when it is unmistakably the printed square itself (square-shaped, one square's worth of
     // ink, sitting on the prediction), so a shadow can never enlarge or shift a page anchor.
     if (marginInkFraction(image, left, top, width, height, head, threshold) > MARGIN_INK_LIMIT) {
+      // "One square's worth of ink" is measured on the whole component, not on the square window.
+      // A handheld photo stretches the sheet along one axis (measured on the reference set: the
+      // printed square arrives ~1.2x taller than wide), so the square window has to truncate the
+      // longer axis of a perfectly solid mark. The mark's own truncated edge rows then land in the
+      // margin frame that exists to detect *foreign* ink, and measuring the same truncated window
+      // again made the rescue unable to fire for a mark that is beyond doubt the printed square.
+      // The component's own ink is the honest measure: for a clean mark it is one square, while a
+      // square merged with a shadow or a rule line exceeds 1.3 squares and is still refused.
       const isPrintedSquare = predictionError <= radius * TOUCHING_PREDICTION_RATIO &&
-        squareFill >= TOUCHING_SQUARE_FILL && head.count >= area * .8 && head.count <= area * 1.3;
+        squareFill >= TOUCHING_SQUARE_FILL && count >= area * .8 && count <= area * 1.3;
       if (!isPrintedSquare) { rejected.unstable++; continue; }
     }
     candidates.push({ id: mark.id, center: headCenter, area: head.count, fill: windowFill, predictionError,

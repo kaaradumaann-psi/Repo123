@@ -296,3 +296,58 @@ Ham çıktı: `6A-OLCUM-RAPORU.txt` (üretici: `scripts/report-6a.mts`, üretikt
 **Çürütülen hipotez:** §10'daki "anizotropik perspektif kareyi 24w×36h yapmış → squareFill ≈ 0.81 < 0.84" **YANLIŞ**. Ölçülen: squareFill = **1.000** (testi geçiyor), gerçek bbox 33×41 (24×36 değil). Başarısızlık squareFill'de değil, **margin**'da.
 
 **Doğrulananlar (özet):** 6a'nın landscape saklanması hata değil ✅ · yön normalizasyonu matematiksel ve ampirik olarak doğru ✅ · salvage refit mekanizması **tasarlandığı gibi çalışıyor** (66 px'e iniyor) ✅ · sorun **filtre düzeyinde** ve tam olarak `squareWindow`'un izotropik olmasında ✅ · arama yarıçapını büyütmek çözmez (§12'de doğru tahmin edilmiş; kare artık pencerenin içinde ve yine de reddediliyor) ✅
+
+## D. 6a düzeltmesi — ÇÖZÜLDÜ ve doğrulandı
+
+### D.1 Yapılan değişiklik (tek kelime)
+
+`src/omr/alignmentDetector.ts`, `searchAtThreshold()` içindeki `isPrintedSquare` kurtarması:
+
+```diff
+-        squareFill >= TOUCHING_SQUARE_FILL && head.count >= area * .8 && head.count <= area * 1.3;
++        squareFill >= TOUCHING_SQUARE_FILL && count >= area * .8 && count <= area * 1.3;
+```
+
+**Eşik değiştirilmedi. Yeni sabit eklenmedi. Yeni fallback eklenmedi. Yeni arama penceresi yok.** Yalnızca "bir karelik mürekkep" ölçüsü artık **pencerenin** değil **bileşenin** kendi toplam mürekkebi.
+
+### D.2 Neden bu, ve neden daha geniş bir düzeltme DEĞİL
+
+Kurtarma zaten şunu soruyor: *"bu aday, tartışmasız basılı kare mi?"* Üç şartı var: tahmine yakın (dPred ≤ 0.25·radius), kare (squareFill ≥ 0.95), ve **bir karelik mürekkep**. Üçüncü şart `head.count` ile ölçülüyordu — yani karenin *kesilmiş* penceresinin mürekkebi. Kesme yüzünden bu sayı 1089'a düşüyor, ama gerçek işaret 1328 px. Kurtarma kendi kendini engelliyordu.
+
+`count` (bileşenin tamamı) doğru ölçüdür:
+- temiz işarette ≈ 1 kare → kurtarma çalışır ✅
+- gölge/çizgi ile birleşmiş adayda > 1.3 kare → kurtarma **yine reddeder** ✅ (üst sınır artık daha sıkı, çünkü kesilmiş pencere yerine tüm bileşen sayılıyor)
+
+**Denenip GERİ ALINAN yaklaşım (tekrarlanmasın):** `squareWindow`'u eksen-başına (anizotropi-farkında) yapmak. 6a'yı da düzeltiyordu, **ama** `tests/captureGates.test.ts` test 13'ü kırıyordu ("a printed square bridged to the paper edge by a hairline…" → `ALIGNMENT_MISSING`, "sol üst kare: 1 aday kare biçiminde değildi") ve c2 çıktısını kaydırıyordu (blank 95→97, multiple 4→3, ambiguous 29→28). Pencere, şerit boyunca büyüdüğü için `squareFill` 0.53'e düşüyordu. `git checkout` ile geri alındı.
+
+### D.3 Doğrulama (tam ölçüm)
+
+**a) 11 fotoğraf — temel çizgiye (`a11280a` öncesi §8) karşı:**
+
+| Foto | Değişiklik |
+|---|---|
+| 1a, 2a, 3a, 4a, 7a, c1, c2, c3, c4 | **birebir aynı** (hiçbir sayı oynamadı) ✅ |
+| 5a | `FAIL QR_UNREADABLE` — **birebir aynı** (foto kalitesi, beklenen) ✅ |
+| **6a** | `ALIGNMENT_MISSING` → **`ok=true`**, page 1, `{single 21, blank 120, multiple 2, ambiguous 1}`, warnings 1, 1779 ms ✅ |
+
+**b) Artık 10/11 fotoğraf uçtan uca okunuyor.** (Kabul kriteri: 5a'nın yeniden çekme mesajıyla kalması kabul edilebilir.)
+
+**c) Doğruluk kanıtı (yalnızca "hata vermiyor" değil):** 6a ve 7a **aynı cevap kâğıdı**. İki çıktı, madde madde karşılaştırıldı:
+- İkisinde de tam olarak **24** boş-olmayan madde var.
+- **24 maddenin 24'ünde status VE choice birebir aynı.** Yalnızca `conf` değerleri farklı (iki ayrı fotoğraf; 6 tanesi karakter karakter bile aynı).
+- Madde **#90 her ikisinde de `ambiguous`** (bilinen gerçekten silik işaret — §5'te görsel olarak doğrulanmıştı).
+→ 6a artık **doğru** okunuyor; uydurma bir kabul değil.
+
+**d) Tam test paketi:** `npx tsx --test tests/*.test.ts` → **98 test, 98 pass, 0 fail** (71.9 s).
+Özellikle korunan korumalar: test 13 (hairline köprü → okunmalı) ✅, test 14 (geniş gölge bandı → sayfa çapası olmamalı) ✅, "hollow alignment square" ✅, "same-area circular blobs" ✅.
+
+**e) `npx tsc --noEmit`** → temiz ✅
+
+### D.4 6a durumu: ÇÖZÜLDÜ
+
+- Landscape saklanması: **hata değildi, doğrulandı** ✅
+- Yön normalizasyonu: **matematiksel + ampirik olarak doğru (bit-exact)** ✅
+- Salvage refit: **tasarlandığı gibi çalışıyor** (tahmin hatası 1392 px → 66 px) ✅
+- Kök neden: **ölçüldü ve kanıtlandı** (izotropik pencere + kesilmiş kenar satırlarının margin çerçevesini kirletmesi) ✅
+- Düzeltme: **tek kelime**, hedefli, regresyonsuz ✅
+- Sonuç: **6a okunuyor ve 7a ile madde madde tutarlı** ✅
