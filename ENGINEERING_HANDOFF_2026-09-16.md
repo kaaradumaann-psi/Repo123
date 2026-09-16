@@ -351,3 +351,64 @@ Kurtarma zaten şunu soruyor: *"bu aday, tartışmasız basılı kare mi?"* Üç
 - Kök neden: **ölçüldü ve kanıtlandı** (izotropik pencere + kesilmiş kenar satırlarının margin çerçevesini kirletmesi) ✅
 - Düzeltme: **tek kelime**, hedefli, regresyonsuz ✅
 - Sonuç: **6a okunuyor ve 7a ile madde madde tutarlı** ✅
+
+## E. C-serisi — ÖLÇÜM ve kök neden (henüz düzeltme YOK)
+
+Ham çıktı: `C-SERISI-OLCUM-RAPORU.txt` (üretici: `scripts/analyze-c-series.mts`, `scripts/probe-c-ring.mts`).
+**Bu bölümde hiçbir eşik değiştirilmedi. Kod değişikliği yapılmadı.**
+
+### E.1 Ölçüm 1 — kalan ambiguity nereden geliyor?
+
+c1–c4, 103 ambiguous maddenin her biri, D ve Y alanlarının **halka fit durumuna** göre sınıflandırıldı:
+
+| Durum | Madde sayısı | Payı |
+|---|---|---|
+| **En az bir alanda `halka bulunamadı`** (tamamlık <%70) | **87** | **%84.5** |
+| **`kayma çok büyük`** içeren (offset > 1.6 mm) | 33 | %32 |
+| Yalnız `kayma çok büyük` (NOT_FOUND yok) | **12** | **%11.7** |
+| Yalnız `ok`/`ok` (her iki halka bulundu) | 3 | %2.9 |
+
+Dağılım: `NOTFOUND+NOTFOUND 60`, `OVER+NOTFOUND 20`, `ok+NOTFOUND 7`, `ok+OVER 11`, `ok+ok 3`, `ok+NOM 1`, `OVER+OVER 1`.
+
+**Sonuç: kalan ambiguity'nin baskın nedeni `kayma çok büyük` DEĞİL, `halka bulunamadı`.** Kabul edilen offset'ler: medyan ≈0.5 mm, p90 ≈1.2 mm, max 1.55–1.59 mm (yani 1.6 mm bütçesinin hemen altında).
+
+### E.2 Ölçüm 2 — bütçeyi 2.2 mm yapmak bu sınıfı ÇÖZEMEZ
+
+`‖1.60 − d‖` … `1.60 + d` geometrisiyle, **sabit** 1.2–2.05 mm bant içinde kalan halka oranı (saf geometri, görüntüden bağımsız):
+
+| Kayma d | Bantta kalan halka | ≥%70 kapısı |
+|---|---|---|
+| 0.00 mm | %100 | geçer |
+| 0.25 mm | %100 | geçer |
+| **0.50 mm** | **%66** | **ARTIK GEÇMEZ** |
+| 0.75 mm | %40 | geçmez |
+| 1.00 mm | %29 | geçmez |
+| 1.60 mm | %20 | geçmez |
+| 2.20 mm | %17 | geçmez |
+
+→ **`maxOffsetMm = 1.6 mm` pratikte ulaşılamaz bir bütçedir**: offset kapısına gelmeden, tamamlık kapısı çok önce kapanır. Bütçeyi 2.2 mm yapmak `NOT_FOUND` sınıfının hiçbir üyesini kurtarmaz; yalnız offset kapısını yukarı taşır (yarım satır aralığı 2.125 mm'ye yaklaşır).
+
+**Kullanıcının 7. talimatı ("2.2 mm'yi güvenlik analizi yapmadan production'a alma") ölçümle doğrulandı: o değişiklik yararsız olurdu.**
+**Handoff §11.2b'deki "2.0–2.1 mm ya da 2.2 mm + tamamlık ≥%85" önerisi de yanlıştır** — tamamlık kapısını yükseltmek aynı bantta daha da çok reddeder.
+
+### E.3 Ölçüm 3 — asıl yapısal kusur (kod okumasıyla)
+
+`bubbleRingRefinement.ts` → `searchRingOffset()`: aday her ofset için, yarıçap `r` **aday merkeze göre** 1.2–2.05 mm bandında tarandığı için bant aslında doğru yerde. **Ancak** tarama içinde:
+
+```ts
+if (isCoveredByNeighbour(xMm, yMm, neighbours)) continue;   // komşu balonun alanına düşen prob noktası atlanır
+```
+
+ile komşu balonların alanına düşen prob noktaları **atlanıyor**. Aday ofset yarım satır aralığına (~2.1 mm) yaklaştığında, aday merkez etrafındaki 1.6 mm yarıçaplı prob çemberi **zorunlu olarak** komşu balonların alanına girer; o sektörlerde `bestDarkness` −1 kalır → sektör "hit" sayılmaz → tamamlık %70'e ulaşamaz.
+
+**Yani arama, yarım satır aralığına yakın kaymaları yapısal olarak tasdik edemez** — bu bir hata değil, komşuya atlamayı önleyen güvenlik özelliğinin tamamlık kapısıyla çarpışmasıdır. Bu yüzden kayma ~2 mm'ye çıktığında hem nominal aday (halka banttan çıkar) hem de kaydırılmış aday (prob çemberi komşuya girer) başarısız olur.
+
+### E.4 Durum ayrımı
+
+- **DOĞRULANDI:** kalan ambiguity baskın olarak `halka bulunamadı` (87/103 madde, %84.5).
+- **DOĞRULANDI:** 2.2 mm bütçesi bu sınıfı çözmez (E.2 tablosu, saf geometri).
+- **DOĞRULANDI:** 1.6 mm bütçesi tamamlık kapısı yüzünden ulaşılamaz.
+- **DOĞRULANDI:** komşu-alanı dışlama, büyük kaymalarda tamamlığı yapısal olarak sınırlar (E.3, kod).
+- **HİPOTEZ (enstrümanla doğrulanmadı):** banttaki gerçek lokal kaymanın büyüklüğü. `probe-c-ring.mts` ile geniş arama yapıldı ancak **bu enstrüman güvenilir değil**: dolu (işaretli) bir balonun merkezi koyu olduğu için şablon skoru ~0 çıkıyor ve arama komşu boş balonun daha temiz halkasına atlayabiliyor (kontrol maddelerinde de 0.6–3.4 mm arası tutarsız sonuçlar verdi). Bu yüzden oradaki 2.0–2.6 mm sayıları **gerçek kayma olarak alınmamalıdır**.
+- **AÇIK:** 22–29 ambiguous'un kalıcı düzeltmesi yapılmadı. Yönü: ya daha iyi bir geometri modeli (lokal ~2 mm kaymanın fiziksel nedeni hâlâ belirsiz), ya da bu maddelerin gerçek "elle inceleme" kalemi olarak kabulü.
+- **AÇIK:** komşu-alanı dışlamasının tamamlık üzerindeki nicel etkisi enstrümante edilmedi (bir sonraki adım).
