@@ -20,6 +20,7 @@ type IconName =
   | 'close'
   | 'checkCircle'
   | 'arrowRight'
+  | 'menu'
   | 'sparkles';
 
 const paths: Record<IconName, string> = {
@@ -44,6 +45,7 @@ const paths: Record<IconName, string> = {
   close: 'M18 6 6 18M6 6l12 12',
   checkCircle: 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
   arrowRight: 'M5 12h14M12 5l7 7-7 7',
+  menu: 'M4 7h16M4 12h16M4 17h16',
   sparkles: 'm12 3 1.91 5.89L20 10.8l-4.59 3.96L16.82 21 12 17.27 7.18 21l1.41-6.24L4 10.8l6.09-1.91L12 3z',
 };
 

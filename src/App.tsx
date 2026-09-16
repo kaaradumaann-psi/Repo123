@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
-import { AuthGate } from './components/AuthGate';
+import { useAuthSession } from './auth/useAuthSession';
+import { LandingPage } from './components/landing/LandingPage';
+import { LoginModal } from './components/LoginModal';
 import { AdminPanel } from './components/AdminPanel';
 import { PageNavigation } from './components/PageNavigation';
 import { FormPreview } from './components/FormPreview';
@@ -15,13 +17,91 @@ import { displayName } from './auth/userDisplay';
 
 type Workspace = 'form' | 'scan' | 'admin';
 
-type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
+type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void; onHome: () => void };
 
+type Route = 'landing' | 'workspace';
+
+/**
+ * Single-route product experience: public landing → login modal → analysis
+ * workspace. The workspace (scanner, form prep, admin) is unchanged; only the
+ * entry point moved from a blocking auth gate to the landing page.
+ */
 export default function App() {
-  return <AuthGate>{(user, onLogout) => <SignedInApp user={user} onLogout={onLogout} />}</AuthGate>;
+  const auth = useAuthSession();
+  const [route, setRoute] = useState<Route>('landing');
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [enterWorkspaceAfterLogin, setEnterWorkspaceAfterLogin] = useState(false);
+
+  // A signed-out (or deactivated) account always falls back to the landing page.
+  useEffect(() => {
+    if (!auth.checking && !auth.user) setRoute('landing');
+  }, [auth.checking, auth.user]);
+
+  if (auth.checking) {
+    return (
+      <main className="landing-loading" aria-label="Yükleniyor">
+        <div className="landing-loading-card">
+          <div className="spinner" />
+          <p>Oturum doğrulanıyor, lütfen bekleyin...</p>
+        </div>
+      </main>
+    );
+  }
+
+  const openLogin = (thenEnterWorkspace: boolean) => {
+    setEnterWorkspaceAfterLogin(thenEnterWorkspace);
+    auth.clearError();
+    setLoginOpen(true);
+  };
+
+  const handleAnalyze = () => {
+    if (auth.user) {
+      setRoute('workspace');
+      window.scrollTo({ top: 0 });
+    } else {
+      openLogin(true);
+    }
+  };
+
+  const handleLogout = () => {
+    void auth.signOut().catch(() => {});
+    setRoute('landing');
+  };
+
+  if (auth.user && route === 'workspace') {
+    return <SignedInApp user={auth.user} onLogout={handleLogout} onHome={() => { setRoute('landing'); window.scrollTo({ top: 0 }); }} />;
+  }
+
+  return (
+    <>
+      <LandingPage
+        user={auth.user}
+        onLogin={() => openLogin(false)}
+        onLogout={handleLogout}
+        onAnalyze={handleAnalyze}
+      />
+      <LoginModal
+        open={loginOpen}
+        error={auth.error}
+        busy={false}
+        configured={auth.configured}
+        onClose={() => setLoginOpen(false)}
+        onClearError={auth.clearError}
+        onSubmit={async (email, password) => {
+          await auth.signIn(email, password);
+          setLoginOpen(false);
+          if (enterWorkspaceAfterLogin) {
+            setRoute('workspace');
+            window.scrollTo({ top: 0 });
+          }
+          setEnterWorkspaceAfterLogin(false);
+        }}
+      />
+    </>
+  );
 }
 
-function SignedInApp({ user, onLogout }: SignedInAppProps) {
+function SignedInApp({ user, onLogout, onHome }: SignedInAppProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [printNote, setPrintNote] = useState<'' | 'busy' | 'opened' | 'manual'>('');
   const [workspace, setWorkspace] = useState<Workspace>('scan');
@@ -110,6 +190,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
 
           {/* Sağ Kullanıcı Profili & Çıkış */}
           <div className="header-user">
+            <button type="button" className="btn-home" onClick={onHome} title="Tanıtım sayfasına dön">
+              <Icon name="left" size={14} />
+              <span>Ana Sayfa</span>
+            </button>
             <div className="user-profile-summary">
               <div className="user-avatar-circle">
                 {user.firstName.charAt(0)}{user.lastName.charAt(0)}

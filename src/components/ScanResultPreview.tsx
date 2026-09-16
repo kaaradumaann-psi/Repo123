@@ -72,13 +72,13 @@ function ItemCrop({
 
   return (
     <figure className="scan-crop-figure">
-      <div className="scan-crop-map">
+      <div className="scan-crop-map" aria-hidden="true">
         {item.responseAreas.map(area => (
           <span
             key={area.responseId}
             style={{ left: `${((area.x + area.width / 2 - rect.x) / rect.width) * 100}%` }}
           >
-            {area.choiceId} ({area.label})
+            {area.choiceId}
           </span>
         ))}
       </div>
@@ -103,9 +103,14 @@ function ItemCrop({
         ))}
       </div>
       <figcaption className="crop-meta-caption">
-        Madde {item.itemNumber} (Optik Form {item.columnIndex + 1}. Sütun, {item.rowIndex + 1}. Satır)
+        Madde {item.itemNumber} · {item.columnIndex + 1}. sütun, {item.rowIndex + 1}. satır · normalize görüntüden kırpıntı
       </figcaption>
-      {error && <p className="status-banner error-banner">{error}</p>}
+      {error && (
+        <p className="status-banner error-banner" role="alert">
+          <Icon name="alert" size={16} />
+          <span>{error}</span>
+        </p>
+      )}
     </figure>
   );
 }
@@ -120,6 +125,16 @@ const STATUS_OPTIONS = [
   ['invalid', 'Geçersiz'],
   ['unread', 'Okunamadı'],
 ] as const;
+
+const STATUS_TONE: Record<string, 'ok' | 'warn' | 'bad' | 'muted'> = {
+  reliable: 'ok',
+  single: 'warn',
+  ambiguous: 'warn',
+  multiple: 'bad',
+  invalid: 'bad',
+  blank: 'muted',
+  unread: 'muted',
+};
 
 export function ScanResultPreview({ definition, page, onReview, onRemove }: ScanResultPreviewProps) {
   const expected = definition.pages.find(p => p.pageNumber === page.pageNumber)!;
@@ -162,27 +177,36 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
     }
   };
 
+  const statusTone = STATUS_TONE[resolved?.original?.status ?? 'unread'] ?? 'muted';
+  const qualityPct = Math.round(page.quality.score * 100);
+
   return (
-    <section className="scan-review-panel card-elevated" aria-labelledby={`${id}-title`}>
-      <div className="section-header-row">
+    <section className="scan-review-panel ws-card" aria-labelledby={`${id}-title`}>
+      <div className="ws-card-head">
         <div>
-          <span className="section-badge badge-primary">Sayfa İnceleme</span>
-          <h3 id={`${id}-title`} className="section-heading">
-            {page.pageNumber}. Sayfa Cevap Detayları
+          <p className="ws-eyebrow">Sayfa inceleme</p>
+          <h3 id={`${id}-title`} className="ws-review-title">
+            {page.pageNumber}. Sayfa · Madde {expected.firstItem}–{expected.lastItem}
           </h3>
-          <p className="section-subtext">
-            Kaynak dosya: <strong>{page.sourceName}</strong> · Şüpheli veya belirsiz okumaları doğrudan optik görsel üzerinden kontrol edin.
+          <p className="ws-source-line">
+            Kaynak: <strong>{page.sourceName}</strong>
+            <span className="ws-source-sep" aria-hidden="true">·</span>
+            {unresolved.length > 0 ? (
+              <span className="ws-todo-inline">{unresolved.length} madde kontrol bekliyor</span>
+            ) : (
+              <span className="ws-done-inline">Bekleyen kontrol yok</span>
+            )}
           </p>
         </div>
         <button type="button" className="btn-secondary btn-danger-soft btn-sm" onClick={onRemove}>
           <Icon name="trash" size={15} />
-          <span>Sayfayı Sil</span>
+          <span>Sayfayı Kaldır</span>
         </button>
       </div>
 
       <div className="scan-review-columns">
-        {/* Sol Kolon: Sayfa Önizleme & Kalite Metrikleri */}
-        <aside className="scan-preview-aside">
+        {/* Sol: sayfa önizleme ve kalite */}
+        <aside className="scan-preview-aside" aria-label="Sayfa önizleme ve görüntü kalitesi">
           <div className="normalized-sheet-card">
             <img src={page.previewUrl} alt={`${page.pageNumber}. sayfa düzeltilmiş önizleme`} />
             {row && (
@@ -199,38 +223,47 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
             )}
           </div>
 
+          <div className={`ws-quality${page.quality.ok ? '' : ' is-low'}`}>
+            <div className="ws-quality-head">
+              <span className="ws-quality-label">Görüntü kalitesi</span>
+              <strong className="ws-quality-score">%{qualityPct}</strong>
+            </div>
+            <div className="ws-quality-bar" aria-hidden="true">
+              <span style={{ width: `${qualityPct}%` }} />
+            </div>
+            <dl className="ws-quality-metrics">
+              <div>
+                <dt>Parlaklık</dt>
+                <dd>{page.quality.metrics.brightness.toFixed(1)}</dd>
+              </div>
+              <div>
+                <dt>Netlik</dt>
+                <dd>{page.quality.metrics.laplacianVariance.toFixed(1)}</dd>
+              </div>
+              <div>
+                <dt>Çözünürlük</dt>
+                <dd>{page.quality.metrics.pixelsPerMm.toFixed(1)} px/mm</dd>
+              </div>
+            </dl>
+          </div>
+
           {!page.quality.ok && page.quality.reasons.length > 0 && (
-            <div className="status-banner warning-banner" role="status">
-              <p>Otomatik güvenilir cevap üretilmedi; maddeleri elle doğrulayın.</p>
-              {page.quality.reasons.map(reason => <p key={reason}>{reason}</p>)}
+            <div className="status-banner warning-banner ws-quality-reasons" role="status">
+              <Icon name="alert" size={18} />
+              <div>
+                <p>
+                  <strong>Otomatik güvenilir cevap üretilmedi;</strong> maddeleri tek tek doğrulayın.
+                </p>
+                {page.quality.reasons.map(reason => (
+                  <p key={reason}>{reason}</p>
+                ))}
+              </div>
             </div>
           )}
-
-          <details className="quality-dropdown">
-            <summary>
-              <Icon name="sparkles" size={15} />
-              <span>Görsel Kalite Puanı: <strong>%{(page.quality.score * 100).toFixed(0)}</strong></span>
-            </summary>
-            <div className="quality-details-list">
-              <div className="q-metric">
-                <span>Parlaklık:</span>
-                <strong>{page.quality.metrics.brightness.toFixed(1)}</strong>
-              </div>
-              <div className="q-metric">
-                <span>Netlik Skoru:</span>
-                <strong>{page.quality.metrics.laplacianVariance.toFixed(1)}</strong>
-              </div>
-              <div className="q-metric">
-                <span>Çözünürlük:</span>
-                <strong>{page.quality.metrics.pixelsPerMm.toFixed(1)} px/mm</strong>
-              </div>
-            </div>
-          </details>
         </aside>
 
-        {/* Sağ Kolon: Madde Filtreleme ve Düzeltme Alanı */}
+        {/* Sağ: madde listesi ve inceleme */}
         <div className="scan-items-workspace">
-          {/* Filtre Kontrolleri */}
           <div className="review-filters-bar">
             <div className="filter-group">
               <label htmlFor={`${id}-filter`}>Filtre</label>
@@ -285,19 +318,28 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
             </div>
           </div>
 
-          {/* Madde Butonları Tablosu */}
+          <ul className="ws-legend" aria-label="Durum renkleri">
+            {STATUS_OPTIONS.filter(([val]) => val !== 'all').map(([val, label]) => (
+              <li key={val}>
+                <span className={`ws-legend-dot status-${val}`} aria-hidden="true" />
+                <span>{label}</span>
+              </li>
+            ))}
+          </ul>
+
           <div className="items-selector-grid" aria-label="İncelenecek maddeler">
             {filtered.slice(start, start + pageSize).map(item => {
               const itemResult = resolveItem(item, page);
               const isSelected = selected?.itemId === item.itemId;
               const hasReview = Boolean(itemResult.review);
-              const originalStatus = itemResult.original?.status;
+              const originalStatus = itemResult.original?.status ?? 'unread';
 
               return (
                 <button
                   type="button"
+                  aria-current={isSelected ? 'true' : undefined}
                   key={item.itemId}
-                  className={`item-select-chip ${isSelected ? 'active' : ''} ${hasReview ? 'reviewed' : ''} status-${originalStatus || 'none'}`}
+                  className={`item-select-chip ${isSelected ? 'active' : ''} ${hasReview ? 'reviewed' : ''} status-${originalStatus}`}
                   onClick={() => setSelectedId(item.itemId)}
                 >
                   <span className="item-num">{item.itemNumber}</span>
@@ -313,11 +355,21 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
 
           {!filtered.length && (
             <div className="empty-state-card">
+              <div className="empty-state-icon" aria-hidden="true">
+                <Icon name="search" size={26} />
+              </div>
+              <h4>Sonuç bulunamadı</h4>
               <p>Bu filtre kriterine uygun madde bulunamadı.</p>
             </div>
           )}
 
-          {/* Sayfalama */}
+          {filtered.length > 0 && (
+            <p className="ws-list-count" role="status">
+              {filtered.length} madde listeleniyor
+              {selected ? ` · Madde ${selected.itemNumber} seçili` : ''}
+            </p>
+          )}
+
           {filtered.length > pageSize && (
             <div className="review-pagination-bar">
               <button
@@ -329,7 +381,8 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
                   setOffset(start - pageSize);
                 }}
               >
-                Önceki maddeler
+                <Icon name="left" size={14} />
+                <span>Önceki maddeler</span>
               </button>
               <span className="page-indicator">
                 {start + 1}–{Math.min(start + pageSize, filtered.length)} / {filtered.length}
@@ -343,54 +396,97 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
                   setOffset(start + pageSize);
                 }}
               >
-                Sonraki maddeler
+                <span>Sonraki maddeler</span>
+                <Icon name="right" size={14} />
               </button>
             </div>
           )}
 
-          {/* Seçilen Maddenin Optik Kırpılmış Görüntüsü ve Cevap Seçimi */}
           {selected && resolved && (
-            <div className="item-inspection-box card-elevated" aria-labelledby={`${id}-item`}>
+            <div className="item-inspection-box" aria-labelledby={`${id}-item`}>
               <div className="inspection-header">
                 <h4 id={`${id}-item`} className="inspection-title">
-                  Madde {selected.itemNumber} <span>{readStatusLabel(resolved.original)}</span>
+                  Madde {selected.itemNumber}
                 </h4>
-                <div className="badge-chip badge-default">
+                <span className={`ws-status-badge tone-${statusTone}`}>
                   {readStatusLabel(resolved.original)}
-                </div>
+                </span>
               </div>
 
-              {/* Taranmış gerçek kırpıntı */}
               <ItemCrop item={selected} page={page} definition={definition} onRendered={setRenderedCrop} />
 
-              <p className="original-reading-info">
-                <strong>Özgün okuma:</strong>{' '}
-                {resolved.original
-                  ? `${resolved.original.choiceId ?? 'Yanıt seçilmedi'} · ${resolved.original.reason}`
-                  : 'Algoritma bu madde için sonuç üretmedi.'}
-              </p>
+              <dl className="ws-evidence">
+                <div className="ws-evidence-row">
+                  <dt>Özgün okuma</dt>
+                  <dd>
+                    {resolved.original
+                      ? <>{resolved.original.choiceId ?? 'Yanıt seçilmedi'} · {resolved.original.reason}</>
+                      : 'Algoritma bu madde için sonuç üretmedi.'}
+                  </dd>
+                </div>
+                {resolved.original && (
+                  <div className="ws-evidence-row">
+                    <dt>İşaret gücü</dt>
+                    <dd>
+                      %{Math.round(resolved.original.confidence * 100)}
+                      <span className="ws-evidence-note">sezgisel ölçüm, olasılık değil</span>
+                    </dd>
+                  </div>
+                )}
+              </dl>
 
-              <fieldset className="scan-review-controls" disabled={!canReview}>
-                <legend className="visually-hidden">İşaretleme Düzeltmesi</legend>
-                {choices.map(area => (
+              {resolved.original && resolved.original.measurements.length > 0 ? (
+                <div className="ws-measures">
+                  <p className="ws-measures-title">Seçenek koyuluk ölçümleri</p>
+                  <ul className="ws-measure-list">
+                    {choices.map(area => {
+                      const measurement = resolved.original!.measurements.find(m => m.responseId === area.responseId);
+                      const pct = Math.round((measurement?.darkness ?? 0) * 100);
+                      return (
+                        <li key={area.responseId}>
+                          <span className="ws-measure-choice">{area.choiceId}</span>
+                          <span className="ws-measure-bar" aria-hidden="true">
+                            <span style={{ width: `${pct}%` }} />
+                          </span>
+                          <span className="ws-measure-val">%{pct}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : (
+                <p className="ws-no-measure">Bu madde için seçenek ölçümü üretilmedi.</p>
+              )}
+
+              <div className="ws-verdict">
+                <p className="ws-verdict-prompt">Kırpıntıyı inceleyip kararı onaylayın:</p>
+                <fieldset className="scan-review-controls" disabled={!canReview}>
+                  <legend className="visually-hidden">İşaretleme Düzeltmesi</legend>
+                  {choices.map(area => (
+                    <button
+                      type="button"
+                      key={area.responseId}
+                      className={`choice-action-btn ${resolved.review?.choiceId === area.choiceId ? 'selected' : ''}`}
+                      onClick={() => choose(area.choiceId)}
+                      aria-label={`Madde ${selected.itemNumber}: ${area.choiceId}, ${area.label} olarak incele`}
+                    >
+                      {area.choiceId} · {area.label}
+                    </button>
+                  ))}
                   <button
                     type="button"
-                    key={area.responseId}
-                    className={`choice-action-btn ${resolved.review?.choiceId === area.choiceId ? 'selected' : ''}`}
-                    onClick={() => choose(area.choiceId)}
-                    aria-label={`Madde ${selected.itemNumber}: ${area.choiceId}, ${area.label} olarak incele`}
+                    className={`choice-action-btn blank-btn ${resolved.review?.choiceId === null ? 'selected' : ''}`}
+                    onClick={() => choose(null)}
                   >
-                    {area.choiceId} · {area.label}
+                    Boş olarak onayla
                   </button>
-                ))}
-                <button
-                  type="button"
-                  className={`choice-action-btn blank-btn ${resolved.review?.choiceId === null ? 'selected' : ''}`}
-                  onClick={() => choose(null)}
-                >
-                  Boş olarak onayla
-                </button>
-              </fieldset>
+                </fieldset>
+              </div>
+              {!canReview && (
+                <p className="ws-crop-wait" role="status">
+                  Satır görüntüsü hazırlanıyor; butonlar kırpıntı ekrana geldiğinde aktifleşir.
+                </p>
+              )}
 
               <p className="scan-review-provenance" role="status">
                 {resolved.review
@@ -402,12 +498,13 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
 
               {resolved.review && (
                 <div className="undo-review-row">
+                  <span className="undo-info">Manuel inceleme uygulandı.</span>
                   <button
                     type="button"
                     className="btn-text-danger"
                     onClick={() => onReview(selected.itemId, undefined)}
                   >
-                    Manuel incelemeyi geri al
+                    Geri al
                   </button>
                 </div>
               )}
