@@ -61,17 +61,15 @@ test('every PDF header line fits between the content edge and the QR area', () =
   }
 });
 
-test('the marking key and the sample bubble share one line without touching', () => {
+test('the marking key fits alone without the removed sample bubble', () => {
   const page = formDefinition.pages[0]!;
-  const example = headerExample(page, formDefinition);
-  assert.ok(example);
   const key = headerLines(page, formDefinition).find(line => line.id === 'marking-key')!;
   const keyWidth = lineWidthMm(fonts, key);
-  const captionWidth = lineWidthMm(fonts, example.label);
-  const exampleWidth = captionWidth + example.gapMm + example.diameterMm;
-  assert.ok(keyWidth + 2 + exampleWidth <= HEADER_WIDTH_MM,
-    `örnek işaretleme anahtarla çakışıyor: ${(keyWidth + exampleWidth).toFixed(1)} mm / ${HEADER_WIDTH_MM} mm`);
-  assert.ok(left + keyWidth < example.rightMm - exampleWidth, 'The sample bubble must stay right of the key.');
+  // “Örnek işaretleme” dolgulu dairesi kaldırıldı — artık yalnızca anahtar sığmalı.
+  assert.ok(keyWidth + 2 <= HEADER_WIDTH_MM,
+    `marking key çok geniş: ${keyWidth.toFixed(1)} mm / ${HEADER_WIDTH_MM} mm`);
+  // Geriye uyum için headerExample null döndürmeli, hiçbir yerde çizilmemeli.
+  assert.equal(headerExample(page, formDefinition), null);
 });
 
 test('no header line or rule reaches the answer grid, the QR area or the page edge', () => {
@@ -122,9 +120,12 @@ test('the HTML header renders the same boxes the PDF writes', () => {
   for (const text of ['MMPI-566', `OPTİK CEVAP FORMU / ${formDefinition.version}`, 'D: Doğru', 'Y: Yanlış',
     'Her maddede yalnızca bir dairenin içini tamamen doldurun.', 'El yazısı kimlik yalnızca bu sayfadadır.',
     'Numaraları sütun boyunca aşağıya doğru izleyin.', 'Dört sayfayı aynı oturumda yazdırın.',
-    'Sağ üstteki QR kodu sayfaları otomatik eşleştirir.', 'Örnek işaretleme']) {
+    'Sağ üstteki QR kodu sayfaları otomatik eşleştirir.']) {
     assert.ok(html.includes(text), `Başlıkta "${text}" yok.`);
   }
+  // "Örnek işaretleme" kaldırıldı — kayma yaratıyordu, başlıkta olmamalı.
+  assert.ok(!html.includes('Örnek işaretleme'), '"Örnek işaretleme" başlıkta olmamalı — kaldırıldı.');
+  assert.ok(!html.includes('paper-example'), 'paper-example elementi kaldırıldı.');
   // The instruction that used to be wider than the sheet is gone from both renderers.
   assert.ok(!jsonContainsLongReminder(html), 'Eski 259 mm\'lik yönerge cümlesi geri gelmemeli.');
 });

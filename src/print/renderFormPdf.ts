@@ -1,5 +1,5 @@
 import { createPageQr } from '../form/pageIdentity';
-import { baselineMm, headerExample, headerLines, headerRules, MM_PER_PT } from '../form/headerLayout';
+import { baselineMm, headerLines, headerRules, MM_PER_PT } from '../form/headerLayout';
 import { FORM_COPYRIGHT_LINE } from '../form/attribution';
 import { COLUMN_WIDTH_MM, FORM } from '../omr/formDefinition';
 import type { FormDefinition, PageDefinition } from '../omr/omrTypes';
@@ -42,19 +42,6 @@ class Sheet {
       `${p(cx - kappa, cy + r)} ${p(cx - path, cy + kappa)} ${p(cx - path, cy)} c`,
       `${p(cx - path, cy - kappa)} ${p(cx - kappa, cy - r)} ${p(cx, cy - r)} c`,
       `${p(cx + kappa, cy - r)} ${p(cx + path, cy - kappa)} ${p(cx + path, cy)} c`, 'S');
-  }
-
-  /** Filled disc for the marking example. Uses `f`, so verify-pdf does not count it as a bubble. */
-  fillCircle(cx: number, cyTop: number, diameter: number): void {
-    const radius = diameter / 2;
-    const cy = FORM.pageHeightMm - cyTop, kappa = 0.5522847498 * radius, r = round(radius);
-    const p = (x: number, y: number) => `${num(x)} ${num(y)}`;
-    this.ops.push('0 g',
-      `${p(cx + radius, cy)} m`,
-      `${p(cx + radius, cy + kappa)} ${p(cx + kappa, cy + r)} ${p(cx, cy + r)} c`,
-      `${p(cx - kappa, cy + r)} ${p(cx - radius, cy + kappa)} ${p(cx - radius, cy)} c`,
-      `${p(cx - radius, cy - kappa)} ${p(cx - kappa, cy - r)} ${p(cx, cy - r)} c`,
-      `${p(cx + kappa, cy - r)} ${p(cx + radius, cy - kappa)} ${p(cx + radius, cy)} c`, 'f');
   }
 
   /** Rendered width of a label in millimetres. */
@@ -122,14 +109,9 @@ function drawHeader(sheet: Sheet, page: PageDefinition, definition: FormDefiniti
       x += widths[index]!;
     });
   }
-  const example = headerExample(page, definition);
-  if (example) {
-    const { label, cyMm, diameterMm, gapMm, rightMm } = example;
-    const caption = label.spans[0]!.text;
-    const captionWidth = sheet.width(caption, label.sizePt, false);
-    sheet.text(caption, rightMm, baselineMm(label.topMm, label.sizePt, label.boxMm), label.sizePt, { align: 'right' });
-    sheet.fillCircle(rightMm - captionWidth - gapMm - diameterMm / 2, cyMm, diameterMm);
-  }
+  // “Örnek işaretleme” dolgulu dairesi kaldırıldı — başlıkta kayma (35 mm sağ rezerv)
+  // ve adaylar için kafa karışıklığı yaratıyordu.  Artık çizim yok; `headerExample`
+  // geriye uyum için `null` döndürür.
 }
 
 function drawGrid(sheet: Sheet, page: PageDefinition): void {

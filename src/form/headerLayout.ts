@@ -36,9 +36,6 @@ export const HEADER_LAYOUT = Object.freeze({
   identityColumnGapMm: 4,
   identityDateWidthMm: 30,
   instructionsTopMm: 44,
-  exampleDiameterMm: 2.5,
-  exampleLabelSizePt: 6.5,
-  exampleGapMm: 1.5,
   /** Guard band for the test that measures real glyph advances. */
   maxTextWidthMm: 132,
 });
@@ -202,20 +199,15 @@ export function identityColumns(): { id: string; xMm: number; widthMm: number }[
   ];
 }
 
-/** The filled sample bubble and its caption, on the same line as the marking key.
- * The caption width is measured by whichever renderer draws it, so the caller places the
- * bubble immediately left of the caption; the marking key keeps its own left edge. */
-export function headerExample(page: HeaderPageInfo, definition: FormDefinition): HeaderExample | null {
-  if (page.pageNumber !== 1) return null;
-  const key = headerLines(page, definition).find(line => line.id === 'marking-key');
-  if (!key) return null;
-  const layout = HEADER_LAYOUT;
-  return { cyMm: key.topMm + (key.boxMm - layout.exampleDiameterMm) / 2,
-    diameterMm: layout.exampleDiameterMm, gapMm: layout.exampleGapMm,
-    rightMm: FORM.contentLeftMm + HEADER_WIDTH_MM,
-    label: { id: 'marking-example', spans: [{ text: 'Örnek işaretleme', sizePt: layout.exampleLabelSizePt, bold: false }],
-      sizePt: layout.exampleLabelSizePt, boxMm: lineBoxMm(layout.exampleLabelSizePt),
-      xMm: FORM.contentLeftMm + HEADER_WIDTH_MM, topMm: key.topMm, align: 'right', visibility: 'first' } };
+/**
+ * Eski “Örnek işaretleme” dolgulu dairesi artık basılmıyor — hem PDF’te hem
+ * HTML’de formu neredeyse hiç kullanmayan adayları yanıltıyor ve başlıkta
+ * 35 mm’lik sağ rezerv nedeniyle “D: Doğru Y: Yanlış” satırının kaymış
+ * görünmesine neden oluyordu.  Kaldırıldı; fonksiyon geriye uyum için
+ * `null` döndürmeye devam ediyor fakat hiçbir çağrıcı artık çizim yapmıyor.
+ */
+export function headerExample(_page: HeaderPageInfo, _definition: FormDefinition): HeaderExample | null {
+  return null;
 }
 
 /** Lowest printed pixel of the header; the answer grid starts at `FORM.gridTopMm`. */
