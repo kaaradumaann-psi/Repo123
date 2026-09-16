@@ -1,5 +1,5 @@
 import type { AlignmentMark, GrayImage, Point } from './omrTypes';
-import { mapPoint } from './perspectiveCorrection';
+import { fitHomographyLeastSquares, mapPoint } from './perspectiveCorrection';
 import type { Homography } from './perspectiveCorrection';
 
 export type DetectedAlignmentMark = { id: string; center: Point; area: number; fill: number; predictionError: number };
@@ -65,7 +65,11 @@ function locateMark(image: GrayImage, mark: AlignmentMark, prediction: Homograph
     return { ok: false, reason: `kare görüntüde beklenen boyutta değil (ölçek ${scale.toFixed(1)})` };
   }
   const distanceMm = Math.hypot(mmCenter.x - qrCenter.x, mmCenter.y - qrCenter.y);
-  const radius = Math.min(500, Math.ceil(scale * (8 + distanceMm * .09)));
+  // The prediction extrapolates from the 26 mm QR symbol; under strong
+  // perspective its scale error grows with distance, so the window widens
+  // linearly. Candidate filters (square fill, solidity, margin, size) still
+  // reject everything that is not a printed square of the right size.
+  const radius = Math.min(500, Math.ceil(scale * (8 + distanceMm * .22)));
   const left = Math.max(0, Math.floor(predicted.x - radius)), top = Math.max(0, Math.floor(predicted.y - radius));
   const right = Math.min(image.width - 1, Math.ceil(predicted.x + radius)), bottom = Math.min(image.height - 1, Math.ceil(predicted.y + radius));
   const width = right - left + 1, height = bottom - top + 1;
@@ -185,8 +189,16 @@ function searchAtThreshold(
     // kept when it is unmistakably the printed square itself (square-shaped, one square's worth of
     // ink, sitting on the prediction), so a shadow can never enlarge or shift a page anchor.
     if (marginInkFraction(image, left, top, width, height, head, threshold) > MARGIN_INK_LIMIT) {
+      // "One square's worth of ink" is measured on the whole component, not on the square window.
+      // A handheld photo stretches the sheet along one axis (measured on the reference set: the
+      // printed square arrives ~1.2x taller than wide), so the square window has to truncate the
+      // longer axis of a perfectly solid mark. The mark's own truncated edge rows then land in the
+      // margin frame that exists to detect *foreign* ink, and measuring the same truncated window
+      // again made the rescue unable to fire for a mark that is beyond doubt the printed square.
+      // The component's own ink is the honest measure: for a clean mark it is one square, while a
+      // square merged with a shadow or a rule line exceeds 1.3 squares and is still refused.
       const isPrintedSquare = predictionError <= radius * TOUCHING_PREDICTION_RATIO &&
-        squareFill >= TOUCHING_SQUARE_FILL && head.count >= area * .8 && head.count <= area * 1.3;
+        squareFill >= TOUCHING_SQUARE_FILL && count >= area * .8 && count <= area * 1.3;
       if (!isPrintedSquare) { rejected.unstable++; continue; }
     }
     candidates.push({ id: mark.id, center: headCenter, area: head.count, fill: windowFill, predictionError,
@@ -211,9 +223,18 @@ function searchAtThreshold(
  */
 export function detectAlignmentMarks(image: GrayImage, marks: readonly AlignmentMark[],
   predictions: readonly Homography[], qrCenter: Point,
-  onFailure?: (failure: AlignmentFailure) => void): DetectedAlignmentMark[] | null {
+  onFailure?: (failure: AlignmentFailure) => void,
+  salvage?: { mm: readonly Point[]; px: readonly Point[] }): DetectedAlignmentMark[] | null {
   if (marks.length !== 4 || predictions.length < 1) return null;
   const detected: DetectedAlignmentMark[] = [];
+  const missing: { mark: AlignmentMark; reasons: string[]; lastError: unknown }[] = [];
+  const accept = (candidate: DetectedAlignmentMark): string | null => {
+    if (detected.some(previous => Math.hypot(previous.center.x - candidate.center.x, previous.center.y - candidate.center.y) < Math.sqrt(candidate.area))) {
+      return 'başka bir kareyle aynı konumda görünüyor';
+    }
+    detected.push(candidate);
+    return null;
+  };
   for (const mark of marks) {
     let found: DetectedAlignmentMark | null = null, lastError: unknown;
     const reasons: string[] = [];
@@ -224,18 +245,51 @@ export function detectAlignmentMarks(image: GrayImage, marks: readonly Alignment
         reasons.push(result.reason);
       } catch (error) { lastError = error; }
     }
-    if (!found) {
-      if (lastError !== undefined && !reasons.length) throw lastError;
-      onFailure?.({ markId: mark.id, reason: [...new Set(reasons)].join(' · ') || 'bulunamadı' });
-      return null;
+    if (found) {
+      const duplicate = accept(found);
+      if (duplicate) { onFailure?.({ markId: mark.id, reason: duplicate }); return null; }
+      continue;
     }
-    if (detected.some(previous => Math.hypot(previous.center.x - found!.center.x, previous.center.y - found!.center.y) < Math.sqrt(found!.area))) {
-      onFailure?.({ markId: mark.id, reason: 'başka bir kareyle aynı konumda görünüyor' });
-      return null;
-    }
-    detected.push(found);
+    if (lastError !== undefined && !reasons.length) throw lastError;
+    missing.push({ mark, reasons, lastError });
   }
-  return detected;
+  // Salvage pass: strong perspective can throw the QR-only prediction of a far
+  // corner hundreds of pixels off (the 26 mm symbol cannot constrain the
+  // projective terms). Squares already found span the whole sheet, so a
+  // projective refit over them plus the QR corners predicts the missing square
+  // tightly. Missing squares still must pass every locateMark filter — a
+  // prediction is never substituted for a measurement.
+  if (missing.length && salvage && detected.length >= 2) {
+    const physical = detected.map(found => {
+      const def = marks.find(candidate => candidate.id === found.id)!;
+      return { x: def.x + def.width / 2, y: def.y + def.height / 2 };
+    });
+    try {
+      const refit = fitHomographyLeastSquares([...salvage.mm, ...physical],
+        [...salvage.px, ...detected.map(found => ({ x: found.center.x, y: found.center.y }))]);
+      const still: typeof missing = [];
+      for (const entry of missing) {
+        let found: DetectedAlignmentMark | null = null;
+        try {
+          const result = locateMark(image, entry.mark, refit, qrCenter);
+          if (result.ok) found = result.mark;
+          else entry.reasons.push(result.reason);
+        } catch (error) { entry.lastError = error; }
+        if (found && !accept(found)) continue;
+        still.push(entry);
+      }
+      missing.length = 0;
+      missing.push(...still);
+    } catch { /* first-pass reasons stand */ }
+  }
+  if (missing.length) {
+    for (const entry of missing) {
+      if (entry.lastError !== undefined && !entry.reasons.length) throw entry.lastError;
+      onFailure?.({ markId: entry.mark.id, reason: [...new Set(entry.reasons)].join(' · ') || 'bulunamadı' });
+    }
+    return null;
+  }
+  return marks.map(mark => detected.find(found => found.id === mark.id)!);
 }
 
 /** Turns detector failures into one actionable Turkish sentence. */

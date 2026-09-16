@@ -86,7 +86,7 @@ açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 94 test
+npm test            # 101 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -183,7 +183,9 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |
 | `src/print/*` | PDF yazıcısı, TrueType gömme ve form sayfası çizimi (tarayıcı gerektirmez). |
 | `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
-| `scripts/*` | Tek dosya derleme, PDF üretimi, PDF doğrulaması. |
+| `scripts/build.mjs` | Tek dosya production derlemesi (`optik-form.html` / `dist/index.html`). |
+| `scripts/generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts` | Yazdırılabilir form PDF üretimi ve bağımsız doğrulama. |
+| `scripts/run-photos.mts` | Gerçek telefon fotoğrafları üzerinde `analyzePage` regresyon harness'i (production import zincirinde yok). |
 
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
 paylaşır; koordinat kaynağı tektir.

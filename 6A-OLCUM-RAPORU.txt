@@ -1,0 +1,814 @@
+
+==============================================================================
+PART A — landscape→upright rotation: mathematical verification
+==============================================================================
+A1  rotateGray90(turns=1) mapping law  xu = H-1-ys , yu = xs
+    dimensions 7×4 → 4×7
+    every source pixel accounted for: YES
+A2  unrotatePoint inverts the forward law on all 28 pixels: YES
+A3  direction probe, black at stored (0,0) and (3,0); dest 2×4
+      rotateGray90(t=1) → (1,0) (1,3)
+      IM -rotate 90     → (1,0) (1,3)
+      IM -transpose     → (0,0) (0,3)
+
+A4  real photo 6a.jpg
+    browser feed (long side 2800)   : 2550×1507 Uint8ClampedArray
+    grayscale                                   : 2550×1507
+    rotateGray90(t=1)                           : 1507×2550
+    IM -rotate 90 (PGM, lossless)               : 1507×2550
+    differing pixels: 0 (max |Δ| = 0)
+    ⇒ rotateGray90(turns=1) == ImageMagick -rotate 90 : BIT-EXACT
+A5  turns=1 (90°): 1507×2550 vs IM 1507×2550 → BIT-EXACT
+A5  turns=2 (180°): 2550×1507 vs IM 2550×1507 → BIT-EXACT
+A5  turns=3 (270°): 1507×2550 vs IM 1507×2550 → BIT-EXACT
+
+A6  quarterTurnsToUpright on the four cardinal poses:
+      top edge → +x  (already upright)   → k=0 expected 0 OK
+      top edge → +y  (rotate 3 CW)       → k=3 expected 3 OK
+      top edge → −x  (rotate 2 CW)       → k=2 expected 2 OK
+      top edge → −y  (rotate 1 CW)       → k=1 expected 1 OK
+      ⇒ all four cardinal poses: CORRECT
+
+==============================================================================
+PART B — upright 6a: bottom-left candidate census
+==============================================================================
+stored (browser feed)          : 2550×1507
+QR decoded with turns=0 (clockwise quarter turns on the stored image)
+quarterTurnsToUpright(corners)=1 → totalTurns=1
+upright page (after isolatePaper): 1507×2550  (origin 0,0)
+QR corners in upright frame      : (1159.3,237.6) (1297.9,243.5) (1297.7,410.2) (1156.6,408.2)
+
+predictions: [0] projective fitHomography(QR corners)   [1] fitSimilarity(QR corners)
+
+marks located by the first pass: top-left, top-right, bottom-right
+   top-left      138.1, 170.8
+   top-right     1357.4, 185.0
+   bottom-right  1339.2, 2345.2
+
+REFERENCE — the three squares that WERE accepted (same filters, same image):
+   top-left      via homography @thr 140  centre (138,171) local  bbox 35×42  ink 1407  head 1321  winFill 0.915  sqFill 0.993  solid 1.000  margin 0%  area(1 square) 2220px²  ink/area 0.63  head/area 0.60
+   top-right     via homography @thr 140  centre (95,94) local  bbox 32×39  ink 1197  head 992  winFill 0.969  sqFill 1.000  solid 1.000  margin 8%  area(1 square) 1152px²  ink/area 1.04  head/area 0.86
+   bottom-right  via similarity @thr 140  centre (458,651) local  bbox 34×40  ink 1293  head 1120  winFill 0.969  sqFill 0.998  solid 1.000  margin 11%  area(1 square) 1301px²  ink/area 0.99  head/area 0.86
+
+salvage refit built from 4 QR corners + 3 located square(s)
+
+missing mark: bottom-left  physical centre (12.5, 284.5) mm
+
+GROUND TRUTH (filter-free flood fill, x≤400, y≥2200, threshold 140):
+   bottom-left printed square centre = (120, 2366)  bbox 33×41  ink 1328
+   distance to similarity prediction (9,2133) = 258 px
+   distance to salvage refit       (79,2418) = 66 px
+   distance to projective prediction (-574,3572) = 1392 px
+   zoomed 6× crop around it → /tmp/6a-report/square-zoom.png  (region x 30..210, y 2276..2456)
+
+--- homography (prediction 0)
+    predicted centre         : (-573.7, 3572.5)
+    implied square area      : 5794 px²  (side 76.1 px, scale 15.22 px/mm)
+    distance to QR centre    : 302.2 mm → search radius 500 px
+    REJECTED: search window is -72×-522 px — the prediction lands outside the image
+
+--- similarity (prediction 1)
+    predicted centre         : (9.2, 2132.7)
+    implied square area      : 1301 px²  (side 36.1 px, scale 7.21 px/mm)
+    distance to QR centre    : 302.2 mm → search radius 500 px
+    search window            : x 0..510, y 1632..2549  (511×918 px)
+    background (85th pct)    : 255   otsu: 174   thresholds: 140, 179, 174
+      threshold 140: components 215 | blob 0 | window-unstable 178 | size 36, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 179]
+      threshold 179: components 155 | blob 0 | window-unstable 118 | size 36, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 119]
+      threshold 174: components 166 | blob 0 | window-unstable 129 | size 36, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 130]
+    outcome: REJECTED at every threshold; last threshold 174 → no accepted candidate
+    ⇒ the ACTUAL printed square (component containing the ground-truth centre) in this pass:
+        centroid (120,2366)  bbox 33×41  ink 1328
+        head ink 1089/1353  windowFill 1.000  clipped false  squareFill 1.000  solid 1.000  margin 40%
+        reached stage: reject-margin → unstable: margin ink 40% > 15% and not the unmistakable printed square
+        component bbox x 104..136 (33 px), y 2346..2386 (41 px)
+        square window  x 104..136 (33 px), y 2350..2382 (33 px)  → component rows left outside the window: 8, columns: 0
+        margin frame: 84 samples, dark 34 → from THIS mark's own pixels 21, from genuine foreign ink 13  e.g. (104,2346)v163 (104,2386)v150 (106,2346)v143 (108,2346)v144 (112,2346)v142 (116,2346)v175
+        ⇒ margin test is triggered by the mark's own 21 pixels, not by an occluding line/shadow
+        filter budget for this prediction: area 1301 px² → head ink must be in [651, 2342], windowFill ≥ 0.43, squareFill ≥ 0.84, solid ≥ 0.92, margin ≤ 15%, dPred ≤ 450 px
+    stage histogram at threshold 174: reject-margin×1, reject-size×36, reject-window×129
+    every component, deepest-filtering first:
+      #115  ctr ( 120,2366)  bbox  34× 41  ink  1363  head  1122  winFill 0.971  sqFill 1.000  margin 24%  dPred 258px  → unstable: margin ink 24% > 15% and not the unmistakable printed square
+           distance to similarity prediction 258 px | to salvage refit 66 px
+      # 33  ctr ( 353,1895)  bbox  24× 27  ink   516  head   516  winFill 0.614  → size: head ink 516 < 651 (0.5× area)
+           distance to similarity prediction 418 px | to salvage refit 590 px
+      # 37  ctr ( 352,1929)  bbox  23× 27  ink   504  head   504  winFill 0.599  → size: head ink 504 < 651 (0.5× area)
+           distance to similarity prediction 399 px | to salvage refit 560 px
+      # 36  ctr ( 460,1927)  bbox  23× 28  ink   485  head   485  winFill 0.577  → size: head ink 485 < 651 (0.5× area)
+           distance to similarity prediction 496 px | to salvage refit 621 px
+      # 16  ctr ( 462,1756)  bbox  23× 28  ink   374  head   374  winFill 0.445  → size: head ink 374 < 651 (0.5× area)
+           distance to similarity prediction 589 px | to salvage refit 764 px
+      #  4  ctr ( 463,1655)  bbox  23× 28  ink   358  head   358  winFill 0.426  → size: head ink 358 < 651 (0.5× area); windowFill 0.426 < 0.43
+           distance to similarity prediction 659 px | to salvage refit 854 px
+      #  5  ctr ( 356,1656)  bbox  24× 27  ink   356  head   356  winFill 0.423  → size: head ink 356 < 651 (0.5× area); windowFill 0.423 < 0.43
+           distance to similarity prediction 590 px | to salvage refit 810 px
+      #  8  ctr ( 462,1688)  bbox  23× 28  ink   329  head   329  winFill 0.391  → size: head ink 329 < 651 (0.5× area); windowFill 0.391 < 0.43
+           distance to similarity prediction 635 px | to salvage refit 824 px
+      # 49  ctr ( 352,2031)  bbox  24× 28  ink   183  head   183  winFill 0.218  → size: head ink 183 < 651 (0.5× area); windowFill 0.218 < 0.43
+           distance to similarity prediction 358 px | to salvage refit 473 px
+      # 61  ctr ( 350,2132)  bbox  23× 28  ink   180  head   180  winFill 0.214  → size: head ink 180 < 651 (0.5× area); windowFill 0.214 < 0.43
+           distance to similarity prediction 341 px | to salvage refit 394 px
+      # 64  ctr ( 458,2165)  bbox  23× 28  ink   179  head   179  winFill 0.213  → size: head ink 179 < 651 (0.5× area); windowFill 0.213 < 0.43
+           distance to similarity prediction 450 px | to salvage refit 455 px
+      # 65  ctr ( 350,2167)  bbox  24× 28  ink   179  head   179  winFill 0.213  → size: head ink 179 < 651 (0.5× area); windowFill 0.213 < 0.43
+           distance to similarity prediction 343 px | to salvage refit 369 px
+      # 69  ctr ( 349,2202)  bbox  24× 28  ink   179  head   179  winFill 0.213  → size: head ink 179 < 651 (0.5× area); windowFill 0.213 < 0.43
+           distance to similarity prediction 347 px | to salvage refit 346 px
+      # 57  ctr ( 351,2098)  bbox  24× 28  ink   178  head   178  winFill 0.212  → size: head ink 178 < 651 (0.5× area); windowFill 0.212 < 0.43
+           distance to similarity prediction 344 px | to salvage refit 420 px
+      # 45  ctr ( 352,1997)  bbox  24× 28  ink   177  head   177  winFill 0.210  → size: head ink 177 < 651 (0.5× area); windowFill 0.210 < 0.43
+           distance to similarity prediction 369 px | to salvage refit 501 px
+      # 52  ctr ( 459,2062)  bbox  23× 27  ink   176  head   176  winFill 0.209  → size: head ink 176 < 651 (0.5× area); windowFill 0.209 < 0.43
+           distance to similarity prediction 455 px | to salvage refit 520 px
+      # 41  ctr ( 352,1963)  bbox  24× 27  ink   175  head   175  winFill 0.208  → size: head ink 175 < 651 (0.5× area); windowFill 0.208 < 0.43
+           distance to similarity prediction 383 px | to salvage refit 530 px
+      # 29  ctr ( 354,1861)  bbox  24× 27  ink   174  head   174  winFill 0.207  → size: head ink 174 < 651 (0.5× area); windowFill 0.207 < 0.43
+           distance to similarity prediction 439 px | to salvage refit 621 px
+      # 68  ctr ( 458,2199)  bbox  23× 27  ink   174  head   174  winFill 0.207  → size: head ink 174 < 651 (0.5× area); windowFill 0.207 < 0.43
+           distance to similarity prediction 454 px | to salvage refit 438 px
+      # 60  ctr ( 458,2131)  bbox  23× 28  ink   173  head   173  winFill 0.206  → size: head ink 173 < 651 (0.5× area); windowFill 0.206 < 0.43
+           distance to similarity prediction 449 px | to salvage refit 475 px
+      # 53  ctr ( 351,2064)  bbox  23× 27  ink   172  head   172  winFill 0.205  → size: head ink 172 < 651 (0.5× area); windowFill 0.205 < 0.43
+           distance to similarity prediction 349 px | to salvage refit 446 px
+      # 56  ctr ( 459,2096)  bbox  23× 28  ink   172  head   172  winFill 0.205  → size: head ink 172 < 651 (0.5× area); windowFill 0.205 < 0.43
+           distance to similarity prediction 451 px | to salvage refit 498 px
+      # 25  ctr ( 355,1826)  bbox  24× 29  ink   170  head   168  winFill 0.200  → size: head ink 168 < 651 (0.5× area); windowFill 0.200 < 0.43
+           distance to similarity prediction 462 px | to salvage refit 653 px
+      # 48  ctr ( 459,2029)  bbox  23× 28  ink   170  head   170  winFill 0.202  → size: head ink 170 < 651 (0.5× area); windowFill 0.202 < 0.43
+           distance to similarity prediction 462 px | to salvage refit 544 px
+      # 40  ctr ( 459,1961)  bbox  23× 28  ink   169  head   169  winFill 0.201  → size: head ink 169 < 651 (0.5× area); windowFill 0.201 < 0.43
+           distance to similarity prediction 481 px | to salvage refit 594 px
+      # 32  ctr ( 461,1893)  bbox  23× 28  ink   163  head   163  winFill 0.194  → size: head ink 163 < 651 (0.5× area); windowFill 0.194 < 0.43
+           distance to similarity prediction 511 px | to salvage refit 649 px
+      # 12  ctr ( 462,1722)  bbox  23× 28  ink   161  head   161  winFill 0.191  → size: head ink 161 < 651 (0.5× area); windowFill 0.191 < 0.43
+           distance to similarity prediction 611 px | to salvage refit 794 px
+      # 44  ctr ( 459,1995)  bbox  23× 28  ink   161  head   161  winFill 0.191  → size: head ink 161 < 651 (0.5× area); windowFill 0.191 < 0.43
+           distance to similarity prediction 470 px | to salvage refit 568 px
+      # 17  ctr ( 356,1758)  bbox  23× 28  ink   160  head   160  winFill 0.190  → size: head ink 160 < 651 (0.5× area); windowFill 0.190 < 0.43
+           distance to similarity prediction 511 px | to salvage refit 715 px
+      # 28  ctr ( 462,1859)  bbox  23× 28  ink   160  head   160  winFill 0.190  → size: head ink 160 < 651 (0.5× area); windowFill 0.190 < 0.43
+           distance to similarity prediction 529 px | to salvage refit 677 px
+      #  9  ctr ( 356,1690)  bbox  24× 27  ink   159  head   159  winFill 0.189  → size: head ink 159 < 651 (0.5× area); windowFill 0.189 < 0.43
+           distance to similarity prediction 562 px | to salvage refit 779 px
+      # 21  ctr ( 355,1793)  bbox  23× 28  ink   159  head   159  winFill 0.189  → size: head ink 159 < 651 (0.5× area); windowFill 0.189 < 0.43
+           distance to similarity prediction 485 px | to salvage refit 683 px
+      # 13  ctr ( 356,1724)  bbox  23× 27  ink   155  head   155  winFill 0.184  → size: head ink 155 < 651 (0.5× area); windowFill 0.184 < 0.43
+           distance to similarity prediction 536 px | to salvage refit 747 px
+      # 73  ctr ( 350,2236)  bbox  23× 29  ink   154  head   154  winFill 0.183  → size: head ink 154 < 651 (0.5× area); windowFill 0.183 < 0.43
+           distance to similarity prediction 356 px | to salvage refit 326 px
+      # 24  ctr ( 462,1824)  bbox  23× 28  ink   153  head   153  winFill 0.182  → size: head ink 153 < 651 (0.5× area); windowFill 0.182 < 0.43
+           distance to similarity prediction 548 px | to salvage refit 706 px
+      # 20  ctr ( 462,1790)  bbox  23× 28  ink   149  head   149  winFill 0.177  → size: head ink 149 < 651 (0.5× area); windowFill 0.177 < 0.43
+           distance to similarity prediction 568 px | to salvage refit 735 px
+      # 72  ctr ( 458,2232)  bbox  23× 29  ink   137  head   133  winFill 0.158  → size: head ink 133 < 651 (0.5× area); windowFill 0.158 < 0.43
+           distance to similarity prediction 460 px | to salvage refit 422 px
+      # 93  ctr ( 340,2304)  bbox 340×  9  ink   712  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 373 px | to salvage refit 285 px
+      #149  ctr ( 366,2362)  bbox  33× 10  ink   155  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 424 px | to salvage refit 292 px
+      # 39  ctr ( 247,1932)  bbox  11× 18  ink    91  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 311 px | to salvage refit 514 px
+      # 74  ctr ( 245,2239)  bbox  10× 19  ink    89  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 259 px | to salvage refit 244 px
+      # 35  ctr ( 248,1898)  bbox  10× 17  ink    87  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 335 px | to salvage refit 546 px
+      # 66  ctr ( 244,2171)  bbox  10× 18  ink    84  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 238 px | to salvage refit 297 px
+      # 43  ctr ( 246,1966)  bbox  10× 17  ink    82  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 290 px | to salvage refit 482 px
+      # 26  ctr ( 239,1830)  bbox   9× 19  ink    81  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 380 px | to salvage refit 609 px
+      # 59  ctr ( 234,2103)  bbox  10× 17  ink    80  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 227 px | to salvage refit 351 px
+      # 27  ctr ( 249,1830)  bbox  10× 19  ink    79  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 386 px | to salvage refit 612 px
+      # 54  ctr ( 247,2067)  bbox  10× 18  ink    79  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 247 px | to salvage refit 389 px
+      # 30  ctr ( 238,1864)  bbox  10× 19  ink    78  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 353 px | to salvage refit 576 px
+      # 58  ctr ( 245,2102)  bbox  10× 18  ink    78  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 238 px | to salvage refit 357 px
+      # 62  ctr ( 234,2137)  bbox  10× 18  ink    77  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 225 px | to salvage refit 321 px
+      # 38  ctr ( 236,1933)  bbox  10× 18  ink    74  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 302 px | to salvage refit 509 px
+      # 10  ctr ( 240,1694)  bbox  10× 18  ink    73  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 496 px | to salvage refit 741 px
+      # 34  ctr ( 237,1898)  bbox  10× 18  ink    73  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 327 px | to salvage refit 543 px
+      # 67  ctr ( 234,2171)  bbox  10× 17  ink    73  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 228 px | to salvage refit 291 px
+      # 42  ctr ( 235,1966)  bbox  10× 17  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 281 px | to salvage refit 478 px
+      # 50  ctr ( 235,2034)  bbox  10× 18  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 246 px | to salvage refit 414 px
+      # 75  ctr ( 234,2240)  bbox  10× 17  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 249 px | to salvage refit 236 px
+      # 76  ctr ( 484,2249)  bbox  55×  3  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 489 px | to salvage refit 439 px
+      # 14  ctr ( 240,1728)  bbox  10× 18  ink    71  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 466 px | to salvage refit 708 px
+      # 22  ctr ( 239,1796)  bbox  10× 18  ink    71  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 408 px | to salvage refit 642 px
+      # 63  ctr ( 245,2136)  bbox  10× 18  ink    71  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 236 px | to salvage refit 327 px
+      #  6  ctr ( 240,1660)  bbox  10× 18  ink    70  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 526 px | to salvage refit 775 px
+      # 18  ctr ( 240,1762)  bbox  10× 18  ink    70  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 437 px | to salvage refit 675 px
+      # 70  ctr ( 234,2205)  bbox   9× 17  ink    70  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 236 px | to salvage refit 263 px
+      # 55  ctr ( 235,2068)  bbox  10× 17  ink    69  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 235 px | to salvage refit 383 px
+      # 23  ctr ( 250,1795)  bbox   9× 18  ink    68  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 415 px | to salvage refit 646 px
+      # 51  ctr ( 246,2035)  bbox   9× 18  ink    67  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 256 px | to salvage refit 417 px
+      #108  ctr ( 189,2333)  bbox  10× 12  ink    64  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 269 px | to salvage refit 139 px
+      # 81  ctr ( 310,2253)  bbox  55×  2  ink    63  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 324 px | to salvage refit 284 px
+      # 11  ctr ( 251,1694)  bbox   9× 18  ink    62  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 501 px | to salvage refit 744 px
+      # 46  ctr ( 235,2000)  bbox  10× 17  ink    62  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 262 px | to salvage refit 446 px
+      #107  ctr ( 176,2334)  bbox  10× 12  ink    60  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 261 px | to salvage refit 128 px
+      # 15  ctr ( 252,1728)  bbox   9× 18  ink    59  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 472 px | to salvage refit 711 px
+      #  7  ctr ( 251,1661)  bbox   9× 18  ink    57  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 530 px | to salvage refit 776 px
+      # 19  ctr ( 251,1762)  bbox  10× 16  ink    56  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 443 px | to salvage refit 678 px
+      # 31  ctr ( 249,1861)  bbox   9× 17  ink    55  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 362 px | to salvage refit 582 px
+      # 47  ctr ( 246,2001)  bbox   9× 17  ink    54  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 271 px | to salvage refit 449 px
+      # 94  ctr ( 299,2332)  bbox   7× 13  ink    48  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 352 px | to salvage refit 236 px
+      #146  ctr ( 314,2362)  bbox  11× 10  ink    47  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 381 px | to salvage refit 241 px
+      # 71  ctr ( 245,2202)  bbox  10× 17  ink    46  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 246 px | to salvage refit 272 px
+      #141  ctr ( 261,2363)  bbox   8× 12  ink    46  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 341 px | to salvage refit 190 px
+      #101  ctr ( 246,2333)  bbox   9× 13  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 310 px | to salvage refit 187 px
+      #116  ctr ( 450,2359)  bbox   7× 13  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 495 px | to salvage refit 376 px
+      #147  ctr ( 324,2363)  bbox   8× 10  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 390 px | to salvage refit 251 px
+      #129  ctr ( 294,2362)  bbox   7× 13  ink    43  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 366 px | to salvage refit 222 px
+      #  2  ctr ( 356,1634)  bbox  17×  5  ink    42  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 607 px | to salvage refit 831 px
+      #117  ctr ( 392,2360)  bbox   7× 13  ink    42  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 445 px | to salvage refit 318 px
+      #125  ctr ( 470,2358)  bbox  10×  9  ink    42  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 513 px | to salvage refit 395 px
+      #157  ctr ( 239,2365)  bbox   7× 10  ink    42  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 327 px | to salvage refit 168 px
+      #131  ctr ( 428,2361)  bbox   7× 10  ink    41  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 477 px | to salvage refit 354 px
+      #122  ctr ( 481,2359)  bbox   8× 11  ink    40  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 523 px | to salvage refit 406 px
+      # 97  ctr ( 200,2332)  bbox   9× 13  ink    39  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 276 px | to salvage refit 148 px
+      #133  ctr ( 442,2360)  bbox   8×  9  ink    39  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 489 px | to salvage refit 368 px
+      #139  ctr ( 230,2363)  bbox   9× 13  ink    39  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 319 px | to salvage refit 161 px
+      #154  ctr ( 286,2363)  bbox   7× 10  ink    39  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 360 px | to salvage refit 214 px
+      # 98  ctr ( 214,2332)  bbox   7× 13  ink    38  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 286 px | to salvage refit 160 px
+      #130  ctr ( 401,2361)  bbox   8× 10  ink    38  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 453 px | to salvage refit 327 px
+      # 95  ctr ( 314,2331)  bbox  10× 12  ink    37  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 364 px | to salvage refit 250 px
+      # 99  ctr ( 223,2333)  bbox   7× 13  ink    37  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 293 px | to salvage refit 167 px
+      #138  ctr ( 215,2363)  bbox   6× 13  ink    37  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 309 px | to salvage refit 147 px
+      # 80  ctr ( 361,2252)  bbox  34×  1  ink    34  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 371 px | to salvage refit 327 px
+      # 79  ctr ( 409,2251)  bbox  33×  1  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 417 px | to salvage refit 370 px
+      #105  ctr ( 291,2333)  bbox   7× 12  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 346 px | to salvage refit 228 px
+      #136  ctr ( 199,2363)  bbox   7× 13  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 298 px | to salvage refit 132 px
+      #152  ctr ( 272,2364)  bbox   7× 10  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 350 px | to salvage refit 200 px
+      #100  ctr ( 231,2333)  bbox   6× 13  ink    32  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 299 px | to salvage refit 174 px
+      #102  ctr ( 256,2332)  bbox   8× 13  ink    31  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 317 px | to salvage refit 197 px
+      #120  ctr ( 418,2360)  bbox   6× 13  ink    30  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 468 px | to salvage refit 344 px
+      #  3  ctr ( 463,1633)  bbox  14×  3  ink    29  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 675 px | to salvage refit 874 px
+      #148  ctr ( 331,2362)  bbox   7× 10  ink    27  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 395 px | to salvage refit 258 px
+      # 96  ctr ( 323,2333)  bbox   6× 13  ink    26  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 372 px | to salvage refit 258 px
+      #128  ctr ( 252,2363)  bbox   2× 14  ink    26  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 335 px | to salvage refit 181 px
+      #103  ctr ( 272,2332)  bbox   6× 12  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 330 px | to salvage refit 211 px
+      #104  ctr ( 279,2331)  bbox   9× 12  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 335 px | to salvage refit 218 px
+      #119  ctr ( 413,2359)  bbox   2× 13  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 463 px | to salvage refit 339 px
+      #156  ctr ( 208,2365)  bbox   6× 10  ink    24  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 306 px | to salvage refit 139 px
+      #124  ctr ( 500,2359)  bbox   6× 10  ink    23  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 540 px | to salvage refit 425 px
+      #  0  ctr ( 239,1633)  bbox  10×  4  ink    22  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 550 px | to salvage refit 801 px
+      #145  ctr ( 191,2364)  bbox   6× 12  ink    21  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 294 px | to salvage refit 124 px
+      #118  ctr ( 407,2359)  bbox   2× 13  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 458 px | to salvage refit 333 px
+      #121  ctr ( 508,2358)  bbox   5× 11  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 547 px | to salvage refit 433 px
+      #123  ctr ( 491,2359)  bbox   4× 10  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 532 px | to salvage refit 416 px
+      #158  ctr ( 248,2365)  bbox   3×  9  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 333 px | to salvage refit 177 px
+      #132  ctr ( 434,2360)  bbox   4×  9  ink    19  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 482 px | to salvage refit 360 px
+      #140  ctr ( 245,2364)  bbox   2× 13  ink    18  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 330 px | to salvage refit 174 px
+      #  1  ctr ( 251,1633)  bbox   8×  3  ink    17  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 555 px | to salvage refit 803 px
+      #109  ctr ( 208,2333)  bbox   2× 12  ink    17  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 282 px | to salvage refit 154 px
+      #151  ctr ( 175,2362)  bbox   6× 10  ink    15  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 283 px | to salvage refit 111 px
+      # 77  ctr ( 442,2250)  bbox  14×  1  ink    14  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 448 px | to salvage refit 400 px
+      # 84  ctr ( 196,2256)  bbox  13×  2  ink    14  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 224 px | to salvage refit 200 px
+      #153  ctr ( 279,2363)  bbox   4× 10  ink    14  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 355 px | to salvage refit 207 px
+      #126  ctr ( 486,2358)  bbox   2×  9  ink    12  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 527 px | to salvage refit 411 px
+      #155  ctr ( 305,2364)  bbox   2×  9  ink    12  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 375 px | to salvage refit 232 px
+      #134  ctr ( 456,2360)  bbox   3×  9  ink    11  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 501 px | to salvage refit 381 px
+      # 83  ctr ( 267,2255)  bbox  10×  1  ink    10  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 285 px | to salvage refit 249 px
+      #135  ctr ( 461,2360)  bbox   3×  8  ink    10  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 506 px | to salvage refit 386 px
+      #142  ctr ( 410,2361)  bbox   1×  9  ink     9  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 461 px | to salvage refit 336 px
+      #137  ctr ( 207,2358)  bbox   5×  3  ink     7  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 300 px | to salvage refit 141 px
+      # 88  ctr ( 223,2256)  bbox   6×  1  ink     6  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 247 px | to salvage refit 216 px
+      # 87  ctr ( 216,2256)  bbox   5×  1  ink     5  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 241 px | to salvage refit 212 px
+      #160  ctr ( 300,2365)  bbox   1×  5  ink     5  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 372 px | to salvage refit 227 px
+      # 89  ctr ( 235,2256)  bbox   4×  1  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 257 px | to salvage refit 225 px
+      #111  ctr ( 265,2335)  bbox   2×  2  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 326 px | to salvage refit 204 px
+      #161  ctr ( 335,2366)  bbox   1×  4  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 401 px | to salvage refit 261 px
+      #113  ctr ( 269,2338)  bbox   3×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 331 px | to salvage refit 206 px
+      #114  ctr ( 283,2338)  bbox   3×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 342 px | to salvage refit 219 px
+      #150  ctr ( 172,2359)  bbox   2×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 279 px | to salvage refit 110 px
+      #164  ctr ( 180,2367)  bbox   2×  3  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 290 px | to salvage refit 113 px
+      # 82  ctr ( 258,2255)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 277 px | to salvage refit 242 px
+      # 85  ctr ( 207,2256)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 233 px | to salvage refit 206 px
+      # 90  ctr ( 241,2256)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 263 px | to salvage refit 229 px
+      #110  ctr ( 306,2333)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 358 px | to salvage refit 242 px
+      #112  ctr ( 239,2335)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 306 px | to salvage refit 180 px
+      #127  ctr ( 248,2357)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 328 px | to salvage refit 180 px
+      #144  ctr ( 189,2359)  bbox   2×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 289 px | to salvage refit 125 px
+      #159  ctr ( 343,2363)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 406 px | to salvage refit 270 px
+      #162  ctr ( 385,2366)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 442 px | to salvage refit 310 px
+      # 78  ctr ( 452,2250)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 458 px | to salvage refit 409 px
+      # 86  ctr ( 210,2256)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 236 px | to salvage refit 208 px
+      # 91  ctr ( 174,2257)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 206 px | to salvage refit 187 px
+      # 92  ctr ( 176,2257)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 208 px | to salvage refit 188 px
+      #106  ctr ( 320,2327)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 367 px | to salvage refit 257 px
+      #143  ctr ( 421,2357)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 469 px | to salvage refit 347 px
+      #163  ctr ( 177,2366)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 287 px | to salvage refit 111 px
+      #165  ctr ( 302,2368)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 376 px | to salvage refit 228 px
+
+--- salvage refit
+    predicted centre         : (79.0, 2417.6)
+    implied square area      : 1506 px²  (side 38.8 px, scale 7.76 px/mm)
+    distance to QR centre    : 302.2 mm → search radius 500 px
+    search window            : x 0..580, y 1917..2549  (581×633 px)
+    background (85th pct)    : 255   otsu: 175   thresholds: 140, 179, 175
+      threshold 140: components 194 | blob 0 | window-unstable 173 | size 20, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 174]
+      threshold 179: components 129 | blob 0 | window-unstable 108 | size 20, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 109]
+      threshold 175: components 134 | blob 0 | window-unstable 113 | size 20, shape 0, distance 0, square 0, solid 0, margin-unstable 1  [production's merged "unstable" = 114]
+    outcome: REJECTED at every threshold; last threshold 175 → no accepted candidate
+    ⇒ the ACTUAL printed square (component containing the ground-truth centre) in this pass:
+        centroid (120,2366)  bbox 33×41  ink 1328
+        head ink 1089/1353  windowFill 1.000  clipped false  squareFill 1.000  solid 1.000  margin 40%
+        reached stage: reject-margin → unstable: margin ink 40% > 15% and not the unmistakable printed square
+        component bbox x 104..136 (33 px), y 2346..2386 (41 px)
+        square window  x 104..136 (33 px), y 2350..2382 (33 px)  → component rows left outside the window: 8, columns: 0
+        margin frame: 84 samples, dark 34 → from THIS mark's own pixels 21, from genuine foreign ink 13  e.g. (104,2346)v163 (104,2386)v150 (106,2346)v143 (108,2346)v144 (112,2346)v142 (116,2346)v175
+        ⇒ margin test is triggered by the mark's own 21 pixels, not by an occluding line/shadow
+        filter budget for this prediction: area 1506 px² → head ink must be in [753, 2711], windowFill ≥ 0.43, squareFill ≥ 0.84, solid ≥ 0.92, margin ≤ 15%, dPred ≤ 450 px
+    stage histogram at threshold 175: reject-margin×1, reject-size×20, reject-window×113
+    every component, deepest-filtering first:
+      # 75  ctr ( 120,2366)  bbox  34× 41  ink  1368  head  1122  winFill 0.971  sqFill 1.000  margin 25%  dPred 66px  → unstable: margin ink 25% > 15% and not the unmistakable printed square
+           distance to similarity prediction 258 px | to salvage refit 66 px
+      #  0  ctr ( 352,1929)  bbox  23× 26  ink   496  head   496  winFill 0.516  → size: head ink 496 < 753 (0.5× area); head touches the search-window border (clipped)
+           distance to similarity prediction 399 px | to salvage refit 560 px
+      #  1  ctr ( 460,1928)  bbox  23× 24  ink   449  head   449  winFill 0.467  → size: head ink 449 < 753 (0.5× area); head touches the search-window border (clipped)
+           distance to similarity prediction 495 px | to salvage refit 620 px
+      # 13  ctr ( 351,2031)  bbox  24× 28  ink   184  head   184  winFill 0.191  → size: head ink 184 < 753 (0.5× area); windowFill 0.191 < 0.43
+           distance to similarity prediction 357 px | to salvage refit 473 px
+      # 24  ctr ( 350,2132)  bbox  23× 28  ink   181  head   181  winFill 0.188  → size: head ink 181 < 753 (0.5× area); windowFill 0.188 < 0.43
+           distance to similarity prediction 341 px | to salvage refit 394 px
+      # 32  ctr ( 349,2202)  bbox  24× 28  ink   181  head   181  winFill 0.188  → size: head ink 181 < 753 (0.5× area); windowFill 0.188 < 0.43
+           distance to similarity prediction 347 px | to salvage refit 346 px
+      # 27  ctr ( 458,2165)  bbox  23× 28  ink   180  head   180  winFill 0.187  → size: head ink 180 < 753 (0.5× area); windowFill 0.187 < 0.43
+           distance to similarity prediction 450 px | to salvage refit 455 px
+      # 28  ctr ( 350,2167)  bbox  24× 28  ink   179  head   179  winFill 0.186  → size: head ink 179 < 753 (0.5× area); windowFill 0.186 < 0.43
+           distance to similarity prediction 343 px | to salvage refit 369 px
+      #  9  ctr ( 352,1997)  bbox  24× 28  ink   178  head   178  winFill 0.185  → size: head ink 178 < 753 (0.5× area); windowFill 0.185 < 0.43
+           distance to similarity prediction 369 px | to salvage refit 501 px
+      # 16  ctr ( 459,2062)  bbox  23× 27  ink   178  head   178  winFill 0.185  → size: head ink 178 < 753 (0.5× area); windowFill 0.185 < 0.43
+           distance to similarity prediction 455 px | to salvage refit 520 px
+      # 21  ctr ( 351,2098)  bbox  24× 28  ink   178  head   178  winFill 0.185  → size: head ink 178 < 753 (0.5× area); windowFill 0.185 < 0.43
+           distance to similarity prediction 344 px | to salvage refit 420 px
+      # 23  ctr ( 458,2131)  bbox  23× 29  ink   177  head   177  winFill 0.184  → size: head ink 177 < 753 (0.5× area); windowFill 0.184 < 0.43
+           distance to similarity prediction 449 px | to salvage refit 475 px
+      #  5  ctr ( 352,1963)  bbox  24× 27  ink   175  head   175  winFill 0.182  → size: head ink 175 < 753 (0.5× area); windowFill 0.182 < 0.43
+           distance to similarity prediction 383 px | to salvage refit 530 px
+      # 31  ctr ( 458,2199)  bbox  23× 27  ink   175  head   175  winFill 0.182  → size: head ink 175 < 753 (0.5× area); windowFill 0.182 < 0.43
+           distance to similarity prediction 454 px | to salvage refit 438 px
+      # 17  ctr ( 351,2064)  bbox  23× 27  ink   174  head   174  winFill 0.181  → size: head ink 174 < 753 (0.5× area); windowFill 0.181 < 0.43
+           distance to similarity prediction 349 px | to salvage refit 446 px
+      # 20  ctr ( 459,2096)  bbox  23× 28  ink   172  head   172  winFill 0.179  → size: head ink 172 < 753 (0.5× area); windowFill 0.179 < 0.43
+           distance to similarity prediction 451 px | to salvage refit 498 px
+      #  4  ctr ( 459,1961)  bbox  23× 28  ink   170  head   170  winFill 0.177  → size: head ink 170 < 753 (0.5× area); windowFill 0.177 < 0.43
+           distance to similarity prediction 481 px | to salvage refit 594 px
+      # 12  ctr ( 459,2029)  bbox  23× 28  ink   170  head   170  winFill 0.177  → size: head ink 170 < 753 (0.5× area); windowFill 0.177 < 0.43
+           distance to similarity prediction 462 px | to salvage refit 544 px
+      #  8  ctr ( 459,1995)  bbox  23× 28  ink   163  head   163  winFill 0.170  → size: head ink 163 < 753 (0.5× area); windowFill 0.170 < 0.43
+           distance to similarity prediction 470 px | to salvage refit 568 px
+      # 36  ctr ( 350,2236)  bbox  23× 29  ink   154  head   154  winFill 0.160  → size: head ink 154 < 753 (0.5× area); windowFill 0.160 < 0.43
+           distance to similarity prediction 356 px | to salvage refit 326 px
+      # 35  ctr ( 459,2233)  bbox  23× 29  ink   139  head   139  winFill 0.145  → size: head ink 139 < 753 (0.5× area); windowFill 0.145 < 0.43
+           distance to similarity prediction 461 px | to salvage refit 422 px
+      # 54  ctr ( 377,2303)  bbox 410× 10  ink   878  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 405 px | to salvage refit 319 px
+      # 22  ctr ( 240,2103)  bbox  21× 18  ink   159  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 233 px | to salvage refit 353 px
+      #117  ctr ( 366,2362)  bbox  33× 10  ink   155  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 424 px | to salvage refit 292 px
+      #  3  ctr ( 247,1932)  bbox  11× 18  ink    92  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 311 px | to salvage refit 514 px
+      # 37  ctr ( 245,2239)  bbox  10× 19  ink    89  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 259 px | to salvage refit 244 px
+      # 29  ctr ( 244,2171)  bbox  10× 18  ink    84  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 238 px | to salvage refit 297 px
+      #  7  ctr ( 246,1966)  bbox  10× 17  ink    82  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 290 px | to salvage refit 482 px
+      # 18  ctr ( 247,2067)  bbox  10× 18  ink    79  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 247 px | to salvage refit 389 px
+      # 25  ctr ( 234,2137)  bbox  10× 18  ink    78  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 225 px | to salvage refit 321 px
+      # 40  ctr ( 485,2249)  bbox  58×  3  ink    76  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 490 px | to salvage refit 440 px
+      #  2  ctr ( 236,1933)  bbox  10× 18  ink    74  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 302 px | to salvage refit 509 px
+      # 30  ctr ( 234,2171)  bbox  10× 17  ink    73  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 228 px | to salvage refit 291 px
+      # 38  ctr ( 234,2240)  bbox  10× 17  ink    73  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 249 px | to salvage refit 236 px
+      #  6  ctr ( 235,1966)  bbox  10× 17  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 281 px | to salvage refit 478 px
+      # 14  ctr ( 235,2034)  bbox  10× 18  ink    72  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 246 px | to salvage refit 414 px
+      # 26  ctr ( 245,2136)  bbox  10× 18  ink    71  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 236 px | to salvage refit 327 px
+      # 33  ctr ( 234,2205)  bbox   9× 17  ink    71  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 236 px | to salvage refit 263 px
+      # 19  ctr ( 235,2068)  bbox  10× 17  ink    70  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 235 px | to salvage refit 383 px
+      # 15  ctr ( 246,2035)  bbox   9× 18  ink    67  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 256 px | to salvage refit 417 px
+      # 44  ctr ( 310,2253)  bbox  56×  2  ink    65  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 324 px | to salvage refit 284 px
+      # 68  ctr ( 189,2333)  bbox  10× 12  ink    64  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 269 px | to salvage refit 139 px
+      # 10  ctr ( 235,2001)  bbox  10× 17  ink    63  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 261 px | to salvage refit 445 px
+      # 67  ctr ( 176,2334)  bbox  10× 12  ink    62  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 261 px | to salvage refit 128 px
+      # 11  ctr ( 246,2001)  bbox   9× 17  ink    54  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 271 px | to salvage refit 449 px
+      # 56  ctr ( 299,2332)  bbox   7× 13  ink    49  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 352 px | to salvage refit 236 px
+      # 34  ctr ( 245,2202)  bbox  10× 17  ink    47  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 246 px | to salvage refit 272 px
+      #108  ctr ( 261,2363)  bbox   8× 12  ink    47  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 341 px | to salvage refit 190 px
+      #114  ctr ( 314,2362)  bbox  11× 10  ink    47  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 381 px | to salvage refit 241 px
+      # 63  ctr ( 246,2333)  bbox   9× 13  ink    45  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 310 px | to salvage refit 187 px
+      # 86  ctr ( 520,2357)  bbox  11× 11  ink    45  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 558 px | to salvage refit 445 px
+      # 77  ctr ( 450,2359)  bbox   7× 13  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 495 px | to salvage refit 376 px
+      # 96  ctr ( 294,2362)  bbox   7× 13  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 366 px | to salvage refit 222 px
+      #115  ctr ( 324,2363)  bbox   8× 10  ink    44  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 390 px | to salvage refit 251 px
+      # 92  ctr ( 470,2358)  bbox  10× 10  ink    43  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 513 px | to salvage refit 395 px
+      #125  ctr ( 239,2365)  bbox   7× 10  ink    43  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 327 px | to salvage refit 168 px
+      # 81  ctr ( 392,2360)  bbox   7× 13  ink    42  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 445 px | to salvage refit 318 px
+      # 89  ctr ( 481,2359)  bbox   8× 11  ink    41  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 523 px | to salvage refit 406 px
+      # 98  ctr ( 428,2361)  bbox   7× 10  ink    41  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 477 px | to salvage refit 354 px
+      #100  ctr ( 442,2360)  bbox   8×  9  ink    41  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 489 px | to salvage refit 368 px
+      # 59  ctr ( 201,2332)  bbox   9× 13  ink    40  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 277 px | to salvage refit 149 px
+      # 79  ctr ( 565,2357)  bbox   7× 11  ink    40  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 599 px | to salvage refit 490 px
+      #106  ctr ( 230,2363)  bbox   9× 13  ink    40  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 319 px | to salvage refit 161 px
+      #122  ctr ( 286,2363)  bbox   7× 10  ink    39  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 360 px | to salvage refit 214 px
+      # 57  ctr ( 314,2331)  bbox  10× 12  ink    38  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 364 px | to salvage refit 250 px
+      # 60  ctr ( 214,2332)  bbox   7× 13  ink    38  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 286 px | to salvage refit 160 px
+      # 97  ctr ( 401,2361)  bbox   8× 10  ink    38  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 453 px | to salvage refit 327 px
+      # 61  ctr ( 223,2333)  bbox   7× 13  ink    37  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 293 px | to salvage refit 167 px
+      #105  ctr ( 215,2363)  bbox   6× 13  ink    37  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 309 px | to salvage refit 147 px
+      # 80  ctr ( 574,2357)  bbox   6× 11  ink    35  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 608 px | to salvage refit 499 px
+      # 43  ctr ( 361,2252)  bbox  34×  1  ink    34  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 371 px | to salvage refit 327 px
+      # 55  ctr ( 291,2332)  bbox   7× 13  ink    34  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 345 px | to salvage refit 229 px
+      # 85  ctr ( 509,2358)  bbox   8× 11  ink    34  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 548 px | to salvage refit 434 px
+      #120  ctr ( 272,2364)  bbox   7× 10  ink    34  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 350 px | to salvage refit 200 px
+      # 42  ctr ( 409,2251)  bbox  33×  1  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 417 px | to salvage refit 370 px
+      # 62  ctr ( 231,2333)  bbox   6× 13  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 299 px | to salvage refit 174 px
+      #103  ctr ( 199,2363)  bbox   7× 13  ink    33  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 298 px | to salvage refit 132 px
+      # 64  ctr ( 256,2332)  bbox   8× 13  ink    31  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 317 px | to salvage refit 197 px
+      # 84  ctr ( 418,2360)  bbox   6× 13  ink    30  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 468 px | to salvage refit 344 px
+      # 58  ctr ( 323,2332)  bbox   6× 13  ink    28  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 372 px | to salvage refit 259 px
+      # 88  ctr ( 556,2357)  bbox   6× 10  ink    27  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 591 px | to salvage refit 481 px
+      # 95  ctr ( 252,2363)  bbox   2× 14  ink    27  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 335 px | to salvage refit 181 px
+      #116  ctr ( 331,2362)  bbox   7× 10  ink    27  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 395 px | to salvage refit 258 px
+      # 65  ctr ( 272,2332)  bbox   6× 12  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 330 px | to salvage refit 211 px
+      # 66  ctr ( 279,2331)  bbox   9× 12  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 335 px | to salvage refit 218 px
+      # 83  ctr ( 413,2359)  bbox   2× 13  ink    25  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 463 px | to salvage refit 339 px
+      # 78  ctr ( 533,2357)  bbox   3× 11  ink    24  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 570 px | to salvage refit 458 px
+      # 91  ctr ( 500,2359)  bbox   6× 10  ink    24  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 540 px | to salvage refit 425 px
+      #124  ctr ( 208,2365)  bbox   6× 10  ink    24  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 306 px | to salvage refit 139 px
+      # 82  ctr ( 407,2359)  bbox   2× 13  ink    21  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 458 px | to salvage refit 333 px
+      #113  ctr ( 191,2364)  bbox   6× 12  ink    21  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 294 px | to salvage refit 124 px
+      # 90  ctr ( 491,2359)  bbox   4× 10  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 532 px | to salvage refit 416 px
+      #126  ctr ( 248,2365)  bbox   3×  9  ink    20  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 333 px | to salvage refit 177 px
+      # 87  ctr ( 537,2357)  bbox   4× 10  ink    19  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 573 px | to salvage refit 462 px
+      # 99  ctr ( 434,2360)  bbox   4×  9  ink    19  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 482 px | to salvage refit 360 px
+      # 41  ctr ( 444,2250)  bbox  18×  1  ink    18  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 450 px | to salvage refit 402 px
+      # 76  ctr ( 580,2356)  bbox   2× 11  ink    18  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 613 px | to salvage refit 505 px
+      #107  ctr ( 245,2364)  bbox   2× 13  ink    18  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 330 px | to salvage refit 174 px
+      # 69  ctr ( 208,2333)  bbox   2× 12  ink    17  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 282 px | to salvage refit 154 px
+      # 47  ctr ( 195,2256)  bbox  14×  2  ink    15  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 223 px | to salvage refit 199 px
+      #119  ctr ( 175,2362)  bbox   6× 10  ink    15  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 283 px | to salvage refit 111 px
+      #121  ctr ( 279,2363)  bbox   4× 10  ink    14  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 355 px | to salvage refit 207 px
+      # 49  ctr ( 220,2256)  bbox  12×  1  ink    12  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 244 px | to salvage refit 214 px
+      # 93  ctr ( 486,2358)  bbox   2×  9  ink    12  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 527 px | to salvage refit 411 px
+      #123  ctr ( 305,2364)  bbox   2×  9  ink    12  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 375 px | to salvage refit 232 px
+      # 39  ctr ( 575,2247)  bbox  11×  1  ink    11  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 577 px | to salvage refit 524 px
+      #101  ctr ( 456,2360)  bbox   3×  9  ink    11  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 501 px | to salvage refit 381 px
+      #102  ctr ( 461,2360)  bbox   3×  8  ink    11  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 506 px | to salvage refit 386 px
+      # 46  ctr ( 267,2255)  bbox  10×  1  ink    10  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 285 px | to salvage refit 249 px
+      #109  ctr ( 410,2361)  bbox   1×  9  ink     9  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 461 px | to salvage refit 336 px
+      #104  ctr ( 207,2358)  bbox   5×  3  ink     7  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 300 px | to salvage refit 141 px
+      #129  ctr ( 300,2366)  bbox   3×  6  ink     7  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 373 px | to salvage refit 227 px
+      # 48  ctr ( 208,2256)  bbox   5×  1  ink     5  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 234 px | to salvage refit 207 px
+      #130  ctr ( 335,2366)  bbox   2×  4  ink     5  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 401 px | to salvage refit 261 px
+      # 51  ctr ( 235,2256)  bbox   4×  1  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 257 px | to salvage refit 225 px
+      # 53  ctr ( 175,2257)  bbox   4×  1  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 207 px | to salvage refit 187 px
+      # 71  ctr ( 265,2335)  bbox   2×  2  ink     4  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 326 px | to salvage refit 204 px
+      # 73  ctr ( 269,2338)  bbox   3×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 331 px | to salvage refit 206 px
+      # 74  ctr ( 283,2338)  bbox   3×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 342 px | to salvage refit 219 px
+      #111  ctr ( 547,2358)  bbox   2×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 583 px | to salvage refit 472 px
+      #118  ctr ( 172,2359)  bbox   2×  2  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 279 px | to salvage refit 110 px
+      #133  ctr ( 180,2367)  bbox   2×  3  ink     3  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 290 px | to salvage refit 113 px
+      # 45  ctr ( 258,2255)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 277 px | to salvage refit 242 px
+      # 52  ctr ( 241,2256)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 263 px | to salvage refit 229 px
+      # 70  ctr ( 306,2333)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 358 px | to salvage refit 242 px
+      # 72  ctr ( 239,2335)  bbox   2×  1  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 306 px | to salvage refit 180 px
+      # 94  ctr ( 248,2357)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 328 px | to salvage refit 180 px
+      #112  ctr ( 189,2359)  bbox   2×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 289 px | to salvage refit 125 px
+      #127  ctr ( 343,2363)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 406 px | to salvage refit 270 px
+      #131  ctr ( 385,2366)  bbox   1×  2  ink     2  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 442 px | to salvage refit 310 px
+      # 50  ctr ( 231,2256)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 254 px | to salvage refit 222 px
+      #110  ctr ( 421,2357)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 469 px | to salvage refit 347 px
+      #128  ctr ( 528,2362)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 567 px | to salvage refit 452 px
+      #132  ctr ( 177,2366)  bbox   1×  1  ink     1  → unstable: squareWindow() found no window holding ≥50% of a square
+           distance to similarity prediction 287 px | to salvage refit 111 px
+
+==============================================================================
+PART C — independent region inspection (no filter logic involved)
+==============================================================================
+region x 0..640, y 2150..2549 → /tmp/6a-report/region-bottom-left.png (641×400)
+predictions in this frame: similarity (9,2133)  refit (79,2418)
+
+ink map (8px blocks; column header = x/10, row label = y):
+      ||           |           ||           |           ||           |           ||    
+y2150                                           ###           ###                   #+ 
+y2158                              ###          #+##         +# #                   ##+
+y2166                             ####          # ##         +# #                   ##+
+y2174                             +###          ###+          ###                      
+y2182                                            ##           ###                   ###
+y2190                              +++          ####          # #                   ###
+y2198                             ##+#          # +#         +# #                   ###
+y2206                             ##+           ####          ###                      
+y2214                                            ##           ++                       
+y2222                                           +++           + +                   +#+
+y2230                              +##          + ++          + +                   ###
+y2238                             #+##          + ++          +++                   +++
+y2246                              ++#          +++           ++                       
+y2254                                                                                  
+y2262                                                                                  
+y2270                                                                                  
+y2278                                                                                  
+y2286                                                                                  
+y2294                                                     +++####+####+###########+++++
+y2302                      + + ++#######++++++######++#++###++                         
+y2310                                                                                  
+y2318                                                                                  
+y2326                      ++##+#+# +++ ++#++++                                        
+y2334                      ++++  +#   + + +# ++                                        
+y2342              #####                                                          +  + 
+y2350              #####             +     +          #++++++++ #++++++##+ +++######+#.
+y2358              #####   +  ++#++###++##+++### +##+#+#+#####++++#++++#++ ++#####+++# 
+y2366              #####     ++#+++++# +++++++#+  +++                                  
+y2374              #####                                                               
+y2382              #####                                                               
+y2390                                                                                  
+y2398                                                                                  
+y2406                                                                                  
+y2414                                                                                  
+y2422                                                                                  
+y2430                                                                                  
+y2438                                                                                  
+y2446                                                                                  
+y2454                                                                                  
+y2462                                                                                  
+y2470                                                                                  
+y2478                                                                                  
+y2486                                                                                  
+y2494                                                                                  
+y2502                                                                                  
+y2510                                                                                  
+y2518                                                                                  
+y2526                                                                                  
+y2534                                                                                  
+y2542                                                                                  
+
+threshold 100: 5 components with min(bbox) ≥ 12 px:
+   centre (120,2366)  bbox 33×40  ink 1254  dSim 258px  dRefit 66px
+   centre (458,2166)  bbox 23×27  ink 114  dSim 450px  dRefit 455px
+   centre (465,2200)  bbox 12×26  ink 52  dSim 460px  dRefit 443px
+   centre (356,2197)  bbox 15×22  ink 48  dSim 353px  dRefit 355px
+   centre (350,2177)  bbox 21×12  ink 46  dSim 344px  dRefit 363px
+
+threshold 140: 7 components with min(bbox) ≥ 12 px:
+   centre (120,2366)  bbox 33×41  ink 1328  dSim 259px  dRefit 66px
+   centre (350,2201)  bbox 24×27  ink 151  dSim 347px  dRefit 346px
+   centre (459,2165)  bbox 23×28  ink 146  dSim 450px  dRefit 456px
+   centre (350,2167)  bbox 24×28  ink 146  dSim 343px  dRefit 369px
+   centre (458,2200)  bbox 23×26  ink 134  dSim 454px  dRefit 437px
+   centre (350,2236)  bbox 23×28  ink 102  dSim 356px  dRefit 326px
+   centre (459,2233)  bbox 22×28  ink 96  dSim 460px  dRefit 422px
+
+threshold 175: 8 components with min(bbox) ≥ 12 px:
+   centre (120,2366)  bbox 34×41  ink 1368  dSim 258px  dRefit 66px
+   centre (349,2202)  bbox 24×28  ink 181  dSim 347px  dRefit 346px
+   centre (458,2165)  bbox 23×28  ink 180  dSim 450px  dRefit 456px
+   centre (350,2167)  bbox 24×28  ink 179  dSim 342px  dRefit 369px
+   centre (458,2199)  bbox 23×27  ink 175  dSim 454px  dRefit 438px
+   centre (350,2236)  bbox 23×29  ink 154  dSim 356px  dRefit 326px
+   centre (459,2233)  bbox 23×29  ink 139  dSim 460px  dRefit 422px
+   centre (610,2356)  bbox 13×17  ink 91  dSim 641px  dRefit 534px
+
+==============================================================================
+PART B validation — instrument vs production
+==============================================================================
+production message for bottom-left:
+  karenin bulunması gereken alan görüntünün dışında · 36 aday boyut veya dolgunluk ölçütünü geçmedi; 130 aday gölgeye veya çizgiye bağlıydı · 20 aday boyut veya dolgunluk ölçütünü geçmedi; 114 aday gölgeye veya çizgiye bağlıydı
+
+instrument, similarity, last threshold : size 36; margin-unstable 130 (blob 0, window 130, shape 0, distance 0, square 0, solid 0)
+instrument, salvage refit, last threshold: size 20; margin-unstable 114 (blob 0, window 114, shape 0, distance 0, square 0, solid 0)
+
+(production groups "window-unstable" and "margin-unstable" under one label "gölgeye veya çizgiye bağlıydı", so compare size counts exactly and unstable sums.)
+
+==============================================================================
+PART A verdict
+==============================================================================
+rotateGray90 is the exact inverse-free implementation of a clockwise quarter turn
+and matches ImageMagick -rotate 90 bit-for-bit: true

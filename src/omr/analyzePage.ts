@@ -11,6 +11,7 @@ import type { Homography } from './perspectiveCorrection';
 import { describeQrDisagreement, evaluateQrConsistency } from './alignmentVerification';
 import { decodePageQr } from './qrDecoder';
 import { isolatePaper } from './pageIsolation';
+import { quarterTurnsToUpright, rotateGray90 } from './orientation';
 
 export const MAX_INPUT_PIXELS = 12_000_000;
 /** Beyond this much implied blank margin the page frame itself is not trustworthy any more. */
@@ -40,8 +41,28 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     return failure('INVALID_DEFINITION', 'Form geometrisi geçersiz veya desteklenen boyutu aşıyor.');
   }
   try {
-    const isolated = isolatePaper(toGrayscale(image)), source = isolated.image, decoded = decodePageQr(source);
+    // Orientation normalisation: phones store the sheet at any multiple of 90°
+    // (EXIF orientation is 1 on these files — the pixels themselves are
+    // rotated, so nothing downstream can un-rotate them).  The QR symbol is
+    // the orientation authority: first find a rotation in which it decodes,
+    // then turn the sheet upright from the symbol's own corner order.
+    const gray = toGrayscale(image);
+    let isolated = isolatePaper(gray), decoded = decodePageQr(isolated.image), turns = 0;
+    for (let q = 1; q < 4 && !decoded; q++) {
+      const trial = isolatePaper(rotateGray90(gray, q));
+      const candidate = decodePageQr(trial.image);
+      if (candidate) { isolated = trial; decoded = candidate; turns = q; }
+    }
     if (!decoded) return failure('QR_UNREADABLE', 'QR okunamadı; doğru formun tamamını net olarak çekin.');
+    const totalTurns = (turns + quarterTurnsToUpright(decoded.corners)) % 4;
+    if (totalTurns !== turns) {
+      const upright = isolatePaper(rotateGray90(gray, totalTurns));
+      const retry = decodePageQr(upright.image);
+      if (!retry) return failure('QR_UNREADABLE', 'QR okunamadı; doğru formun tamamını net olarak çekin.');
+      isolated = upright;
+      decoded = retry;
+    }
+    const source = isolated.image;
     let identity;
     try { identity = parsePageIdentity(decoded.text, definition); }
     catch { return failure('QR_MISMATCH', 'QR kimliği, form sürümü, yerleşim veya sayfa bilgisi eşleşmiyor.'); }
@@ -65,7 +86,9 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     let markers;
     try {
       markers = detectAlignmentMarks(source, page.alignmentMarks, predictions, qrCenter,
-        entry => alignmentFailures.push(entry));
+        entry => alignmentFailures.push(entry),
+        // Salvage anchors: the QR corners plus any squares the first pass found.
+        { mm: qr.innerCorners, px: decoded.corners });
     }
     catch { return failure('INVALID_GEOMETRY', 'QR konum tahmini geçersiz; sayfayı daha dik açıdan çekin.'); }
     if (!markers) return { ...failure('ALIGNMENT_MISSING', describeAlignmentFailures(alignmentFailures)),
@@ -105,24 +128,28 @@ export async function analyzePage(image: PixelImage, definition: FormDefinition)
     const agreement = evaluateQrConsistency(transform, qr.innerCorners, decoded.corners, geometry.pixelsPerMm);
     if (!agreement.ok) return failure('INVALID_GEOMETRY', describeQrDisagreement(agreement.agreement));
     const normalized = warpPerspective(source, transform, definition.pageWidthMm, definition.pageHeightMm);
-    const quality = assessImageQuality(normalized, page, geometry.pixelsPerMm);
-    if (quality.fatal) {
-      return { ...failure('POOR_QUALITY', quality.reasons.join(' ') || 'Görüntü kalitesi yetersiz; yanıtlar okunmadı.'), quality };
-    }
     const allResponseAreas = page.items.flatMap(item => item.responseAreas);
     // Per-bubble ring refinement — OMRChecker auto_align’s bubble-level analogue.
-    // Each bubble’s printed ring (1.05–2.05 mm) is fitted with r(θ)=R+dx·cos+dy·sin.
-    // Offsets are small (≤0.55 mm), validated by RMS residual and sector completeness,
-    // and gracefully fall back to the nominal centre when the ring is missing,
-    // occluded, or dominated by real ink — so “en koyu pikseli bul → kaydır”
-    // never happens.  Mirrors OMRChecker’s block-shift search but at bubble
-    // granularity and with geometric, not photometric, evidence.
+    // Stage 1: a translation search over a 2.5 mm disk scores candidates by how
+    // fully they explain the printed ring as a circle (per-sector radial argmax).
+    // Stage 2: a Huber IRLS sub-pixel fit of r(θ)=R+dx·cos+dy·sin validated by
+    // RMS residual, radius plausibility and sector completeness.  Offsets fall
+    // back to the nominal centre when the ring is missing, occluded, or
+    // dominated by real ink — so “en koyu pikseli bul → kaydır” never happens.
+    // Mirrors OMRChecker’s block-shift search but at bubble granularity and
+    // with geometric, not photometric, evidence.
     let ringOffsets: Map<string, { dx: number; dy: number }> | undefined;
     try {
       ringOffsets = refinePageCentres(normalized, allResponseAreas);
       // If nothing refined, keep undefined to avoid map lookups in the hot loop.
       if (ringOffsets.size === 0) ringOffsets = undefined;
     } catch { ringOffsets = undefined; }
+    // Quality is assessed *after* refinement so the per-bubble outline checks
+    // measure the rings where they actually are on curled phone photos.
+    const quality = assessImageQuality(normalized, page, geometry.pixelsPerMm, ringOffsets);
+    if (quality.fatal) {
+      return { ...failure('POOR_QUALITY', quality.reasons.join(' ') || 'Görüntü kalitesi yetersiz; yanıtlar okunmadı.'), quality };
+    }
     const items = page.items.map(item => detectItemMarks(normalized, item, quality, allResponseAreas, {}, ringOffsets));
     return {
       ok: true, pageId: page.pageId, pageNumber: page.pageNumber, batchId: identity.batchId,
