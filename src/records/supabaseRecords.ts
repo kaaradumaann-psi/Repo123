@@ -144,12 +144,24 @@ async function upsertRecord(
     raw_omr_answers: answers,
     created_by: actor.id,
   };
-  const { data, error } = await requireSupabase()
-    .from('mmpi_records')
-    .upsert(payload, { onConflict: 'idempotency_key' })
-    .select('id,created_at')
-    .single();
-  if (error || !data) throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.');
+  let data: { id?: unknown; created_at?: unknown } | null = null;
+  try {
+    const response = await requireSupabase()
+      .from('mmpi_records')
+      .upsert(payload, { onConflict: 'idempotency_key' })
+      .select('id,created_at')
+      .single();
+    if (response.error) {
+      // Ağ hatası ile sunucu hatasını ayırt edebilmek için orijinal mesaj `cause` ile taşınır;
+      // `isNetworkError` kuyruğa alma kararını bu zincirden verir.
+      throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.', { cause: response.error });
+    }
+    data = response.data as { id?: unknown; created_at?: unknown } | null;
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('Kayıt oluşturulamadı.')) throw cause;
+    throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.', { cause });
+  }
+  if (!data) throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.');
   const row = data as { id?: unknown; created_at?: unknown };
   if (typeof row.id !== 'string' || typeof row.created_at !== 'string') throw new Error('Kayıt yanıtı geçersiz.');
   return { id: row.id, createdAt: row.created_at };

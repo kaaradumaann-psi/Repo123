@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { listOwnRecords, getRecordDetail, deleteRecord } from '../records/supabaseRecords';
 import type { RecordSummary, FullRecordDetail } from '../records/supabaseRecords';
 import { RecordDetailModal } from './RecordDetailModal';
+import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
 export function MyRecordsPanel() {
@@ -11,6 +12,7 @@ export function MyRecordsPanel() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<FullRecordDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<RecordSummary | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function fetchRecords() {
@@ -33,25 +35,26 @@ export function MyRecordsPanel() {
   async function handleViewDetail(recordId: string) {
     try {
       setLoadingDetail(recordId);
+      setError('');
       const detail = await getRecordDetail(recordId);
       setSelectedRecord(detail);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Detaylar yüklenemedi.');
+      setError(err instanceof Error ? err.message : 'Detaylar yüklenemedi.');
     } finally {
       setLoadingDetail(null);
     }
   }
 
-  async function handleDelete(record: RecordSummary) {
-    if (!window.confirm(`"${record.firstName} ${record.lastName}" adlı danışana ait test kaydını silmek istediğinize emin misiniz?`)) {
-      return;
-    }
+  async function confirmDelete() {
+    const record = confirmTarget;
+    if (!record) return;
     setDeletingId(record.id);
     try {
       await deleteRecord(record.id);
       setRecords(prev => prev.filter(r => r.id !== record.id));
+      setConfirmTarget(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Kayıt silinemedi.');
+      setError(err instanceof Error ? err.message : 'Kayıt silinemedi.');
     } finally {
       setDeletingId(null);
     }
@@ -72,11 +75,15 @@ export function MyRecordsPanel() {
     <section className="dashboard-section" aria-labelledby="saved-records-title">
       <div className="section-header-row">
         <div>
+          <span className="section-badge badge-primary">Arşiv</span>
           <h3 id="saved-records-title" className="section-heading">Kayıtlar</h3>
-          <p className="section-subtext">Bu hesaba yazılmış testler.</p>
+          <p className="section-subtext">
+            Bu hesaptan tamamlanan MMPI uygulamaları. “Testi İncele” ile cevap detayını açın; hatalı kayıtları
+            buradan kaldırın.
+          </p>
         </div>
         <div className="section-header-actions">
-          <button type="button" className="btn-secondary btn-sm" onClick={fetchRecords} disabled={loading}>
+          <button type="button" className="btn-secondary btn-sm" onClick={() => void fetchRecords()} disabled={loading}>
             <Icon name="refresh" size={15} />
             <span>Yenile</span>
           </button>
@@ -84,7 +91,6 @@ export function MyRecordsPanel() {
         </div>
       </div>
 
-      {/* Arama Barı */}
       <div className="search-filter-box">
         <div className="search-input-wrapper">
           <Icon name="search" size={16} className="search-icon" />
@@ -93,6 +99,7 @@ export function MyRecordsPanel() {
             placeholder="Danışan adı, soyadı veya kayıt no ile ara..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
+            aria-label="Kayıtlarda ara"
           />
         </div>
       </div>
@@ -107,7 +114,10 @@ export function MyRecordsPanel() {
       {error && !loading && (
         <div className="status-banner error-banner" role="alert">
           <Icon name="alert" size={18} />
-          <span>{error}</span>
+          <span style={{ flex: 1 }}>{error}</span>
+          <button type="button" className="btn-secondary btn-sm" onClick={() => void fetchRecords()}>
+            Tekrar dene
+          </button>
         </div>
       )}
 
@@ -116,14 +126,14 @@ export function MyRecordsPanel() {
           <div className="empty-state-icon">
             <Icon name="file" size={32} />
           </div>
-          <h4>Kayıt yok</h4>
-          <p>İşlem sekmesinden yeni bir MMPI başlatın.</p>
+          <h4>Henüz kayıt yok</h4>
+          <p>İşlem sekmesinden yeni bir MMPI başlatın; tamamlanan uygulamalar burada listelenecek.</p>
         </div>
       )}
 
       {!loading && !error && records.length > 0 && filtered.length === 0 && (
         <div className="empty-state-card">
-          <p>Aramanızla eşleşen danışan kaydı bulunamadı.</p>
+          <p>Aramanızla eşleşen danışan kaydı bulunamadı. Farklı bir isim deneyin.</p>
         </div>
       )}
 
@@ -178,7 +188,7 @@ export function MyRecordsPanel() {
                         <button
                           type="button"
                           className="action-btn-primary"
-                          onClick={() => handleViewDetail(record.id)}
+                          onClick={() => void handleViewDetail(record.id)}
                           disabled={loadingDetail === record.id}
                         >
                           <Icon name="eye" size={15} />
@@ -187,10 +197,10 @@ export function MyRecordsPanel() {
                         <button
                           type="button"
                           className="action-btn-danger"
-                          onClick={() => handleDelete(record)}
+                          onClick={() => setConfirmTarget(record)}
                           disabled={deletingId === record.id}
-                          title="Bu kaydı sil"
-                          aria-label="Kaydı sil"
+                          title="Bu kaydı kalıcı sil (geri alınamaz)"
+                          aria-label={`${record.firstName} ${record.lastName} kaydını sil`}
                         >
                           <Icon name="trash" size={15} />
                         </button>
@@ -202,6 +212,19 @@ export function MyRecordsPanel() {
             </table>
           </div>
         </div>
+      )}
+
+      {confirmTarget && (
+        <ConfirmDialog
+          title={`"${confirmTarget.firstName} ${confirmTarget.lastName}" kaydı silinsin mi?`}
+          description="Test kaydı ve cevap verisi kalıcı olarak silinecek. Bu işlem geri alınamaz."
+          confirmLabel="Evet, kaydı sil"
+          busy={deletingId === confirmTarget.id}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => {
+            if (!deletingId) setConfirmTarget(null);
+          }}
+        />
       )}
 
       {selectedRecord && (

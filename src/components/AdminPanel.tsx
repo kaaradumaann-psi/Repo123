@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, KeyboardEvent } from 'react';
 import {
   createPsychologist,
   listPsychologists,
@@ -15,9 +15,12 @@ import type { RecordSummary, FullRecordDetail } from '../records/supabaseRecords
 import { displayName } from '../auth/userDisplay';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { RecordDetailModal } from './RecordDetailModal';
+import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
 type AdminTab = 'records' | 'users' | 'new-user';
+
+const TAB_ORDER: AdminTab[] = ['records', 'users', 'new-user'];
 
 export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   const [activeTab, setActiveTab] = useState<AdminTab>('records');
@@ -26,14 +29,17 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   const [users, setUsers] = useState<AuthenticatedUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [userSearch, setUserSearch] = useState('');
+  const [usersFailed, setUsersFailed] = useState(false);
 
   // Tüm Test Kayıtları state
   const [records, setRecords] = useState<RecordSummary[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(true);
+  const [recordsFailed, setRecordsFailed] = useState(false);
   const [recordSearch, setRecordSearch] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<FullRecordDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
   const [deletingRecordId, setDeletingRecordId] = useState<string | null>(null);
+  const [confirmRecord, setConfirmRecord] = useState<RecordSummary | null>(null);
 
   // Yeni psikolog form state
   const [firstName, setFirstName] = useState('');
@@ -41,16 +47,20 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordAgain, setPasswordAgain] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [busyUser, setBusyUser] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [confirmUser, setConfirmUser] = useState<AuthenticatedUser | null>(null);
   const [message, setMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
 
   async function refreshUsers() {
     try {
       setLoadingUsers(true);
+      setUsersFailed(false);
       setUsers(await listPsychologists());
     } catch (cause) {
+      setUsersFailed(true);
       setMessage({
         kind: 'error',
         text: cause instanceof Error ? cause.message : 'Psikolog listesi alınamadı.',
@@ -63,9 +73,11 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   async function refreshRecords() {
     try {
       setLoadingRecords(true);
+      setRecordsFailed(false);
       const data = await listAllRecords();
       setRecords(data);
     } catch (cause) {
+      setRecordsFailed(true);
       setMessage({
         kind: 'error',
         text: cause instanceof Error ? cause.message : 'Test kayıtları alınamadı.',
@@ -80,16 +92,42 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
     void refreshRecords();
   }, []);
 
+  function onSubnavKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const current = TAB_ORDER.indexOf(activeTab);
+    let next = -1;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (current + 1) % TAB_ORDER.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (current - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = TAB_ORDER.length - 1;
+    if (next < 0) return;
+    event.preventDefault();
+    setActiveTab(TAB_ORDER[next]!);
+  }
+
   async function addPsychologist(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
+    const cleanEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setMessage({ kind: 'error', text: 'Geçerli bir e-posta adresi girin.' });
+      return;
+    }
+    if (password.length < 10) {
+      setMessage({ kind: 'error', text: 'Başlangıç şifresi en az 10 karakter olmalı.' });
+      return;
+    }
     if (password !== passwordAgain) {
       setMessage({ kind: 'error', text: 'Girdiğiniz şifreler birbiriyle eşleşmiyor.' });
       return;
     }
     setBusy(true);
     try {
-      const created = await createPsychologist({ firstName, lastName, email, password });
+      const created = await createPsychologist({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: cleanEmail,
+        password,
+      });
       setUsers(previous => [...previous, created]);
       setFirstName('');
       setLastName('');
@@ -98,7 +136,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
       setPasswordAgain('');
       setMessage({
         kind: 'success',
-        text: `${displayName(created)} hesabı başarıyla oluşturuldu. Giriş bilgilerini güvenle paylaşabilirsiniz.`,
+        text: `${displayName(created)} hesabı oluşturuldu ve aktif edildi. Giriş bilgilerini güvenli bir kanaldan paylaşın.`,
       });
       setActiveTab('users');
     } catch (cause) {
@@ -119,7 +157,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
       setUsers(previous => previous.map(c => (c.id === updated.id ? updated : c)));
       setMessage({
         kind: 'success',
-        text: `${displayName(user)} hesabı ${updated.active ? 'aktif' : 'pasif'} duruma getirildi.`,
+        text: `${displayName(user)} hesabı ${updated.active ? 'aktif edildi; uzman giriş yapabilir.' : 'pasifleştirildi; uzman giriş yapamaz, kayıtları korunur.'}`,
       });
     } catch (cause) {
       setMessage({
@@ -131,27 +169,18 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
     }
   }
 
-  async function handleDeletePsychologist(user: AuthenticatedUser) {
+  async function confirmDeletePsychologist() {
+    const user = confirmUser;
+    if (!user) return;
     const name = displayName(user);
-    if (
-      !window.confirm(
-        `"${name}" isimli psikolog hesabını tamamen silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz. Psikoloğun oluşturduğu tüm test kayıtları da silinecektir.`,
-      )
-    ) {
-      return;
-    }
-
     setDeletingUserId(user.id);
     setMessage(null);
     try {
       await deletePsychologist(user.id);
       setUsers(prev => prev.filter(u => u.id !== user.id));
-      // Test kayıtlarını da güncelle
       setRecords(prev => prev.filter(r => r.createdBy !== user.id));
-      setMessage({
-        kind: 'success',
-        text: `"${name}" hesabı sistemden başarıyla silindi.`,
-      });
+      setConfirmUser(null);
+      setMessage({ kind: 'success', text: `"${name}" hesabı ve ilişkili kayıtları silindi.` });
     } catch (cause) {
       setMessage({
         kind: 'error',
@@ -165,28 +194,25 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   async function handleViewRecord(recordId: string) {
     try {
       setLoadingDetail(recordId);
+      setMessage(null);
       const detail = await getRecordDetail(recordId);
       setSelectedRecord(detail);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Test detayları yüklenemedi.');
+      setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Test detayları yüklenemedi.' });
     } finally {
       setLoadingDetail(null);
     }
   }
 
-  async function handleDeleteRecord(record: RecordSummary) {
-    if (
-      !window.confirm(
-        `"${record.firstName} ${record.lastName}" adlı danışanın test kaydını silmek istediğinize emin misiniz?`,
-      )
-    ) {
-      return;
-    }
+  async function confirmDeleteRecord() {
+    const record = confirmRecord;
+    if (!record) return;
     setDeletingRecordId(record.id);
     try {
       await deleteRecord(record.id);
       setRecords(prev => prev.filter(r => r.id !== record.id));
-      setMessage({ kind: 'success', text: 'Test kaydı sistemden kaldırıldı.' });
+      setConfirmRecord(null);
+      setMessage({ kind: 'success', text: `"${record.firstName} ${record.lastName}" kaydı silindi. Bu işlem geri alınamaz.` });
     } catch (err) {
       setMessage({
         kind: 'error',
@@ -198,6 +224,13 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   }
 
   const activeCount = users.filter(u => u.active).length;
+  const passiveCount = users.length - activeCount;
+  const passwordHint =
+    password.length === 0
+      ? 'En az 10 karakter; uzman ilk girişte değiştirmeli.'
+      : password.length < 10
+        ? `${10 - password.length} karakter daha gerekli.`
+        : 'Uzunluk yeterli. Tahmin edilmesi zor bir şifre seçin.';
 
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase().trim();
@@ -222,14 +255,21 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
 
   return (
     <div className="admin-console-wrapper">
-      {/* Üst Karşılama ve İstatistik Kartları */}
       <header className="admin-header-hero">
         <div className="hero-text-side">
           <div className="badge-chip badge-primary">
             <Icon name="shield" size={14} /> Yönetim
           </div>
           <h1>Yönetim</h1>
-          <p>Hesaplar ve kayıtlar.</p>
+          <p>
+            Uzman hesapları ve tüm test kayıtları tek ekranda. Yeni psikolog ekleyin, erişimi aktif/pasif ile
+            yönetin, kayıtları inceleyin. Yıkıcı işlemler her zaman onay ister.
+          </p>
+          <ol className="admin-guide-steps" aria-label="Yönetim akışı">
+            <li><strong>1.</strong> Psikolog ekle</li>
+            <li><strong>2.</strong> Testler burada listelenir</li>
+            <li><strong>3.</strong> Detayı incele, gerektiğinde sil</li>
+          </ol>
         </div>
         <div className="hero-account-badge">
           <div className="admin-avatar-ring">
@@ -242,7 +282,6 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         </div>
       </header>
 
-      {/* İstatistik Göstergeleri */}
       <div className="admin-metrics-grid">
         <div className="metric-box">
           <div className="metric-icon-wrap bg-blue-tint">
@@ -251,6 +290,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           <div>
             <span className="metric-label">Toplam Test Kaydı</span>
             <strong className="metric-value">{records.length}</strong>
+            <small className="ws-hint">Tüm uzmanların uygulamaları</small>
           </div>
         </div>
 
@@ -261,6 +301,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           <div>
             <span className="metric-label">Kayıtlı Psikolog</span>
             <strong className="metric-value">{users.length}</strong>
+            <small className="ws-hint">{passiveCount > 0 ? `${passiveCount} pasif hesap` : 'Tüm hesaplar aktif'}</small>
           </div>
         </div>
 
@@ -271,11 +312,11 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           <div>
             <span className="metric-label">Aktif Uzman</span>
             <strong className="metric-value">{activeCount}</strong>
+            <small className="ws-hint">Şu an giriş yapabilen</small>
           </div>
         </div>
       </div>
 
-      {/* Bildirim Mesajı */}
       {message && (
         <div
           className={`status-banner ${message.kind === 'error' ? 'error-banner' : 'success-banner'}`}
@@ -283,62 +324,65 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         >
           <Icon name={message.kind === 'error' ? 'alert' : 'checkCircle'} size={18} />
           <span style={{ flex: 1 }}>{message.text}</span>
-          <button type="button" className="close-banner-btn" onClick={() => setMessage(null)}>
+          <button type="button" className="close-banner-btn" onClick={() => setMessage(null)} aria-label="Kapat">
             <Icon name="close" size={14} />
           </button>
         </div>
       )}
 
-      {/* Yönetim Sekmeleri */}
-      <div className="admin-subnav-tabs" role="tablist">
+      <div className="admin-subnav-tabs" role="tablist" aria-label="Yönetim bölümleri" onKeyDown={onSubnavKeyDown}>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'records'}
+          tabIndex={activeTab === 'records' ? 0 : -1}
           className={`subnav-tab ${activeTab === 'records' ? 'active' : ''}`}
           onClick={() => setActiveTab('records')}
         >
           <Icon name="file" size={16} />
-          <span>Psikologların Yaptığı Testler ({records.length})</span>
+          <span>Testler ({records.length})</span>
         </button>
 
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'users'}
+          tabIndex={activeTab === 'users' ? 0 : -1}
           className={`subnav-tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           <Icon name="users" size={16} />
-          <span>Psikolog Hesapları ({users.length})</span>
+          <span>Psikologlar ({users.length})</span>
         </button>
 
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'new-user'}
+          tabIndex={activeTab === 'new-user' ? 0 : -1}
           className={`subnav-tab ${activeTab === 'new-user' ? 'active' : ''}`}
           onClick={() => setActiveTab('new-user')}
         >
-          <span style={{ fontWeight: 800, fontSize: 16 }}>+</span>
-          <span>Yeni Psikolog Ekle</span>
+          <span style={{ fontWeight: 800, fontSize: 16 }} aria-hidden="true">+</span>
+          <span>Yeni Psikolog</span>
         </button>
       </div>
 
-      {/* TAB 1: PSİKOLOGLARIN YAPTIĞI TESTLER */}
       {activeTab === 'records' && (
-        <section className="dashboard-section card-elevated" aria-label="Tüm Test Kayıtları">
+        <section className="dashboard-section card-elevated" aria-label="Tüm Test Kayıtları" role="tabpanel">
           <div className="section-header-row">
             <div>
-              <h3 className="section-heading">Tüm Test Uygulamaları</h3>
+              <span className="section-badge badge-primary">Kayıtlar</span>
+              <h3 className="section-heading">Tüm test uygulamaları</h3>
               <p className="section-subtext">
-                Klinik uzmanlarının uyguladığı tüm MMPI testlerini listeleyebilir, optik cevap formlarını detaylıca inceleyebilir ve silebilirsiniz.
+                Uzmanların tamamladığı MMPI uygulamaları. “Testi İncele” ile cevap detayını açın; hatalı/çift
+                kayıtları buradan kaldırın. Silme geri alınamaz.
               </p>
             </div>
             <button
               type="button"
               className="btn-secondary btn-sm"
-              onClick={refreshRecords}
+              onClick={() => void refreshRecords()}
               disabled={loadingRecords}
             >
               <Icon name="refresh" size={15} />
@@ -354,6 +398,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                 placeholder="Danışan adı, uygulayan psikolog veya kayıt no ile filtreleyin..."
                 value={recordSearch}
                 onChange={e => setRecordSearch(e.target.value)}
+                aria-label="Test kayıtlarında ara"
               />
             </div>
           </div>
@@ -365,19 +410,35 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
             </div>
           )}
 
-          {!loadingRecords && records.length === 0 && (
+          {!loadingRecords && recordsFailed && records.length === 0 && (
+            <div className="empty-state-card">
+              <div className="empty-state-icon">
+                <Icon name="alert" size={32} />
+              </div>
+              <h4>Kayıtlar alınamadı</h4>
+              <p>Bağlantıyı kontrol edip yeniden deneyin. Uzmanların taslakları kendi cihazlarında korunur.</p>
+              <button type="button" className="btn-secondary btn-sm" onClick={() => void refreshRecords()}>
+                Tekrar dene
+              </button>
+            </div>
+          )}
+
+          {!loadingRecords && !recordsFailed && records.length === 0 && (
             <div className="empty-state-card">
               <div className="empty-state-icon">
                 <Icon name="file" size={32} />
               </div>
-              <h4>Sistemde Henüz Test Kaydı Yok</h4>
-              <p>Psikologlar test taraması tamamladığında kayıtlar otomatik olarak burada listelenecektir.</p>
+              <h4>Henüz test kaydı yok</h4>
+              <p>Psikologlar İşlem akışını tamamladığında kayıtlar burada listelenecek. Önce psikolog hesabı ekleyin.</p>
+              <button type="button" className="btn-secondary btn-sm" onClick={() => setActiveTab('new-user')}>
+                Psikolog ekle
+              </button>
             </div>
           )}
 
           {!loadingRecords && records.length > 0 && filteredRecords.length === 0 && (
             <div className="empty-state-card">
-              <p>Arama kriterinize uygun test kaydı bulunamadı.</p>
+              <p>Aramanızla eşleşen kayıt bulunamadı. Farklı bir isim ya da kayıt no deneyin.</p>
             </div>
           )}
 
@@ -443,7 +504,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             <button
                               type="button"
                               className="action-btn-primary"
-                              onClick={() => handleViewRecord(rec.id)}
+                              onClick={() => void handleViewRecord(rec.id)}
                               disabled={loadingDetail === rec.id}
                             >
                               <Icon name="eye" size={15} />
@@ -452,10 +513,10 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             <button
                               type="button"
                               className="action-btn-danger"
-                              onClick={() => handleDeleteRecord(rec)}
+                              onClick={() => setConfirmRecord(rec)}
                               disabled={deletingRecordId === rec.id}
-                              title="Test kaydını sil"
-                              aria-label="Test kaydını sil"
+                              title="Test kaydını sil (geri alınamaz)"
+                              aria-label={`${rec.firstName} ${rec.lastName} kaydını sil`}
                             >
                               <Icon name="trash" size={15} />
                             </button>
@@ -471,14 +532,15 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         </section>
       )}
 
-      {/* TAB 2: PSİKOLOG HESAPLARI YÖNETİMİ & SİLME */}
       {activeTab === 'users' && (
-        <section className="dashboard-section card-elevated" aria-label="Psikolog Hesapları">
+        <section className="dashboard-section card-elevated" aria-label="Psikolog Hesapları" role="tabpanel">
           <div className="section-header-row">
             <div>
-              <h3 className="section-heading">Psikolog Kadrosu</h3>
+              <span className="section-badge badge-primary">Ekip</span>
+              <h3 className="section-heading">Psikolog kadrosu</h3>
               <p className="section-subtext">
-                Kullanıcı durumunu (aktif/pasif) değiştirebilir veya psikolog hesabını kalıcı olarak silebilirsiniz.
+                Pasifleştirme erişimi kapatır ama kayıtları korur (geri alınabilir). Silme hesabı ve tüm
+                kayıtlarını kalıcı olarak kaldırır.
               </p>
             </div>
             <div className="section-header-actions">
@@ -492,7 +554,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
               <button
                 type="button"
                 className="btn-secondary btn-sm"
-                onClick={refreshUsers}
+                onClick={() => void refreshUsers()}
                 disabled={loadingUsers}
               >
                 <Icon name="refresh" size={15} />
@@ -509,6 +571,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                 placeholder="Psikolog adı, soyadı veya e-posta adresi ile ara..."
                 value={userSearch}
                 onChange={e => setUserSearch(e.target.value)}
+                aria-label="Psikologlarda ara"
               />
             </div>
           </div>
@@ -520,19 +583,35 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
             </div>
           )}
 
-          {!loadingUsers && users.length === 0 && (
+          {!loadingUsers && usersFailed && users.length === 0 && (
+            <div className="empty-state-card">
+              <div className="empty-state-icon">
+                <Icon name="alert" size={32} />
+              </div>
+              <h4>Hesaplar alınamadı</h4>
+              <p>Bağlantıyı kontrol edip yeniden deneyin.</p>
+              <button type="button" className="btn-secondary btn-sm" onClick={() => void refreshUsers()}>
+                Tekrar dene
+              </button>
+            </div>
+          )}
+
+          {!loadingUsers && !usersFailed && users.length === 0 && (
             <div className="empty-state-card">
               <div className="empty-state-icon">
                 <Icon name="users" size={32} />
               </div>
-              <h4>Henüz Psikolog Hesabı Eklenmedi</h4>
-              <p>Sistemi kullanacak uzmanları eklemek için "Yeni Psikolog Ekle" sekmesini kullanın.</p>
+              <h4>Henüz psikolog hesabı yok</h4>
+              <p>Sistemi kullanacak ilk uzmanı ekleyin; giriş bilgileri e-posta ile eşleşir.</p>
+              <button type="button" className="btn-primary btn-sm" onClick={() => setActiveTab('new-user')}>
+                İlk psikoloğu ekle
+              </button>
             </div>
           )}
 
           {!loadingUsers && users.length > 0 && filteredUsers.length === 0 && (
             <div className="empty-state-card">
-              <p>Arama kriterinize uygun psikolog bulunamadı.</p>
+              <p>Aramanızla eşleşen psikolog bulunamadı.</p>
             </div>
           )}
 
@@ -581,16 +660,17 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                               className={`btn-toggle-status ${u.active ? 'is-active' : ''}`}
                               disabled={busyUser === u.id}
                               onClick={() => void toggleActive(u)}
+                              title={u.active ? 'Erişimi kapat (kayıtlar korunur)' : 'Erişimi aç'}
                             >
                               {busyUser === u.id ? 'İşleniyor...' : u.active ? 'Pasifleştir' : 'Aktifleştir'}
                             </button>
                             <button
                               type="button"
                               className="action-btn-danger"
-                              onClick={() => void handleDeletePsychologist(u)}
+                              onClick={() => setConfirmUser(u)}
                               disabled={deletingUserId === u.id}
-                              title="Psikoloğu Sil"
-                              aria-label="Psikoloğu Sil"
+                              title="Psikoloğu ve tüm kayıtlarını kalıcı sil"
+                              aria-label={`${displayName(u)} hesabını sil`}
                             >
                               <Icon name="trash" size={15} />
                               <span>{deletingUserId === u.id ? 'Siliniyor...' : 'Sil'}</span>
@@ -607,15 +687,15 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         </section>
       )}
 
-      {/* TAB 3: YENİ PSİKOLOG EKLEME FORMU */}
       {activeTab === 'new-user' && (
-        <section className="dashboard-section card-elevated" aria-label="Yeni Psikolog Kaydı">
+        <section className="dashboard-section card-elevated" aria-label="Yeni Psikolog Kaydı" role="tabpanel">
           <div className="section-header-row">
             <div>
               <span className="section-badge badge-primary">Yeni Uzman</span>
-              <h3 className="section-heading">Psikolog Hesabı Oluştur</h3>
+              <h3 className="section-heading">Psikolog hesabı oluştur</h3>
               <p className="section-subtext">
-                Psikoloğun sisteme giriş yapabilmesi için bilgilerini eksiksiz tanımlayın.
+                Hesap anında aktif olur. Başlangıç şifresini güvenli bir kanaldan iletin ve ilk girişte
+                değiştirilmesini isteyin.
               </p>
             </div>
           </div>
@@ -623,8 +703,9 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           <form className="admin-creation-form" onSubmit={addPsychologist}>
             <div className="form-grid-2col">
               <div className="form-group">
-                <label>Ad *</label>
+                <label htmlFor="admin-new-first">Ad *</label>
                 <input
+                  id="admin-new-first"
                   required
                   placeholder="Örn. Selin"
                   value={firstName}
@@ -634,8 +715,9 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
               </div>
 
               <div className="form-group">
-                <label>Soyad *</label>
+                <label htmlFor="admin-new-last">Soyad *</label>
                 <input
+                  id="admin-new-last"
                   required
                   placeholder="Örn. Demir"
                   value={lastName}
@@ -646,8 +728,9 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
             </div>
 
             <div className="form-group">
-              <label>Kurumsal veya Kişisel E-posta *</label>
+              <label htmlFor="admin-new-email">E-posta (giriş adı) *</label>
               <input
+                id="admin-new-email"
                 required
                 type="email"
                 placeholder="psikolog@kurum.com"
@@ -655,27 +738,41 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                 onChange={e => setEmail(e.target.value)}
                 autoComplete="off"
               />
+              <small className="ws-hint">Aynı e-posta ile ikinci hesap açılamaz; yazımı kontrol edin.</small>
             </div>
 
             <div className="form-grid-2col">
               <div className="form-group">
-                <label>Başlangıç Şifresi (En az 10 karakter) *</label>
-                <input
-                  required
-                  type="password"
-                  minLength={10}
-                  placeholder="••••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
+                <label htmlFor="admin-new-pass">Başlangıç şifresi *</label>
+                <div className="ws-password-wrap">
+                  <input
+                    id="admin-new-pass"
+                    required
+                    type={showPassword ? 'text' : 'password'}
+                    minLength={10}
+                    placeholder="••••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={() => setShowPassword(show => !show)}
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? 'Gizle' : 'Göster'}
+                  </button>
+                </div>
+                <small className="ws-hint">{passwordHint}</small>
               </div>
 
               <div className="form-group">
-                <label>Şifre Tekrarı *</label>
+                <label htmlFor="admin-new-pass2">Şifre tekrarı *</label>
                 <input
+                  id="admin-new-pass2"
                   required
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   minLength={10}
                   placeholder="••••••••••"
                   value={passwordAgain}
@@ -711,7 +808,32 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         </section>
       )}
 
-      {/* Test Detay Modalı */}
+      {confirmUser && (
+        <ConfirmDialog
+          title={`"${displayName(confirmUser)}" silinsin mi?`}
+          description="Hesap ve bu psikoloğun oluşturduğu tüm test kayıtları kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin değilseniz önce Pasifleştirin."
+          confirmLabel="Evet, kalıcı sil"
+          busy={deletingUserId === confirmUser.id}
+          onConfirm={() => void confirmDeletePsychologist()}
+          onCancel={() => {
+            if (!deletingUserId) setConfirmUser(null);
+          }}
+        />
+      )}
+
+      {confirmRecord && (
+        <ConfirmDialog
+          title={`"${confirmRecord.firstName} ${confirmRecord.lastName}" kaydı silinsin mi?`}
+          description="Test kaydı ve optik cevap verisi kalıcı olarak silinecek. Bu işlem geri alınamaz."
+          confirmLabel="Evet, kaydı sil"
+          busy={deletingRecordId === confirmRecord.id}
+          onConfirm={() => void confirmDeleteRecord()}
+          onCancel={() => {
+            if (!deletingRecordId) setConfirmRecord(null);
+          }}
+        />
+      )}
+
       {selectedRecord && (
         <RecordDetailModal
           record={selectedRecord}

@@ -1,4 +1,4 @@
-import { RAW_SCORE_FIELDS, RAW_SCORE_MAX } from '../workspace/caseTypes';
+import { MMPI_MAX_BLANK, RAW_SCORE_FIELDS, RAW_SCORE_MAX } from '../workspace/caseTypes';
 import type { RawScoreKey, RawScores } from '../workspace/caseTypes';
 
 type RawScoreEntryProps = {
@@ -21,19 +21,49 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
 
   const validity = RAW_SCORE_FIELDS.filter(field => field.group === 'validity');
   const clinical = RAW_SCORE_FIELDS.filter(field => field.group === 'clinical');
+  const entered = RAW_SCORE_FIELDS.filter(field => scores[field.key] !== '').length;
+  const missing = RAW_SCORE_FIELDS.filter(field => scores[field.key] === '').map(field => field.label);
+  const blank = scores.blank === '' ? 0 : scores.blank;
+  const blankOver = typeof blank === 'number' && blank > MMPI_MAX_BLANK;
 
   return (
     <section className="ws-panel" aria-labelledby="raw-title">
       <header className="ws-panel-head">
         <div>
-          <h2 id="raw-title">Ham puan</h2>
-          <p className="ws-muted">Hs, Pd, Pt, Sc ve Ma K düzeltmesi yapılmadan girilir.</p>
+          <span className="section-badge badge-primary">03 · Veri</span>
+          <h2 id="raw-title" className="ws-panel-title">
+            Ham <em>puan</em>
+          </h2>
+          <p className="ws-muted">
+            Hs, Pd, Pt, Sc ve Ma <strong>K düzeltmesi yapılmadan</strong> girilir. Her alan anında taslağa yazılır;
+            F5 ve internet kesintisinde korunur.
+          </p>
+        </div>
+        <div className="qe-counts" aria-label="İlerleme">
+          <span>{entered} / {RAW_SCORE_FIELDS.length}</span>
+          {blankOver ? <span className="ws-chip qe-blank-over">Boş {blank}</span> : null}
         </div>
       </header>
+
+      {blankOver && (
+        <p className="qe-blank-warning" role="alert">
+          Boş ({blank}) {MMPI_MAX_BLANK} sınırını aşıyor; bu durum testi geçersiz sayabilir. Kontrol adımında kayıt
+          engellenecek.
+        </p>
+      )}
+
+      {missing.length > 0 ? (
+        <p className="ws-hint" role="status">
+          Eksik: {missing.join(', ')}. Kontrol adımı için {RAW_SCORE_FIELDS.length} alanın tamamı doldurulmalı.
+        </p>
+      ) : (
+        <p className="ws-hint" role="status">Tüm ölçekler girildi; Kontrol adımına geçebilirsiniz.</p>
+      )}
 
       <div className="raw-grid-wrap">
         <fieldset className="raw-group">
           <legend>Geçerlik göstergeleri</legend>
+          <p className="ws-hint">Boş (?) + L + F + K. Profilin yorumlanabilirliğini belirler.</p>
           <div className="raw-grid">
             {validity.map(field => (
               <label key={field.key} className="raw-field">
@@ -45,6 +75,7 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
                   max={field.max}
                   value={scores[field.key]}
                   onChange={event => setField(field.key, event.target.value)}
+                  aria-label={`${field.label} ham puanı, 0 ile ${field.max} arası`}
                 />
                 <small>0–{field.max}</small>
               </label>
@@ -54,6 +85,7 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
 
         <fieldset className="raw-group">
           <legend>Klinik ölçekler</legend>
+          <p className="ws-hint">Hs · D · Hy · Pd · Mf · Pa · Pt · Sc · Ma · Si. K’li beş ölçek düzeltmesiz girilir.</p>
           <div className="raw-grid">
             {clinical.map(field => (
               <label key={field.key} className="raw-field">
@@ -68,6 +100,7 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
                   max={field.max}
                   value={scores[field.key]}
                   onChange={event => setField(field.key, event.target.value)}
+                  aria-label={`${field.label} ham puanı${field.kRaw ? ' (K düzeltmesiz)' : ''}, 0 ile ${field.max} arası`}
                 />
                 <small>0–{field.max}{field.kRaw ? ' · K’sız' : ''}</small>
               </label>

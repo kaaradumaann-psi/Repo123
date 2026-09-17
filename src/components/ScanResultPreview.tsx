@@ -3,6 +3,7 @@ import type { FormDefinition, ItemDefinition } from '../omr/omrTypes';
 import type { ManualReview, StoredScanPage } from '../results/scanResultTypes';
 import { readStatusLabel, resolveItem } from '../results/resultNormalizer';
 import { itemRowRect } from '../scanner/reviewGeometry';
+import { scanPageHasImage } from '../workspace/draftStorage';
 import { Icon } from './Icon';
 
 export type ScanResultPreviewProps = {
@@ -36,6 +37,13 @@ function ItemCrop({
     setError('');
     try {
       const image = page.normalized;
+      // Taslaktan görselsiz dönen sayfa: kör kırpıntı yerine açık mesaj.
+      if (!image || image.width <= 0 || image.height <= 0 || image.data.length === 0) {
+        throw new Error(
+          'Bu sayfa taslaktan veri olarak geri yüklendi; optik görsel önbellekte tutulmadığı için satır kırpıntısı gösterilemiyor. ' +
+            'Veriler ve düzeltmeler korundu. Görseli yeniden görmek için sayfayı silip yeniden okutun.',
+        );
+      }
       const crop = itemRowRect(item, definition);
       const x = Math.max(0, Math.floor((crop.x / definition.pageWidthMm) * image.width));
       const y = Math.max(0, Math.floor((crop.y / definition.pageHeightMm) * image.height));
@@ -122,6 +130,7 @@ const STATUS_OPTIONS = [
 ] as const;
 
 export function ScanResultPreview({ definition, page, onReview, onRemove }: ScanResultPreviewProps) {
+  const hasImage = scanPageHasImage(page);
   const expected = definition.pages.find(p => p.pageNumber === page.pageNumber)!;
   const [filter, setFilter] = useState<'unresolved' | 'all' | 'reviewed'>('unresolved');
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_OPTIONS)[number][0]>('all');
@@ -180,22 +189,43 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
         </button>
       </div>
 
+      {!hasImage && (
+        <div className="status-banner info-banner" role="status">
+          <Icon name="alert" size={18} />
+          <span>
+            Bu sayfa F5 sonrası taslaktan <strong>veri olarak</strong> geri yüklendi: madde sonuçları ve manuel
+            düzeltmeler korundu, kayıt için hazır. Önizleme görseli saklanmadığı için yeni düzeltme ancak sayfayı
+            silip yeniden okutunca yapılabilir — kör düzeltmeye izin verilmez.
+          </span>
+        </div>
+      )}
+
       <div className="scan-review-columns">
         {/* Sol Kolon: Sayfa Önizleme & Kalite Metrikleri */}
         <aside className="scan-preview-aside">
           <div className="normalized-sheet-card">
-            <img src={page.previewUrl} alt={`${page.pageNumber}. sayfa düzeltilmiş önizleme`} />
-            {row && (
-              <span
-                className="scan-row-location"
-                aria-hidden="true"
-                style={{
-                  left: `${(row.x / definition.pageWidthMm) * 100}%`,
-                  top: `${(row.y / definition.pageHeightMm) * 100}%`,
-                  width: `${(row.width / definition.pageWidthMm) * 100}%`,
-                  height: `${(row.height / definition.pageHeightMm) * 100}%`,
-                }}
-              />
+            {hasImage ? (
+              <>
+                <img src={page.previewUrl} alt={`${page.pageNumber}. sayfa düzeltilmiş önizleme`} />
+                {row && (
+                  <span
+                    className="scan-row-location"
+                    aria-hidden="true"
+                    style={{
+                      left: `${(row.x / definition.pageWidthMm) * 100}%`,
+                      top: `${(row.y / definition.pageHeightMm) * 100}%`,
+                      width: `${(row.width / definition.pageWidthMm) * 100}%`,
+                      height: `${(row.height / definition.pageHeightMm) * 100}%`,
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <div className="missing-page-placeholder is-restored" role="img" aria-label="Önizleme görseli yok, veri korundu">
+                <Icon name="checkCircle" size={28} />
+                <span>Veri korundu</span>
+                <small>Önizleme için sayfayı yeniden okutun</small>
+              </div>
             )}
           </div>
 
@@ -370,7 +400,13 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
                   : 'Algoritma bu madde için sonuç üretmedi.'}
               </p>
 
-              <fieldset className="scan-review-controls" disabled={!canReview}>
+              {!hasImage && (
+                <p className="status-banner warning-banner" role="note">
+                  <span>Görsel olmadan düzeltme kapalı. Bu maddenin mevcut sonucu ve önceki düzeltmesi korunuyor.</span>
+                </p>
+              )}
+
+              <fieldset className="scan-review-controls" disabled={!canReview || !hasImage}>
                 <legend className="visually-hidden">İşaretleme Düzeltmesi</legend>
                 {choices.map(area => (
                   <button
