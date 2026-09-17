@@ -78,7 +78,7 @@ export function MyRecordsPanel() {
           <span className="section-badge badge-primary">Arşiv</span>
           <h3 id="saved-records-title" className="section-heading">Kayıtlar</h3>
           <p className="section-subtext">
-            Bu hesaptan tamamlanan MMPI uygulamaları. “Testi İncele” ile cevap detayını açın; hatalı kayıtları
+            Bu hesaptan tamamlanan MMPI uygulamaları. “Testi İncele” ile hesaplanan T skorları, profil grafiği ve cevap detayını açın; hatalı kayıtları
             buradan kaldırın.
           </p>
         </div>

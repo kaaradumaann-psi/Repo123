@@ -152,7 +152,7 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
 
   // ? scale
   const qT = Math.min(30 + cannotSay * 2, 120);
-  const qLvl = cannotSay > 30 ? { label: 'Geçersiz', level: 'veryHigh', color: '#ef4444' } : cannotSay > 5 ? { label: 'Orta', level: 'moderate', color: '#eab308' } : { label: 'Normal', level: 'average', color: '#22c55e' };
+  const qLvl = cannotSay > 30 ? { label: 'Geçersiz', level: 'veryHigh', color: '#d2453a' } : cannotSay > 5 ? { label: 'Orta', level: 'moderate', color: '#b4770b' } : { label: 'Normal', level: 'average', color: '#0e9e6a' };
   const cannotScale: ScaleResult = {
     id: '?',
     name: SCALE_META['?'].name,

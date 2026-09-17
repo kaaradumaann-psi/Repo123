@@ -30,3 +30,6 @@ supabase/.temp/
 /crops/
 /debug-out/
 .DS_Store
+
+# Gevici sonuç paneli önizleme çıktısı — derlenen statik önizleme
+preview-dist/

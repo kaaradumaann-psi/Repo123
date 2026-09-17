@@ -1279,7 +1279,17 @@ function ReviewPanel({
 
       {/* Hesaplama ve Grafik */}
       {profile ? (
-        <MMPIResultsPanel profile={profile} clientName={`${client.firstName} ${client.lastName}`} />
+        <MMPIResultsPanel
+          profile={profile}
+          clientName={`${client.firstName} ${client.lastName}`}
+          answers={
+            method === 'quick'
+              ? answers
+              : method === 'omr' && scan
+                ? scanToAnswers(definition, scan)
+                : undefined
+          }
+        />
       ) : (
         <div className="mmpi-results-placeholder">
           <Icon name="sheet" size={20} />

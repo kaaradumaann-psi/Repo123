@@ -28,8 +28,10 @@ kendi **Kayıtlarım** listesi ve yalnızca Admin için **Admin paneli**.
 Tarama oturumunda dört sayfa kabul edildiğinde Psikolog için danışan bilgi formu
 (ad, soyad, cinsiyet, yaş, meslek, eğitim, uygulanma tarihi, istekte bulunan)
 açılır. Kaydetme, mevcut `ItemReadResult` OMR maddelerini dönüştürmeden ham cevap
-sayfalarını ve psikolog kimliğini Supabase'e yazar; klinik puanlama veya
-yorumlama çalışmaz.
+sayfalarını ve psikolog kimliğini Supabase'e yazar. MMPI profili (T skorları,
+profil grafiği, geçerlik ve kod analizi) sunucuda değil, kullanıcının cihazında
+hesaplanır: İşlem adımında anlık olarak ve kayıtta **“Testi İncele”** detayında
+(kayıttaki hızlı giriş / OMR / ham puan verisinden yeniden üretilir).
 
 Kimlik oturumu Supabase Auth tarafından yönetilir ve bu frontend'de
 `persistSession: true` ile **`sessionStorage`**'da tutulur: aynı sekmede F5
@@ -149,6 +151,8 @@ Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
 - Klinik puanlama, raporlama ve sonuç API'si **yoktur**. Kayıt akışı Supabase
   `mmpi_records` tablosuna yalnızca ham OMR cevaplarını ve danışan metadata'sını
   yazar; `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
+  Ekran üstü T skoru / profil grafiği hesabı tamamen istemcide yapılır
+  (`src/scoring/`) ve sunucuya hiçbir klinik sonuc iletmez.
 - Yalnızca `reliable` maddeler algoritma cevabı sayılır; `single` ve `ambiguous`
   her zaman insan incelemesi ister.
 - Formda kişisel veri saklanmaz. Form kimliği, katılımcı kodu ve tarih yalnızca

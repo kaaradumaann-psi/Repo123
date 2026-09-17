@@ -1,119 +1,154 @@
+import { useState } from 'react';
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
-import { MMPIScoreChart } from './MMPIScoreChart';
+import type { ItemAnswer } from '../../workspace/caseTypes';
+import { tColor } from '../../scoring/mmpiInterpretation';
+import type { IconName } from '../Icon';
 import { Icon } from '../Icon';
+import { MMPIScoreChart } from './MMPIScoreChart';
+import { MMPIValidityTab } from './MMPIValidityTab';
+import { MMPIClinicalTab } from './MMPIClinicalTab';
+import { MMPICodeTab } from './MMPICodeTab';
+import { MMPIExtraTab } from './MMPIExtraTab';
+import { MMPIAnswersTab } from './MMPIAnswersTab';
+
+export type MmpiResultsTab = 'overview' | 'validity' | 'clinical' | 'code' | 'extra' | 'answers';
+
+const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
+  { id: 'overview', label: 'Genel Bakış', icon: 'pulse' },
+  { id: 'validity', label: 'Geçerlik Analizleri', icon: 'info' },
+  { id: 'clinical', label: 'Klinik Ölçekler', icon: 'list' },
+  { id: 'code', label: 'Kod Analizleri', icon: 'trend' },
+  { id: 'extra', label: 'Ek Ölçekler & Kritikler', icon: 'layers' },
+  { id: 'answers', label: 'Soru Yanıtları', icon: 'sheet' },
+];
 
 type Props = {
   profile: MMPIProfile;
   clientName?: string;
+  /** Madde düzeyinde (566) yanıt dizisi — “Soru Yanıtları” sekmesinde gösterilir. */
+  answers?: ItemAnswer[];
 };
 
-export function MMPIResultsPanel({ profile, clientName }: Props) {
-  const { validity, clinical, cannotSayScale, validityAnalysis, profileCode } = profile;
+function formatT(t: number): string {
+  return t.toFixed(1);
+}
+
+/**
+ * MMPI sonuç paneli — sekmeli düzen:
+ * Genel Bakış (profil grafiği + özet tablo), Geçerlik Analizleri, Klinik
+ * Ölçekler, Kod Analizleri, Ek Ölçekler & Kritikler, Soru Yanıtları.
+ */
+export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
+  const [tab, setTab] = useState<MmpiResultsTab>('overview');
+  const { validityAnalysis, profileCode } = profile;
+  const clinical = profile.clinical;
 
   return (
     <div className="mmpi-results-panel">
       <header className="mmpi-results-header">
         <div>
-          <span className="section-badge badge-primary">Hesaplama · Türk Normları (Savaşır 1981)</span>
+          <div className="mmpi-results-meta">
+            <span className="section-badge badge-primary">Hesaplama · Türk Normları (Savaşır 1981)</span>
+            {clientName && <span className="mmpi-chip">{clientName}</span>}
+            <span className="mmpi-chip">{profile.gender} normları</span>
+            {profileCode && <span className="mmpi-chip mmpi-chip-code">Profil Kodu: {profileCode}</span>}
+          </div>
           <h3 className="mmpi-results-title">
-            MMPI <em>Profil</em> {clientName ? `· ${clientName}` : ''} {profileCode ? `· Kod: ${profileCode}` : ''}
+            MMPI <em>Sonuçları</em>
           </h3>
-          <p className="ws-muted">
-            Ham puanlar K düzeltmesiyle T skoruna çevrildi. T = 50 + 10·(X-M)/SD; Mf kadın ölçeğinde ters çevrilir. T ≥70 klinik eşik, 56-70 orta yüksek aralıktır.
-          </p>
         </div>
         <div className={`mmpi-validity-pill ${validityAnalysis.isValid ? 'is-valid' : 'is-invalid'}`}>
           <Icon name={validityAnalysis.isValid ? 'checkCircle' : 'alert'} size={14} />
-          <span>{validityAnalysis.isValid ? 'Geçerli' : 'Şüpheli / Geçersiz'}</span>
+          <span>{validityAnalysis.isValid ? 'Geçerli Profil' : 'Şüpheli / Geçersiz Profil'}</span>
         </div>
       </header>
 
-      <div className="mmpi-chart-card">
-        <MMPIScoreChart scales={profile.scales} />
-      </div>
+      <nav className="mmpi-tabs" role="tablist" aria-label="MMPI sonuç sekmeleri">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`mmpi-tab ${tab === t.id ? 'active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            <Icon name={t.icon} size={14} />
+            <span>{t.label}</span>
+          </button>
+        ))}
+      </nav>
 
-      <div className="mmpi-tables-grid">
-        <div className="mmpi-table-card">
-          <h4 className="mmpi-table-title">Geçerlik Ölçekleri</h4>
-          <table className="mmpi-mini-table">
-            <thead>
-              <tr>
-                <th>Ölçek</th>
-                <th>Ham</th>
-                <th>T</th>
-                <th>Seviye</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className={cannotSayScale.rawScore > 30 ? 'is-high' : ''}>
-                <td><strong>{cannotSayScale.fullName}</strong></td>
-                <td>{cannotSayScale.rawScore}</td>
-                <td>{cannotSayScale.tScore}</td>
-                <td><span className="level-badge" style={{ background: cannotSayScale.color }}>{cannotSayScale.level}</span></td>
-              </tr>
-              {validity.map(s => (
-                <tr key={s.id} className={s.tScore >= 70 ? 'is-high' : ''}>
-                  <td><strong>{s.fullName}</strong></td>
-                  <td>{s.rawScore}</td>
-                  <td style={{ color: s.tScore >= 70 ? '#ef4444' : undefined, fontWeight: 700 }}>{s.tScore}</td>
-                  <td><span className="level-badge" style={{ background: s.color }}>{s.level}</span></td>
-                </tr>
-              ))}
-              <tr>
-                <td><strong>F-K</strong></td>
-                <td>{validityAnalysis.fMinusK}</td>
-                <td>—</td>
-                <td className="ws-muted">{validityAnalysis.fMinusK > 15 ? 'Abartma?' : validityAnalysis.fMinusK < -15 ? 'İyi görünme?' : 'Normal'}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="mmpi-validity-box">
-            <p>{validityAnalysis.interpretation}</p>
-            {validityAnalysis.warnings.length > 0 && (
-              <ul>
-                {validityAnalysis.warnings.map((w, i) => (
-                  <li key={i}>{w}</li>
-                ))}
-              </ul>
-            )}
-          </div>
+      {tab === 'overview' && (
+        <div role="tabpanel" className="mmpi-tab-panel">
+          <section className="mmpi-chart-card">
+            <h4 className="mmpi-card-title">
+              <span className="mmpi-card-dot" />
+              MMPI Profil Grafiği (T-Skorları)
+            </h4>
+            <MMPIScoreChart scales={profile.scales} />
+          </section>
+
+          <section className="mmpi-summary-card">
+            <div className="mmpi-summary-table-wrap">
+              <table className="mmpi-summary-table">
+                <thead>
+                  <tr>
+                    <th className="row-head">Ölçek</th>
+                    {clinical.map(s => (
+                      <th key={s.id} title={s.fullName}>
+                        {s.shortName}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th className="row-head">Ham Puan</th>
+                    {clinical.map(s => (
+                      <td key={s.id} className="num">
+                        {s.rawScore}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th className="row-head">K Eklemesi (K+)</th>
+                    {clinical.map(s => (
+                      <td key={s.id} className="num k-add">
+                        {s.kAdded !== undefined ? `+${s.kAdded}` : '—'}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th className="row-head">T Puanı</th>
+                    {clinical.map(s => (
+                      <td key={s.id} className="num t-val" style={{ color: tColor(s.tScore) }}>
+                        {formatT(s.tScore)}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mmpi-summary-note">
+              T ≥ 70 klinik eşik · 56–69 orta yüksek aralık · 40–55 normal. T skorları cinsiyete özgü Türk
+              normlarına göre hesaplanır; klinik ölçeklerde K düzeltmesi uygulanmıştır.
+            </p>
+          </section>
         </div>
+      )}
 
-        <div className="mmpi-table-card">
-          <h4 className="mmpi-table-title">Klinik Ölçekler (K düzeltmeli)</h4>
-          <table className="mmpi-mini-table">
-            <thead>
-              <tr>
-                <th>Ölçek</th>
-                <th>Ham</th>
-                <th>K+</th>
-                <th>Düz. Ham</th>
-                <th>T</th>
-                <th>Seviye</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clinical.map(s => (
-                <tr key={s.id} className={s.tScore >= 70 ? 'is-high' : s.tScore >= 56 ? 'is-mid' : ''}>
-                  <td><strong>{s.shortName}</strong> <span className="ws-muted">{s.name}</span></td>
-                  <td>{s.rawScore}</td>
-                  <td>{s.kAdded !== undefined ? `+${s.kAdded}` : '—'}</td>
-                  <td>{s.kCorrectedRaw ?? s.rawScore}</td>
-                  <td style={{ color: s.tScore >= 70 ? '#ef4444' : s.tScore >= 56 ? '#d97706' : undefined, fontWeight: 700 }}>{s.tScore}</td>
-                  <td><span className="level-badge" style={{ background: s.color }}>{s.level}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {tab === 'validity' && <MMPIValidityTab profile={profile} />}
+      {tab === 'clinical' && <MMPIClinicalTab profile={profile} />}
+      {tab === 'code' && <MMPICodeTab profile={profile} />}
+      {tab === 'extra' && <MMPIExtraTab profile={profile} />}
+      {tab === 'answers' && <MMPIAnswersTab answers={answers} />}
 
-      <div className="mmpi-info-foot">
-        <p>
-          * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) kullanılarak yapılmıştır.
-          Kesme puanları tanı koymaz; yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
-        </p>
-      </div>
+      <p className="mmpi-info-foot">
+        * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme
+        oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) kullanılarak yapılmıştır. Kesme puanları tanı koymaz;
+        yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
+      </p>
     </div>
   );
 }
