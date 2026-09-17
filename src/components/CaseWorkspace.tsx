@@ -17,7 +17,9 @@ import {
   ITEM_COUNT,
   MARITAL_OPTIONS,
   RAW_SCORE_FIELDS,
-  clientContextPayload,
+  buildCaseMeta,
+  buildQuickPayload,
+  buildRawPayload,
   countAnswers,
   emptyAnswers,
   emptyClientIntake,
@@ -49,9 +51,10 @@ const STEPS: { id: Exclude<CaseStep, 'home'>; label: string }[] = [
 type CaseWorkspaceProps = {
   definition: FormDefinition;
   actor: AuthenticatedUser;
+  onSaved?: () => void;
 };
 
-export function CaseWorkspace({ definition, actor }: CaseWorkspaceProps) {
+export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps) {
   const [step, setStep] = useState<CaseStep>('home');
   const [client, setClient] = useState<ClientIntake>(emptyClientIntake);
   const [method, setMethod] = useState<EntryMethod | null>(null);
@@ -98,32 +101,29 @@ export function CaseWorkspace({ definition, actor }: CaseWorkspaceProps) {
   const entryReady = method === 'quick' ? quickReady : method === 'raw' ? rawReady : omrReady;
 
   async function saveAndAnalyze() {
-    if (saved || busy) return;
+    if (saved || busy || !method) return;
     setSaveError('');
     if (actor.role !== 'PSYCHOLOG' || !actor.active) {
-      setSaveError('Kayıt yalnızca aktif psikolog hesabıyla yazılır. Veriler bu oturumda analize hazır.');
       setSaved({ id: 'local', createdAt: new Date().toISOString() });
       return;
     }
     setBusy(true);
     try {
       const input = recordInputFromIntake(client);
-      const extras: unknown[] = [clientContextPayload(client)];
+      const meta = buildCaseMeta(method, client);
       let record: MMPIRecord;
       if (method === 'omr') {
         if (!scan || !omrReady) throw new Error('Dört sayfa onaylanmadan kayıt tamamlanamaz.');
-        extras.push({ kind: 'entry-method', method: 'omr' });
-        record = await createRecord(input, sortedPages(scan), definition, actor, submissionKey.current, extras);
+        record = await createRecord(input, sortedPages(scan), definition, actor, submissionKey.current, [meta]);
       } else if (method === 'quick') {
-        extras.push({ kind: 'quick-entry', answers: answers.map(answer => (answer === undefined ? null : answer)) });
-        record = await createDataRecord(input, actor, submissionKey.current, extras);
+        record = await createDataRecord(input, actor, submissionKey.current, [meta, buildQuickPayload(answers)]);
       } else if (method === 'raw') {
-        extras.push({ kind: 'raw-scores', scales: raw });
-        record = await createDataRecord(input, actor, submissionKey.current, extras);
+        record = await createDataRecord(input, actor, submissionKey.current, [meta, buildRawPayload(raw)]);
       } else {
         throw new Error('Veri giriş yöntemi seçilmedi.');
       }
       setSaved(record);
+      onSaved?.();
     } catch (cause) {
       setSaveError(cause instanceof Error ? cause.message : 'Kayıt yazılamadı.');
     } finally {
@@ -266,7 +266,7 @@ function IntakeForm({
       <header className="ws-panel-head">
         <div>
           <h2>Danışan / test</h2>
-          <p className="ws-muted">Zorunlu alanlar cinsiyet, yaş ve test tarihi. Arşiv için ad soyad da gerekir.</p>
+          <p className="ws-muted">Cinsiyet, yaş, test tarihi ve ad soyad zorunlu.</p>
         </div>
       </header>
 
@@ -476,9 +476,9 @@ function ReviewPanel({
 
       {saved ? (
         <div className="ws-ready" role="status">
-          Veriler analize hazır.
-          {saved.id !== 'local' ? <> Kayıt: <strong>{saved.id}</strong>.</> : null}
-          {' '}Klinik puanlama bu çalışma alanında henüz bağlı değil; ham veri korundu.
+          {saved.id === 'local'
+            ? 'Veriler bu oturumda analize hazır. Kayıt yalnızca aktif psikolog hesabıyla veritabanına yazılır.'
+            : <>Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Klinik puanlama bu sürümde bağlı değil.</>}
         </div>
       ) : null}
 

@@ -1,5 +1,5 @@
 import { FORM } from '../form/layout';
-import type { Gender, RecordInput } from '../records/supabaseRecords';
+import type { Gender, RecordInput, SavedAnswerPage } from '../records/supabaseRecords';
 
 export const ITEM_COUNT = FORM.totalItems;
 
@@ -16,7 +16,7 @@ export type ItemAnswer = 'D' | 'Y' | null | undefined;
 export type ClientIntake = {
   firstName: string;
   lastName: string;
-  gender: IntakeGender;
+  gender: IntakeGender | '';
   age: number;
   testDate: string;
   testDuration: string;
@@ -65,17 +65,51 @@ export const RAW_SCORE_MAX: Record<RawScoreKey, number> = Object.fromEntries(
   RAW_SCORE_FIELDS.map(field => [field.key, field.max]),
 ) as Record<RawScoreKey, number>;
 
-const REQUIRED_TEXT_FALLBACK = '—';
+export type CaseMeta = {
+  kind: 'case-meta';
+  version: 1;
+  method: EntryMethod;
+  client: {
+    firstName: string;
+    lastName: string;
+    gender: IntakeGender;
+    age: number;
+    testDate: string;
+    testDuration: string;
+    occupation: string;
+    followUp: FollowUpStatus | '';
+    education: EducationLevel | '';
+    maritalStatus: MaritalStatus | '';
+    applicationReason: string;
+    clinicalContext: string;
+  };
+};
+
+export type QuickEntryPayload = {
+  kind: 'quick-entry';
+  version: 1;
+  answers: Array<'D' | 'Y' | null>;
+};
+
+export type RawScoresPayload = {
+  kind: 'raw-scores';
+  version: 1;
+  scales: Record<RawScoreKey, number>;
+};
 
 export function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function emptyClientIntake(): ClientIntake {
   return {
     firstName: '',
     lastName: '',
-    gender: 'Kadın',
+    gender: '',
     age: 0,
     testDate: todayIsoDate(),
     testDuration: '',
@@ -153,30 +187,121 @@ export function validateIntake(client: ClientIntake): string | null {
   return null;
 }
 
+/** Sütunlar: ad/soyad/cinsiyet/yaş/tarih + isteğe bağlı meslek/eğitim/başvuru (boş string, sahte tire yok). */
+function requireGender(client: ClientIntake): IntakeGender {
+  if (client.gender !== 'Erkek' && client.gender !== 'Kadın') throw new Error('Cinsiyet seçiniz.');
+  return client.gender;
+}
+
 export function recordInputFromIntake(client: ClientIntake): RecordInput {
-  const text = (value: string) => value.trim() || REQUIRED_TEXT_FALLBACK;
+  const error = validateIntake(client);
+  if (error) throw new Error(error);
   return {
     client: {
       firstName: client.firstName.trim(),
       lastName: client.lastName.trim(),
-      gender: client.gender,
+      gender: requireGender(client),
       age: client.age,
-      occupation: text(client.occupation),
-      education: text(client.education),
+      occupation: client.occupation.trim(),
+      education: client.education.trim(),
       applicationDate: client.testDate,
-      requestedBy: text(client.applicationReason),
+      requestedBy: client.applicationReason.trim(),
     },
   };
 }
 
-export function clientContextPayload(client: ClientIntake) {
+export function buildCaseMeta(method: EntryMethod, client: ClientIntake): CaseMeta {
+  const error = validateIntake(client);
+  if (error) throw new Error(error);
   return {
-    kind: 'client-context' as const,
-    followUp: client.followUp || null,
-    maritalStatus: client.maritalStatus || null,
-    testDuration: client.testDuration.trim() || null,
-    applicationReason: client.applicationReason.trim() || null,
-    clinicalContext: client.clinicalContext.trim() || null,
+    kind: 'case-meta',
+    version: 1,
+    method,
+    client: {
+      firstName: client.firstName.trim(),
+      lastName: client.lastName.trim(),
+      gender: requireGender(client),
+      age: client.age,
+      testDate: client.testDate,
+      testDuration: client.testDuration.trim(),
+      occupation: client.occupation.trim(),
+      followUp: client.followUp,
+      education: client.education,
+      maritalStatus: client.maritalStatus,
+      applicationReason: client.applicationReason.trim(),
+      clinicalContext: client.clinicalContext.trim(),
+    },
+  };
+}
+
+export function buildQuickPayload(answers: readonly ItemAnswer[]): QuickEntryPayload {
+  if (answers.length !== ITEM_COUNT) throw new Error('Madde sayısı 566 olmalıdır.');
+  return {
+    kind: 'quick-entry',
+    version: 1,
+    answers: answers.map(answer => (answer === undefined ? null : answer)),
+  };
+}
+
+export function buildRawPayload(scores: RawScores): RawScoresPayload {
+  if (!rawScoresComplete(scores)) throw new Error('Ham puan alanları eksik veya sınır dışında.');
+  const scales = {} as Record<RawScoreKey, number>;
+  for (const field of RAW_SCORE_FIELDS) scales[field.key] = scores[field.key] as number;
+  return { kind: 'raw-scores', version: 1, scales };
+}
+
+function kindOf(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null;
+  const kind = (value as { kind?: unknown }).kind;
+  return typeof kind === 'string' ? kind : null;
+}
+
+export function isOmrPage(value: unknown): value is SavedAnswerPage {
+  if (!value || typeof value !== 'object') return false;
+  if (kindOf(value)) return false;
+  const page = value as SavedAnswerPage;
+  return typeof page.pageNumber === 'number' && Array.isArray(page.items);
+}
+
+export function parseRecordPayload(raw: unknown[]) {
+  const items = Array.isArray(raw) ? raw : [];
+  const meta = items.find(item => kindOf(item) === 'case-meta') as CaseMeta | undefined;
+  const legacyContext = items.find(item => kindOf(item) === 'client-context') as
+    | {
+        kind: 'client-context';
+        followUp?: string | null;
+        maritalStatus?: string | null;
+        testDuration?: string | null;
+        applicationReason?: string | null;
+        clinicalContext?: string | null;
+      }
+    | undefined;
+  const legacyMethod = items.find(item => kindOf(item) === 'entry-method') as
+    | { kind: 'entry-method'; method?: EntryMethod }
+    | undefined;
+  const quick = items.find(item => kindOf(item) === 'quick-entry') as
+    | (QuickEntryPayload & { answers?: Array<'D' | 'Y' | null> })
+    | undefined;
+  const rawScores = items.find(item => kindOf(item) === 'raw-scores') as
+    | (RawScoresPayload & { scales?: Record<string, number | ''> })
+    | undefined;
+  const omrPages = items.filter(isOmrPage);
+  const method: EntryMethod | undefined =
+    meta?.method ??
+    legacyMethod?.method ??
+    (quick ? 'quick' : rawScores ? 'raw' : omrPages.length ? 'omr' : undefined);
+  const client = meta?.client;
+  return {
+    method,
+    client,
+    followUp: client?.followUp || legacyContext?.followUp || '',
+    maritalStatus: client?.maritalStatus || legacyContext?.maritalStatus || '',
+    testDuration: client?.testDuration || legacyContext?.testDuration || '',
+    applicationReason: client?.applicationReason || legacyContext?.applicationReason || '',
+    clinicalContext: client?.clinicalContext || legacyContext?.clinicalContext || '',
+    quickAnswers: quick?.answers,
+    rawScales: rawScores?.scales,
+    omrPages,
   };
 }
 

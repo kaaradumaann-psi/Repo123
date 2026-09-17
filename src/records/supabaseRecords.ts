@@ -61,6 +61,15 @@ function text(value: string, label: string, max = 120): string {
   return normalized;
 }
 
+function optionalText(value: string, label: string, max = 500): string {
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  if (!normalized) return '';
+  if (normalized.length > max || /[\u0000-\u001f]/.test(normalized)) {
+    throw new Error(`${label} geçerli olmalıdır.`);
+  }
+  return normalized;
+}
+
 export function canCreateRecord(pages: readonly StoredScanPage[], definition: FormDefinition): boolean {
   if (pages.length !== definition.totalPages) return false;
   const batches = new Set(pages.map(page => page.batchId));
@@ -94,10 +103,10 @@ function normalizeClient(input: RecordInput['client']) {
     lastName: text(input.lastName, 'Soyad', 80),
     gender: input.gender,
     age: input.age,
-    occupation: text(input.occupation, 'Meslek', 120),
-    education: text(input.education, 'Eğitim durumu', 120),
+    occupation: optionalText(input.occupation, 'Meslek', 120),
+    education: optionalText(input.education, 'Eğitim durumu', 120),
     applicationDate: text(input.applicationDate, 'Uygulama tarihi', 10),
-    requestedBy: text(input.requestedBy, 'İstekte bulunan', 120),
+    requestedBy: optionalText(input.requestedBy, 'Başvuru nedeni', 500),
   };
   if (!['Kadın', 'Erkek', 'Belirtmek istemiyor', 'Diğer'].includes(client.gender)) throw new Error('Cinsiyet seçimi geçersiz.');
   if (!Number.isInteger(client.age) || client.age < 0 || client.age > 120) throw new Error('Yaş 0–120 arasında olmalıdır.');
@@ -161,7 +170,7 @@ export async function createRecord(
     .slice()
     .sort((a, b) => a.pageNumber - b.pageNumber)
     .map(toSavedPage);
-  return upsertRecord(normalizeClient(input.client), actor, idempotencyKey, [...omrPages, ...extras]);
+  return upsertRecord(normalizeClient(input.client), actor, idempotencyKey, [...extras, ...omrPages]);
 }
 
 export async function createDataRecord(

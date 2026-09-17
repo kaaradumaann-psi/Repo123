@@ -3,12 +3,16 @@ import test from 'node:test';
 import {
   ITEM_COUNT,
   RAW_SCORE_MAX,
+  buildCaseMeta,
+  buildQuickPayload,
+  buildRawPayload,
   countAnswers,
   emptyAnswers,
   emptyClientIntake,
   emptyRawScores,
   mapQuickKey,
   parseRawScore,
+  parseRecordPayload,
   rawScoresComplete,
   recordInputFromIntake,
   validateIntake,
@@ -57,8 +61,9 @@ test('raw score maxima match the requested validity and clinical caps', () => {
   assert.equal(rawScoresComplete(emptyRawScores()), false);
 });
 
-test('intake requires gender, age and test date; optional fields map to placeholders', () => {
+test('intake requires gender, age and test date; optional fields stay empty strings', () => {
   const client = emptyClientIntake();
+  assert.equal(client.gender, '');
   client.firstName = 'Ayşe';
   client.lastName = 'Yılmaz';
   client.gender = 'Kadın';
@@ -66,10 +71,61 @@ test('intake requires gender, age and test date; optional fields map to placehol
   client.testDate = '2026-09-17';
   assert.equal(validateIntake(client), null);
   const input = recordInputFromIntake(client);
-  assert.equal(input.client.occupation, '—');
-  assert.equal(input.client.education, '—');
-  assert.equal(input.client.requestedBy, '—');
+  assert.equal(input.client.occupation, '');
+  assert.equal(input.client.education, '');
+  assert.equal(input.client.requestedBy, '');
   assert.equal(input.client.gender, 'Kadın');
+  assert.equal(input.client.applicationDate, '2026-09-17');
   client.age = 0;
   assert.equal(validateIntake(client), 'Yaş 1–120 arasında olmalıdır.');
+});
+
+test('saved payload round-trips client fields, quick answers and raw scores', () => {
+  const client = emptyClientIntake();
+  client.firstName = 'Ayşe';
+  client.lastName = 'Yılmaz';
+  client.gender = 'Erkek';
+  client.age = 41;
+  client.testDate = '2026-09-17';
+  client.testDuration = '90 dk';
+  client.occupation = 'Öğretmen';
+  client.followUp = 'Ayaktan';
+  client.education = 'Lisans';
+  client.maritalStatus = 'Evli';
+  client.applicationReason = 'Değerlendirme';
+  client.clinicalContext = 'Kısa öykü';
+
+  const answers = emptyAnswers();
+  answers.fill('D');
+  const scores = emptyRawScores();
+  for (const key of Object.keys(scores) as Array<keyof typeof scores>) scores[key] = 1;
+
+  const meta = buildCaseMeta('quick', client);
+  const quick = buildQuickPayload(answers);
+  const parsedQuick = parseRecordPayload([meta, quick]);
+  assert.equal(parsedQuick.method, 'quick');
+  assert.equal(parsedQuick.client?.firstName, 'Ayşe');
+  assert.equal(parsedQuick.followUp, 'Ayaktan');
+  assert.equal(parsedQuick.maritalStatus, 'Evli');
+  assert.equal(parsedQuick.testDuration, '90 dk');
+  assert.equal(parsedQuick.applicationReason, 'Değerlendirme');
+  assert.equal(parsedQuick.clinicalContext, 'Kısa öykü');
+  assert.equal(parsedQuick.quickAnswers?.length, ITEM_COUNT);
+  assert.equal(parsedQuick.quickAnswers?.[0], 'D');
+
+  const rawMeta = buildCaseMeta('raw', client);
+  const raw = buildRawPayload(scores);
+  const parsedRaw = parseRecordPayload([rawMeta, raw]);
+  assert.equal(parsedRaw.method, 'raw');
+  assert.equal(parsedRaw.rawScales?.Hs, 1);
+  assert.equal(parsedRaw.omrPages.length, 0);
+
+  const legacy = parseRecordPayload([
+    { kind: 'client-context', followUp: 'Yatış', maritalStatus: 'Bekar', testDuration: '60', applicationReason: 'x', clinicalContext: 'y' },
+    { kind: 'entry-method', method: 'omr' },
+    { pageNumber: 1, items: [] },
+  ]);
+  assert.equal(legacy.method, 'omr');
+  assert.equal(legacy.followUp, 'Yatış');
+  assert.equal(legacy.omrPages.length, 1);
 });

@@ -1,17 +1,11 @@
 import { useState } from 'react';
-import type { FullRecordDetail, SavedAnswerPage } from '../records/supabaseRecords';
+import type { FullRecordDetail } from '../records/supabaseRecords';
+import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { Icon } from './Icon';
 
-function isOmrPage(value: unknown): value is SavedAnswerPage {
-  if (!value || typeof value !== 'object') return false;
-  const page = value as SavedAnswerPage;
-  return typeof page.pageNumber === 'number' && Array.isArray(page.items);
-}
-
-function kindOf(value: unknown): string | null {
-  if (!value || typeof value !== 'object') return null;
-  const kind = (value as { kind?: unknown }).kind;
-  return typeof kind === 'string' ? kind : null;
+function dash(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
 }
 
 export function RecordDetailModal({
@@ -21,27 +15,11 @@ export function RecordDetailModal({
   record: FullRecordDetail;
   onClose: () => void;
 }) {
-  const payload = record.rawOmrAnswers ?? [];
-  const omrPages = payload.filter(isOmrPage);
-  const quick = payload.find(item => kindOf(item) === 'quick-entry') as
-    | { kind: 'quick-entry'; answers?: Array<'D' | 'Y' | null> }
-    | undefined;
-  const raw = payload.find(item => kindOf(item) === 'raw-scores') as
-    | { kind: 'raw-scores'; scales?: Record<string, number | ''> }
-    | undefined;
-  const context = payload.find(item => kindOf(item) === 'client-context') as
-    | {
-        kind: 'client-context';
-        followUp?: string | null;
-        maritalStatus?: string | null;
-        testDuration?: string | null;
-        applicationReason?: string | null;
-        clinicalContext?: string | null;
-      }
-    | undefined;
-
+  const parsed = parseRecordPayload(record.rawOmrAnswers ?? []);
+  const client = parsed.client;
+  const omrPages = parsed.omrPages;
   const [activePageNum, setActivePageNum] = useState<number>(omrPages[0]?.pageNumber ?? 1);
-  const activePage = omrPages.find(p => p.pageNumber === activePageNum);
+  const activePage = omrPages.find(page => page.pageNumber === activePageNum);
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -50,10 +28,11 @@ export function RecordDetailModal({
           <div>
             <div className="badge-chip badge-primary">Kayıt</div>
             <h2 id="modal-title">
-              {record.firstName} {record.lastName}
+              {client?.firstName ?? record.firstName} {client?.lastName ?? record.lastName}
             </h2>
             <p className="modal-subtitle">
-              {record.applicationDate} · {new Date(record.createdAt).toLocaleString('tr-TR')}
+              {client?.testDate ?? record.applicationDate} · {new Date(record.createdAt).toLocaleString('tr-TR')}
+              {parsed.method ? ` · ${methodLabel(parsed.method)}` : ''}
             </p>
           </div>
           <button type="button" className="icon-close-btn" onClick={onClose} aria-label="Kapat">
@@ -67,46 +46,50 @@ export function RecordDetailModal({
             <div className="client-details-grid">
               <div className="detail-item">
                 <span className="detail-label">Ad Soyad</span>
-                <span className="detail-val">{record.firstName} {record.lastName}</span>
+                <span className="detail-val">{dash(`${client?.firstName ?? record.firstName} ${client?.lastName ?? record.lastName}`.trim())}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Cinsiyet</span>
-                <span className="detail-val">{record.gender || '—'}</span>
+                <span className="detail-val">{dash(client?.gender ?? record.gender)}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Yaş</span>
-                <span className="detail-val">{record.age !== undefined ? `${record.age}` : '—'}</span>
+                <span className="detail-val">{dash(client?.age ?? record.age)}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Test tarihi</span>
+                <span className="detail-val">{dash(client?.testDate ?? record.applicationDate)}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Süre</span>
+                <span className="detail-val">{dash(parsed.testDuration)}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Meslek</span>
-                <span className="detail-val">{record.occupation || '—'}</span>
+                <span className="detail-val">{dash(client?.occupation ?? record.occupation)}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">İzlem</span>
+                <span className="detail-val">{dash(parsed.followUp)}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Eğitim</span>
-                <span className="detail-val">{record.education || '—'}</span>
+                <span className="detail-val">{dash(client?.education ?? record.education)}</span>
               </div>
-              {context?.followUp ? (
-                <div className="detail-item">
-                  <span className="detail-label">İzlem</span>
-                  <span className="detail-val">{context.followUp}</span>
-                </div>
-              ) : null}
-              {context?.maritalStatus ? (
-                <div className="detail-item">
-                  <span className="detail-label">Medeni durum</span>
-                  <span className="detail-val">{context.maritalStatus}</span>
-                </div>
-              ) : null}
-              {context?.testDuration ? (
-                <div className="detail-item">
-                  <span className="detail-label">Süre</span>
-                  <span className="detail-val">{context.testDuration}</span>
-                </div>
-              ) : null}
               <div className="detail-item">
-                <span className="detail-label">Başvuru</span>
-                <span className="detail-val">{context?.applicationReason || record.requestedBy || '—'}</span>
+                <span className="detail-label">Medeni durum</span>
+                <span className="detail-val">{dash(parsed.maritalStatus)}</span>
               </div>
+              <div className="detail-item">
+                <span className="detail-label">Başvuru nedeni</span>
+                <span className="detail-val">{dash(parsed.applicationReason || record.requestedBy)}</span>
+              </div>
+              {parsed.method ? (
+                <div className="detail-item">
+                  <span className="detail-label">Yöntem</span>
+                  <span className="detail-val">{methodLabel(parsed.method)}</span>
+                </div>
+              ) : null}
               {record.psychologistName && (
                 <div className="detail-item">
                   <span className="detail-label">Uzman</span>
@@ -118,16 +101,16 @@ export function RecordDetailModal({
                 <span className="detail-val mono">{record.id}</span>
               </div>
             </div>
-            {context?.clinicalContext ? (
-              <p className="ws-muted" style={{ marginTop: 12 }}>{context.clinicalContext}</p>
+            {parsed.clinicalContext ? (
+              <p className="ws-muted" style={{ marginTop: 12 }}>{parsed.clinicalContext}</p>
             ) : null}
           </section>
 
-          {quick?.answers && (
+          {parsed.quickAnswers && (
             <section>
               <h3 className="section-mini-heading">Hızlı giriş</h3>
               <div className="answers-bubble-grid">
-                {quick.answers.map((choice, index) => (
+                {parsed.quickAnswers.map((choice, index) => (
                   <div
                     key={index}
                     className={`answer-bubble-cell ${
@@ -142,11 +125,11 @@ export function RecordDetailModal({
             </section>
           )}
 
-          {raw?.scales && (
+          {parsed.rawScales && (
             <section>
               <h3 className="section-mini-heading">Ham puan</h3>
               <div className="client-details-grid">
-                {Object.entries(raw.scales).map(([key, value]) => (
+                {Object.entries(parsed.rawScales).map(([key, value]) => (
                   <div className="detail-item" key={key}>
                     <span className="detail-label">{key}</span>
                     <span className="detail-val">{value === '' ? '—' : String(value)}</span>
@@ -161,14 +144,14 @@ export function RecordDetailModal({
               <div className="answers-nav-row">
                 <h3 className="section-mini-heading">Optik cevaplar</h3>
                 <div className="page-switcher-pills">
-                  {omrPages.map(p => (
+                  {omrPages.map(page => (
                     <button
-                      key={p.pageNumber}
+                      key={page.pageNumber}
                       type="button"
-                      className={`pill-btn ${p.pageNumber === activePageNum ? 'active' : ''}`}
-                      onClick={() => setActivePageNum(p.pageNumber)}
+                      className={`pill-btn ${page.pageNumber === activePageNum ? 'active' : ''}`}
+                      onClick={() => setActivePageNum(page.pageNumber)}
                     >
-                      {p.pageNumber}. sayfa
+                      {page.pageNumber}. sayfa
                     </button>
                   ))}
                 </div>

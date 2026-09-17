@@ -22,6 +22,7 @@ export default function App() {
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
   const [printNote, setPrintNote] = useState<'' | 'busy' | 'opened' | 'manual'>('');
   const [workspace, setWorkspace] = useState<Workspace>('case');
+  const [recordsTick, setRecordsTick] = useState(0);
   const tabs: Workspace[] =
     user.role === 'ADMIN'
       ? ['case', 'form', 'admin']
@@ -133,7 +134,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           aria-labelledby="tab-case"
           className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
         >
-          <CaseWorkspace definition={formDefinition} actor={user} />
+          <CaseWorkspace definition={formDefinition} actor={user} onSaved={() => setRecordsTick(tick => tick + 1)} />
         </div>
 
         <div
@@ -193,7 +194,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
             aria-labelledby="tab-records"
             className={workspace === 'records' ? 'tab-content-active' : 'is-screen-hidden'}
           >
-            <MyRecordsPanel />
+            <MyRecordsPanel key={recordsTick} />
           </div>
         )}
 
