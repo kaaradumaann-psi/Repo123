@@ -102,9 +102,7 @@
   .form-prep-hero p,
   .hero-text-side p,
   .section-subtext,
-  .section-desc,
   .guide-note,
-  .contact-note,
   .dropzone-desc,
   .scan-camera p,
   .locked-content p {
@@ -127,8 +125,7 @@
   .filter-group label,
   .brand-subtitle,
   .user-role-badge,
-  .preview-label,
-  .field-label {
+  .preview-label {
     font-size: 10.5px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -226,13 +223,6 @@
   .header-inner {
     max-width: var(--container);
     padding: 0 28px;
-  }
-
-  /* The 900 px breakpoint in screen.css stacks the header; that layout wins. */
-  @media (min-width: 901px) {
-    .header-inner {
-      height: var(--nav-h);
-    }
   }
 
   .brand-mark {
@@ -903,11 +893,11 @@
     color: var(--text);
   }
 
-  .answer-bubble-grid {
+  .answers-bubble-grid {
     background: var(--white);
   }
 
-  .answer-bubble-grid,
+  .answers-bubble-grid,
   .page-answers-table-container {
     border-color: var(--hairline);
   }
@@ -1446,64 +1436,71 @@
     color: var(--text);
     text-decoration: none;
   }
+}
 
-  /* ========================================================================
-     15 · Narrow screens — mirror the breakpoints of the files above
-     ======================================================================== */
+/* The 900 px breakpoint in screen.css stacks the header; the stacked layout wins below it. */
+@media screen and (min-width: 901px) {
+  .header-inner {
+    height: var(--nav-h);
+  }
+}
 
-  @media (max-width: 900px) {
-    .header-inner {
-      padding: 14px 20px;
-    }
+/* ========================================================================
+   15 · Narrow screens — mirror the breakpoints of the files above
+   ======================================================================== */
 
-    .app-main {
-      padding: 28px 20px 44px;
-    }
-
-    /* The stacked header gives the workspace switcher its own scrollable row
-       instead of squeezing three Turkish labels next to the brand. */
-    .header-left {
-      flex-wrap: wrap;
-    }
-
-    .workspace-tabs {
-      width: 100%;
-      overflow-x: auto;
-      justify-content: flex-start;
-      scrollbar-width: none;
-    }
-
-    .workspace-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .portal-tab {
-      flex: 0 0 auto;
-      padding: 8px 13px;
-      font-size: 12px;
-    }
-
-    .section-heading {
-      font-size: 16px;
-    }
-
-    .form-prep-hero,
-    .scanner-hero-header,
-    .admin-header-hero {
-      padding-bottom: 20px;
-    }
+@media screen and (max-width: 900px) {
+  .header-inner {
+    padding: 14px 20px;
   }
 
-  @media (max-width: 560px) {
-    .hero-cta-group .btn-primary,
-    .hero-cta-group .btn-secondary {
-      width: 100%;
-      justify-content: center;
-    }
+  .app-main {
+    padding: 28px 20px 44px;
+  }
 
-    .mode-tab {
-      padding: 8px 12px;
-      font-size: 12.5px;
-    }
+  /* The stacked header gives the workspace switcher its own scrollable row
+     instead of squeezing three Turkish labels next to the brand. */
+  .header-left {
+    flex-wrap: wrap;
+  }
+
+  .workspace-tabs {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .workspace-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portal-tab {
+    flex: 0 0 auto;
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+
+  .section-heading {
+    font-size: 16px;
+  }
+
+  .form-prep-hero,
+  .scanner-hero-header,
+  .admin-header-hero {
+    padding-bottom: 20px;
+  }
+}
+
+@media screen and (max-width: 560px) {
+  .hero-cta-group .btn-primary,
+  .hero-cta-group .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mode-tab {
+    padding: 8px 12px;
+    font-size: 12.5px;
   }
 }
