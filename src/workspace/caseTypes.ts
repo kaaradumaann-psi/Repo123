@@ -265,6 +265,9 @@ export function validateIntake(client: ClientIntake): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(client.testDate) || Number.isNaN(Date.parse(`${client.testDate}T00:00:00Z`))) {
     return 'Test tarihi geçersiz.';
   }
+  if (client.testDate > todayIsoDate()) {
+    return 'Test tarihi bugünden ileri olamaz; testi uyguladığınız günü seçin.';
+  }
   if (client.education === 'İlkokul') return MMPI_EDUCATION_MESSAGE;
   if (assessDuration(client.testDuration).level === 'invalid') return 'Test süresi dakika olarak rakam girilmelidir (örn. 90).';
   return null;

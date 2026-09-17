@@ -1,13 +1,14 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { AdminPanel } from './components/AdminPanel';
 import { CaseWorkspace } from './components/CaseWorkspace';
+import { ConnectivityBanner } from './components/ConnectivityBanner';
+import { FormKit } from './components/FormKit';
 import { MyRecordsPanel } from './components/MyRecordsPanel';
 import { Icon } from './components/Icon';
-import { PAGE_COUNT, formDefinition } from './form/layout';
+import { formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
-import { downloadFormPdf, openFormPdf, printFormPdf, FORM_PDF_FILE_NAME, PRINT_SETTINGS_HINT } from './print/formPdf';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { displayName } from './auth/userDisplay';
 
@@ -15,19 +16,41 @@ type Workspace = 'case' | 'form' | 'records' | 'admin';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 
+const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
+
 export default function App() {
   return <AuthGate>{(user, onLogout) => <SignedInApp user={user} onLogout={onLogout} />}</AuthGate>;
 }
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
-  const [printNote, setPrintNote] = useState<'' | 'busy' | 'opened' | 'manual'>('');
-  const [workspace, setWorkspace] = useState<Workspace>('case');
+  // F5 sonrası sekme korunur: İşlem'deyken yenileyen Form'a düşmez.
+  const [workspace, setWorkspace] = useState<Workspace>(() => {
+    try {
+      const saved = sessionStorage.getItem(WORKSPACE_TAB_KEY);
+      if (saved === 'case' || saved === 'form' || saved === 'records' || saved === 'admin') {
+        if (user.role === 'ADMIN' && saved === 'records') return 'case';
+        if (user.role !== 'ADMIN' && saved === 'admin') return 'case';
+        return saved;
+      }
+    } catch {
+      /* desteksiz ortamda varsayılan */
+    }
+    return 'case';
+  });
   const [recordsTick, setRecordsTick] = useState(0);
   const tabs: Workspace[] =
     user.role === 'ADMIN'
       ? ['case', 'form', 'admin']
       : ['case', 'form', 'records'];
   const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(WORKSPACE_TAB_KEY, workspace);
+    } catch {
+      /* yoksay */
+    }
+  }, [workspace]);
 
   function activateTab(next: Workspace) {
     setWorkspace(next);
@@ -137,6 +160,8 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         </div>
       </header>
 
+      <ConnectivityBanner />
+
       <main className="app-main" id="main">
         <div
           role="tabpanel"
@@ -153,48 +178,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           aria-labelledby="tab-form"
           className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
         >
-          <section className="form-kit">
-            <div>
-              <h1>Optik form</h1>
-              <p className="ws-muted">{PAGE_COUNT} sayfa A4 · {FORM_PDF_FILE_NAME}</p>
-            </div>
-            <div className="form-kit-actions">
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => {
-                  setPrintNote('busy');
-                  void printFormPdf().then(outcome => setPrintNote(outcome === 'printed' ? 'opened' : 'manual'));
-                }}
-              >
-                <Icon name="print" size={16} />
-                Yazdır
-              </button>
-              <button type="button" className="btn-secondary download-button" onClick={downloadFormPdf}>
-                <Icon name="download" size={16} />
-                İndir
-              </button>
-              <button type="button" className="btn-secondary download-button" onClick={() => { void openFormPdf(); }}>
-                <Icon name="sheet" size={16} />
-                Aç
-              </button>
-            </div>
-            {printNote !== '' && (
-              <p className="print-status-note" role="status" aria-live="polite">
-                {printNote === 'busy'
-                  ? 'PDF hazırlanıyor…'
-                  : printNote === 'opened'
-                    ? `Yazdırma: ${PRINT_SETTINGS_HINT}.`
-                    : `Pencere açılamadı. “Aç” ile yazdırın: ${PRINT_SETTINGS_HINT}.`}
-              </p>
-            )}
-            <ul className="form-kit-list">
-              <li>A4, dikey, %100, kenar yok, tek yüz.</li>
-              <li>“Sayfaya sığdır” kapalı.</li>
-              <li>Köşe kareleri ve QR net çıksın.</li>
-              <li>Aynı danışanın 4 sayfasını birlikte okutun.</li>
-            </ul>
-          </section>
+          <FormKit />
         </div>
 
         {user.role === 'PSYCHOLOG' && (

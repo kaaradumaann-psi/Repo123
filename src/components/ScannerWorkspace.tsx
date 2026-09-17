@@ -21,9 +21,11 @@ export type ScannerWorkspaceProps = {
   actor: AuthenticatedUser;
   embedded?: boolean;
   onScanChange?: (scan: ScanSet) => void;
+  /** F5 sonrası taslaktan geri yüklenen tarama (görseller hariç, veriler dahil). */
+  initialScan?: ScanSet | null;
 };
 
-export function ScannerWorkspace({ definition, actor, embedded = false, onScanChange }: ScannerWorkspaceProps) {
+export function ScannerWorkspace({ definition, actor, embedded = false, onScanChange, initialScan = null }: ScannerWorkspaceProps) {
   return (
     <ScannerSession
       key={definition.fingerprint}
@@ -31,6 +33,7 @@ export function ScannerWorkspace({ definition, actor, embedded = false, onScanCh
       actor={actor}
       embedded={embedded}
       onScanChange={onScanChange}
+      initialScan={initialScan}
     />
   );
 }
@@ -40,23 +43,32 @@ function ScannerSession({
   actor,
   embedded,
   onScanChange,
+  initialScan,
 }: {
   definition: FormDefinition;
   actor: AuthenticatedUser;
   embedded: boolean;
   onScanChange?: (scan: ScanSet) => void;
+  initialScan: ScanSet | null;
 }) {
-  const [scan, setScan] = useState(createScanSet);
+  const [scan, setScan] = useState<ScanSet>(() => initialScan ?? createScanSet());
   const current = useRef(scan);
   const alive = useRef(true);
   const job = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('İlk yüklenen sayfa, bu oturumun form set kodunu belirler.');
+  const [status, setStatus] = useState(() =>
+    initialScan && Object.keys(initialScan.pages).length > 0
+      ? `Taslak geri yüklendi: ${Object.keys(initialScan.pages).length} sayfanın verisi ve düzeltmeleri korundu. Önizleme görselleri yeniden okutmadıkça gösterilemez.`
+      : 'İlk yüklenen sayfa, bu oturumun form set kodunu belirler.',
+  );
   const [alerts, setAlerts] = useState<{ id: number; message: string }[]>([]);
   const alertId = useRef(0);
   const [source, setSource] = useState<'files' | 'camera'>('files');
   const [cameraKey, setCameraKey] = useState(0);
-  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(() => {
+    const numbers = initialScan ? Object.keys(initialScan.pages).map(Number).sort((a, b) => a - b) : [];
+    return numbers[0] ?? null;
+  });
   const [confirmReset, setConfirmReset] = useState(false);
   const [recordsRefresh, setRecordsRefresh] = useState(0);
   const id = useId();
@@ -76,7 +88,16 @@ function ScannerSession({
   }
 
   function releaseImages(state: ScanSet) {
-    sortedPages(state).forEach(page => URL.revokeObjectURL(page.previewUrl));
+    sortedPages(state).forEach(page => {
+      // Taslaktan dönen sayfalarda blob yok; geçersiz URL'yi çözmeye kalkışma.
+      if (page.previewUrl.startsWith('blob:')) {
+        try {
+          URL.revokeObjectURL(page.previewUrl);
+        } catch {
+          /* yoksay */
+        }
+      }
+    });
   }
 
   useEffect(() => {
@@ -84,7 +105,10 @@ function ScannerSession({
     return () => {
       alive.current = false;
       job.current?.abort('unmount');
-      releaseImages(current.current);
+      // Blob önizlemeler burada çözülmez: gömülü modda tarama üst bileşende (ve taslakta)
+      // yaşar; yöntem değiştirip dönünce aynı sayfalar ve görseller aynen geri gelir.
+      // Açık sıfırlama ve sayfa silme kendi çözümlerini yapar; sekme kapanınca
+      // tarayıcı kalan blob'ları zaten temizler.
       current.current = createScanSet();
     };
   }, []);
@@ -368,7 +392,15 @@ function ScannerSession({
                 >
                   <div className="page-card-thumb">
                     {page ? (
-                      <img src={page.previewUrl} alt={`${expected.pageNumber}. sayfa önizleme`} />
+                      page.previewUrl ? (
+                        <img src={page.previewUrl} alt={`${expected.pageNumber}. sayfa önizleme`} />
+                      ) : (
+                        <div className="missing-page-placeholder is-restored" role="img" aria-label={`${expected.pageNumber}. sayfa verisi korundu, önizleme görseli yok`}>
+                          <Icon name="checkCircle" size={24} />
+                          <span>Veri korundu</span>
+                          <small>Önizleme için yeniden okutun</small>
+                        </div>
+                      )
                     ) : (
                       <div className="missing-page-placeholder">
                         <Icon name="file" size={24} />
@@ -438,7 +470,13 @@ function ScannerSession({
           }}
           onRemove={() => {
             const page = current.current.pages[selected.pageNumber];
-            if (page) URL.revokeObjectURL(page.previewUrl);
+            if (page?.previewUrl.startsWith('blob:')) {
+              try {
+                URL.revokeObjectURL(page.previewUrl);
+              } catch {
+                /* yoksay */
+              }
+            }
             commit(removePage(current.current, selected.pageNumber));
             setStatus(`${selected.pageNumber}. sayfa kaldırıldı. Yeniden tarayabilirsiniz.`);
           }}

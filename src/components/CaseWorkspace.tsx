@@ -1,5 +1,5 @@
-import { useId, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { FormEvent, KeyboardEvent } from 'react';
 import type { FormDefinition } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import type { ScanSet } from '../scanner/pageSequence';
@@ -10,7 +10,26 @@ import { summarizeResults } from '../results/resultNormalizer';
 import { ScannerWorkspace } from './ScannerWorkspace';
 import { QuickEntry } from './QuickEntry';
 import { RawScoreEntry } from './RawScoreEntry';
+import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
+import { useOnlineStatus } from '../workspace/useOnlineStatus';
+import {
+  clearDraft,
+  decodeAnswers,
+  deserializeScan,
+  encodeAnswers,
+  enqueueOutbox,
+  formatDraftTime,
+  isDraftNonEmpty,
+  isNetworkError,
+  loadDraft,
+  loadOutbox,
+  removeOutboxEntry,
+  saveDraft,
+  serializeScan,
+  updateOutboxEntry,
+} from '../workspace/draftStorage';
+import type { OutboxEntry } from '../workspace/draftStorage';
 import {
   EDUCATION_OPTIONS,
   FOLLOW_UP_OPTIONS,
@@ -35,6 +54,7 @@ import {
   methodLabel,
   rawScoresComplete,
   recordInputFromIntake,
+  todayIsoDate,
   validateIntake,
 } from '../workspace/caseTypes';
 import type {
@@ -94,29 +114,68 @@ function formatDuration(value: string): string {
   return /dk|dakika/i.test(trimmed) ? trimmed : `${trimmed} dk`;
 }
 
+function formatClock(iso: string | null): string {
+  if (!iso) return '—';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+}
+
 export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps) {
-  const [step, setStep] = useState<CaseStep>('home');
-  const [client, setClient] = useState<ClientIntake>(emptyClientIntake);
-  const [method, setMethod] = useState<EntryMethod | null>(null);
-  const [answers, setAnswers] = useState<ItemAnswer[]>(emptyAnswers);
-  const [currentItem, setCurrentItem] = useState(0);
-  const [raw, setRaw] = useState<RawScores>(emptyRawScores);
-  const [scan, setScan] = useState<ScanSet | null>(null);
+  /**
+   * Taslak geri yükleme (F5 dayanıklılığı): bileşen ilk açıldığında bu uzmanın
+   * kayıtlı taslağı varsa state ondan beslenir. Boş/bozuk/süresi dolmuş taslak
+   * yok sayılır; uygulama yine tertemiz açılır.
+   */
+  const [boot] = useState(() => {
+    const draft = loadDraft(actor.id);
+    if (!draft || !isDraftNonEmpty(draft)) {
+      // Kaydedilmiş başarı ekranı da korunur (F5 sonrası "kaydedildi" kaybolmaz).
+      if (draft?.savedId) return draft;
+      return null;
+    }
+    return draft;
+  });
+
+  const [step, setStep] = useState<CaseStep>(() => (boot && boot.step !== 'home' ? boot.step : 'home'));
+  const [client, setClient] = useState<ClientIntake>(() => boot?.client ?? emptyClientIntake());
+  const [method, setMethod] = useState<EntryMethod | null>(() => boot?.method ?? null);
+  const [answers, setAnswers] = useState<ItemAnswer[]>(() =>
+    boot ? (decodeAnswers(boot.answersEncoded) ?? emptyAnswers()) : emptyAnswers(),
+  );
+  const [currentItem, setCurrentItem] = useState(() => boot?.currentItem ?? 0);
+  const [raw, setRaw] = useState<RawScores>(() => boot?.raw ?? emptyRawScores());
+  const [scan, setScan] = useState<ScanSet | null>(() => (boot?.scan ? deserializeScan(boot.scan) : null));
   const [scanKey, setScanKey] = useState(0);
   const [intakeError, setIntakeError] = useState('');
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [saved, setSaved] = useState<MMPIRecord | null>(null);
-  const submissionKey = useRef(crypto.randomUUID());
+  const [saved, setSaved] = useState<MMPIRecord | null>(() =>
+    boot?.savedId && boot?.savedAt ? { id: boot.savedId, createdAt: boot.savedAt } : null,
+  );
+  const [conditionsAccepted, setConditionsAccepted] = useState(false);
+  const submissionKey = useRef(boot?.submissionKey ?? crypto.randomUUID());
+  const [restoredAt, setRestoredAt] = useState<string | null>(() => (boot && isDraftNonEmpty(boot) ? boot.updatedAt : null));
+  const [restoreDismissed, setRestoreDismissed] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(() => boot?.updatedAt ?? null);
+  const [storageWarning, setStorageWarning] = useState('');
+  const [confirmNew, setConfirmNew] = useState(false);
+  const [outbox, setOutbox] = useState<OutboxEntry[]>(() => loadOutbox(actor.id));
+  const [flushing, setFlushing] = useState(false);
+  const [flushNote, setFlushNote] = useState('');
+  const online = useOnlineStatus();
   const stepIndex = STEPS.findIndex(item => item.id === step);
 
   const omrReady = scan ? canCreateRecord(sortedPages(scan), definition) : false;
-  const quickReady = countAnswers(answers).entered === ITEM_COUNT;
+  const quickCounts = countAnswers(answers);
+  const quickReady = quickCounts.entered === ITEM_COUNT;
   const rawReady = rawScoresComplete(raw);
+  const rawEntered = RAW_SCORE_FIELDS.filter(field => raw[field.key] !== '').length;
+  const omrPages = scan ? sortedPages(scan).length : 0;
   const entryReady = method === 'quick' ? quickReady : method === 'raw' ? rawReady : method === 'omr' ? omrReady : false;
   const blankCount =
     method === 'quick'
-      ? countAnswers(answers).blank
+      ? quickCounts.blank
       : method === 'raw'
         ? typeof raw.blank === 'number'
           ? raw.blank
@@ -137,8 +196,181 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     client.maritalStatus !== '' ||
     client.applicationReason.trim() !== '' ||
     client.clinicalContext.trim() !== '';
+  const hasAnyData =
+    hasPartialIntake || method !== null || quickCounts.entered > 0 || rawEntered > 0 || omrPages > 0;
+  const dirty = hasAnyData && !saved;
+
+  /* ---------------- Taslak otomatik kayıt (debounced) ---------------- */
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const result = saveDraft(actor.id, {
+        step,
+        client,
+        method,
+        answersEncoded: encodeAnswers(answers),
+        currentItem,
+        raw,
+        scan: scan ? serializeScan(scan) : null,
+        submissionKey: submissionKey.current,
+        savedId: saved?.id ?? null,
+        savedAt: saved?.createdAt ?? null,
+      });
+      if (result.ok) {
+        setLastSavedAt(new Date().toISOString());
+        setStorageWarning('');
+      } else {
+        setStorageWarning(result.reason);
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved]);
+
+  /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
+  const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved });
+  liveRef.current = { step, client, method, answers, currentItem, raw, scan, saved };
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      const live = liveRef.current;
+      try {
+        saveDraft(actor.id, {
+          step: live.step,
+          client: live.client,
+          method: live.method,
+          answersEncoded: encodeAnswers(live.answers),
+          currentItem: live.currentItem,
+          raw: live.raw,
+          scan: live.scan ? serializeScan(live.scan) : null,
+          submissionKey: submissionKey.current,
+          savedId: live.saved?.id ?? null,
+          savedAt: live.saved?.createdAt ?? null,
+        });
+      } catch {
+        /* kapanış anında sessiz */
+      }
+      const entered = countAnswers(live.answers).entered;
+      const rawCount = RAW_SCORE_FIELDS.filter(field => live.raw[field.key] !== '').length;
+      const scanCount = live.scan ? sortedPages(live.scan).length : 0;
+      const partial =
+        live.client.firstName.trim() !== '' ||
+        live.client.lastName.trim() !== '' ||
+        entered > 0 ||
+        rawCount > 0 ||
+        scanCount > 0;
+      if (!live.saved && partial) event.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [actor.id]);
+
+  /* ---------------- Çevrimdışı kuyruk (outbox) ---------------- */
+
+  async function flushEntries(entries: OutboxEntry[]): Promise<void> {
+    for (const entry of entries) {
+      try {
+        const input = recordInputFromIntake(entry.client);
+        const meta = buildCaseMeta(entry.method, entry.client);
+        let record: MMPIRecord;
+        if (entry.method === 'quick') {
+          const decoded = decodeAnswers(entry.answersEncoded);
+          if (!decoded) throw new Error('Taslak cevaplar okunamadı.');
+          record = await createDataRecord(input, actor, entry.idempotencyKey, [meta, buildQuickPayload(decoded)]);
+        } else if (entry.method === 'raw') {
+          if (!entry.raw) throw new Error('Ham puan taslağı okunamadı.');
+          record = await createDataRecord(input, actor, entry.idempotencyKey, [meta, buildRawPayload(entry.raw)]);
+        } else {
+          const restored = entry.scan ? deserializeScan(entry.scan) : null;
+          if (!restored) throw new Error('Tarama taslağı okunamadı.');
+          record = await createRecord(input, sortedPages(restored), definition, actor, entry.idempotencyKey, [meta]);
+        }
+        removeOutboxEntry(actor.id, entry.idempotencyKey);
+        // Kuyruktaki kayıt bu ekrandaki işlemse başarı ekranına geç.
+        if (entry.idempotencyKey === submissionKey.current && !saved) {
+          setSaved(record);
+          onSaved?.();
+        }
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : 'Gönderilemedi.';
+        if (isNetworkError(cause)) {
+          updateOutboxEntry(actor.id, entry.idempotencyKey, { attempts: entry.attempts + 1, lastError: message });
+        } else {
+          // Doğrulama/sunucu hatası tekrar denemekle düzelmez: kuyruktan çıkar, ekranda göster.
+          removeOutboxEntry(actor.id, entry.idempotencyKey);
+          if (entry.idempotencyKey === submissionKey.current) setSaveError(message);
+          else setFlushNote(`Bir bekleyen kayıt gönderilemedi ve kuyruktan çıkarıldı: ${message}`);
+        }
+      }
+    }
+    setOutbox(loadOutbox(actor.id));
+  }
+
+  async function flushOutbox() {
+    if (flushing) return;
+    const entries = loadOutbox(actor.id);
+    if (entries.length === 0) return;
+    if (!online) {
+      setFlushNote('Çevrimdışısınız; bağlantı gelince kayıtlar otomatik gönderilecek.');
+      return;
+    }
+    setFlushing(true);
+    setFlushNote('');
+    setSaveError('');
+    try {
+      await flushEntries(entries);
+      const remaining = loadOutbox(actor.id).length;
+      if (remaining === 0) setFlushNote('Bekleyen kayıtlar gönderildi.');
+      else setFlushNote(`${remaining} kayıt hâlâ bekliyor; bağlantıyı kontrol edip tekrar deneyin.`);
+    } finally {
+      setFlushing(false);
+    }
+  }
+
+  useEffect(() => {
+    const onOnline = () => {
+      setFlushNote('');
+      void flushOutbox();
+    };
+    window.addEventListener('online', onOnline);
+    if (loadOutbox(actor.id).length > 0) {
+      try {
+        if (navigator.onLine) void flushOutbox();
+      } catch {
+        /* yoksay */
+      }
+    }
+    return () => window.removeEventListener('online', onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actor.id]);
+
+  function enqueueCurrent(lastError: string) {
+    if (!method) return;
+    const entry: OutboxEntry = {
+      idempotencyKey: submissionKey.current,
+      method,
+      client: { ...client },
+      answersEncoded: method === 'quick' ? encodeAnswers(answers) : null,
+      raw: method === 'raw' ? { ...raw } : null,
+      scan: method === 'omr' && scan ? serializeScan(scan) : null,
+      createdAt: new Date().toISOString(),
+      attempts: 0,
+      lastError,
+    };
+    const queued = enqueueOutbox(actor.id, entry);
+    setOutbox(loadOutbox(actor.id));
+    if (queued) {
+      setSaveError('');
+      setFlushNote(
+        'Bağlantı kurulamadı — kaydınız kuyruğa alındı. İnternet gelince otomatik gönderilecek; bu ekranı güvenle kapatabilirsiniz.',
+      );
+    } else {
+      setSaveError('Bağlantı yok ve kuyruk yazılamadı. Bu ekranı kapatmayın; bağlantı gelince “Analizi başlat”a tekrar basın.');
+    }
+  }
+
+  /* ---------------- Akış eylemleri ---------------- */
 
   function startNew() {
+    setConfirmNew(false);
+    clearDraft(actor.id);
     setClient(emptyClientIntake());
     setMethod(null);
     setAnswers(emptyAnswers());
@@ -148,9 +380,21 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     setScanKey(key => key + 1);
     setIntakeError('');
     setSaveError('');
+    setFlushNote('');
     setSaved(null);
+    setConditionsAccepted(false);
+    setRestoredAt(null);
+    setRestoreDismissed(true);
     submissionKey.current = crypto.randomUUID();
     setStep('intake');
+  }
+
+  function requestNew() {
+    if (saved || !hasAnyData) {
+      startNew();
+      return;
+    }
+    setConfirmNew(true);
   }
 
   function goBack() {
@@ -191,27 +435,48 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   }
 
   function selectMethod(next: EntryMethod) {
-    if (method !== next) {
-      setMethod(next);
-      if (next !== 'omr') {
-        // OMR oturumu bileşen içinde yaşar; yöntemi terk ederken kayıtsızlaştır ki
-        // eski bir tarama "hazır" görünerek yeni yöntemle kaydedilmesin.
-        setScan(null);
-        setScanKey(key => key + 1);
-      }
-    }
+    // Yöntem değişimi veri silmez: hızlı giriş, ham puan ve OMR taraması ayrı
+    // state'lerde yaşar; kayıt ve hazırlık kontrolleri seçili `method`'a göre
+    // dallandığı için eski bir tarama başka yöntemle asla kaydedilemez.
+    if (method !== next) setMethod(next);
     setStep('entry');
+  }
+
+  function onMethodListKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const order: EntryMethod[] = ['quick', 'raw', 'omr'];
+    const current = method ? order.indexOf(method) : -1;
+    let next: EntryMethod | null = null;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      next = order[(current + 1 + order.length) % order.length]!;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      next = order[(current - 1 + order.length) % order.length]!;
+    }
+    if (!next) return;
+    event.preventDefault();
+    // Ok tuşu yalnızca seçimi değiştirir; Veri adımına tek başına geçirmez.
+    // Veri silinmez (bk. selectMethod).
+    if (method !== next) setMethod(next);
+    document.querySelector<HTMLButtonElement>(`[data-method="${next}"]`)?.focus();
   }
 
   async function saveAndAnalyze() {
     if (saved || busy || !method) return;
     setSaveError('');
+    setFlushNote('');
     if (blankExceeded) {
       setSaveError(MMPI_BLANK_MESSAGE);
       return;
     }
+    if (!conditionsAccepted) {
+      setSaveError('Devam etmek için uygulama koşullarını doğrulayın (aşağıdaki onay kutusu).');
+      return;
+    }
     if (actor.role !== 'PSYCHOLOG' || !actor.active) {
       setSaved({ id: 'local', createdAt: new Date().toISOString() });
+      return;
+    }
+    if (!online) {
+      enqueueCurrent('Çevrimdışı kuyruğa alındı.');
       return;
     }
     setBusy(true);
@@ -230,13 +495,23 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
         throw new Error('Veri giriş yöntemi seçilmedi.');
       }
       setSaved(record);
+      removeOutboxEntry(actor.id, submissionKey.current);
+      setOutbox(loadOutbox(actor.id));
       onSaved?.();
     } catch (cause) {
-      setSaveError(cause instanceof Error ? cause.message : 'Kayıt yazılamadı.');
+      if (isNetworkError(cause)) enqueueCurrent(cause instanceof Error ? cause.message : 'Ağ hatası.');
+      else setSaveError(cause instanceof Error ? cause.message : 'Kayıt yazılamadı.');
     } finally {
       setBusy(false);
     }
   }
+
+  const showRestoreBanner = restoredAt !== null && !restoreDismissed;
+  const draftStatusText = !online
+    ? 'Çevrimdışı — taslak bu cihazda korunuyor'
+    : lastSavedAt
+      ? `Taslak kaydedildi ${formatClock(lastSavedAt)}`
+      : 'Taslak hazırlanıyor…';
 
   if (step === 'home') {
     return (
@@ -246,17 +521,46 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           Yeni bir MMPI <em>işlemi</em> başlatın
         </h1>
         <p className="ws-home-sub">
-          Danışan bilgisi, veri girişi ve kontrol tek akışta yürür. Optik okuma mevcut OMR
+          Danışan bilgisi, veri girişi ve kontrol tek akışta yürür. Girdikleriniz her adımda bu cihaza
+          otomatik kaydedilir; F5 ve internet kesintisinde kaybolmaz. Optik okuma mevcut OMR
           hattını kullanır; klinik puanlama motoru bu sürümde bağlı değildir.
         </p>
+
+        {showRestoreBanner && (
+          <div className="status-banner info-banner ws-restore" role="status">
+            <Icon name="refresh" size={18} />
+            <span style={{ flex: 1 }}>
+              Yarım kalan işlem geri yüklendi ({formatDraftTime(restoredAt)}). Kaldığınız yerden devam edebilirsiniz.
+            </span>
+            <button type="button" className="btn-secondary btn-sm" onClick={() => setRestoreDismissed(true)}>
+              Kapat
+            </button>
+          </div>
+        )}
+
+        {outbox.length > 0 && (
+          <div className="status-banner warning-banner ws-restore" role="status">
+            <Icon name="alert" size={18} />
+            <span style={{ flex: 1 }}>
+              {outbox.length} kayıt bağlantı nedeniyle kuyrukta bekliyor. Bağlantı gelince otomatik gönderilir.
+            </span>
+            <button type="button" className="btn-secondary btn-sm" onClick={() => void flushOutbox()} disabled={flushing || !online}>
+              {flushing ? 'Gönderiliyor…' : 'Şimdi dene'}
+            </button>
+          </div>
+        )}
+        {flushNote && (
+          <p className="ws-muted" role="status">{flushNote}</p>
+        )}
+
         <div className="ws-actions">
-          {hasPartialIntake ? (
+          {hasAnyData ? (
             <>
               <button type="button" className="btn-primary" onClick={() => setStep('intake')}>
                 İşleme devam et
                 <Icon name="arrowRight" size={16} />
               </button>
-              <button type="button" className="btn-secondary" onClick={startNew}>
+              <button type="button" className="btn-secondary" onClick={requestNew}>
                 <Icon name="refresh" size={16} />
                 Yeni işlem
               </button>
@@ -268,6 +572,10 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
             </button>
           )}
         </div>
+        <p className="ws-autosave-note" role="note">
+          <Icon name="checkCircle" size={14} />
+          Otomatik taslak açık: danışan, cevaplar ve tarama verisi bu cihazda saklanır.
+        </p>
         <dl className="ws-facts">
           <div>
             <dt>Madde</dt>
@@ -286,6 +594,16 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
             <dd>{MMPI_AGE_MIN}+</dd>
           </div>
         </dl>
+
+        {confirmNew && (
+          <ConfirmDialog
+            title="Yeni işlem başlatılsın mı?"
+            description="Yarım kalan danışan ve veri girişi silinecek. Kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+            confirmLabel="Evet, temiz başla"
+            onConfirm={startNew}
+            onCancel={() => setConfirmNew(false)}
+          />
+        )}
       </section>
     );
   }
@@ -328,12 +646,47 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
             </button>
           )}
           {step === 'review' && (
-            <button type="button" className="btn-primary btn-sm" disabled={busy || !!saved || blankExceeded} onClick={() => void saveAndAnalyze()}>
+            <button
+              type="button"
+              className="btn-primary btn-sm"
+              disabled={busy || !!saved || blankExceeded || !conditionsAccepted}
+              onClick={() => void saveAndAnalyze()}
+            >
               {busy ? 'Kaydediliyor…' : 'Analizi başlat'}
             </button>
           )}
         </div>
       </div>
+
+      <div className="ws-draftbar" role="status" aria-live="polite">
+        <span className={`ws-netdot ${online ? 'is-on' : 'is-off'}`} aria-hidden="true" />
+        <span>{draftStatusText}</span>
+        {outbox.length > 0 && <span className="ws-chip">Kuyruk: {outbox.length}</span>}
+        {dirty && <span className="ws-chip">Kaydedilmedi</span>}
+        {storageWarning && <span className="ws-hint is-error">{storageWarning}</span>}
+      </div>
+
+      {showRestoreBanner && (
+        <div className="status-banner info-banner" role="status">
+          <Icon name="refresh" size={18} />
+          <span style={{ flex: 1 }}>
+            Taslak geri yüklendi ({formatDraftTime(restoredAt)}). Hiçbir veriniz kaybolmadı; kaldığınız adımdasınız.
+          </span>
+          <button type="button" className="close-banner-btn" onClick={() => setRestoreDismissed(true)} aria-label="Kapat">
+            <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
+
+      {!online && (
+        <div className="status-banner warning-banner" role="alert">
+          <Icon name="alert" size={18} />
+          <span style={{ flex: 1 }}>
+            Çevrimdışısınız. Girmeye devam edebilirsiniz — her şey taslağa yazılıyor. Kaydet’e basarsanız kaydınız
+            kuyruğa alınır ve bağlantı gelince otomatik gönderilir.
+          </span>
+        </div>
+      )}
 
       {step === 'intake' && (
         <IntakeForm
@@ -353,7 +706,8 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
                 Veri giriş <em>yöntemi</em>
               </h2>
               <p className="ws-muted">
-                Yöntemi her an değiştirebilirsiniz; danışan bilgisi ve girdiğiniz veriler korunur.
+                Yöntemi her an değiştirebilirsiniz; danışan bilgisi ile girdiğiniz tüm veriler (cevaplar, ham
+                puanlar, tarama) korunur. Ok tuşlarıyla seçim yapıp Enter ile ilerleyebilirsiniz.
               </p>
             </div>
           </header>
@@ -367,24 +721,38 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
               {client.gender} · {client.age} yaş · {formatDate(client.testDate)}
             </span>
           </p>
-          <div className="ws-methods" role="radiogroup" aria-label="Veri giriş yöntemi">
-            {METHOD_CARDS.map(card => (
-              <button
-                key={card.id}
-                type="button"
-                role="radio"
-                aria-checked={method === card.id}
-                className={`ws-method ${method === card.id ? 'is-selected' : ''}`}
-                onClick={() => selectMethod(card.id)}
-              >
-                <span className="ws-method-icon">
-                  <Icon name={card.icon} size={18} />
-                </span>
-                <strong>{card.title}</strong>
-                <span>{card.desc}</span>
-                {method === card.id && <span className="ws-method-flag">Seçili</span>}
-              </button>
-            ))}
+          <div className="ws-methods" role="radiogroup" aria-label="Veri giriş yöntemi" onKeyDown={onMethodListKeyDown}>
+            {METHOD_CARDS.map(card => {
+              const progress =
+                card.id === 'quick'
+                  ? `${quickCounts.entered}/${ITEM_COUNT} madde`
+                  : card.id === 'raw'
+                    ? `${rawEntered}/${RAW_SCORE_FIELDS.length} ölçek`
+                    : `${omrPages}/4 sayfa`;
+              const hasProgress =
+                (card.id === 'quick' && quickCounts.entered > 0) ||
+                (card.id === 'raw' && rawEntered > 0) ||
+                (card.id === 'omr' && omrPages > 0);
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  role="radio"
+                  data-method={card.id}
+                  aria-checked={method === card.id}
+                  className={`ws-method ${method === card.id ? 'is-selected' : ''}`}
+                  onClick={() => selectMethod(card.id)}
+                >
+                  <span className="ws-method-icon">
+                    <Icon name={card.icon} size={18} />
+                  </span>
+                  <strong>{card.title}</strong>
+                  <span>{card.desc}</span>
+                  <span className={`ws-method-progress ${hasProgress ? 'has-data' : ''}`}>{progress}</span>
+                  {method === card.id && <span className="ws-method-flag">Seçili</span>}
+                </button>
+              );
+            })}
           </div>
           <div className="ws-nav">
             <button type="button" className="btn-secondary" onClick={() => setStep('intake')}>
@@ -406,11 +774,19 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
         </>
       )}
 
-      {/* OMR oturumu yöntem 'omr' olduğu sürece canlı kalır; böylece Geri → Kontrol
-          arasında gidip gelince tarama yitirilmez. Başka yönteme geçilirse sıfırlanır. */}
+      {/* OMR taraması üst state'te yaşar; yöntem değişiminde de korunur.
+          Tarayıcı yöntem dışındayken unmount olur, dönüldüğünde `initialScan`
+          ile aynen geri gelir (aynı oturumda görseller dahil). */}
       {method === 'omr' && (
         <div className={step === 'entry' ? undefined : 'is-screen-hidden'}>
-          <ScannerWorkspace key={scanKey} definition={definition} actor={actor} embedded onScanChange={setScan} />
+          <ScannerWorkspace
+            key={scanKey}
+            definition={definition}
+            actor={actor}
+            embedded
+            initialScan={scan}
+            onScanChange={setScan}
+          />
         </div>
       )}
 
@@ -441,9 +817,28 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           error={saveError}
           blankCount={blankCount}
           blankExceeded={blankExceeded}
+          online={online}
+          outboxCount={outbox.length}
+          flushNote={flushNote}
+          flushing={flushing}
+          conditionsAccepted={conditionsAccepted}
+          onConditions={setConditionsAccepted}
+          onFlush={() => void flushOutbox()}
           onBack={() => setStep('entry')}
+          onEditIntake={() => setStep('intake')}
+          onEditMethod={() => setStep('method')}
           onSave={() => void saveAndAnalyze()}
-          onNew={startNew}
+          onNew={requestNew}
+        />
+      )}
+
+      {confirmNew && (
+        <ConfirmDialog
+          title="Yeni işlem başlatılsın mı?"
+          description="Yarım kalan danışan ve veri girişi silinecek. Kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+          confirmLabel="Evet, temiz başla"
+          onConfirm={startNew}
+          onCancel={() => setConfirmNew(false)}
         />
       )}
     </div>
@@ -468,6 +863,7 @@ function IntakeForm({
   const educationInvalid = client.education === 'İlkokul';
   const durationInfo = assessDuration(client.testDuration);
   const showDurationHint = client.testDuration.trim() !== '' || durationInfo.level !== 'empty';
+  const today = todayIsoDate();
 
   return (
     <form id="intake-form" className="ws-panel" noValidate onSubmit={onSubmit}>
@@ -478,8 +874,8 @@ function IntakeForm({
             Danışan / test <em>bilgileri</em>
           </h2>
           <p className="ws-muted">
-            Cinsiyet, yaş, test tarihi ve ad soyad zorunludur. MMPI {MMPI_AGE_MIN} yaş ve
-            üzerine, en az ortaokul düzeyine uygulanır.
+            Yıldızlı alanlar zorunludur. MMPI {MMPI_AGE_MIN} yaş ve üzerine, en az ortaokul düzeyine uygulanır.
+            Yazdıklarınız her harfte bu cihaza kaydedilir; F5 veya internet kesintisinde kaybolmaz.
           </p>
         </div>
       </header>
@@ -490,14 +886,28 @@ function IntakeForm({
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-first`}>Ad *</label>
-          <input id={`${id}-first`} required value={client.firstName} onChange={e => set('firstName', e.target.value)} autoComplete="off" />
+          <input
+            id={`${id}-first`}
+            required
+            value={client.firstName}
+            onChange={e => set('firstName', e.target.value)}
+            autoComplete="off"
+            placeholder="Örn. Ayşe"
+          />
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-last`}>Soyad *</label>
-          <input id={`${id}-last`} required value={client.lastName} onChange={e => set('lastName', e.target.value)} autoComplete="off" />
+          <input
+            id={`${id}-last`}
+            required
+            value={client.lastName}
+            onChange={e => set('lastName', e.target.value)}
+            autoComplete="off"
+            placeholder="Örn. Yılmaz"
+          />
         </div>
-        <div className="form-group">
-          <span>Cinsiyet *</span>
+        <fieldset className="form-group ws-fieldset">
+          <legend>Cinsiyet *</legend>
           <div className="ws-choice-row">
             {(['Erkek', 'Kadın'] as IntakeGender[]).map(option => (
               <label key={option}>
@@ -511,7 +921,8 @@ function IntakeForm({
               </label>
             ))}
           </div>
-        </div>
+          <small className="ws-hint">MMPI normları cinsiyete göre ayrışır; doğru seçim puanlamayı etkiler.</small>
+        </fieldset>
         <div className="form-group">
           <label htmlFor={`${id}-age`}>Yaş *</label>
           <input
@@ -522,8 +933,13 @@ function IntakeForm({
             max={MMPI_AGE_MAX}
             value={client.age || ''}
             onChange={e => set('age', Number(e.target.value) || 0)}
+            placeholder={`${MMPI_AGE_MIN}+`}
           />
-          {ageOutOfRange && <small className="ws-hint is-error">{MMPI_AGE_MESSAGE}</small>}
+          {ageOutOfRange ? (
+            <small className="ws-hint is-error">{MMPI_AGE_MESSAGE}</small>
+          ) : (
+            <small className="ws-hint">16 yaş altı kabul edilmez; üst sınır norm koşulu değildir.</small>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-edu`}>Eğitim</label>
@@ -539,7 +955,11 @@ function IntakeForm({
               </option>
             ))}
           </select>
-          {educationInvalid && <small className="ws-hint is-error">{MMPI_EDUCATION_MESSAGE}</small>}
+          {educationInvalid ? (
+            <small className="ws-hint is-error">{MMPI_EDUCATION_MESSAGE}</small>
+          ) : (
+            <small className="ws-hint">Maddeleri anlayarak yanıtlamak için en az ortaokul düzeyi gerekir.</small>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-marital`}>Medeni durum</label>
@@ -558,7 +978,13 @@ function IntakeForm({
         </div>
         <div className="form-group span-2">
           <label htmlFor={`${id}-job`}>Meslek</label>
-          <input id={`${id}-job`} value={client.occupation} onChange={e => set('occupation', e.target.value)} autoComplete="off" />
+          <input
+            id={`${id}-job`}
+            value={client.occupation}
+            onChange={e => set('occupation', e.target.value)}
+            autoComplete="off"
+            placeholder="Örn. Öğretmen"
+          />
         </div>
 
         <div className="ws-section-label" role="group" aria-label="Test bilgileri">
@@ -566,7 +992,15 @@ function IntakeForm({
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-date`}>Test tarihi *</label>
-          <input id={`${id}-date`} required type="date" value={client.testDate} onChange={e => set('testDate', e.target.value)} />
+          <input
+            id={`${id}-date`}
+            required
+            type="date"
+            max={today}
+            value={client.testDate}
+            onChange={e => set('testDate', e.target.value)}
+          />
+          <small className="ws-hint">Testin uygulandığı gün; ileri tarih seçilemez.</small>
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-duration`}>Test süresi</label>
@@ -580,17 +1014,21 @@ function IntakeForm({
               value={client.testDuration}
               onChange={e => set('testDuration', e.target.value)}
               placeholder="75"
+              aria-describedby={`${id}-duration-hint`}
             />
             <span className="ws-duration-suffix">dk</span>
           </div>
-          {showDurationHint && durationInfo.level === 'invalid' && <small className="ws-hint is-error">{durationInfo.message}</small>}
-          {showDurationHint && durationInfo.level === 'very-short' && <small className="ws-hint is-error">{durationInfo.message}</small>}
-          {showDurationHint && durationInfo.level === 'short' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
-          {showDurationHint && durationInfo.level === 'long' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
-          {showDurationHint && durationInfo.level === 'ok' && <small className="ws-hint">{MMPI_DURATION_REFERENCE}</small>}
+          <span id={`${id}-duration-hint`}>
+            {showDurationHint && durationInfo.level === 'invalid' && <small className="ws-hint is-error">{durationInfo.message}</small>}
+            {showDurationHint && durationInfo.level === 'very-short' && <small className="ws-hint is-error">{durationInfo.message}</small>}
+            {showDurationHint && durationInfo.level === 'short' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
+            {showDurationHint && durationInfo.level === 'long' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
+            {showDurationHint && durationInfo.level === 'ok' && <small className="ws-hint">{MMPI_DURATION_REFERENCE}</small>}
+            {!showDurationHint && <small className="ws-hint">Tipik aralık 60–120 dk; kaydı engellemez, kontrolde işaretlenir.</small>}
+          </span>
         </div>
-        <div className="form-group">
-          <span>İzlem</span>
+        <fieldset className="form-group ws-fieldset">
+          <legend>İzlem</legend>
           <div className="ws-choice-row">
             {FOLLOW_UP_OPTIONS.map(option => (
               <label key={option}>
@@ -604,14 +1042,24 @@ function IntakeForm({
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
         <div className="form-group">
           <label htmlFor={`${id}-reason`}>Başvuru nedeni</label>
-          <input id={`${id}-reason`} value={client.applicationReason} onChange={e => set('applicationReason', e.target.value)} />
+          <input
+            id={`${id}-reason`}
+            value={client.applicationReason}
+            onChange={e => set('applicationReason', e.target.value)}
+            placeholder="Örn. İşe giriş değerlendirmesi"
+          />
         </div>
         <div className="form-group span-2">
           <label htmlFor={`${id}-ctx`}>Kısa öykü / klinik bağlam</label>
-          <textarea id={`${id}-ctx`} value={client.clinicalContext} onChange={e => set('clinicalContext', e.target.value)} />
+          <textarea
+            id={`${id}-ctx`}
+            value={client.clinicalContext}
+            onChange={e => set('clinicalContext', e.target.value)}
+            placeholder="Değerlendirme için gerekli kısa bağlam (isteğe bağlı)"
+          />
         </div>
       </div>
 
@@ -645,7 +1093,16 @@ function ReviewPanel({
   error,
   blankCount,
   blankExceeded,
+  online,
+  outboxCount,
+  flushNote,
+  flushing,
+  conditionsAccepted,
+  onConditions,
+  onFlush,
   onBack,
+  onEditIntake,
+  onEditMethod,
   onSave,
   onNew,
 }: {
@@ -661,13 +1118,37 @@ function ReviewPanel({
   error: string;
   blankCount: number;
   blankExceeded: boolean;
+  online: boolean;
+  outboxCount: number;
+  flushNote: string;
+  flushing: boolean;
+  conditionsAccepted: boolean;
+  onConditions: (next: boolean) => void;
+  onFlush: () => void;
   onBack: () => void;
+  onEditIntake: () => void;
+  onEditMethod: () => void;
   onSave: () => void;
   onNew: () => void;
 }) {
   const counts = countAnswers(answers);
   const omrSummary = scan ? summarizeResults(definition, sortedPages(scan)) : null;
   const durationInfo = assessDuration(client.testDuration);
+  const checklist = [
+    { ok: true, label: `Danışan: ${client.firstName} ${client.lastName} · ${client.gender} · ${client.age} yaş` },
+    {
+      ok: !blankExceeded,
+      label:
+        method === 'quick'
+          ? `Veri: ${counts.entered}/${ITEM_COUNT} madde · Boş ${counts.blank}`
+          : method === 'raw'
+            ? `Veri: ham puan tamam · Boş ${blankCount}`
+            : omrSummary
+              ? `Veri: ${omrSummary.acceptedPages}/${omrSummary.expectedPages} sayfa · Boş ${omrSummary.blank}`
+              : 'Veri: tarama eksik',
+    },
+    { ok: conditionsAccepted, label: 'Uygulama koşulları doğrulandı' },
+  ];
 
   return (
     <section className="ws-review">
@@ -678,10 +1159,30 @@ function ReviewPanel({
             Verileri <em>gözden geçirin</em>
           </h2>
           <p className="ws-muted">
-            Kayıt veritabanına bu ekrandan yazılır. Klinik puanlama motoru bu sürümde bağlı değildir.
+            Kayıt veritabanına bu ekrandan yazılır. Bir şeyi düzeltmeniz gerekirse ilgili adıma tek tıkla dönün;
+            hiçbir veri kaybolmaz. Klinik puanlama motoru bu sürümde bağlı değildir.
           </p>
         </div>
+        {!saved && (
+          <div className="ws-review-edits">
+            <button type="button" className="btn-secondary btn-sm" onClick={onEditIntake}>
+              Danışanı düzenle
+            </button>
+            <button type="button" className="btn-secondary btn-sm" onClick={onEditMethod}>
+              Yöntemi değiştir
+            </button>
+          </div>
+        )}
       </header>
+
+      <ol className="ws-checklist" aria-label="Kayıt öncesi kontrol listesi">
+        {checklist.map((item, index) => (
+          <li key={index} className={item.ok ? 'is-ok' : 'is-missing'}>
+            <Icon name={item.ok ? 'checkCircle' : 'alert'} size={15} />
+            <span>{item.label}</span>
+          </li>
+        ))}
+      </ol>
 
       {blankExceeded && (
         <div className="status-banner error-banner" role="alert">
@@ -700,11 +1201,43 @@ function ReviewPanel({
         </div>
       )}
 
+      {!online && !saved && (
+        <div className="status-banner warning-banner" role="alert">
+          <Icon name="alert" size={16} />
+          <span style={{ flex: 1 }}>
+            Çevrimdışısınız. “Analizi başlat”a basarsanız kaydınız kuyruğa alınır ve bağlantı gelince otomatik
+            gönderilir.
+          </span>
+        </div>
+      )}
+
+      {outboxCount > 0 && !saved && (
+        <div className="status-banner info-banner" role="status">
+          <Icon name="refresh" size={16} />
+          <span style={{ flex: 1 }}>
+            {outboxCount} kayıt kuyrukta bekliyor.
+            {flushNote ? ` ${flushNote}` : ''}
+          </span>
+          <button type="button" className="btn-secondary btn-sm" onClick={onFlush} disabled={flushing || !online}>
+            {flushing ? 'Gönderiliyor…' : 'Şimdi dene'}
+          </button>
+        </div>
+      )}
+      {flushNote && outboxCount === 0 && (
+        <p className="ws-muted" role="status">{flushNote}</p>
+      )}
+
       <p className="ws-conditions-note">
         Uygulama koşulları: danışan akut psikotik durumda değil, madde/sedatif etkisi altında
         değil, testi tek başına ve yönlendirme olmaksızın doldurmuştur; uygulamayı yetkin bir
         uzman yürütmüştür.
       </p>
+      {!saved && (
+        <label className="ws-conditions-check">
+          <input type="checkbox" checked={conditionsAccepted} onChange={e => onConditions(e.target.checked)} />
+          <span>Yukarıdaki uygulama koşullarının sağlandığını doğruluyorum.</span>
+        </label>
+      )}
 
       <dl className="ws-dl">
         <div>
@@ -858,8 +1391,14 @@ function ReviewPanel({
             <button type="button" className="btn-secondary" onClick={onBack}>
               Geri
             </button>
-            <button type="button" className="btn-primary" disabled={busy || blankExceeded} onClick={onSave}>
-              {busy ? 'Kaydediliyor…' : 'Analizi başlat'}
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={busy || blankExceeded || !conditionsAccepted}
+              onClick={onSave}
+              title={!conditionsAccepted ? 'Önce uygulama koşullarını doğrulayın' : undefined}
+            >
+              {busy ? 'Kaydediliyor…' : online ? 'Analizi başlat' : 'Kuyruğa al'}
             </button>
           </>
         )}
