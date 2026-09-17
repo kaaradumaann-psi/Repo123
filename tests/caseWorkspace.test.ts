@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   ITEM_COUNT,
+  MMPI_AGE_MIN,
   RAW_SCORE_MAX,
+  assessDuration,
   buildCaseMeta,
   buildQuickPayload,
   buildRawPayload,
@@ -11,6 +13,7 @@ import {
   emptyClientIntake,
   emptyRawScores,
   mapQuickKey,
+  parseDurationMinutes,
   parseRawScore,
   parseRecordPayload,
   rawScoresComplete,
@@ -77,7 +80,68 @@ test('intake requires gender, age and test date; optional fields stay empty stri
   assert.equal(input.client.gender, 'Kadın');
   assert.equal(input.client.applicationDate, '2026-09-17');
   client.age = 0;
-  assert.equal(validateIntake(client), 'Yaş 1–120 arasında olmalıdır.');
+  assert.match(validateIntake(client) ?? '', new RegExp(`${MMPI_AGE_MIN} yaş ve üzerine uygulanır`));
+});
+
+test('intake enforces the Turkish MMPI application conditions (age 16+, at least middle school)', () => {
+  const client = emptyClientIntake();
+  client.firstName = 'Deniz';
+  client.lastName = 'Kaya';
+  client.gender = 'Kadın';
+  client.testDate = '2026-09-17';
+
+  // 13 yaş: Türkiye normlarında 16 yaş altı sonuçlar geçerli kabul edilmez → reddedilir.
+  client.age = 13;
+  assert.match(validateIntake(client) ?? '', /16 yaş ve üzerine uygulanır/);
+
+  // Alt sınır kabul edilir; yaşın üst sınırı norm koşulu olarak kısıtlanmaz.
+  client.age = 16;
+  assert.equal(validateIntake(client), null);
+  client.age = 71;
+  assert.equal(validateIntake(client), null);
+
+  // Girdi sağlamlığı: aşırı değer doğrulanamaz.
+  client.age = 121;
+  assert.match(validateIntake(client) ?? '', /doğrulanamadı/);
+
+  // İlkokul düzeyi kabul edilmez; en az ortaokul gerekir.
+  client.age = 28;
+  client.education = 'İlkokul';
+  assert.match(validateIntake(client) ?? '', /ortaokul/i);
+  client.education = 'Ortaokul';
+  assert.equal(validateIntake(client), null);
+  client.education = 'Lisansüstü';
+  assert.equal(validateIntake(client), null);
+});
+
+test('duration is parsed as minutes and judged against the Turkish sample (60–120 dk)', () => {
+  assert.equal(parseDurationMinutes('75'), 75);
+  assert.equal(parseDurationMinutes('90 dk'), 90);
+  assert.equal(parseDurationMinutes('60 dakika'), 60);
+  assert.equal(parseDurationMinutes(''), null);
+  assert.equal(parseDurationMinutes('abc'), null);
+  assert.equal(parseDurationMinutes('0'), null);
+  assert.equal(parseDurationMinutes('999'), null);
+
+  assert.equal(assessDuration('').level, 'empty');
+  assert.equal(assessDuration('abc').level, 'invalid');
+
+  // 566 madde 20 dakikada cevaplanamaz.
+  const veryShort = assessDuration('20');
+  assert.equal(veryShort.level, 'very-short');
+  assert.match(veryShort.message, /çok kısa/);
+
+  const short = assessDuration('50');
+  assert.equal(short.level, 'short');
+  assert.match(short.message, /60–120/);
+
+  assert.equal(assessDuration('60').level, 'ok');
+  assert.equal(assessDuration('90 dk').level, 'ok');
+  assert.equal(assessDuration('120').level, 'ok');
+
+  const long = assessDuration('240');
+  assert.equal(long.level, 'long');
+  assert.match(long.message, /üzerinde/);
 });
 
 test('saved payload round-trips client fields, quick answers and raw scores', () => {

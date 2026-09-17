@@ -1,24 +1,80 @@
 /* Professional workspace — dense, no marketing copy. Screen only. */
 
 @media screen {
+  /* İşlem akışı ana ekranı: ana sitedeki hero'nun çalışma alanı karşılığı —
+     kılavuz çipi, ağırlıksız serif başlık ve kıl payı çizgiyle ayrılmış gerçek
+     değer satırı. */
   .ws-home {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    max-width: 720px;
+    align-items: center;
+    max-width: 680px;
+    margin: 10px auto 0;
+    text-align: center;
   }
 
-  .ws-home h1,
-  .ws-panel h2,
-  .ws-review h2 {
-    font-family: var(--font-sans);
+  .ws-home-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin: 18px 0 0;
+    color: var(--text);
+  }
+
+  .ws-home-title em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .ws-home-sub {
+    margin: 16px auto 0;
+    max-width: 520px;
+    color: var(--soft);
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+
+  .ws-home .ws-actions {
+    justify-content: center;
+    margin-top: 26px;
+  }
+
+  .ws-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 18px;
+    width: 100%;
+    max-width: 640px;
+    margin: 42px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--hairline);
+    text-align: left;
+  }
+
+  .ws-facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 0;
+  }
+
+  .ws-facts dt {
+    font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: -0.03em;
-    margin: 0 0 6px;
-    font-size: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
-  .ws-home h1 { font-size: 22px; }
+  .ws-facts dd {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
 
   .ws-muted {
     margin: 0;
@@ -34,10 +90,54 @@
     align-items: center;
   }
 
+  /* Adım başlıkları: sitedeki serif bölüm başlıkları (01 — ... çipi + Newsreader). */
+  .ws-panel-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 25px;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 10px 0 4px;
+    color: var(--text);
+  }
+
+  .ws-panel-title em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .ws-panel-head .section-badge {
+    margin-bottom: 2px;
+  }
+
+  /* Akış çubuğu: geri + adım haritası + ileri eylemi tek pill izde. */
+  .ws-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ws-flowbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+  }
+
+  .ws-flowbar-action {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+
   .ws-stepper {
     display: flex;
     gap: 4px;
-    margin: 0 0 18px;
+    margin: 0;
     padding: 0;
     list-style: none;
     flex-wrap: wrap;
@@ -50,15 +150,32 @@
     padding: 6px 12px;
     font-size: 12px;
     color: var(--soft);
-    background: var(--bg-soft);
-    border: 1px solid var(--hairline);
+    background: transparent;
+    border: 1px solid transparent;
     border-radius: var(--radius-full);
+  }
+
+  .ws-step button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .ws-step button:hover {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .ws-step.is-on {
     color: var(--text);
     background: var(--white);
     font-weight: 600;
+    border-color: var(--hairline);
+    box-shadow: 0 1px 2px rgba(13, 13, 13, 0.06);
   }
 
   .ws-step.is-done { color: var(--text); }
@@ -142,9 +259,10 @@
   }
 
   .ws-method {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     text-align: left;
     padding: 18px 16px;
     background: var(--white);
@@ -153,10 +271,119 @@
     color: var(--text);
   }
 
-  .ws-method:hover { border-color: var(--text); }
+  .ws-method:hover {
+    border-color: var(--text);
+    transform: translateY(-2px);
+  }
 
-  .ws-method strong { font-size: 14px; }
-  .ws-method span { font-size: 12.5px; color: var(--soft); line-height: 1.4; }
+  .ws-method.is-selected {
+    border-color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--text);
+  }
+
+  .ws-method-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    display: grid;
+    place-items: center;
+    color: var(--text);
+  }
+
+  .ws-method strong { font-size: 14px; letter-spacing: -0.02em; }
+  .ws-method span { font-size: 12.5px; color: var(--soft); line-height: 1.45; }
+
+  .ws-method-flag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-full);
+  }
+
+  .ws-client-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 14px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    color: var(--soft);
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .ws-client-chip strong {
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Form bölümleri: sitedeki "Eğitim / Deneyim" mikro etiketleri. */
+  .ws-section-label {
+    grid-column: 1 / -1;
+    padding-top: 10px;
+    border-top: 1px solid var(--hairline);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .ws-form .ws-section-label:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .ws-conditions-note {
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    color: var(--soft);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  /* Alan ipuçları: yalnızca gerçek veriye dayanır; hata kırmızı, uyarı amber. */
+  .ws-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .ws-hint.is-warn { color: #8a5a05; }
+  .ws-hint.is-error { color: #a93028; }
+
+  .ws-duration {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ws-duration input { flex: 1; min-width: 0; }
+
+  .ws-duration-suffix {
+    color: var(--muted);
+    font-size: 13px;
+    flex: none;
+  }
 
   .qe-counts {
     display: flex;
@@ -178,6 +405,18 @@
 
   .qe-d { color: var(--accent-ink); }
   .qe-y { color: #a93028; }
+  .qe-blank-over { color: #a93028; background: var(--danger-tint); border-color: var(--danger-border); }
+
+  .qe-blank-warning {
+    margin: 0;
+    padding: 10px 14px;
+    background: var(--danger-tint);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius-md);
+    color: #a93028;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
 
   .qe-stage {
     outline: none;
@@ -235,6 +474,19 @@
   }
 
   .qe-value { margin: 0; font-size: 13px; color: var(--soft); }
+
+  .qe-progress {
+    height: 3px;
+    background: var(--hairline);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .qe-progress-fill {
+    height: 100%;
+    background: var(--text);
+    transition: width 0.2s ease-out;
+  }
 
   .qe-map {
     display: grid;
@@ -385,4 +637,8 @@
   .ws-form,
   .ws-methods { grid-template-columns: 1fr; }
   .ws-form .span-2 { grid-column: span 1; }
+  .ws-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin-top: 30px; }
+  .ws-flowbar { border-radius: var(--radius-lg); }
+  .ws-flowbar-action { margin-left: 0; width: 100%; }
+  .ws-flowbar-action .btn-primary { width: 100%; justify-content: center; }
 }
