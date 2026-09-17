@@ -13,6 +13,7 @@ import { ScanResultPreview } from './ScanResultPreview';
 import { RecordCapture } from './RecordCapture';
 import { MyRecordsPanel } from './MyRecordsPanel';
 import { Icon } from './Icon';
+import { MMPI_MAX_BLANK } from '../workspace/caseTypes';
 import '../styles/scanner.css';
 
 export type ScannerWorkspaceProps = {
@@ -408,8 +409,12 @@ function ScannerSession({
             <strong className="stat-val text-warning">{summary.ambiguous + summary.multiple}</strong>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Boş Bırakılan</span>
-            <strong className="stat-val">{summary.blank}</strong>
+            <span className="stat-label">
+              Boş Bırakılan{summary.blank > MMPI_MAX_BLANK ? ` · ${MMPI_MAX_BLANK} sınırı aşıldı` : ''}
+            </span>
+            <strong className={`stat-val ${summary.blank > MMPI_MAX_BLANK ? 'text-danger' : ''}`}>
+              {summary.blank}
+            </strong>
           </div>
           <div className="stat-item">
             <span className="stat-label">Manuel Düzeltilen</span>
