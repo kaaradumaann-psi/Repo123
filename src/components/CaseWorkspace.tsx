@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
 import type { FormDefinition } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
@@ -13,6 +13,9 @@ import { RawScoreEntry } from './RawScoreEntry';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 import { useOnlineStatus } from '../workspace/useOnlineStatus';
+import { buildProfileFromAnswers, buildProfileFromRawScoresObject } from '../scoring/mmpiScoring';
+import { scanToAnswers } from '../scoring/omrAnswers';
+import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import {
   clearDraft,
   decodeAnswers,
@@ -527,30 +530,51 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
         </p>
 
         {showRestoreBanner && (
-          <div className="status-banner info-banner ws-restore" role="status">
-            <Icon name="refresh" size={18} />
-            <span style={{ flex: 1 }}>
-              Yarım kalan işlem geri yüklendi ({formatDraftTime(restoredAt)}). Kaldığınız yerden devam edebilirsiniz.
-            </span>
-            <button type="button" className="btn-secondary btn-sm" onClick={() => setRestoreDismissed(true)}>
-              Kapat
-            </button>
+          <div className="ws-restore-card" role="status">
+            <div className="ws-restore-icon">
+              <Icon name="refresh" size={20} />
+            </div>
+            <div className="ws-restore-body">
+              <strong className="ws-restore-title">Yarım kalan işlem bulundu</strong>
+              <p className="ws-restore-desc">
+                Son düzenleme <b>{formatDraftTime(restoredAt)}</b> — danışan bilgileri, cevaplar ve tarama verisi bu cihazda korunuyor.
+                Kaldığınız yerden devam edebilirsiniz. F5 ve internet kesintisinde kaybolmaz.
+              </p>
+              <div className="ws-restore-meta">
+                <span className="ws-chip">Otomatik taslak</span>
+                <span className="ws-muted">{client.firstName ? `${client.firstName} ${client.lastName}` : 'Danışan bilgisi'} · {method ? methodLabel(method) : 'Yöntem seçilmedi'}</span>
+              </div>
+            </div>
+            <div className="ws-restore-actions">
+              <button type="button" className="btn-primary btn-sm" onClick={() => setStep('intake')}>
+                Devam et
+                <Icon name="arrowRight" size={14} />
+              </button>
+              <button type="button" className="btn-secondary btn-sm" onClick={() => setRestoreDismissed(true)}>
+                Kapat
+              </button>
+            </div>
           </div>
         )}
 
         {outbox.length > 0 && (
-          <div className="status-banner warning-banner ws-restore" role="status">
-            <Icon name="alert" size={18} />
-            <span style={{ flex: 1 }}>
-              {outbox.length} kayıt bağlantı nedeniyle kuyrukta bekliyor. Bağlantı gelince otomatik gönderilir.
-            </span>
-            <button type="button" className="btn-secondary btn-sm" onClick={() => void flushOutbox()} disabled={flushing || !online}>
-              {flushing ? 'Gönderiliyor…' : 'Şimdi dene'}
-            </button>
+          <div className="ws-restore-card is-warning" role="status">
+            <div className="ws-restore-icon is-warn">
+              <Icon name="alert" size={20} />
+            </div>
+            <div className="ws-restore-body">
+              <strong className="ws-restore-title">{outbox.length} kayıt kuyrukta bekliyor</strong>
+              <p className="ws-restore-desc">Bağlantı nedeniyle gönderilemedi. İnternet geldiğinde otomatik gönderilir; bu ekranı güvenle kapatabilirsiniz.</p>
+            </div>
+            <div className="ws-restore-actions">
+              <button type="button" className="btn-secondary btn-sm" onClick={() => void flushOutbox()} disabled={flushing || !online}>
+                {flushing ? 'Gönderiliyor…' : 'Şimdi dene'}
+              </button>
+            </div>
           </div>
         )}
         {flushNote && (
-          <p className="ws-muted" role="status">{flushNote}</p>
+          <p className="ws-muted ws-restore-note" role="status">{flushNote}</p>
         )}
 
         <div className="ws-actions">
@@ -667,11 +691,13 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
       </div>
 
       {showRestoreBanner && (
-        <div className="status-banner info-banner" role="status">
-          <Icon name="refresh" size={18} />
-          <span style={{ flex: 1 }}>
-            Taslak geri yüklendi ({formatDraftTime(restoredAt)}). Hiçbir veriniz kaybolmadı; kaldığınız adımdasınız.
-          </span>
+        <div className="ws-restore-inline" role="status">
+          <div className="ws-restore-inline-icon">
+            <Icon name="refresh" size={16} />
+          </div>
+          <div className="ws-restore-inline-body">
+            <strong>Taslak geri yüklendi</strong> <span>({formatDraftTime(restoredAt)}) — hiçbir veriniz kaybolmadı; kaldığınız adımdasınız.</span>
+          </div>
           <button type="button" className="close-banner-btn" onClick={() => setRestoreDismissed(true)} aria-label="Kapat">
             <Icon name="close" size={14} />
           </button>
@@ -1150,17 +1176,41 @@ function ReviewPanel({
     { ok: conditionsAccepted, label: 'Uygulama koşulları doğrulandı' },
   ];
 
+  const gender = (client.gender === 'Kadın' ? 'Kadın' : 'Erkek') as 'Erkek' | 'Kadın';
+
+  const profile = useMemo(() => {
+    try {
+      if (client.gender !== 'Erkek' && client.gender !== 'Kadın') return null;
+      if (method === 'quick') {
+        if (counts.entered < ITEM_COUNT) return null;
+        return buildProfileFromAnswers(answers, gender);
+      }
+      if (method === 'raw') {
+        if (!rawScoresComplete(raw)) return null;
+        return buildProfileFromRawScoresObject(raw, gender);
+      }
+      if (method === 'omr' && scan) {
+        const omrAnswers = scanToAnswers(definition, scan);
+        // OMR'de eksik sayfalar varsa hesaplama yine denenir ama blank yüksek olacaktır
+        return buildProfileFromAnswers(omrAnswers, gender);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [method, answers, raw, scan, definition, client.gender, counts.entered, gender]);
+
   return (
     <section className="ws-review">
       <header className="ws-panel-head">
         <div>
-          <span className="section-badge badge-primary">04 · Kontrol</span>
+          <span className="section-badge badge-primary">04 · Kontrol & Hesaplama</span>
           <h2 className="ws-panel-title">
-            Verileri <em>gözden geçirin</em>
+            Verileri <em>gözden geçirin</em> ve profili inceleyin
           </h2>
           <p className="ws-muted">
-            Kayıt veritabanına bu ekrandan yazılır. Bir şeyi düzeltmeniz gerekirse ilgili adıma tek tıkla dönün;
-            hiçbir veri kaybolmaz. Klinik puanlama motoru bu sürümde bağlı değildir.
+            Kayıt veritabanına bu ekrandan yazılır. Aşağıda Türk normlarına göre hesaplanmış T skorları ve profil grafiği anlık olarak gösterilir.
+            Bir şeyi düzeltmeniz gerekirse ilgili adıma tek tıkla dönün; hiçbir veri kaybolmaz.
           </p>
         </div>
         {!saved && (
@@ -1225,6 +1275,19 @@ function ReviewPanel({
       )}
       {flushNote && outboxCount === 0 && (
         <p className="ws-muted" role="status">{flushNote}</p>
+      )}
+
+      {/* Hesaplama ve Grafik */}
+      {profile ? (
+        <MMPIResultsPanel profile={profile} clientName={`${client.firstName} ${client.lastName}`} />
+      ) : (
+        <div className="mmpi-results-placeholder">
+          <Icon name="sheet" size={20} />
+          <div>
+            <strong>Profil hesaplanamadı</strong>
+            <p className="ws-muted">Cinsiyet seçili olmalı ve veri girişi tamamlanmalıdır. Hızlı girişte 566 madde, ham puanda tüm ölçekler, OMR’de 4 sayfa gereklidir.</p>
+          </div>
+        </div>
       )}
 
       <p className="ws-conditions-note">
@@ -1376,7 +1439,7 @@ function ReviewPanel({
           {saved.id === 'local'
             ? 'Veriler bu oturumda analize hazır. Kayıt yalnızca aktif psikolog hesabıyla veritabanına yazılır.'
             : <>
-                Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Klinik puanlama bu sürümde bağlı değil.
+                Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Profil yukarıda hesaplanmıştır.
               </>}
         </div>
       ) : null}
