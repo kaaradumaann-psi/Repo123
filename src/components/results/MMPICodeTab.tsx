@@ -1,23 +1,23 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
-import type { ScaleId } from '../../scoring/mmpiKeys';
-import { SCALE_MEANINGS, codePointName, tColor } from '../../scoring/mmpiInterpretation';
+import { codePointInterpretation, thirdHighestClinical } from '../../scoring/mmpiInterpretation';
 import { Icon } from '../Icon';
 
 /**
  * Kod Analizleri sekmesi — profil kodu (Mf ve Si hariç en yüksek iki klinik
- * ölçek) ve klinik ölçeklerin T sıralaması (çubuk görünümü).
+ * ölçek) ve kaynak.pdf'teki iki noktalı kod yorumları. Kodlar kanonik
+ * biçimde eşlenir (21 → 12/21); kaynakta olmayan kodlar için genel not verilir.
  */
 export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
   const code = profile.profileCode;
-  const codeName = codePointName(code);
-  const clinicalSorted = [...profile.clinical].sort((a, b) => b.tScore - a.tScore);
+  const entry = codePointInterpretation(code);
   const codeDigits = (code ?? '').split('');
   const idByDigit: Record<string, string> = {
     '1': 'Hs', '2': 'D', '3': 'Hy', '4': 'Pd', '5': 'Mf', '6': 'Pa', '7': 'Pt', '8': 'Sc', '9': 'Ma', '0': 'Si',
   };
-  const topScales = codeDigits
-    .map(digit => clinicalSorted.find(s => idByDigit[digit] === s.id))
+  const codeScales = codeDigits
+    .map(digit => profile.clinical.find(s => idByDigit[digit] === s.id))
     .filter(s => s !== undefined);
+  const third = thirdHighestClinical(profile, codeDigits.map(digit => idByDigit[digit] ?? ''));
 
   return (
     <div role="tabpanel" className="mmpi-tab-panel">
@@ -29,54 +29,67 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           </h4>
           <div className="mmpi-code-value">{code ?? '—'}</div>
           <div className="mmpi-code-name">
-            {codeName ?? (code ? 'İki noktalı kod noktası' : 'Kod hesaplanamadı')}
+            {entry ? `Kod ${entry.code} — kaynak yorumu aşağıdadır` : code ? 'İki noktalı kod noktası' : 'Kod hesaplanamadı'}
           </div>
-          {topScales.length > 0 && (
-            <>
-              {topScales.map((scale, index) => (
-                <div className="mmpi-code-scale" key={scale.id}>
-                  <b>
-                    {index + 1}. {scale.fullName} — T {scale.tScore.toFixed(1)}
-                  </b>
-                  <span>
-                    {scale.tScore >= 70 ? SCALE_MEANINGS[scale.id as ScaleId].high : SCALE_MEANINGS[scale.id as ScaleId].measures}
-                  </span>
-                </div>
-              ))}
-            </>
+          {codeScales.map((scale, index) => (
+            <div className="mmpi-code-scale" key={scale.id}>
+              <b>
+                {index + 1}. {scale.fullName} — T {scale.tScore.toFixed(1)}
+              </b>
+              <span>{index === 0 ? 'Kodun birinci (en yüksek) ölçeği' : 'Kodun ikinci ölçeği'}</span>
+            </div>
+          ))}
+          {third && (
+            <div className="mmpi-code-scale">
+              <b>
+                3. yükselen: {third.fullName} — T {third.tScore.toFixed(1)}
+              </b>
+              <span>Kaynak kod yorumlarında üçüncü yükselen alt test sıklıkla ek bilgi verir.</span>
+            </div>
           )}
           <p className="mmpi-code-desc">
             <Icon name="info" size={13} />
-            Kod, Mf ve Si hariç en yüksek iki klinik ölçekten oluşur; kod tek başına tanı değil,
-            yorumlamada başlangıç noktasıdır.
+            Kod, Mf ve Si hariç en yüksek iki klinik ölçekten oluşur; kaynakta kodlar her iki sıralamayla
+            (ör. 12/21) birlikte ele alınır. Kod tek başına tanı değil, yorumlamada başlangıç noktasıdır.
           </p>
         </section>
 
         <section className="mmpi-code-bars">
           <h4 className="mmpi-card-title">
             <span className="mmpi-card-dot" />
-            Klinik Ölçekler — T Sıralaması
+            Kod Yorumu (kaynak.pdf)
           </h4>
-          {clinicalSorted.map(scale => {
-            const pct = Math.max(4, Math.min(100, ((scale.tScore - 30) / 60) * 100));
-            const color = tColor(scale.tScore);
-            return (
-              <div className="code-bar-row" key={scale.id} title={scale.fullName}>
-                <span className="code-bar-label">{scale.shortName}</span>
-                <div className="code-bar-track">
-                  <div className="code-bar-fill" style={{ width: `${pct}%`, background: color }} />
+          {entry ? (
+            <>
+              <p className="clin-signal">{entry.text}</p>
+              {entry.diagnosis && entry.diagnosis.length > 0 && (
+                <div className="mmpi-box info">
+                  <b>Olası Tanı:</b>
+                  <ul>
+                    {entry.diagnosis.map((d, i) => (
+                      <li key={i}>
+                        <Icon name="info" size={12} />
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <span className="code-bar-val" style={{ color }}>
-                  {scale.tScore.toFixed(1)}
-                </span>
-              </div>
-            );
-          })}
-          <p className="mmpi-summary-note">
-            Çubuklar T skorunu gösterir; kırmızı T ≥ 70, mor 56–69, yeşil normal aralıktır.
-          </p>
+              )}
+              {entry.seeAlso && <p className="mmpi-summary-note">{entry.seeAlso}</p>}
+            </>
+          ) : (
+            <p className="clin-desc">
+              Kaynak raporda bu iki noktalı koda ilişkin ayrı bir yorum yer almamaktadır. Klinik ölçeklerin
+              ayrıntılı T puanı yorumları için “Klinik Ölçekler” sekmesine, profil konfigürasyonları için
+              “Ek Ölçekler &amp; Kritikler” sekmesine bakınız.
+            </p>
+          )}
         </section>
       </div>
+      <p className="mmpi-summary-note">
+        Yorum metinleri kaynak raporun kod bölümlerine dayanır; olası tanılar kaynaktaki gibi listelenir ve
+        klinik karar uygulayıcı uzmana aittir.
+      </p>
     </div>
   );
 }

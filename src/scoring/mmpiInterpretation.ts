@@ -1,91 +1,106 @@
 import type { MMPIProfile, ScaleResult } from './mmpiScoring';
-import type { ScaleId } from './mmpiKeys';
+import type { Gender, ScaleId } from './mmpiKeys';
+import {
+  clinicalBands,
+  findBand,
+  SINGLE_D,
+  SINGLE_HS,
+  SINGLE_HY,
+  SINGLE_MF_MALE,
+  SINGLE_PA,
+  SINGLE_PD,
+  SINGLE_PT,
+  type Band,
+  type SingleElevation,
+} from './mmpiSource';
+import { codeInterpretation, canonicalCode } from './mmpiSourceCodes';
 
 /**
- * Kullanıcı dostu açıklama metinleri.
- * Bu metinler ölçeklerin ölçtüğü *yönü* tarif eder; tanı veya kesin klinik
- * yorum içermez. Kesin yorum uygulayıcı uzmana aittir.
+ * Kullanıcı dostu açıklama metinleri — kaynak.pdf'teki alt testi tanımlarının
+ * kısa özetleridir. Ayrıntılı band yorumları için mmpiSource.ts'deki
+ * T puanı tabloları kullanılır. Bu metinler tanı içermez; kesin yorum
+ * uygulayıcı uzmana aittir.
  */
 
 export type ScaleMeaning = {
   /** Ölçek ne ölçüyor? (1-2 cümle) */
   measures: string;
-  /** Yüksek puan (T ≥ 70) neyi düşündürür? */
+  /** Yüksek puan neyi düşündürür? (kaynak) */
   high: string;
-  /** Düşük puan (T ≤ 35) neyi düşündürür? */
+  /** Düşük puan neyi düşündürür? (kaynak) */
   low: string;
 };
 
 export const SCALE_MEANINGS: Record<ScaleId, ScaleMeaning> = {
   '?': {
-    measures: 'Cevaplanmayan (boş bırakılan) madde sayısını gösterir. Boşluklar fazla olduğunda ölçek puanları gerçek durumdan düşük görünebilir.',
-    high: 'Çok fazla boş madde var; profil güvenilirliğini düşürür, gerekirse test yeniden uygulanmalıdır.',
-    low: 'Boş madde sayısı düşük; cevaplama tutarlılığı iyi.',
+    measures: '“Hiç Bir Şey Diyemem” skalası: boş bırakılan madde sayısını gösterir. Kaynağa göre yaklaşık 30 madde boş bırakılmışsa geçerlilik sorgulanır, 31 ve üstünde profil büyük olasılıkla geçersizdir.',
+    high: 'Profil büyük bir olasılıkla geçersizdir; birey testi tamamlamaya muktedir değildir veya isteksizdir. Mümkünse boş maddelerin doldurulması için danışan güdülenmeli, gerekirse test yinelenmelidir.',
+    low: 'Birey bütün maddeleri yanıtlamaya isteklidir; birçok kişinin bu performansta olması beklenir.',
   },
   L: {
-    measures: 'İnsanların kendini çok “kusursuz” gösterme eğilimini ölçer (yalan eğilimi).',
-    high: 'Savunmacı / iyi görünme çabası olabilir; klinik puanlar gerçek durumdan düşük kalabilir.',
-    low: 'İyi görünme çabası gözlenmiyor; savunma düşük.',
+    measures: 'Yalan skalası: bireyin kendini olduğundan iyi gösterme, küçük sosyal hatalarını inkar etme eğilimini ölçer.',
+    high: 'Kendindeki zayıflıkları inkar, patolojik olarak kendini iyi gösterme çabası; represif ve savunucu tutum. Puanlamada hata olasılığı da dışlanmalıdır.',
+    low: 'Bağımsız, kendine güvenen, ufak sosyal hatalarını kabul etmeye hazır kimseler; ya da kendini oldukça patolojik gösterme çabası — diğer geçerlik alt testleri incelenmelidir.',
   },
   F: {
-    measures: 'Beklenmedik, sıra dışı maddelere verilen cevapların yoğunluğunu ölçer; sıkıntı ve dikkatsizliğin göstergesidir.',
-    high: 'Ciddi sıkıntı, abartma ya da dikkat dağınıklığı / rastgele cevaplayış olabilir.',
-    low: 'Cevaplar genel beklentiye uygun; dikkat sorunu görünmüyor.',
+    measures: 'Sıklık skalası: uygun olmayan (seyrek) yaşantılara verilen yanıtların sayısını ölçer; psikopatolojinin miktarı ve şekline ilişkin bilgi verir.',
+    high: 'İlişki kurmak istememe, sahte kötülük (simülasyon), yardım çağrısı profili ya da açık psikoz/ciddi psikopatoloji; 90 T puanını aşarsa profil dikkatli değerlendirilmelidir.',
+    low: 'Birey rahatsız edici nitelikteki maddelere bilgi vermekten kaçınmış olabilir; ciddi psikopatolojiyi inkar ya da aşırı geleneksel, savunucu (“sahte iyilik”) tutum.',
   },
   K: {
-    measures: 'Farkında olunan savunma ve sorunlarını gizleme eğilimini ölçer (düzeltme ölçeği). Klinik puanlara K düzeltmesi eklenmesinin temelidir.',
-    high: 'Savunmacı tutum; sorunlar maskedeleniyor olabilir, klinik puanlar düşük görünebilir.',
-    low: 'Kendini eleştirme / yardım arama eğilimi; sorunlar açıkça ifade ediliyor olabilir.',
+    measures: 'Düzeltme skalası: psikopatolojinin fark edilme ve bilinme düzeyini, savunmacılığı ölçer; bazı klinik ölçeklere K düzeltmesi eklenmesinin temelidir.',
+    high: 'Savunucu; sorunları ve zayıflıkları kabule isteksiz, içgörü eksikliği; klinisyen K ile düzeltilmemiş profilleri kullanmalıdır; prognoz kötüdür.',
+    low: 'Problemleri aşırı abartma ya da uydurma, akut psikotik stres; kişisel kaynakları sınırlanmış, kötü benlik kavramına sahip bireyler; prognoz sınırlı ya da olumsuzdur.',
   },
   Hs: {
-    measures: 'Vücut şikâyetlerine ve sağlığa aşırı odaklanmayı ölçer (1 no’lu klinik ölçek).',
-    high: 'Fiziksel şikâyetlere abartılı odaklanma, sağlık kaygısı; bedensel yakınmalar ön planda olabilir.',
-    low: 'Fiziksel şikâyetler az; bedensel yakınmalara odaklanma düşük.',
+    measures: '(1) Hipokondriazis: bedensel yakınmalar ve sağlık konularıyla aşırı uğraşıyı ölçer.',
+    high: 'Bedensel yakınmalarla çok fazla uğraşma; yakınmaların bedensel kaynağını sürekli araştırma; 84 üzerinde somatik delüzyonlar ve olası şizofrenik epizod başlangıcı.',
+    low: 'Bedensel yakınmalar ve genel sağlık durumu ile çok az ilgilenme; uyanık, iyimser, yeterli ve yaşamda etkin kişiler.',
   },
   D: {
-    measures: 'İçine kapanıklık, hayal kırıklığı, enerji düşüklüğü ve değersizlik duygularını ölçer (2 no’lu klinik ölçek).',
-    high: 'Düşük moral, tükenmişlik, değersizlik ve hayal kırıklığı belirtileri öne çıkıyor olabilir.',
-    low: 'Duygudurum belirtileri belirgin değil; enerjik ve umutlu bir tablo.',
+    measures: '(2) Depresyon: depresif duygudurum, karamsarlık, ilgi daralması ve değersizlik duygularını ölçer.',
+    high: 'Depresif ve kaygılı, benlik saygısı düşük, karamsar; ilgi alanları daralmış, kendini işe yaramaz görme; 85 ve üstünde odaklanamayacak kadar keder.',
+    low: 'Neşeli, meraklı, iyimser, aktif ve dışa dönük; bazen kayıtsız gibi algılanabilir.',
   },
   Hy: {
-    measures: 'Stresle baş etmede bedenselleşen yakınmaları ve duygusal tepkiseliliği ölçer (3 no’lu klinik ölçek).',
-    high: 'Stres kaynaklı bedensel yakınmalar ve duygusal tepkiselilik ön planda olabilir.',
-    low: 'Stresle baş etme belirgin bedensel yakınma üretmiyor.',
+    measures: '(3) Histeri: stres altında bedenselleşen (konversif) yakınmaları, bastırma ve inkar kullanımını ölçer.',
+    high: 'Bastırma ve inkarı çok fazla kullanma, çocuksu benmerkezcilik, anksiyete bağlantılı somatik yakınmalar; histeroid mekanizmalarla ikincil kazanç.',
+    low: 'Kendini sürekli eleştirme; olumlu kişilerarası ilişkileri inkar eğilimi.',
   },
   Pd: {
-    measures: 'İlişkilerde ve kurallara uymada güçlük, suçluluk taşımama ve sorumsuz davranış eğilimlerini ölçer (4 no’lu klinik ölçek).',
-    high: 'İlişkilerde çatışma, kurallara uyumsuzluk ve suçluluk taşımama eğilimi öne çıkıyor olabilir.',
-    low: 'İlişki ve uyum sorunları belirgin değil.',
+    measures: '(4) Psikopatik Sapma: sosyal uyumsuzluk, otoriteyle çatışma, impulsivite ve yüzeysel duygusal ilişkileri ölçer.',
+    high: 'Öfkeli, impulsif, duygusal açıdan yüzeysel, yordanamaz davranışlar; antisosyal tutum ve otoriteye karşı olma; 80 ve üstünde klinik olarak psikopatik birey.',
+    low: 'Durağan, pasif ve atılgan olmayan; sosyal geleneklere uymada bağımlı, hatta katı bireyler.',
   },
   Mf: {
-    measures: 'Cinsiyete özgü tipik rol kalıplarından uzaklaşmayı ve bazı sosyal uyum güçlüklerini ölçer (5 no’lu klinik ölçek).',
-    high: 'Sosyal etkileşimde gerginlik, beceriksizlik hissi ve tipik rol kalıplarından uzaklaşma olabilir.',
-    low: 'Cinsiyet rolüne uygun, sosyal açıdan uyumlu bir tablo.',
+    measures: '(5) Kadınlık-Erkeklik: cinsiyete özgü geleneksel ilgi ve rol kalıplarından uzaklaşmayı ölçer; yorum cinsiyete göre değişir.',
+    high: 'Erkeklerde: hayalperest, içedönük, eğitim ve sanat yönelimli; çok yüksek puanlar pasiflik/kadınsı özellikler. Kadınlarda: güçlü, yarışmacı, yönlendirici, geleneksel erkek rolüne özgü ilgi ve işler.',
+    low: 'Erkeklerde: erkeksi ilgilerde daralma, maskülen görünmek için kompülsif uğraş. Kadınlarda: pasif, çekingen; nevrotik üçlü yükselmesiyle ilişkili olabilir.',
   },
   Pa: {
-    measures: 'Güvensizlik, kolay kırılma, kişiselleştirme ve savunmacılığı ölçer (6 no’lu klinik ölçek).',
-    high: 'Çevreye güvensizlik, kırgınlık ve kendini savunma eğilimi öne çıkıyor olabilir.',
-    low: 'Güvensizlik / savunmacılık belirgin değil.',
+    measures: '(6) Paranoaya: kuşkuculuk, alınganlık, güvensizlik ve yansıtma eğilimini ölçer.',
+    high: 'Diğerlerini suçlama ve hostilite; katı, inatçı, aşırı duyarlı; 80 ve üstünde referans fikirleri, perseküsyon/grandiyöz delüzyonlar ve bozuk gerçeklik değerlendirmesi.',
+    low: 'Geleneksel, güvenilir, kişiler arası ilişkilerde duyarsız, ilkel ve saf; ya da aşırı şüphesi nedeniyle maddeleri atlayan bireyler.',
   },
   Pt: {
-    measures: 'Gerilim, kaygı, obsesif düşünceler ve sıkılma / uykusuzluk gibi gerginlik belirtilerini ölçer (7 no’lu klinik ölçek).',
-    high: 'Yaygın kaygı, gerginlik ve obsesif düşünceler ön planda olabilir.',
-    low: 'Kaygı / gerginlik belirtileri belirgin değil; gevşek bir ton.',
+    measures: '(7) Psikasteni: anksiyete, gerginlik, obsesif düşünce, ruminasyon ve kendinden şüpheyi ölçer.',
+    high: 'Ajite ruminasyonlar, obsesyonlar, kompulsiyonlar ya da fobiler; anksiyete ve gerginlik günlük yaşamı sürdüremeyecek kadar yoğun olabilir.',
+    low: 'Rahat, gerginliği olmayan, kendine güvenli ve üretici; kaygı düzeyi çok düşük.',
   },
   Sc: {
-    measures: 'Sosyal yalıtılmışlık, duygusal uzaklaşma, sıra dışı düşünme biçimlerini ölçer (8 no’lu klinik ölçek).',
-    high: 'Sosyal geri çekilme, duygusal uzaklaşma ve sıra dışı düşünme / algılama eğilimi olabilir.',
-    low: 'Düşünce örüntüsü tipik; sosyal yalıtılmışlık yok.',
+    measures: '(8) Şizofreni: yabancılaşma, sıra dışı düşünce ve algı yaşantılarını, sosyal çekilmeyi ölçer.',
+    high: 'Yabancılaşma, dezorganize düşünce, iletişim güçlüğü; 75 ve üstünde gerçek şizoid düşünce süreci; 100 ve üstünde akut psikotik reaksiyon ya da kimlik krizi.',
+    low: 'Pratik ve geleneksel; konservatif, uyumlu ve sorumlu ancak hayal gücü sınırlı ve katı.',
   },
   Ma: {
-    measures: 'Enerji, hız ve huzursuzluk düzeyini ölçer (9 no’lu klinik ölçek).',
-    high: 'Aşırı enerji, huzursuzluk, iritabilite ve hızlı düşünme ön planda olabilir.',
-    low: 'Enerji düzeyi düşük / sakin bir tablo.',
+    measures: '(9) Hipomani: enerji, aktivite, fikir uçuşması ve dürtüsellik düzeyini ölçer.',
+    high: 'Enerjik, konuşkan, eylemi düşünceye tercih eden; 85 ve üstünde ajitasyon ya da manik dönem, hiperaktivite ve grandiyözite.',
+    low: 'Düşük enerji düzeyi, güdü azlığı, hatta apati; özellikle 2 yükselmemişse depresyon düşünülmelidir.',
   },
   Si: {
-    measures: 'Sosyal geri çekilme, içedönüklük ve sınırlı sosyal çevreyi ölçer (0 no’lu klinik ölçek).',
-    high: 'Sosyal geri çekilme, içedönüklük ve dar sosyal çevre öne çıkıyor olabilir.',
-    low: 'Sosyal açıdan dışa dönük, geniş bir çevre.',
+    measures: '(0) Sosyal İçedönüklük: sosyal ilişkilerden kaçınma, utangaçlık ve içedönüklüğü ölçer.',
+    high: 'Sosyal açıdan beceriksiz; sosyal ilişkilerde anksiyete yaşama ve ilişki kurmaktan kaçınma; çekingen ve utangaç.',
+    low: 'İyimser, manipülatif, yüzeysel; yalnız kalamayan, sosyal kabul ve onay gereksinimi çok fazla bireyler.',
   },
 };
 
@@ -98,8 +113,8 @@ export type PatternHit = {
 };
 
 /**
- * Klasik MMPI profil desenleri. T skorlarına bakarak hesaplanan,
- * yol gösterici (tanı değil) göstergelerdir.
+ * kaynak.pdf'te tanımlanan klasik profil konfigürasyonları. Eşikler ve
+ * yorumlar kaynak rapora dayanır; tanı değil, yol gösterici göstergedir.
  */
 export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   const t = (id: ScaleId): number => profile.scales.find(s => s.id === id)?.tScore ?? 50;
@@ -107,79 +122,127 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   const D = t('D');
   const Hy = t('Hy');
   const Pd = t('Pd');
+  const Pa = t('Pa');
   const Pt = t('Pt');
   const Sc = t('Sc');
   const Ma = t('Ma');
+  const F = t('F');
 
   const hits: PatternHit[] = [];
 
   hits.push({
     id: 'conversion-v',
-    name: 'Dönüşüm V (1-3 / 3-1)',
+    name: 'Konversiyon Vadisi / Dönüşüm V (1-3-2)',
     rule: 'Hs ≥ 65 ve Hy ≥ 65 ve ikisinin en düşüğü D’den en az 5 T yüksek',
-    detail: 'Stres kaynaklı bedensel yakınmaların öne çıktığı klasik “dönüşüm” deseni; Hs ve Hy zirvesi D’nin üzerinde belirgin olmalıdır.',
+    detail: 'Kaynağın 13/31 kodunda anlattığı klasik görünüm: psikolojik sorunlar somatik yakınmalara dönüştürülür, psikolojik etkenler kabul edilmez; semptomlar ikincil kazanç sağlar (sorumluluk almama ve görevden kaçma). D’nin vadi oluşturması tipiktir.',
     hit: Hs >= 65 && Hy >= 65 && Math.min(Hs, Hy) - D >= 5,
+  });
+  hits.push({
+    id: 'cry-for-help',
+    name: 'Yardım Çağrısı Profili',
+    rule: 'F ≥ 70 ve 2 ile 7 testleri 6, 8 ve 9 testlerinden yüksek',
+    detail: 'Kaynağın F alt testi yorumunda saydığı yükselme nedenlerinden dördüncüsüdür: yardım çağrısı profili; 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
+    hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma,
+  });
+  hits.push({
+    id: 'psychotic-v',
+    name: 'Paranoid Vadi / Psikotik V (6-8 yükselmesi)',
+    rule: 'Pa ≥ 70 ve Sc ≥ 70 ve her ikisi de Pt’den yüksek',
+    detail: 'Kaynağın 678/876 yorumuna göre 6 ve 8, 7’den yüksek ise bu psikotik vadiyi oluşturur; ciddi psikopatoloji vardır ve paranoid tip şizofrenik bozukluklar düşünülebilir. 86/68 kodunda “Paranoid vadi” ya da “Psikotik V” olarak adlandırılır.',
+    hit: Pa >= 70 && Sc >= 70 && Math.min(Pa, Sc) > Pt,
   });
   hits.push({
     id: 'depressive-27',
     name: 'Depresif Kod (2-7 / 7-2)',
     rule: 'Pt ≥ 70 ve D ≥ 60',
-    detail: 'Kaygı ve duygudurum bozulmasının birlikte yükseldiği depresif desen; klinikte en bilinen kod noktalarından biridir.',
+    detail: 'Kaynağın 27/72 kodunda anlattığı görünüm: pasif, bağımlı, yüksek standartlar koyarak stres yaşayan; stres arttığında yapışırcasına bağımlı hale gelen bireyler. 278/728 kodunda intihar olasılığı dikkatle değerlendirilmelidir.',
     hit: Pt >= 70 && D >= 60,
   });
   hits.push({
     id: '49',
     name: '4-9 / 9-4 Modeli',
     rule: 'Pd ≥ 70 ve Ma ≥ 70',
-    detail: 'Eğilim ve enerji ölçeklerinin birlikte yükseldiği model; dürtüsellik ve huzursuzluk ön planda olabilir.',
+    detail: 'Kaynağın 49/94 kodu: kendi isteklerini ön plana çıkarma, sınırlar, kurallar ve düzenlemelere kızma; benmerkezci, narsisistik, kısa vadeli hedef odaklı. 20 yaş üstünde örüntü daha kalıcıdır; psikoterapi prognozu genellikle çok kötüdür.',
     hit: Pd >= 70 && Ma >= 70,
   });
   hits.push({
     id: '89',
     name: '8-9 / 9-8 Modeli',
     rule: 'Sc ≥ 70 ve Ma ≥ 70',
-    detail: 'Düşünce örüntüsü ve enerji ölçeklerinin birlikte yükseldiği model; enerji yüksek, örüntü sıra dışı olabilir.',
+    detail: 'Kaynağın 89/98 kodu: ergenlerde ve yetişkinlerde ciddi psikopatoloji; gerginlik, ajitasyon, uykusuzluk, fikir uçuşmaları. Kod daha da yükselirse delüzyon ve halüsinasyonlarla psikotik tablo ortaya çıkar.',
     hit: Sc >= 70 && Ma >= 70,
   });
   hits.push({
     id: 'neurotic-triad',
     name: 'Nörotik Üçlü (1-2-3)',
     rule: 'Hs, D ve Hy birlikte ≥ 65',
-    detail: 'Uyum güçlükleri ve duygusal gerilimin birden çok ölçekten yükseldiği tablo; klinikte sık görülen nörotik örüntü bölgesidir.',
+    detail: 'Kaynakta Mf düşüklüğüyle ilişkisi vurgulanan klasik nevrotik bölge: bedensel yakınmalar, depresif duygudurum ve histerik savunmaların birlikte yükseldiği tablo.',
     hit: Hs >= 65 && D >= 65 && Hy >= 65,
   });
   hits.push({
     id: 'multi-high',
     name: 'Çoklu Yükselme',
     rule: '3 veya daha fazla klinik ölçek T ≥ 65',
-    detail: 'Yaygın psikolojik sıkıntı işareti; tek ölçek yerine bütüncül değerlendirmeyi gerektirir.',
+    detail: 'Birden çok klinik alanın birlikte yükseldiği tablo; tek ölçek yorumu yerine profilin bütününün ve kaynak kod analizlerinin birlikte değerlendirilmesini gerektirir.',
     hit: profile.clinical.filter(s => s.tScore >= 65).length >= 3,
   });
   return hits;
 }
 
-const CODE_NAMES: Record<string, string> = {
-  '13': 'Dönüşüm V — stres kaynaklı bedensel yakınmalar',
-  '31': 'Dönüşüm V — stres kaynaklı bedensel yakınmalar',
-  '27': 'Depresif kod — kaygı + duygudurum bozulması',
-  '72': 'Depresif kod — kaygı + duygudurum bozulması',
-  '49': 'Eğilim + enerji — dürtüsellik ve huzursuzluk',
-  '94': 'Eğilim + enerji — dürtüsellik ve huzursuzluk',
-  '89': 'Düşünce + enerji — sıra dışı örüntü ve huzursuzluk',
-  '98': 'Düşünce + enerji — sıra dışı örüntü ve huzursuzluk',
-  '14': 'Nörotik bölge — uyum güçlüğü ve kaygı',
-  '41': 'Nörotik bölge — uyum güçlüğü ve kaygı',
-  '15': 'Nörotik bölge — uyum güçlüğü ve sosyal çekilme',
-  '51': 'Nörotik bölge — uyum güçlüğü ve sosyal çekilme',
-  '17': 'Anksiyete-dürtüsellik bölgesi',
-  '71': 'Anksiyete-dürtüsellik bölgesi',
-};
-
-/** Bilinen iki noktalı kod noktaları için kısa ad; bilinmiyorsa undefined. */
-export function codePointName(code: string | undefined): string | undefined {
-  if (!code) return undefined;
-  return CODE_NAMES[code];
+/** İki noktalı profil kodu için kaynak yorumu (yoksa undefined). */
+export function codePointInterpretation(code: string | undefined) {
+  return codeInterpretation(code);
 }
+
+/** İki noktalı kod için kısa başlık; bilinmiyorsa undefined. */
+export function codePointName(code: string | undefined): string | undefined {
+  const entry = codeInterpretation(code);
+  if (!entry) return undefined;
+  const prefix = entry.diagnosis && entry.diagnosis.length > 0 ? `Olası tanı: ${entry.diagnosis[0]}` : 'Kaynak yorumu mevcut';
+  return `Kod ${entry.code} — ${prefix}`;
+}
+
+/** Klinik ölçeğin T puanı için kaynak bandı. */
+export function clinicalBandFor(id: ScaleId, gender: Gender, tScore: number): Band | undefined {
+  const bands = clinicalBands(id, gender);
+  if (bands.length === 0) return undefined;
+  return findBand(bands, Math.round(tScore));
+}
+
+export type SingleElevationHit = { scale: ScaleId; entry: SingleElevation };
+
+/**
+ * kaynak.pdf'teki “Sadece X alt testinin yükselmesi” yorumları.
+ * Ortak ölçüt: ilgili klinik ölçek T ≥ 70 ve diğer klinik ölçeklerden hiçbiri
+ * T ≥ 70 değil (Pd için kaynak ayrıca ≥ 10 T farkı koşulunu koyar).
+ */
+export function detectSingleElevations(profile: MMPIProfile): SingleElevationHit[] {
+  const t = (id: ScaleId): number => profile.clinical.find(s => s.id === id)?.tScore ?? 50;
+  const others = (id: ScaleId): number => Math.max(...profile.clinical.filter(s => s.id !== id).map(s => s.tScore));
+  const hits: SingleElevationHit[] = [];
+
+  const single = (id: ScaleId): boolean => t(id) >= 70 && others(id) < 70;
+
+  if (single('Hs')) hits.push({ scale: 'Hs', entry: SINGLE_HS });
+  if (single('D')) hits.push({ scale: 'D', entry: SINGLE_D });
+  if (single('Hy')) hits.push({ scale: 'Hy', entry: SINGLE_HY });
+  // Kaynak: Pd diğer testlerden en az 10 T puanı yukarıda.
+  if (t('Pd') >= 70 && t('Pd') - others('Pd') >= 10) hits.push({ scale: 'Pd', entry: SINGLE_PD });
+  if (profile.gender === 'Erkek' && single('Mf')) hits.push({ scale: 'Mf', entry: SINGLE_MF_MALE });
+  if (single('Pa')) hits.push({ scale: 'Pa', entry: SINGLE_PA });
+  if (single('Pt')) hits.push({ scale: 'Pt', entry: SINGLE_PT });
+  return hits;
+}
+
+/** Kod analizinde gösterilecek üçüncü yükselen ölçek bilgisi. */
+export function thirdHighestClinical(profile: MMPIProfile, exclude: readonly string[]): ScaleResult | undefined {
+  return [...profile.clinical]
+    .filter(s => !exclude.includes(s.id))
+    .sort((a, b) => b.tScore - a.tScore)[0];
+}
+
+/** Kod kanonikleştirmesini dışa açar ("21" → "12"). */
+export { canonicalCode };
 
 /** T skoruna göre tablo/grafik rengi (site paleti: mürekkep, uyarı, tehlike). */
 export function tColor(t: number): string {
