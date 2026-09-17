@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="description" content="MMPI-566 portalının tasarım dili referansı — www.halilkaraduman.com.tr tasarım sisteminin bu depodaki karşılığı." />
+    <title>Tasarım Dili Referansı | MMPI-566</title>
+    <!-- Geliştirme referansı: gerçek stil dosyalarını (yayın bütünü değil) doğrudan yükler.
+         `?direct` Vite geliştirme sunucusunda ham CSS döner; statik sunucularda sorgu yok sayılır. -->
+    <link rel="stylesheet" href="/src/styles/screen.css?direct" />
+    <link rel="stylesheet" href="/src/styles/auth.css?direct" />
+    <link rel="stylesheet" href="/src/styles/scanner.css?direct" />
+    <link rel="stylesheet" href="/src/styles/theme.css?direct" />
+  </head>
+  <body>
+    <div class="portal-layout">
+      <!-- ================= APP CHROME ================= -->
+      <header class="app-header">
+        <div class="header-inner">
+          <div class="header-left">
+            <a class="brand" href="#">
+              <span class="brand-mark">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                  <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
+                  <circle cx="10" cy="10" r="1.8" fill="currentColor" />
+                  <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+                  <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+                  <circle cx="16" cy="16" r="1.8" fill="currentColor" />
+                </svg>
+              </span>
+              <div class="brand-text">
+                <strong class="brand-title">MMPI-566</strong>
+                <span class="brand-subtitle">Optik Okuma Portalı</span>
+              </div>
+            </a>
+            <nav class="workspace-tabs">
+              <button type="button" class="portal-tab active"><span>Test Değerlendirme</span></button>
+              <button type="button" class="portal-tab"><span>Optik Form Hazırla</span></button>
+              <button type="button" class="portal-tab"><span>Yönetim Paneli</span></button>
+            </nav>
+          </div>
+          <div class="header-user">
+            <div class="user-profile-summary">
+              <div class="user-avatar-circle">HK</div>
+              <div class="user-info-text">
+                <strong class="user-full-name">Halil Karaduman</strong>
+                <span class="user-role-badge badge-psy">Klinik Psikolog</span>
+              </div>
+            </div>
+            <button type="button" class="btn-logout"><span>Çıkış</span></button>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <!-- ================= KICKER ================= -->
+        <section class="scanner-hero-header" style="display:block;margin-bottom:36px">
+          <span class="section-badge badge-primary">Tasarım Dili</span>
+          <h2>halilkaraduman.com.tr <em>tasarım dili</em></h2>
+          <p class="scanner-hero-sub">
+            Bu sayfa, yazarın sitesindeki tasarım sisteminin portalda nasıl karşılık bulduğunu gösterir:
+            kâğıt beyazı yüzeyler, kıl payı çizgiler, tek bir mavi vurgu ve serif başlıklar. Sayfa yalnızca
+            geliştirme ortamında açılır (<code>npm run dev</code> → <code>/docs/tasarim-dili.html</code>).
+          </p>
+        </section>
+
+        <!-- ================= 01 RENK ================= -->
+        <section class="card-elevated" style="margin-bottom:24px">
+          <span class="section-badge">01 — Renk &amp; yüzey</span>
+          <h3 class="section-heading" style="margin-top:10px">Tek vurgu, gerisi kâğıt</h3>
+          <p class="section-subtext">Dokuz gri tonu ve bir mavi. Renk yalnızca durum bildirir; yüzeyler kıl payı çizgiyle ayrılır.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:18px">
+            <div class="client-details-grid" style="display:block"><div class="detail-item"><span class="detail-label">Mürekkep</span><span class="detail-val mono-sub">#0D0D0D</span></div></div>
+            <div class="client-details-grid" style="display:block"><div class="detail-item"><span class="detail-label">Kıl payı</span><span class="detail-val mono-sub">#E9E9EB</span></div></div>
+            <div class="client-details-grid" style="display:block"><div class="detail-item"><span class="detail-label">Yumuşak zemin</span><span class="detail-val mono-sub">#F6F6F6</span></div></div>
+            <div class="client-details-grid" style="display:block"><div class="detail-item"><span class="detail-label">Vurgu</span><span class="detail-val mono-sub" style="color:var(--accent)">#0A84FF</span></div></div>
+            <div class="client-details-grid" style="display:block"><div class="detail-item"><span class="detail-label">Metin</span><span class="detail-val mono-sub">#6E6E73</span></div></div>
+          </div>
+        </section>
+
+        <!-- ================= 02 TİPOGRAFİ ================= -->
+        <section class="card-elevated" style="margin-bottom:24px">
+          <span class="section-badge">02 — Tipografi</span>
+          <h3 class="section-heading" style="margin-top:10px">Serif başlık, sakin gövde</h3>
+          <p class="section-subtext">Başlıklar Newsreader (300) ve sıkı harf aralığı; metin DM Sans. İkisi de kurulu değilse sistem karşılıkları kullanılır — yayın bütünü çevrimdışı kalır.</p>
+          <h1 style="font-family:var(--font-display);font-weight:300;letter-spacing:-0.03em;font-size:33px;margin:20px 0 0">Anlamak için <em>dinlerim,</em> kolaylaştırmak için tasarlarım.</h1>
+          <div class="scanner-hero-sub" style="margin-top:16px">
+            <p style="margin:0 0 8px"><strong style="color:var(--text)">Gövde metni</strong> 13,5–14,5 px, 1,6 satır aralığı ve yumuşak gri.</p>
+            <p class="section-label" style="margin:0 0 6px">Mikro etiket · 10,5 px · 0.1em</p>
+            <p class="mono-sub" style="margin:0">SET-KODU · 6A-2F19 · mono</p>
+          </div>
+        </section>
+
+        <!-- ================= 03 DÜĞMELER ================= -->
+        <section class="card-elevated" style="margin-bottom:24px">
+          <span class="section-badge">03 — Kontroller</span>
+          <h3 class="section-heading" style="margin-top:10px">Düğmeler hap biçiminde</h3>
+          <p class="section-subtext">Birincil eylem mürekkep siyahı; ikincil eylem kâğıt üzerinde kıl payı çerçeve. Vurgu mavisi düğmelerde kullanılmaz.</p>
+          <div class="hero-cta-group" style="justify-content:flex-start;margin-top:18px">
+            <button type="button" class="btn-primary">Tüm Sayfaları Yazdır</button>
+            <button type="button" class="btn-secondary">PDF Olarak İndir</button>
+            <button type="button" class="btn-secondary btn-danger-soft">Yeni Set / Sıfırla</button>
+            <button type="button" class="btn-danger">Evet, Sıfırla</button>
+            <button type="button" class="btn-primary" disabled>Kaydet</button>
+          </div>
+          <div class="confirm-btn-group" style="margin-top:16px">
+            <button type="button" class="pill-btn active">Sayfa 1</button>
+            <button type="button" class="pill-btn">Sayfa 2</button>
+            <button type="button" class="mode-tab active">Dosya Yükle</button>
+            <button type="button" class="mode-tab">Kamera ile Canlı Çekim</button>
+          </div>
+        </section>
+
+        <!-- ================= 04 ETİKETLER ================= -->
+        <section class="card-elevated" style="margin-bottom:24px">
+          <span class="section-badge">04 — Etiketler &amp; durum</span>
+          <h3 class="section-heading" style="margin-top:10px">Kicker çipi ve durum rozetleri</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center">
+            <span class="badge-chip badge-primary">Sistem Yönetim Paneli</span>
+            <span class="badge-chip badge-default">Psikolog</span>
+            <span class="badge-psychologist">Klinik Psikolog</span>
+            <span class="status-pill pill-active">Aktif</span>
+            <span class="status-pill pill-inactive">Pasif</span>
+            <span class="stats-pill">12 Kayıt</span>
+            <span class="date-tag">17 Eyl 2026</span>
+            <span class="batch-badge"><span class="batch-label">Set</span><span class="batch-code">6A-2F19</span></span>
+          </div>
+          <div class="status-banner info-banner" style="margin-top:18px">Bilgi şeridi — vurgu tonunda, koyulaştırılmış mavi metin.</div>
+          <div class="status-banner success-banner">Başarı şeridi — form okundu ve kayda hazır.</div>
+          <div class="status-banner warning-banner">Uyarı şeridi — köşe işaretleri tam görünmüyor.</div>
+          <div class="status-banner error-banner">Hata şeridi — sayfa bu setle eşleşmiyor.</div>
+        </section>
+
+        <!-- ================= 05 KARTLAR & FORM ================= -->
+        <section class="form-workspace-grid" style="align-items:start;margin-bottom:24px">
+          <aside class="form-sidebar-panel">
+            <nav class="page-navigation">
+              <div class="section-label">Sayfalar <span>4</span></div>
+              <div class="page-list">
+                <button type="button" class="page-option selected"><span class="page-option-copy"><strong>Sayfa 01</strong><span>1–150. maddeler · kimlik</span></span><span class="selected-check">✓</span></button>
+                <button type="button" class="page-option"><span class="page-option-copy"><strong>Sayfa 02</strong><span>151–300. maddeler</span></span></button>
+              </div>
+            </nav>
+            <div class="print-guide-card card-elevated">
+              <h3 class="guide-title">Yazdırma Rehberi</h3>
+              <dl class="guide-spec-list">
+                <div><dt>Kağıt Boyutu:</dt><dd>A4 (210 × 297 mm)</dd></div>
+                <div><dt>Ölçek Ayarı:</dt><dd>%100 (Gerçek Boyut)</dd></div>
+                <div><dt>Baskı Şekli:</dt><dd>Tek Yüz · Siyah Beyaz</dd></div>
+              </dl>
+              <p class="guide-note">“Sayfaya sığdır” seçeneğini işaretlemeyiniz.</p>
+            </div>
+          </aside>
+
+          <div class="form-preview-column">
+            <div class="card-elevated">
+              <span class="section-badge">05 — Form &amp; kartlar</span>
+              <h3 class="section-heading" style="margin-top:10px">Form alanları</h3>
+              <div class="form-grid-2col" style="margin-top:16px">
+                <div class="form-group"><label>Ad</label><input value="Ayşe" /></div>
+                <div class="form-group"><label>Soyad</label><input placeholder="Danışan soyadı" /></div>
+                <div class="form-group"><label>Eğitim</label><select><option>Lisans</option><option>Lise</option></select></div>
+                <div class="form-group"><label>Uygulanma Tarihi</label><input value="17.09.2026" /></div>
+              </div>
+              <div class="form-actions-bar" style="margin-top:20px">
+                <p class="form-audit-note">Kayıt, psikolog kimliğiyle birlikte saklanır.</p>
+                <button type="button" class="btn-primary">Kaydet</button>
+              </div>
+            </div>
+            <div class="document-meta-strip"><span>Set kodu <strong>6A-2F19</strong></span><span>•</span><span>566 Madde Alanı</span><span>•</span><span>4 Sayfalık A4 Form Seti</span></div>
+          </div>
+        </section>
+
+        <!-- ================= 06 TABLO ================= -->
+        <section class="modern-table-card" style="margin-bottom:24px">
+          <div class="table-responsive">
+            <table class="modern-data-table">
+              <thead>
+                <tr><th>Danışan</th><th>Uygulama Tarihi</th><th>Set Kodu</th><th>Durum</th><th style="text-align:right">İşlem</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="table-user-cell"><span class="user-initials-avatar">AY</span><div><span class="cell-title">Ayşe Yılmaz</span><span class="cell-subtitle">Klinik Psikolog · Bursa</span></div></div></td>
+                  <td><span class="date-tag">17 Eyl 2026</span></td>
+                  <td><span class="mono-sub">6A-2F19</span></td>
+                  <td><span class="status-pill pill-active">Tamamlandı</span></td>
+                  <td><div class="table-row-actions"><button type="button" class="action-btn-primary">Görüntüle</button></div></td>
+                </tr>
+                <tr class="row-muted">
+                  <td><div class="table-user-cell"><span class="user-initials-avatar avatar-inactive">MK</span><div><span class="cell-title">Mehmet Kaya</span><span class="cell-subtitle">Hesap pasif</span></div></div></td>
+                  <td><span class="date-tag">12 Eyl 2026</span></td>
+                  <td><span class="mono-sub">6A-2F18</span></td>
+                  <td><span class="status-pill pill-inactive">Pasif</span></td>
+                  <td><div class="table-row-actions"><button type="button" class="action-btn-danger">Kaldır</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= 07 METRİK & GİRİŞ ================= -->
+        <section class="scanner-metrics-strip" style="margin-bottom:24px">
+          <div class="stat-item"><span class="stat-label">Okunan sayfa</span><span class="stat-val">4</span></div>
+          <div class="stat-item"><span class="stat-label">Güvenli okuma</span><span class="stat-val text-success">%98</span></div>
+          <div class="stat-item"><span class="stat-label">İnceleme bekleyen</span><span class="stat-val text-warning">3</span></div>
+          <div class="stat-item"><span class="stat-label">Manuel düzeltme</span><span class="stat-val text-primary">2</span></div>
+          <div class="stat-item"><span class="stat-label">Eksik sayfa</span><span class="stat-val">0</span></div>
+        </section>
+
+        <section class="card-elevated" style="max-width:460px">
+          <span class="section-badge">07 — Giriş ekranı</span>
+          <h3 class="section-heading" style="margin-top:10px">Uzman paneli</h3>
+          <p class="section-subtext">Giriş kartı da aynı dili kullanır: kâğıt zeminde kıl payı çerçeve, mürekkep monoğram ve hap düğme.</p>
+          <div class="auth-form" style="margin-top:16px">
+            <div class="form-group"><label>E-posta Adresi</label><input placeholder="uzman@kurum.com" /></div>
+            <div class="form-group"><label>Şifre</label><input type="password" value="parola" /></div>
+            <button type="button" class="btn-primary auth-submit-btn">Giriş Yap</button>
+          </div>
+          <div class="auth-footer-help" style="margin-top:20px">
+            <span>Hesabınız yoksa kurum yöneticinizle iletişime geçin.</span>
+          </div>
+        </section>
+      </main>
+
+      <!-- ================= FOOTER ================= -->
+      <footer class="app-footer">
+        <div class="footer-inner">
+          <span class="copyright-text">© 2026 Halil Karaduman · Tüm hakları saklıdır.</span>
+          <nav class="app-footer-links" aria-label="Yazar bağlantıları">
+            <a href="https://www.halilkaraduman.com.tr" target="_blank" rel="noopener noreferrer">www.halilkaraduman.com.tr</a>
+            <a href="mailto:contact@halilkaraduman.com.tr">contact@halilkaraduman.com.tr</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

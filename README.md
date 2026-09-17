@@ -82,6 +82,29 @@ Yazdırma ayarları: **A4 · Dikey · %100 (Gerçek boyut) · Kenar boşluğu yo
 Üst/alt bilgi kapalı · Tek yüz · Siyah-beyaz.** “Sayfaya sığdır” seçeneğini
 açmayın. İlk baskıda köşe karelerini kumpasla 5 mm olarak ölçün.
 
+## Arayüz tasarım dili
+
+Ekran arayüzü, yazarın kendi sitesi **www.halilkaraduman.com.tr** ile aynı görsel
+dili kullanır: kâğıt beyazı yüzeyler, mürekkep siyahı metin, kıl payı (1 px)
+çerçeveler, tek bir mavi vurgu ve ağırlıksız serif başlıklar.
+
+| Katman | Dosya | İşi |
+| --- | --- | --- |
+| Token'lar | `src/styles/screen.css` → `:root` | Sitenin paleti, yazı tipi yığınları, yarıçaplar ve gölgeler. `--slate-*` / `--primary-*` adları bileşenlerin zaten kullandığı adlara eşlenir. |
+| Tasarım katmanı | `src/styles/theme.css` | Token'ları bileşenlere uygular. `main.tsx`'te **en son** içe aktarılır; böylece diğer üç stil dosyasının kurallarını davranışına dokunmadan inceltir. Tamamı `@media screen` içindedir: yazdırılabilir A4 sayfası bu dosyadan tek bir bildirim almaz. |
+| Referans sayfası | `docs/tasarim-dili.html` | Renk, tipografi, düğme, kart, tablo ve form örneklerini gerçek sınıf adlarıyla gösterir (`npm run dev` → `/docs/tasarim-dili.html`). |
+
+Site 780 px'lik tek bir editoryal sayfa olduğu için birebir düzen değil, **dil**
+taşınmıştır: aynı token'lar, aynı tipografi hiyerarşisi, aynı yüzey anlayışı;
+tablolar, formlar ve çalışma alanları bunun üzerine kuruludur.
+
+- **Birincil eylem** mürekkep siyahı hap düğmedir; **vurgu mavisi** yalnızca
+  durum, bağlantı ve odak halkası için kullanılır.
+- Gövde yazı tipi **DM Sans**, başlıklar **Newsreader** (300). İkisi de yayın
+  bütününde uzaktan yüklenmez; kurulu değilse sistem karşılıkları kullanılır ve
+  çevrimdışı derleme (`font-src 'none'`) bozulmaz.
+- Yazdırılabilir form geometrisi (`form.css`, `print.css`) bu katmandan etkilenmez.
+
 ## Nasıl kontrol edersiniz
 
 ```sh
