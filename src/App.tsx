@@ -262,8 +262,9 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
       {/* Alt Bilgi */}
       <footer className="app-footer">
         <div className="footer-inner">
+          {/* Yazar adı, sitedeki alt bilgiyle aynı serif vurguyla yazılır (bkz. .copyright-text b). */}
           <span className="copyright-text">
-            © {COPYRIGHT_YEAR} {COPYRIGHT_HOLDER} · Tüm hakları saklıdır.
+            © {COPYRIGHT_YEAR} <b>{COPYRIGHT_HOLDER}</b> · Tüm hakları saklıdır.
           </span>
           <nav className="app-footer-links" aria-label="Yazar bağlantıları">
             <a href={SITE_URL} target="_blank" rel="noopener noreferrer">

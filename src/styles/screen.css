@@ -1,55 +1,83 @@
-/* System font stack only: the single-file build must stay fully offline, so no web font is fetched. */
+/* System font stack only: the single-file build must stay fully offline, so no web font is
+   fetched. The stack mirrors halilkaraduman.com.tr (DM Sans / Newsreader); when those faces are
+   installed locally they are used, otherwise the closest system equivalent renders instead. */
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #1e293b;
-  background-color: #f8fafc;
+  font-family: "DM Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #0d0d0d;
+  background-color: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Modern Design Palette */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-tint: #eff6ff;
-  --primary-border: #bfdbfe;
+  /* ------------------------------------------------------------------
+     Design language of www.halilkaraduman.com.tr
+     Paper-white surfaces, near-black ink, hairline borders, a single
+     Apple-blue accent and almost no elevation. The names below are the
+     author's own tokens; the --slate- and --primary- families are their
+     mapping onto the names the components already use.
+     ------------------------------------------------------------------ */
+  --bg: #ffffff;
+  --bg-soft: #f6f6f6;
+  --text: #0d0d0d;
+  --soft: #6e6e73;
+  --muted: #8e8e93;
+  --hairline: #e9e9eb;
+  --accent: #0a84ff;
+  /* The accent is a highlight colour; for small text it is darkened to keep contrast. */
+  --accent-ink: #0a5ac1;
 
-  --success: #10b981;
-  --success-tint: #ecfdf5;
-  --success-border: #a7f3d0;
+  --font-sans: "DM Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --warning: #f59e0b;
-  --warning-tint: #fffbeb;
-  --warning-border: #fde68a;
+  --primary: #0a84ff;
+  --primary-hover: #0071e3;
+  --primary-tint: #f1f7ff;
+  --primary-border: #d6e7ff;
 
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --danger-tint: #fef2f2;
-  --danger-border: #fecaca;
+  --success: #0e9e6a;
+  --success-tint: #f1fbf6;
+  --success-border: #cdebdd;
 
-  --dark: #0f172a;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-600: #475569;
-  --slate-500: #64748b;
-  --slate-400: #94a3b8;
-  --slate-200: #e2e8f0;
-  --slate-100: #f1f5f9;
-  --slate-50: #f8fafc;
+  --warning: #b4770b;
+  --warning-tint: #fffbf1;
+  --warning-border: #f2e2c2;
+
+  --danger: #d2453a;
+  --danger-hover: #b93b31;
+  --danger-tint: #fdf4f3;
+  --danger-border: #f5d8d5;
+
+  --dark: #0d0d0d;
+  --slate-900: #0d0d0d;
+  --slate-800: #1b1b1d;
+  --slate-700: #3a3a3c;
+  --slate-600: #57575a;
+  --slate-500: #6e6e73;
+  --slate-400: #8e8e93;
+  --slate-300: #c9c9ce;
+  --slate-200: #e9e9eb;
+  --slate-100: #f2f2f3;
+  --slate-50: #f6f6f6;
   --white: #ffffff;
 
-  --border: #e2e8f0;
-  --border-focus: #3b82f6;
+  --border: #e9e9eb;
+  --border-focus: #0a84ff;
 
-  --radius-sm: 6px;
+  --radius-sm: 8px;
   --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  /* Surfaces are separated by hairlines, not by shadow: elevation stays whisper-quiet. */
+  --shadow-sm: 0 1px 2px rgba(13, 13, 13, 0.04);
+  --shadow-md: 0 6px 16px -10px rgba(13, 13, 13, 0.16);
+  --shadow-lg: 0 16px 36px -24px rgba(13, 13, 13, 0.22);
+  --shadow-xl: 0 26px 60px -34px rgba(13, 13, 13, 0.3);
+
+  --nav-h: 64px;
+  --container: 1440px;
 }
 
 *, *::before, *::after {
@@ -58,9 +86,9 @@
 
 body {
   margin: 0;
-  background-color: var(--slate-50);
-  color: var(--slate-800);
-  line-height: 1.5;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
 }
 
 button, input, select, textarea {
