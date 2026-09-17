@@ -15,11 +15,36 @@ import { MyRecordsPanel } from './MyRecordsPanel';
 import { Icon } from './Icon';
 import '../styles/scanner.css';
 
-export function ScannerWorkspace({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
-  return <ScannerSession key={definition.fingerprint} definition={definition} actor={actor} />;
+export type ScannerWorkspaceProps = {
+  definition: FormDefinition;
+  actor: AuthenticatedUser;
+  embedded?: boolean;
+  onScanChange?: (scan: ScanSet) => void;
+};
+
+export function ScannerWorkspace({ definition, actor, embedded = false, onScanChange }: ScannerWorkspaceProps) {
+  return (
+    <ScannerSession
+      key={definition.fingerprint}
+      definition={definition}
+      actor={actor}
+      embedded={embedded}
+      onScanChange={onScanChange}
+    />
+  );
 }
 
-function ScannerSession({ definition, actor }: { definition: FormDefinition; actor: AuthenticatedUser }) {
+function ScannerSession({
+  definition,
+  actor,
+  embedded,
+  onScanChange,
+}: {
+  definition: FormDefinition;
+  actor: AuthenticatedUser;
+  embedded: boolean;
+  onScanChange?: (scan: ScanSet) => void;
+}) {
   const [scan, setScan] = useState(createScanSet);
   const current = useRef(scan);
   const alive = useRef(true);
@@ -42,6 +67,7 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   function commit(next: ScanSet) {
     current.current = next;
     if (alive.current) setScan(next);
+    onScanChange?.(next);
   }
 
   function notify(message: string) {
@@ -173,15 +199,14 @@ function ScannerSession({ definition, actor }: { definition: FormDefinition; act
   }
 
   return (
-    <div className="scanner-layout-container" aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
-      {/* Başlık ve Sıfırlama */}
+    <div className={`scanner-layout-container${embedded ? ' is-embedded' : ''}`} aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
       <div className="scanner-hero-header">
         <div>
-          <span className="section-badge badge-primary">Adım 1: Optik Okuma</span>
-          <h2 id={`${id}-title`}>Optik Form Tarama ve Değerlendirme</h2>
-          <p className="scanner-hero-sub">
-            Cihazınızın kamerasını kullanarak veya taranmış PDF/görselleri yükleyerek 4 sayfalık formu otomatik olarak okutun.
-          </p>
+          {embedded ? null : <span className="section-badge badge-primary">OMR</span>}
+          <h2 id={`${id}-title`}>{embedded ? 'OMR / Kamera' : 'Optik form tarama'}</h2>
+          {embedded ? null : (
+            <p className="scanner-hero-sub">Kamera veya dosya ile 4 sayfayı okutun.</p>
+          )}
         </div>
         <div className="hero-actions">
           {pages.length > 0 && (

@@ -72,9 +72,8 @@ export function MyRecordsPanel() {
     <section className="dashboard-section" aria-labelledby="saved-records-title">
       <div className="section-header-row">
         <div>
-          <span className="section-badge">Arşiv</span>
-          <h3 id="saved-records-title" className="section-heading">Tamamlanan Test Kayıtlarım</h3>
-          <p className="section-subtext">Gerçekleştirdiğiniz test uygulamalarını inceleyebilir, detaylı cevap tablosuna ulaşabilirsiniz.</p>
+          <h3 id="saved-records-title" className="section-heading">Kayıtlar</h3>
+          <p className="section-subtext">Bu hesaba yazılmış testler.</p>
         </div>
         <div className="section-header-actions">
           <button type="button" className="btn-secondary btn-sm" onClick={fetchRecords} disabled={loading}>
@@ -117,8 +116,8 @@ export function MyRecordsPanel() {
           <div className="empty-state-icon">
             <Icon name="file" size={32} />
           </div>
-          <h4>Henüz Test Kaydı Bulunmuyor</h4>
-          <p>Yukarıdaki tarayıcıyı kullanarak 4 sayfalık form setini tarayıp ilk kaydınızı oluşturabilirsiniz.</p>
+          <h4>Kayıt yok</h4>
+          <p>İşlem sekmesinden yeni bir MMPI başlatın.</p>
         </div>
       )}
 

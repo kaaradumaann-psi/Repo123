@@ -35,7 +35,7 @@ export type RecordSummary = {
 };
 
 export type FullRecordDetail = RecordSummary & {
-  rawOmrAnswers: SavedAnswerPage[];
+  rawOmrAnswers: unknown[];
 };
 
 export type Gender = 'Kadın' | 'Erkek' | 'Belirtmek istemiyor' | 'Diğer';
@@ -57,6 +57,15 @@ function text(value: string, label: string, max = 120): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
   if (!normalized || normalized.length > max || /[\u0000-\u001f]/.test(normalized)) {
     throw new Error(`${label} zorunludur ve geçerli olmalıdır.`);
+  }
+  return normalized;
+}
+
+function optionalText(value: string, label: string, max = 500): string {
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  if (!normalized) return '';
+  if (normalized.length > max || /[\u0000-\u001f]/.test(normalized)) {
+    throw new Error(`${label} geçerli olmalıdır.`);
   }
   return normalized;
 }
@@ -88,36 +97,39 @@ function toSavedPage(page: StoredScanPage): SavedAnswerPage {
   };
 }
 
-export async function createRecord(
-  input: RecordInput,
-  pages: readonly StoredScanPage[],
-  definition: FormDefinition,
-  actor: AuthenticatedUser,
-  idempotencyKey: string,
-): Promise<MMPIRecord> {
-  if (actor.role !== 'PSYCHOLOG' || !actor.active) {
-    throw new Error('Kayıt yalnızca aktif Psikolog hesabı ile oluşturulabilir.');
-  }
-  if (!canCreateRecord(pages, definition)) {
-    throw new Error('4 sayfanın tamamı ve taranmış cevaplar onaylanmadan kayıt tamamlanamaz.');
-  }
+function normalizeClient(input: RecordInput['client']) {
   const client = {
-    firstName: text(input.client.firstName, 'Ad', 80),
-    lastName: text(input.client.lastName, 'Soyad', 80),
-    gender: input.client.gender,
-    age: input.client.age,
-    occupation: text(input.client.occupation, 'Meslek', 120),
-    education: text(input.client.education, 'Eğitim durumu', 120),
-    applicationDate: text(input.client.applicationDate, 'Uygulama tarihi', 10),
-    requestedBy: text(input.client.requestedBy, 'İstekte bulunan', 120),
+    firstName: text(input.firstName, 'Ad', 80),
+    lastName: text(input.lastName, 'Soyad', 80),
+    gender: input.gender,
+    age: input.age,
+    occupation: optionalText(input.occupation, 'Meslek', 120),
+    education: optionalText(input.education, 'Eğitim durumu', 120),
+    applicationDate: text(input.applicationDate, 'Uygulama tarihi', 10),
+    requestedBy: optionalText(input.requestedBy, 'Başvuru nedeni', 500),
   };
   if (!['Kadın', 'Erkek', 'Belirtmek istemiyor', 'Diğer'].includes(client.gender)) throw new Error('Cinsiyet seçimi geçersiz.');
   if (!Number.isInteger(client.age) || client.age < 0 || client.age > 120) throw new Error('Yaş 0–120 arasında olmalıdır.');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(client.applicationDate) || Number.isNaN(Date.parse(`${client.applicationDate}T00:00:00Z`))) {
     throw new Error('Uygulama tarihi geçersiz.');
   }
+  return client;
+}
+
+async function upsertRecord(
+  client: ReturnType<typeof normalizeClient>,
+  actor: AuthenticatedUser,
+  idempotencyKey: string,
+  answers: unknown[],
+): Promise<MMPIRecord> {
+  if (actor.role !== 'PSYCHOLOG' || !actor.active) {
+    throw new Error('Kayıt yalnızca aktif Psikolog hesabı ile oluşturulabilir.');
+  }
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
     throw new Error('Kayıt anahtarı geçersiz. Sayfayı yenileyip tekrar deneyin.');
+  }
+  if (!Array.isArray(answers) || answers.length === 0) {
+    throw new Error('Kayıt için veri yükü boş olamaz.');
   }
   const payload = {
     idempotency_key: idempotencyKey,
@@ -129,10 +141,7 @@ export async function createRecord(
     education: client.education,
     application_date: client.applicationDate,
     requested_by: client.requestedBy,
-    raw_omr_answers: pages
-      .slice()
-      .sort((a, b) => a.pageNumber - b.pageNumber)
-      .map(toSavedPage),
+    raw_omr_answers: answers,
     created_by: actor.id,
   };
   const { data, error } = await requireSupabase()
@@ -144,6 +153,33 @@ export async function createRecord(
   const row = data as { id?: unknown; created_at?: unknown };
   if (typeof row.id !== 'string' || typeof row.created_at !== 'string') throw new Error('Kayıt yanıtı geçersiz.');
   return { id: row.id, createdAt: row.created_at };
+}
+
+export async function createRecord(
+  input: RecordInput,
+  pages: readonly StoredScanPage[],
+  definition: FormDefinition,
+  actor: AuthenticatedUser,
+  idempotencyKey: string,
+  extras: unknown[] = [],
+): Promise<MMPIRecord> {
+  if (!canCreateRecord(pages, definition)) {
+    throw new Error('4 sayfanın tamamı ve taranmış cevaplar onaylanmadan kayıt tamamlanamaz.');
+  }
+  const omrPages = pages
+    .slice()
+    .sort((a, b) => a.pageNumber - b.pageNumber)
+    .map(toSavedPage);
+  return upsertRecord(normalizeClient(input.client), actor, idempotencyKey, [...extras, ...omrPages]);
+}
+
+export async function createDataRecord(
+  input: RecordInput,
+  actor: AuthenticatedUser,
+  idempotencyKey: string,
+  payload: unknown[],
+): Promise<MMPIRecord> {
+  return upsertRecord(normalizeClient(input.client), actor, idempotencyKey, payload);
 }
 
 export async function listOwnRecords(): Promise<RecordSummary[]> {
@@ -284,7 +320,7 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
     education: typeof v.education === 'string' ? v.education : undefined,
     requestedBy: typeof v.requested_by === 'string' ? v.requested_by : undefined,
     createdBy: typeof v.created_by === 'string' ? v.created_by : undefined,
-    rawOmrAnswers: (v.raw_omr_answers as SavedAnswerPage[]) || [],
+    rawOmrAnswers: Array.isArray(v.raw_omr_answers) ? (v.raw_omr_answers as unknown[]) : [],
   };
 }
 
