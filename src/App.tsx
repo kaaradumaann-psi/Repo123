@@ -2,18 +2,16 @@ import { useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { AdminPanel } from './components/AdminPanel';
-import { PageNavigation } from './components/PageNavigation';
-import { FormPreview } from './components/FormPreview';
-import { ScannerWorkspace } from './components/ScannerWorkspace';
+import { CaseWorkspace } from './components/CaseWorkspace';
+import { MyRecordsPanel } from './components/MyRecordsPanel';
 import { Icon } from './components/Icon';
-import { FORM, PAGE_COUNT, formDefinition } from './form/layout';
+import { PAGE_COUNT, formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
 import { downloadFormPdf, openFormPdf, printFormPdf, FORM_PDF_FILE_NAME, PRINT_SETTINGS_HINT } from './print/formPdf';
-import { FORM_SET_CODE } from './form/formSet';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { displayName } from './auth/userDisplay';
 
-type Workspace = 'form' | 'scan' | 'admin';
+type Workspace = 'case' | 'form' | 'records' | 'admin';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 
@@ -22,13 +20,12 @@ export default function App() {
 }
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
-  const [currentPage, setCurrentPage] = useState(0);
   const [printNote, setPrintNote] = useState<'' | 'busy' | 'opened' | 'manual'>('');
-  const [workspace, setWorkspace] = useState<Workspace>('scan');
-  // One set code for everything this workspace prints, so pages printed at different times still
-  // match each other in the scanner; the embedded PDF carries the same code (see print/formPdf.ts).
-  const [batchId] = useState(FORM_SET_CODE);
-  const tabs: Workspace[] = user.role === 'ADMIN' ? ['scan', 'form', 'admin'] : ['scan', 'form'];
+  const [workspace, setWorkspace] = useState<Workspace>('case');
+  const tabs: Workspace[] =
+    user.role === 'ADMIN'
+      ? ['case', 'form', 'admin']
+      : ['case', 'form', 'records'];
   const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
 
   function activateTab(next: Workspace) {
@@ -53,13 +50,25 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
     activateTab(tabs[nextIndex]!);
   }
 
+  const tabLabel: Record<Workspace, string> = {
+    case: 'İşlem',
+    form: 'Form',
+    records: 'Kayıtlar',
+    admin: 'Yönetim',
+  };
+  const tabIcon: Record<Workspace, 'scan' | 'sheet' | 'file' | 'shield'> = {
+    case: 'scan',
+    form: 'sheet',
+    records: 'file',
+    admin: 'shield',
+  };
+
   return (
     <div className="portal-layout">
-      {/* Üst Navigasyon Barı */}
       <header className="app-header">
         <div className="header-inner">
           <div className="header-left">
-            <a className="brand" href="#main" aria-label="MMPI-566 Ana Sayfa">
+            <a className="brand" href="#main" aria-label="MMPI-566 çalışma alanı">
               <span className="brand-mark">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
@@ -71,11 +80,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               </span>
               <div className="brand-text">
                 <strong className="brand-title">MMPI-566</strong>
-                <span className="brand-subtitle">Optik Okuma Portalı</span>
+                <span className="brand-subtitle">Çalışma alanı</span>
               </div>
             </a>
 
-            {/* Çalışma Alanı Navigasyonu */}
             <nav className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
               {tabs.map(tab => (
                 <button
@@ -92,23 +100,13 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   onClick={() => activateTab(tab)}
                   className={`portal-tab ${workspace === tab ? 'active' : ''}`}
                 >
-                  <Icon
-                    name={tab === 'scan' ? 'scan' : tab === 'form' ? 'sheet' : 'shield'}
-                    size={16}
-                  />
-                  <span>
-                    {tab === 'scan'
-                      ? 'Test Değerlendirme'
-                      : tab === 'form'
-                      ? 'Optik Form Hazırla'
-                      : 'Yönetim Paneli'}
-                  </span>
+                  <Icon name={tabIcon[tab]} size={16} />
+                  <span>{tabLabel[tab]}</span>
                 </button>
               ))}
             </nav>
           </div>
 
-          {/* Sağ Kullanıcı Profili & Çıkış */}
           <div className="header-user">
             <div className="user-profile-summary">
               <div className="user-avatar-circle">
@@ -117,7 +115,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               <div className="user-info-text">
                 <strong className="user-full-name">{displayName(user)}</strong>
                 <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
-                  {user.role === 'ADMIN' ? 'Yönetici' : 'Klinik Psikolog'}
+                  {user.role === 'ADMIN' ? 'Yönetici' : 'Psikolog'}
                 </span>
               </div>
             </div>
@@ -128,125 +126,77 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         </div>
       </header>
 
-      {/* Ana İçerik */}
       <main className="app-main" id="main">
-        {/* PANEL 1: TARA VE İNCELE (TEST DEĞERLENDİRME) */}
         <div
           role="tabpanel"
-          id="panel-scan"
-          aria-labelledby="tab-scan"
-          className={workspace === 'scan' ? 'tab-content-active' : 'is-screen-hidden'}
+          id="panel-case"
+          aria-labelledby="tab-case"
+          className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
         >
-          <ScannerWorkspace definition={formDefinition} actor={user} />
+          <CaseWorkspace definition={formDefinition} actor={user} />
         </div>
 
-        {/* PANEL 2: OPTİK FORM VE YAZDIRMA */}
         <div
           role="tabpanel"
           id="panel-form"
           aria-labelledby="tab-form"
           className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
         >
-          <section className="form-prep-hero">
-            <div className="hero-text-side">
-              <span className="section-badge badge-primary">Form Hazırlığı</span>
-              <h1>MMPI-566 Optik Cevap Formu</h1>
-              <p>
-                A4 standartlarında basılı optik form setini yazdırabilir veya yüksek kaliteli orijinal PDF dosyasını indirebilirsiniz.
-              </p>
+          <section className="form-kit">
+            <div>
+              <h1>Optik form</h1>
+              <p className="ws-muted">{PAGE_COUNT} sayfa A4 · {FORM_PDF_FILE_NAME}</p>
             </div>
-            <div className="hero-cta-group">
-              <button type="button" className="btn-primary btn-print" onClick={() => {
-                setPrintNote('busy');
-                void printFormPdf().then(outcome => setPrintNote(outcome === 'printed' ? 'opened' : 'manual'));
-              }}>
-                <Icon name="print" size={18} />
-                <div className="btn-multiline">
-                  <span>Tüm Sayfaları Yazdır</span>
-                  <small>{PAGE_COUNT} Sayfa · A4 Tek Yüz</small>
-                </div>
+            <div className="form-kit-actions">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  setPrintNote('busy');
+                  void printFormPdf().then(outcome => setPrintNote(outcome === 'printed' ? 'opened' : 'manual'));
+                }}
+              >
+                <Icon name="print" size={16} />
+                Yazdır
               </button>
-              <button type="button" className="btn-secondary btn-download download-button" onClick={downloadFormPdf}>
-                <Icon name="download" size={18} />
-                <div className="btn-multiline">
-                  <span>PDF Olarak İndir</span>
-                  <small>{FORM_PDF_FILE_NAME}</small>
-                </div>
+              <button type="button" className="btn-secondary download-button" onClick={downloadFormPdf}>
+                <Icon name="download" size={16} />
+                İndir
               </button>
               <button type="button" className="btn-secondary download-button" onClick={() => { void openFormPdf(); }}>
-                <Icon name="sheet" size={18} />
-                <div className="btn-multiline">
-                  <span>PDF'i Aç ve Yazdır</span>
-                  <small>Tarayıcı yazdırma penceresi açılmazsa</small>
-                </div>
+                <Icon name="sheet" size={16} />
+                Aç
               </button>
             </div>
+            {printNote !== '' && (
+              <p className="print-status-note" role="status" aria-live="polite">
+                {printNote === 'busy'
+                  ? 'PDF hazırlanıyor…'
+                  : printNote === 'opened'
+                    ? `Yazdırma: ${PRINT_SETTINGS_HINT}.`
+                    : `Pencere açılamadı. “Aç” ile yazdırın: ${PRINT_SETTINGS_HINT}.`}
+              </p>
+            )}
+            <ul className="form-kit-list">
+              <li>A4, dikey, %100, kenar yok, tek yüz.</li>
+              <li>“Sayfaya sığdır” kapalı.</li>
+              <li>Köşe kareleri ve QR net çıksın.</li>
+              <li>Aynı danışanın 4 sayfasını birlikte okutun.</li>
+            </ul>
           </section>
-
-          {printNote !== '' && (
-            <p className="print-status-note" role="status" aria-live="polite">
-              {printNote === 'busy'
-                ? 'Doğrulanmış 4 sayfalık PDF yazdırma için hazırlanıyor…'
-                : printNote === 'opened'
-                  ? `Yazdırma penceresi açıldı. Ayarlar: ${PRINT_SETTINGS_HINT}.`
-                  : `Yazdırma penceresi açılamadı. “PDF'i Aç ve Yazdır” ile açıp şu ayarlarla yazdırın: ${PRINT_SETTINGS_HINT}.`}
-            </p>
-          )}
-
-          <div className="form-workspace-grid">
-            <aside className="form-sidebar-panel" aria-label="Form bilgisi ve sayfa seçimi">
-              <PageNavigation current={currentPage} onChange={setCurrentPage} />
-
-              <div className="print-guide-card card-elevated">
-                <h3 className="guide-title">
-                  <Icon name="print" size={18} />
-                  <span>Yazdırma Rehberi</span>
-                </h3>
-                <dl className="guide-spec-list">
-                  <div>
-                    <dt>Kağıt Boyutu:</dt>
-                    <dd>A4 (210 × 297 mm)</dd>
-                  </div>
-                  <div>
-                    <dt>Ölçek Ayarı:</dt>
-                    <dd>%100 (Gerçek Boyut)</dd>
-                  </div>
-                  <div>
-                    <dt>Kenar Boşluğu:</dt>
-                    <dd>Yok (Sıfır)</dd>
-                  </div>
-                  <div>
-                    <dt>Baskı Şekli:</dt>
-                    <dd>Tek Yüz · Siyah Beyaz</dd>
-                  </div>
-                </dl>
-                <p className="guide-note">
-                  "Sayfaya sığdır" seçeneğini işaretlemeyiniz. Köşe hizalama karelerinin ve QR kodun net çıkması optik okuyucunun hatasız çalışmasını sağlar. Dört sayfanın altında aynı set kodu yazılıdır; aynı katılımcının sayfalarını birlikte yükleyin, yeni katılımcı için “Yeni Set / Sıfırla” düğmesini kullanın.
-                </p>
-              </div>
-            </aside>
-
-            <div className="form-preview-column">
-              <FormPreview
-                current={currentPage}
-                onChange={setCurrentPage}
-                definition={formDefinition}
-                batchId={batchId}
-              />
-              <div className="document-meta-strip">
-                <span>Set kodu <strong>{FORM_SET_CODE}</strong></span>
-                <span>•</span>
-                <span>{FORM.totalItems} Madde Alanı</span>
-                <span>•</span>
-                <span>{PAGE_COUNT} Sayfalık A4 Form Seti</span>
-                <span>•</span>
-                <span>Ø {String(FORM.bubbleDiameterMm).replace('.', ',')} mm Optik Kabarcık</span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* PANEL 3: ADMİN YÖNETİM PANELİ */}
+        {user.role === 'PSYCHOLOG' && (
+          <div
+            role="tabpanel"
+            id="panel-records"
+            aria-labelledby="tab-records"
+            className={workspace === 'records' ? 'tab-content-active' : 'is-screen-hidden'}
+          >
+            <MyRecordsPanel />
+          </div>
+        )}
+
         {user.role === 'ADMIN' && (
           <div
             role="tabpanel"
@@ -259,12 +209,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         )}
       </main>
 
-      {/* Alt Bilgi */}
       <footer className="app-footer">
         <div className="footer-inner">
-          {/* Yazar adı, sitedeki alt bilgiyle aynı serif vurguyla yazılır (bkz. .copyright-text b). */}
           <span className="copyright-text">
-            © {COPYRIGHT_YEAR} <b>{COPYRIGHT_HOLDER}</b> · Tüm hakları saklıdır.
+            © {COPYRIGHT_YEAR} <b>{COPYRIGHT_HOLDER}</b>
           </span>
           <nav className="app-footer-links" aria-label="Yazar bağlantıları">
             <a href={SITE_URL} target="_blank" rel="noopener noreferrer">

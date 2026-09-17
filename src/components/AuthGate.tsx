@@ -93,16 +93,14 @@ function SystemSetupScreen() {
           </span>
           <div>
             <strong>MMPI-566</strong>
-            <small>Optik Değerlendirme Sistemi</small>
+            <small>Uzman çalışma alanı</small>
           </div>
         </div>
-        <div className="auth-heading">
-          <p className="auth-eyebrow">Sistem Kurulumu</p>
-          <h1 id="config-title">Bağlantı Ayarları Gerekli</h1>
-          <p>
-            Uygulamayı başlatabilmek için ortam değişkenlerinin (VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY) yapılandırılması gerekmektedir.
-          </p>
-        </div>
+          <div className="auth-heading">
+            <p className="auth-eyebrow">Kurulum</p>
+            <h1 id="config-title">Bağlantı gerekli</h1>
+            <p>VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlayın.</p>
+          </div>
         <div className="status-banner info-banner" role="alert">
           <Icon name="alert" size={18} />
           <span>Güvenlik gereği yalnızca yayınlanabilir erişim anahtarını yapılandırın.</span>
@@ -149,14 +147,13 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
             </span>
             <div>
               <strong>MMPI-566</strong>
-              <small>Akıllı Optik Değerlendirme Sistemi</small>
+              <small>Uzman çalışma alanı</small>
             </div>
           </div>
 
           <div className="auth-heading">
-            <span className="section-badge badge-primary">Güvenli Giriş</span>
-            <h1 id="auth-title">Uzman Paneline Giriş</h1>
-            <p>MMPI formlarını okumak ve arşivlemek için hesabınızla giriş yapın.</p>
+            <h1 id="auth-title">Giriş</h1>
+            <p>Yetkili uzman hesabı.</p>
           </div>
 
           {(error || externalError) && (
