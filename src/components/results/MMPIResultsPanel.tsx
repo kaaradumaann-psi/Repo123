@@ -131,8 +131,10 @@ export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
               </table>
             </div>
             <p className="mmpi-summary-note">
-              T ≥ 70 klinik eşik · 56–69 orta yüksek aralık · 40–55 normal. T skorları cinsiyete özgü Türk
-              normlarına göre hesaplanır; klinik ölçeklerde K düzeltmesi uygulanmıştır.
+              T skorları cinsiyete özgü Türk normlarına göre hesaplanır; klinik ölçeklerde K düzeltmesi
+              uygulanmıştır. Ölçeğe özgü T puanı aralıkları ve yorumları kaynak rapora dayanır ve “Klinik
+              Ölçekler” sekmesinde gösterilir; geçerlik kararları “Geçerlik Analizleri” sekmesindeki kaynak
+              tablolarına göre verilir.
             </p>
           </section>
         </div>
@@ -146,8 +148,9 @@ export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
 
       <p className="mmpi-info-foot">
         * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme
-        oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) kullanılarak yapılmıştır. Kesme puanları tanı koymaz;
-        yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
+        oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) kullanılarak yapılmıştır. Geçerlik analizleri, klinik ölçek
+        yorumları, tek ölçek yükselmeleri ve kod analizleri depodaki kaynak.pdf raporuna birebir dayanır.
+        Kesme puanları tanı koymaz; yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
       </p>
     </div>
   );

@@ -1,4 +1,17 @@
 import { SCORING_KEYS, K_CORRECTION, TURKISH_NORMS, SCALE_META, T_INTERPRETATION, isGendered, type Gender, type ScaleId } from './mmpiKeys';
+import {
+  CANNOT_SAY_RAW_BANDS,
+  F_RAW_BANDS,
+  K_RAW_BANDS,
+  L_RAW_BANDS,
+  F_T_BANDS,
+  K_T_BANDS,
+  L_T_BANDS,
+  FK_INDEX_NOTE,
+  VALIDITY_CUTOFFS,
+  findBand,
+  type Tone,
+} from './mmpiSource';
 import type { ItemAnswer } from '../workspace/caseTypes';
 import type { RawScores } from '../workspace/caseTypes';
 
@@ -19,6 +32,26 @@ export type ScaleResult = {
   color: string;
 };
 
+/** kaynak.pdf'teki ham puan tablosuna dayanan tek geçerlik ölçeği bulgusu. */
+export type ValidityFinding = {
+  id: '?' | 'L' | 'F' | 'K';
+  fullName: string;
+  raw: number;
+  /** T puanı ('?' ölçeğinde yoktur). */
+  t: number | null;
+  /** Kaynaktaki ham puan aralığı, ör. "Ham 8-15". */
+  rawRange: string;
+  /** Kaynaktaki düzey adı (Düşük / Normal / Orta / Belirgin / Aşırı Belirgin). */
+  band: string;
+  /** Kaynağın ham puan bandı yorumu. */
+  comment: string;
+  /** Kaynağın T puanı bandı yorumu (yalnızca L, F, K). */
+  tDetail?: string;
+  /** Kaynağın T puanı aralık etiketi (yalnızca L, F, K). */
+  tRange?: string;
+  tone: Tone;
+};
+
 export type ValidityAnalysis = {
   cannotSay: number;
   lRaw: number;
@@ -28,6 +61,10 @@ export type ValidityAnalysis = {
   isValid: boolean;
   warnings: string[];
   interpretation: string;
+  /** ?, L, F, K için kaynak tabanlı bulgular. */
+  findings: ValidityFinding[];
+  /** F-K endeksi 16'nın üstünde ise kaynağın uyarısı; değilse null. */
+  fMinusKNote: string | null;
 };
 
 export type MMPIProfile = {
@@ -150,9 +187,14 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
     });
   });
 
-  // ? scale
+  // ? scale — T hesaplaması değişmez; düzey etiketi kaynak.pdf ham puan tablosundan gelir.
   const qT = Math.min(30 + cannotSay * 2, 120);
-  const qLvl = cannotSay > 30 ? { label: 'Geçersiz', level: 'veryHigh', color: '#d2453a' } : cannotSay > 5 ? { label: 'Orta', level: 'moderate', color: '#b4770b' } : { label: 'Normal', level: 'average', color: '#0e9e6a' };
+  const qBand = findBand(CANNOT_SAY_RAW_BANDS, cannotSay);
+  const qLvl = qBand.tone === 'alert'
+    ? { label: qBand.label, level: 'veryHigh', color: '#d2453a' }
+    : qBand.tone === 'watch'
+      ? { label: qBand.label, level: 'moderate', color: '#b4770b' }
+      : { label: qBand.label, level: 'average', color: '#0e9e6a' };
   const cannotScale: ScaleResult = {
     id: '?',
     name: SCALE_META['?'].name,
@@ -197,43 +239,107 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
   };
 }
 
+/**
+ * Geçerlik analizi — kaynak.pdf'in ham puan tablolarına (?) s.48-49,
+ * L s.49, K s.49-51, F s.51-52) ve T puanı aralıklarına (L/F/K s.1-3)
+ * birebir dayanır. Puanlama matematiğine dokunmaz; yalnızca ham/T
+ * değerlerini kaynaktaki bantlarla eşleştirir.
+ */
 function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: number, gender: Gender, scales: ScaleResult[]): ValidityAnalysis {
   const warnings: string[] = [];
-  let isValid = true;
 
   const lT = scales.find(s => s.id === 'L')?.tScore ?? computeT(lRaw, 'L', gender);
   const fT = scales.find(s => s.id === 'F')?.tScore ?? computeT(fRaw, 'F', gender);
   const kT = scales.find(s => s.id === 'K')?.tScore ?? computeT(kRaw, 'K', gender);
   const fMinusK = fRaw - kRaw;
 
-  if (cannotSay > 30) {
-    warnings.push(`Çok fazla boş madde (${cannotSay}): Profil geçerliliği tartışmalıdır.`);
-  } else if (cannotSay > 10) {
-    warnings.push(`Dikkat: ${cannotSay} madde boş bırakılmış; ölçeklerin suni düşme ihtimali.`);
+  const qBand = findBand(CANNOT_SAY_RAW_BANDS, cannotSay);
+  const lBand = findBand(L_RAW_BANDS, lRaw);
+  const kBand = findBand(K_RAW_BANDS, kRaw);
+  const fBand = findBand(F_RAW_BANDS, fRaw);
+  const lTBand = findBand(L_T_BANDS, Math.round(lT));
+  const fTBand = findBand(F_T_BANDS, Math.round(fT));
+  const kTBand = findBand(K_T_BANDS, Math.round(kT));
+
+  const findings: ValidityFinding[] = [
+    {
+      id: '?', fullName: SCALE_META['?'].full, raw: cannotSay, t: null,
+      rawRange: qBand.rangeLabel, band: qBand.label, comment: qBand.text, tone: qBand.tone,
+    },
+    {
+      id: 'L', fullName: SCALE_META.L.full, raw: lRaw, t: lT,
+      rawRange: lBand.rangeLabel, band: lBand.label, comment: lBand.text,
+      tDetail: lTBand.text, tRange: lTBand.rangeLabel, tone: worseTone(lBand.tone, lTBand.tone),
+    },
+    {
+      id: 'F', fullName: SCALE_META.F.full, raw: fRaw, t: fT,
+      rawRange: fBand.rangeLabel, band: fBand.label, comment: fBand.text,
+      tDetail: fTBand.text, tRange: fTBand.rangeLabel, tone: worseTone(fBand.tone, fTBand.tone),
+    },
+    {
+      id: 'K', fullName: SCALE_META.K.full, raw: kRaw, t: kT,
+      rawRange: kBand.rangeLabel, band: kBand.label, comment: kBand.text,
+      tDetail: kTBand.text, tRange: kTBand.rangeLabel, tone: worseTone(kBand.tone, kTBand.tone),
+    },
+  ];
+
+  // kaynak.pdf: Ham 31 ve üstü boş → profil büyük olasılıkla geçersizdir.
+  const qInvalid = cannotSay >= VALIDITY_CUTOFFS.cannotSayInvalid;
+  // kaynak.pdf: Ham 23 ve üstü F → profil geçersizdir.
+  const fInvalid = fRaw >= VALIDITY_CUTOFFS.fInvalid;
+  const isValid = !(qInvalid || fInvalid);
+
+  if (qInvalid) {
+    warnings.push(`Boş madde sayısı ${cannotSay} (Ham ≥ ${VALIDITY_CUTOFFS.cannotSayInvalid}): ${qBand.text}`);
+  } else if (cannotSay >= 6) {
+    warnings.push(`Boş madde sayısı ${cannotSay} (${qBand.rangeLabel}, ${qBand.label}): boş bırakılan maddelere yeniden bakılması istenir; yaklaşık 30 madde boş bırakılmışsa geçerlilik sorgulanır.`);
   }
 
-  if (lT >= 70) warnings.push(`L yüksek (T=${lT}): Savunmacı / iyi görünme çabası.`);
-  if (fT >= 100) {
-    warnings.push(`F çok yüksek (T=${fT}): Ağır psikopatoloji veya rastgele yanıtlamayı düşündürür.`);
-  } else if (fT >= 80) {
-    warnings.push(`F yüksek (T=${fT}): Ciddi sıkıntı veya yardım arayışı / abartma.`);
+  if (fInvalid) {
+    warnings.push(`F ham ${fRaw} (Ham ≥ ${VALIDITY_CUTOFFS.fInvalid}, Aşırı Belirgin): ${fBand.text}`);
+  } else if (fRaw >= VALIDITY_CUTOFFS.fSuspect) {
+    warnings.push(`F ham ${fRaw} (${fBand.rangeLabel}, ${fBand.label}): profil geçersiz olabilir; diğer geçerlilik skalalarına bakılmalıdır.`);
   }
-  if (kT >= 70) warnings.push(`K yüksek (T=${kT}): Savunmacı tutum, sorunları maskeleme olasılığı.`);
-  else if (kT <= 35) warnings.push(`K düşük (T=${kT}): Kendini eleştirme / yardım arama eğilimi.`);
 
-  if (fMinusK > 15) warnings.push(`F-K yüksek (${fMinusK}): Olası abartma / simülasyon.`);
-  else if (fMinusK < -15) warnings.push(`F-K düşük (${fMinusK}): Olası iyi görünme çabası.`);
+  if (lRaw >= 8) {
+    warnings.push(`L ham ${lRaw} (${lBand.rangeLabel}, ${lBand.label}): ${lBand.text}`);
+  }
 
-  // Geçersizlik için yalnızca aşırı rastgelelik vb. kabul edilsin; boş tek başına geçersiz kılmaz (referans mantığı)
-  if (cannotSay > 60) isValid = false;
+  if (kRaw >= 21) {
+    warnings.push(`K ham ${kRaw} (${kBand.rangeLabel}, ${kBand.label}): ${kBand.text}`);
+  } else if (kRaw >= 16) {
+    warnings.push(`K ham ${kRaw} (${kBand.rangeLabel}, ${kBand.label}): savunmacı tutum; klinisyen K ile düzeltilmemiş profilleri kullanmalıdır.`);
+  } else if (kRaw <= 4) {
+    warnings.push(`K ham ${kRaw} (${kBand.rangeLabel}, ${kBand.label}): ${kBand.text}`);
+  } else if (kRaw <= 9) {
+    warnings.push(`K ham ${kRaw} (${kBand.rangeLabel}, ${kBand.label}): aşırı stres nedeniyle kişisel kaynakları sınırlanmış bireyler; psikolojik yaklaşımda prognez sınırlıdır.`);
+  }
 
-  let interpretation = '';
+  // kaynak.pdf s.48: F-K endeksi 16'nın üstünde ise dikkatli değerlendirme gerekir.
+  const fMinusKNote = fMinusK > VALIDITY_CUTOFFS.fkIndexAlert ? FK_INDEX_NOTE : null;
+  if (fMinusKNote) {
+    warnings.push(`F-K endeksi ${fMinusK} (16'nın üstünde): ${FK_INDEX_NOTE}`);
+  }
+
+  let interpretation: string;
   if (!isValid) {
-    interpretation = `Profil geçersiz olarak değerlendirilmelidir. Boş madde sayısı çok yüksek.`;
+    const reasons: string[] = [];
+    if (qInvalid) reasons.push('boş madde sayısı 31 ve üstünde');
+    if (fInvalid) reasons.push('F ham puanı 23 ve üstünde');
+    interpretation =
+      `Profil geçersiz olarak değerlendirilmelidir (${reasons.join(' ve ')}). ` +
+      'Kaynağa göre bu durumda standart değerlendirme bireyin durumunu yansıtmayabilir; ' +
+      'mümkünse test yeniden uygulanmalı ya da klinik görüşme tanı koydurucu olarak kullanılmalıdır.';
   } else if (warnings.length === 0) {
-    interpretation = `Geçerlik ölçekleri normal sınırlarda. Profil güvenilir görünmektedir.`;
+    interpretation =
+      'Geçerlik skalaları kaynak ölçütlerine göre normal sınırlardadır: birey maddeleri yanıtlamaya isteklidir, ' +
+      'küçük sosyal hataları kabul etme ve reddetme dengesi yerindedir, tipik sayıda uygun olmayan yaşantıya ilişkin ' +
+      'bilgi vermiştir ve benliğini açma ile saklama arasında uygun dengeye sahiptir. Profil güvenilir görünmektedir.';
   } else {
-    interpretation = `Yorumlama sırasında geçerlik ölçeklerindeki uyarılar dikkate alınmalıdır. Hiçbir tek uyarı tek başına profili geçersiz kılmaz; eğitim, yaş ve klinik bağlam bütüncül değerlendirilmelidir.`;
+    interpretation =
+      'Geçerlik konfigürasyonu dikkatli değerlendirmeyi gerektirmektedir. Bulgular kaynak rapordaki ham puan ' +
+      'tablolarına göre yukarıda ayrıntılı olarak verilmiştir; hiçbir tek bulgu tek başına profili geçersiz kılmaz. ' +
+      'Eğitim, yaş ve klinik bağlam bütüncül değerlendirilmelidir.';
   }
 
   return {
@@ -245,7 +351,15 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     isValid,
     warnings,
     interpretation,
+    findings,
+    fMinusKNote,
   };
+}
+
+/** İki tondan daha kritik olanı döndürür (alert > watch > ok). */
+function worseTone(a: Tone, b: Tone): Tone {
+  const rank: Record<Tone, number> = { ok: 0, watch: 1, alert: 2 };
+  return rank[a] >= rank[b] ? a : b;
 }
 
 export function buildProfileFromAnswers(answers: readonly ItemAnswer[], gender: Gender): MMPIProfile {

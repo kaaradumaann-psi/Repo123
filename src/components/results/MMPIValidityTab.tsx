@@ -1,70 +1,66 @@
-import type { MMPIProfile, ScaleResult } from '../../scoring/mmpiScoring';
-import type { ScaleId } from '../../scoring/mmpiKeys';
-import { SCALE_MEANINGS, tColor } from '../../scoring/mmpiInterpretation';
+import type { MMPIProfile, ValidityFinding } from '../../scoring/mmpiScoring';
+import { SCALE_MEANINGS } from '../../scoring/mmpiInterpretation';
 import { Icon } from '../Icon';
 
-function ValidityCard({ scale, blankCount }: { scale: ScaleResult; blankCount?: number }) {
-  const id = scale.id as ScaleId;
-  const meaning = SCALE_MEANINGS[id];
-  const isHigh = id !== '?' && scale.tScore >= 70;
-  const isLow = id !== '?' && scale.tScore <= 35;
-  const tone = isHigh ? 'is-high' : isLow ? 'is-low' : '';
+const toneClass = (tone: ValidityFinding['tone']): string =>
+  tone === 'alert' ? 'is-high' : tone === 'watch' ? 'is-low' : '';
 
+const badgeColor = (tone: ValidityFinding['tone']): string =>
+  tone === 'alert' ? '#d2453a' : tone === 'watch' ? '#b4770b' : '#0e9e6a';
+
+function FindingCard({ finding }: { finding: ValidityFinding }) {
+  const meaning = SCALE_MEANINGS[finding.id];
   return (
-    <div className={`mmpi-vcard ${tone}`}>
+    <div className={`mmpi-vcard ${toneClass(finding.tone)}`}>
       <div className="mmpi-vcard-head">
-        <span className={`mmpi-vcard-letter ${id === '?' ? 'q' : ''}`}>{scale.shortName}</span>
-        <span className="mmpi-vcard-name">{scale.fullName}</span>
+        <span className={`mmpi-vcard-letter ${finding.id === '?' ? 'q' : ''}`}>{finding.id}</span>
+        <span className="mmpi-vcard-name">{finding.fullName}</span>
       </div>
       <p className="mmpi-vcard-desc">{meaning.measures}</p>
       <div className="mmpi-vcard-stats">
-        {id === '?' ? (
-          <>
-            <div className="mmpi-vstat">
-              <span>Boş Madde</span>
-              <b style={{ color: (blankCount ?? 0) > 30 ? '#d2453a' : (blankCount ?? 0) > 10 ? '#b4770b' : undefined }}>
-                {blankCount ?? scale.rawScore}
-              </b>
-            </div>
-            <span className="level-badge" style={{ background: scale.color, marginLeft: 'auto' }}>
-              {scale.level}
-            </span>
-          </>
-        ) : (
-          <>
-            <div className="mmpi-vstat">
-              <span>Ham</span>
-              <b>{scale.rawScore}</b>
-            </div>
-            <div className="mmpi-vstat">
-              <span>T</span>
-              <b style={{ color: tColor(scale.tScore) }}>{scale.tScore.toFixed(1)}</b>
-            </div>
-            <span className="level-badge" style={{ background: scale.color, marginLeft: 'auto' }}>
-              {scale.level}
-            </span>
-          </>
+        <div className="mmpi-vstat">
+          <span>Ham</span>
+          <b>{finding.raw}</b>
+        </div>
+        {finding.t !== null && (
+          <div className="mmpi-vstat">
+            <span>T</span>
+            <b>{finding.t.toFixed(1)}</b>
+          </div>
         )}
+        <div className="mmpi-vstat">
+          <span>Aralık</span>
+          <b>{finding.rawRange}</b>
+        </div>
+        <span className="level-badge" style={{ background: badgeColor(finding.tone), marginLeft: 'auto' }}>
+          {finding.band}
+        </span>
       </div>
-      {(isHigh || isLow) && (
-        <p className="mmpi-vcard-signal">{isHigh ? meaning.high : meaning.low}</p>
+      <p className="mmpi-vcard-signal">{finding.comment}</p>
+      {finding.tDetail && (
+        <p className="mmpi-vcard-signal">
+          <b>{finding.tRange}: </b>
+          {finding.tDetail}
+        </p>
       )}
     </div>
   );
 }
 
 export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
-  const { validity, cannotSayScale, validityAnalysis } = profile;
+  const { validityAnalysis } = profile;
   const fK = validityAnalysis.fMinusK;
-  const fKLabel = fK > 15 ? 'Yüksek F-K: abartma / simülasyon yönünde' : fK < -15 ? 'Düşük F-K: iyi görünme çabası yönünde' : 'Normal aralıkta';
-  const fKColor = fK > 15 || fK < -15 ? '#d2453a' : '#0e9e6a';
+  const fKAlert = validityAnalysis.fMinusKNote !== null;
+  const fKLabel = fKAlert
+    ? 'F-K endeksi 16’nın üstünde: dikkatli değerlendirme gerekir'
+    : 'F-K endeksi kaynakta belirtilen 16 sınırının altında';
+  const fKColor = fKAlert ? '#d2453a' : '#0e9e6a';
 
   return (
     <div role="tabpanel" className="mmpi-tab-panel">
       <div className="mmpi-vgrid">
-        <ValidityCard scale={cannotSayScale} blankCount={validityAnalysis.cannotSay} />
-        {validity.map(scale => (
-          <ValidityCard key={scale.id} scale={scale} />
+        {validityAnalysis.findings.map(finding => (
+          <FindingCard key={finding.id} finding={finding} />
         ))}
       </div>
 
@@ -82,13 +78,22 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
           {fKLabel}
         </span>
       </div>
+      {validityAnalysis.fMinusKNote && (
+        <div className="mmpi-box warn">
+          <Icon name="alert" size={14} />
+          <span> {validityAnalysis.fMinusKNote}</span>
+        </div>
+      )}
 
       <div>
         <h4 className="mmpi-section-title">Uyarılar</h4>
         {validityAnalysis.warnings.length === 0 ? (
           <div className="mmpi-box ok">
             <Icon name="checkCircle" size={14} />
-            <span> Geçerlik ölçeklerinden uyarı yok — cevap tutarlılığı ve savunma düzeyi normal sınırlarda.</span>
+            <span>
+              {' '}Geçerlik skalaları kaynak ölçütlerine göre normal sınırlarda — yanıtlama isteği, inkar/savunma
+              düzeyi ve uygun olmayan yaşantı miktarı beklenen aralıkta.
+            </span>
           </div>
         ) : (
           <div className="mmpi-box warn">
@@ -109,6 +114,10 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
         <div className={`mmpi-box ${validityAnalysis.isValid ? 'ok' : 'warn'}`}>
           {validityAnalysis.interpretation}
         </div>
+        <p className="mmpi-summary-note">
+          Geçerlik değerlendirmesi kaynak rapordaki ham puan tablolarına [(?) “Hiç Bir Şey Diyemem”, L, K, F]
+          ve L/F/K için T puanı aralıklarına birebir dayanır; F-K endeksinde kaynak sınırı 16’dır.
+        </p>
       </div>
     </div>
   );
