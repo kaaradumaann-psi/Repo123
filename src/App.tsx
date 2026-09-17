@@ -109,6 +109,16 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           </div>
 
           <div className="header-user">
+            <a
+              className="home-site-link"
+              href={SITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Ana site: halilkaraduman.com.tr"
+            >
+              <span>halilkaraduman.com.tr</span>
+              <Icon name="external" size={13} />
+            </a>
             <div className="user-profile-summary">
               <div className="user-avatar-circle">
                 {user.firstName.charAt(0)}{user.lastName.charAt(0)}
