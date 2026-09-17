@@ -386,6 +386,14 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
               </button>
             ))}
           </div>
+          <div className="ws-nav">
+            <button type="button" className="btn-secondary" onClick={() => setStep('intake')}>
+              Geri
+            </button>
+            <button type="button" className="btn-primary" disabled={!method} onClick={() => setStep('entry')}>
+              Devam
+            </button>
+          </div>
         </section>
       )}
 
@@ -403,6 +411,19 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
       {method === 'omr' && (
         <div className={step === 'entry' ? undefined : 'is-screen-hidden'}>
           <ScannerWorkspace key={scanKey} definition={definition} actor={actor} embedded onScanChange={setScan} />
+        </div>
+      )}
+
+      {/* Alt nav her adımda korunur (rapor §3.4); OMR modunda uzun içerikten
+          sonra "Kontrol" eylemine en kısa yoldan erişim için OMR bloğunun altındadır. */}
+      {step === 'entry' && method && (
+        <div className="ws-nav">
+          <button type="button" className="btn-secondary" onClick={() => setStep('method')}>
+            Geri
+          </button>
+          <button type="button" className="btn-primary" disabled={!entryReady} onClick={() => setStep('review')}>
+            Kontrol
+          </button>
         </div>
       )}
 

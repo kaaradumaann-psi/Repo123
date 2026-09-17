@@ -236,3 +236,43 @@ Kullanıcının paylaştığı kriter metni ve aşağıdaki Türkçe kaynaklar; 
 
 - Tüm değişiklikler `arena/01a0afbb-repo123` branch'inde commit edilip push edildi (sandbox kaybına karşı).
 - Önceki oturumların OMR/tasarım geçmişi git geçmişinde korunuyor (`fed1a20`, `6aa6ca2`, `59f6fbc` vb.); bu rapor §4.6'da önceki OMR tasarımını özetliyor.
+
+---
+
+## 12. Ek — Taşıma, İkinci Eksiksiz Denetim ve Son Durum (17 Eylül 2026, `arena/01a0afd1-repo123`)
+
+Bu raporun çalışması, `arena/01a0afd1-repo123` branch'ine (temel: `main @ 103d45d`) dosya dosya taşınmış; raporun **her iddiası kodun son durumuyla satır satır denetlenmiştir**. Orijinal raporun yazıldığı andan beri farklar şunlardır:
+
+### 12.1 Denetim Düzeltmeleri (kod)
+
+1. **Adım haritasında tamamlanan TÜM adımlar tıklanabilir:** Önceki uygulama adım haritasında yalnızca "Danışan" ve "Yöntem" adımlarına tıklamayla dönme izni veriyordu. §3.4 ifadesiyle ("tamamlanan adımlar tıklanarak geri atlanır") uyum için **tüm tamamlanmış adımlar (Kontrol adımından "3. Veri" dahil) tıklanabilir** yapıldı; ileriye sıçrama hâlâ yok.
+2. **OMR boş > 30 canlı göstergesi (§9.6 isteğe bağlı maddesi tamamlandı):** OMR metrik şeridinde boş bırakılan madde sayısı 30'u aştığında değer kırmızıya döner ve etikete "· 30 sınırı aşıldı" notu eklenir. Böylece boş>30 kuralı üç yolda da (hızlı giriş canlı uyarısı, OMR canlı göstergesi, kontrolde hata banner'ı + kayıt engeli) aynı sıkılıkla görünür. OMR motoru/okuma kodu değişmedi.
+3. **"Yöntem" ve "Veri" adımlarında alt nav (rapor §3.4: "alt nav da korunuyor"):** Önceki uygulamada alt nav yalnızca "Danışan" ve "Kontrol" adımlarındaydı; yöntem/veri adımlarında eksikti. Her iki adıma da alt nav (Geri + ileri eylemi) eklendi; OMR modunda nav, OMR bloğunun **altına** yerleştirildi — uzun tarama içeriğinden sonra "Kontrol" eylemine en kısa yoldan erişim.
+
+### 12.2 İkinci Denetim — Veri Yolu ve Şema (rapor §7)
+
+Veri tutarlılık matrisi, `supabase/migrations/20260915000000_initial_schema.sql` şeması ve yazan/okuyan kodla sütun sütun karşılaştırıldı:
+
+- §5.5'teki 11 sütun şema ile birebir aynı; `upsertRecord` payload'u aynı adları kullanıyor. `occupation/education/requested_by` şemada `NOT NULL` — yazımda her zaman string (isteğe bağlı alanlarda boş string, `null` asla).
+- `gender`: form Erkek/Kadın ⊂ şemanın 4 değeri. `age`: form 16+ (daha sıkı) ⊂ şemanın 0–120 sınırı. `application_date`: ISO tarih, şemada `date`. `raw_omr_answers`: jsonb array — `createRecord` her zaman `[case-meta, …, OMR sayfa nesneleri]` sırasıyla (meta önde, sayfa nesneleri arkada) doldurur; `createDataRecord` `[case-meta, quick-entry|raw-scores]`. Boş payload `upsertRecord` içinde engellenir.
+- İdempotency: işlem başına tek UUIDv4; `idempotency_key` (unique) üzerinden upsert. RLS politikaları insert/update/delete'i `created_by = auth.uid()` ile sınırlar — kullanıcılar arası geçiş imkânsız; `created_by` form alanından değil, oturumdan alınır.
+- Kayıt sonrası `onSaved → recordsTick` "Kayıtlar" sekmesini yeniler; eski `client-context`/`entry-method` kayıtları `parseRecordPayload` ile geriye dönük okunur.
+- **Sonuç: §7 matrisi geçerli; yazılan ↔ okunan tutarlı, kırılma yok.**
+
+### 12.3 Yeniden Doğrulama Sonuçları
+
+| Kontrol | Sonuç |
+|---|---|
+| `npm run typecheck` (tsc --noEmit) | ✅ temiz |
+| `npm test` (tsx --test) | ✅ **108/108** geçti |
+| `npm run build` | ✅ `dist/index.html` + `optik-form.html` üretildi |
+| Bundle içerik doğrulaması | ✅ Yeni arayüz parçaları (adım çubuğu, ana site pill'i, "Seçili" çipi, "İşleme devam et", 16 yaş / ilkokul reddi / 60–120 dk / boş>30 mesajları, OMR "sınırı aşıldı" göstergesi) derlenmiş tek dosyalı bütünde tek tek doğrulandı |
+| Şema ↔ payload ↔ okuma | ✅ Bkz. 12.2 |
+
+### 12.4 Pull Request ve İş Birliği Durumu
+
+- Önceki oturumun **PR #14**'ü (`arena/01a0afbb-repo123`) **kopya olarak kapatıldı** — çalışmanın tamamı (bu rapor dahil) yeni branch'e taşındı.
+- **PR #15** (`arena/01a0afd1-repo123` → `main`) bu çalışmaya ait tek PR'dır; bu ek, PR #15 ile birlikte `main`'e girer.
+- §9.1 (kullanıcı onayı): canlı önizleme sandbox'ta çalıştırıldı; sandbox'ta Supabase ortam değişkenleri tanımlı olmadığı için önizleme kurulum ekranını gösterir — akışın üç yolu (hızlı/ham/OMR), env yapılandırılmış yayın ortamında tam denenebilir durumda.
+- §9.6 (OMR boş rozeti): **tamamlandı** (bkz. 12.1/2).
+- Değişmeyen kapsam dışı maddeler: §9.3 (ana site yönlendirmesi — ayrı repo), §9.4 (klinik puanlama motoru — `clinicalTransferAllowed: false`), §9.5 (16 yaş altı / MMPI-A — ayrı ürün kararı).
