@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import { ITEM_COUNT, answerLabel, countAnswers, mapQuickKey } from '../workspace/caseTypes';
+import { ITEM_COUNT, MMPI_MAX_BLANK, answerLabel, countAnswers, mapQuickKey } from '../workspace/caseTypes';
 import type { ItemAnswer } from '../workspace/caseTypes';
 
 type QuickEntryProps = {
@@ -60,9 +60,15 @@ export function QuickEntry({ answers, current, onCurrent, onAnswers }: QuickEntr
           <span>{counts.entered} / {ITEM_COUNT}</span>
           <span className="ws-chip qe-d">D {counts.correct}</span>
           <span className="ws-chip qe-y">Y {counts.wrong}</span>
-          <span className="ws-chip">Boş {counts.blank}</span>
+          <span className={`ws-chip ${counts.blank > MMPI_MAX_BLANK ? 'qe-blank-over' : ''}`}>Boş {counts.blank}</span>
         </div>
       </header>
+
+      {counts.blank > MMPI_MAX_BLANK && (
+        <p className="qe-blank-warning" role="alert">
+          Boş bırakılan madde sayısı {MMPI_MAX_BLANK} sınırını aşıyor; bu durum testi geçersiz sayabilir.
+        </p>
+      )}
 
       <div
         ref={focus}
@@ -81,6 +87,10 @@ export function QuickEntry({ answers, current, onCurrent, onAnswers }: QuickEntr
           <span className={value === null ? 'is-on' : ''}><kbd>0</kbd> Boş</span>
         </div>
         <p className="qe-value">Kayıtlı: <strong>{answerLabel(value)}</strong></p>
+      </div>
+
+      <div className="qe-progress" aria-hidden="true">
+        <div className="qe-progress-fill" style={{ width: `${(counts.entered / ITEM_COUNT) * 100}%` }} />
       </div>
 
       <div className="qe-map" role="listbox" aria-label="566 madde haritası">

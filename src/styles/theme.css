@@ -322,6 +322,36 @@
     border-color: var(--danger-border);
   }
 
+  /* Ana site kısayolu: uygulama mmpi alt alan adında yaşar; uzman tek tıkla
+     yazarın sitesine (halilkaraduman.com.tr) geri dönebilmeli. */
+  .home-site-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--soft);
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+  }
+
+  .home-site-link:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  .home-site-link svg {
+    color: var(--muted);
+  }
+
+  .home-site-link:hover svg {
+    color: var(--text);
+  }
+
   .app-main {
     max-width: var(--container);
     padding: 40px 28px 56px;

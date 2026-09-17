@@ -177,13 +177,96 @@ export function rawScoresComplete(scores: RawScores): boolean {
   });
 }
 
+/**
+ * MMPI (566 maddelik klasik form, Türkiye uyarlaması) uygulama koşulları.
+ * Türkiye'de 566 soruluk klasik MMPI formu kullanılır (MMPI-2 değil).
+ * Kriterler, Türkiye norm/standardizasyon çalışmalarına dayanan resmi
+ * uygulama kılavuzlarından alınır:
+ *
+ * - Yaş: test 16 yaş ve üzerine uygulanır; 16 yaş altındaki bireylerde
+ *   Türkiye örnekleminde sonuçlar geçerli kabul edilmez (örn. 13 yaş reddedilir).
+ * - Eğitim: maddelerin doğru analiz edilebilmesi için okuryazarlık şartıdır;
+ *   Türkiye klinik pratiğinde en düşük kabul edilen düzey ortaokul
+ *   (6–8 yıllık resmi eğitim) olduğu için "İlkokul" seçimi kabul edilmez.
+ * - Süre: test hız testi değildir; Türkiye uygulamalarında ortalama 60–120
+ *   dakika (1–2 saat) içinde tamamlanması beklenir. Alan kaydı engellemez;
+ *   gerçekçi olmayan değerler "çok kısa / kısa / uzun" olarak işaretlenir —
+ *   566 madde 20 dakikada cevaplanamaz.
+ * - Boş yanıt: boş bırakılan (Cannot Say / ?) madde sayısı 30'u geçmemelidir;
+ *   aşılması testin geçerlilik profilini düşürür ve testi geçersiz sayabilir.
+ */
+export const MMPI_AGE_MIN = 16;
+/** Sağılabilirlik üst sınırı yalnızca giriş sağlamlığı içindir; norm koşulu alt sınırdır. */
+export const MMPI_AGE_MAX = 120;
+export const MMPI_AGE_MESSAGE = 'MMPI 16 yaş ve üzerine uygulanır; 16 yaş altı danışanlarda sonuçlar Türkiye normları için geçerli kabul edilmez.';
+export const MMPI_EDUCATION_MESSAGE = 'MMPI Türkiye uygulamasında en az ortaokul (6–8 yıllık eğitim) düzeyine uygulanır; ilkokul düzeyi kabul edilmez.';
+export const MMPI_DURATION_RANGE = { min: 60, max: 120 } as const;
+export const MMPI_DURATION_REFERENCE = `MMPI, 566 madde için Türkiye uygulamalarında ortalama ${MMPI_DURATION_RANGE.min}–${MMPI_DURATION_RANGE.max} dakika (1–2 saat) sürer.`;
+export const MMPI_MAX_BLANK = 30;
+export const MMPI_BLANK_MESSAGE = `Boş bırakılan (?) madde sayısı ${MMPI_MAX_BLANK}'u aşıyor; bu durum testi geçersiz sayabilir.`;
+
+export type DurationLevel = 'empty' | 'invalid' | 'very-short' | 'short' | 'ok' | 'long';
+
+export type DurationAssessment = {
+  minutes: number | null;
+  level: DurationLevel;
+  message: string;
+};
+
+/** "75", "90 dk", "90 dakika" biçimlerini dakikaya çevirir; okunamayan girdide null. */
+export function parseDurationMinutes(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/^(\d{1,3})\s*(dk|dakika)?$/i);
+  if (!match) return null;
+  const minutes = Number(match[1]);
+  if (!Number.isFinite(minutes) || minutes < 1 || minutes > 600) return null;
+  return minutes;
+}
+
+export function assessDuration(value: string): DurationAssessment {
+  if (value.trim() === '') return { minutes: null, level: 'empty', message: '' };
+  const minutes = parseDurationMinutes(value);
+  if (minutes === null) {
+    return { minutes: null, level: 'invalid', message: 'Süreyi dakika olarak rakam girin (örn. 90).' };
+  }
+  if (minutes < 45) {
+    return {
+      minutes,
+      level: 'very-short',
+      message: `${minutes} dk çok kısa — 566 madde bu sürede cevaplanamaz. ${MMPI_DURATION_REFERENCE}`,
+    };
+  }
+  if (minutes < MMPI_DURATION_RANGE.min) {
+    return {
+      minutes,
+      level: 'short',
+      message: `${minutes} dk tipik aralığın (${MMPI_DURATION_RANGE.min}–${MMPI_DURATION_RANGE.max} dk) altında; girdiğiniz süreyi doğrulayın.`,
+    };
+  }
+  if (minutes > 180) {
+    return {
+      minutes,
+      level: 'long',
+      message: `${minutes} dk tipik aralığın (${MMPI_DURATION_RANGE.min}–${MMPI_DURATION_RANGE.max} dk) belirgin üzerinde; girdiğiniz süreyi doğrulayın.`,
+    };
+  }
+  return { minutes, level: 'ok', message: '' };
+}
+
+/** Girilen IQ değeri formda istenmez (kullanıcı kararı); bu modül IQ verisi tutmaz. */
 export function validateIntake(client: ClientIntake): string | null {
   if (!client.firstName.trim() || !client.lastName.trim()) return 'Ad ve soyad zorunludur.';
   if (client.gender !== 'Erkek' && client.gender !== 'Kadın') return 'Cinsiyet seçiniz.';
-  if (!Number.isInteger(client.age) || client.age < 1 || client.age > 120) return 'Yaş 1–120 arasında olmalıdır.';
+  if (!Number.isInteger(client.age) || client.age < MMPI_AGE_MIN) {
+    return MMPI_AGE_MESSAGE;
+  }
+  if (client.age > MMPI_AGE_MAX) return 'Yaş doğrulanamadı; lütfen kontrol edin.';
   if (!/^\d{4}-\d{2}-\d{2}$/.test(client.testDate) || Number.isNaN(Date.parse(`${client.testDate}T00:00:00Z`))) {
     return 'Test tarihi geçersiz.';
   }
+  if (client.education === 'İlkokul') return MMPI_EDUCATION_MESSAGE;
+  if (assessDuration(client.testDuration).level === 'invalid') return 'Test süresi dakika olarak rakam girilmelidir (örn. 90).';
   return null;
 }
 

@@ -440,17 +440,21 @@ function ScannerSession({
         />
       ) : null}
 
-      {/* Danışan Bilgileri Kaydetme */}
-      <RecordCapture
-        key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`}
-        definition={definition}
-        scan={scan}
-        actor={actor}
-        onSaved={() => setRecordsRefresh(prev => prev + 1)}
-      />
+      {/* Danışan bilgisi ve arşiv, gömülü modda İşlem akışının kendi adımlarında
+          (Danışan formu + Kontrol/Kayıt + Kayıtlar sekmesi) yaşar; burada ikinci
+          bir danışan formu ve ikinci kayıt yolu açılmaz. */}
+      {!embedded && (
+        <RecordCapture
+          key={`${scan.batchId ?? 'empty'}:${Object.keys(scan.pages).sort((a, b) => Number(a) - Number(b)).join('-')}`}
+          definition={definition}
+          scan={scan}
+          actor={actor}
+          onSaved={() => setRecordsRefresh(prev => prev + 1)}
+        />
+      )}
 
       {/* Psikolog Arşivi */}
-      {actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
+      {!embedded && actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
     </div>
   );
 }

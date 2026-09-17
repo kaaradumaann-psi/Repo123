@@ -16,7 +16,15 @@ import {
   FOLLOW_UP_OPTIONS,
   ITEM_COUNT,
   MARITAL_OPTIONS,
+  MMPI_AGE_MAX,
+  MMPI_AGE_MESSAGE,
+  MMPI_AGE_MIN,
+  MMPI_BLANK_MESSAGE,
+  MMPI_DURATION_REFERENCE,
+  MMPI_EDUCATION_MESSAGE,
+  MMPI_MAX_BLANK,
   RAW_SCORE_FIELDS,
+  assessDuration,
   buildCaseMeta,
   buildQuickPayload,
   buildRawPayload,
@@ -48,11 +56,43 @@ const STEPS: { id: Exclude<CaseStep, 'home'>; label: string }[] = [
   { id: 'review', label: 'Kontrol' },
 ];
 
+const METHOD_CARDS: { id: EntryMethod; icon: 'file' | 'sheet' | 'camera'; title: string; desc: string }[] = [
+  {
+    id: 'quick',
+    icon: 'file',
+    title: 'Hızlı veri girişi',
+    desc: 'Basılı formdaki cevaplar klavyeyle girilir: 1 Doğru · 2 Yanlış · 0 Boş.',
+  },
+  {
+    id: 'raw',
+    icon: 'sheet',
+    title: 'Ham puan',
+    desc: 'Geçerlik ve klinik ölçekler; Hs, Pd, Pt, Sc ve Ma K düzeltmesiz girilir.',
+  },
+  {
+    id: 'omr',
+    icon: 'camera',
+    title: 'OMR / Kamera',
+    desc: 'Basılı optik form: mevcut okuma hattıyla dosya veya kamera ile aktarılır.',
+  },
+];
+
 type CaseWorkspaceProps = {
   definition: FormDefinition;
   actor: AuthenticatedUser;
   onSaved?: () => void;
 };
+
+function formatDate(value: string): string {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('tr-TR');
+}
+
+function formatDuration(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '—';
+  return /dk|dakika/i.test(trimmed) ? trimmed : `${trimmed} dk`;
+}
 
 export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps) {
   const [step, setStep] = useState<CaseStep>('home');
@@ -68,6 +108,35 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState<MMPIRecord | null>(null);
   const submissionKey = useRef(crypto.randomUUID());
+  const stepIndex = STEPS.findIndex(item => item.id === step);
+
+  const omrReady = scan ? canCreateRecord(sortedPages(scan), definition) : false;
+  const quickReady = countAnswers(answers).entered === ITEM_COUNT;
+  const rawReady = rawScoresComplete(raw);
+  const entryReady = method === 'quick' ? quickReady : method === 'raw' ? rawReady : method === 'omr' ? omrReady : false;
+  const blankCount =
+    method === 'quick'
+      ? countAnswers(answers).blank
+      : method === 'raw'
+        ? typeof raw.blank === 'number'
+          ? raw.blank
+          : 0
+        : scan
+          ? summarizeResults(definition, sortedPages(scan)).blank
+          : 0;
+  const blankExceeded = blankCount > MMPI_MAX_BLANK;
+  const hasPartialIntake =
+    client.firstName.trim() !== '' ||
+    client.lastName.trim() !== '' ||
+    client.gender !== '' ||
+    client.age > 0 ||
+    client.testDuration.trim() !== '' ||
+    client.occupation.trim() !== '' ||
+    client.followUp !== '' ||
+    client.education !== '' ||
+    client.maritalStatus !== '' ||
+    client.applicationReason.trim() !== '' ||
+    client.clinicalContext.trim() !== '';
 
   function startNew() {
     setClient(emptyClientIntake());
@@ -84,6 +153,30 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     setStep('intake');
   }
 
+  function goBack() {
+    if (step === 'intake') {
+      setIntakeError('');
+      setStep('home');
+    } else if (step === 'method') {
+      setIntakeError('');
+      setStep('intake');
+    } else if (step === 'entry') {
+      setStep('method');
+    } else if (step === 'review') {
+      setStep('entry');
+    }
+  }
+
+  /** Tamamlanmış adımlara geri dön; ileriye sıçrama yok (hazırlık koşulu adımın kendisidir). */
+  function gotoStep(target: 'intake' | 'method') {
+    if (target === 'intake' && (step === 'method' || step === 'entry' || step === 'review')) {
+      setIntakeError('');
+      setStep('intake');
+    } else if (target === 'method' && (step === 'entry' || step === 'review')) {
+      setStep('method');
+    }
+  }
+
   function submitIntake(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const message = validateIntake(client);
@@ -95,14 +188,26 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     setStep('method');
   }
 
-  const omrReady = scan ? canCreateRecord(sortedPages(scan), definition) : false;
-  const quickReady = countAnswers(answers).entered === ITEM_COUNT;
-  const rawReady = rawScoresComplete(raw);
-  const entryReady = method === 'quick' ? quickReady : method === 'raw' ? rawReady : omrReady;
+  function selectMethod(next: EntryMethod) {
+    if (method !== next) {
+      setMethod(next);
+      if (next !== 'omr') {
+        // OMR oturumu bileşen içinde yaşar; yöntemi terk ederken kayıtsızlaştır ki
+        // eski bir tarama "hazır" görünerek yeni yöntemle kaydedilmesin.
+        setScan(null);
+        setScanKey(key => key + 1);
+      }
+    }
+    setStep('entry');
+  }
 
   async function saveAndAnalyze() {
     if (saved || busy || !method) return;
     setSaveError('');
+    if (blankExceeded) {
+      setSaveError(MMPI_BLANK_MESSAGE);
+      return;
+    }
     if (actor.role !== 'PSYCHOLOG' || !actor.active) {
       setSaved({ id: 'local', createdAt: new Date().toISOString() });
       return;
@@ -133,31 +238,100 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
 
   if (step === 'home') {
     return (
-      <div className="ws-home">
-        <h1>Çalışma alanı</h1>
-        <p className="ws-muted">Yeni bir MMPI işlemi başlatın. Veri girişi, optik okuma ve kayıt bu oturumda yürür.</p>
+      <section className="ws-home" aria-labelledby="ws-home-title">
+        <span className="section-badge badge-primary">MMPI-566 · Uzman çalışma alanı</span>
+        <h1 id="ws-home-title" className="ws-home-title">
+          Yeni bir MMPI <em>işlemi</em> başlatın
+        </h1>
+        <p className="ws-home-sub">
+          Danışan bilgisi, veri girişi ve kontrol tek akışta yürür. Optik okuma mevcut OMR
+          hattını kullanır; klinik puanlama motoru bu sürümde bağlı değildir.
+        </p>
         <div className="ws-actions">
-          <button type="button" className="btn-primary" onClick={startNew}>
-            Yeni MMPI işlemi
-          </button>
+          {hasPartialIntake ? (
+            <>
+              <button type="button" className="btn-primary" onClick={() => setStep('intake')}>
+                İşleme devam et
+                <Icon name="arrowRight" size={16} />
+              </button>
+              <button type="button" className="btn-secondary" onClick={startNew}>
+                <Icon name="refresh" size={16} />
+                Yeni işlem
+              </button>
+            </>
+          ) : (
+            <button type="button" className="btn-primary" onClick={startNew}>
+              Yeni MMPI işlemi
+              <Icon name="arrowRight" size={16} />
+            </button>
+          )}
         </div>
-      </div>
+        <dl className="ws-facts">
+          <div>
+            <dt>Madde</dt>
+            <dd>{ITEM_COUNT}</dd>
+          </div>
+          <div>
+            <dt>Optik form</dt>
+            <dd>4 sayfa A4</dd>
+          </div>
+          <div>
+            <dt>Tipik süre</dt>
+            <dd>60–120 dk</dd>
+          </div>
+          <div>
+            <dt>Uygulama yaşı</dt>
+            <dd>{MMPI_AGE_MIN}+</dd>
+          </div>
+        </dl>
+      </section>
     );
   }
 
   return (
     <div className="ws-flow">
-      <ol className="ws-stepper">
-        {STEPS.map((item, index) => {
-          const currentIndex = STEPS.findIndex(stepItem => stepItem.id === step);
-          const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-on' : '';
-          return (
-            <li key={item.id} className={`ws-step ${state}`}>
-              {index + 1}. {item.label}
-            </li>
-          );
-        })}
-      </ol>
+      <div className="ws-flowbar" aria-label="İşlem adımları">
+        <button type="button" className="btn-secondary btn-sm" onClick={goBack}>
+          <Icon name="left" size={14} />
+          <span>{step === 'intake' ? 'Çalışma alanı' : 'Geri'}</span>
+        </button>
+
+        <ol className="ws-stepper">
+          {STEPS.map((item, index) => {
+            const state = index < stepIndex ? 'is-done' : index === stepIndex ? 'is-on' : '';
+            const canJump = index < stepIndex && (item.id === 'intake' || item.id === 'method');
+            return (
+              <li key={item.id} className={`ws-step ${state}`} aria-current={index === stepIndex ? 'step' : undefined}>
+                {canJump ? (
+                  <button type="button" onClick={() => gotoStep(item.id as 'intake' | 'method')}>
+                    {index + 1}. {item.label}
+                  </button>
+                ) : (
+                  <span>{index + 1}. {item.label}</span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="ws-flowbar-action">
+          {step === 'intake' && (
+            <button type="submit" form="intake-form" className="btn-primary btn-sm">
+              Devam
+            </button>
+          )}
+          {step === 'entry' && (
+            <button type="button" className="btn-primary btn-sm" disabled={!entryReady} onClick={() => setStep('review')}>
+              Kontrol
+            </button>
+          )}
+          {step === 'review' && (
+            <button type="button" className="btn-primary btn-sm" disabled={busy || !!saved || blankExceeded} onClick={() => void saveAndAnalyze()}>
+              {busy ? 'Kaydediliyor…' : 'Analizi başlat'}
+            </button>
+          )}
+        </div>
+      </div>
 
       {step === 'intake' && (
         <IntakeForm
@@ -165,37 +339,50 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           error={intakeError}
           onChange={setClient}
           onSubmit={submitIntake}
-          onCancel={() => setStep('home')}
         />
       )}
 
       {step === 'method' && (
-        <section className="ws-panel">
+        <section className="ws-panel" aria-labelledby="ws-method-title">
           <header className="ws-panel-head">
             <div>
-              <h2>Veri giriş yöntemi</h2>
-              <p className="ws-muted">{client.lastName}, {client.firstName} · {client.gender} · {client.age}</p>
+              <span className="section-badge badge-primary">02 · Yöntem</span>
+              <h2 id="ws-method-title" className="ws-panel-title">
+                Veri giriş <em>yöntemi</em>
+              </h2>
+              <p className="ws-muted">
+                Yöntemi her an değiştirebilirsiniz; danışan bilgisi ve girdiğiniz veriler korunur.
+              </p>
             </div>
           </header>
-          <div className="ws-methods">
-            <button type="button" className="ws-method" onClick={() => { setMethod('quick'); setStep('entry'); }}>
-              <Icon name="file" size={18} />
-              <strong>Hızlı veri girişi</strong>
-              <span>Basılı cevaplar. 1 / 2 / 0.</span>
-            </button>
-            <button type="button" className="ws-method" onClick={() => { setMethod('raw'); setStep('entry'); }}>
-              <Icon name="sheet" size={18} />
-              <strong>Ham puan</strong>
-              <span>Geçerlik ve klinik ölçekler, K’sız.</span>
-            </button>
-            <button type="button" className="ws-method" onClick={() => { setMethod('omr'); setStep('entry'); }}>
-              <Icon name="camera" size={18} />
-              <strong>OMR / Kamera</strong>
-              <span>Mevcut optik okuma hattı.</span>
-            </button>
-          </div>
-          <div className="ws-nav">
-            <button type="button" className="btn-secondary" onClick={() => setStep('intake')}>Geri</button>
+          <p className="ws-client-chip">
+            <Icon name="user" size={14} />
+            <span>
+              <strong>
+                {client.firstName} {client.lastName}
+              </strong>
+              {' · '}
+              {client.gender} · {client.age} yaş · {formatDate(client.testDate)}
+            </span>
+          </p>
+          <div className="ws-methods" role="radiogroup" aria-label="Veri giriş yöntemi">
+            {METHOD_CARDS.map(card => (
+              <button
+                key={card.id}
+                type="button"
+                role="radio"
+                aria-checked={method === card.id}
+                className={`ws-method ${method === card.id ? 'is-selected' : ''}`}
+                onClick={() => selectMethod(card.id)}
+              >
+                <span className="ws-method-icon">
+                  <Icon name={card.icon} size={18} />
+                </span>
+                <strong>{card.title}</strong>
+                <span>{card.desc}</span>
+                {method === card.id && <span className="ws-method-flag">Seçili</span>}
+              </button>
+            ))}
           </div>
         </section>
       )}
@@ -206,22 +393,15 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
             <QuickEntry answers={answers} current={currentItem} onCurrent={setCurrentItem} onAnswers={setAnswers} />
           )}
           {method === 'raw' && <RawScoreEntry scores={raw} onChange={setRaw} />}
-          {method === 'omr' && (
-            <ScannerWorkspace
-              key={scanKey}
-              definition={definition}
-              actor={actor}
-              embedded
-              onScanChange={setScan}
-            />
-          )}
-          <div className="ws-nav">
-            <button type="button" className="btn-secondary" onClick={() => setStep('method')}>Geri</button>
-            <button type="button" className="btn-primary" disabled={!entryReady} onClick={() => setStep('review')}>
-              Kontrol
-            </button>
-          </div>
         </>
+      )}
+
+      {/* OMR oturumu yöntem 'omr' olduğu sürece canlı kalır; böylece Geri → Kontrol
+          arasında gidip gelince tarama yitirilmez. Başka yönteme geçilirse sıfırlanır. */}
+      {method === 'omr' && (
+        <div className={step === 'entry' ? undefined : 'is-screen-hidden'}>
+          <ScannerWorkspace key={scanKey} definition={definition} actor={actor} embedded onScanChange={setScan} />
+        </div>
       )}
 
       {step === 'review' && method && (
@@ -236,6 +416,8 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           busy={busy}
           saved={saved}
           error={saveError}
+          blankCount={blankCount}
+          blankExceeded={blankExceeded}
           onBack={() => setStep('entry')}
           onSave={() => void saveAndAnalyze()}
           onNew={startNew}
@@ -250,27 +432,39 @@ function IntakeForm({
   error,
   onChange,
   onSubmit,
-  onCancel,
 }: {
   client: ClientIntake;
   error: string;
   onChange: (next: ClientIntake) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onCancel: () => void;
 }) {
   const id = useId();
   const set = <K extends keyof ClientIntake>(key: K, value: ClientIntake[K]) => onChange({ ...client, [key]: value });
 
+  const ageOutOfRange = client.age > 0 && client.age < MMPI_AGE_MIN;
+  const educationInvalid = client.education === 'İlkokul';
+  const durationInfo = assessDuration(client.testDuration);
+  const showDurationHint = client.testDuration.trim() !== '' || durationInfo.level !== 'empty';
+
   return (
-    <form className="ws-panel" onSubmit={onSubmit}>
+    <form id="intake-form" className="ws-panel" noValidate onSubmit={onSubmit}>
       <header className="ws-panel-head">
         <div>
-          <h2>Danışan / test</h2>
-          <p className="ws-muted">Cinsiyet, yaş, test tarihi ve ad soyad zorunlu.</p>
+          <span className="section-badge badge-primary">01 · Danışan</span>
+          <h2 className="ws-panel-title">
+            Danışan / test <em>bilgileri</em>
+          </h2>
+          <p className="ws-muted">
+            Cinsiyet, yaş, test tarihi ve ad soyad zorunludur. MMPI {MMPI_AGE_MIN} yaş ve
+            üzerine, en az ortaokul düzeyine uygulanır.
+          </p>
         </div>
       </header>
 
       <div className="ws-form">
+        <div className="ws-section-label" role="group" aria-label="Danışan bilgileri">
+          Danışan
+        </div>
         <div className="form-group">
           <label htmlFor={`${id}-first`}>Ad *</label>
           <input id={`${id}-first`} required value={client.firstName} onChange={e => set('firstName', e.target.value)} autoComplete="off" />
@@ -301,11 +495,51 @@ function IntakeForm({
             id={`${id}-age`}
             required
             type="number"
-            min={1}
-            max={120}
+            min={MMPI_AGE_MIN}
+            max={MMPI_AGE_MAX}
             value={client.age || ''}
             onChange={e => set('age', Number(e.target.value) || 0)}
           />
+          {ageOutOfRange && <small className="ws-hint is-error">{MMPI_AGE_MESSAGE}</small>}
+        </div>
+        <div className="form-group">
+          <label htmlFor={`${id}-edu`}>Eğitim</label>
+          <select
+            id={`${id}-edu`}
+            value={client.education}
+            onChange={e => set('education', e.target.value as EducationLevel | '')}
+          >
+            <option value="">—</option>
+            {EDUCATION_OPTIONS.map(option => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {educationInvalid && <small className="ws-hint is-error">{MMPI_EDUCATION_MESSAGE}</small>}
+        </div>
+        <div className="form-group">
+          <label htmlFor={`${id}-marital`}>Medeni durum</label>
+          <select
+            id={`${id}-marital`}
+            value={client.maritalStatus}
+            onChange={e => set('maritalStatus', e.target.value as MaritalStatus | '')}
+          >
+            <option value="">—</option>
+            {MARITAL_OPTIONS.map(option => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group span-2">
+          <label htmlFor={`${id}-job`}>Meslek</label>
+          <input id={`${id}-job`} value={client.occupation} onChange={e => set('occupation', e.target.value)} autoComplete="off" />
+        </div>
+
+        <div className="ws-section-label" role="group" aria-label="Test bilgileri">
+          Test
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-date`}>Test tarihi *</label>
@@ -313,11 +547,24 @@ function IntakeForm({
         </div>
         <div className="form-group">
           <label htmlFor={`${id}-duration`}>Test süresi</label>
-          <input id={`${id}-duration`} value={client.testDuration} onChange={e => set('testDuration', e.target.value)} placeholder="dk" />
-        </div>
-        <div className="form-group">
-          <label htmlFor={`${id}-job`}>Meslek</label>
-          <input id={`${id}-job`} value={client.occupation} onChange={e => set('occupation', e.target.value)} autoComplete="off" />
+          <div className="ws-duration">
+            <input
+              id={`${id}-duration`}
+              type="number"
+              min={1}
+              max={600}
+              inputMode="numeric"
+              value={client.testDuration}
+              onChange={e => set('testDuration', e.target.value)}
+              placeholder="75"
+            />
+            <span className="ws-duration-suffix">dk</span>
+          </div>
+          {showDurationHint && durationInfo.level === 'invalid' && <small className="ws-hint is-error">{durationInfo.message}</small>}
+          {showDurationHint && durationInfo.level === 'very-short' && <small className="ws-hint is-error">{durationInfo.message}</small>}
+          {showDurationHint && durationInfo.level === 'short' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
+          {showDurationHint && durationInfo.level === 'long' && <small className="ws-hint is-warn">{durationInfo.message}</small>}
+          {showDurationHint && durationInfo.level === 'ok' && <small className="ws-hint">{MMPI_DURATION_REFERENCE}</small>}
         </div>
         <div className="form-group">
           <span>İzlem</span>
@@ -336,28 +583,6 @@ function IntakeForm({
           </div>
         </div>
         <div className="form-group">
-          <label htmlFor={`${id}-edu`}>Eğitim</label>
-          <select
-            id={`${id}-edu`}
-            value={client.education}
-            onChange={e => set('education', e.target.value as EducationLevel | '')}
-          >
-            <option value="">—</option>
-            {EDUCATION_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor={`${id}-marital`}>Medeni durum</label>
-          <select
-            id={`${id}-marital`}
-            value={client.maritalStatus}
-            onChange={e => set('maritalStatus', e.target.value as MaritalStatus | '')}
-          >
-            <option value="">—</option>
-            {MARITAL_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
-          </select>
-        </div>
-        <div className="form-group span-2">
           <label htmlFor={`${id}-reason`}>Başvuru nedeni</label>
           <input id={`${id}-reason`} value={client.applicationReason} onChange={e => set('applicationReason', e.target.value)} />
         </div>
@@ -375,8 +600,10 @@ function IntakeForm({
       )}
 
       <div className="ws-nav">
-        <button type="button" className="btn-secondary" onClick={onCancel}>İptal</button>
-        <button type="submit" className="btn-primary">Devam</button>
+        <span />
+        <button type="submit" className="btn-primary">
+          Devam
+        </button>
       </div>
     </form>
   );
@@ -393,6 +620,8 @@ function ReviewPanel({
   busy,
   saved,
   error,
+  blankCount,
+  blankExceeded,
   onBack,
   onSave,
   onNew,
@@ -407,42 +636,132 @@ function ReviewPanel({
   busy: boolean;
   saved: MMPIRecord | null;
   error: string;
+  blankCount: number;
+  blankExceeded: boolean;
   onBack: () => void;
   onSave: () => void;
   onNew: () => void;
 }) {
   const counts = countAnswers(answers);
   const omrSummary = scan ? summarizeResults(definition, sortedPages(scan)) : null;
+  const durationInfo = assessDuration(client.testDuration);
 
   return (
     <section className="ws-review">
       <header className="ws-panel-head">
         <div>
-          <h2>Kontrol</h2>
-          <p className="ws-muted">Veriler analize hazırlanmadan önce gözden geçirilir. Klinik puanlama motoru bu sürümde bağlı değildir.</p>
+          <span className="section-badge badge-primary">04 · Kontrol</span>
+          <h2 className="ws-panel-title">
+            Verileri <em>gözden geçirin</em>
+          </h2>
+          <p className="ws-muted">
+            Kayıt veritabanına bu ekrandan yazılır. Klinik puanlama motoru bu sürümde bağlı değildir.
+          </p>
         </div>
       </header>
 
+      {blankExceeded && (
+        <div className="status-banner error-banner" role="alert">
+          <Icon name="alert" size={16} />
+          <span>{MMPI_BLANK_MESSAGE} (Boş: {blankCount})</span>
+        </div>
+      )}
+
+      {(durationInfo.level === 'very-short' || durationInfo.level === 'short' || durationInfo.level === 'long') && (
+        <div
+          className={`status-banner ${durationInfo.level === 'very-short' ? 'error-banner' : 'warning-banner'}`}
+          role="alert"
+        >
+          <Icon name="alert" size={16} />
+          <span>{durationInfo.message}</span>
+        </div>
+      )}
+
+      <p className="ws-conditions-note">
+        Uygulama koşulları: danışan akut psikotik durumda değil, madde/sedatif etkisi altında
+        değil, testi tek başına ve yönlendirme olmaksızın doldurmuştur; uygulamayı yetkin bir
+        uzman yürütmüştür.
+      </p>
+
       <dl className="ws-dl">
-        <div><dt>Danışan</dt><dd>{client.firstName} {client.lastName}</dd></div>
-        <div><dt>Cinsiyet</dt><dd>{client.gender}</dd></div>
-        <div><dt>Yaş</dt><dd>{client.age}</dd></div>
-        <div><dt>Test tarihi</dt><dd>{client.testDate}</dd></div>
-        {client.testDuration ? <div><dt>Süre</dt><dd>{client.testDuration}</dd></div> : null}
-        {client.occupation ? <div><dt>Meslek</dt><dd>{client.occupation}</dd></div> : null}
-        {client.followUp ? <div><dt>İzlem</dt><dd>{client.followUp}</dd></div> : null}
-        {client.education ? <div><dt>Eğitim</dt><dd>{client.education}</dd></div> : null}
-        {client.maritalStatus ? <div><dt>Medeni durum</dt><dd>{client.maritalStatus}</dd></div> : null}
-        <div><dt>Yöntem</dt><dd>{methodLabel(method)}</dd></div>
-        <div><dt>Uzman</dt><dd>{actor.firstName} {actor.lastName}</dd></div>
+        <div>
+          <dt>Danışan</dt>
+          <dd>
+            {client.firstName} {client.lastName}
+          </dd>
+        </div>
+        <div>
+          <dt>Cinsiyet</dt>
+          <dd>{client.gender}</dd>
+        </div>
+        <div>
+          <dt>Yaş</dt>
+          <dd>{client.age}</dd>
+        </div>
+        <div>
+          <dt>Test tarihi</dt>
+          <dd>{formatDate(client.testDate)}</dd>
+        </div>
+        <div>
+          <dt>Süre</dt>
+          <dd>{client.testDuration.trim() ? formatDuration(client.testDuration) : '—'}</dd>
+        </div>
+        {client.occupation && (
+          <div>
+            <dt>Meslek</dt>
+            <dd>{client.occupation}</dd>
+          </div>
+        )}
+        {client.followUp && (
+          <div>
+            <dt>İzlem</dt>
+            <dd>{client.followUp}</dd>
+          </div>
+        )}
+        {client.education && (
+          <div>
+            <dt>Eğitim</dt>
+            <dd>{client.education}</dd>
+          </div>
+        )}
+        {client.maritalStatus && (
+          <div>
+            <dt>Medeni durum</dt>
+            <dd>{client.maritalStatus}</dd>
+          </div>
+        )}
+        <div>
+          <dt>Yöntem</dt>
+          <dd>{methodLabel(method)}</dd>
+        </div>
+        <div>
+          <dt>Uzman</dt>
+          <dd>
+            {actor.firstName} {actor.lastName}
+          </dd>
+        </div>
       </dl>
 
       {method === 'quick' && (
         <dl className="ws-dl">
-          <div><dt>Girilen</dt><dd>{counts.entered} / {ITEM_COUNT}</dd></div>
-          <div><dt>Doğru</dt><dd>{counts.correct}</dd></div>
-          <div><dt>Yanlış</dt><dd>{counts.wrong}</dd></div>
-          <div><dt>Boş</dt><dd>{counts.blank}</dd></div>
+          <div>
+            <dt>Girilen</dt>
+            <dd>
+              {counts.entered} / {ITEM_COUNT}
+            </dd>
+          </div>
+          <div>
+            <dt>Doğru</dt>
+            <dd>{counts.correct}</dd>
+          </div>
+          <div>
+            <dt>Yanlış</dt>
+            <dd>{counts.wrong}</dd>
+          </div>
+          <div>
+            <dt>Boş</dt>
+            <dd>{counts.blank}</dd>
+          </div>
         </dl>
       )}
 
@@ -450,7 +769,10 @@ function ReviewPanel({
         <dl className="ws-dl">
           {RAW_SCORE_FIELDS.map(field => (
             <div key={field.key}>
-              <dt>{field.label}{field.kRaw ? ' (K’sız)' : ''}</dt>
+              <dt>
+                {field.label}
+                {field.kRaw ? ' (K’sız)' : ''}
+              </dt>
               <dd>{raw[field.key] === '' ? '—' : raw[field.key]}</dd>
             </div>
           ))}
@@ -459,11 +781,30 @@ function ReviewPanel({
 
       {method === 'omr' && omrSummary && (
         <dl className="ws-dl">
-          <div><dt>Sayfa</dt><dd>{omrSummary.acceptedPages} / {omrSummary.expectedPages}</dd></div>
-          <div><dt>Okunan</dt><dd>{omrSummary.readItems} / {omrSummary.expectedItems}</dd></div>
-          <div><dt>Güvenilir</dt><dd>{omrSummary.reliableAnswers}</dd></div>
-          <div><dt>İnceleme</dt><dd>{omrSummary.ambiguous + omrSummary.multiple}</dd></div>
-          <div><dt>Boş</dt><dd>{omrSummary.blank}</dd></div>
+          <div>
+            <dt>Sayfa</dt>
+            <dd>
+              {omrSummary.acceptedPages} / {omrSummary.expectedPages}
+            </dd>
+          </div>
+          <div>
+            <dt>Okunan</dt>
+            <dd>
+              {omrSummary.readItems} / {omrSummary.expectedItems}
+            </dd>
+          </div>
+          <div>
+            <dt>Güvenilir</dt>
+            <dd>{omrSummary.reliableAnswers}</dd>
+          </div>
+          <div>
+            <dt>İnceleme</dt>
+            <dd>{omrSummary.ambiguous + omrSummary.multiple}</dd>
+          </div>
+          <div>
+            <dt>Boş</dt>
+            <dd>{omrSummary.blank}</dd>
+          </div>
         </dl>
       )}
 
@@ -478,17 +819,23 @@ function ReviewPanel({
         <div className="ws-ready" role="status">
           {saved.id === 'local'
             ? 'Veriler bu oturumda analize hazır. Kayıt yalnızca aktif psikolog hesabıyla veritabanına yazılır.'
-            : <>Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Klinik puanlama bu sürümde bağlı değil.</>}
+            : <>
+                Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Klinik puanlama bu sürümde bağlı değil.
+              </>}
         </div>
       ) : null}
 
       <div className="ws-nav">
         {saved ? (
-          <button type="button" className="btn-primary" onClick={onNew}>Yeni işlem</button>
+          <button type="button" className="btn-primary" onClick={onNew}>
+            Yeni işlem
+          </button>
         ) : (
           <>
-            <button type="button" className="btn-secondary" onClick={onBack}>Geri</button>
-            <button type="button" className="btn-primary" disabled={busy} onClick={onSave}>
+            <button type="button" className="btn-secondary" onClick={onBack}>
+              Geri
+            </button>
+            <button type="button" className="btn-primary" disabled={busy || blankExceeded} onClick={onSave}>
               {busy ? 'Kaydediliyor…' : 'Analizi başlat'}
             </button>
           </>
