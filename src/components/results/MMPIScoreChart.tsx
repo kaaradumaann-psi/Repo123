@@ -1,117 +1,184 @@
 import type { ScaleResult } from '../../scoring/mmpiScoring';
 
 type Props = {
-  scales: ScaleResult[]; // validity + clinical + ?
-  height?: number;
+  /** Geçerlik + klinik ölçekler (sıralama bileşen içinde yapılır). */
+  scales: ScaleResult[];
 };
 
 const ORDER: string[] = ['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
 
-export function MMPIScoreChart({ scales, height = 360 }: Props) {
+/* Site paleti: tek vurgu (Apple mavi) + mürekkep/gri + durumsal renkler. */
+const COLOR_VALIDITY = '#57575a';
+const COLOR_CLINICAL = '#0a84ff';
+const COLOR_HIGH = '#d2453a';
+const COLOR_CANNOT = '#8e8e93';
+const GRID = '#e9e9eb';
+const AXIS = '#c9c9ce';
+const LABEL_MUTED = '#8e8e93';
+const LABEL_INK = '#3a3a3c';
+
+const WIDTH = 1400;
+const HEIGHT = 470;
+const PAD = { top: 26, right: 26, bottom: 48, left: 58 };
+
+const Y_MIN = 24;
+const Y_MAX = 122;
+const Y_TICKS = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
+
+/**
+ * MMPI profil grafiği — T skorları.
+ * Tek, sade profil çizgisi: geçerlik (L-F-K) ile klinik (Hs-Si) bölümleri
+ * ara ayracıyla ayrılır; T=70 klinik sınır ve T=50 ortalama rehber çizgilerdir.
+ */
+export function MMPIScoreChart({ scales }: Props) {
   const ordered = [...scales].sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+  if (ordered.length === 0) return null;
 
-  const width = 820;
-  const padding = { top: 24, right: 24, bottom: 36, left: 40 };
-  const chartW = width - padding.left - padding.right;
-  const chartH = height - padding.top - padding.bottom;
-
-  const yMin = 20;
-  const yMax = 120;
-  const yRange = yMax - yMin;
+  const chartW = WIDTH - PAD.left - PAD.right;
+  const chartH = HEIGHT - PAD.top - PAD.bottom;
 
   const xStep = chartW / (ordered.length - 1 || 1);
+  const yPos = (t: number) => {
+    const clamped = Math.max(Y_MIN, Math.min(Y_MAX, t));
+    return PAD.top + chartH - ((clamped - Y_MIN) / (Y_MAX - Y_MIN)) * chartH;
+  };
+  const xPos = (index: number) => PAD.left + index * xStep;
 
-  function yPos(t: number) {
-    const clamped = Math.max(yMin, Math.min(yMax, t));
-    return padding.top + chartH - ((clamped - yMin) / yRange) * chartH;
-  }
-  function xPos(i: number) {
-    return padding.left + i * xStep;
-  }
-
-  const tTicks = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
-
-  // Separate lines: cannotSay, validity, clinical
   const validityIds = new Set(['L', 'F', 'K']);
-  const cannotIds = new Set(['?']);
-
   const validityPoints = ordered.map((s, i) => ({ s, i })).filter(p => validityIds.has(p.s.id));
-  const clinicalPoints = ordered.map((s, i) => ({ s, i })).filter(p => !validityIds.has(p.s.id) && !cannotIds.has(p.s.id));
+  const clinicalPoints = ordered.map((s, i) => ({ s, i })).filter(p => !validityIds.has(p.s.id) && p.s.id !== '?');
 
-  function linePath(points: { s: ScaleResult; i: number }[]) {
-    if (points.length < 2) return '';
-    return points
-      .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${xPos(p.i)} ${yPos(p.s.tScore)}`)
-      .join(' ');
-  }
+  const linePath = (points: { s: ScaleResult; i: number }[]) =>
+    points.length < 2
+      ? ''
+      : points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${xPos(p.i).toFixed(2)} ${yPos(p.s.tScore).toFixed(2)}`).join(' ');
+
+  const pointFill = (s: ScaleResult): string => {
+    if (s.id === '?') {
+      if (s.rawScore >= 30) return COLOR_HIGH;
+      if (s.rawScore >= 11) return '#b4770b';
+      return COLOR_CANNOT;
+    }
+    if (s.tScore >= 70) return COLOR_HIGH;
+    return s.group === 'validity' ? COLOR_VALIDITY : COLOR_CLINICAL;
+  };
+
+  const separatorX = xPos(3) + xStep / 2;
 
   return (
     <div className="mmpi-chart-wrap">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="MMPI Profil Grafiği" className="mmpi-chart-svg">
-        {/* Grid */}
-        {tTicks.map(t => (
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        role="img"
+        aria-label="MMPI Profil Grafiği: geçerlik ve klinik ölçek T skorları"
+        className="mmpi-chart-svg"
+      >
+        {/* Yatay ızgara + T etiketleri */}
+        {Y_TICKS.map(t => (
           <g key={t}>
             <line
-              x1={padding.left}
-              x2={width - padding.right}
+              x1={PAD.left}
+              x2={WIDTH - PAD.right}
               y1={yPos(t)}
               y2={yPos(t)}
-              stroke={t === 50 ? '#0d9488' : t === 70 ? '#ef4444' : '#e2e8f0'}
-              strokeDasharray={t === 50 ? '4 3' : t === 70 ? '6 4' : '3 3'}
-              strokeWidth={t === 50 || t === 70 ? 1.2 : 0.8}
+              stroke={t === 30 ? AXIS : GRID}
+              strokeWidth={t === 30 ? 1.2 : 0.9}
+              strokeDasharray={t === 30 ? undefined : '3 4'}
             />
-            <text x={padding.left - 8} y={yPos(t) + 3} textAnchor="end" fontSize="10" fill="#64748b">
+            <text x={PAD.left - 12} y={yPos(t) + 4} textAnchor="end" fontSize="12" fill={LABEL_MUTED}>
               {t}
             </text>
           </g>
         ))}
 
-        {/* Vertical separator after ?LK */}
+        {/* T=70 klinik sınır */}
         <line
-          x1={xPos(3) + xStep / 2}
-          x2={xPos(3) + xStep / 2}
-          y1={padding.top}
-          y2={padding.top + chartH}
-          stroke="#cbd5e1"
-          strokeDasharray="4 4"
-          strokeWidth={1}
+          x1={PAD.left}
+          x2={WIDTH - PAD.right}
+          y1={yPos(70)}
+          y2={yPos(70)}
+          stroke={COLOR_HIGH}
+          strokeWidth="1.3"
+          strokeDasharray="7 5"
         />
+        <text x={PAD.left + 6} y={yPos(70) + 16} fontSize="11.5" fontWeight={600} fill={COLOR_HIGH}>
+          T=70 Sınır
+        </text>
 
-        {/* Clinical line */}
-        <path d={linePath(clinicalPoints)} fill="none" stroke="#6d28d9" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
-        {/* Validity line */}
-        <path d={linePath(validityPoints)} fill="none" stroke="#0d9488" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
-        {/* Cannot line is single point, no line */}
+        {/* T=50 ortalama */}
+        <line
+          x1={PAD.left}
+          x2={WIDTH - PAD.right}
+          y1={yPos(50)}
+          y2={yPos(50)}
+          stroke={AXIS}
+          strokeWidth="1"
+          strokeDasharray="4 5"
+        />
+        <text x={PAD.left + 6} y={yPos(50) + 16} fontSize="11.5" fontWeight={600} fill={LABEL_MUTED}>
+          T=50 Ortalama
+        </text>
 
-        {/* Points */}
-        {ordered.map((s, i) => {
-          const cx = xPos(i);
-          const cy = yPos(s.tScore);
-          const isHigh = s.tScore >= 70;
-          const fill = s.group === 'cannot' ? (s.rawScore >= 30 ? '#ef4444' : s.rawScore >= 11 ? '#f59e0b' : '#64748b') : isHigh ? '#ef4444' : s.group === 'validity' ? '#0d9488' : '#6d28d9';
-          return (
-            <g key={s.id}>
-              <circle cx={cx} cy={cy} r={6} fill={fill} stroke="#ffffff" strokeWidth={1.6} />
-              <text x={cx} y={cy - 12} textAnchor="middle" fontSize="10" fontWeight={700} fill={fill}>
-                {Math.round(s.tScore)}
-              </text>
-            </g>
-          );
-        })}
+        {/* Geçerlik | klinik ayracı */}
+        <line
+          x1={separatorX}
+          x2={separatorX}
+          y1={PAD.top - 6}
+          y2={PAD.top + chartH}
+          stroke={AXIS}
+          strokeWidth="1"
+          strokeDasharray="5 5"
+        />
+        <text x={separatorX} y={PAD.top + chartH + 22} textAnchor="middle" fontSize="13" fill={AXIS}>
+          |
+        </text>
 
-        {/* X labels */}
+        {/* Profil çizgileri */}
+        <path d={linePath(validityPoints)} fill="none" stroke={COLOR_VALIDITY} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
+        <path d={linePath(clinicalPoints)} fill="none" stroke={COLOR_CLINICAL} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
+
+        {/* Noktalar */}
         {ordered.map((s, i) => (
-          <text key={`label-${s.id}`} x={xPos(i)} y={padding.top + chartH + 18} textAnchor="middle" fontSize="11" fontWeight={700} fill={s.group === 'validity' ? '#0d9488' : s.group === 'cannot' ? '#64748b' : '#334155'}>
+          <circle
+            key={s.id}
+            cx={xPos(i)}
+            cy={yPos(s.tScore)}
+            r={5.5}
+            fill={pointFill(s)}
+            stroke="#ffffff"
+            strokeWidth="1.5"
+          />
+        ))}
+
+        {/* X ekseni etiketleri */}
+        {ordered.map((s, i) => (
+          <text
+            key={`label-${s.id}`}
+            x={xPos(i)}
+            y={PAD.top + chartH + 22}
+            textAnchor="middle"
+            fontSize="12.5"
+            fontWeight={700}
+            fill={s.id === '?' ? LABEL_MUTED : LABEL_INK}
+          >
             {s.shortName}
           </text>
         ))}
       </svg>
 
-      <div className="mmpi-chart-legend">
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#0d9488' }} /> Geçerlik (L,F,K)</span>
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#6d28d9' }} /> Klinik</span>
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#ef4444' }} /> T ≥70 klinik eşik</span>
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#0d9488', opacity: 0.3 }} /> 50 = Türk norm ortalaması</span>
+      <div className="mmpi-chart-legend" aria-hidden="true">
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: COLOR_VALIDITY }} /> Geçerlik Ölçekleri (L, F, K)
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: COLOR_CLINICAL }} /> Klinik Ölçekler (HS–SI)
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: COLOR_HIGH }} /> Klinik Yükseklik (T ≥ 70)
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot" style={{ background: COLOR_CANNOT }} /> Boş Soru Sınır Uyarısı (?)
+        </span>
       </div>
     </div>
   );

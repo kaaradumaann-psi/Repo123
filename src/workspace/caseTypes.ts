@@ -394,3 +394,5 @@ export function parseRecordPayload(raw: unknown[]) {
 export function methodLabel(method: EntryMethod): string {
   return method === 'quick' ? 'Hızlı veri girişi' : method === 'raw' ? 'Ham puan' : 'OMR / Kamera';
 }
+
+export type ParsedRecordPayload = ReturnType<typeof parseRecordPayload>;

@@ -1,4 +1,4 @@
-type IconName =
+export type IconName =
   | 'print'
   | 'left'
   | 'right'
@@ -21,7 +21,12 @@ type IconName =
   | 'checkCircle'
   | 'arrowRight'
   | 'sparkles'
-  | 'external';
+  | 'external'
+  | 'pulse'
+  | 'info'
+  | 'list'
+  | 'trend'
+  | 'layers';
 
 const paths: Record<IconName, string> = {
   print: 'M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01',
@@ -47,6 +52,11 @@ const paths: Record<IconName, string> = {
   arrowRight: 'M5 12h14M12 5l7 7-7 7',
   sparkles: 'm12 3 1.91 5.89L20 10.8l-4.59 3.96L16.82 21 12 17.27 7.18 21l1.41-6.24L4 10.8l6.09-1.91L12 3z',
   external: 'M7 17 17 7M9 7h8v8',
+  pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
+  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
+  list: 'M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01',
+  trend: 'M3 17l6-6 4 4 8-8M15 7h6v6',
+  layers: 'm12 2 10 5-10 5L2 7l10-5zM2 12l10 5 10-5M2 17l10 5 10-5',
 };
 
 export function Icon({ name, size = 20, className }: { name: IconName; size?: number; className?: string }) {

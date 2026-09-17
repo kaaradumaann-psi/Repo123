@@ -193,10 +193,10 @@ export const SCALE_META: Record<ScaleId, { name: string; short: string; full: st
 };
 
 export const T_INTERPRETATION: { min: number; max: number; level: 'veryLow' | 'low' | 'average' | 'moderate' | 'high' | 'veryHigh'; label: string; color: string }[] = [
-  { min: 0, max: 35, level: 'veryLow', label: 'Çok Düşük', color: '#3b82f6' },
-  { min: 35, max: 45, level: 'low', label: 'Düşük', color: '#22c55e' },
-  { min: 45, max: 56, level: 'average', label: 'Normal', color: '#22c55e' },
-  { min: 56, max: 70, level: 'moderate', label: 'Orta Yüksek', color: '#eab308' },
-  { min: 70, max: 80, level: 'high', label: 'Yüksek (Klinik)', color: '#f97316' },
-  { min: 80, max: 200, level: 'veryHigh', label: 'Çok Yüksek', color: '#ef4444' },
+  { min: 0, max: 35, level: 'veryLow', label: 'Çok Düşük', color: '#8e8e93' },
+  { min: 35, max: 45, level: 'low', label: 'Düşük', color: '#0e9e6a' },
+  { min: 45, max: 56, level: 'average', label: 'Normal', color: '#0d0d0d' },
+  { min: 56, max: 70, level: 'moderate', label: 'Orta Yüksek', color: '#b4770b' },
+  { min: 70, max: 80, level: 'high', label: 'Yüksek (Klinik)', color: '#d2453a' },
+  { min: 80, max: 200, level: 'veryHigh', label: 'Çok Yüksek', color: '#b93b31' },
 ];

@@ -1086,12 +1086,12 @@
   .ws-restore-inline-body { flex: 1; min-width: 0; }
   .ws-restore-inline-body strong { font-weight: 700; }
 
-  /* ===== MMPI Sonuç paneli & grafik ===== */
+  /* ===== MMPI Sonuç paneli & grafik (sekmeli) ===== */
   .mmpi-results-panel {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    padding: 20px;
+    gap: 16px;
+    padding: 18px 20px 14px;
     background: var(--white);
     border: 1px solid var(--hairline);
     border-radius: var(--radius-lg);
@@ -1100,15 +1100,37 @@
   .mmpi-results-header {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: 14px;
     align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .mmpi-results-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .mmpi-chip {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--slate-700);
+    background: var(--slate-50);
+    border: 1px solid var(--hairline);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+  .mmpi-chip-code {
+    background: var(--primary-tint);
+    border-color: var(--primary-border);
+    color: var(--accent-ink);
   }
   .mmpi-results-title {
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: 22px;
+    font-size: 21px;
     letter-spacing: -0.03em;
-    margin: 8px 0 4px;
+    margin: 0;
   }
   .mmpi-results-title em { font-style: italic; }
   .mmpi-validity-pill {
@@ -1132,19 +1154,72 @@
     border-color: var(--danger-border);
     color: #991b1b;
   }
-  .mmpi-chart-card {
-    padding: 16px;
-    background: #fbfdff;
-    border: 1px solid var(--primary-border);
-    border-radius: var(--radius-lg);
-    overflow-x: auto;
+
+  /* Sekmeler */
+  .mmpi-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--hairline);
   }
+  .mmpi-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--hairline);
+    background: var(--white);
+    color: var(--soft);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .mmpi-tab:hover { background: var(--bg-soft); color: var(--text); }
+  .mmpi-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mmpi-tab.active {
+    background: var(--text);
+    color: var(--white);
+    border-color: var(--text);
+    box-shadow: 0 1px 2px rgba(13, 13, 13, 0.06);
+  }
+  .mmpi-tab.active:hover { background: var(--slate-800); }
+  .mmpi-tab-panel { display: flex; flex-direction: column; gap: 14px; }
+  .mmpi-section-title {
+    margin: 4px 0 8px;
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  /* Grafik kartı */
+  .mmpi-chart-card {
+    padding: 16px 18px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+  }
+  .mmpi-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--slate-800);
+  }
+  .mmpi-card-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
   .mmpi-chart-wrap {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     min-width: 640px;
   }
+  .mmpi-chart-card { overflow-x: auto; }
   .mmpi-chart-svg {
     width: 100%;
     height: auto;
@@ -1152,53 +1227,138 @@
   }
   .mmpi-chart-legend {
     display: flex;
-    gap: 14px;
+    gap: 18px;
     flex-wrap: wrap;
-    font-size: 11px;
+    justify-content: center;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--hairline);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: var(--soft);
   }
   .legend-item { display: inline-flex; align-items: center; gap: 6px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
-  .mmpi-tables-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .mmpi-table-card {
-    padding: 14px;
-    background: var(--bg-soft);
+  /* Genel Bakış özet tablosu */
+  .mmpi-summary-card {
     border: 1px solid var(--hairline);
-    border-radius: var(--radius-md);
-    overflow: hidden;
+    border-radius: var(--radius-lg);
+    padding: 8px 14px 12px;
+    background: var(--white);
   }
-  .mmpi-table-title {
-    margin: 0 0 10px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  .mmpi-summary-table-wrap { overflow-x: auto; }
+  .mmpi-summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mmpi-summary-table th,
+  .mmpi-summary-table td {
+    padding: 13px 10px;
+    text-align: center;
+  }
+  .mmpi-summary-table thead th {
     color: var(--text);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--hairline);
   }
-  .mmpi-mini-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12.5px;
-  }
-  .mmpi-mini-table th {
+  .mmpi-summary-table .row-head {
     text-align: left;
     font-size: 10.5px;
     text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    font-weight: 700;
+    min-width: 130px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .mmpi-summary-table tbody tr { border-bottom: 1px solid var(--hairline); }
+  .mmpi-summary-table tbody tr:last-child { border-bottom: none; }
+  .mmpi-summary-table .num {
+    font-weight: 700;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+  }
+  .mmpi-summary-table .k-add { color: var(--accent-ink); font-weight: 600; }
+  .mmpi-summary-table .t-val { font-weight: 800; font-size: 13.5px; }
+  .mmpi-summary-note {
+    margin: 8px 2px 0;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Geçerlik Analizleri */
+  .mmpi-vgrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .mmpi-vcard {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mmpi-vcard.is-high { border-color: var(--danger-border); background: var(--danger-tint); }
+  .mmpi-vcard.is-low { border-color: var(--hairline); background: var(--bg-soft); }
+  .mmpi-vcard-head { display: flex; align-items: center; gap: 8px; }
+  .mmpi-vcard-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: #ffffff;
+    background: var(--text);
+    flex: none;
+  }
+  .mmpi-vcard-letter.q { background: var(--slate-400); }
+  .mmpi-vcard-name { font-size: 12.5px; font-weight: 700; color: var(--slate-800); line-height: 1.3; }
+  .mmpi-vcard-desc {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--soft);
+    line-height: 1.45;
+    flex: 1;
+  }
+  .mmpi-vcard-stats {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    border-top: 1px dashed var(--hairline);
+    padding-top: 10px;
+  }
+  .mmpi-vstat { display: flex; flex-direction: column; gap: 2px; }
+  .mmpi-vstat span {
+    font-size: 9.5px;
+    text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--muted);
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--hairline);
+    font-weight: 700;
   }
-  .mmpi-mini-table td {
-    padding: 7px 8px;
-    border-bottom: 1px solid var(--hairline);
+  .mmpi-vstat b {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
   }
-  .mmpi-mini-table tr.is-high { background: #fff7f7; }
-  .mmpi-mini-table tr.is-mid { background: #fffaf0; }
+  .mmpi-vcard-signal {
+    margin: 0;
+    font-size: 11.5px;
+    color: #92400e;
+    background: var(--warning-tint);
+    border: 1px solid var(--warning-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    line-height: 1.45;
+  }
   .level-badge {
     display: inline-block;
     padding: 2px 7px;
@@ -1207,22 +1367,288 @@
     font-weight: 700;
     color: white;
     letter-spacing: 0.02em;
+    white-space: nowrap;
   }
-  .mmpi-validity-box {
-    margin-top: 12px;
-    padding: 10px 12px;
-    background: var(--white);
+  .mmpi-fk-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
     border: 1px solid var(--hairline);
     border-radius: var(--radius-md);
-    font-size: 12px;
+    padding: 12px 14px;
+    background: var(--white);
+    font-size: 12.5px;
+  }
+  .mmpi-fk-left { display: flex; flex-direction: column; gap: 2px; }
+  .mmpi-fk-left b { font-size: 12.5px; color: var(--slate-800); }
+  .mmpi-fk-left span { font-size: 11px; color: var(--muted); }
+  .mmpi-fk-value { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .mmpi-fk-label { font-weight: 700; font-size: 12px; }
+  .mmpi-box {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-size: 12.5px;
     line-height: 1.5;
-    color: var(--soft);
+    border: 1px solid;
   }
-  .mmpi-validity-box ul {
-    margin: 8px 0 0;
-    padding-left: 16px;
+  .mmpi-box svg { flex: none; margin-top: 2px; }
+  .mmpi-box.warn { background: var(--warning-tint); border-color: var(--warning-border); color: #7c5407; }
+  .mmpi-box.ok { background: var(--success-tint); border-color: var(--success-border); color: #0a6b49; }
+  .mmpi-box.info { background: var(--primary-tint); border-color: var(--primary-border); color: var(--accent-ink); }
+  .mmpi-box ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 5px;
+    flex: 1;
   }
-  .mmpi-validity-box li { margin: 2px 0; }
+  .mmpi-box li { display: flex; gap: 6px; align-items: flex-start; }
+  .mmpi-box li svg { margin-top: 3px; }
+
+  /* Klinik Ölçekler */
+  .mmpi-clinical-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .clin-row {
+    display: flex;
+    gap: 16px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--white);
+  }
+  .clin-row:last-child { border-bottom: none; }
+  .clin-row.is-high { background: var(--danger-tint); }
+  .clin-row.is-mid { background: var(--warning-tint); }
+  .clin-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .clin-row-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .clin-chip {
+    min-width: 34px;
+    text-align: center;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  .clin-row-head strong { font-size: 13.5px; color: var(--slate-900); }
+  .clin-desc { margin: 0; font-size: 12px; color: var(--soft); line-height: 1.5; }
+  .clin-signal {
+    margin: 0;
+    font-size: 12px;
+    color: #92400e;
+    background: var(--warning-tint);
+    border: 1px solid var(--warning-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    line-height: 1.45;
+  }
+  .clin-signal.is-low {
+    color: var(--accent-ink);
+    background: var(--primary-tint);
+    border-color: var(--primary-border);
+  }
+  .clin-row-stats { display: flex; align-items: center; gap: 16px; flex: none; }
+  .clin-stat { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .clin-stat span {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .clin-stat b {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--slate-800);
+    font-variant-numeric: tabular-nums;
+  }
+  .clin-stat b.k { color: var(--accent-ink); }
+  .clin-t {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    min-width: 58px;
+    text-align: right;
+    line-height: 1;
+  }
+
+  /* Kod Analizleri */
+  .mmpi-code-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) 1.5fr;
+    gap: 14px;
+    align-items: stretch;
+  }
+  .mmpi-code-card {
+    border: 1px solid var(--hairline);
+    background: var(--bg-soft);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mmpi-code-value {
+    font-size: 46px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .mmpi-code-name { font-size: 13px; font-weight: 700; color: var(--slate-800); }
+  .mmpi-code-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-top: 1px dashed var(--hairline);
+    padding-top: 10px;
+  }
+  .mmpi-code-scale b { font-size: 12.5px; color: var(--slate-800); }
+  .mmpi-code-scale span { font-size: 11.5px; color: var(--soft); line-height: 1.5; }
+  .mmpi-code-desc {
+    display: flex;
+    gap: 7px;
+    align-items: flex-start;
+    margin: auto 0 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .mmpi-code-desc svg { flex: none; margin-top: 2px; }
+  .mmpi-code-bars {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    background: var(--white);
+  }
+  .code-bar-row {
+    display: grid;
+    grid-template-columns: 34px 1fr 52px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .code-bar-label { font-size: 12px; font-weight: 800; color: var(--text); text-align: center; }
+  .code-bar-track { height: 12px; border-radius: 999px; background: var(--slate-100); overflow: hidden; }
+  .code-bar-fill { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+  .code-bar-val {
+    font-size: 12.5px;
+    font-weight: 800;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Ek Ölçekler & Kritikler */
+  .mmpi-crit-list { display: flex; flex-direction: column; gap: 10px; }
+  .mmpi-crit-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid var(--danger-border);
+    background: var(--danger-tint);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+  }
+  .mmpi-crit-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); margin-top: 4px; flex: none; }
+  .mmpi-crit-item b { font-size: 12.5px; color: var(--slate-800); }
+  .mmpi-crit-item p { margin: 2px 0 0; font-size: 11.5px; color: var(--soft); line-height: 1.45; }
+  .mmpi-pattern-list { display: flex; flex-direction: column; gap: 8px; }
+  .mmpi-pattern-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--white);
+  }
+  .mmpi-pattern-row.is-hit { border-color: var(--primary-border); background: var(--primary-tint); }
+  .mmpi-pattern-main { flex: 1; min-width: 0; }
+  .mmpi-pattern-main b { font-size: 12.5px; color: var(--slate-800); display: block; }
+  .mmpi-pattern-main span { font-size: 11px; color: var(--muted); }
+  .mmpi-pattern-main p { font-size: 11.5px; color: var(--soft); margin: 4px 0 0; line-height: 1.45; }
+  .pattern-pill {
+    flex: none;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+  .pattern-pill.hit { background: var(--primary-tint); color: var(--accent-ink); }
+  .pattern-pill.miss { background: var(--slate-100); color: var(--muted); }
+  .mmpi-glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .mmpi-glossary-item {
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--white);
+  }
+  .mmpi-glossary-item b { font-size: 12px; color: var(--slate-800); display: flex; gap: 6px; align-items: center; }
+  .mmpi-glossary-item b i { font-style: normal; color: var(--accent-ink); font-weight: 800; }
+  .mmpi-glossary-item p { margin: 4px 0 0; font-size: 11px; color: var(--soft); line-height: 1.45; }
+
+  /* Soru Yanıtları */
+  .mmpi-answers-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ans-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--white);
+    color: var(--slate-700);
+  }
+  .ans-chip b { font-variant-numeric: tabular-nums; }
+  .ans-chip.chip-d { background: var(--success-tint); border-color: var(--success-border); color: #0a6b49; }
+  .ans-chip.chip-y { background: var(--slate-100); border-color: var(--hairline); color: var(--slate-700); }
+  .ans-chip.chip-blank { background: var(--danger-tint); border-color: var(--danger-border); color: #991b1b; }
+  .mmpi-answers-grid {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    background: var(--white);
+    max-height: 480px;
+    overflow: auto;
+  }
+  .mmpi-answers-row {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(40px, 1fr));
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .ans-cell {
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--slate-50);
+    padding: 4px 4px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+  .ans-num { font-size: 8.5px; color: var(--muted); font-weight: 700; }
+  .ans-letter { font-size: 11px; font-weight: 800; color: var(--slate-600); }
+  .ans-cell.a-d { background: var(--success-tint); border-color: var(--success-border); }
+  .ans-cell.a-d .ans-letter { color: #0a6b49; }
+  .ans-cell.a-y { background: var(--slate-100); border-color: var(--hairline); }
+  .ans-cell.a-y .ans-letter { color: var(--slate-700); }
+  .ans-cell.a-blank { background: var(--danger-tint); border-color: var(--danger-border); }
+  .ans-cell.a-blank .ans-letter { color: #991b1b; }
+  .ans-cell.a-pending .ans-letter { color: var(--slate-400); }
+
   .mmpi-info-foot {
     font-size: 11px;
     color: var(--muted);
@@ -1241,6 +1667,46 @@
     color: var(--soft);
   }
   .mmpi-results-placeholder strong { color: var(--text); display: block; margin-bottom: 4px; }
+  .record-results-section { margin-bottom: 18px; }
+
+  /* Detay modalında sonuç grafiği rahat görünsün */
+  .modal-container.modal-wide { max-width: 1240px; }
+
+  /* Testi İncele — modal düzeni */
+  .modal-header-row { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+  .modal-quicknav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 24px 0;
+  }
+  .quicknav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--hairline);
+    background: var(--slate-50);
+    color: var(--slate-700);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .quicknav-chip:hover {
+    background: var(--bg-soft);
+    border-color: var(--slate-300);
+    color: var(--text);
+  }
+  .quicknav-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .modal-section-anchor { scroll-margin-top: 8px; }
+  .modal-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text);
+  }
 }
 
 @media screen and (max-width: 900px) {
@@ -1249,10 +1715,16 @@
   .form-kit-head { flex-direction: column; }
   .form-kit-file { max-width: none; width: 100%; }
   .connectivity-banner { width: calc(100% - 32px); }
-  .mmpi-tables-grid { grid-template-columns: 1fr; }
   .ws-restore-card { flex-direction: column; }
   .ws-restore-actions { flex-direction: row; width: 100%; }
   .ws-restore-actions .btn-primary, .ws-restore-actions .btn-secondary { flex: 1; justify-content: center; }
+  .mmpi-vgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mmpi-code-grid { grid-template-columns: 1fr; }
+  .mmpi-glossary { grid-template-columns: 1fr; }
+  .clin-row { flex-direction: column; gap: 10px; }
+  .clin-row-stats { align-items: flex-start; }
+  .clin-stat { align-items: flex-start; }
+  .clin-t { text-align: left; }
   .mmpi-chart-wrap { min-width: 0; }
   .mmpi-results-header { flex-direction: column; }
 }
