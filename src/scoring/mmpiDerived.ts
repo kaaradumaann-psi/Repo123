@@ -99,6 +99,9 @@ const PERSONALITY_CUTOFFS: Record<PersonalityScaleId, PdCutoff> = {
   SZD: { marked: 7, mild: 5 },
 };
 
+/** UI'da eşik çipleri için dışa açılmıştır; değerler değişmeden yalnızca okunur. */
+export const PERSONALITY_CUTOFFS_READ_ONLY: Record<PersonalityScaleId, PdCutoff> = PERSONALITY_CUTOFFS;
+
 const PERSONALITY_MARKED_TEXT: Record<PersonalityScaleId, string> = {
   HST: 'Belirgin histrionik özellikler: ilgi odağı olma ihtiyacı, duygusal abartı, yüzeysel ilişkiler ve manipülatif davranışlar gözlenebilir.',
   NAR: 'Belirgin narsisistik özellikler: kendini aşırı önemseme, empati eksikliği, sınırsız başarı hayalleri ve başkalarını kullanma eğilimi.',

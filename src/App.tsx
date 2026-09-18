@@ -168,17 +168,6 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           </div>
 
           <div className="header-user">
-            <button
-              type="button"
-              className="home-site-link"
-              onClick={() => {
-                window.location.hash = route.view === 'sources' ? '' : SOURCES_ROUTE;
-              }}
-              title="Uygulamada kullanılan bilimsel ve teknik kaynaklar"
-            >
-              <span>Kaynakça</span>
-              <Icon name="file" size={13} />
-            </button>
             <a
               className="home-site-link"
               href={SITE_URL}
