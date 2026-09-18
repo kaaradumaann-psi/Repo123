@@ -6,7 +6,7 @@ import { Icon } from '../Icon';
 const GLOSSARY_ORDER: ScaleId[] = ['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
 
 /**
- * Ek Ölçekler & Kritikler sekmesi — kaynak.pdf band yorumlarıyla klinik eşiği
+ * Ek Ölçekler & Kritikler sekmesi — klinik yorum rehberi band yorumlarıyla klinik eşiği
  * aşan ölçekler, kaynakta tanımlanan profil konfigürasyonları ve tek ölçek
  * yükselmeleri, ayrıca tüm ölçeklerin sözlüğü.
  */

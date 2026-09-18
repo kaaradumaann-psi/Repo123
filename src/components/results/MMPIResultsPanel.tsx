@@ -9,16 +9,28 @@ import { MMPIValidityTab } from './MMPIValidityTab';
 import { MMPIClinicalTab } from './MMPIClinicalTab';
 import { MMPICodeTab } from './MMPICodeTab';
 import { MMPIExtraTab } from './MMPIExtraTab';
+import { MMPIDerivedSection } from './MMPIDerivedSection';
+import { MMPICriticalSection } from './MMPICriticalSection';
 import { MMPIAnswersTab } from './MMPIAnswersTab';
 
-export type MmpiResultsTab = 'overview' | 'validity' | 'clinical' | 'code' | 'extra' | 'answers';
+export type MmpiResultsTab =
+  | 'overview'
+  | 'validity'
+  | 'clinical'
+  | 'code'
+  | 'derived'
+  | 'extra'
+  | 'critical'
+  | 'answers';
 
 const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
   { id: 'overview', label: 'Genel Bakış', icon: 'pulse' },
   { id: 'validity', label: 'Geçerlik Analizleri', icon: 'info' },
   { id: 'clinical', label: 'Klinik Ölçekler', icon: 'list' },
   { id: 'code', label: 'Kod Analizleri', icon: 'trend' },
-  { id: 'extra', label: 'Ek Ölçekler & Kritikler', icon: 'layers' },
+  { id: 'derived', label: 'Türetilmiş Ölçekler', icon: 'layers' },
+  { id: 'extra', label: 'Desenler & Sözlük', icon: 'file' },
+  { id: 'critical', label: 'Kritik Bulgular', icon: 'alert' },
   { id: 'answers', label: 'Soru Yanıtları', icon: 'sheet' },
 ];
 
@@ -35,8 +47,10 @@ function formatT(t: number): string {
 
 /**
  * MMPI sonuç paneli — sekmeli düzen:
- * Genel Bakış (profil grafiği + özet tablo), Geçerlik Analizleri, Klinik
- * Ölçekler, Kod Analizleri, Ek Ölçekler & Kritikler, Soru Yanıtları.
+ * Genel Bakış (profil grafiği + özet tablo), Geçerlik Analizleri (TR,
+ * Dikkatsizlik, F-K ve konfigürasyonlarla), Klinik Ölçekler, Kod Analizleri,
+ * Türetilmiş Ölçekler & Endeksler, Desenler & Sözlük, Kritik Bulgular,
+ * Soru Yanıtları.
  */
 export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
   const [tab, setTab] = useState<MmpiResultsTab>('overview');
@@ -131,10 +145,10 @@ export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
               </table>
             </div>
             <p className="mmpi-summary-note">
-              T skorları cinsiyete özgü Türk normlarına göre hesaplanır; klinik ölçeklerde K düzeltmesi
-              uygulanmıştır. Ölçeğe özgü T puanı aralıkları ve yorumları kaynak rapora dayanır ve “Klinik
-              Ölçekler” sekmesinde gösterilir; geçerlik kararları “Geçerlik Analizleri” sekmesindeki kaynak
-              tablolarına göre verilir.
+              T skorları cinsiyete özgü Türk normlarına göre hesaplanır; klinik ölçeklerde K düzeltmesi uygulanmıştır
+              (standart ekleme tablosu). Ölçeğe özgü T puanı aralıkları ve yorumları “Klinik Ölçekler” sekmesinde;
+              geçerlik kararları, TR/Dikkatsizlik endeksleri, F-K analizi ve geçerlik konfigürasyonu “Geçerlik
+              Analizleri” sekmesinde gösterilir.
             </p>
           </section>
         </div>
@@ -143,14 +157,16 @@ export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
       {tab === 'validity' && <MMPIValidityTab profile={profile} />}
       {tab === 'clinical' && <MMPIClinicalTab profile={profile} />}
       {tab === 'code' && <MMPICodeTab profile={profile} />}
+      {tab === 'derived' && <MMPIDerivedSection profile={profile} />}
       {tab === 'extra' && <MMPIExtraTab profile={profile} />}
+      {tab === 'critical' && <MMPICriticalSection profile={profile} />}
       {tab === 'answers' && <MMPIAnswersTab answers={answers} />}
 
       <p className="mmpi-info-foot">
-        * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme
-        oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) kullanılarak yapılmıştır. Geçerlik analizleri, klinik ölçek
-        yorumları, tek ölçek yükselmeleri ve kod analizleri depodaki kaynak.pdf raporuna birebir dayanır.
-        Kesme puanları tanı koymaz; yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
+        * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme oranları
+        (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2 — standart ekleme tablosuyla) kullanılarak yapılmıştır. Geçerlik analizleri,
+        klinik ölçek yorumları, tek ölçek yükselmeleri ve kod analizleri klinik yorum rehberine dayanır. Kesme puanları
+        tanı koymaz; yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
       </p>
     </div>
   );

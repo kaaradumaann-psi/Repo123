@@ -1,4 +1,8 @@
-import { SCORING_KEYS, K_CORRECTION, TURKISH_NORMS, SCALE_META, T_INTERPRETATION, isGendered, type Gender, type ScaleId } from './mmpiKeys';
+import { SCORING_KEYS, K_CORRECTION, kAddition, TURKISH_NORMS, SCALE_META, T_INTERPRETATION, isGendered, type Gender, type ScaleId } from './mmpiKeys';
+import { trIndex, carelessnessIndex, fkIndexAnalysis, type TrIndexResult, type CarelessnessResult, type FkAnalysis } from './mmpiConsistency';
+import { detectValidityConfig, type ValidityConfig } from './mmpiValidityConfigs';
+import { computeDerivedScales, computeDerivedIndexes, tMapFromProfileScales, type DerivedScaleResult, type DerivedIndexResult } from './mmpiDerived';
+import { findCriticalItems, clinicalImpressions, type CriticalItemHit, type ClinicalImpression } from './mmpiCritical';
 import {
   CANNOT_SAY_RAW_BANDS,
   F_RAW_BANDS,
@@ -32,7 +36,7 @@ export type ScaleResult = {
   color: string;
 };
 
-/** kaynak.pdf'teki ham puan tablosuna dayanan tek geçerlik ölçeği bulgusu. */
+/** yorum rehberindeki ham puan tablosuna dayanan tek geçerlik ölçeği bulgusu. */
 export type ValidityFinding = {
   id: '?' | 'L' | 'F' | 'K';
   fullName: string;
@@ -65,6 +69,26 @@ export type ValidityAnalysis = {
   findings: ValidityFinding[];
   /** F-K endeksi 16'nın üstünde ise kaynağın uyarısı; değilse null. */
   fMinusKNote: string | null;
+  /** F-K endeksi için ayrıntılı bant değerlendirmesi (Gough). */
+  fkAnalysis: FkAnalysis;
+  /** L/F/K T puanlarının oluşturduğu geçerlik konfigürasyonu; yoksa null. */
+  validityConfig: ValidityConfig | null;
+};
+
+/**
+ * Madde düzeyinde cevap verisiyle hesaplanan genişletilmiş analiz katmanı.
+ * Ham puan girişinde (566 cevap yoksa) bu katman bulunmaz; arayüz bunu
+ * kullanıcıya not olarak gösterir.
+ */
+export type ItemLevelAnalysis = {
+  responses: ResponseMap;
+  answeredCount: number;
+  trIndex: TrIndexResult;
+  carelessness: CarelessnessResult;
+  derivedScales: DerivedScaleResult[];
+  derivedIndexes: DerivedIndexResult[];
+  criticalItems: CriticalItemHit[];
+  impressions: ClinicalImpression[];
 };
 
 export type MMPIProfile = {
@@ -78,6 +102,8 @@ export type MMPIProfile = {
   profileCode?: string;
   maxT: number;
   minT: number;
+  /** Yalnızca madde düzeyinde cevap verisi varsa doldurulur. */
+  itemLevel?: ItemLevelAnalysis;
 };
 
 function tLevel(t: number) {
@@ -166,7 +192,7 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
     let added: number | undefined;
     if (id in K_CORRECTION) {
       const ratio = K_CORRECTION[id as keyof typeof K_CORRECTION]!;
-      added = Math.round(kRaw * ratio);
+      added = kAddition(kRaw, ratio);
       corrected = raw + added;
     }
     const t = computeT(corrected, id as Exclude<ScaleId, '?'>, gender);
@@ -187,7 +213,7 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
     });
   });
 
-  // ? scale — T hesaplaması değişmez; düzey etiketi kaynak.pdf ham puan tablosundan gelir.
+  // ? scale — T hesaplaması değişmez; düzey etiketi yorum rehberi ham puan tablosundan gelir.
   const qT = Math.min(30 + cannotSay * 2, 120);
   const qBand = findBand(CANNOT_SAY_RAW_BANDS, cannotSay);
   const qLvl = qBand.tone === 'alert'
@@ -240,7 +266,7 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
 }
 
 /**
- * Geçerlik analizi — kaynak.pdf'in ham puan tablolarına (?) s.48-49,
+ * Geçerlik analizi — yorum rehberinin ham puan tablolarına (?) s.48-49,
  * L s.49, K s.49-51, F s.51-52) ve T puanı aralıklarına (L/F/K s.1-3)
  * birebir dayanır. Puanlama matematiğine dokunmaz; yalnızca ham/T
  * değerlerini kaynaktaki bantlarla eşleştirir.
@@ -283,9 +309,9 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     },
   ];
 
-  // kaynak.pdf: Ham 31 ve üstü boş → profil büyük olasılıkla geçersizdir.
+  // klinik yorum rehberi: Ham 31 ve üstü boş → profil büyük olasılıkla geçersizdir.
   const qInvalid = cannotSay >= VALIDITY_CUTOFFS.cannotSayInvalid;
-  // kaynak.pdf: Ham 23 ve üstü F → profil geçersizdir.
+  // klinik yorum rehberi: Ham 23 ve üstü F → profil geçersizdir.
   const fInvalid = fRaw >= VALIDITY_CUTOFFS.fInvalid;
   const isValid = !(qInvalid || fInvalid);
 
@@ -315,11 +341,18 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     warnings.push(`K ham ${kRaw} (${kBand.rangeLabel}, ${kBand.label}): aşırı stres nedeniyle kişisel kaynakları sınırlanmış bireyler; psikolojik yaklaşımda prognez sınırlıdır.`);
   }
 
-  // kaynak.pdf s.48: F-K endeksi 16'nın üstünde ise dikkatli değerlendirme gerekir.
+  // Yorum rehberi: F-K endeksi 16'nın üstünde ise dikkatli değerlendirme gerekir.
   const fMinusKNote = fMinusK > VALIDITY_CUTOFFS.fkIndexAlert ? FK_INDEX_NOTE : null;
   if (fMinusKNote) {
     warnings.push(`F-K endeksi ${fMinusK} (16'nın üstünde): ${FK_INDEX_NOTE}`);
   }
+
+  // F-K için ayrıntılı bant değerlendirmesi ve L/F/K geçerlik konfigürasyonu.
+  const fkAnalysis = fkIndexAnalysis(fRaw, kRaw);
+  if (fkAnalysis.isWarning && !fMinusKNote) {
+    warnings.push(`F-K endeksi ${fMinusK} (${fkAnalysis.level}): ${fkAnalysis.interpretation}`);
+  }
+  const validityConfig = detectValidityConfig(lT, fT, kT);
 
   let interpretation: string;
   if (!isValid) {
@@ -353,6 +386,8 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     interpretation,
     findings,
     fMinusKNote,
+    fkAnalysis,
+    validityConfig,
   };
 }
 
@@ -370,7 +405,42 @@ export function buildProfileFromAnswers(answers: readonly ItemAnswer[], gender: 
     '?': blank,
     ...rawClin,
   } as any;
-  return buildProfileFromRaw(rawAll, gender);
+  const profile = buildProfileFromRaw(rawAll, gender);
+
+  // Madde düzeyinde genişletilmiş analiz katmanı (TR, Dikkatsizlik, türetilmiş
+  // ölçekler, kritik maddeler ve klinik izlenimler).
+  const answeredCount = Object.values(map).filter(v => v === 1 || v === 0).length;
+  const trResult = trIndex(map);
+  const carelessnessResult = carelessnessIndex(map);
+  if (trResult.isWarning) {
+    profile.validityAnalysis.warnings.push(`TR endeksi yüksek (${trResult.score}): yanıtlar tutarsız olabilir.`);
+  }
+  if (carelessnessResult.isWarning) {
+    profile.validityAnalysis.warnings.push(`Dikkatsizlik endeksi yüksek (${carelessnessResult.score}): olası rastgele işaretleme.`);
+  }
+  const tMap = tMapFromProfileScales(profile.scales);
+  const derivedScales = computeDerivedScales(map);
+  const derivedIndexes = computeDerivedIndexes(tMap);
+  const criticalItems = findCriticalItems(map, gender);
+  const impressions = clinicalImpressions({
+    t: tMap,
+    lRaw: profile.validityAnalysis.lRaw,
+    kRaw: profile.validityAnalysis.kRaw,
+    responses: map,
+    gender,
+  });
+
+  profile.itemLevel = {
+    responses: map,
+    answeredCount,
+    trIndex: trResult,
+    carelessness: carelessnessResult,
+    derivedScales,
+    derivedIndexes,
+    criticalItems,
+    impressions,
+  };
+  return profile;
 }
 
 export function buildProfileFromRawScoresObject(scores: RawScores, gender: Gender): MMPIProfile {

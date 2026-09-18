@@ -1,8 +1,8 @@
 /**
- * kaynak.pdf'e birebir dayanan yorum katmanı.
+ * yorum rehberine birebir dayanan yorum katmanı.
  *
  * Bu dosyadaki tüm kesme noktaları, aralıklar ve yorum metinleri depodaki
- * `kaynak.pdf` raporundan alınmıştır (MMPI alt test yorum rehberi).
+ * `klinik yorum rehberi` raporundan alınmıştır (MMPI alt test yorum rehberi).
  * Puanlama algoritması, Türk normları ve K düzeltmesi `mmpiKeys.ts` ve
  * `mmpiScoring.ts` içindedir; bu dosya yalnızca *değerlere göre sonuç*
  * (band → yorum) eşlemesini taşır.
@@ -39,7 +39,7 @@ export function findBand(bands: readonly Band[], value: number): Band {
 }
 
 /* ------------------------------------------------------------------ */
-/* Geçerlik ölçekleri — ham puan tabloları (kaynak.pdf s.48-52)        */
+/* Geçerlik ölçekleri — ham puan tabloları (klinik yorum rehberi s.48-52)        */
 /* ------------------------------------------------------------------ */
 
 /** (?) “Hiç Bir Şey Diyemem” skalası — boş madde sayısı. */
@@ -131,7 +131,7 @@ export const F_RAW_BANDS: Band[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Geçerlik ölçekleri — T puanı aralıkları (kaynak.pdf s.1-3)          */
+/* Geçerlik ölçekleri — T puanı aralıkları (klinik yorum rehberi s.1-3)          */
 /* ------------------------------------------------------------------ */
 
 export const L_T_BANDS: Band[] = [
@@ -200,7 +200,7 @@ export const K_T_BANDS: Band[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Klinik ölçekler — T puanı aralıkları (kaynak.pdf s.3-47)            */
+/* Klinik ölçekler — T puanı aralıkları (klinik yorum rehberi s.3-47)            */
 /* ------------------------------------------------------------------ */
 
 export const HS_T_BANDS: Band[] = [
@@ -474,7 +474,7 @@ export function clinicalBands(id: ScaleId, gender: Gender): readonly Band[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tek ölçek yükselmeleri (kaynak.pdf "Sadece X alt testinin yükselmesi") */
+/* Tek ölçek yükselmeleri (klinik yorum rehberi "Sadece X alt testinin yükselmesi") */
 /* ------------------------------------------------------------------ */
 
 export type SingleElevation = {
@@ -526,7 +526,7 @@ export const SINGLE_PT: SingleElevation = {
 };
 
 /* ------------------------------------------------------------------ */
-/* F-K endeksi (kaynak.pdf s.48)                                       */
+/* F-K endeksi (klinik yorum rehberi s.48)                                       */
 /* ------------------------------------------------------------------ */
 
 export const FK_INDEX_NOTE =

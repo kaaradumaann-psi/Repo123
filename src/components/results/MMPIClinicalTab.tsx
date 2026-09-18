@@ -3,7 +3,7 @@ import type { ScaleId } from '../../scoring/mmpiKeys';
 import { SCALE_MEANINGS, clinicalBandFor, detectSingleElevations, tColor } from '../../scoring/mmpiInterpretation';
 
 /**
- * Klinik Ölçekler sekmesi — her ölçek için kaynak.pdf'teki T puanı aralığının
+ * Klinik Ölçekler sekmesi — her ölçek için yorum rehberindeki T puanı aralığının
  * yorumu ve ham → K+ → düzeltilmiş → T akışı. Yorumlar kaynak rapora dayanır;
  * tanı koydurmaz, uygulayıcı uzmana yol gösterir.
  */

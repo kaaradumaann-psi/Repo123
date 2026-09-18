@@ -1734,3 +1734,224 @@
   .ws-review-edits { width: 100%; }
   .ws-review-edits .btn-secondary { flex: 1; justify-content: center; }
 }
+
+/* ==========================================================================
+   Test kaydı detay SAYFASI (açılır pencere değil, tam sayfa rota)
+   ========================================================================== */
+@media screen {
+  .record-page {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 1060px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .record-page-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .record-page-topbar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .record-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 18px 20px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .record-page-name {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(22px, 2.6vw, 28px);
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .record-page-sub {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    color: var(--soft);
+  }
+  .record-page-psychologist {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    background: var(--bg-soft);
+    color: var(--slate-700);
+    font-size: 12px;
+  }
+  .record-page-psychologist span { display: block; font-size: 10.5px; color: var(--muted); }
+  .record-page-psychologist b { display: block; font-size: 12.5px; color: var(--text); }
+  .record-page-context { margin: 12px 0 0; }
+
+  /* ---- Düz rapor düzeni (sekmesiz, tek akış) ---- */
+  .mmpi-report { display: flex; flex-direction: column; gap: 18px; }
+  .mmpi-validity-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--success-border);
+    background: var(--success-tint);
+    color: #0a6b49;
+  }
+  .mmpi-validity-banner.is-invalid {
+    border-color: var(--danger-border);
+    background: var(--danger-tint);
+    color: #991b1b;
+  }
+  .mmpi-validity-banner svg { flex: none; }
+  .mmpi-validity-banner div { flex: 1; min-width: 220px; }
+  .mmpi-validity-banner b { display: block; font-size: 13px; letter-spacing: 0.04em; }
+  .mmpi-validity-banner span { font-size: 12.5px; }
+  .report-code-chip {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    background: var(--white);
+    border: 1px solid currentColor;
+  }
+  .report-quicknav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 8px;
+    z-index: 30;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--white) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .report-quicknav .quicknav-chip {
+    text-decoration: none;
+    font-family: inherit;
+    line-height: 1.2;
+  }
+  .report-section {
+    scroll-margin-top: 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .report-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--hairline);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .report-section-title svg { color: var(--accent-ink); }
+
+  /* ---- Ayrım endeksleri kartları ---- */
+  .mmpi-index-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .index-card {
+    padding: 14px 16px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    background: var(--bg-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .index-card.is-high { border-color: var(--danger-border); background: var(--danger-tint); }
+  .index-card-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .index-card b { font-size: 13px; }
+  .index-card-level { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+  .index-card p { margin: 6px 0 0; font-size: 12.5px; color: var(--slate-600); line-height: 1.45; }
+
+  /* ---- Klinik izlenimler ---- */
+  .impression-list { display: flex; flex-direction: column; gap: 10px; }
+  .impression-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--white);
+  }
+  .impression-item svg { flex: none; margin-top: 2px; color: var(--slate-500); }
+  .impression-item b { font-size: 13px; display: block; }
+  .impression-item p { margin: 4px 0 0; font-size: 12.5px; color: var(--slate-600); line-height: 1.5; }
+  .impression-item.tone-alert { border-color: var(--danger-border); background: var(--danger-tint); }
+  .impression-item.tone-alert svg { color: var(--danger); }
+  .impression-item.tone-alert b { color: #991b1b; }
+  .impression-item.tone-watch { border-color: var(--warning-border); background: var(--warning-tint); }
+  .impression-item.tone-watch svg { color: var(--warning); }
+  .impression-item.tone-ok { border-color: var(--success-border); background: var(--success-tint); }
+  .impression-item.tone-ok svg { color: var(--success); }
+
+  /* ---- Türetilmiş ölçekler tablo notları ---- */
+  .wiggins-table .col-note { text-align: left; font-size: 12px; max-width: 420px; }
+  .critical-table th.row-head { width: 90px; }
+
+  @media (max-width: 760px) {
+    .report-quicknav { position: static; }
+    .wiggins-table .col-note { max-width: 220px; }
+  }
+}
+
+/* Yazdırma: yalnızca rapor sayfası içeriği basılır. */
+@media print {
+  .app-header, .app-footer, .no-print { display: none !important; }
+  .app-main { padding: 0 !important; }
+  .record-page { max-width: none; gap: 10px; }
+  .report-quicknav { display: none !important; }
+  .report-section, .record-page-header, .client-info-section {
+    box-shadow: none !important;
+    break-inside: avoid-page;
+  }
+}
+
+@media screen {
+  .no-data-text {
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--bg-soft);
+    border: 1px dashed var(--hairline);
+    border-radius: var(--radius-md);
+  }
+}

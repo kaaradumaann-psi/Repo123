@@ -1,5 +1,5 @@
 /**
- * kaynak.pdf'teki iki noktalı kod yorumları (Kod Analizleri).
+ * yorum rehberindeki iki noktalı kod yorumları (Kod Analizleri).
  *
  * Anahtarlar kanonik biçimde yazılır: kodun iki rakamı küçükten büyüğe
  * sıralanır ("21" → "12"). Kaynakta kodların büyük kısmı "12/21" gibi her iki

@@ -30,16 +30,28 @@ Tarama oturumunda dört sayfa kabul edildiğinde Psikolog için danışan bilgi 
 açılır. Kaydetme, mevcut `ItemReadResult` OMR maddelerini dönüştürmeden ham cevap
 sayfalarını ve psikolog kimliğini Supabase'e yazar. MMPI profili (T skorları,
 profil grafiği, geçerlik ve kod analizi) sunucuda değil, kullanıcının cihazında
-hesaplanır: İşlem adımında anlık olarak ve kayıtta **“Testi İncele”** detayında
-(kayıttaki hızlı giriş / OMR / ham puan verisinden yeniden üretilir). T
-skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
-oranlarına dayanır; **yorum katmanı** ise depodaki `kaynak.pdf` raporuna birebir
-dayanır: geçerlik analizleri (?) “Hiç Bir Şey Diyemem”, L, F, K ham puan
-tabloları ve L/F/K T puanı aralıklarıyla, klinik ölçek yorumları ölçeğe özgü T
-puanı bantlarıyla (Mf erkek/kadın ayrı), tek ölçek yükselmeleri ve iki noktalı
-kod analizleri kaynaktaki metin ve olası tanılarla üretilir. F-K endeksinde
-kaynak sınırı 16’dır; boş madde ≥ 31 veya F ham ≥ 23 ise profil geçersiz
-sayılır (`src/scoring/mmpiSource.ts`, `src/scoring/mmpiSourceCodes.ts`).
+hesaplanır: İşlem adımında anlık olarak ve kayıtta **“Testi İncele”** ile açılan
+tam sayfada (kayıttaki hızlı giriş / OMR / ham puan verisinden yeniden üretilir).
+T skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
+standart ekleme tablosuna dayanır; **yorum katmanı** klinik MMPI yorumlama
+kaynağına birebir dayanır: geçerlik analizleri (?) “Hiç Bir Şey Diyemem”, L, F, K
+ham puan tabloları ve L/F/K T puanı aralıklarıyla, klinik ölçek yorumları ölçeğe
+özgü T puanı bantlarıyla (Mf erkek/kadın ayrı), tek ölçek yükselmeleri ve iki
+noktalı kod analizleri kaynaktaki metin ve olası tanılarla üretilir. F-K
+endeksinde kaynak sınırı 16’dır; boş madde ≥ 31 veya F ham ≥ 23 ise profil
+geçersiz sayılır (`src/scoring/mmpiSource.ts`, `src/scoring/mmpiSourceCodes.ts`).
+
+Cevap dizisi olan kayıtlarda **madde düzeyi analiz katmanı** da hesaplanır
+(`src/scoring/mmpiConsistency.ts`, `mmpiValidityConfigs.ts`, `mmpiDerived.ts`,
+`mmpiCritical.ts`): TR (tekrarlanmış maddeler) endeksi ve Dikkatsizlik endeksi
+ile tutarlılık değerlendirmesi, 15 geçerlik profili konfigürasyonu (V Şekli,
+Tersine V, tümüne yanlış vb.), Goldberg / Taulbee / Peterson ayırma endeksleri,
+11 kişilik bozukluğu ölçeği (PDI-IV), alkol/madde kullanım ölçekleri (MacAndrew,
+MAC-R, AAS), 13 Wiggins içerik ölçeği ve özel ölçekler (Barron Ego Gücü, Welsh
+A/R, Aşikâr Anksiyete, Prejudice, Hostility), 38 kritik patolojik madde
+taraması (intihar, zarar verme, alkol/madde, ajitasyon, paranoya) ve 16 otomatik
+klinik izlenim. Ham puan girişlerinde bu katman yerine kaynak tablo bandı
+gösterilir.
 
 Kimlik oturumu Supabase Auth tarafından yönetilir ve bu frontend'de
 `persistSession: true` ile **`sessionStorage`**'da tutulur: aynı sekmede F5
@@ -212,7 +224,7 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/omr/markDetector.ts` | Bubble geometri maskeli merkez/peripheral/zemin örneklemesi, komşu bubble izolasyonu ve debug ölçümleriyle madde durumu; `reliable` yalnız `quality.ok`. |
 | `src/omr/analyzePage.ts` | Saf dizilerle çalışan sayfa hattı; fatal kalitede cevap üretmez. |
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
-| `src/scoring/*` | MMPI puanlama anahtarları, Türk normları, K düzeltmesi ve `kaynak.pdf`'e birebir dayanan geçerlik/klinik/kod yorum katmanı. |
+| `src/scoring/*` | MMPI puanlama anahtarları, Türk normları, K düzeltmesi ve klinik yorum kaynağına birebir dayanan geçerlik/klinik/kod yorum katmanı; madde düzeyi analiz (TR/Dikkatsizlik endeksleri, konfigürasyonlar, türetilmiş ölçekler, kritik maddeler). |
 | `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
 | `src/records/*` | Ham OMR maddelerini bozmadan Supabase kayıt payload'ı ve idempotent gönderim. |
 | `supabase/*` | Migration, ilişkiler, RLS politikaları, Auth trigger'ı ve Admin Edge Function. |
