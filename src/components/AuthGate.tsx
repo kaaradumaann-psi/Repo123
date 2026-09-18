@@ -4,6 +4,7 @@ import type { AuthenticatedUser } from '../auth/authTypes';
 import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
 import { Icon } from './Icon';
+import { SiteFooter } from './SiteFooter';
 
 export function AuthGate({ children }: { children: (user: AuthenticatedUser, onLogout: () => void) => ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
@@ -59,15 +60,17 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     setError('');
   }
 
-  if (!supabaseConfig.configured) return <SystemSetupScreen />;
+  if (!supabaseConfig.configured) return <AuthPageShell><SystemSetupScreen /></AuthPageShell>;
   if (checking) {
     return (
-      <main className="auth-shell">
-        <div className="auth-card auth-loading">
-          <div className="spinner" />
-          <p>Oturum doğrulanıyor, lütfen bekleyin...</p>
-        </div>
-      </main>
+      <AuthPageShell>
+        <main className="auth-shell">
+          <div className="auth-card auth-loading">
+            <div className="spinner" />
+            <p>Oturum doğrulanıyor, lütfen bekleyin...</p>
+          </div>
+        </main>
+      </AuthPageShell>
     );
   }
   if (user) {
@@ -80,7 +83,25 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
       </>
     );
   }
-  return <AuthScreen onSignIn={handleSignIn} error={error} />;
+  return (
+    <AuthPageShell>
+      <AuthScreen onSignIn={handleSignIn} error={error} />
+    </AuthPageShell>
+  );
+}
+
+/**
+ * Giriş/kurulum ekranlarını sitenin tam alt bilgisiyle sarmalar: SSS, Gizlilik
+ * & KVKK, Kullanım Koşulları ve Kaynakça sayfaları oturum açmadan da
+ * okunabilir (sitenin her ekranında aynı alt bilgi görünür).
+ */
+function AuthPageShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="auth-page">
+      {children}
+      <SiteFooter compact />
+    </div>
+  );
 }
 
 function SystemSetupScreen() {

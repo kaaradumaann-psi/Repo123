@@ -2495,7 +2495,7 @@
 
 /* Yazdırma: yalnızca rapor sayfası içeriği basılır. */
 @media print {
-  .app-header, .app-footer, .no-print { display: none !important; }
+  .app-header, .site-footer, .no-print { display: none !important; }
   .app-main { padding: 0 !important; }
   .record-page { max-width: none; gap: 10px; }
   .report-quicknav { display: none !important; }
@@ -2524,42 +2524,7 @@
 @media screen {
   .print-only { display: none; }
 
-  .footer-route-link {
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .footer-route-link:hover { color: var(--text); }
-  button.home-site-link { font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
-
-  /* ---- Kaynaklar sayfası ---- */
-  .sources-page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 860px;
-    margin: 0 auto;
-    width: 100%;
-  }
-  .sources-hero h1 {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(24px, 2.6vw, 30px);
-    letter-spacing: -0.03em;
-    margin: 10px 0 6px;
-  }
-  .sources-hero p {
-    margin: 0;
-    color: var(--soft);
-    line-height: 1.6;
-    font-size: 13px;
-    max-width: 68ch;
-  }
+  /* ---- Kaynakça sayfası (düzen: site.css) ---- */
   .sources-group { display: flex; flex-direction: column; gap: 10px; }
   .sources-group-head { border-bottom: 1px solid var(--hairline); padding-bottom: 8px; }
   .sources-kicker {

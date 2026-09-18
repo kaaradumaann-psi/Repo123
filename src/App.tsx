@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
 import { CaseWorkspace } from './components/CaseWorkspace';
 import { ConnectivityBanner } from './components/ConnectivityBanner';
+import { FaqPage } from './components/FaqPage';
 import { FormKit } from './components/FormKit';
+import { InfoPageShell } from './components/InfoPageShell';
 import { MyRecordsPanel } from './components/MyRecordsPanel';
+import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { RecordDetailPage } from './components/RecordDetailPage';
 import { SourcesPage } from './components/SourcesPage';
+import { SiteFooter, INFO_ROUTES } from './components/SiteFooter';
+import { TermsPage } from './components/TermsPage';
 import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
-import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
+import { SITE_URL } from './form/attribution';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { supabaseConfig } from './auth/supabaseClient';
 import { displayName } from './auth/userDisplay';
@@ -23,16 +28,45 @@ type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
 /** Test kaydı detayı için hash rotası: #/test/<kayıt-id> */
 const TEST_ROUTE_PREFIX = '#/test/';
-/** Kaynakça sayfası hash rotası. */
-const SOURCES_ROUTE = '#/kaynaklar';
 /** Tasarım önizlemesi rotası — yalnızca Supabase yapılandırılmadığında açılır. */
 const PREVIEW_ROUTE = '#/onizleme';
 
-type Route = { view: 'workspace' } | { view: 'test'; id: string } | { view: 'sources' };
+type Route = { view: 'workspace' } | { view: 'test'; id: string };
+
+/** Hash'i ele alan üst düzey bilgi sayfaları — oturumdan bağımsız açılır. */
+function readInfoRoute(hash: string): { title: string; kicker: string; page: ReactNode } | null {
+  switch (hash) {
+    case INFO_ROUTES.sss:
+      return {
+        title: 'Sıkça Sorulan Sorular',
+        kicker: 'Yardım',
+        page: <FaqPage />,
+      };
+    case INFO_ROUTES.gizlilik:
+      return {
+        title: 'Gizlilik & KVKK Politikası',
+        kicker: 'Yasal',
+        page: <PrivacyPolicyPage />,
+      };
+    case INFO_ROUTES.kullanim:
+      return {
+        title: 'Kullanım Koşulları',
+        kicker: 'Yasal',
+        page: <TermsPage />,
+      };
+    case INFO_ROUTES.kaynaklar:
+      return {
+        title: 'Kaynakça',
+        kicker: 'Kaynaklar',
+        page: <SourcesPage />,
+      };
+    default:
+      return null;
+  }
+}
 
 function readRoute(): Route {
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
-  if (hash === SOURCES_ROUTE) return { view: 'sources' };
   if (hash.startsWith(TEST_ROUTE_PREFIX)) {
     const id = hash.slice(TEST_ROUTE_PREFIX.length);
     if (id) return { view: 'test', id };
@@ -53,6 +87,23 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  // Bilgi sayfaları (SSS, Gizlilik & KVKK, Kullanım Koşulları, Kaynakça):
+  // oturum ve yapılandırmadan bağımsız, kendi kabuğu ve alt bilgisiyle açılır.
+  const infoRoute = readInfoRoute(hash);
+  if (infoRoute) {
+    return (
+      <InfoPageShell
+        kicker={infoRoute.kicker}
+        title={infoRoute.title}
+        onBack={() => {
+          window.location.hash = '';
+        }}
+      >
+        {infoRoute.page}
+      </InfoPageShell>
+    );
+  }
 
   // Önizleme rotası: kurulum ekranının yanında, gerçek oturum gerektirmeden
   // sonuç ekranlarının tasarımını gösterir. Yapılandırılmış bir kurulumda rota
@@ -231,12 +282,6 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               window.location.hash = '';
             }}
           />
-        ) : route.view === 'sources' ? (
-          <SourcesPage
-            onBack={() => {
-              window.location.hash = '';
-            }}
-          />
         ) : (
           <>
             <div
@@ -282,28 +327,12 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         )}
       </main>
 
-      <footer className="app-footer">
-        <div className="footer-inner">
-          <span className="copyright-text">
-            © {COPYRIGHT_YEAR} <b>{COPYRIGHT_HOLDER}</b>
-          </span>
-          <nav className="app-footer-links" aria-label="Yazar bağlantıları">
-            <button
-              type="button"
-              className="footer-route-link"
-              onClick={() => {
-                window.location.hash = route.view === 'sources' ? '' : SOURCES_ROUTE;
-              }}
-            >
-              Kaynaklar / Kaynakça
-            </button>
-            <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
-              {SITE_LABEL}
-            </a>
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter
+        onNewEntry={() => {
+          window.location.hash = '';
+          activateTab('case');
+        }}
+      />
     </div>
   );
 }
