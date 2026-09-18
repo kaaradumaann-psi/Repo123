@@ -4,7 +4,7 @@ import { Icon } from '../Icon';
 
 /**
  * Kod Analizleri sekmesi — profil kodu (Mf ve Si hariç en yüksek iki klinik
- * ölçek) ve kaynak.pdf'teki iki noktalı kod yorumları. Kodlar kanonik
+ * ölçek) ve yorum rehberindeki iki noktalı kod yorumları. Kodlar kanonik
  * biçimde eşlenir (21 → 12/21); kaynakta olmayan kodlar için genel not verilir.
  */
 export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
@@ -57,7 +57,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
         <section className="mmpi-code-bars">
           <h4 className="mmpi-card-title">
             <span className="mmpi-card-dot" />
-            Kod Yorumu (kaynak.pdf)
+            Kod Yorumu (klinik yorum rehberi)
           </h4>
           {entry ? (
             <>

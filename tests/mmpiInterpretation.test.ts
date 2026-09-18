@@ -241,23 +241,91 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
     const p = buildProfileFromAnswers(answers, 'Erkek');
 
     const validity = renderToStaticMarkup(createElement(MMPIValidityTab, { profile: p }));
-    assert.match(validity, /F–K İndeksi/);
+    assert.match(validity, /F-K Endeksi \(Gough\)/);
     // hepsi-Y: L ham 15, F ham 20, K ham 29 → üçü de kaynak tablosunda "Belirgin"
     assert.match(validity, /Ham 8-15/);
     assert.match(validity, /Ham 16-22/);
     assert.match(validity, /Ham 21 ve üstü/);
-    assert.match(validity, /16 sınırının altında/);
+    // Yeni göstergeler: TR, Dikkatsizlik ve geçerlik konfigürasyonu kartları
+    assert.match(validity, /TR Endeksi/);
+    assert.match(validity, /Dikkatsizlik Endeksi/);
+    assert.match(validity, /Geçerlik Konfigürasyonu/);
 
     const clinical = renderToStaticMarkup(createElement(MMPIClinicalTab, { profile: p }));
     assert.match(clinical, /Hipokondriazis/);
     assert.match(clinical, /kaynak raporun ölçeğe özgü T puanı tablolarından/);
 
     const code = renderToStaticMarkup(createElement(MMPICodeTab, { profile: p }));
-    assert.match(code, /Kod Yorumu \(kaynak\.pdf\)/);
+    // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık rehbere gönderme yapar.
+    assert.match(code, /Kod Yorumu \(klinik yorum rehberi\)/);
+    assert.doesNotMatch(code, /kaynak\.pdf/);
 
     const extra = renderToStaticMarkup(createElement(MMPIExtraTab, { profile: p }));
     assert.match(extra, /Konversiyon Vadisi/);
     assert.match(extra, /Yardım Çağrısı Profili/);
     assert.match(extra, /Paranoid Vadi/);
+  });
+});
+
+describe('yeni analiz bölümleri uçtan uca render olur', () => {
+  it('düz rapor, türetilmiş ölçekler ve kritik bulgular kaynak içerikle render olur', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPIReport } = await import('../src/components/results/MMPIReport');
+    const { MMPIDerivedSection } = await import('../src/components/results/MMPIDerivedSection');
+    const { MMPICriticalSection } = await import('../src/components/results/MMPICriticalSection');
+
+    // İntihar maddesini tetikleyen karışık bir cevap seti
+    const answers: ItemAnswer[] = new Array(566).fill('D');
+    answers[201] = 'D'; // madde 202
+    answers[138] = 'D'; // madde 139
+    const p = buildProfileFromAnswers(answers, 'Erkek');
+
+    const report = renderToStaticMarkup(createElement(MMPIReport, { profile: p, clientName: 'Denek A', answers }));
+    // Bölüm başlıkları düz akışta bir arada
+    assert.match(report, /Genel Bakış/);
+    assert.match(report, /Geçerlik Analizleri/);
+    assert.match(report, /Klinik Ölçekler/);
+    assert.match(report, /Kod Analizleri/);
+    assert.match(report, /Türetilmiş Ölçekler/);
+    assert.match(report, /Kritik Bulgular/);
+    assert.match(report, /Soru Yanıtları/);
+    // Geçerlik banner'ı
+    assert.match(report, /TEST GEÇERLİ|PROFİL ŞÜPHELİ/);
+    // Dosya adı sayfalarda asla görünmez
+    assert.doesNotMatch(report, /kaynak\.pdf/i);
+
+    const derived = renderToStaticMarkup(createElement(MMPIDerivedSection, { profile: p }));
+    assert.match(derived, /Goldberg Ayrım Endeksi/);
+    assert.match(derived, /Taulbee İndeksi/);
+    assert.match(derived, /Peterson İndeksi/);
+    assert.match(derived, /MacAndrew Alkolizm Ölçeği/);
+    assert.match(derived, /Barron Ego Gücü/);
+    assert.match(derived, /Welsh Anksiyete/);
+    assert.match(derived, /Wiggins/);
+    assert.match(derived, /Narsisistik Kişilik Özellikleri/);
+    assert.match(derived, /Sınır \(Borderline\) Kişilik Özellikleri/);
+
+    const critical = renderToStaticMarkup(createElement(MMPICriticalSection, { profile: p }));
+    assert.match(critical, /Klinik İzlenimler/);
+    assert.match(critical, /Kritik Patolojik Maddeler/);
+    assert.match(critical, /İntihar Riski \/ Depresyon/);
+    assert.match(critical, /Kendine\/Başkasına Zarar Verme/);
+    assert.doesNotMatch(critical, /kaynak\.pdf/i);
+  });
+
+  it('ham puan kaydında madde düzeyi bölümler açıklayıcı not gösterir', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPIDerivedSection } = await import('../src/components/results/MMPIDerivedSection');
+    const { MMPICriticalSection } = await import('../src/components/results/MMPICriticalSection');
+    const { MMPIValidityTab } = await import('../src/components/results/MMPIValidityTab');
+    const p = profile({});
+    const derived = renderToStaticMarkup(createElement(MMPIDerivedSection, { profile: p }));
+    assert.match(derived, /ham puan yöntemiyle girildiği için hesaplanamıyorlar/);
+    const critical = renderToStaticMarkup(createElement(MMPICriticalSection, { profile: p }));
+    assert.match(critical, /ham puan yöntemiyle girildiği için kritik maddeler listelenemiyor/);
+    const validity = renderToStaticMarkup(createElement(MMPIValidityTab, { profile: p }));
+    assert.match(validity, /TR endeksi, Dikkatsizlik endeksi ve madde düzeyindeki diğer/);
   });
 });

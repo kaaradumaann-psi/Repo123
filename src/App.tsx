@@ -6,6 +6,7 @@ import { CaseWorkspace } from './components/CaseWorkspace';
 import { ConnectivityBanner } from './components/ConnectivityBanner';
 import { FormKit } from './components/FormKit';
 import { MyRecordsPanel } from './components/MyRecordsPanel';
+import { RecordDetailPage } from './components/RecordDetailPage';
 import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
@@ -17,12 +18,36 @@ type Workspace = 'case' | 'form' | 'records' | 'admin';
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 
 const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
+/** Test kaydı detayı için hash rotası: #/test/<kayıt-id> */
+const TEST_ROUTE_PREFIX = '#/test/';
+
+function readRoute(): { view: 'workspace' } | { view: 'test'; id: string } {
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  if (hash.startsWith(TEST_ROUTE_PREFIX)) {
+    const id = hash.slice(TEST_ROUTE_PREFIX.length);
+    if (id) return { view: 'test', id };
+  }
+  return { view: 'workspace' };
+}
+
+/** Test kaydı detay sayfasını açar (açılır pencere değil, tam sayfa rota). */
+export function openTestRecordPage(recordId: string): void {
+  window.location.hash = `${TEST_ROUTE_PREFIX}${recordId}`;
+}
 
 export default function App() {
   return <AuthGate>{(user, onLogout) => <SignedInApp user={user} onLogout={onLogout} />}</AuthGate>;
 }
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
+  const [route, setRoute] = useState(readRoute);
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(readRoute());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
   // F5 sonrası sekme korunur: İşlem'deyken yenileyen Form'a düşmez.
   const [workspace, setWorkspace] = useState<Workspace>(() => {
     try {
@@ -118,11 +143,16 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   ref={element => {
                     tabRefs.current[tab] = element;
                   }}
-                  aria-selected={workspace === tab}
+                  aria-selected={workspace === tab && route.view === 'workspace'}
                   aria-controls={`panel-${tab}`}
                   tabIndex={workspace === tab ? 0 : -1}
-                  onClick={() => activateTab(tab)}
-                  className={`portal-tab ${workspace === tab ? 'active' : ''}`}
+                  onClick={() => {
+                    if (route.view === 'test') {
+                      window.location.hash = '';
+                    }
+                    activateTab(tab);
+                  }}
+                  className={`portal-tab ${workspace === tab && route.view === 'workspace' ? 'active' : ''}`}
                 >
                   <Icon name={tabIcon[tab]} size={16} />
                   <span>{tabLabel[tab]}</span>
@@ -163,44 +193,55 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
       <ConnectivityBanner />
 
       <main className="app-main" id="main">
-        <div
-          role="tabpanel"
-          id="panel-case"
-          aria-labelledby="tab-case"
-          className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
-        >
-          <CaseWorkspace definition={formDefinition} actor={user} onSaved={() => setRecordsTick(tick => tick + 1)} />
-        </div>
+        {route.view === 'test' ? (
+          <RecordDetailPage
+            recordId={route.id}
+            onBack={() => {
+              window.location.hash = '';
+            }}
+          />
+        ) : (
+          <>
+            <div
+              role="tabpanel"
+              id="panel-case"
+              aria-labelledby="tab-case"
+              className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
+            >
+              <CaseWorkspace definition={formDefinition} actor={user} onSaved={() => setRecordsTick(tick => tick + 1)} />
+            </div>
 
-        <div
-          role="tabpanel"
-          id="panel-form"
-          aria-labelledby="tab-form"
-          className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
-        >
-          <FormKit />
-        </div>
+            <div
+              role="tabpanel"
+              id="panel-form"
+              aria-labelledby="tab-form"
+              className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
+            >
+              <FormKit />
+            </div>
 
-        {user.role === 'PSYCHOLOG' && (
-          <div
-            role="tabpanel"
-            id="panel-records"
-            aria-labelledby="tab-records"
-            className={workspace === 'records' ? 'tab-content-active' : 'is-screen-hidden'}
-          >
-            <MyRecordsPanel key={recordsTick} />
-          </div>
-        )}
+            {user.role === 'PSYCHOLOG' && (
+              <div
+                role="tabpanel"
+                id="panel-records"
+                aria-labelledby="tab-records"
+                className={workspace === 'records' ? 'tab-content-active' : 'is-screen-hidden'}
+              >
+                <MyRecordsPanel key={recordsTick} />
+              </div>
+            )}
 
-        {user.role === 'ADMIN' && (
-          <div
-            role="tabpanel"
-            id="panel-admin"
-            aria-labelledby="tab-admin"
-            className={workspace === 'admin' ? 'tab-content-active' : 'is-screen-hidden'}
-          >
-            <AdminPanel admin={user} />
-          </div>
+            {user.role === 'ADMIN' && (
+              <div
+                role="tabpanel"
+                id="panel-admin"
+                aria-labelledby="tab-admin"
+                className={workspace === 'admin' ? 'tab-content-active' : 'is-screen-hidden'}
+              >
+                <AdminPanel admin={user} />
+              </div>
+            )}
+          </>
         )}
       </main>
 

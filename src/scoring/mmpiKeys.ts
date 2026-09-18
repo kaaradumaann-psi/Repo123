@@ -140,6 +140,26 @@ export const K_CORRECTION: Partial<Record<Exclude<ScaleId, '?' | 'L' | 'F' | 'K'
   Ma: 0.2,
 };
 
+/**
+ * Klasik MMPI K düzeltmesi ekleme tablosu (K ham puanı 0-30).
+ * Oranlar (Hs .5K, Pd .4K, Pt 1K, Sc 1K, Ma .2K) bu tablodan okunur;
+ * basit yuvarlama yerine standardizasyonun öngördüğü değerler kullanılır.
+ * 30'un üzerindeki K değerleri için oran yuvarlaması geri çekilme değeridir.
+ */
+export const K_ADDITION_TABLE: Record<'ratio5' | 'ratio4' | 'ratio2' | 'ratio10', number[]> = {
+  ratio5: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15],
+  ratio4: [0, 1, 1, 2, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 10, 11, 11, 12, 12],
+  ratio2: [0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6],
+  ratio10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+};
+
+/** K ham puanı ve orana göre eklenecek puanı tablodan verir. */
+export function kAddition(kRaw: number, ratio: number): number {
+  const key = ratio === 0.5 ? 'ratio5' : ratio === 0.4 ? 'ratio4' : ratio === 0.2 ? 'ratio2' : 'ratio10';
+  const clamped = Math.max(0, Math.min(30, Math.round(kRaw)));
+  return K_ADDITION_TABLE[key][clamped] ?? Math.round(kRaw * ratio);
+}
+
 export type Norm = { mean: number; sd: number };
 
 export const TURKISH_NORMS: Record<'Erkek' | 'Kadın', Record<Exclude<ScaleId, '?'>, Norm>> = {

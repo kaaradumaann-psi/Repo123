@@ -16,7 +16,7 @@ import {
 import { codeInterpretation, canonicalCode } from './mmpiSourceCodes';
 
 /**
- * Kullanıcı dostu açıklama metinleri — kaynak.pdf'teki alt testi tanımlarının
+ * Kullanıcı dostu açıklama metinleri — yorum rehberindeki alt testi tanımlarının
  * kısa özetleridir. Ayrıntılı band yorumları için mmpiSource.ts'deki
  * T puanı tabloları kullanılır. Bu metinler tanı içermez; kesin yorum
  * uygulayıcı uzmana aittir.
@@ -113,7 +113,7 @@ export type PatternHit = {
 };
 
 /**
- * kaynak.pdf'te tanımlanan klasik profil konfigürasyonları. Eşikler ve
+ * yorum rehberinde tanımlanan klasik profil konfigürasyonları. Eşikler ve
  * yorumlar kaynak rapora dayanır; tanı değil, yol gösterici göstergedir.
  */
 export function detectPatterns(profile: MMPIProfile): PatternHit[] {
@@ -212,7 +212,7 @@ export function clinicalBandFor(id: ScaleId, gender: Gender, tScore: number): Ba
 export type SingleElevationHit = { scale: ScaleId; entry: SingleElevation };
 
 /**
- * kaynak.pdf'teki “Sadece X alt testinin yükselmesi” yorumları.
+ * yorum rehberindeki “Sadece X alt testinin yükselmesi” yorumları.
  * Ortak ölçüt: ilgili klinik ölçek T ≥ 70 ve diğer klinik ölçeklerden hiçbiri
  * T ≥ 70 değil (Pd için kaynak ayrıca ≥ 10 T farkı koşulunu koyar).
  */

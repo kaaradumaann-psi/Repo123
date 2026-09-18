@@ -47,14 +47,16 @@ function FindingCard({ finding }: { finding: ValidityFinding }) {
   );
 }
 
+/**
+ * Geçerlik Analizleri bölümü — temel geçerlik ölçekleri (?) / L / F / K),
+ * yanıt tutarlılığı göstergeleri (TR endeksi, Dikkatsizlik endeksi),
+ * F-K endeksi ayrıntısı ve L/F/K geçerlik konfigürasyonu.
+ */
 export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
-  const { validityAnalysis } = profile;
-  const fK = validityAnalysis.fMinusK;
-  const fKAlert = validityAnalysis.fMinusKNote !== null;
-  const fKLabel = fKAlert
-    ? 'F-K endeksi 16’nın üstünde: dikkatli değerlendirme gerekir'
-    : 'F-K endeksi kaynakta belirtilen 16 sınırının altında';
-  const fKColor = fKAlert ? '#d2453a' : '#0e9e6a';
+  const { validityAnalysis, itemLevel } = profile;
+  const fk = validityAnalysis.fkAnalysis;
+  const config = validityAnalysis.validityConfig;
+  const fkColor = fk.tone === 'alert' ? '#d2453a' : fk.tone === 'watch' ? '#b4770b' : '#0e9e6a';
 
   return (
     <div role="tabpanel" className="mmpi-tab-panel">
@@ -64,35 +66,139 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
         ))}
       </div>
 
-      <div className="mmpi-fk-row">
-        <div className="mmpi-fk-left">
-          <b>F–K İndeksi</b>
-          <span>
-            F ham ({validityAnalysis.fRaw}) − K ham ({validityAnalysis.kRaw})
-          </span>
+      {/* Yanıt tutarlılığı ve konfigürasyon kartları */}
+      <div className="mmpi-vgrid">
+        <div className={`mmpi-vcard ${fk.tone === 'alert' ? 'is-high' : fk.tone === 'watch' ? 'is-low' : ''}`}>
+          <div className="mmpi-vcard-head">
+            <span className="mmpi-vcard-letter">FK</span>
+            <span className="mmpi-vcard-name">F-K Endeksi (Gough)</span>
+          </div>
+          <p className="mmpi-vcard-desc">
+            F ham ({validityAnalysis.fRaw}) − K ham ({validityAnalysis.kRaw}); abartma ve savunmacılık dengesini gösterir.
+          </p>
+          <div className="mmpi-vcard-stats">
+            <div className="mmpi-vstat">
+              <span>Değer</span>
+              <b style={{ color: fkColor }}>{fk.value > 0 ? `+${fk.value}` : fk.value}</b>
+            </div>
+            <span className="level-badge" style={{ background: fkColor, marginLeft: 'auto' }}>
+              {fk.level}
+            </span>
+          </div>
+          <p className="mmpi-vcard-signal">{fk.interpretation}</p>
         </div>
-        <b className="mmpi-fk-value" style={{ color: fKColor }}>
-          {fK > 0 ? `+${fK}` : fK}
-        </b>
-        <span className="mmpi-fk-label" style={{ color: fKColor }}>
-          {fKLabel}
-        </span>
+
+        <div className={`mmpi-vcard ${config && config.tone !== 'ok' ? (config.tone === 'alert' ? 'is-high' : 'is-low') : ''}`}>
+          <div className="mmpi-vcard-head">
+            <span className="mmpi-vcard-letter">LFK</span>
+            <span className="mmpi-vcard-name">Geçerlik Konfigürasyonu</span>
+          </div>
+          {config ? (
+            <>
+              <p className="mmpi-vcard-desc">{config.rule}</p>
+              <div className="mmpi-vcard-stats">
+                <span
+                  className="level-badge"
+                  style={{
+                    background: config.tone === 'alert' ? '#d2453a' : config.tone === 'watch' ? '#b4770b' : '#0e9e6a',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  {config.validity === 'geçerli' ? 'Geçerli örüntü' : 'Şüpheli örüntü'}
+                </span>
+              </div>
+              <p className="mmpi-vcard-signal">
+                <b>{config.name}: </b>
+                {config.interpretation}
+              </p>
+            </>
+          ) : (
+            <p className="mmpi-vcard-signal">
+              L, F ve K puanları klasik konfigürasyon örüntülerinden (V, Tersine V, tümüne doğru/yanlış vb.) hiçbirine
+              uymuyor; geçerlik değerlendirmesi yukarıdaki ölçek bulgularına göre yapılır.
+            </p>
+          )}
+        </div>
+
+        {itemLevel && (
+          <>
+            <div className={`mmpi-vcard ${itemLevel.trIndex.isWarning ? 'is-high' : ''}`}>
+              <div className="mmpi-vcard-head">
+                <span className="mmpi-vcard-letter">TR</span>
+                <span className="mmpi-vcard-name">TR Endeksi (Tekrar Maddeleri)</span>
+              </div>
+              <p className="mmpi-vcard-desc">
+                Formdaki 16 çift tekrarlanmış maddenin tutarlılığı; 3 ve altı tutarlı kabul edilir.
+              </p>
+              <div className="mmpi-vcard-stats">
+                <div className="mmpi-vstat">
+                  <span>Puan</span>
+                  <b>
+                    {itemLevel.trIndex.score} / {itemLevel.trIndex.evaluated || 16}
+                  </b>
+                </div>
+                <span
+                  className="level-badge"
+                  style={{ background: itemLevel.trIndex.isWarning ? '#d2453a' : '#0e9e6a', marginLeft: 'auto' }}
+                >
+                  {itemLevel.trIndex.level}
+                </span>
+              </div>
+              <p className="mmpi-vcard-signal">{itemLevel.trIndex.interpretation}</p>
+              {itemLevel.trIndex.mismatches.length > 0 && (
+                <p className="mmpi-vcard-signal ws-muted">
+                  Tutarsız çiftler:{' '}
+                  {itemLevel.trIndex.mismatches.map(([a, b]) => `${a}-${b}`).join(', ')}
+                </p>
+              )}
+            </div>
+
+            <div className={`mmpi-vcard ${itemLevel.carelessness.isWarning ? 'is-high' : ''}`}>
+              <div className="mmpi-vcard-head">
+                <span className="mmpi-vcard-letter">D</span>
+                <span className="mmpi-vcard-name">Dikkatsizlik Endeksi</span>
+              </div>
+              <p className="mmpi-vcard-desc">
+                12 kritik madde çifti üzerinde rastgele işaretleme göstergesi; 4 ve üzeri kuşku doğurur (Greene 1980).
+              </p>
+              <div className="mmpi-vcard-stats">
+                <div className="mmpi-vstat">
+                  <span>Puan</span>
+                  <b>
+                    {itemLevel.carelessness.score} / {itemLevel.carelessness.evaluated || 12}
+                  </b>
+                </div>
+                <span
+                  className="level-badge"
+                  style={{ background: itemLevel.carelessness.isWarning ? '#d2453a' : '#0e9e6a', marginLeft: 'auto' }}
+                >
+                  {itemLevel.carelessness.level}
+                </span>
+              </div>
+              <p className="mmpi-vcard-signal">{itemLevel.carelessness.interpretation}</p>
+            </div>
+          </>
+        )}
       </div>
-      {validityAnalysis.fMinusKNote && (
-        <div className="mmpi-box warn">
-          <Icon name="alert" size={14} />
-          <span> {validityAnalysis.fMinusKNote}</span>
+
+      {!itemLevel && (
+        <div className="mmpi-box info">
+          <Icon name="info" size={14} />
+          <span>
+            {' '}Bu kayıt ham puan yöntemiyle girildiği için TR endeksi, Dikkatsizlik endeksi ve madde düzeyindeki diğer
+            göstergeler hesaplanamıyor; temel geçerlik değerlendirmesi yukarıdaki tablolara göre yapılır.
+          </span>
         </div>
       )}
 
       <div>
-        <h4 className="mmpi-section-title">Uyarılar</h4>
+        <h4 className="mmpi-section-title">Geçerlik Uyarıları</h4>
         {validityAnalysis.warnings.length === 0 ? (
           <div className="mmpi-box ok">
             <Icon name="checkCircle" size={14} />
             <span>
-              {' '}Geçerlik skalaları kaynak ölçütlerine göre normal sınırlarda — yanıtlama isteği, inkar/savunma
-              düzeyi ve uygun olmayan yaşantı miktarı beklenen aralıkta.
+              {' '}Geçerlik skalaları ölçütlere göre normal sınırlarda — yanıtlama isteği, inkar/savunma düzeyi ve uygun
+              olmayan yaşantı miktarı beklenen aralıkta.
             </span>
           </div>
         ) : (
@@ -110,14 +216,16 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
       </div>
 
       <div>
-        <h4 className="mmpi-section-title">Genel Yorum</h4>
+        <h4 className="mmpi-section-title">Genel Geçerlik Yorumu</h4>
         <div className={`mmpi-box ${validityAnalysis.isValid ? 'ok' : 'warn'}`}>
+          <b>{validityAnalysis.isValid ? 'TEST GEÇERLİ — ' : 'PROFIL ŞÜPHELİ/GEÇERSİZ — '}</b>
           {validityAnalysis.interpretation}
+          <span className="ws-muted">
+            {' '}Yorumlama sırasında geçerlik ölçeklerindeki uyarılar dikkate alınmalıdır; hiçbir uyarı tek başına
+            profili geçersiz yapmaz. Tüm bulgular (eğitim, sosyo-ekonomik düzey, hastanın durumu, okuma becerisi)
+            bütüncül değerlendirilmelidir.
+          </span>
         </div>
-        <p className="mmpi-summary-note">
-          Geçerlik değerlendirmesi kaynak rapordaki ham puan tablolarına [(?) “Hiç Bir Şey Diyemem”, L, K, F]
-          ve L/F/K için T puanı aralıklarına birebir dayanır; F-K endeksinde kaynak sınırı 16’dır.
-        </p>
       </div>
     </div>
   );

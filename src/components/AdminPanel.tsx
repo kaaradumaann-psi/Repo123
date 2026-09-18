@@ -8,13 +8,12 @@ import {
 } from '../auth/adminApi';
 import {
   listAllRecords,
-  getRecordDetail,
   deleteRecord,
 } from '../records/supabaseRecords';
-import type { RecordSummary, FullRecordDetail } from '../records/supabaseRecords';
+import type { RecordSummary } from '../records/supabaseRecords';
 import { displayName } from '../auth/userDisplay';
 import type { AuthenticatedUser } from '../auth/authTypes';
-import { RecordDetailModal } from './RecordDetailModal';
+import { openTestRecordPage } from '../App';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
@@ -36,8 +35,6 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   const [loadingRecords, setLoadingRecords] = useState(true);
   const [recordsFailed, setRecordsFailed] = useState(false);
   const [recordSearch, setRecordSearch] = useState('');
-  const [selectedRecord, setSelectedRecord] = useState<FullRecordDetail | null>(null);
-  const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
   const [deletingRecordId, setDeletingRecordId] = useState<string | null>(null);
   const [confirmRecord, setConfirmRecord] = useState<RecordSummary | null>(null);
 
@@ -188,19 +185,6 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
       });
     } finally {
       setDeletingUserId(null);
-    }
-  }
-
-  async function handleViewRecord(recordId: string) {
-    try {
-      setLoadingDetail(recordId);
-      setMessage(null);
-      const detail = await getRecordDetail(recordId);
-      setSelectedRecord(detail);
-    } catch (err) {
-      setMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Test detayları yüklenemedi.' });
-    } finally {
-      setLoadingDetail(null);
     }
   }
 
@@ -375,7 +359,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
               <span className="section-badge badge-primary">Kayıtlar</span>
               <h3 className="section-heading">Tüm test uygulamaları</h3>
               <p className="section-subtext">
-                Uzmanların tamamladığı MMPI uygulamaları. “Testi İncele” ile cevap detayını açın; hatalı/çift
+                Uzmanların tamamladığı MMPI uygulamaları. “Testi İncele” kaydı ayrı bir sayfada açar; hatalı/çift
                 kayıtları buradan kaldırın. Silme geri alınamaz.
               </p>
             </div>
@@ -504,11 +488,10 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             <button
                               type="button"
                               className="action-btn-primary"
-                              onClick={() => void handleViewRecord(rec.id)}
-                              disabled={loadingDetail === rec.id}
+                              onClick={() => openTestRecordPage(rec.id)}
                             >
                               <Icon name="eye" size={15} />
-                              <span>{loadingDetail === rec.id ? 'Açılıyor...' : 'Testi İncele'}</span>
+                              <span>Testi İncele</span>
                             </button>
                             <button
                               type="button"
@@ -834,12 +817,6 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
         />
       )}
 
-      {selectedRecord && (
-        <RecordDetailModal
-          record={selectedRecord}
-          onClose={() => setSelectedRecord(null)}
-        />
-      )}
     </div>
   );
 }

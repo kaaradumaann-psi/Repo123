@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { listOwnRecords, getRecordDetail, deleteRecord } from '../records/supabaseRecords';
-import type { RecordSummary, FullRecordDetail } from '../records/supabaseRecords';
-import { RecordDetailModal } from './RecordDetailModal';
+import { listOwnRecords, deleteRecord } from '../records/supabaseRecords';
+import type { RecordSummary } from '../records/supabaseRecords';
+import { openTestRecordPage } from '../App';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
@@ -10,8 +10,6 @@ export function MyRecordsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRecord, setSelectedRecord] = useState<FullRecordDetail | null>(null);
-  const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<RecordSummary | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -31,19 +29,6 @@ export function MyRecordsPanel() {
   useEffect(() => {
     void fetchRecords();
   }, []);
-
-  async function handleViewDetail(recordId: string) {
-    try {
-      setLoadingDetail(recordId);
-      setError('');
-      const detail = await getRecordDetail(recordId);
-      setSelectedRecord(detail);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Detaylar yüklenemedi.');
-    } finally {
-      setLoadingDetail(null);
-    }
-  }
 
   async function confirmDelete() {
     const record = confirmTarget;
@@ -78,8 +63,8 @@ export function MyRecordsPanel() {
           <span className="section-badge badge-primary">Arşiv</span>
           <h3 id="saved-records-title" className="section-heading">Kayıtlar</h3>
           <p className="section-subtext">
-            Bu hesaptan tamamlanan MMPI uygulamaları. “Testi İncele” ile hesaplanan T skorları, profil grafiği ve cevap detayını açın; hatalı kayıtları
-            buradan kaldırın.
+            Bu hesaptan tamamlanan MMPI uygulamaları. “Testi İncele” kaydı ayrı bir sayfada açar: T skorları, profil
+            grafiği, geçerlik/kod analizleri ve cevap detayı tek raporda görüntülenir; hatalı kayıtları buradan kaldırın.
           </p>
         </div>
         <div className="section-header-actions">
@@ -188,11 +173,10 @@ export function MyRecordsPanel() {
                         <button
                           type="button"
                           className="action-btn-primary"
-                          onClick={() => void handleViewDetail(record.id)}
-                          disabled={loadingDetail === record.id}
+                          onClick={() => openTestRecordPage(record.id)}
                         >
                           <Icon name="eye" size={15} />
-                          <span>{loadingDetail === record.id ? 'Açılıyor...' : 'Testi İncele'}</span>
+                          <span>Testi İncele</span>
                         </button>
                         <button
                           type="button"
@@ -227,12 +211,6 @@ export function MyRecordsPanel() {
         />
       )}
 
-      {selectedRecord && (
-        <RecordDetailModal
-          record={selectedRecord}
-          onClose={() => setSelectedRecord(null)}
-        />
-      )}
     </section>
   );
 }
