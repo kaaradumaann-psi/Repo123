@@ -1409,53 +1409,8 @@
     gap: 8px;
   }
 
-  /* ========================================================================
-     14 · Footer & reachable links
-     ======================================================================== */
-
-  .app-footer {
-    background: var(--bg);
-    border-top: 1px solid var(--hairline);
-    padding: 30px 24px;
-  }
-
-  .footer-inner {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-    color: var(--muted);
-  }
-
-  .copyright-text {
-    font-size: 12.5px;
-    letter-spacing: 0.01em;
-  }
-
-  /* The author's name carries the serif accent, exactly like the site footer. */
-  .copyright-text b {
-    font-family: var(--font-display);
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
-
-  .app-footer-links {
-    gap: 18px;
-  }
-
-  .app-footer-links a {
-    color: var(--soft);
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-
-  .app-footer-links a:hover {
-    color: var(--text);
-    text-decoration: none;
-  }
+  /* (14 · Footer) Eski tek satırlık app-footer kaldırıldı; sitenin tam alt
+     bilgisi site.css'teki .site-footer'da yaşar ve her ekranda aynıdır. */
 }
 
 /* The 900 px breakpoint in screen.css stacks the header; the stacked layout wins below it. */

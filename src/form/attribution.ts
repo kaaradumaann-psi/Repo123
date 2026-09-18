@@ -12,3 +12,16 @@ export const CONTACT_EMAIL = 'contact@halilkaraduman.com.tr';
 
 /** Printed under the template id in every sheet footer, on all four pages. */
 export const FORM_COPYRIGHT_LINE = `© ${COPYRIGHT_YEAR} ${COPYRIGHT_HOLDER} · ${SITE_LABEL} · ${CONTACT_EMAIL}`;
+
+/**
+ * Site chrome (footer / info pages) copy. These describe the *application*
+ * ("dijital asistan" tagline and developer credit); they never appear on the
+ * printed sheet, whose line is FORM_COPYRIGHT_LINE above.
+ */
+export const APP_TAGLINE =
+  'Minnesota Çok Yönlü Kişilik Envanteri standardizasyonu ve puanlamasında dijital asistan.';
+export const DEVELOPER_CREDIT =
+  `Psikolog & Yazılım Geliştirici ${COPYRIGHT_HOLDER} tarafından ruh sağlığı profesyonellerine karar destek amacıyla geliştirilmiştir.`;
+/** Yürürlük tarihi — SSS, Gizlilik & KVKK Politikası ve Kullanım Koşulları için ortak. */
+export const POLICY_EFFECTIVE_DATE = '18 Eylül 2026';
+export const POLICY_UPDATED_LABEL = `Son güncelleme: ${POLICY_EFFECTIVE_DATE}`;

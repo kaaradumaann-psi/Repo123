@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { Icon } from './Icon';
 
 /**
@@ -456,76 +457,125 @@ function StatusBadge({ status }: { status: SourceStatus }) {
   );
 }
 
+/** Kicker'daki "01 · NORM VE PUANLAMA" biçimli metnin içindekiler etiketi. */
+function groupLabel(kicker: string): string {
+  const parts = kicker.split('·');
+  const label = (parts[1] ?? parts[0] ?? kicker).trim();
+  return label.charAt(0) + label.slice(1).toLocaleLowerCase('tr');
+}
+
+function scrollToGroup(event: MouseEvent<HTMLAnchorElement>, id: string) {
+  event.preventDefault();
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 /**
- * Uygulamada kullanılan bilimsel/teknik kaynakların denetlenmiş tek sayfası.
- * Yalnızca kimliği doğrulanan kaynaklara APA 7 künyesi verilir; doğrulanamayan
- * bileşenler statüleriyle (C/D/E) açıkça işaretlenir. Kaynak uydurulmaz.
+ * Kaynakça sayfası — düzenli tek sayfa: sabit içindekiler şeridi, numaralı
+ * bölümler ve girdiler, başa dön eylemi. Uygulamada kullanılan bilimsel/teknik
+ * kaynakların denetlenmiş tam listesi; yalnızca kimliği doğrulanan kaynaklara
+ * APA 7 künyesi verilir, doğrulanamayan bileşenler statüleriyle (C/D/E)
+ * işaretlenir. Kaynak uydurulmaz.
  */
-export function SourcesPage({ onBack }: { onBack: () => void }) {
+export function SourcesPage() {
   return (
     <div className="sources-page">
-      <header className="sources-hero">
-        <button type="button" className="btn-secondary btn-sm" onClick={onBack}>
-          <Icon name="left" size={14} />
-          <span>Geri dön</span>
-        </button>
-        <h1>Kaynaklar</h1>
-        <p>
-          Bu sayfa, uygulamanın puanlama ve yorum bileşenlerinin dayandığı bilimsel kaynakların
-          bağımsız kaynak denetimi sonucudur. Künyeler yalnızca kimliği Crossref, PubMed, yayınevi
-          kayıtları veya hakemli dergi kaynakçalarıyla doğrulanan kaynaklara verilmiştir; her kaydın
-          kodla formül düzeyinde eşleşme durumu ayrıca işaretlenmiştir. Formülü özgün kaynakla birebir
-          doğrulanamayan bileşenler tahminle doldurulmamış, doğrulanamayan hâlleriyle raporlanmıştır.
-        </p>
-        <div className="sources-legend" aria-label="Statü açıklamaları">
-          {LEGEND.map(item => (
-            <span key={item.status} className="sources-legend-item">
-              <StatusBadge status={item.status} />
-              <span>{item.text}</span>
-            </span>
-          ))}
-        </div>
-      </header>
+      <p className="info-lede">
+        Bu sayfa, uygulamanın puanlama ve yorum bileşenlerinin dayandığı bilimsel kaynakların
+        bağımsız kaynak denetimi sonucudur. Künyeler yalnızca kimliği Crossref, PubMed, yayınevi
+        kayıtları veya hakemli dergi kaynakçalarıyla doğrulanan kaynaklara verilmiştir; her kaydın
+        kodla formül düzeyinde eşleşme durumu ayrıca işaretlenmiştir. Formülü özgün kaynakla birebir
+        doğrulanamayan bileşenler tahminle doldurulmamış, doğrulanamayan hâlleriyle raporlanmıştır.
+      </p>
 
-      {GROUPS.map(group => (
-        <section key={group.kicker} className="sources-group" aria-label={group.title}>
-          <header className="sources-group-head">
-            <span className="sources-kicker">{group.kicker}</span>
-            <h2>{group.title}</h2>
-            {group.intro && <p className="sources-intro">{group.intro}</p>}
-          </header>
-          <ul className="sources-list">
-            {group.entries.map(entry => (
-              <li key={entry.citation} className="sources-entry">
-                <div className="sources-entry-head">
-                  <StatusBadge status={entry.status} />
-                  <p className={`sources-citation${entry.isAp7 ? '' : ' is-component'}`}>{entry.citation}</p>
-                </div>
-                <p className="sources-role">
-                  <b>Uygulamadaki kullanım:</b> {entry.role}
-                </p>
-                <div className="sources-used">
-                  {entry.usedIn.map(place => (
-                    <span key={place} className="sources-used-chip">
-                      {place}
-                    </span>
-                  ))}
-                </div>
-                {entry.matchNote && <p className="sources-note">{entry.matchNote}</p>}
+      <div className="sources-layout">
+        <aside className="sources-toc" aria-label="Kaynakça bölümleri">
+          <span className="policy-toc-heading">İçindekiler</span>
+          <ol className="policy-toc-list">
+            {GROUPS.map((group, index) => (
+              <li key={group.kicker}>
+                <a
+                  href={`#kaynaklar-${index + 1}`}
+                  onClick={event => scrollToGroup(event, `kaynaklar-${index + 1}`)}
+                >
+                  <span className="policy-toc-no">{String(index + 1).padStart(2, '0')}</span>
+                  <span>{groupLabel(group.kicker)}</span>
+                  <span className="sources-toc-count">{group.entries.length}</span>
+                </a>
               </li>
             ))}
-          </ul>
-        </section>
-      ))}
+          </ol>
+          <div className="sources-legend" aria-label="Statü açıklamaları">
+            {LEGEND.map(item => (
+              <span key={item.status} className="sources-legend-item">
+                <StatusBadge status={item.status} />
+                <span>{item.text}</span>
+              </span>
+            ))}
+          </div>
+        </aside>
 
-      <footer>
-        <p className="sources-foot">
-          Kaynak denetimi 18 Eylül 2026 tarihinde tamamlanmıştır. Denetimin tam bileşen–kaynak
-          eşleştirme tabloları depoda <code>docs/kaynak-denetimi.md</code> dosyasındadır. Bu sayfada
-          yalnızca doğrulanabilir bilgiler yer alır; künyesi doğrulanamayan hiçbir bileşene kaynak
-          atfedilmemiştir.
-        </p>
-      </footer>
+        <div className="sources-body">
+          {GROUPS.map((group, groupIndex) => {
+            const groupId = `kaynaklar-${groupIndex + 1}`;
+            const groupNo = String(groupIndex + 1).padStart(2, '0');
+            return (
+              <section key={group.kicker} id={groupId} className="sources-group" aria-label={group.title}>
+                <header className="sources-group-head">
+                  <span className="sources-kicker">{group.kicker}</span>
+                  <h2>{group.title}</h2>
+                  <span className="sources-group-count">
+                    {group.entries.length} kayıt
+                  </span>
+                  {group.intro && <p className="sources-intro">{group.intro}</p>}
+                </header>
+                <ol className="sources-list">
+                  {group.entries.map((entry, entryIndex) => (
+                    <li key={entry.citation} className="sources-entry">
+                      <div className="sources-entry-head">
+                        <StatusBadge status={entry.status} />
+                        <p className={`sources-citation${entry.isAp7 ? '' : ' is-component'}`}>
+                          <span className="sources-entry-no">
+                            {groupNo}.{entryIndex + 1}
+                          </span>
+                          {entry.citation}
+                        </p>
+                      </div>
+                      <p className="sources-role">
+                        <b>Uygulamadaki kullanım:</b> {entry.role}
+                      </p>
+                      <div className="sources-used">
+                        {entry.usedIn.map(place => (
+                          <span key={place} className="sources-used-chip">
+                            {place}
+                          </span>
+                        ))}
+                      </div>
+                      {entry.matchNote && <p className="sources-note">{entry.matchNote}</p>}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            );
+          })}
+
+          <footer>
+            <p className="sources-foot">
+              Kaynak denetimi 18 Eylül 2026 tarihinde tamamlanmıştır. Denetimin tam bileşen–kaynak
+              eşleştirme tabloları depoda <code>docs/kaynak-denetimi.md</code> dosyasındadır. Bu
+              sayfada yalnızca doğrulanabilir bilgiler yer alır; künyesi doğrulanamayan hiçbir
+              bileşene kaynak atfedilmemiştir.
+            </p>
+            <button
+              type="button"
+              className="policy-back-top"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              <Icon name="left" size={13} />
+              <span>Başa dön</span>
+            </button>
+          </footer>
+        </div>
+      </div>
     </div>
   );
 }

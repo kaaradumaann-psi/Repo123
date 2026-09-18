@@ -1107,44 +1107,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 /* ==========================================================================
-   Footer
-   ========================================================================== */
-
-.app-footer {
-  margin-top: auto;
-  border-top: 1px solid var(--border);
-  background: var(--white);
-  padding: 20px 24px;
-}
-
-.footer-inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 12.5px;
-  color: var(--slate-500);
-}
-
-.app-footer-links {
-  display: flex;
-  gap: 16px;
-}
-
-.app-footer-links a {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.app-footer-links a:hover {
-  text-decoration: underline;
-}
-
-/* ==========================================================================
    Responsive Breakpoints
    ========================================================================== */
 
@@ -1170,7 +1132,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 @media print {
-  .app-header, .workspace-tabs, .app-footer, .form-sidebar-panel, .form-prep-hero,
+  .app-header, .workspace-tabs, .site-footer, .form-sidebar-panel, .form-prep-hero,
   .preview-toolbar, .preview-bottom, .document-meta-strip {
     display: none !important;
   }
