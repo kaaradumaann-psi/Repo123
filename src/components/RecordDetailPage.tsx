@@ -3,7 +3,8 @@ import { getRecordDetail } from '../records/supabaseRecords';
 import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
-import { MMPIReport } from './results/MMPIReport';
+import { MMPIResultsPanel } from './results/MMPIResultsPanel';
+import { MMPIPrintReport } from './results/MMPIPrintReport';
 import { Icon } from './Icon';
 
 function dash(value: string | number | null | undefined): string {
@@ -11,10 +12,55 @@ function dash(value: string | number | null | undefined): string {
   return String(value);
 }
 
+/* ------------------------------------------------------------------ */
+/* PDF dosya adı: MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>             */
+/* ------------------------------------------------------------------ */
+
+const TR_ASCII: Record<string, string> = {
+  ç: 'c', Ç: 'C', ğ: 'g', Ğ: 'G', ı: 'i', I: 'I', i: 'i', İ: 'I', ö: 'o', Ö: 'O',
+  ş: 's', Ş: 'S', ü: 'u', Ü: 'U', â: 'a', Â: 'A', î: 'i', Î: 'I', û: 'u', Û: 'U',
+};
+
+/** Danışan adını dosya adı için güvenli ASCII parçasına çevirir. */
+function nameSlug(name: string): string {
+  const transliterated = name
+    .split('')
+    .map(ch => TR_ASCII[ch] ?? ch)
+    .join('');
+  const words = transliterated
+    .split(/[^A-Za-z0-9]+/)
+    .filter(part => part.length > 0)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1));
+  return words.length > 0 ? words.join('_') : 'Danisan';
+}
+
+/** ISO (yyyy-AA-gg) ya da gg.AA.yyyy tarihini gg-AA-yyyy biçimine çevirir. */
+function fileDate(value: string | null | undefined): string {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
+  if (iso) return `${iso[3]}-${iso[2]}-${iso[1]}`;
+  const dotted = /^(\d{1,2})[.](\d{1,2})[.](\d{4})$/.exec((value ?? '').trim());
+  if (dotted) return `${dotted[1]!.padStart(2, '0')}-${dotted[2]!.padStart(2, '0')}-${dotted[3]}`;
+  const parsed = new Date(value ?? '');
+  if (!Number.isNaN(parsed.getTime())) {
+    const dd = String(parsed.getUTCDate()).padStart(2, '0');
+    const mm = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+    return `${dd}-${mm}-${parsed.getUTCFullYear()}`;
+  }
+  const now = new Date();
+  const dd = String(now.getUTCDate()).padStart(2, '0');
+  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+  return `${dd}-${mm}-${now.getUTCFullYear()}`;
+}
+
 /**
  * Test kaydı detay sayfası — açılır pencere değil, tam sayfa.
  * `#/test/<id>` hash rotasıyla açılır; Supabase RLS erişimi zorlar
  * (yönetici tüm kayıtları, psikolog yalnız kendi kayıtlarını görür).
+ *
+ * Ekran: kısa özet şeridi + sekmeli çalışma görünümü (progressive disclosure).
+ * Baskı/PDF: yalnızca gerekli MMPI verisini taşıyan profesyonel rapor
+ * (`MMPIPrintReport`); yazdırma dosya adı document.title üzerinden
+ * `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>` olarak önerilir.
  */
 export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBack: () => void }) {
   const [record, setRecord] = useState<FullRecordDetail | null>(null);
@@ -53,6 +99,19 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
   );
   const answers = useMemo(() => (parsed ? answersFromRecordPayload(parsed) : null), [parsed]);
 
+  const fullName = `${client?.firstName ?? record?.firstName ?? ''} ${client?.lastName ?? record?.lastName ?? ''}`.trim();
+  const testDate = client?.testDate ?? record?.applicationDate ?? '';
+
+  // Yazdır/PDF kaydedilirken tarayıcının önerdiği dosya adı rapor adıyla eşleşsin.
+  useEffect(() => {
+    if (loading || error || !record) return;
+    const previous = document.title;
+    document.title = `MMPI_Klinik_Raporu_${nameSlug(fullName || 'Danisan')}_${fileDate(testDate)}`;
+    return () => {
+      document.title = previous;
+    };
+  }, [loading, error, record, fullName, testDate]);
+
   if (loading) {
     return (
       <div className="record-page">
@@ -87,119 +146,142 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
     );
   }
 
-  const fullName = `${client?.firstName ?? record.firstName} ${client?.lastName ?? record.lastName}`.trim();
+  const printMeta = {
+    fullName,
+    testDate: dash(testDate),
+    reportDate: new Date().toLocaleDateString('tr-TR'),
+    psychologist: record.psychologistName ?? '',
+    gender: client?.gender ?? record.gender ?? '',
+    age: dash(client?.age ?? record.age),
+    occupation: client?.occupation ?? record.occupation ?? '',
+    education: client?.education ?? record.education ?? '',
+    method: parsed.method ? methodLabel(parsed.method) : '',
+    duration: parsed.testDuration ?? '',
+    reason: parsed.applicationReason || record.requestedBy || '',
+    followUp: parsed.followUp ?? '',
+    marital: parsed.maritalStatus ?? '',
+  };
 
   return (
     <div className="record-page">
-      <div className="record-page-topbar no-print">
-        <button type="button" className="btn-secondary btn-sm" onClick={onBack}>
-          <Icon name="left" size={15} />
-          <span>Listeye dön</span>
-        </button>
-        <div className="record-page-topbar-title">
-          <span className="section-badge badge-primary">Kayıt İnceleme</span>
-          <span className="mono-sub">ID: {record.id}</span>
+      <div className="screen-only">
+        <div className="record-page-topbar no-print">
+          <button type="button" className="btn-secondary btn-sm" onClick={onBack}>
+            <Icon name="left" size={15} />
+            <span>Listeye dön</span>
+          </button>
+          <div className="record-page-topbar-title">
+            <span className="section-badge badge-primary">Kayıt İnceleme</span>
+            <span className="mono-sub">ID: {record.id}</span>
+          </div>
+          <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
+            <Icon name="sheet" size={15} />
+            <span>Yazdır / PDF</span>
+          </button>
         </div>
-        <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
-          <Icon name="sheet" size={15} />
-          <span>Yazdır / PDF</span>
-        </button>
-      </div>
 
-      <header className="record-page-header">
-        <div>
-          <h1 className="record-page-name">{fullName}</h1>
-          <p className="record-page-sub">
-            {dash(client?.testDate ?? record.applicationDate)} · Kayıt:{' '}
-            {new Date(record.createdAt).toLocaleString('tr-TR')}
-            {parsed.method ? ` · ${methodLabel(parsed.method)}` : ''}
-          </p>
-        </div>
-        {record.psychologistName && (
-          <div className="record-page-psychologist">
-            <Icon name="user" size={14} />
+        <header className="record-page-header">
+          <div className="record-page-id">
+            <h1 className="record-page-name">{fullName || 'Danışan'}</h1>
+            <p className="record-page-sub">
+              {dash(testDate)}
+              {parsed.method ? ` · ${methodLabel(parsed.method)}` : ''}
+              {parsed.testDuration ? ` · ${parsed.testDuration}` : ''}
+              {record.psychologistName ? ` · ${record.psychologistName}` : ''}
+            </p>
+          </div>
+          {profile && (
+            <div className="record-page-status">
+              <span className={`mmpi-validity-pill ${profile.validityAnalysis.isValid ? 'is-valid' : 'is-invalid'}`}>
+                <Icon name={profile.validityAnalysis.isValid ? 'checkCircle' : 'alert'} size={14} />
+                <span>{profile.validityAnalysis.isValid ? 'Geçerli Profil' : 'Şüpheli / Geçersiz'}</span>
+              </span>
+              {profile.profileCode && <span className="mmpi-chip mmpi-chip-code">Kod: {profile.profileCode}</span>}
+              <span className="mmpi-chip">{profile.gender} normları</span>
+            </div>
+          )}
+        </header>
+
+        <details className="client-info-details">
+          <summary>
+            <Icon name="user" size={15} />
+            Danışan ve Uygulama Bilgileri
+          </summary>
+          <div className="client-details-grid">
+            <div className="detail-item">
+              <span className="detail-label">Ad Soyad</span>
+              <span className="detail-val">{dash(fullName)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Cinsiyet</span>
+              <span className="detail-val">{dash(client?.gender ?? record.gender)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Yaş</span>
+              <span className="detail-val">{dash(client?.age ?? record.age)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Test tarihi</span>
+              <span className="detail-val">{dash(testDate)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Süre</span>
+              <span className="detail-val">{dash(parsed.testDuration)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Meslek</span>
+              <span className="detail-val">{dash(client?.occupation ?? record.occupation)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Eğitim</span>
+              <span className="detail-val">{dash(client?.education ?? record.education)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Medeni durum</span>
+              <span className="detail-val">{dash(parsed.maritalStatus)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">İzlem</span>
+              <span className="detail-val">{dash(parsed.followUp)}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Başvuru nedeni</span>
+              <span className="detail-val">{dash(parsed.applicationReason || record.requestedBy)}</span>
+            </div>
+            {parsed.method && (
+              <div className="detail-item">
+                <span className="detail-label">Yöntem</span>
+                <span className="detail-val">{methodLabel(parsed.method)}</span>
+              </div>
+            )}
+            <div className="detail-item">
+              <span className="detail-label">Uzman</span>
+              <span className="detail-val highlight">{dash(record.psychologistName)}</span>
+            </div>
+          </div>
+          {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
+        </details>
+
+        {profile ? (
+          <MMPIResultsPanel embedded profile={profile} answers={answers ?? undefined} />
+        ) : (
+          <div className="mmpi-results-placeholder">
+            <Icon name="info" size={20} />
             <div>
-              <span>Uygulayan Uzman</span>
-              <b>{record.psychologistName}</b>
+              <strong>Profil hesaplanamadı</strong>
+              <p className="ws-muted">
+                Bu kaydın verisi skorlamaya uygun değil (cinsiyet normlara uygun seçilmemiş olabilir ya da cevap/ham
+                puan verisi eksik). Aşağıda ham verileri görebilirsiniz.
+              </p>
             </div>
           </div>
         )}
-      </header>
 
-      <section className="client-info-section" aria-label="Danışan bilgileri">
-        <h3 className="section-mini-heading">Danışan ve Uygulama Bilgileri</h3>
-        <div className="client-details-grid">
-          <div className="detail-item">
-            <span className="detail-label">Ad Soyad</span>
-            <span className="detail-val">{dash(fullName)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Cinsiyet</span>
-            <span className="detail-val">{dash(client?.gender ?? record.gender)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Yaş</span>
-            <span className="detail-val">{dash(client?.age ?? record.age)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Test tarihi</span>
-            <span className="detail-val">{dash(client?.testDate ?? record.applicationDate)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Süre</span>
-            <span className="detail-val">{dash(parsed.testDuration)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Meslek</span>
-            <span className="detail-val">{dash(client?.occupation ?? record.occupation)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Eğitim</span>
-            <span className="detail-val">{dash(client?.education ?? record.education)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Medeni durum</span>
-            <span className="detail-val">{dash(parsed.maritalStatus)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">İzlem</span>
-            <span className="detail-val">{dash(parsed.followUp)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Başvuru nedeni</span>
-            <span className="detail-val">{dash(parsed.applicationReason || record.requestedBy)}</span>
-          </div>
-          {parsed.method && (
-            <div className="detail-item">
-              <span className="detail-label">Yöntem</span>
-              <span className="detail-val">{methodLabel(parsed.method)}</span>
-            </div>
-          )}
-          <div className="detail-item">
-            <span className="detail-label">Uzman</span>
-            <span className="detail-val highlight">{dash(record.psychologistName)}</span>
-          </div>
-        </div>
-        {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
-      </section>
+        {/* Ham veri bölümü: profil varken optik cevaplar “Soru Yanıtları”
+            sekmesinde zaten görünür; profilsiz kayıtlarda ham veri gösterilir. */}
+      </div>
 
-      {profile ? (
-        <MMPIReport profile={profile} clientName={fullName} answers={answers ?? undefined} />
-      ) : (
-        <div className="mmpi-results-placeholder">
-          <Icon name="info" size={20} />
-          <div>
-            <strong>Profil hesaplanamadı</strong>
-            <p className="ws-muted">
-              Bu kaydın verisi skorlamaya uygun değil (cinsiyet normlara uygun seçilmemiş olabilir ya da cevap/ham
-              puan verisi eksik). Aşağıda ham verileri görebilirsiniz.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Ham veri bölümü: profil varken optik cevaplar “Soru Yanıtları”
-          bölümünde zaten görünür; profilsiz kayıtlarda ham veri gösterilir. */}
+      {/* Profilsüz kayıtlarda ham veri hem ekranda hem baskıda görünür. */}
       {!profile && parsed.quickAnswers && (
         <section className="report-section" aria-label="Hızlı giriş cevapları">
           <h3 className="report-section-title">
@@ -219,9 +301,9 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
             ))}
           </div>
         </section>
-      )}
+        )}
 
-      {!profile && parsed.rawScales && (
+        {!profile && parsed.rawScales && (
         <section className="report-section" aria-label="Ham puanlar">
           <h3 className="report-section-title">
             <Icon name="pulse" size={16} /> Ham puanlar
@@ -235,9 +317,11 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
             ))}
           </div>
         </section>
-      )}
+        )}
 
       {!profile && omrPages.length > 0 && <OmrPagesFallback pages={omrPages} />}
+
+      {profile && <div className="print-only">{<MMPIPrintReport profile={profile} meta={printMeta} />}</div>}
     </div>
   );
 }

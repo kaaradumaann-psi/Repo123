@@ -268,10 +268,11 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
 });
 
 describe('yeni analiz bölümleri uçtan uca render olur', () => {
-  it('düz rapor, türetilmiş ölçekler ve kritik bulgular kaynak içerikle render olur', async () => {
+  it('sekmeli panel ve yazdırma raporu, türetilmiş ölçekler ve kritik bulgular kaynak içerikle render olur', async () => {
     const { createElement } = await import('react');
     const { renderToStaticMarkup } = await import('react-dom/server');
-    const { MMPIReport } = await import('../src/components/results/MMPIReport');
+    const { MMPIResultsPanel } = await import('../src/components/results/MMPIResultsPanel');
+    const { MMPIPrintReport } = await import('../src/components/results/MMPIPrintReport');
     const { MMPIDerivedSection } = await import('../src/components/results/MMPIDerivedSection');
     const { MMPICriticalSection } = await import('../src/components/results/MMPICriticalSection');
 
@@ -281,19 +282,49 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     answers[138] = 'D'; // madde 139
     const p = buildProfileFromAnswers(answers, 'Erkek');
 
-    const report = renderToStaticMarkup(createElement(MMPIReport, { profile: p, clientName: 'Denek A', answers }));
-    // Bölüm başlıkları düz akışta bir arada
-    assert.match(report, /Genel Bakış/);
-    assert.match(report, /Geçerlik Analizleri/);
-    assert.match(report, /Klinik Ölçekler/);
-    assert.match(report, /Kod Analizleri/);
-    assert.match(report, /Türetilmiş Ölçekler/);
-    assert.match(report, /Kritik Bulgular/);
-    assert.match(report, /Soru Yanıtları/);
-    // Geçerlik banner'ı
-    assert.match(report, /TEST GEÇERLİ|PROFİL ŞÜPHELİ/);
+    // Sekmeli çalışma görünümü: bölüm başlıkları sekme etiketi olarak bir arada
+    const panel = renderToStaticMarkup(createElement(MMPIResultsPanel, { profile: p, clientName: 'Denek A', answers }));
+    assert.match(panel, /Genel Bakış/);
+    assert.match(panel, /Geçerlik Analizleri/);
+    assert.match(panel, /Klinik Ölçekler/);
+    assert.match(panel, /Kod Analizleri/);
+    assert.match(panel, /Türetilmiş Ölçekler/);
+    assert.match(panel, /Kritik Bulgular/);
+    assert.match(panel, /Soru Yanıtları/);
+    // Profil özeti şeridi
+    assert.match(panel, /Geçerli Profil|Şüpheli/);
     // Dosya adı sayfalarda asla görünmez
-    assert.doesNotMatch(report, /kaynak\.pdf/i);
+    assert.doesNotMatch(panel, /kaynak\.pdf/i);
+
+    // Yazdırma/PDF raporu: gerekli MMPI bölümleri profesyonel düzende
+    const print = renderToStaticMarkup(
+      createElement(MMPIPrintReport, {
+        profile: p,
+        meta: {
+          fullName: 'Denek A',
+          testDate: '2026-09-18',
+          reportDate: '2026-09-18',
+          psychologist: 'Uzman',
+          gender: 'Erkek',
+          age: '24',
+          occupation: '',
+          education: '',
+          method: '',
+          duration: '',
+          reason: '',
+          followUp: '',
+          marital: '',
+        },
+      }),
+    );
+    assert.match(print, /MMPI Klinik Raporu/);
+    assert.match(print, /Profil Grafiği/);
+    assert.match(print, /Klinik Ölçekler/);
+    assert.match(print, /Geçerlik Analizi/);
+    assert.match(print, /Türetilmiş Ölçekler/);
+    assert.match(print, /Kritik Bulgular/);
+    assert.match(print, /GEÇERLİ|ŞÜPHELİ/);
+    assert.doesNotMatch(print, /kaynak\.pdf/i);
 
     const derived = renderToStaticMarkup(createElement(MMPIDerivedSection, { profile: p }));
     assert.match(derived, /Goldberg Ayrım Endeksi/);

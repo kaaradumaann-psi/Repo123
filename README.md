@@ -32,6 +32,16 @@ sayfalarını ve psikolog kimliğini Supabase'e yazar. MMPI profili (T skorları
 profil grafiği, geçerlik ve kod analizi) sunucuda değil, kullanıcının cihazında
 hesaplanır: İşlem adımında anlık olarak ve kayıtta **“Testi İncele”** ile açılan
 tam sayfada (kayıttaki hızlı giriş / OMR / ham puan verisinden yeniden üretilir).
+Kayıt sayfası psikolog çalışma alanı olarak sekmeli bir bilgi mimarisi kullanır
+(Profil özeti → Genel Bakış / Geçerlik / Klinik Ölçekler / Kod / Türetilmiş /
+Desenler / Kritik / Soru Yanıtları); ayrıntılar yalnızca istendiğinde açılır.
+**Yazdır / PDF** düğmesi uygulama arayüzünü değil, yalnızca gerekli MMPI
+verisini taşıyan profesyonel klinik raporu basar (`src/components/results/MMPIPrintReport.tsx`);
+tarayıcının PDF dosya adı önerisi `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>`
+biçiminde test tarihinden üretilir. Uygulamada kullanılan bilimsel/teknik
+kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, başlık ve
+altbilgiden açılır) künye + uygulamadaki karşılıklarıyla listelenir; raporlara
+yalnızca kısa yöntem notu taşınır.
 T skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
 standart ekleme tablosuna dayanır; **yorum katmanı** klinik MMPI yorumlama
 kaynağına birebir dayanır: geçerlik analizleri (?) “Hiç Bir Şey Diyemem”, L, F, K
