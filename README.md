@@ -39,9 +39,17 @@ Desenler / Kritik / Soru Yanıtları); ayrıntılar yalnızca istendiğinde aç�
 verisini taşıyan profesyonel klinik raporu basar (`src/components/results/MMPIPrintReport.tsx`);
 tarayıcının PDF dosya adı önerisi `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>`
 biçiminde test tarihinden üretilir. Uygulamada kullanılan bilimsel/teknik
-kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, başlık ve
-altbilgiden açılır) künye + uygulamadaki karşılıklarıyla listelenir; raporlara
-yalnızca kısa yöntem notu taşınır. Supabase yapılandırılmadan önce sonuç
+kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, alt
+bilgiden açılır; sabit içindekiler şeridi ve numaralı bölümlerle) künye +
+uygulamadaki karşılıklarıyla listelenir; raporlara yalnızca kısa yöntem notu
+taşınır. Sitenin tam alt bilgisi (marka + slogan, **Yeni Veri Girişi**, **SSS**,
+**Gizlilik & KVKK Politikası**, **Kullanım Koşulları**, **Kaynakça**, iletişim
+ve telif/kredi şeridi) her ekranda — çalışma alanı, giriş/kurulum, bilgi
+sayfaları — aynı düzenle görünür; SSS (`#/sss`), Gizlilik & KVKK (`#/gizlilik`)
+ve Kullanım Koşulları (`#/kullanim`) sayfaları oturum açmadan da okunabilir
+(kabuk: `InfoPageShell`, içerik: `FaqPage`, `PrivacyPolicyPage`, `TermsPage`,
+ortak politika düzeni: `PolicyDoc`, stiller: `src/styles/site.css`).
+Supabase yapılandırılmadan önce sonuç
 ekranlarının tamamı `#/onizleme` rotasındaki örnek veriyle incelenebilir (bu
 rota yalnızca yapılandırılmamış kurulumda açılır; veriler gerçek kayda ait
 değildir).

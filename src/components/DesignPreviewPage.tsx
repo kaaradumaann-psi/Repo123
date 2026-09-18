@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DEMO_CASES } from '../preview/demoProfile';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import { MMPIPrintReport } from './results/MMPIPrintReport';
+import { SiteFooter } from './SiteFooter';
 import type { PrintReportMeta } from './results/MMPIPrintReport';
 import { Icon } from './Icon';
 
@@ -78,6 +79,9 @@ export function DesignPreviewPage({ onExit }: { onExit?: () => void }) {
         <p className="preview-note">{demo.summary}</p>
 
         <MMPIResultsPanel profile={demo.profile} clientName="Örnek Danışan" answers={demo.answers} />
+
+        {/* Tam alt bilgi: "Yeni Veri Girişi" bağlantısı #/ hedefiyle kurulum ekranına döndürür. */}
+        <SiteFooter />
       </div>
 
       <div className="print-only">
