@@ -1,11 +1,14 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
-import type { DerivedScaleResult } from '../../scoring/mmpiDerived';
+import type { DerivedIndexResult, DerivedScaleResult } from '../../scoring/mmpiDerived';
+import { PERSONALITY_CUTOFFS_READ_ONLY } from '../../scoring/mmpiDerived';
 import { Icon } from '../Icon';
 
 const toneColor = (tone: DerivedScaleResult['tone']): string =>
   tone === 'alert' ? '#d2453a' : tone === 'watch' ? '#b4770b' : '#0e9e6a';
 
-function DerivedCard({ scale }: { scale: DerivedScaleResult }) {
+type Cutoff = { mild: number; marked: number };
+
+function DerivedCard({ scale, cutoff }: { scale: DerivedScaleResult; cutoff?: Cutoff }) {
   const color = toneColor(scale.tone);
   return (
     <div className={`mmpi-vcard ${scale.tone === 'alert' ? 'is-high' : scale.tone === 'watch' ? 'is-low' : ''}`}>
@@ -25,7 +28,72 @@ function DerivedCard({ scale }: { scale: DerivedScaleResult }) {
           {scale.levelLabel}
         </span>
       </div>
+      {cutoff && (
+        <span className="index-card-cutoff">
+          Ham eşikler: Hafif ≥ {cutoff.mild} · Belirgin ≥ {cutoff.marked}
+        </span>
+      )}
       <p className="mmpi-vcard-signal">{scale.interpretation}</p>
+    </div>
+  );
+}
+
+/** Ayrım endekslerinin ölçüt aralıkları ve kesim sınırları (yalnızca görselleştirme). */
+const INDEX_BANDS: Record<
+  DerivedIndexResult['scaleId'],
+  { min: number; max: number; bands: { from: number; to: number; short: string; color: string }[] }
+> = {
+  GOLDBERG: {
+    min: -100,
+    max: 100,
+    bands: [
+      { from: -100, to: 45, short: '≤ 45 nevrotik yönü', color: '#c8e8d6' },
+      { from: 45, to: 100, short: '> 45 psikotik yönü', color: '#f2c4be' },
+    ],
+  },
+  TAULBEE: {
+    min: 0,
+    max: 16,
+    bands: [
+      { from: 0, to: 6.5, short: '≤ 6 psikotik', color: '#f2c4be' },
+      { from: 6.5, to: 12.5, short: '7–12 belirsiz', color: '#f2ddb2' },
+      { from: 12.5, to: 16, short: '≥ 13 nevrotik', color: '#c8e8d6' },
+    ],
+  },
+  PETERSON: {
+    min: 0,
+    max: 6,
+    bands: [
+      { from: 0, to: 2.5, short: '≤ 2 ölçüt', color: '#dde4ec' },
+      { from: 2.5, to: 6, short: '≥ 3 psikotik yük', color: '#f2c4be' },
+    ],
+  },
+};
+
+/** Endeks puanının ölçüt aralığındaki yerini gösteren küçük bant + işaretçi. */
+function IndexRangeBar({ scaleId, value }: { scaleId: string; value: number }) {
+  const spec = INDEX_BANDS[scaleId as keyof typeof INDEX_BANDS];
+  if (!spec) return null;
+  const clamped = Math.min(spec.max, Math.max(spec.min, value));
+  const markerPct = ((clamped - spec.min) / (spec.max - spec.min)) * 100;
+  return (
+    <div className="index-range" aria-hidden="true">
+      <div className="index-range-track">
+        {spec.bands.map(band => (
+          <span
+            key={band.short}
+            style={{ flexGrow: band.to - band.from, flexBasis: 0, background: band.color }}
+          />
+        ))}
+        <span className="index-range-marker" style={{ left: `${markerPct}%` }} />
+      </div>
+      <div className="index-range-labels">
+        {spec.bands.map(band => (
+          <span key={band.short} style={{ flexGrow: band.to - band.from, flexBasis: 0 }}>
+            {band.short}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -62,18 +130,29 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
     <div className="mmpi-tab-panel">
       <div>
         <h4 className="mmpi-section-title">Ayrım Endeksleri</h4>
+        <p className="mmpi-summary-note">
+          Ayrım endeksleri, profilin nevrotik–psikotik eksenindeki konumuna dair sayısal yardımcı
+          göstergelerdir; tek başına tanı koymazlar, klinik ölçekler ve iki noktalı kodla birlikte
+          okunurlar. Her kartta puan, ölçüt aralığında karşılık gelen bant ve kesim sınırları
+          gösterilir.
+        </p>
         <div className="mmpi-index-grid">
           {indexes.map(index => {
             const color = toneColor(index.tone);
             return (
               <div key={index.scaleId} className={`index-card ${index.tone === 'alert' ? 'is-high' : ''}`}>
-                <div className="index-card-value" style={{ color }}>
-                  {index.value}
+                <div className="index-card-head">
+                  <div className="index-card-value" style={{ color }}>
+                    {index.value}
+                  </div>
+                  <div className="index-card-title">
+                    <b>{index.scaleName}</b>
+                    <span className="index-card-level" style={{ color }}>
+                      {index.levelLabel}
+                    </span>
+                  </div>
                 </div>
-                <b>{index.scaleName}</b>
-                <span className="index-card-level" style={{ color }}>
-                  {index.levelLabel}
-                </span>
+                <IndexRangeBar scaleId={index.scaleId} value={index.value} />
                 <p>{index.interpretation}</p>
               </div>
             );
@@ -85,13 +164,26 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
         <h4 className="mmpi-section-title">Kişilik Bozukluğu Eğilimleri (Ham Puan)</h4>
         <div className="mmpi-vgrid">
           {personality.map(scale => (
-            <DerivedCard key={scale.scaleId} scale={scale} />
+            <DerivedCard
+              key={scale.scaleId}
+              scale={scale}
+              cutoff={
+                PERSONALITY_CUTOFFS_READ_ONLY[
+                  scale.scaleId as keyof typeof PERSONALITY_CUTOFFS_READ_ONLY
+                ]
+              }
+            />
           ))}
         </div>
       </div>
 
       <div>
         <h4 className="mmpi-section-title">Madde Bağımlılığı ve Özel Ölçekler</h4>
+        <p className="mmpi-summary-note">
+          MAC, ICAS, SAP, O-H, Es, Welsh A/R, Do ve Dy ham puanlarıyla yorum eşikleri bu bölümde
+          gösterilir. Eşiklerin kaynak eşleşme durumu Kaynaklar sayfasının 04–05. bölümlerinde
+          raporlanmıştır.
+        </p>
         <div className="mmpi-vgrid">
           {addiction.map(scale => (
             <DerivedCard key={scale.scaleId} scale={scale} />

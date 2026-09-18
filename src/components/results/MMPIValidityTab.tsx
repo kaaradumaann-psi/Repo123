@@ -60,68 +60,76 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
 
   return (
     <div role="tabpanel" className="mmpi-tab-panel">
-      <div className="mmpi-vgrid">
-        {validityAnalysis.findings.map(finding => (
-          <FindingCard key={finding.id} finding={finding} />
-        ))}
+      <div>
+        <h4 className="mmpi-section-title">Geçerlik Ölçek Bulguları (?, L, F, K)</h4>
+        <div className="mmpi-vgrid">
+          {validityAnalysis.findings.map(finding => (
+            <FindingCard key={finding.id} finding={finding} />
+          ))}
+        </div>
       </div>
 
-      {/* Yanıt tutarlılığı ve konfigürasyon kartları */}
-      <div className="mmpi-vgrid">
-        <div className={`mmpi-vcard ${fk.tone === 'alert' ? 'is-high' : fk.tone === 'watch' ? 'is-low' : ''}`}>
-          <div className="mmpi-vcard-head">
-            <span className="mmpi-vcard-letter">FK</span>
-            <span className="mmpi-vcard-name">F-K Endeksi (Gough)</span>
-          </div>
-          <p className="mmpi-vcard-desc">
-            F ham ({validityAnalysis.fRaw}) − K ham ({validityAnalysis.kRaw}); abartma ve savunmacılık dengesini gösterir.
-          </p>
-          <div className="mmpi-vcard-stats">
-            <div className="mmpi-vstat">
-              <span>Değer</span>
-              <b style={{ color: fkColor }}>{fk.value > 0 ? `+${fk.value}` : fk.value}</b>
+      <div>
+        <h4 className="mmpi-section-title">F-K Endeksi ve Geçerlik Konfigürasyonu</h4>
+        <div className="mmpi-vgrid">
+          <div className={`mmpi-vcard ${fk.tone === 'alert' ? 'is-high' : fk.tone === 'watch' ? 'is-low' : ''}`}>
+            <div className="mmpi-vcard-head">
+              <span className="mmpi-vcard-letter">FK</span>
+              <span className="mmpi-vcard-name">F-K Endeksi (Gough)</span>
             </div>
-            <span className="level-badge" style={{ background: fkColor, marginLeft: 'auto' }}>
-              {fk.level}
-            </span>
-          </div>
-          <p className="mmpi-vcard-signal">{fk.interpretation}</p>
-        </div>
-
-        <div className={`mmpi-vcard ${config && config.tone !== 'ok' ? (config.tone === 'alert' ? 'is-high' : 'is-low') : ''}`}>
-          <div className="mmpi-vcard-head">
-            <span className="mmpi-vcard-letter">LFK</span>
-            <span className="mmpi-vcard-name">Geçerlik Konfigürasyonu</span>
-          </div>
-          {config ? (
-            <>
-              <p className="mmpi-vcard-desc">{config.rule}</p>
-              <div className="mmpi-vcard-stats">
-                <span
-                  className="level-badge"
-                  style={{
-                    background: config.tone === 'alert' ? '#d2453a' : config.tone === 'watch' ? '#b4770b' : '#0e9e6a',
-                    marginLeft: 'auto',
-                  }}
-                >
-                  {config.validity === 'geçerli' ? 'Geçerli örüntü' : 'Şüpheli örüntü'}
-                </span>
-              </div>
-              <p className="mmpi-vcard-signal">
-                <b>{config.name}: </b>
-                {config.interpretation}
-              </p>
-            </>
-          ) : (
-            <p className="mmpi-vcard-signal">
-              L, F ve K puanları klasik konfigürasyon örüntülerinden (V, Tersine V, tümüne doğru/yanlış vb.) hiçbirine
-              uymuyor; geçerlik değerlendirmesi yukarıdaki ölçek bulgularına göre yapılır.
+            <p className="mmpi-vcard-desc">
+              F ham ({validityAnalysis.fRaw}) − K ham ({validityAnalysis.kRaw}); abartma ve savunmacılık dengesini gösterir.
             </p>
-          )}
-        </div>
+            <div className="mmpi-vcard-stats">
+              <div className="mmpi-vstat">
+                <span>Değer</span>
+                <b style={{ color: fkColor }}>{fk.value > 0 ? `+${fk.value}` : fk.value}</b>
+              </div>
+              <span className="level-badge" style={{ background: fkColor, marginLeft: 'auto' }}>
+                {fk.level}
+              </span>
+            </div>
+            <p className="mmpi-vcard-signal">{fk.interpretation}</p>
+          </div>
 
-        {itemLevel && (
-          <>
+          <div className={`mmpi-vcard ${config && config.tone !== 'ok' ? (config.tone === 'alert' ? 'is-high' : 'is-low') : ''}`}>
+            <div className="mmpi-vcard-head">
+              <span className="mmpi-vcard-letter">LFK</span>
+              <span className="mmpi-vcard-name">Geçerlik Konfigürasyonu</span>
+            </div>
+            {config ? (
+              <>
+                <p className="mmpi-vcard-desc">{config.rule}</p>
+                <div className="mmpi-vcard-stats">
+                  <span
+                    className="level-badge"
+                    style={{
+                      background: config.tone === 'alert' ? '#d2453a' : config.tone === 'watch' ? '#b4770b' : '#0e9e6a',
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    {config.validity === 'geçerli' ? 'Geçerli örüntü' : 'Şüpheli örüntü'}
+                  </span>
+                </div>
+                <p className="mmpi-vcard-signal">
+                  <b>{config.name}: </b>
+                  {config.interpretation}
+                </p>
+              </>
+            ) : (
+              <p className="mmpi-vcard-signal">
+                L, F ve K puanları klasik konfigürasyon örüntülerinden (V, Tersine V, tümüne doğru/yanlış vb.) hiçbirine
+                uymuyor; geçerlik değerlendirmesi yukarıdaki ölçek bulgularına göre yapılır.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {itemLevel && (
+        <div>
+          <h4 className="mmpi-section-title">Yanıt Tutarlılığı Endeksleri</h4>
+          <div className="mmpi-vgrid">
             <div className={`mmpi-vcard ${itemLevel.trIndex.isWarning ? 'is-high' : ''}`}>
               <div className="mmpi-vcard-head">
                 <span className="mmpi-vcard-letter">TR</span>
@@ -177,9 +185,9 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
               </div>
               <p className="mmpi-vcard-signal">{itemLevel.carelessness.interpretation}</p>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
 
       {!itemLevel && (
         <div className="mmpi-box info">

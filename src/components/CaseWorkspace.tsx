@@ -1312,130 +1312,138 @@ function ReviewPanel({
         </label>
       )}
 
-      <dl className="ws-dl">
-        <div>
-          <dt>Danışan</dt>
-          <dd>
-            {client.firstName} {client.lastName}
-          </dd>
-        </div>
-        <div>
-          <dt>Cinsiyet</dt>
-          <dd>{client.gender}</dd>
-        </div>
-        <div>
-          <dt>Yaş</dt>
-          <dd>{client.age}</dd>
-        </div>
-        <div>
-          <dt>Test tarihi</dt>
-          <dd>{formatDate(client.testDate)}</dd>
-        </div>
-        <div>
-          <dt>Süre</dt>
-          <dd>{client.testDuration.trim() ? formatDuration(client.testDuration) : '—'}</dd>
-        </div>
-        {client.occupation && (
-          <div>
-            <dt>Meslek</dt>
-            <dd>{client.occupation}</dd>
-          </div>
-        )}
-        {client.followUp && (
-          <div>
-            <dt>İzlem</dt>
-            <dd>{client.followUp}</dd>
-          </div>
-        )}
-        {client.education && (
-          <div>
-            <dt>Eğitim</dt>
-            <dd>{client.education}</dd>
-          </div>
-        )}
-        {client.maritalStatus && (
-          <div>
-            <dt>Medeni durum</dt>
-            <dd>{client.maritalStatus}</dd>
-          </div>
-        )}
-        <div>
-          <dt>Yöntem</dt>
-          <dd>{methodLabel(method)}</dd>
-        </div>
-        <div>
-          <dt>Uzman</dt>
-          <dd>
-            {actor.firstName} {actor.lastName}
-          </dd>
-        </div>
-      </dl>
-
-      {method === 'quick' && (
+      <section className="ws-session-summary" aria-label="Oturum künyesi">
+        <h3 className="ws-session-title">Oturum Künyesi</h3>
+        <p className="ws-muted ws-session-hint">
+          Bu kaydın veritabanına yazılacak künye özeti. Veri girişinde kullandığınız yönteme göre alt
+          satırda giriş istatistikleri gösterilir.
+        </p>
         <dl className="ws-dl">
           <div>
-            <dt>Girilen</dt>
+            <dt>Danışan</dt>
             <dd>
-              {counts.entered} / {ITEM_COUNT}
+              {client.firstName} {client.lastName}
             </dd>
           </div>
           <div>
-            <dt>Doğru</dt>
-            <dd>{counts.correct}</dd>
+            <dt>Cinsiyet</dt>
+            <dd>{client.gender}</dd>
           </div>
           <div>
-            <dt>Yanlış</dt>
-            <dd>{counts.wrong}</dd>
+            <dt>Yaş</dt>
+            <dd>{client.age}</dd>
           </div>
           <div>
-            <dt>Boş</dt>
-            <dd>{counts.blank}</dd>
+            <dt>Test tarihi</dt>
+            <dd>{formatDate(client.testDate)}</dd>
           </div>
-        </dl>
-      )}
-
-      {method === 'raw' && (
-        <dl className="ws-dl">
-          {RAW_SCORE_FIELDS.map(field => (
-            <div key={field.key}>
-              <dt>
-                {field.label}
-                {field.kRaw ? ' (K’sız)' : ''}
-              </dt>
-              <dd>{raw[field.key] === '' ? '—' : raw[field.key]}</dd>
+          <div>
+            <dt>Süre</dt>
+            <dd>{client.testDuration.trim() ? formatDuration(client.testDuration) : '—'}</dd>
+          </div>
+          {client.occupation && (
+            <div>
+              <dt>Meslek</dt>
+              <dd>{client.occupation}</dd>
             </div>
-          ))}
+          )}
+          {client.followUp && (
+            <div>
+              <dt>İzlem</dt>
+              <dd>{client.followUp}</dd>
+            </div>
+          )}
+          {client.education && (
+            <div>
+              <dt>Eğitim</dt>
+              <dd>{client.education}</dd>
+            </div>
+          )}
+          {client.maritalStatus && (
+            <div>
+              <dt>Medeni durum</dt>
+              <dd>{client.maritalStatus}</dd>
+            </div>
+          )}
+          <div>
+            <dt>Yöntem</dt>
+            <dd>{methodLabel(method)}</dd>
+          </div>
+          <div>
+            <dt>Uzman</dt>
+            <dd>
+              {actor.firstName} {actor.lastName}
+            </dd>
+          </div>
         </dl>
-      )}
 
-      {method === 'omr' && omrSummary && (
-        <dl className="ws-dl">
-          <div>
-            <dt>Sayfa</dt>
-            <dd>
-              {omrSummary.acceptedPages} / {omrSummary.expectedPages}
-            </dd>
-          </div>
-          <div>
-            <dt>Okunan</dt>
-            <dd>
-              {omrSummary.readItems} / {omrSummary.expectedItems}
-            </dd>
-          </div>
-          <div>
-            <dt>Güvenilir</dt>
-            <dd>{omrSummary.reliableAnswers}</dd>
-          </div>
-          <div>
-            <dt>İnceleme</dt>
-            <dd>{omrSummary.ambiguous + omrSummary.multiple}</dd>
-          </div>
-          <div>
-            <dt>Boş</dt>
-            <dd>{omrSummary.blank}</dd>
-          </div>
-        </dl>
-      )}
+        <h4 className="ws-session-subtitle">Veri İstatistikleri — {methodLabel(method)}</h4>
+        {method === 'quick' && (
+          <dl className="ws-dl">
+            <div>
+              <dt>Girilen</dt>
+              <dd>
+                {counts.entered} / {ITEM_COUNT}
+              </dd>
+            </div>
+            <div>
+              <dt>Doğru</dt>
+              <dd>{counts.correct}</dd>
+            </div>
+            <div>
+              <dt>Yanlış</dt>
+              <dd>{counts.wrong}</dd>
+            </div>
+            <div>
+              <dt>Boş</dt>
+              <dd>{counts.blank}</dd>
+            </div>
+          </dl>
+        )}
+
+        {method === 'raw' && (
+          <dl className="ws-dl">
+            {RAW_SCORE_FIELDS.map(field => (
+              <div key={field.key}>
+                <dt>
+                  {field.label}
+                  {field.kRaw ? ' (K’sız)' : ''}
+                </dt>
+                <dd>{raw[field.key] === '' ? '—' : raw[field.key]}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {method === 'omr' && omrSummary && (
+          <dl className="ws-dl">
+            <div>
+              <dt>Sayfa</dt>
+              <dd>
+                {omrSummary.acceptedPages} / {omrSummary.expectedPages}
+              </dd>
+            </div>
+            <div>
+              <dt>Okunan</dt>
+              <dd>
+                {omrSummary.readItems} / {omrSummary.expectedItems}
+              </dd>
+            </div>
+            <div>
+              <dt>Güvenilir</dt>
+              <dd>{omrSummary.reliableAnswers}</dd>
+            </div>
+            <div>
+              <dt>İnceleme</dt>
+              <dd>{omrSummary.ambiguous + omrSummary.multiple}</dd>
+            </div>
+            <div>
+              <dt>Boş</dt>
+              <dd>{omrSummary.blank}</dd>
+            </div>
+          </dl>
+        )}
+      </section>
 
       {error && (
         <div className="status-banner error-banner" role="alert">
@@ -1445,12 +1453,27 @@ function ReviewPanel({
       )}
 
       {saved ? (
-        <div className="ws-ready" role="status">
-          {saved.id === 'local'
-            ? 'Veriler bu oturumda analize hazır. Kayıt yalnızca aktif psikolog hesabıyla veritabanına yazılır.'
-            : <>
-                Veriler kaydedildi. Kayıt: <strong>{saved.id}</strong>. Profil yukarıda hesaplanmıştır.
-              </>}
+        <div className={`ws-ready ${saved.id === 'local' ? 'is-local' : ''}`} role="status">
+          <Icon name={saved.id === 'local' ? 'info' : 'checkCircle'} size={18} />
+          <div>
+            <strong>
+              {saved.id === 'local'
+                ? 'Analiz bu oturum için hesaplandı'
+                : 'Kayıt veritabanına yazıldı'}
+            </strong>
+            {saved.id === 'local' ? (
+              <p>
+                Profil ve tüm hesaplamalar yukarıda tamamlanmıştır. Bu hesap psikolog kayıt
+                yetkisine sahip olmadığından sonuç veritabanına yazılmadı; kaydı ancak aktif
+                psikolog hesabıyla oluşturabilirsiniz.
+              </p>
+            ) : (
+              <p>
+                Kayıt numarası <strong>{saved.id}</strong>. Profil ve tüm hesaplamalar yukarıda
+                tamamlanmıştır; kayıt “Kayıtlar” ekranından her zaman yeniden açılabilir.
+              </p>
+            )}
+          </div>
         </div>
       ) : null}
 
