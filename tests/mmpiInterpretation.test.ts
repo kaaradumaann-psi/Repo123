@@ -241,7 +241,7 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
     const p = buildProfileFromAnswers(answers, 'Erkek');
 
     const validity = renderToStaticMarkup(createElement(MMPIValidityTab, { profile: p }));
-    assert.match(validity, /F-K Endeksi \(Gough\)/);
+    assert.match(validity, /F-K Endeksi/);
     // hepsi-Y: L ham 15, F ham 20, K ham 29 → üçü de kaynak tablosunda "Belirgin"
     assert.match(validity, /Ham 8-15/);
     assert.match(validity, /Ham 16-22/);
@@ -249,15 +249,15 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
     // Yeni göstergeler: TR, Dikkatsizlik ve geçerlik konfigürasyonu kartları
     assert.match(validity, /TR Endeksi/);
     assert.match(validity, /Dikkatsizlik Endeksi/);
-    assert.match(validity, /Geçerlik Konfigürasyonu/);
+    assert.match(validity, /L \/ F \/ K Konfigürasyonu/);
 
     const clinical = renderToStaticMarkup(createElement(MMPIClinicalTab, { profile: p }));
     assert.match(clinical, /Hipokondriazis/);
-    assert.match(clinical, /kaynak raporun ölçeğe özgü T puanı tablolarından/);
+    assert.match(clinical, /Düzey rozetleri ölçeğe özgü T puanı aralıklarını gösterir/);
 
     const code = renderToStaticMarkup(createElement(MMPICodeTab, { profile: p }));
-    // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık rehbere gönderme yapar.
-    assert.match(code, /Kod Yorumu \(klinik yorum rehberi\)/);
+    // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık yalnızca kod yorumunu anar.
+    assert.match(code, /Kod Yorumu/);
     assert.doesNotMatch(code, /kaynak\.pdf/);
 
     const extra = renderToStaticMarkup(createElement(MMPIExtraTab, { profile: p }));
@@ -357,6 +357,6 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     const critical = renderToStaticMarkup(createElement(MMPICriticalSection, { profile: p }));
     assert.match(critical, /ham puan yöntemiyle girildiği için kritik maddeler listelenemiyor/);
     const validity = renderToStaticMarkup(createElement(MMPIValidityTab, { profile: p }));
-    assert.match(validity, /TR endeksi, Dikkatsizlik endeksi ve madde düzeyindeki diğer/);
+    assert.match(validity, /TR, dikkatsizlik ve konfigürasyon analizleri madde düzeyinde/);
   });
 });

@@ -39,7 +39,7 @@ describe('TR endeksi (16 tekrarlanmış madde çifti)', () => {
     const four = trIndex(responseMap(patch));
     assert.equal(four.score, 4);
     assert.equal(four.isWarning, true);
-    assert.match(four.interpretation, /Dahlstrom/);
+    assert.match(four.interpretation, /geçersiz profil olasılığını artırır/);
   });
 
   it('boş bırakılan çiftler değerlendirilmez', () => {
@@ -59,7 +59,7 @@ describe('Dikkatsizlik endeksi (12 çift)', () => {
     assert.equal(allD.score, sameCount);
   });
 
-  it('4 ve üzeri uyarı üretir (Greene 1980 kesme puanı)', () => {
+  it('4 ve üzeri uyarı üretir (kesme puanı 4)', () => {
     // hepsi-D tabanında 7 'same' çifti sayılır; dördünü farklılaştır → 3 (uyarı yok)
     const low = carelessnessIndex(responseMap({ 10: 1, 405: 0, 49: 1, 113: 0, 76: 1, 107: 0, 88: 1, 526: 0 }));
     assert.equal(low.score, 3);
@@ -68,7 +68,7 @@ describe('Dikkatsizlik endeksi (12 çift)', () => {
     const high = carelessnessIndex(responseMap({ 10: 1, 405: 0, 49: 1, 113: 0, 76: 1, 107: 0 }));
     assert.equal(high.score, 4);
     assert.equal(high.isWarning, true);
-    assert.match(high.interpretation, /Greene/);
+    assert.match(high.interpretation, /dikkatli olunması gerektiğini gösterir/);
   });
 });
 
@@ -196,15 +196,15 @@ describe('kritik maddeler ve klinik izlenimler', () => {
     assert.ok(impressions.some(i => i.tone === 'alert' && i.title.includes('İntihar')));
   });
 
-  it('K ham <= 15 tedaviye olumlu yanıt notu üretir (Reis 1966)', () => {
+  it('K ham <= 15 tedaviye olumlu yanıt notu üretir', () => {
     const low = clinicalImpressions({
       t: {}, lRaw: 5, kRaw: 12, gender: 'Kadın',
     });
-    assert.ok(low.some(i => i.title.includes('Reis') && i.tone === 'ok'));
+    assert.ok(low.some(i => i.title.includes('Tedaviye Yanıt Notu') && i.tone === 'ok'));
     const high = clinicalImpressions({
       t: {}, lRaw: 5, kRaw: 22, gender: 'Kadın',
     });
-    assert.ok(high.some(i => i.title.includes('Reis') && i.tone === 'watch'));
+    assert.ok(high.some(i => i.title.includes('Tedaviye Yanıt Notu') && i.tone === 'watch'));
   });
 });
 
@@ -233,7 +233,7 @@ describe('uçtan uca profil: madde düzeyi analiz katmanı', () => {
     assert.equal(profile.itemLevel!.derivedScales.length, 33);
     assert.equal(profile.itemLevel!.derivedIndexes.length, 3);
     assert.ok(profile.itemLevel!.criticalItems.length > 0);
-    assert.ok(profile.itemLevel!.impressions.some(i => i.title.includes('Reis')));
+    assert.ok(profile.itemLevel!.impressions.some(i => i.title.includes('Tedaviye Yanıt Notu')));
     // hepsi-Y: tümüne yanlış konfigürasyonu ve TR tutarlı (hepsi aynı)
     assert.ok(profile.validityAnalysis.validityConfig);
     assert.equal(profile.itemLevel!.trIndex.score, 0);

@@ -2,239 +2,285 @@ import type { MMPIProfile, ValidityFinding } from '../../scoring/mmpiScoring';
 import { SCALE_MEANINGS } from '../../scoring/mmpiInterpretation';
 import { Icon } from '../Icon';
 
-const toneClass = (tone: ValidityFinding['tone']): string =>
-  tone === 'alert' ? 'is-high' : tone === 'watch' ? 'is-low' : '';
+type Tone = ValidityFinding['tone'];
 
-const badgeColor = (tone: ValidityFinding['tone']): string =>
-  tone === 'alert' ? '#d2453a' : tone === 'watch' ? '#b4770b' : '#0e9e6a';
+/** Uyarı tonlarının tek renk kaynağı (kart kenarı, rozet ve sayı renkleri). */
+const TONE_COLOR: Record<Tone, string> = { alert: '#d2453a', watch: '#b4770b', ok: '#0e9e6a' };
 
-function FindingCard({ finding }: { finding: ValidityFinding }) {
+/** Profili geçersiz kılan eşikler — özet metniyle aynı kaynaktan beslenir. */
+const CANNOT_SAY_CUTOFF = 31;
+const F_CUTOFF = 23;
+
+function toneClass(tone: Tone): string {
+  return tone === 'alert' ? 'is-alert' : tone === 'watch' ? 'is-watch' : 'is-ok';
+}
+
+/** Tek geçerlik ölçeği kartı: ham/T puanı, düzey rozeti ve düzey yorumu. */
+function ScaleCard({ finding }: { finding: ValidityFinding }) {
   const meaning = SCALE_MEANINGS[finding.id];
   return (
-    <div className={`mmpi-vcard ${toneClass(finding.tone)}`}>
-      <div className="mmpi-vcard-head">
-        <span className={`mmpi-vcard-letter ${finding.id === '?' ? 'q' : ''}`}>{finding.id}</span>
-        <span className="mmpi-vcard-name">{finding.fullName}</span>
-      </div>
-      <p className="mmpi-vcard-desc">{meaning.measures}</p>
-      <div className="mmpi-vcard-stats">
-        <div className="mmpi-vstat">
+    <article className={`mv-scale ${toneClass(finding.tone)}`}>
+      <header className="mv-scale-head">
+        <span className="mv-scale-letter">{finding.id}</span>
+        <div className="mv-scale-title">
+          <b>{finding.fullName}</b>
+          <span>{finding.id === '?' ? 'Yanıtlanmayan madde' : 'Geçerlik ölçeği'}</span>
+        </div>
+      </header>
+
+      <p className="mv-scale-desc">{meaning.measures}</p>
+
+      <div className="mv-scale-stats">
+        <div className="mv-stat">
           <span>Ham</span>
           <b>{finding.raw}</b>
         </div>
         {finding.t !== null && (
-          <div className="mmpi-vstat">
-            <span>T</span>
+          <div className="mv-stat">
+            <span>T puanı</span>
             <b>{finding.t.toFixed(1)}</b>
           </div>
         )}
-        <div className="mmpi-vstat">
+        <div className="mv-stat is-wide">
           <span>Aralık</span>
           <b>{finding.rawRange}</b>
         </div>
-        <span className="level-badge" style={{ background: badgeColor(finding.tone), marginLeft: 'auto' }}>
+      </div>
+
+      <div className="mv-scale-foot">
+        <span className="mv-band" style={{ background: TONE_COLOR[finding.tone] }}>
           {finding.band}
         </span>
       </div>
-      <p className="mmpi-vcard-signal">{finding.comment}</p>
-      {finding.tDetail && (
-        <p className="mmpi-vcard-signal">
-          <b>{finding.tRange}: </b>
-          {finding.tDetail}
-        </p>
-      )}
-    </div>
+
+      <details className="mv-scale-more">
+        <summary>Düzey yorumu</summary>
+        <p className="mv-scale-comment">{finding.comment}</p>
+        {finding.tDetail && (
+          <p className="mv-scale-comment">
+            <b>{finding.tRange}: </b>
+            {finding.tDetail}
+          </p>
+        )}
+      </details>
+    </article>
   );
 }
 
 /**
- * Geçerlik Analizleri bölümü — temel geçerlik ölçekleri (?) / L / F / K),
- * yanıt tutarlılığı göstergeleri (TR endeksi, Dikkatsizlik endeksi),
- * F-K endeksi ayrıntısı ve L/F/K geçerlik konfigürasyonu.
+ * Uyarı listesinde yalnızca ilk cümle gösterilir; bandın ayrıntılı metni ilgili
+ * ölçek kartında ve endeks panelinde zaten yer alır.
+ */
+function warningHeadline(warning: string): string {
+  const colon = warning.indexOf(': ');
+  if (colon < 0) return warning;
+  const head = warning.slice(0, colon + 1);
+  const body = warning.slice(colon + 2);
+  const end = body.search(/\.\s|\.$/);
+  const sentence = end >= 0 ? body.slice(0, end + 1) : body;
+  return `${head} ${sentence.length > 180 ? `${sentence.slice(0, 177).trimEnd()}…` : sentence}`;
+}
+
+/**
+ * Geçerlik Analizleri — üç adımlık tek akış:
+ *  1) profil durumu (uyarı şeridi) + ?, L, F, K istatistik kartları,
+ *  2) F-K endeksi ve yanıt tutarlılığı endeksleri,
+ *  3) tespit edilen uyarılar ve genel değerlendirme.
+ * Kaynak künyeleri bu ekranda yer almaz; uygulamanın “Kaynaklar” sayfasındadır.
  */
 export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
   const { validityAnalysis, itemLevel } = profile;
-  const fk = validityAnalysis.fkAnalysis;
+  const { fkAnalysis: fk, warnings, isValid, findings } = validityAnalysis;
+
+  const reasons = [
+    validityAnalysis.cannotSay >= CANNOT_SAY_CUTOFF
+      ? `boş bırakılan madde sayısı ${validityAnalysis.cannotSay} (eşik ≥ ${CANNOT_SAY_CUTOFF})`
+      : null,
+    validityAnalysis.fRaw >= F_CUTOFF ? `F ham puanı ${validityAnalysis.fRaw} (eşik ≥ ${F_CUTOFF})` : null,
+  ].filter((reason): reason is string => reason !== null);
+
+  const bannerTone: Tone = !isValid ? 'alert' : warnings.length > 0 ? 'watch' : 'ok';
+  const bannerTitle = !isValid
+    ? 'PROFİL GEÇERSİZ / ŞÜPHELİ'
+    : warnings.length > 0
+      ? 'PROFİL GEÇERLİ — İNCELENMESİ GEREKEN BULGULAR VAR'
+      : 'PROFİL GEÇERLİ';
+  const bannerText = !isValid
+    ? `${reasons.join(' ve ')} eşik değerin üzerinde olduğu için bu profil standart değerlendirmeye uygun değildir. Testin yenilenmesi ya da sonuçların klinik görüşmeyle doğrulanması önerilir.`
+    : warnings.length > 0
+      ? 'Geçerliği düşüren bir bulgu yok; aşağıdaki ölçek ve endeks uyarıları yorumlamada birlikte değerlendirilmelidir.'
+      : 'Yanıtlanmayan madde, uygun olmayan yaşantı ve savunma düzeyi beklenen aralıkta; profil standart yorumlamaya uygundur.';
+
   const config = validityAnalysis.validityConfig;
-  const fkColor = fk.tone === 'alert' ? '#d2453a' : fk.tone === 'watch' ? '#b4770b' : '#0e9e6a';
 
   return (
-    <div role="tabpanel" className="mmpi-tab-panel">
-      <div>
-        <h4 className="mmpi-section-title">Geçerlik Ölçek Bulguları (?, L, F, K)</h4>
-        <div className="mmpi-vgrid">
-          {validityAnalysis.findings.map(finding => (
-            <FindingCard key={finding.id} finding={finding} />
-          ))}
+    <div role="tabpanel" className="mmpi-tab-panel mv-report">
+      {/* 0 · Profil durumu */}
+      <div className={`mv-alert ${toneClass(bannerTone)}`} role="status">
+        <span className="mv-alert-icon">
+          <Icon name={bannerTone === 'alert' ? 'alert' : bannerTone === 'watch' ? 'info' : 'checkCircle'} size={18} />
+        </span>
+        <div className="mv-alert-body">
+          <b>{bannerTitle}</b>
+          <p>{bannerText}</p>
         </div>
       </div>
 
-      <div>
-        <h4 className="mmpi-section-title">F-K Endeksi ve Geçerlik Konfigürasyonu</h4>
-        <div className="mmpi-vgrid">
-          <div className={`mmpi-vcard ${fk.tone === 'alert' ? 'is-high' : fk.tone === 'watch' ? 'is-low' : ''}`}>
-            <div className="mmpi-vcard-head">
-              <span className="mmpi-vcard-letter">FK</span>
-              <span className="mmpi-vcard-name">F-K Endeksi (Gough)</span>
-            </div>
-            <p className="mmpi-vcard-desc">
-              F ham ({validityAnalysis.fRaw}) − K ham ({validityAnalysis.kRaw}); abartma ve savunmacılık dengesini gösterir.
-            </p>
-            <div className="mmpi-vcard-stats">
-              <div className="mmpi-vstat">
-                <span>Değer</span>
-                <b style={{ color: fkColor }}>{fk.value > 0 ? `+${fk.value}` : fk.value}</b>
-              </div>
-              <span className="level-badge" style={{ background: fkColor, marginLeft: 'auto' }}>
+      {/* 1 · Geçerlik ölçeği kartları */}
+      <section className="mv-step">
+        <header className="mv-step-head">
+          <span className="mv-step-num">1</span>
+          <h4 className="mv-step-title">Geçerlik Ölçekleri</h4>
+          <span className="mv-step-note">?, L, F, K — ham puan ve T dönüşümü</span>
+        </header>
+        <div className="mv-scale-grid">
+          {findings.map(finding => (
+            <ScaleCard key={finding.id} finding={finding} />
+          ))}
+        </div>
+      </section>
+
+      {/* 2 · Endeks ve tutarlılık analizleri */}
+      <section className="mv-step">
+        <header className="mv-step-head">
+          <span className="mv-step-num">2</span>
+          <h4 className="mv-step-title">İndeks ve Tutarlılık Analizleri</h4>
+          <span className="mv-step-note">F-K endeksi · yanıt tutarlılığı</span>
+        </header>
+
+        <div className="mv-two-col">
+          <div className={`mv-panel ${toneClass(fk.tone)}`}>
+            <header className="mv-panel-head">
+              <Icon name="trend" size={14} />
+              <span>F-K Endeksi</span>
+            </header>
+            <div className="mv-metric">
+              <span className="mv-metric-value" style={{ color: TONE_COLOR[fk.tone] }}>
+                {fk.value > 0 ? `+${fk.value}` : fk.value}
+              </span>
+              <span className="mv-band" style={{ background: TONE_COLOR[fk.tone] }}>
                 {fk.level}
               </span>
             </div>
-            <p className="mmpi-vcard-signal">{fk.interpretation}</p>
+            <p className="mv-panel-note">
+              F ham {validityAnalysis.fRaw} − K ham {validityAnalysis.kRaw} = {fk.value > 0 ? `+${fk.value}` : fk.value}
+            </p>
+            <p className="mv-panel-text">{fk.interpretation}</p>
           </div>
 
-          <div className={`mmpi-vcard ${config && config.tone !== 'ok' ? (config.tone === 'alert' ? 'is-high' : 'is-low') : ''}`}>
-            <div className="mmpi-vcard-head">
-              <span className="mmpi-vcard-letter">LFK</span>
-              <span className="mmpi-vcard-name">Geçerlik Konfigürasyonu</span>
-            </div>
-            {config ? (
-              <>
-                <p className="mmpi-vcard-desc">{config.rule}</p>
-                <div className="mmpi-vcard-stats">
-                  <span
-                    className="level-badge"
-                    style={{
-                      background: config.tone === 'alert' ? '#d2453a' : config.tone === 'watch' ? '#b4770b' : '#0e9e6a',
-                      marginLeft: 'auto',
-                    }}
-                  >
-                    {config.validity === 'geçerli' ? 'Geçerli örüntü' : 'Şüpheli örüntü'}
-                  </span>
+          <div className="mv-panel">
+            <header className="mv-panel-head">
+              <Icon name="layers" size={14} />
+              <span>Yanıt Tutarlılığı</span>
+            </header>
+
+            {itemLevel ? (
+              <div className="mv-rows">
+                <div className={`mv-row ${itemLevel.trIndex.isWarning ? 'is-alert' : ''}`}>
+                  <div className="mv-row-main">
+                    <b>TR Endeksi</b>
+                    <span>Tekrarlanan 16 madde çiftindeki tutarsız yanıt sayısı.</span>
+                  </div>
+                  <div className="mv-row-value">
+                    {itemLevel.trIndex.score} / {itemLevel.trIndex.evaluated || 16}
+                    <span className="mv-band" style={{ background: itemLevel.trIndex.isWarning ? '#d2453a' : '#0e9e6a' }}>
+                      {itemLevel.trIndex.level}
+                    </span>
+                  </div>
                 </div>
-                <p className="mmpi-vcard-signal">
-                  <b>{config.name}: </b>
-                  {config.interpretation}
-                </p>
-              </>
+
+                <div className={`mv-row ${itemLevel.carelessness.isWarning ? 'is-alert' : ''}`}>
+                  <div className="mv-row-main">
+                    <b>Dikkatsizlik Endeksi</b>
+                    <span>12 kritik madde çiftinde rastgele işaretleme göstergesi.</span>
+                  </div>
+                  <div className="mv-row-value">
+                    {itemLevel.carelessness.score} / {itemLevel.carelessness.evaluated || 12}
+                    <span
+                      className="mv-band"
+                      style={{ background: itemLevel.carelessness.isWarning ? '#d2453a' : '#0e9e6a' }}
+                    >
+                      {itemLevel.carelessness.level}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mv-row">
+                  <div className="mv-row-main">
+                    <b>L / F / K Konfigürasyonu</b>
+                    <span>{config ? config.rule : 'Bilinen örüntülerin (V, ters V vb.) dışında bir dağılım.'}</span>
+                  </div>
+                  <div className="mv-row-value">
+                    <span
+                      className="mv-band"
+                      style={{
+                        background: config ? TONE_COLOR[config.tone] : '#8e8e93',
+                      }}
+                    >
+                      {config ? config.name : 'Örüntü yok'}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <p className="mmpi-vcard-signal">
-                L, F ve K puanları klasik konfigürasyon örüntülerinden (V, Tersine V, tümüne doğru/yanlış vb.) hiçbirine
-                uymuyor; geçerlik değerlendirmesi yukarıdaki ölçek bulgularına göre yapılır.
+              <p className="mv-panel-note">
+                Bu kayıt ham puan yöntemiyle girildi; TR, dikkatsizlik ve konfigürasyon analizleri madde düzeyinde
+                yanıt gerektirir.
               </p>
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      {itemLevel && (
-        <div>
-          <h4 className="mmpi-section-title">Yanıt Tutarlılığı Endeksleri</h4>
-          <div className="mmpi-vgrid">
-            <div className={`mmpi-vcard ${itemLevel.trIndex.isWarning ? 'is-high' : ''}`}>
-              <div className="mmpi-vcard-head">
-                <span className="mmpi-vcard-letter">TR</span>
-                <span className="mmpi-vcard-name">TR Endeksi (Tekrar Maddeleri)</span>
-              </div>
-              <p className="mmpi-vcard-desc">
-                Formdaki 16 çift tekrarlanmış maddenin tutarlılığı; 3 ve altı tutarlı kabul edilir.
+      {/* 3 · Uyarılar ve genel değerlendirme */}
+      <section className="mv-step">
+        <header className="mv-step-head">
+          <span className="mv-step-num">3</span>
+          <h4 className="mv-step-title">Uyarılar ve Genel Değerlendirme</h4>
+          <span className="mv-step-note">{warnings.length} uyarı</span>
+        </header>
+
+        <div className="mv-two-col">
+          <div className="mv-panel">
+            <header className="mv-panel-head">
+              <Icon name="alert" size={14} />
+              <span>Tespit Edilen Uyarılar</span>
+            </header>
+            {warnings.length === 0 ? (
+              <p className="mv-panel-text">
+                <Icon name="checkCircle" size={13} /> Profili geçersiz kılan ya da dikkat gerektiren bir bulgu
+                saptanmadı.
               </p>
-              <div className="mmpi-vcard-stats">
-                <div className="mmpi-vstat">
-                  <span>Puan</span>
-                  <b>
-                    {itemLevel.trIndex.score} / {itemLevel.trIndex.evaluated || 16}
-                  </b>
-                </div>
-                <span
-                  className="level-badge"
-                  style={{ background: itemLevel.trIndex.isWarning ? '#d2453a' : '#0e9e6a', marginLeft: 'auto' }}
-                >
-                  {itemLevel.trIndex.level}
-                </span>
-              </div>
-              <p className="mmpi-vcard-signal">{itemLevel.trIndex.interpretation}</p>
-              {itemLevel.trIndex.mismatches.length > 0 && (
-                <p className="mmpi-vcard-signal ws-muted">
-                  Tutarsız çiftler:{' '}
-                  {itemLevel.trIndex.mismatches.map(([a, b]) => `${a}-${b}`).join(', ')}
-                </p>
-              )}
-            </div>
+            ) : (
+              <ul className="mv-warn-list">
+                {warnings.map((warning, index) => (
+                  <li key={index}>
+                    <Icon name="alert" size={12} />
+                    <span>{warningHeadline(warning)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-            <div className={`mmpi-vcard ${itemLevel.carelessness.isWarning ? 'is-high' : ''}`}>
-              <div className="mmpi-vcard-head">
-                <span className="mmpi-vcard-letter">D</span>
-                <span className="mmpi-vcard-name">Dikkatsizlik Endeksi</span>
-              </div>
-              <p className="mmpi-vcard-desc">
-                12 kritik madde çifti üzerinde rastgele işaretleme göstergesi; 4 ve üzeri kuşku doğurur (Greene 1980).
+          <div className={`mv-panel ${isValid ? 'is-ok' : 'is-alert'}`}>
+            <header className="mv-panel-head">
+              <Icon name={isValid ? 'checkCircle' : 'alert'} size={14} />
+              <span>Genel Değerlendirme</span>
+            </header>
+            <p className="mv-verdict-text">{validityAnalysis.interpretation}</p>
+            <p className="mv-panel-note">
+              Kesme puanları tanı koymaz; bulgular klinik görüşme ve diğer kaynaklarla birlikte değerlendirilir.
+            </p>
+            {config && (
+              <p className="mv-panel-note">
+                <b>{config.name}: </b>
+                {config.interpretation}
               </p>
-              <div className="mmpi-vcard-stats">
-                <div className="mmpi-vstat">
-                  <span>Puan</span>
-                  <b>
-                    {itemLevel.carelessness.score} / {itemLevel.carelessness.evaluated || 12}
-                  </b>
-                </div>
-                <span
-                  className="level-badge"
-                  style={{ background: itemLevel.carelessness.isWarning ? '#d2453a' : '#0e9e6a', marginLeft: 'auto' }}
-                >
-                  {itemLevel.carelessness.level}
-                </span>
-              </div>
-              <p className="mmpi-vcard-signal">{itemLevel.carelessness.interpretation}</p>
-            </div>
+            )}
           </div>
         </div>
-      )}
-
-      {!itemLevel && (
-        <div className="mmpi-box info">
-          <Icon name="info" size={14} />
-          <span>
-            {' '}Bu kayıt ham puan yöntemiyle girildiği için TR endeksi, Dikkatsizlik endeksi ve madde düzeyindeki diğer
-            göstergeler hesaplanamıyor; temel geçerlik değerlendirmesi yukarıdaki tablolara göre yapılır.
-          </span>
-        </div>
-      )}
-
-      <div>
-        <h4 className="mmpi-section-title">Geçerlik Uyarıları</h4>
-        {validityAnalysis.warnings.length === 0 ? (
-          <div className="mmpi-box ok">
-            <Icon name="checkCircle" size={14} />
-            <span>
-              {' '}Geçerlik skalaları ölçütlere göre normal sınırlarda — yanıtlama isteği, inkar/savunma düzeyi ve uygun
-              olmayan yaşantı miktarı beklenen aralıkta.
-            </span>
-          </div>
-        ) : (
-          <div className="mmpi-box warn">
-            <ul>
-              {validityAnalysis.warnings.map((warning, index) => (
-                <li key={index}>
-                  <Icon name="alert" size={12} />
-                  {warning}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      <div>
-        <h4 className="mmpi-section-title">Genel Geçerlik Yorumu</h4>
-        <div className={`mmpi-box ${validityAnalysis.isValid ? 'ok' : 'warn'}`}>
-          <b>{validityAnalysis.isValid ? 'TEST GEÇERLİ — ' : 'PROFIL ŞÜPHELİ/GEÇERSİZ — '}</b>
-          {validityAnalysis.interpretation}
-          <span className="ws-muted">
-            {' '}Yorumlama sırasında geçerlik ölçeklerindeki uyarılar dikkate alınmalıdır; hiçbir uyarı tek başına
-            profili geçersiz yapmaz. Tüm bulgular (eğitim, sosyo-ekonomik düzey, hastanın durumu, okuma becerisi)
-            bütüncül değerlendirilmelidir.
-          </span>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

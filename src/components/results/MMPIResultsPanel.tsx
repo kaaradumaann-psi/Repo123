@@ -68,7 +68,7 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
       <header className="mmpi-results-header">
         <div>
           <div className="mmpi-results-meta">
-            <span className="section-badge badge-primary">Hesaplama · Türk Normları (Savaşır 1981)</span>
+            <span className="section-badge badge-primary">Türk Normları · Cinsiyete Göre</span>
             {clientName && <span className="mmpi-chip">{clientName}</span>}
             <span className="mmpi-chip">{profile.gender} normları</span>
             {profileCode && <span className="mmpi-chip mmpi-chip-code">Profil Kodu: {profileCode}</span>}
@@ -170,10 +170,8 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
       {tab === 'answers' && <MMPIAnswersTab answers={answers} />}
 
       <p className="mmpi-info-foot">
-        * Bu hesaplama Savaşır (1981) Türk standardizasyonu normları (Erkek/Kadın ayrı) ve klasik K düzeltme oranları
-        (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2 — standart ekleme tablosuyla) kullanılarak yapılmıştır. Geçerlik analizleri,
-        klinik ölçek yorumları, tek ölçek yükselmeleri ve kod analizleri klinik yorum rehberine dayanır. Kesme puanları
-        tanı koymaz; yalnızca uzmana yol gösterir. Klinik karar nihai olarak uygulayıcı uzmana aittir.
+        * T puanları cinsiyete özgü Türk normları ve klasik K düzeltme oranları (Hs, Pd, Pt, Sc, Ma) kullanılarak
+        hesaplanır. Kesme puanları tanı koymaz, yalnızca uzmana yol gösterir; klinik karar uygulayıcı uzmana aittir.
       </p>
     </div>
   );

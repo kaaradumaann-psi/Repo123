@@ -8,6 +8,19 @@ const toneColor = (tone: DerivedScaleResult['tone']): string =>
 
 type Cutoff = { mild: number; marked: number };
 
+/** Eşik çubuğu — ham puanın “hafif” ve “belirgin” kesimlerine göre konumu. */
+function ThresholdBar({ score, cutoff, color }: { score: number; cutoff: Cutoff; color: string }) {
+  const max = Math.max(score, cutoff.marked) * 1.2;
+  const pct = (value: number) => `${Math.min(100, Math.max(0, (value / max) * 100))}%`;
+  return (
+    <div className="ds-threshold" aria-hidden="true">
+      <span className="ds-threshold-fill" style={{ width: pct(score), background: color }} />
+      <span className="ds-threshold-mark" style={{ left: pct(cutoff.mild) }} />
+      <span className="ds-threshold-mark is-marked" style={{ left: pct(cutoff.marked) }} />
+    </div>
+  );
+}
+
 function DerivedCard({ scale, cutoff }: { scale: DerivedScaleResult; cutoff?: Cutoff }) {
   const color = toneColor(scale.tone);
   return (
@@ -28,9 +41,10 @@ function DerivedCard({ scale, cutoff }: { scale: DerivedScaleResult; cutoff?: Cu
           {scale.levelLabel}
         </span>
       </div>
+      {cutoff && <ThresholdBar score={scale.rawScore} cutoff={cutoff} color={color} />}
       {cutoff && (
         <span className="index-card-cutoff">
-          Ham eşikler: Hafif ≥ {cutoff.mild} · Belirgin ≥ {cutoff.marked}
+          Eşik: Hafif ≥ {cutoff.mild} · Belirgin ≥ {cutoff.marked}
         </span>
       )}
       <p className="mmpi-vcard-signal">{scale.interpretation}</p>
@@ -180,9 +194,8 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
       <div>
         <h4 className="mmpi-section-title">Madde Bağımlılığı ve Özel Ölçekler</h4>
         <p className="mmpi-summary-note">
-          MAC, ICAS, SAP, O-H, Es, Welsh A/R, Do ve Dy ham puanlarıyla yorum eşikleri bu bölümde
-          gösterilir. Eşiklerin kaynak eşleşme durumu Kaynaklar sayfasının 04–05. bölümlerinde
-          raporlanmıştır.
+          MAC, ICAS, SAP, O-H, Es, Welsh A/R, Do ve Dy ölçeklerinin ham puanları ve yorum eşikleri bu bölümde
+          gösterilir. Eşik üstü ölçekler koyu renkli rozetle işaretlenir.
         </p>
         <div className="mmpi-vgrid">
           {addiction.map(scale => (

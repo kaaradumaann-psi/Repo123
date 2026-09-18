@@ -231,12 +231,12 @@ export function clinicalImpressions(input: ImpressionInput): ClinicalImpression[
   out.push(
     kRaw <= 15
       ? {
-          title: 'Tedaviye Yanıt Notu (Reis, 1966)',
+          title: 'Tedaviye Yanıt Notu',
           text: 'K ham puanının 15 ve altında olması, klinik olarak iyileşme oranının ve tedaviye/psikolojik müdahaleye olumlu yanıt verme olasılığının anlamlı derecede yüksek olduğuna işaret eder.',
           tone: 'ok',
         }
       : {
-          title: 'Tedaviye Yanıt Notu (Reis, 1966)',
+          title: 'Tedaviye Yanıt Notu',
           text: "K ham puanının 15'in üzerinde olması, bireyin psikolojik müdahalelere karşı savunmalarının daha katı olduğunu ve iyileşme sürecinin daha fazla zaman alabileceğini gösterir.",
           tone: 'watch',
         },

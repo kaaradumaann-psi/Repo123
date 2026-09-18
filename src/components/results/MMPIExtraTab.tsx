@@ -6,9 +6,9 @@ import { Icon } from '../Icon';
 const GLOSSARY_ORDER: ScaleId[] = ['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
 
 /**
- * Ek Ölçekler & Kritikler sekmesi — klinik yorum rehberi band yorumlarıyla klinik eşiği
- * aşan ölçekler, kaynakta tanımlanan profil konfigürasyonları ve tek ölçek
- * yükselmeleri, ayrıca tüm ölçeklerin sözlüğü.
+ * Ek Ölçekler & Kritikler sekmesi — T puanı band yorumlarıyla klinik eşiği
+ * aşan ölçekler, profil konfigürasyonları ve tek ölçek yükselmeleri, ayrıca
+ * tüm ölçeklerin sözlüğü.
  */
 export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
   const critical = profile.clinical.filter(s => s.tScore >= 70);
@@ -51,8 +51,8 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
           <div className="mmpi-box info">
             <Icon name="info" size={14} />
             <span>
-              {' '}Kaynakta tanımlanan “sadece X alt testinin yükselmesi” koşullarından hiçbiri sağlanmıyor
-              (birden fazla ölçek yükseldiğinde kod analizleri önceliklidir).
+              {' '}“Sadece X alt testinin yükselmesi” koşullarından hiçbiri sağlanmıyor (birden fazla ölçek
+              yükseldiğinde kod analizleri önceliklidir).
             </span>
           </div>
         ) : (

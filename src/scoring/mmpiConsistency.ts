@@ -62,8 +62,8 @@ export function trIndex(responses: ResponseMap): TrIndexResult {
     evaluated,
     level: consistent ? 'Tutarlı Yanıt Örüntüsü' : 'Tutarsız Yanıt Örüntüsü',
     interpretation: consistent
-      ? 'TR endeksinin 3 puan ya da daha az olması, yanıtların tutarlı olduğunu gösterir. Gravitz ve Gerton (1976), normal bireylerin tekrarlanan maddelerin sadece üç, dördüne değişik yanıtlar verdiklerini belirlemişlerdir. Bu seviyedeki düşük tutarsızlıklar genellikle dikkatsizlik nedeniyle ortaya çıkar.'
-      : 'TR endeksinde 3 puanın üzerindeki değerlerin geçersiz profil olasılığını artırdığı ileri sürülmüştür (Dahlstrom 1972). Bu durum bireyin işbirliği içinde olmadığını, test almaya karşı dirençli olduğunu veya maddeleri okumadan/rastgele işaretlediğini (dikkatsizlik, yorgunluk vb.) gösterebilir.',
+      ? 'TR endeksinin 3 puan ya da daha az olması, yanıtların tutarlı olduğunu gösterir. Normal bireyler tekrarlanan maddelerin yalnızca üç-dördüne değişik yanıt verir. Bu seviyedeki düşük tutarsızlıklar genellikle dikkatsizlik kaynaklıdır.'
+      : 'TR endeksinde 3 puanın üzerindeki değerler geçersiz profil olasılığını artırır. Bu durum bireyin işbirliği içinde olmadığını, test almaya karşı dirençli olduğunu veya maddeleri okumadan/rastgele işaretlediğini (dikkatsizlik, yorgunluk vb.) gösterebilir.',
     isWarning: !consistent,
     tone: consistent ? 'ok' : 'alert',
     mismatches,
@@ -123,8 +123,8 @@ export function carelessnessIndex(responses: ResponseMap): CarelessnessResult {
     evaluated,
     level: normal ? 'Normal / Dikkatli' : 'Yüksek / Tutarsız',
     interpretation: normal
-      ? "Dikkatsizlik endeksi puanı 4'ün altındadır; bu da bireyin maddeleri dikkatle ve içeriklerini anlayarak cevapladığını gösterir. Greene (1980) geçersiz profilleri belirlemede 4'ün kesim puanı olarak alınabileceğini belirtmiştir."
-      : "Dikkatsizlik puanının 4 veya üzerinde olması, saptırılmış test davranışının ortaya çıkarılmasını mümkün kılar. Bu durum; bireyin testi tamamlamaya karşı isteksizliğini, beceri eksikliğini veya konfüzyon (zihinsel karışıklık) durumunu yansıtıyor olabilir. Greene (1980) 4 puanı kesim noktası olarak belirlemiştir; bu seviyedeki bir puan, test bulgularının değerlendirilmesinde dikkatli olunması gerektiğini gösterir.",
+      ? "Dikkatsizlik endeksi puanı 4'ün altındadır; bu da bireyin maddeleri dikkatle ve içeriklerini anlayarak cevapladığını gösterir."
+      : "Dikkatsizlik puanının 4 veya üzerinde olması, saptırılmış test davranışının ortaya çıkarılmasını mümkün kılar. Bu durum; bireyin testi tamamlamaya karşı isteksizliğini, beceri eksikliğini veya konfüzyon (zihinsel karışıklık) durumunu yansıtıyor olabilir. Bu seviyedeki bir puan, test bulgularının değerlendirilmesinde dikkatli olunması gerektiğini gösterir.",
     isWarning: !normal,
     tone: normal ? 'ok' : 'alert',
   };

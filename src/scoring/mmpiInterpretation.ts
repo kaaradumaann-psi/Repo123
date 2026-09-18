@@ -33,7 +33,7 @@ export type ScaleMeaning = {
 
 export const SCALE_MEANINGS: Record<ScaleId, ScaleMeaning> = {
   '?': {
-    measures: '“Hiç Bir Şey Diyemem” skalası: boş bırakılan madde sayısını gösterir. Kaynağa göre yaklaşık 30 madde boş bırakılmışsa geçerlilik sorgulanır, 31 ve üstünde profil büyük olasılıkla geçersizdir.',
+    measures: '“Hiç Bir Şey Diyemem” skalası: boş bırakılan madde sayısını gösterir. Yaklaşık 30 madde boş bırakılmışsa geçerlilik sorgulanır, 31 ve üstünde profil büyük olasılıkla geçersizdir.',
     high: 'Profil büyük bir olasılıkla geçersizdir; birey testi tamamlamaya muktedir değildir veya isteksizdir. Mümkünse boş maddelerin doldurulması için danışan güdülenmeli, gerekirse test yinelenmelidir.',
     low: 'Birey bütün maddeleri yanıtlamaya isteklidir; birçok kişinin bu performansta olması beklenir.',
   },
@@ -134,56 +134,56 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     id: 'conversion-v',
     name: 'Konversiyon Vadisi / Dönüşüm V (1-3-2)',
     rule: 'Hs ≥ 65 ve Hy ≥ 65 ve ikisinin en düşüğü D’den en az 5 T yüksek',
-    detail: 'Kaynağın 13/31 kodunda anlattığı klasik görünüm: psikolojik sorunlar somatik yakınmalara dönüştürülür, psikolojik etkenler kabul edilmez; semptomlar ikincil kazanç sağlar (sorumluluk almama ve görevden kaçma). D’nin vadi oluşturması tipiktir.',
+    detail: '13/31 kodunun klasik görünümü: psikolojik sorunlar somatik yakınmalara dönüştürülür, psikolojik etkenler kabul edilmez; semptomlar ikincil kazanç sağlar (sorumluluk almama ve görevden kaçma). D’nin vadi oluşturması tipiktir.',
     hit: Hs >= 65 && Hy >= 65 && Math.min(Hs, Hy) - D >= 5,
   });
   hits.push({
     id: 'cry-for-help',
     name: 'Yardım Çağrısı Profili',
     rule: 'F ≥ 70 ve 2 ile 7 testleri 6, 8 ve 9 testlerinden yüksek',
-    detail: 'Kaynağın F alt testi yorumunda saydığı yükselme nedenlerinden dördüncüsüdür: yardım çağrısı profili; 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
+    detail: 'F yükselmesinin nedenlerinden biri: yardım çağrısı profili; 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
     hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma,
   });
   hits.push({
     id: 'psychotic-v',
     name: 'Paranoid Vadi / Psikotik V (6-8 yükselmesi)',
     rule: 'Pa ≥ 70 ve Sc ≥ 70 ve her ikisi de Pt’den yüksek',
-    detail: 'Kaynağın 678/876 yorumuna göre 6 ve 8, 7’den yüksek ise bu psikotik vadiyi oluşturur; ciddi psikopatoloji vardır ve paranoid tip şizofrenik bozukluklar düşünülebilir. 86/68 kodunda “Paranoid vadi” ya da “Psikotik V” olarak adlandırılır.',
+    detail: '6 ve 8, 7’den yüksek olduğunda bu psikotik vadiyi oluşturur; ciddi psikopatoloji vardır ve paranoid tip şizofrenik bozukluklar düşünülebilir. 86/68 kodunda “Paranoid vadi” ya da “Psikotik V” olarak adlandırılır.',
     hit: Pa >= 70 && Sc >= 70 && Math.min(Pa, Sc) > Pt,
   });
   hits.push({
     id: 'depressive-27',
     name: 'Depresif Kod (2-7 / 7-2)',
     rule: 'Pt ≥ 70 ve D ≥ 60',
-    detail: 'Kaynağın 27/72 kodunda anlattığı görünüm: pasif, bağımlı, yüksek standartlar koyarak stres yaşayan; stres arttığında yapışırcasına bağımlı hale gelen bireyler. 278/728 kodunda intihar olasılığı dikkatle değerlendirilmelidir.',
+    detail: '27/72 kodunun görünümü: pasif, bağımlı, yüksek standartlar koyarak stres yaşayan; stres arttığında yapışırcasına bağımlı hale gelen bireyler. 278/728 kodunda intihar olasılığı dikkatle değerlendirilmelidir.',
     hit: Pt >= 70 && D >= 60,
   });
   hits.push({
     id: '49',
     name: '4-9 / 9-4 Modeli',
     rule: 'Pd ≥ 70 ve Ma ≥ 70',
-    detail: 'Kaynağın 49/94 kodu: kendi isteklerini ön plana çıkarma, sınırlar, kurallar ve düzenlemelere kızma; benmerkezci, narsisistik, kısa vadeli hedef odaklı. 20 yaş üstünde örüntü daha kalıcıdır; psikoterapi prognozu genellikle çok kötüdür.',
+    detail: '49/94 kodu: kendi isteklerini ön plana çıkarma, sınırlar, kurallar ve düzenlemelere kızma; benmerkezci, narsisistik, kısa vadeli hedef odaklı. 20 yaş üstünde örüntü daha kalıcıdır; psikoterapi prognozu genellikle çok kötüdür.',
     hit: Pd >= 70 && Ma >= 70,
   });
   hits.push({
     id: '89',
     name: '8-9 / 9-8 Modeli',
     rule: 'Sc ≥ 70 ve Ma ≥ 70',
-    detail: 'Kaynağın 89/98 kodu: ergenlerde ve yetişkinlerde ciddi psikopatoloji; gerginlik, ajitasyon, uykusuzluk, fikir uçuşmaları. Kod daha da yükselirse delüzyon ve halüsinasyonlarla psikotik tablo ortaya çıkar.',
+    detail: '89/98 kodu: ergenlerde ve yetişkinlerde ciddi psikopatoloji; gerginlik, ajitasyon, uykusuzluk, fikir uçuşmaları. Kod daha da yükselirse delüzyon ve halüsinasyonlarla psikotik tablo ortaya çıkar.',
     hit: Sc >= 70 && Ma >= 70,
   });
   hits.push({
     id: 'neurotic-triad',
     name: 'Nörotik Üçlü (1-2-3)',
     rule: 'Hs, D ve Hy birlikte ≥ 65',
-    detail: 'Kaynakta Mf düşüklüğüyle ilişkisi vurgulanan klasik nevrotik bölge: bedensel yakınmalar, depresif duygudurum ve histerik savunmaların birlikte yükseldiği tablo.',
+    detail: 'Mf düşüklüğüyle ilişkili klasik nevrotik bölge: bedensel yakınmalar, depresif duygudurum ve histerik savunmaların birlikte yükseldiği tablo.',
     hit: Hs >= 65 && D >= 65 && Hy >= 65,
   });
   hits.push({
     id: 'multi-high',
     name: 'Çoklu Yükselme',
     rule: '3 veya daha fazla klinik ölçek T ≥ 65',
-    detail: 'Birden çok klinik alanın birlikte yükseldiği tablo; tek ölçek yorumu yerine profilin bütününün ve kaynak kod analizlerinin birlikte değerlendirilmesini gerektirir.',
+    detail: 'Birden çok klinik alanın birlikte yükseldiği tablo; tek ölçek yorumu yerine profilin bütününün ve kod analizlerinin birlikte değerlendirilmesini gerektirir.',
     hit: profile.clinical.filter(s => s.tScore >= 65).length >= 3,
   });
   return hits;
@@ -198,7 +198,7 @@ export function codePointInterpretation(code: string | undefined) {
 export function codePointName(code: string | undefined): string | undefined {
   const entry = codeInterpretation(code);
   if (!entry) return undefined;
-  const prefix = entry.diagnosis && entry.diagnosis.length > 0 ? `Olası tanı: ${entry.diagnosis[0]}` : 'Kaynak yorumu mevcut';
+  const prefix = entry.diagnosis && entry.diagnosis.length > 0 ? `Olası tanı: ${entry.diagnosis[0]}` : 'Yorum mevcut';
   return `Kod ${entry.code} — ${prefix}`;
 }
 

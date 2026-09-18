@@ -3,9 +3,8 @@ import type { ScaleId } from '../../scoring/mmpiKeys';
 import { SCALE_MEANINGS, clinicalBandFor, detectSingleElevations, tColor } from '../../scoring/mmpiInterpretation';
 
 /**
- * Klinik Ölçekler sekmesi — her ölçek için yorum rehberindeki T puanı aralığının
- * yorumu ve ham → K+ → düzeltilmiş → T akışı. Yorumlar kaynak rapora dayanır;
- * tanı koydurmaz, uygulayıcı uzmana yol gösterir.
+ * Klinik Ölçekler sekmesi — her ölçek için T puanı aralığının yorumu ve
+ * ham → K+ → düzeltilmiş → T akışı. Tanı koydurmaz, uygulayıcı uzmana yol gösterir.
  */
 export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
   const singles = detectSingleElevations(profile);
@@ -35,12 +34,6 @@ export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
                 </div>
                 <p className="clin-desc">{meaning.measures}</p>
                 {band && <p className="clin-signal">{band.text}</p>}
-                {scale.id === 'Mf' && (
-                  <p className="clin-desc">
-                    Kaynak bu ölçeğin yorumunu cinsiyete göre ayırır; yukarıdaki yorum {profile.gender} normlarına
-                    göre seçilmiştir.
-                  </p>
-                )}
                 {single && (
                   <p className="clin-signal is-low">
                     <b>Sadece {scale.shortName} yükselmesi ({single.entry.rule}): </b>
@@ -74,8 +67,8 @@ export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
         })}
       </div>
       <p className="mmpi-summary-note">
-        Aralık etiketleri ve yorumlar kaynak raporun ölçeğe özgü T puanı tablolarından alınmıştır (ör. Hs için
-        84 üzeri / 75-84 / 60-74 / 50-59 / 21-49). K düzeltmesi yalnızca Hs, Pd, Pt, Sc ve Ma ölçeklerine uygulanır.
+        Düzey rozetleri ölçeğe özgü T puanı aralıklarını gösterir (ör. Hs için 21-49 / 50-59 / 60-74 / 75-84 / 84
+        üzeri). K düzeltmesi yalnızca Hs, Pd, Pt, Sc ve Ma ölçeklerine uygulanır.
       </p>
     </div>
   );

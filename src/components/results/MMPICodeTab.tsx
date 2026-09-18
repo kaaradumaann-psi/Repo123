@@ -4,8 +4,8 @@ import { Icon } from '../Icon';
 
 /**
  * Kod Analizleri sekmesi — profil kodu (Mf ve Si hariç en yüksek iki klinik
- * ölçek) ve yorum rehberindeki iki noktalı kod yorumları. Kodlar kanonik
- * biçimde eşlenir (21 → 12/21); kaynakta olmayan kodlar için genel not verilir.
+ * ölçek) ve iki noktalı kod yorumları. Kodlar kanonik biçimde eşlenir
+ * (21 → 12/21); yorumu tanımlı olmayan kodlar için genel not verilir.
  */
 export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
   const code = profile.profileCode;
@@ -29,7 +29,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           </h4>
           <div className="mmpi-code-value">{code ?? '—'}</div>
           <div className="mmpi-code-name">
-            {entry ? `Kod ${entry.code} — kaynak yorumu aşağıdadır` : code ? 'İki noktalı kod noktası' : 'Kod hesaplanamadı'}
+            {entry ? `Kod ${entry.code} — yorumu aşağıdadır` : code ? 'İki noktalı kod noktası' : 'Kod hesaplanamadı'}
           </div>
           {codeScales.map((scale, index) => (
             <div className="mmpi-code-scale" key={scale.id}>
@@ -44,20 +44,20 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
               <b>
                 3. yükselen: {third.fullName} — T {third.tScore.toFixed(1)}
               </b>
-              <span>Kaynak kod yorumlarında üçüncü yükselen alt test sıklıkla ek bilgi verir.</span>
+              <span>Üçüncü yükselen alt test koda ek bilgi katar.</span>
             </div>
           )}
           <p className="mmpi-code-desc">
             <Icon name="info" size={13} />
-            Kod, Mf ve Si hariç en yüksek iki klinik ölçekten oluşur; kaynakta kodlar her iki sıralamayla
-            (ör. 12/21) birlikte ele alınır. Kod tek başına tanı değil, yorumlamada başlangıç noktasıdır.
+            Kod, Mf ve Si hariç en yüksek iki klinik ölçekten oluşur; her iki sıralama (ör. 12/21) aynı örüntüyü
+            temsil eder. Kod tek başına tanı değil, yorumlamada başlangıç noktasıdır.
           </p>
         </section>
 
         <section className="mmpi-code-bars">
           <h4 className="mmpi-card-title">
             <span className="mmpi-card-dot" />
-            Kod Yorumu (klinik yorum rehberi)
+            Kod Yorumu
           </h4>
           {entry ? (
             <>
@@ -79,16 +79,15 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
             </>
           ) : (
             <p className="clin-desc">
-              Kaynak raporda bu iki noktalı koda ilişkin ayrı bir yorum yer almamaktadır. Klinik ölçeklerin
-              ayrıntılı T puanı yorumları için “Klinik Ölçekler” sekmesine, profil konfigürasyonları için
-              “Ek Ölçekler &amp; Kritikler” sekmesine bakınız.
+              Bu iki noktalı koda ilişkin tanımlı bir kod yorumu yoktur. Klinik ölçeklerin ayrıntılı T puanı
+              yorumları için “Klinik Ölçekler” sekmesine, profil konfigürasyonları için “Ek Ölçekler &amp;
+              Kritikler” sekmesine bakınız.
             </p>
           )}
         </section>
       </div>
       <p className="mmpi-summary-note">
-        Yorum metinleri kaynak raporun kod bölümlerine dayanır; olası tanılar kaynaktaki gibi listelenir ve
-        klinik karar uygulayıcı uzmana aittir.
+        Olası tanılar yol göstericidir; kesme puanları tanı koymaz ve klinik karar uygulayıcı uzmana aittir.
       </p>
     </div>
   );

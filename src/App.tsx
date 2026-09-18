@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { AuthGate } from './components/AuthGate';
+import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
 import { CaseWorkspace } from './components/CaseWorkspace';
 import { ConnectivityBanner } from './components/ConnectivityBanner';
@@ -12,6 +13,7 @@ import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
 import type { AuthenticatedUser } from './auth/authTypes';
+import { supabaseConfig } from './auth/supabaseClient';
 import { displayName } from './auth/userDisplay';
 
 type Workspace = 'case' | 'form' | 'records' | 'admin';
@@ -23,6 +25,8 @@ const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
 const TEST_ROUTE_PREFIX = '#/test/';
 /** Kaynakça sayfası hash rotası. */
 const SOURCES_ROUTE = '#/kaynaklar';
+/** Tasarım önizlemesi rotası — yalnızca Supabase yapılandırılmadığında açılır. */
+const PREVIEW_ROUTE = '#/onizleme';
 
 type Route = { view: 'workspace' } | { view: 'test'; id: string } | { view: 'sources' };
 
@@ -42,6 +46,27 @@ export function openTestRecordPage(recordId: string): void {
 }
 
 export default function App() {
+  const [hash, setHash] = useState(() => (typeof window !== 'undefined' ? window.location.hash : ''));
+
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // Önizleme rotası: kurulum ekranının yanında, gerçek oturum gerektirmeden
+  // sonuç ekranlarının tasarımını gösterir. Yapılandırılmış bir kurulumda rota
+  // kapalıdır; üretimde yalnızca giriş akışı çalışır.
+  if (!supabaseConfig.configured && hash === PREVIEW_ROUTE) {
+    return (
+      <DesignPreviewPage
+        onExit={() => {
+          window.location.hash = '';
+        }}
+      />
+    );
+  }
+
   return <AuthGate>{(user, onLogout) => <SignedInApp user={user} onLogout={onLogout} />}</AuthGate>;
 }
 

@@ -41,7 +41,10 @@ tarayıcının PDF dosya adı önerisi `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy
 biçiminde test tarihinden üretilir. Uygulamada kullanılan bilimsel/teknik
 kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, başlık ve
 altbilgiden açılır) künye + uygulamadaki karşılıklarıyla listelenir; raporlara
-yalnızca kısa yöntem notu taşınır.
+yalnızca kısa yöntem notu taşınır. Supabase yapılandırılmadan önce sonuç
+ekranlarının tamamı `#/onizleme` rotasındaki örnek veriyle incelenebilir (bu
+rota yalnızca yapılandırılmamış kurulumda açılır; veriler gerçek kayda ait
+değildir).
 T skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
 standart ekleme tablosuna dayanır; **yorum katmanı** klinik MMPI yorumlama
 kaynağına birebir dayanır: geçerlik analizleri (?) “Hiç Bir Şey Diyemem”, L, F, K
