@@ -1754,6 +1754,157 @@
   }
 
   /* ========================================================================
+     AÇILIR SONUÇ LİSTELERİ (Klinik, Türetilmiş, Ek Ölçekler, Kritik Bulgular)
+     Başlık her zaman görünür; ayrıntı istendiğinde açılır.
+     ======================================================================== */
+  .mmpi-list-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .mmpi-list-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .mmpi-list-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .mmpi-list-title b { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .mmpi-list-note { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .mmpi-disc-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .mmpi-disc-counter { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mmpi-disc-controls .quicknav-chip { font-size: 11.5px; font-weight: 600; padding: 5px 11px; }
+  .mmpi-disc-controls .quicknav-chip:disabled { opacity: 0.45; cursor: default; }
+
+  .mmpi-disc-list { display: flex; flex-direction: column; gap: 8px; }
+  .mmpi-disc {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .mmpi-disc.tone-alert { border-color: var(--danger-border); background: var(--danger-tint); }
+  .mmpi-disc.tone-watch { border-color: var(--warning-border); }
+  .mmpi-disc.tone-ok { background: var(--bg-soft); }
+  .mmpi-disc.is-open { background: var(--white); }
+  .mmpi-disc-heading { margin: 0; }
+  .mmpi-disc-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    background: none;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    color: inherit;
+    border-radius: var(--radius-md);
+  }
+  .mmpi-disc-head:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  .mmpi-disc-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .mmpi-disc-chevron {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: 6px;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    color: var(--slate-500);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+  .mmpi-disc-head:hover .mmpi-disc-chevron { color: var(--text); }
+  .mmpi-disc.is-open .mmpi-disc-chevron { transform: rotate(90deg); }
+  .mmpi-disc-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .mmpi-disc-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .mmpi-disc-title strong { font-weight: 600; }
+  .mmpi-disc-summary {
+    font-size: 11.5px;
+    color: var(--soft);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mmpi-disc-value { display: flex; align-items: center; gap: 10px; flex: none; }
+  .mmpi-disc-t { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .mmpi-disc-num {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .mmpi-disc-num em { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--muted); }
+  .mmpi-disc-hint { font-size: 11px; color: var(--muted); }
+  .mmpi-disc-body {
+    padding: 0 14px 14px 46px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mmpi-disc-body[hidden] { display: none; }
+  .mmpi-disc-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+  }
+  .mmpi-disc-card > .mmpi-disc-body { padding-left: 14px; }
+  .mmpi-section-block { display: flex; flex-direction: column; gap: 10px; }
+  .wiggins-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  /* Klinik ölçek satırındaki T puanı çubuğu (0–120, 50 ortalama, 70 sınır) */
+  .mmpi-tbar {
+    position: relative;
+    display: block;
+    width: 130px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--slate-100);
+    border: 1px solid var(--hairline);
+    overflow: hidden;
+  }
+  .mmpi-tbar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+  .mmpi-tbar-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: color-mix(in srgb, var(--text) 40%, transparent);
+  }
+  .mmpi-tbar-mark.is-limit { width: 2px; background: color-mix(in srgb, var(--danger) 75%, transparent); }
+
+  /* ========================================================================
      TASARIM ÖNİZLEMESİ (#/onizleme) — gerçek sonuç panelleriyle aynı düzen
      ======================================================================== */
   .preview-page {

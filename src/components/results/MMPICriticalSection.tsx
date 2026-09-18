@@ -1,5 +1,6 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ImpressionTone } from '../../scoring/mmpiCritical';
+import { DisclosureCard } from './Disclosure';
 import { Icon } from '../Icon';
 import type { IconName } from '../Icon';
 
@@ -66,15 +67,8 @@ export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
         )}
       </div>
 
-      <div>
-        <div className="answers-nav-row">
-          <h4 className="mmpi-section-title">Kritik Patolojik Maddeler</h4>
-          {criticalItems.length > 0 && (
-            <span className="stats-pill" style={{ margin: 0 }}>
-              {criticalItems.length} madde tetiklendi
-            </span>
-          )}
-        </div>
+      <div className="mmpi-section-block">
+        <h4 className="mmpi-section-title">Kritik Patolojik Maddeler</h4>
 
         {criticalItems.length === 0 ? (
           <div className="mmpi-box ok">
@@ -82,7 +76,12 @@ export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
             <span> Kritik maddelerden hiçbiri doğrulanmadı.</span>
           </div>
         ) : (
-          <>
+          <DisclosureCard
+            title="Tetiklenen Maddeler"
+            note={`${criticalItems.length} madde işaretlendi — madde listesi varsayılan olarak kapalıdır`}
+            value={<span className="mmpi-disc-hint">{criticalItems.length} madde</span>}
+            tone="alert"
+          >
             <div className="mmpi-summary-table-wrap">
               <table className="mmpi-summary-table critical-table">
                 <thead>
@@ -111,7 +110,7 @@ export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
               Madde metinleri telifli olduğu için gösterilmez; numaralar MMPI-566 formundaki sırayı izler. Kritik
               maddeler tek başına tanı koydurmaz — içerikleri klinik görüşmede doğrudan sorulmalıdır.
             </p>
-          </>
+          </DisclosureCard>
         )}
       </div>
     </div>

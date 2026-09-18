@@ -1,12 +1,15 @@
 # MMPI Uygulaması — Kapsamlı Kaynak / Literatür Denetimi (Audit)
 
 **Tarih:** 18 Eylül 2026 · **Kapsam:** `src/scoring/*` içindeki tüm puanlama, norm, geçerlik,
-türetilmiş ölçek ve yorum bileşenleri + `kaynaks/` deposu
+türetilmiş ölçek ve yorum bileşenleri + yerel kaynak arşivi (depo dışı)
 **Yöntem:** Kod bileşen çıkarımı → özgün/birincil kaynak araması (Crossref, PubMed,
 yayınevi kayıtları, hakemli dergi kaynakça listeleri) → formül–kaynak eşleştirme (Golden Rule).
 
 Kurallar: Kaynak uydurma yok. Tahmini künye yok. Blog/ticari MMPI sitesi/SEO sayfası birincil
 kaynak sayılmaz. Formül literatürdeki özgün tanımla birebir doğrulanamıyorsa bu açıkça yazılır.
+
+Telif riski taşıyan tarama ve paket dosyaları depoda izlenmez; bu belgede yalnızca
+bulgular ve dosya adları korunur.
 
 ## Statü tanımları
 
@@ -27,11 +30,11 @@ kaynak sayılmaz. Formül literatürdeki özgün tanımla birebir doğrulanamıy
 | Türk normları (Erkek/Kadın M/SD), T dönüşümü, Mf kadın ters çevrimi | `mmpiKeys.ts` (TURKISH_NORMS), `mmpiScoring.ts` (computeT) | T = 50 + 10·(X−M)/SD; Mf-Kadın: 50 + 10·(M−X)/SD | Savaşır (1981) El Kitabı, Sevinç Matbaası, Ankara | Kitap/manual | Doğrulandı (aşağıda) | A (künye); norm sayıları kitapla birebir karşılaştırılamadı (kitap erişimi yok) |
 | Ölçek anahtarları (L,F,K,Hs–Si), madde yapısı | `mmpiKeys.ts` SCORING_KEYS | D/Y anahtar listeleri | Hathaway & McKinley (1940) makale; (1942) Manual | Makale + Manual | Doğrulandı | B (anahtarlar klasik set; madde madde birebir kontrol telifli orijinalle yapılamadı) |
 | K düzeltme oranları (Hs .5, Pd .4, Pt 1, Sc 1, Ma .2) + ekleme tablosu | `mmpiKeys.ts` (K_CORRECTION, K_ADDITION_TABLE) | Tablodan okuma; oran yuvarlaması | Klasik MMPI puanlama sistemi: Hathaway & McKinley (1942); Dahlstrom, Welsh & Dahlstrom (1972) | Manual/Handbook | Doğrulandı | B; .4K kolonunda klasik basılı tabloyla birebir karşılaştırma yapılamadı (kodda K=3→2, K=4→1 gibi monotonik olmayan bir değer var — bu audit değiştirmedi) |
-| Geçerlik bant yorumları (?, L, F, K ham+T), geçersizlik ölçütleri (boş ≥31, F ham ≥23), F-K>16 uyarı metni | `mmpiSource.ts`, `mmpiScoring.ts` | Ham/T bant tabloları | Depo içi rehber: `kaynaks/kaynak.pdf` (belge içi başlık “MMPI (KES-YAPIŞTIR)”, künyesiz) | Belge (depoda) | — | C (metinler belgeyle birebir; bibliyografik kimlik doğrulanamadı) |
+| Geçerlik bant yorumları (?, L, F, K ham+T), geçersizlik ölçütleri (boş ≥31, F ham ≥23), F-K>16 uyarı metni | `mmpiSource.ts`, `mmpiScoring.ts` | Ham/T bant tabloları | Yerel arşiv rehberi: `kaynak.pdf` (belge içi başlık “MMPI (KES-YAPIŞTIR)”, künyesiz) | Belge (yerel arşiv) | — | C (metinler belgeyle birebir; bibliyografik kimlik doğrulanamadı) |
 | TR Endeksi — 16 tekrar çifti, ≤3 tutarlı | `mmpiConsistency.ts` (TR_PAIRS, trIndex) | 16 çiftte farklı yanıt sayısı ≤3 | Gravitz & Gerton (1976), JCP 32(3), 567–568; Greene (1979), JPA 43(1), 69–71; Dahlstrom (1972) eşlik atfı | Makale | Doğrulandı | A künye / E (16 çiftin tam listesi klasik listeyle uyumlu; özgün makale tablosuyla madde madde doğrulanamadı) |
 | Dikkatsizlik Endeksi — 12 çift, ≥4 kuşku | `mmpiConsistency.ts` (CARELESS_PAIRS) | 12 çiftte beklenmeyen örüntü ≥4 | Greene (1978), JCP 34(2), 407–410 (özgün); Greene (1980) manual (4 kesimi; kodun atfı) | Makale + Kitap | Doğrulandı | A künye / E (12 çiftin madde numaraları tam metinle doğrulanamadı) |
 | F-K Endeksi (Gough) | `mmpiConsistency.ts` (fkIndexAnalysis) | F ham − K ham; 0–9 geçerli, >9 sahte-kötülük, >16 kritik | Gough (1950), JCP 14(5), 408–413; Gough (1947), JASP 42, 215–225 | Makale | Doğrulandı | A (formül özgün tanımla birebir: ham F − ham K); bantlar (0–9/10–16/>16) klinik literatür kullanımı |
-| Geçerlik konfigürasyonları (V, ters V, rastgele, tümü-D/Y…) | `mmpiValidityConfigs.ts` | L/F/K T eşik kuralları | Depo içi rehber + Greene (1980) kapalı-V 5–10T notu | Belge/Kitap | Kısmi | C/D (eşiklerin çoğu rehberden; kodda ayrı künye atfı yok) |
+| Geçerlik konfigürasyonları (V, ters V, rastgele, tümü-D/Y…) | `mmpiValidityConfigs.ts` | L/F/K T eşik kuralları | Yerel arşiv rehberi + Greene (1980) kapalı-V 5–10T notu | Belge/Kitap | Kısmi | C/D (eşiklerin çoğu rehberden; kodda ayrı künye atfı yok) |
 | Goldberg Ayrım Endeksi | `mmpiDerived.ts` computeDerivedIndexes | (L+Pa+Sc)−(Hy+Pt), T puanları; >45 psikotik | Goldberg (1965), Psychological Monographs 79(9, Whole 602), 1–28, DOI 10.1037/h0093885 | Makale (monograf) | Doğrulandı | A (formül, T puanı kullanımı ve 45 kesimi ikincil hakemli literatürle birebir: Brophy 1992, Psych Reports; Egger vd. 2003, Eur Psychiatry) |
 | Taulbee İndeksi | `mmpiDerived.ts` | 16 karşılaştırma; ≤6 psikotik, ≥13 nevrotik, arası belirsiz | Taulbee & Sisson (1957), JCP 21(5), 413–417, DOI 10.1037/h0044567 | Makale | Doğrulandı | B (16 çift sayısı ve kesimler ikincil hakemli literatürle uyumlu; çift yönleri özgün makale tam metniyle doğrulanamadı → E notu) |
 | Peterson İndeksi | `mmpiDerived.ts` | 6 kriter (≥4 klinik T≥70; F>64; max(Pa,Sc,Ma)>max(Hs,D,Hy); D>Hs&Hy; Sc>Pt; Pa>70∥Ma>70); ≥3 | Peterson, D. R. (1954), JCP 18(3), 198–200, DOI 10.1037/h0061349 | Makale | Doğrulandı | B (kriter yapısı Goldberg 1965 ve Türkçe MMPI literatürü tanımıyla uyumlu; özgün tam metin erişilemedi → E notu) |
@@ -51,7 +54,7 @@ kaynak sayılmaz. Formül literatürdeki özgün tanımla birebir doğrulanamıy
 | Kritik madde listesi (39 madde) | `mmpiCritical.ts` CRITICAL_ITEMS | 39 kritik madde + cinsiyetli 74 | Kodda isim yok; klasik kritik madde listeleriyle (Dahlstrom 1972; Greene 1980) çakışıyor | — | — | D (liste kimliği doğrulanamadı) |
 | Klinik izlenimler (intihar riski vb.) | `mmpiCritical.ts` clinicalImpressions | D&Pt≥70; 78/87+Hs,D; F>… vb. | Dahlstrom (1972); Clopton & Baucom (1979), JPA 43(3), 293–296, DOI 10.1207/s15327752jpa4303_12 | Kitap + Makale | Doğrulandı | B/A |
 | Tedaviye yanıt notu (“Reis, 1966”; K ham ≤15) | `mmpiCritical.ts` | K ham ≤15 → olumlu prognoz | Kod “Reis (1966)” diyor; özgün kayıt: **Ries**, H. A. (1966), JCP 22(2), 212–213, DOI 10.1002/1097-4679(196604)22:2<212::AID-JCLP2270220228>3.0.CO;2-T | Makale | Doğrulandı (künye) | E (K≤15 eşiği tam metin doğrulanamadı; kod yazımı “Reis”, gerçek soyad “Ries”) |
-| Klinik yorum katmanı (tek ölçek T bantları, iki noktalı kodlar, olası tanılar) | `mmpiSource.ts`, `mmpiSourceCodes.ts`, `mmpiInterpretation.ts` | Bant tabloları + kod yorumları | Depo içi rehber `kaynaks/kaynak.pdf` (künyesiz) | Belge (depoda) | — | C |
+| Klinik yorum katmanı (tek ölçek T bantları, iki noktalı kodlar, olası tanılar) | `mmpiSource.ts`, `mmpiSourceCodes.ts`, `mmpiInterpretation.ts` | Bant tabloları + kod yorumları | Yerel arşiv rehberi `kaynak.pdf` (künyesiz) | Belge (yerel arşiv) | — | C |
 | Profil kodu kuralı (Mf ve Si hariç en yüksek ikili) | `mmpiScoring.ts` | Uygulama kuralı | Kodda atıf yok (uygulama kararı) | — | — | D |
 
 ## Tablo 2 — Kaynak ↔ kod eşleşme kontrolü
@@ -84,7 +87,7 @@ kaynak sayılmaz. Formül literatürdeki özgün tanımla birebir doğrulanamıy
 | Welsh (1956) | Kısmen — A/R kimliği ve madde sayıları uyumlu; T dönüşüm sabitleri doğrulanamadı |
 | Gough, McClosky & Meehl (1951) | Evet (Do kimliği; 28 madde birebir) |
 | Navran (1954) | Kısmen — künye doğrulandı; klasik 57 madde ile koddaki 56 madde arasındaki fark açıklanamadı |
-| `kaynaks/kaynak.pdf` (“MMPI (KES-YAPIŞTIR)”) | Evet (metinler birebir bu belgeden) — bibliyografik kimlik doğrulanamadı |
+| `kaynak.pdf` (“MMPI (KES-YAPIŞTIR)”) — yerel kaynak arşivi | Evet (metinler birebir bu belgeden) — bibliyografik kimlik doğrulanamadı |
 
 ## 1942 / 1943 sorusu (Hathaway & McKinley)
 

@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { DerivedIndexResult, DerivedScaleResult } from '../../scoring/mmpiDerived';
 import { PERSONALITY_CUTOFFS_READ_ONLY } from '../../scoring/mmpiDerived';
+import { DisclosureCard, DisclosureRow, ResultSection, useDisclosureGroup } from './Disclosure';
 import { Icon } from '../Icon';
 
 const toneColor = (tone: DerivedScaleResult['tone']): string =>
@@ -21,34 +23,33 @@ function ThresholdBar({ score, cutoff, color }: { score: number; cutoff: Cutoff;
   );
 }
 
-function DerivedCard({ scale, cutoff }: { scale: DerivedScaleResult; cutoff?: Cutoff }) {
+function ScaleValue({ scale }: { scale: DerivedScaleResult }) {
   const color = toneColor(scale.tone);
   return (
-    <div className={`mmpi-vcard ${scale.tone === 'alert' ? 'is-high' : scale.tone === 'watch' ? 'is-low' : ''}`}>
-      <div className="mmpi-vcard-head">
-        <span className="mmpi-vcard-name">{scale.scaleName}</span>
-      </div>
-      <p className="mmpi-vcard-desc">{scale.description}</p>
-      <div className="mmpi-vcard-stats">
-        <div className="mmpi-vstat">
-          <span>Puan</span>
-          <b>
-            {scale.rawScore}
-            {scale.tScore !== null ? ` · T ${scale.tScore.toFixed(0)}` : ''}
-          </b>
-        </div>
-        <span className="level-badge" style={{ background: color, marginLeft: 'auto' }}>
-          {scale.levelLabel}
-        </span>
-      </div>
-      {cutoff && <ThresholdBar score={scale.rawScore} cutoff={cutoff} color={color} />}
+    <>
+      <span className="mmpi-disc-num" style={{ color }}>
+        {scale.rawScore}
+        {scale.tScore !== null && <em>T {scale.tScore.toFixed(0)}</em>}
+      </span>
+      <span className="mv-band" style={{ background: color }}>
+        {scale.levelLabel}
+      </span>
+    </>
+  );
+}
+
+function ScaleBody({ scale, cutoff }: { scale: DerivedScaleResult; cutoff?: Cutoff }) {
+  return (
+    <>
+      <p className="clin-desc">{scale.description}</p>
+      {cutoff && <ThresholdBar score={scale.rawScore} cutoff={cutoff} color={toneColor(scale.tone)} />}
       {cutoff && (
         <span className="index-card-cutoff">
           Eşik: Hafif ≥ {cutoff.mild} · Belirgin ≥ {cutoff.marked}
         </span>
       )}
       <p className="mmpi-vcard-signal">{scale.interpretation}</p>
-    </div>
+    </>
   );
 }
 
@@ -113,13 +114,14 @@ function IndexRangeBar({ scaleId, value }: { scaleId: string; value: number }) {
 }
 
 /**
- * Türetilmiş Ölçekler & Endeksler — madde düzeyinde cevap verisinden
- * hesaplanır: ayrım endeksleri (Goldberg, Taulbee, Peterson), DSM yönelimli
- * kişilik eğilimleri, alkol/madde göstergeleri, özel ölçekler (O-H, Es,
- * Welsh A/R, Do, Dy) ve Wiggins içerik ölçekleri.
+ * Türetilmiş Ölçekler & Endeksler — madde düzeyinde cevap verisinden hesaplanır:
+ * ayrım endeksleri (Goldberg, Taulbee, Peterson) her zaman görünür; kişilik
+ * eğilimleri, alkol/madde ve özel ölçekler ile Wiggins içerik ölçekleri açılır
+ * satırlar hâlinde sunulur. Eşik üstü ölçekler açık gelir, geri kalanı kapalı.
  */
 export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
   const itemLevel = profile.itemLevel;
+
   if (!itemLevel) {
     return (
       <div className="mmpi-tab-panel">
@@ -134,22 +136,46 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
     );
   }
 
+  return <DerivedContent itemLevel={itemLevel} />;
+}
+
+/** Madde düzeyi verisi bulunan kayıtlar için türetilmiş ölçek içeriği. */
+function DerivedContent({ itemLevel }: { itemLevel: NonNullable<MMPIProfile['itemLevel']> }) {
+  const [onlyNotable, setOnlyNotable] = useState(true);
   const indexes = itemLevel.derivedIndexes;
   const personality = itemLevel.derivedScales.filter(s => s.category === 'personality');
   const addiction = itemLevel.derivedScales.filter(s => s.category === 'addiction');
   const special = itemLevel.derivedScales.filter(s => s.category === 'special');
-  const wiggins = itemLevel.derivedScales.filter(s => s.category === 'wiggins');
+  const wiggins = [...itemLevel.derivedScales.filter(s => s.category === 'wiggins')].sort(
+    (a, b) => (b.tScore ?? 0) - (a.tScore ?? 0),
+  );
+
+  // Yalnızca “Belirgin” (eşik üstü) satırlar açık gelir; “Hafif” ve normal
+  // satırlar kapalı durur ve başlıktaki düzey rozetiyle birlikte görünür.
+  const notable = (list: DerivedScaleResult[]) => list.filter(scale => scale.tone !== 'ok');
+  const mustOpen = (list: DerivedScaleResult[]) => list.filter(scale => scale.tone === 'alert');
+  const personalityOpen = mustOpen(personality).map(scale => scale.scaleId);
+  const otherOpen = mustOpen([...addiction, ...special]).map(scale => scale.scaleId);
+  const personalityGroup = useDisclosureGroup(personalityOpen);
+  const otherGroup = useDisclosureGroup(otherOpen);
+
+  const personalityNote = `${personality.length} ölçek · ${notable(personality).length} eşik üstü (${personalityOpen.length} belirgin açık)`;
+  const otherNote = `${addiction.length + special.length} ölçek · ${notable([...addiction, ...special]).length} eşik üstü (${otherOpen.length} belirgin açık)`;
+  const wigginsNotable = notable(wiggins);
+  const wigginsRows = onlyNotable && wigginsNotable.length > 0 ? wigginsNotable : wiggins;
 
   return (
     <div className="mmpi-tab-panel">
-      <div>
-        <h4 className="mmpi-section-title">Ayrım Endeksleri</h4>
-        <p className="mmpi-summary-note">
-          Ayrım endeksleri, profilin nevrotik–psikotik eksenindeki konumuna dair sayısal yardımcı
-          göstergelerdir; tek başına tanı koymazlar, klinik ölçekler ve iki noktalı kodla birlikte
-          okunurlar. Her kartta puan, ölçüt aralığında karşılık gelen bant ve kesim sınırları
-          gösterilir.
-        </p>
+      <section className="mmpi-list-card">
+        <header className="mmpi-list-head">
+          <div className="mmpi-list-title">
+            <span className="mmpi-card-dot" />
+            <b>Ayrım Endeksleri</b>
+            <span className="mmpi-list-note">
+              Profilin nevrotik–psikotik eksenindeki konumuna dair yardımcı göstergeler; tek başına tanı koymaz.
+            </span>
+          </div>
+        </header>
         <div className="mmpi-index-grid">
           {indexes.map(index => {
             const color = toneColor(index.tone);
@@ -172,43 +198,70 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
             );
           })}
         </div>
-      </div>
+      </section>
 
-      <div>
-        <h4 className="mmpi-section-title">Kişilik Bozukluğu Eğilimleri (Ham Puan)</h4>
-        <div className="mmpi-vgrid">
-          {personality.map(scale => (
-            <DerivedCard
-              key={scale.scaleId}
+      <ResultSection
+        title="Kişilik Bozukluğu Eğilimleri"
+        note={personalityNote}
+        ids={personality.map(scale => scale.scaleId)}
+        group={personalityGroup}
+      >
+        {personality.map(scale => (
+          <DisclosureRow
+            key={scale.scaleId}
+            id={scale.scaleId}
+            tone={scale.tone}
+            open={personalityGroup.isOpen(scale.scaleId)}
+            onToggle={personalityGroup.toggle}
+            title={scale.scaleName}
+            summary={scale.description}
+            value={<ScaleValue scale={scale} />}
+          >
+            <ScaleBody
               scale={scale}
-              cutoff={
-                PERSONALITY_CUTOFFS_READ_ONLY[
-                  scale.scaleId as keyof typeof PERSONALITY_CUTOFFS_READ_ONLY
-                ]
-              }
+              cutoff={PERSONALITY_CUTOFFS_READ_ONLY[scale.scaleId as keyof typeof PERSONALITY_CUTOFFS_READ_ONLY]}
             />
-          ))}
-        </div>
-      </div>
+          </DisclosureRow>
+        ))}
+      </ResultSection>
 
-      <div>
-        <h4 className="mmpi-section-title">Madde Bağımlılığı ve Özel Ölçekler</h4>
-        <p className="mmpi-summary-note">
-          MAC, ICAS, SAP, O-H, Es, Welsh A/R, Do ve Dy ölçeklerinin ham puanları ve yorum eşikleri bu bölümde
-          gösterilir. Eşik üstü ölçekler koyu renkli rozetle işaretlenir.
-        </p>
-        <div className="mmpi-vgrid">
-          {addiction.map(scale => (
-            <DerivedCard key={scale.scaleId} scale={scale} />
-          ))}
-          {special.map(scale => (
-            <DerivedCard key={scale.scaleId} scale={scale} />
-          ))}
-        </div>
-      </div>
+      <ResultSection
+        title="Madde Bağımlılığı ve Özel Ölçekler"
+        note={otherNote}
+        ids={[...addiction, ...special].map(scale => scale.scaleId)}
+        group={otherGroup}
+      >
+        {[...addiction, ...special].map(scale => (
+          <DisclosureRow
+            key={scale.scaleId}
+            id={scale.scaleId}
+            tone={scale.tone}
+            open={otherGroup.isOpen(scale.scaleId)}
+            onToggle={otherGroup.toggle}
+            title={scale.scaleName}
+            summary={scale.description}
+            value={<ScaleValue scale={scale} />}
+          >
+            <ScaleBody scale={scale} />
+          </DisclosureRow>
+        ))}
+      </ResultSection>
 
-      <div>
-        <h4 className="mmpi-section-title">Wiggins İçerik Ölçekleri</h4>
+      <DisclosureCard
+        title="Wiggins İçerik Ölçekleri"
+        note={`${wiggins.length} ölçek · ${wigginsNotable.length} belirgin (T ≥ 70)`}
+        value={wigginsNotable.length > 0 ? <span className="mmpi-disc-hint">Kapalı — incelemek için açın</span> : undefined}
+        tone={wigginsNotable.length > 0 ? 'watch' : 'ok'}
+      >
+        <div className="wiggins-toolbar">
+          <button type="button" className="quicknav-chip" onClick={() => setOnlyNotable(value => !value)}>
+            {onlyNotable ? 'Tüm ölçekleri göster' : 'Sadece belirginleri göster'}
+          </button>
+          <span className="mmpi-list-note">
+            İçerik ölçekleri T puanları cinsiyete göre Türk örneklemi ortalama/standart sapma değerleriyle hesaplanır;
+            T ≥ 70 belirgin içerik yükselmesi kabul edilir.
+          </span>
+        </div>
         <div className="mmpi-summary-table-wrap">
           <table className="mmpi-summary-table wiggins-table">
             <thead>
@@ -221,7 +274,7 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
               </tr>
             </thead>
             <tbody>
-              {wiggins.map(scale => (
+              {wigginsRows.map(scale => (
                 <tr key={scale.scaleId}>
                   <th className="row-head" title={scale.description}>
                     {scale.scaleName}
@@ -241,11 +294,7 @@ export function MMPIDerivedSection({ profile }: { profile: MMPIProfile }) {
             </tbody>
           </table>
         </div>
-        <p className="mmpi-summary-note">
-          İçerik ölçekleri T puanları Türk örneklemi ortalama/standart sapma değerleriyle hesaplanır; T ≥ 70 belirgin
-          içerik yükselmesi kabul edilir.
-        </p>
-      </div>
+      </DisclosureCard>
     </div>
   );
 }

@@ -372,7 +372,7 @@ const GROUPS: SourceGroup[] = [
       {
         citation: 'Klinik yorum katmanı — tek ölçek T bant yorumları, iki noktalı kodlar ve “Olası Tanı” metinleri',
         status: 'C',
-        role: 'Uygulamanın yorum metinleri, depodaki künyesiz bir Türkçe klinik rehber belgesiyle (kaynaks/kaynak.pdf) birebir örtüşür. Belgenin yazar/yayın bilgisi içermez; bibliyografik kimliği doğrulanamamıştır.',
+        role: 'Uygulamanın yorum metinleri, depo dışında tutulan yerel arşivdeki künyesiz bir Türkçe klinik rehber belgesiyle (kaynak.pdf) birebir örtüşür. Belgenin yazar/yayın bilgisi içermez; bibliyografik kimliği doğrulanamamıştır.',
         usedIn: ['Geçerlik Analizleri', 'Klinik Yorumlar', 'mmpiSource.ts', 'mmpiSourceCodes.ts', 'mmpiInterpretation.ts'],
       },
       {
@@ -420,17 +420,17 @@ const GROUPS: SourceGroup[] = [
     ],
   },
   {
-    kicker: '06 · DEPO BELGELERİ',
-    title: 'Depoda bulunan, künyelendirilemeyen belgeler',
+    kicker: '06 · ARŞİV BELGELERİ',
+    title: 'Depo dışında tutulan, künyelendirilemeyen belgeler',
     entries: [
       {
-        citation: '“MMPI (KES-YAPIŞTIR)” — anonim Türkçe klinik rehber (kaynaks/kaynak.pdf)',
+        citation: '“MMPI (KES-YAPIŞTIR)” — anonim Türkçe klinik rehber (yerel arşivdeki kaynak.pdf)',
         status: 'C',
         role: 'Geçerlik bant yorumları, klinik ölçek yorumları, iki noktalı kod metinleri ve “Olası Tanı” satırlarının doğrudan kaynağı. Belge içinde hiçbir yazar/yayın bilgisi yoktur; telifli bir kitabın taraması olabileceği düşünüldüğünden künye tahmin edilmemiştir.',
         usedIn: ['Yorum katmanı (05. bölümle bağlantılı)'],
       },
       {
-        citation: 'Diğer depo belgeleri — optik cevap formu (MMPI-566-optik-cevap-formu.pdf), örnek klinik rapor taslağı, kayıtlı web sayfası çıktıları',
+        citation: 'Diğer belgeler — optik cevap formu (MMPI-566-optik-cevap-formu.pdf), örnek klinik rapor taslağı, kayıtlı web sayfası çıktıları',
         status: 'D',
         role: 'Uygulama tasarımına yardımcı belgelerdir; bilimsel künye taşımadıklarından kaynak olarak listelenmezler.',
         usedIn: ['Tasarım referansı'],
@@ -521,7 +521,7 @@ export function SourcesPage({ onBack }: { onBack: () => void }) {
       <footer>
         <p className="sources-foot">
           Kaynak denetimi 18 Eylül 2026 tarihinde tamamlanmıştır. Denetimin tam bileşen–kaynak
-          eşleştirme tabloları depoda <code>docs/kaynak-audit.md</code> dosyasındadır. Bu sayfada
+          eşleştirme tabloları depoda <code>docs/kaynak-denetimi.md</code> dosyasındadır. Bu sayfada
           yalnızca doğrulanabilir bilgiler yer alır; künyesi doğrulanamayan hiçbir bileşene kaynak
           atfedilmemiştir.
         </p>

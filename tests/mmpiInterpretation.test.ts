@@ -253,7 +253,11 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
 
     const clinical = renderToStaticMarkup(createElement(MMPIClinicalTab, { profile: p }));
     assert.match(clinical, /Hipokondriazis/);
-    assert.match(clinical, /Düzey rozetleri ölçeğe özgü T puanı aralıklarını gösterir/);
+    assert.match(clinical, /K düzeltmesi yalnızca Hs, Pd, Pt, Sc ve Ma ölçeklerine uygulanır/);
+    // Açılır satırlar: klinik eşiği aşan ölçekler açık, diğerleri kapalı gelir.
+    assert.match(clinical, /5 ölçek klinik eşiğin üzerinde \(T ≥ 70\) — açık gelir\./);
+    assert.match(clinical, /aria-expanded="true"/);
+    assert.match(clinical, /aria-expanded="false"/);
 
     const code = renderToStaticMarkup(createElement(MMPICodeTab, { profile: p }));
     // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık yalnızca kod yorumunu anar.
@@ -336,6 +340,10 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     assert.match(derived, /Wiggins/);
     assert.match(derived, /Narsisistik Kişilik Özellikleri/);
     assert.match(derived, /Sınır \(Borderline\) Kişilik Özellikleri/);
+    // Wiggins içerik ölçekleri varsayılan olarak kapalıdır (istenince açılır).
+    const wiggins = /<span class="mmpi-disc-title">Wiggins İçerik Ölçekleri<\/span>([\s\S]*?)$/.exec(derived);
+    assert.ok(wiggins, 'Wiggins bölümü render edilmeli');
+    assert.match(wiggins![1]!.slice(0, 4000), /class="mmpi-disc-body" hidden=""/);
 
     const critical = renderToStaticMarkup(createElement(MMPICriticalSection, { profile: p }));
     assert.match(critical, /Klinik İzlenimler/);
