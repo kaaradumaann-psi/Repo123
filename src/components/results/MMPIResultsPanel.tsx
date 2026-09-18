@@ -39,6 +39,11 @@ type Props = {
   clientName?: string;
   /** Madde düzeyinde (566) yanıt dizisi — “Soru Yanıtları” sekmesinde gösterilir. */
   answers?: ItemAnswer[];
+  /**
+   * Doğruysa panel kendi başlık şeridini çizmez; sayfayı saran görünüm
+   * (örn. kayıt detay sayfası) özet şeridi kendisi sunar ve tekrar önlenir.
+   */
+  embedded?: boolean;
 };
 
 function formatT(t: number): string {
@@ -52,13 +57,14 @@ function formatT(t: number): string {
  * Türetilmiş Ölçekler & Endeksler, Desenler & Sözlük, Kritik Bulgular,
  * Soru Yanıtları.
  */
-export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
+export function MMPIResultsPanel({ profile, clientName, answers, embedded = false }: Props) {
   const [tab, setTab] = useState<MmpiResultsTab>('overview');
   const { validityAnalysis, profileCode } = profile;
   const clinical = profile.clinical;
 
   return (
-    <div className="mmpi-results-panel">
+    <div className={`mmpi-results-panel ${embedded ? 'is-embedded' : ''}`}>
+      {!embedded && (
       <header className="mmpi-results-header">
         <div>
           <div className="mmpi-results-meta">
@@ -76,6 +82,7 @@ export function MMPIResultsPanel({ profile, clientName, answers }: Props) {
           <span>{validityAnalysis.isValid ? 'Geçerli Profil' : 'Şüpheli / Geçersiz Profil'}</span>
         </div>
       </header>
+      )}
 
       <nav className="mmpi-tabs" role="tablist" aria-label="MMPI sonuç sekmeleri">
         {TABS.map(t => (

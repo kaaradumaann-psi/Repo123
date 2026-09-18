@@ -1955,3 +1955,281 @@
     border-radius: var(--radius-md);
   }
 }
+
+/* ==========================================================================
+   Kaynaklar / Kaynakça sayfası + kayıt sayfası özet şeridi + yazdırma raporu
+   ========================================================================== */
+
+@media screen {
+  .print-only { display: none; }
+
+  .footer-route-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .footer-route-link:hover { color: var(--text); }
+  button.home-site-link { font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+
+  /* ---- Kaynaklar sayfası ---- */
+  .sources-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .sources-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(24px, 2.6vw, 30px);
+    letter-spacing: -0.03em;
+    margin: 10px 0 6px;
+  }
+  .sources-hero p {
+    margin: 0;
+    color: var(--soft);
+    line-height: 1.6;
+    font-size: 13px;
+    max-width: 68ch;
+  }
+  .sources-group { display: flex; flex-direction: column; gap: 10px; }
+  .sources-group-head { border-bottom: 1px solid var(--hairline); padding-bottom: 8px; }
+  .sources-kicker {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .sources-group-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .sources-list { display: flex; flex-direction: column; gap: 10px; }
+  .sources-entry {
+    padding: 14px 16px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sources-citation {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .sources-role { margin: 0; font-size: 12.5px; color: var(--soft); line-height: 1.55; }
+  .sources-used { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sources-used-chip {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--slate-700);
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    padding: 2px 9px;
+  }
+  .sources-note {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--warning);
+    background: var(--warning-tint);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    line-height: 1.5;
+  }
+  .sources-foot {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    border-top: 1px solid var(--hairline);
+    padding-top: 12px;
+    line-height: 1.55;
+  }
+
+  /* ---- Kayıt sayfası: özet şeridi + katlanabilir danışan bilgisi ---- */
+  .record-page-header { align-items: center; }
+  .record-page-id { min-width: 0; }
+  .record-page-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .client-info-details {
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .client-info-details summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 12px 18px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--slate-700);
+    list-style: none;
+    user-select: none;
+  }
+  .client-info-details summary::-webkit-details-marker { display: none; }
+  .client-info-details summary::after {
+    content: '';
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-right: 1.6px solid var(--muted);
+    border-bottom: 1.6px solid var(--muted);
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+  }
+  .client-info-details[open] summary::after { transform: rotate(225deg); }
+  .client-info-details summary:hover { background: var(--bg-soft); }
+  .client-info-details .client-details-grid {
+    padding: 4px 18px 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .client-info-details .record-page-context { padding: 0 18px 14px; margin: 0; }
+
+  .mmpi-results-panel.is-embedded { padding-top: 14px; }
+  .mmpi-tabs { row-gap: 8px; }
+}
+
+/* ==========================================================================
+   Yazdırma / PDF — profesyonel klinik rapor (yalnızca gerekli MMPI verisi)
+   ========================================================================== */
+
+@media print {
+  .screen-only { display: none !important; }
+  .print-only { display: block !important; }
+
+  .pr-report, .pr-report * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .pr-report {
+    padding: 12mm 11mm;
+    color: #14181f;
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+  .pr-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    border-bottom: 2px solid #0d0d0d;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .pr-head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 21px;
+    letter-spacing: -0.02em;
+  }
+  .pr-head span { font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #5c6470; }
+  .pr-head-meta { text-align: right; font-size: 9.5px; color: #5c6470; display: flex; flex-direction: column; gap: 2px; }
+  .pr-head-meta b { color: #14181f; }
+
+  .pr-block { margin: 0 0 14px; }
+  .pr-block.pr-avoid { break-inside: avoid; }
+  .pr-block h2 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid #c9cdd4;
+    padding-bottom: 4px;
+    break-after: avoid;
+  }
+  .pr-block h3 {
+    margin: 10px 0 6px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #40485a;
+    break-after: avoid;
+  }
+
+  .pr-client-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 26px;
+    border: 1px solid #c9cdd4;
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .pr-client-grid > div { display: flex; justify-content: space-between; gap: 10px; }
+  .pr-client-grid span { color: #5c6470; }
+  .pr-client-grid b { text-align: right; }
+  .pr-context { margin: 8px 0 0; font-size: 9.5px; color: #40485a; }
+
+  .pr-table { width: 100%; border-collapse: collapse; margin: 4px 0 8px; }
+  .pr-table th {
+    text-align: left;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #5c6470;
+    border-bottom: 1px solid #9aa1ab;
+    padding: 3px 6px;
+  }
+  .pr-table td {
+    border-bottom: 1px solid #e2e5ea;
+    padding: 4px 6px;
+    vertical-align: top;
+  }
+  .pr-table tr { break-inside: avoid; }
+
+  .pr-note { margin: 0 0 6px; break-inside: avoid; }
+  .pr-note b { color: #14181f; }
+
+  .pr-report .mmpi-chart-wrap { min-width: 0; }
+  .pr-report .mmpi-chart-legend { justify-content: flex-start; gap: 14px; margin-top: 6px; padding-top: 6px; font-size: 8.5px; }
+
+  .pr-sign {
+    margin-top: 26px;
+    break-inside: avoid;
+  }
+  .pr-sign div {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    border-top: 1px solid #c9cdd4;
+    padding-top: 10px;
+    width: 60%;
+  }
+  .pr-sign span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; color: #5c6470; }
+  .pr-sign b { font-size: 11px; }
+  .pr-sign i { font-style: normal; font-size: 9px; color: #5c6470; }
+
+  .pr-foot {
+    margin-top: 14px;
+    border-top: 1px solid #c9cdd4;
+    padding-top: 8px;
+    font-size: 8.5px;
+    color: #5c6470;
+    line-height: 1.5;
+  }
+}

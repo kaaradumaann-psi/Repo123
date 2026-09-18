@@ -33,3 +33,6 @@ supabase/.temp/
 
 # Gevici sonuç paneli önizleme çıktısı — derlenen statik önizleme
 preview-dist/
+
+# Denetim/önizleme çalışma alanı — commit edilmez
+.audit/

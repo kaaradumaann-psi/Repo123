@@ -7,6 +7,7 @@ import { ConnectivityBanner } from './components/ConnectivityBanner';
 import { FormKit } from './components/FormKit';
 import { MyRecordsPanel } from './components/MyRecordsPanel';
 import { RecordDetailPage } from './components/RecordDetailPage';
+import { SourcesPage } from './components/SourcesPage';
 import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from './form/attribution';
@@ -20,9 +21,14 @@ type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
 /** Test kaydı detayı için hash rotası: #/test/<kayıt-id> */
 const TEST_ROUTE_PREFIX = '#/test/';
+/** Kaynakça sayfası hash rotası. */
+const SOURCES_ROUTE = '#/kaynaklar';
 
-function readRoute(): { view: 'workspace' } | { view: 'test'; id: string } {
+type Route = { view: 'workspace' } | { view: 'test'; id: string } | { view: 'sources' };
+
+function readRoute(): Route {
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  if (hash === SOURCES_ROUTE) return { view: 'sources' };
   if (hash.startsWith(TEST_ROUTE_PREFIX)) {
     const id = hash.slice(TEST_ROUTE_PREFIX.length);
     if (id) return { view: 'test', id };
@@ -147,7 +153,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   aria-controls={`panel-${tab}`}
                   tabIndex={workspace === tab ? 0 : -1}
                   onClick={() => {
-                    if (route.view === 'test') {
+                    if (route.view !== 'workspace') {
                       window.location.hash = '';
                     }
                     activateTab(tab);
@@ -162,6 +168,17 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
           </div>
 
           <div className="header-user">
+            <button
+              type="button"
+              className="home-site-link"
+              onClick={() => {
+                window.location.hash = route.view === 'sources' ? '' : SOURCES_ROUTE;
+              }}
+              title="Uygulamada kullanılan bilimsel ve teknik kaynaklar"
+            >
+              <span>Kaynakça</span>
+              <Icon name="file" size={13} />
+            </button>
             <a
               className="home-site-link"
               href={SITE_URL}
@@ -196,6 +213,12 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
         {route.view === 'test' ? (
           <RecordDetailPage
             recordId={route.id}
+            onBack={() => {
+              window.location.hash = '';
+            }}
+          />
+        ) : route.view === 'sources' ? (
+          <SourcesPage
             onBack={() => {
               window.location.hash = '';
             }}
@@ -251,6 +274,15 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
             © {COPYRIGHT_YEAR} <b>{COPYRIGHT_HOLDER}</b>
           </span>
           <nav className="app-footer-links" aria-label="Yazar bağlantıları">
+            <button
+              type="button"
+              className="footer-route-link"
+              onClick={() => {
+                window.location.hash = route.view === 'sources' ? '' : SOURCES_ROUTE;
+              }}
+            >
+              Kaynaklar / Kaynakça
+            </button>
             <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
               {SITE_LABEL}
             </a>
