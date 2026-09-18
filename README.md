@@ -41,7 +41,10 @@ tarayıcının PDF dosya adı önerisi `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy
 biçiminde test tarihinden üretilir. Uygulamada kullanılan bilimsel/teknik
 kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, başlık ve
 altbilgiden açılır) künye + uygulamadaki karşılıklarıyla listelenir; raporlara
-yalnızca kısa yöntem notu taşınır.
+yalnızca kısa yöntem notu taşınır. Supabase yapılandırılmadan önce sonuç
+ekranlarının tamamı `#/onizleme` rotasındaki örnek veriyle incelenebilir (bu
+rota yalnızca yapılandırılmamış kurulumda açılır; veriler gerçek kayda ait
+değildir).
 T skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
 standart ekleme tablosuna dayanır; **yorum katmanı** klinik MMPI yorumlama
 kaynağına birebir dayanır: geçerlik analizleri (?) “Hiç Bir Şey Diyemem”, L, F, K
@@ -65,7 +68,8 @@ gösterilir.
 
 Kimlik oturumu Supabase Auth tarafından yönetilir ve bu frontend'de
 `persistSession: true` ile **`sessionStorage`**'da tutulur: aynı sekmede F5
-oturumu korur, sekme kapanınca düşer. `localStorage` kullanılmaz. Rol ve kayıt
+oturumu korur, sekme kapanınca düşer. (İşlem taslağı ayrı bir yerel depodur;
+veri sorumluluğu için bkz. Kapsam ve sınırlamalar.) Rol ve kayıt
 erişimi hâlâ RLS + `profiles.active` ile doğrulanır. Parolalar uygulama
 tablolarına yazılmaz. Admin hesap oluşturma/aktiflik değişikliği doğrulanmış
 Edge Function üzerinden yapılır.
@@ -141,7 +145,7 @@ tablolar, formlar ve çalışma alanları bunun üzerine kuruludur.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 101 test
+npm test            # 189 test
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -187,6 +191,15 @@ Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
   her zaman insan incelemesi ister.
 - Formda kişisel veri saklanmaz. Form kimliği, katılımcı kodu ve tarih yalnızca
   basılı kağıda el yazısıyla girilir ve **yalnızca 1. sayfada** bulunur.
+- İşlem taslağı (danışan bilgileri, cevaplar, taranmış sayfa verisi — görüntü
+  hariç) F5, tarayıcı çökmesi ve internet kesintisinde kaybolmasın diye
+  tarayıcının `localStorage` alanına kullanıcıya özel anahtarla yazılır, 30 gün
+  sonra atılır ve “Yeni işlem” ile silinir. Ortak kullanılan bir bilgisayarda bu
+  taslak cihazda kalır; kayıt yalnızca kaydedildiğinde sunucuya gider.
+- Kaydetme başarısız olursa işlem, aynı idempotency anahtarıyla yerel kuyruğa
+  (outbox) alınır ve bağlantı gelince otomatik tekrarlanır; çift kayıt oluşmaz.
+- Telif riski taşıyan tarama/paket dosyaları depoda izlenmez; yerel arşivde
+  tutulur (`yerel-kaynaklar/`, `.gitignore`).
 
 ## Sabit form geometrisi
 
@@ -236,6 +249,8 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/results/*` | Sonuç tipleri, OMR sınırını güvenilmez sayan doğrulama, özetleme. |
 | `src/scoring/*` | MMPI puanlama anahtarları, Türk normları, K düzeltmesi ve klinik yorum kaynağına birebir dayanan geçerlik/klinik/kod yorum katmanı; madde düzeyi analiz (TR/Dikkatsizlik endeksleri, konfigürasyonlar, türetilmiş ölçekler, kritik maddeler). |
 | `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
+| `src/workspace/*` | İşlem taslağı (localStorage, 30 gün TTL) ve çevrimdışı kayıt kuyruğu; `ItemAnswer` modeli. |
+| `src/preview/*` | `#/onizleme` tasarım önizlemesi için deterministik demo profilleri (gerçek kayıt yazmaz). |
 | `src/records/*` | Ham OMR maddelerini bozmadan Supabase kayıt payload'ı ve idempotent gönderim. |
 | `supabase/*` | Migration, ilişkiler, RLS politikaları, Auth trigger'ı ve Admin Edge Function. |
 | `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |
@@ -244,14 +259,15 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `scripts/build.mjs` | Tek dosya production derlemesi (`optik-form.html` / `dist/index.html`). |
 | `scripts/generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts` | Yazdırılabilir form PDF üretimi ve bağımsız doğrulama. |
 | `scripts/run-photos.mts` | Gerçek telefon fotoğrafları üzerinde `analyzePage` regresyon harness'i (production import zincirinde yok). |
+| `docs/kaynak-denetimi.md` | Puanlama/yorum bileşenlerinin kaynak denetimi: künye–bileşen eşleştirme tabloları ve doğrulanamayan kesimlerin dürüstlük kaydı. |
+| `docs/tasarim-dili.html` | Arayüz tasarım dili referansı (`npm run dev` → `/docs/tasarim-dili.html`). |
 
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
 paylaşır; koordinat kaynağı tektir.
 
 ## Doğrulama
 
-`DOGRULAMA.md` çalıştırılan komutları, gerçek çıktıları ve **doğrulanmayan**
-maddeleri listeler. Özet: tip kontrolü temiz, sentetik + PDF testleri geçiyor,
+Özet: tip kontrolü temiz, sentetik + PDF testleri geçiyor,
 derleme çalışıyor, üretilen PDF dosyadan geri okunup doğrulanıyor ve aynı PDF
 rasterleştirilip gerçek okuma hattından geçiriliyor. Gerçek kağıt, gerçek
 kamera ve lisanslı form düzeni bu ortamda doğrulanmadı.

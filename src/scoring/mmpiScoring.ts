@@ -361,18 +361,18 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     if (fInvalid) reasons.push('F ham puanı 23 ve üstünde');
     interpretation =
       `Profil geçersiz olarak değerlendirilmelidir (${reasons.join(' ve ')}). ` +
-      'Kaynağa göre bu durumda standart değerlendirme bireyin durumunu yansıtmayabilir; ' +
-      'mümkünse test yeniden uygulanmalı ya da klinik görüşme tanı koydurucu olarak kullanılmalıdır.';
+      'Bu durumda standart değerlendirme bireyin durumunu yansıtmayabilir; mümkünse test yeniden uygulanmalı ' +
+      'ya da bulgular klinik görüşmeyle doğrulanmalıdır.';
   } else if (warnings.length === 0) {
     interpretation =
-      'Geçerlik skalaları kaynak ölçütlerine göre normal sınırlardadır: birey maddeleri yanıtlamaya isteklidir, ' +
+      'Geçerlik skalaları normal sınırlardadır: birey maddeleri yanıtlamaya isteklidir, ' +
       'küçük sosyal hataları kabul etme ve reddetme dengesi yerindedir, tipik sayıda uygun olmayan yaşantıya ilişkin ' +
       'bilgi vermiştir ve benliğini açma ile saklama arasında uygun dengeye sahiptir. Profil güvenilir görünmektedir.';
   } else {
     interpretation =
-      'Geçerlik konfigürasyonu dikkatli değerlendirmeyi gerektirmektedir. Bulgular kaynak rapordaki ham puan ' +
-      'tablolarına göre yukarıda ayrıntılı olarak verilmiştir; hiçbir tek bulgu tek başına profili geçersiz kılmaz. ' +
-      'Eğitim, yaş ve klinik bağlam bütüncül değerlendirilmelidir.';
+      'Geçerlik konfigürasyonu dikkatli değerlendirmeyi gerektirmektedir. Bulgular yukarıda ayrıntılı olarak ' +
+      'verilmiştir; hiçbir tek bulgu tek başına profili geçersiz kılmaz. Eğitim, yaş ve klinik bağlam bütüncül ' +
+      'değerlendirilmelidir.';
   }
 
   return {

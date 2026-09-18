@@ -6,6 +6,10 @@ OMRChecker-master/
 mmpiHesapİcinGerekliOlabilecekTurkStandardizasyonları/
 # Scraped site assets must never be tracked
 MMPI-566*.html
+# Yerel kaynak arşivi: başka bir uygulamadan alınmış paket dosyaları, örnek
+# çıktılar ve künyesiz tarama belgeleri. Yalnızca yerelde kalır; depoda izlenmez.
+/yerel-kaynaklar/
+/kaynaks/
 6A-OLCUM-RAPORU.txt
 C-SERISI-*.txt
 DOGRULAMA.md

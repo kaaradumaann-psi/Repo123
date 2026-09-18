@@ -986,16 +986,6 @@
     padding-bottom: 26px;
   }
 
-  .page-navigation {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 18px;
-    background: var(--bg);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-lg);
-    box-shadow: none;
-  }
 
   .page-option {
     background: var(--white);

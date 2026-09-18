@@ -1,18 +1,21 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
 import { SCALE_MEANINGS, clinicalBandFor, detectPatterns, detectSingleElevations } from '../../scoring/mmpiInterpretation';
+import { DisclosureCard } from './Disclosure';
 import { Icon } from '../Icon';
 
 const GLOSSARY_ORDER: ScaleId[] = ['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'];
 
 /**
- * Ek Ölçekler & Kritikler sekmesi — klinik yorum rehberi band yorumlarıyla klinik eşiği
- * aşan ölçekler, kaynakta tanımlanan profil konfigürasyonları ve tek ölçek
- * yükselmeleri, ayrıca tüm ölçeklerin sözlüğü.
+ * Ek Ölçekler & Kritikler sekmesi — T puanı band yorumlarıyla klinik eşiği
+ * aşan ölçekler, profil konfigürasyonları ve tek ölçek yükselmeleri, ayrıca
+ * tüm ölçeklerin sözlüğü.
  */
 export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
   const critical = profile.clinical.filter(s => s.tScore >= 70);
   const patterns = detectPatterns(profile);
+  const hitPatterns = patterns.filter(pattern => pattern.hit);
+  const missPatterns = patterns.filter(pattern => !pattern.hit);
   const singles = detectSingleElevations(profile);
 
   return (
@@ -51,8 +54,8 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
           <div className="mmpi-box info">
             <Icon name="info" size={14} />
             <span>
-              {' '}Kaynakta tanımlanan “sadece X alt testinin yükselmesi” koşullarından hiçbiri sağlanmıyor
-              (birden fazla ölçek yükseldiğinde kod analizleri önceliklidir).
+              {' '}“Sadece X alt testinin yükselmesi” koşullarından hiçbiri sağlanmıyor (birden fazla ölçek
+              yükseldiğinde kod analizleri önceliklidir).
             </span>
           </div>
         ) : (
@@ -72,24 +75,51 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
 
       <div>
         <h4 className="mmpi-section-title">Desen Göstergeleri</h4>
-        <div className="mmpi-pattern-list">
-          {patterns.map(pattern => (
-            <div className={`mmpi-pattern-row ${pattern.hit ? 'is-hit' : ''}`} key={pattern.id}>
-              <div className="mmpi-pattern-main">
-                <b>{pattern.name}</b>
-                <span>{pattern.rule}</span>
-                {pattern.hit && <p>{pattern.detail}</p>}
+        {hitPatterns.length === 0 ? (
+          <div className="mmpi-box info">
+            <Icon name="info" size={14} />
+            <span> Profilde anlamlı bir örüntü göstergesi saptanmadı; tanımlı örüntülerin tamamı kapalı listede.</span>
+          </div>
+        ) : (
+          <div className="mmpi-pattern-list">
+            {hitPatterns.map(pattern => (
+              <div className="mmpi-pattern-row is-hit" key={pattern.id}>
+                <div className="mmpi-pattern-main">
+                  <b>{pattern.name}</b>
+                  <span>{pattern.rule}</span>
+                  <p>{pattern.detail}</p>
+                </div>
+                <span className="pattern-pill hit">Görüldü</span>
               </div>
-              <span className={`pattern-pill ${pattern.hit ? 'hit' : 'miss'}`}>
-                {pattern.hit ? 'Görüldü' : 'Görülmedi'}
-              </span>
+            ))}
+          </div>
+        )}
+        {missPatterns.length > 0 && (
+          <DisclosureCard
+            title="Görülmeyen Örüntüler"
+            note={`${missPatterns.length} örüntü bu profilde sağlanmıyor`}
+            value={<span className="mmpi-disc-hint">Kapalı</span>}
+          >
+            <div className="mmpi-pattern-list">
+              {missPatterns.map(pattern => (
+                <div className="mmpi-pattern-row" key={pattern.id}>
+                  <div className="mmpi-pattern-main">
+                    <b>{pattern.name}</b>
+                    <span>{pattern.rule}</span>
+                  </div>
+                  <span className="pattern-pill miss">Görülmedi</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </DisclosureCard>
+        )}
       </div>
 
-      <div>
-        <h4 className="mmpi-section-title">Ölçek Sözlüğü</h4>
+      <DisclosureCard
+        title="Ölçek Sözlüğü"
+        note="Her ölçeğin ne ölçtüğüne dair kısa tanımlar — incelemek için açın"
+        value={<span className="mmpi-disc-hint">Kapalı</span>}
+      >
         <div className="mmpi-glossary">
           {GLOSSARY_ORDER.map(id => {
             const scale = profile.scales.find(s => s.id === id);
@@ -105,7 +135,7 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
             );
           })}
         </div>
-      </div>
+      </DisclosureCard>
     </div>
   );
 }

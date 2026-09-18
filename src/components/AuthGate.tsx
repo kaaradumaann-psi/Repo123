@@ -105,6 +105,13 @@ function SystemSetupScreen() {
           <Icon name="alert" size={18} />
           <span>Güvenlik gereği yalnızca yayınlanabilir erişim anahtarını yapılandırın.</span>
         </div>
+        <div className="auth-setup-links">
+          <p>Bağlantı kurulmadan da sonuç ekranlarının tasarımını örnek veriyle inceleyebilirsiniz.</p>
+          <a className="btn-secondary btn-sm auth-setup-preview" href="#/onizleme">
+            <Icon name="scan" size={15} />
+            <span>Tasarım önizlemesini aç</span>
+          </a>
+        </div>
       </section>
     </main>
   );

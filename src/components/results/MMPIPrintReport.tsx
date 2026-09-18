@@ -47,7 +47,7 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
       <header className="pr-head">
         <div>
           <h1>MMPI Klinik Raporu</h1>
-          <span>Minnesota Çok Yönlü Kişilik Envanteri · 566 Madde · Türk Normları (Savaşır 1981)</span>
+          <span>Minnesota Çok Yönlü Kişilik Envanteri · 566 Madde · Türk Normları</span>
         </div>
         <div className="pr-head-meta">
           <span>
@@ -166,10 +166,10 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
               <b>Profil Kodu {profileCode}: </b>
               {codeEntry
                 ? codeEntry.text
-                : 'Kaynak rehberde bu iki noktalı koda ilişkin ayrı bir yorum yer almamaktadır; ölçek yorumları yukarıdadır.'}
+                : 'Bu iki noktalı koda ilişkin ayrı bir kod yorumu tanımlı değildir; ölçek yorumları yukarıdadır.'}
             </div>
             {codeEntry?.diagnosis && codeEntry.diagnosis.length > 0 && (
-              <p className="pr-context">Olası tanılar (kaynaktaki gibi): {codeEntry.diagnosis.join(', ')}.</p>
+              <p className="pr-context">Olası tanılar: {codeEntry.diagnosis.join(', ')}.</p>
             )}
           </>
         )}
@@ -212,7 +212,7 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
         ))}
 
         <div className="pr-note">
-          <b>F-K Endeksi (Gough): </b>
+          <b>F-K Endeksi: </b>
           {fk.value > 0 ? `+${fk.value}` : fk.value} — {fk.level}. {fk.interpretation}
         </div>
 
@@ -341,9 +341,8 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
       </section>
 
       <p className="pr-foot">
-        T skorları Savaşır (1981) cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır;
-        geçerlik ve klinik yorumlar klinik yorum rehberine dayanır. Kesme puanları tanı koymaz; klinik karar
-        uygulayıcı uzmana aittir. Tam kaynakça için uygulamadaki “Kaynaklar / Kaynakça” sayfasına bakınız.
+        T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kesme puanları tanı
+        koymaz; klinik karar uygulayıcı uzmana aittir.
       </p>
     </div>
   );
