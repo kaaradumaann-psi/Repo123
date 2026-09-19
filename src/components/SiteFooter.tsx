@@ -1,12 +1,12 @@
 import { Icon } from './Icon';
 import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, SITE_LABEL, SITE_URL } from '../form/attribution';
 
-/** Bilgi sayfalarının hash rotaları — footer'daki bağlantılar ve App.tsx rotası bunu paylaşır. */
+/** Bilgi sayfalarının rotaları — footer'daki bağlantılar ve App.tsx rotası bunu paylaşır. */
 export const INFO_ROUTES = {
-  sss: '#/sss',
-  gizlilik: '#/gizlilik',
-  kullanim: '#/kullanim',
-  kaynaklar: '#/kaynaklar',
+  sss: '/sss',
+  gizlilik: '/gizlilik',
+  kullanim: '/kullanim',
+  kaynaklar: '/kaynaklar',
 } as const;
 
 type SiteFooterProps = {
@@ -59,7 +59,7 @@ export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
               Yeni Veri Girişi
             </button>
           ) : (
-            <a className="site-footer-link" href="#/">
+            <a className="site-footer-link" href="/islem">
               Yeni Veri Girişi
             </a>
           )}

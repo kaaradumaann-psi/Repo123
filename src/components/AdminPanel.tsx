@@ -13,7 +13,6 @@ import {
 import type { RecordSummary } from '../records/supabaseRecords';
 import { displayName } from '../auth/userDisplay';
 import type { AuthenticatedUser } from '../auth/authTypes';
-import { openTestRecordPage } from '../App';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
@@ -524,14 +523,13 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                         </td>
                         <td>
                           <div className="table-row-actions">
-                            <button
-                              type="button"
+                            <a
+                              href={`/kayitlar/${rec.id}`}
                               className="action-btn-primary"
-                              onClick={() => openTestRecordPage(rec.id)}
                             >
                               <Icon name="eye" size={15} />
                               <span>Testi İncele</span>
-                            </button>
+                            </a>
                             <button
                               type="button"
                               className="action-btn-danger"

@@ -2,7 +2,7 @@ import { CONTACT_EMAIL, COPYRIGHT_HOLDER, SITE_URL } from '../form/attribution';
 import { PolicyDoc, PolicyList, type PolicySection } from './PolicyDoc';
 
 /**
- * Gizlilik & KVKK Politikası (#/gizlilik).
+ * Gizlilik & KVKK Politikası (/gizlilik).
  *
  * Metin, uygulamanın belgelenmiş veri akışını esas alır: optik okuma ve
  * profil hesaplaması tamamen kullanıcının cihazında yapılır; kayıt verisi

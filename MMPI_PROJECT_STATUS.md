@@ -151,7 +151,7 @@ Repo123/
 ## 4. MİMARİ
 
 ```text
-Browser (React SPA, hash-router)
+Browser (React SPA, History API path router)
  ├── Supabase Auth (oturum: sessionStorage, PKCE, autoRefresh)
  ├── Supabase DB (yalnızca 2 tablo: profiles, mmpi_records) — RLS zorunlu
  ├── Supabase Edge Function 'admin-users' (yalnızca Admin; service_role sunucuda)
@@ -551,17 +551,24 @@ Edge Function (Supabase secrets):
 ```
 [✓] Repoda hiçbir secret değeri yok (taramayla doğrulandı).
 
-## 29. FRONTEND ROTALARI (hash tabanlı; klasik path routing YOK)
+## 29. FRONTEND ROTALARI (History API tabanlı path routing — `src/router.ts`)
 
 | Rota | Amaç | Yetki |
 | --- | --- | --- |
-| `#` (boş) | AuthGate → login veya çalışma alanı (İşlem/Form/Kayıtlar/Yönetim sekmeleri) | oturum |
-| `#/test/<uuid>` | Kayıt detayı + rapor | oturum + RLS |
-| `#/onizleme` | Tasarım önizleme (örnek veri) | YALNIZCA Supabase yapılandırılmamışken |
-| `#/sss`, `#/gizlilik`, `#/kullanim`, `#/kaynaklar` | bilgi sayfaları | herkese açık |
+| `/` | Çalışma alanı (varsayılan: İşlem) | oturum |
+| `/islem` | İşlem (CaseWorkspace) | oturum |
+| `/form` | Form Kit | oturum |
+| `/kayitlar` | Kayıtlar (Psikolog) | PSYCHOLOG |
+| `/kayitlar/:id` | Kayıt detayı + rapor | oturum + RLS |
+| `/yonetim` | Yönetim (AdminPanel) | ADMIN |
+| `/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar` | bilgi sayfaları | herkese açık |
+| `/onizleme` | Tasarım önizlemesi (örnek veri) | YALNIZCA Supabase yapılandırılmamışken |
+| `*` | 404 Sayfa Bulunamadı | herkese açık |
 
-Final prompt'un `/patients`, `/assessments`… şeması birebir yok; işlevsel karşılıkları
-sekme/rota olarak mevcut (prompt "mevcut routing farklıysa bozma" diyor). [-]
+Routing: `src/router.ts` — `parseRoute`, `navigate`, `useRoute`, `installLinkInterceptor`.
+Global `<a>` click interceptor tüm same-origin linklerde SPA davranışı sağlar.
+Cloudflare Pages SPA fallback: `dist/_redirects` → `/* /index.html 200`.
+Vite config: `appType: 'spa'`.
 
 ## 30. UI/UX DURUMU
 
@@ -611,7 +618,7 @@ sekme/rota olarak mevcut (prompt "mevcut routing farklıysa bozma" diyor). [-]
 
 ```text
 [✓] npm run typecheck  → temiz (0 hata)
-[✓] npm test           → 192/192 pass, 0 fail (26 dosya, ~85 sn) — B1–B10 dahil son haliyle
+[✓] npm test           → 236/236 pass, 0 fail (26 dosya) — routing + B1–B11 dahil son haliyle
 [✓] npm run build      → başarılı; optik-form.html yeniden üretildi
 [✓] npm run verify:pdf → koşuldu (2026-09-19): 4 A4 sayfa, 566 madde koordinatı doğrulandı
 [ ] Canlı Supabase login/RLS/Edge Function testi → ortam yok, YAPILMADI
@@ -640,6 +647,7 @@ K düzeltme, Mf ters), geçerlik bantları/eşikleri, kod kanonikleştirme, tür
 | B8 | P3 | Audit log tablosu yok | supabase/migrations/20260919000000 | [✓] TAMAMLANDI (audit_logs + security-definer trigger; yalnız Admin okur, istemci yazamaz) — canlı test [?] |
 | B9 | P3 | Kayıt listesinde tarih filtresi yok | MyRecordsPanel/AdminPanel | [✓] TAMAMLANDI (uygulama tarihi aralık filtresi + temizle) |
 | B10 | P3 | Admin'in ham cevap erişimi minimize edilmedi | RLS / ürün kararı | [✓] KARAR VERİLDİ: Admin erişimi denetim/silme görevi için bilinçli ürün; dengeleme B8 audit_logs ile sağlandı (her erişimli yazma izlenir). Ham cevap SELECT kısıtlaması istenirse ileride kolon-düzeyi görünüm gerekir — şu an kapsam dışı. |
+| B11 | P1 | Hash tabanlı routing → History API path routing | src/router.ts, App.tsx, main.tsx, SiteFooter.tsx, MyRecordsPanel.tsx, AdminPanel.tsx, AuthGate.tsx, vite.config.ts, scripts/build.mjs | [✓] TAMAMLANDI (2026-09-19): tüm rotalar gerçek URL, back/forward/F5/direct URL/404 çalışır, Cloudflare Pages SPA fallback, rol koruması |
 
 Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıtlı).
 
