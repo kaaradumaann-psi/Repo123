@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
 **Rapor durumu:** Footer UI düzenlemesi tamamlandı — doğrulandı, commit edildi ve branch'e push edildi
-**Rapor güncellemesi:** 2026-09-19 16:50 UTC
+**Rapor güncellemesi:** 2026-09-19 16:52 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -253,6 +253,7 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / footer pre-stage kontrolü:** Yalnızca `src/styles/site.css`, generated `optik-form.html` ve bu rapor değişmiş durumda; generated `dist/index.html`/`optik-form.html` byte-for-byte aynı (`bb8e43ff…c466df` SHA-256), whitespace hatası yok.
 - **2026-09-19 / footer commit:** Kompakt responsive footer ve generated standalone artifact `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` commit'ine yazıldı.
 - **2026-09-19 / footer push:** Footer commit'i ve report status commit'i `origin/arena/01a0ba1c-repo123` üzerine başarıyla push edildi; final clean-tree doğrulaması yapılıyor.
+- **2026-09-19 / preview cleanup:** Footer visual preview Vite süreci durduruldu; background process bırakılmadı.
 
 ---
 
@@ -266,4 +267,4 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **Footer değişikliği commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
 - **Footer değişikliği push:** ✅ `origin/arena/01a0ba1c-repo123` üzerinde başarılı.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** Final status kontrolü sonrası temiz; remote HEAD doğrulanıp bu son rapor durumu commit/push edilecek.
+- **Son çalışma ağacı durumu:** Footer/report commit zinciri remote'a push edildi; bu final status satırı commit edilip push sonrası son clean-tree kontrolü yapılacak.
