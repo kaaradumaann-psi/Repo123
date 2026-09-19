@@ -72,10 +72,17 @@ export function stretchContrast(image: GrayImage, lowPercent = 0.01, highPercent
 }
 
 /**
- * Local contrast lift via a coarse tile histogram equalisation. Tiles are stitched with bilinear
- * blending so no visible grid artefacts appear at typical preview sizes.
+ * Local contrast lift via a coarse tile histogram equalisation (CLAHE). Tiles are stitched with
+ * bilinear blending so no visible grid artefacts appear at typical preview sizes.
+ *
+ * Each tile histogram is clipped before the CDF is built — without a limit, a nearly flat tile
+ * (blank paper with camera or JPEG noise) gets a near-vertical CDF and the "enhancement"
+ * amplifies that noise ×8 on real phone captures and banded shadow gradients into visible
+ * streaks (measured on real photos during validation). The clipped mass is redistributed
+ * uniformly over all bins, which preserves the local contrast lift on actual content while
+ * capping noise gain at roughly `clipFactor`.
  */
-export function enhanceLocal(image: GrayImage, tileSize = 64): GrayImage {
+export function enhanceLocal(image: GrayImage, tileSize = 64, clipFactor = 3): GrayImage {
   const tilesX = Math.max(1, Math.ceil(image.width / tileSize));
   const tilesY = Math.max(1, Math.ceil(image.height / tileSize));
   const maps: Uint8Array[] = [];
@@ -86,11 +93,21 @@ export function enhanceLocal(image: GrayImage, tileSize = 64): GrayImage {
     const histogram = new Uint32Array(256);
     for (let y = top; y < bottom; y++) for (let x = left; x < right; x++) histogram[image.data[y * image.width + x]!]!++;
     const total = (right - left) * (bottom - top);
+    // CLAHE clip: cap every bin at `clipFactor` × the flat-histogram bin mass, then spread the
+    // clipped mass evenly. Keeps the CDF monotone and ≤255 without ever boosting a flat tile
+    // beyond the clip ratio.
+    const clipLimit = Math.max(1, Math.round((total / 256) * clipFactor));
+    let excess = 0;
+    for (let v = 0; v < 256; v++) {
+      const extra = histogram[v]! - clipLimit;
+      if (extra > 0) { histogram[v] = clipLimit; excess += extra; }
+    }
+    const bonus = excess / 256;
     const map = new Uint8Array(256);
     let cumulative = 0;
     for (let v = 0; v < 256; v++) {
       cumulative += histogram[v]!;
-      map[v] = Math.min(255, Math.round((cumulative * 255) / total));
+      map[v] = Math.min(255, Math.round(((cumulative + bonus * (v + 1)) * 255) / total));
     }
     maps.push(map);
   }
