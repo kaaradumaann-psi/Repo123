@@ -24,37 +24,49 @@
 
   /* ========================================================================
      02 · Tam alt bilgi — sitenin her ekranında aynı
+
+     Kompakt iki katman: solda marka (işaret + ad + slogan), sağda iki satır
+     hâlinde dolaşma bağlantıları (Sayfalar + İletişim); altta basılı formun
+     telif satırıyla aynı dilde, "·" ile ayrılmış tek paragraflık ince yazı.
+     1440 px'te yükseklik ~376 px'ten ~170 px'e iner; ölçü bulunduğu kabuğun
+     içerik genişliğini izler (--site-footer-max: uygulamada 1440, bilgi
+     sayfalarında 1080).
      ======================================================================== */
 
   .site-footer {
     margin-top: auto;
     background: var(--bg);
     border-top: 1px solid var(--hairline);
-    padding: 36px 24px 22px;
+    padding: 26px 24px 18px;
   }
 
   .site-footer-inner {
-    max-width: 1040px;
+    max-width: var(--site-footer-max, var(--container));
     margin: 0 auto;
   }
 
+  /* Marka iki satır boyunca solda kalır; Sayfalar ve İletişim sağda alt alta
+     durur, böylece beş bağlantı tek satıra sığar ve footer uzamaz. */
   .site-footer-top {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.15fr);
-    gap: 36px;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    align-content: center;
+    gap: 14px 28px;
   }
 
   .site-footer-brand {
+    grid-area: 1 / 1 / 3 / 2;
+    align-self: center;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 11px;
   }
 
   .site-footer-mark {
     flex: none;
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
     background: var(--bg-soft);
     border: 1px solid var(--hairline);
     color: var(--text);
@@ -65,44 +77,45 @@
 
   .site-footer-name {
     display: block;
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--text);
   }
 
   .site-footer-tagline {
-    margin: 6px 0 0;
-    max-width: 46ch;
-    font-size: 12.5px;
+    margin: 4px 0 0;
+    font-size: 11.5px;
+    line-height: 1.5;
     color: var(--soft);
-    line-height: 1.6;
   }
 
+  /* Satır başlıkları satır içinde kalır: küçük uppercase kicker, kendi
+     bağlantı grubunun solunda. */
   .site-footer-heading {
-    display: block;
-    font-size: 10.5px;
+    flex: none;
+    font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 10px;
   }
 
   .site-footer-nav,
   .site-footer-contact {
+    grid-column: 2;
+    align-self: start;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 7px 14px;
   }
 
   .site-footer-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 0;
-    margin: 0 0 8px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--soft);
     text-decoration: none;
@@ -116,63 +129,51 @@
     text-underline-offset: 3px;
   }
 
+  /* İnce yazı tek paragraf gibi akar; cümleler "·" ile ayrılır. Küçük puntoda
+     okunabilirlik için gövde rengi --soft (kicker'lar --muted kalır). */
   .site-footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 24px;
-    flex-wrap: wrap;
-    margin-top: 30px;
-    padding-top: 18px;
+    margin-top: 18px;
+    padding-top: 13px;
     border-top: 1px solid var(--hairline);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--soft);
+    text-wrap: pretty;
   }
 
-  .site-footer-copyright {
+  .site-footer-bottom > p {
+    display: inline;
     margin: 0;
-    font-size: 12.5px;
-    color: var(--soft);
+  }
+
+  .site-footer-bottom > p + p::before {
+    content: "·";
+    margin: 0 8px;
+    color: var(--slate-300);
+    font-weight: 700;
   }
 
   .site-footer-copyright b {
     font-family: var(--font-display);
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 400;
     color: var(--text);
   }
 
-  .site-footer-credit {
-    margin: 4px 0 0;
-    font-size: 12px;
-    color: var(--muted);
-    max-width: 62ch;
-    line-height: 1.55;
-  }
-
-  .site-footer-disclaimer {
-    margin: 0;
-    font-size: 11.5px;
-    color: var(--muted);
-    max-width: 40ch;
-    line-height: 1.55;
-    text-align: right;
-  }
-
   @media (max-width: 860px) {
-    .site-footer { padding: 28px 20px 18px; }
+    .site-footer { padding: 22px 20px 16px; }
     .site-footer-top {
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
     }
-    .site-footer-brand { grid-column: 1 / -1; }
+    .site-footer-brand { grid-area: auto; }
+    .site-footer-nav,
+    .site-footer-contact { grid-column: 1; }
   }
 
   @media (max-width: 560px) {
-    .site-footer-top { grid-template-columns: 1fr; }
-    .site-footer-bottom {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .site-footer-disclaimer { text-align: left; }
+    .site-footer-nav,
+    .site-footer-contact { gap: 6px 14px; }
   }
 
   /* ========================================================================
@@ -184,6 +185,8 @@
     display: flex;
     flex-direction: column;
     background: var(--bg);
+    /* Alt bilgi, bilgi sayfalarının içerik ölçüsüyle (1080 px) hizalanır. */
+    --site-footer-max: 1080px;
   }
 
   .info-topbar {
