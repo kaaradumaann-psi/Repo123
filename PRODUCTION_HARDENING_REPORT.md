@@ -237,14 +237,16 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / staging:** Beklenen tüm dosyalar stage edildi; `git diff --cached --check` başarılı oldu. Raporun ilk Markdown hardbreak trailing whitespace'i de temizlendi. Commit/push pending.
 - **2026-09-19 / commit:** Hardening değişiklikleri aktif branch'e `ca275121930896162363bbc4ce7b87d0916bbf21` commit'iyle yazıldı. Rapor, amend sonrası oluşan gerçek implementation commit'ini yansıtacak şekilde güncellendi.
 - **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; report commit hash'i `255b36fc52eacc5910a99eae2e3a673b85d65624` oldu.
-- **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. Implementation ve report commit zinciri remote'a ulaştı. Push sonrası çalışma ağacı kontrolü son adım olarak yapılıyor.
+- **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. `git ls-remote` remote HEAD'i doğruladı ve `git status --porcelain` temiz döndü. Final rapor doğruluk güncellemesi de aynı branch'e push edilecek.
 
 ---
 
 ## 9. Final submit kaydı
 
-- **Final doğrulama durumu:** Bekliyor. 2026-09-19 final zinciri `npm run build && npm run verify:pdf && npm run typecheck && npm test && git diff --check` başında durdu: shell `tsc: not found` (exit 127); dependency installation/environment recovery gerekiyor.
+- **Final doğrulama durumu:** ✅ Tamamlandı. İlk zincir `node_modules` yokluğu nedeniyle `tsc: not found` ile durdu; `npm ci` kilitli dependency kurulumu ve audit'i `0 vulnerability` ile tamamladı. Son zincir başarılı: `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236 pass, 0 fail**) ve `git diff --check`.
+- **PDF/build:** ✅ Self-contained `dist/index.html` ve `optik-form.html` byte-for-byte aynı; 4 A4/566 item/QR geometrisi doğrulandı.
 - **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
-- **Push:** ✅ `origin/arena/01a0ba1c-repo123` oluşturuldu ve `git push` başarılı.
-- **Branch:** `arena/01a0ba1c-repo123`
-- **Son çalışma ağacı durumu:** Push öncesi commit edilmiş durum temizdi; bu post-push rapor satırları için final status commit'i oluşturulacak. Push çalışma ağacını değiştirmez; final kontrolde tekrar doğrulanacak.
+- **Report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'e push edildi.
+- **Push:** ✅ `origin/arena/01a0ba1c-repo123` oluşturuldu; `git ls-remote` ile push edilmiş HEAD doğrulandı.
+- **Branch:** `arena/01a0ba1c-repo123`.
+- **Son çalışma ağacı durumu:** Final status kontrolünde temizdi. Bu son rapor doğruluk güncellemesi de commit edilip aynı branch'e push edilecek; push çalışma ağacını değiştirmediği için son durum temiz kalacaktır.
