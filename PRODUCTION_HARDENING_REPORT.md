@@ -264,7 +264,7 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / PR create:** Aktif branch için PR **#29** oluşturuldu: https://github.com/kaaradumaann-psi/Repo123/pull/29. PR, güncel `main` ile merge edilmiş ve final doğrulama sonuçlarıyla açıldı.
 - **2026-09-19 / PR check:** İlk PR head için GitHub `verify` check'i beklemeden izlenerek **pass** oldu (2m29s). Sonuç rapora yazıldığı için yeni bir report commit'i push edildi; GitHub yeni head (`2b0c1e8`) için ikinci `verify` çalıştırdı ve o da **pass** oldu (2m29s).
 - **2026-09-19 / PR merge:** PR **#29** GitHub tarafından merge edildi. Merge commit: `f6e67e237a2dd24b8b273863772d72d649e16144`; `origin/main` bu merge commit'ine ilerledi.
-- **2026-09-19 / final branch sync:** Merge sonucu rapora yazıldı, `67c0940` status commit'i aktif branch'e push edildi; PR #29, `origin/main`, aktif branch ve temiz çalışma ağacı tekrar doğrulandı.
+- **2026-09-19 / final branch sync:** Merge sonucu rapora yazıldı; status ve final report commit'leri aktif branch'e push edildi. PR #29, `origin/main`, aktif branch ve temiz çalışma ağacı tekrar doğrulandı.
 
 ---
 
@@ -278,4 +278,4 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **PR:** #29 ✅ merge edildi — https://github.com/kaaradumaann-psi/Repo123/pull/29.
 - **Merge commit:** `f6e67e237a2dd24b8b273863772d72d649e16144` (`origin/main`).
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** ✅ `origin/main` PR #29 merge commit'inde; aktif branch remote HEAD `67c09406e496388420760de3e61b06eca24cfadc` ile eşleşiyor ve final çalışma ağacı temiz.
+- **Son çalışma ağacı durumu:** ✅ `origin/main` PR #29 merge commit'inde; aktif branch remote ile senkron ve final çalışma ağacı temiz.
