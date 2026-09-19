@@ -255,6 +255,8 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / footer push:** Footer commit'i ve report status commit'i `origin/arena/01a0ba1c-repo123` üzerine başarıyla push edildi; final clean-tree doğrulaması yapılıyor.
 - **2026-09-19 / preview cleanup:** Footer visual preview Vite süreci durduruldu; background process bırakılmadı.
 - **2026-09-19 / final footer delivery:** Footer commit zinciri remote HEAD `7a2e1b9785cf992d1f20663166536e4d9de2ff31` ile doğrulandı; çalışma ağacı temiz.
+- **2026-09-19 / merge talebi incelemesi:** Kullanıcının merge isteği üzerine aktif branch ve GitHub kontrol edildi. `arena/01a0ba1c-repo123` remote'da mevcut ancak bu branch'e bağlı açık veya kapalı bir PR bulunamadı; `gh pr status` da PR olmadığını doğruladı.
+- **2026-09-19 / PR ve base incelemesi:** Repository PR geçmişinde #27 ve #28 footer PR'larının `main`e merge edildiği görüldü. `origin/main` artık `5a6e959`; aktif branch `c274b95`ten ilerliyor ve merge-base başlangıç hardening commit'i `9db762c`. Aktif branch için gerçek bir PR oluşturulmamış. Kullanıcının istediği merge işlemi için aktif branch'i güncel `origin/main` ile sabitleyip footer/hardening farkını yeni PR olarak açmak gerekiyor; başka bir PR'ı yanlışlıkla merge etmeyeceğim.
 
 ---
 
