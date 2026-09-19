@@ -789,7 +789,7 @@ açık iş kalmamıştır.
 | 2026-09-19 | CaseWorkspace bayat metin düzeltmesi ("klinik puanlama motoru bağlı değildir" → skorlama aynı ekranda) | CaseWorkspace.tsx | doğruluk (metin gerçek durumu yansıtmıyordu) | 2. commit |
 | 2026-09-19 | verify:pdf lokalde koşuldu | — | FINAL TODO maddesi | 4 sayfa/566 madde doğrulandı |
 | 2026-09-19 | 3. tur: '?' grafik netleştirme (lejant + SVG title "T skoru değildir"), rapor footer'ına scoringVersion, final doğrulama raporu (§44) | MMPIScoreChart.tsx, MMPIPrintReport.tsx, RecordDetailPage.tsx, bu doküman | Faz 5/11/19 kapanışı | 3. commit; 192/192 test |
-| 2026-09-19 | 4. tur: alt bilgi (footer) kompaktlaştırıldı — marka solda, dolaşma bağlantıları iki satır sağda, telif/kredi/sorumluluk tek akışlı ince yazı (· ayraçlı); yükseklik ~376 px → ~170 px, alt bilgi artık bulunduğu kabuğun içerik ölçüsüyle hizalanıyor | src/styles/site.css, optik-form.html | UX: alt bilgi sayfayı fazla kaplıyordu | 4. commit; 226/226 test, typecheck temiz |
+| 2026-09-19 | 4. tur: alt bilgi düzen cilası — yasal şerit tek sarma akışından iki hizalı kolona geçti (solda telif + sorumluluk, sağda kredi + iletişim; · ayraçları kalktı), alt bilgi ölçüsü bulunduğu kabuğun içerik genişliğini izliyor (uygulama 1440, bilgi sayfaları 1080); 1440 px'te 150 → 134 px, SSS/Kaynakça'da içerikle hizalı ve 169 px | src/styles/site.css, optik-form.html | UX: alt bilgi sayfayı fazla kaplıyor ve dağınık sarıyordu | 4. commit; 226/226 test, typecheck temiz |
 
 ## 43. GİT DURUMU (2026-09-19)
 
