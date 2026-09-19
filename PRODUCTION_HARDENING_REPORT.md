@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Footer UI düzenlemesi tamamlandı — doğrulandı, commit edildi ve branch'e push edildi
-**Rapor güncellemesi:** 2026-09-19 16:52 UTC
+**Rapor durumu:** Aktif branch güncel `main` ile merge edildi — PR oluşturma/merge ve final push bekleniyor
+**Rapor güncellemesi:** 2026-09-19 17:10 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -259,18 +259,18 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / PR ve base incelemesi:** Repository PR geçmişinde #27 ve #28 footer PR'larının `main`e merge edildiği görüldü. `origin/main` artık `5a6e959`; aktif branch `c274b95`ten ilerliyor ve merge-base başlangıç hardening commit'i `9db762c`. Aktif branch için gerçek bir PR oluşturulmamış. Kullanıcının istediği merge işlemi için aktif branch'i güncel `origin/main` ile sabitleyip footer/hardening farkını yeni PR olarak açmak gerekiyor; başka bir PR'ı yanlışlıkla merge etmeyeceğim.
 - **2026-09-19 / base merge:** `origin/main` aktif branch'e `--no-ff` ile alınmaya çalışıldı. `optik-form.html` ve `src/styles/site.css` içindeki iki footer uygulaması nedeniyle conflict oluştu; otomatik olarak devam edilmedi. Çözümde güncel hardening branch'inin compact footer tasarımı kaynak-of-truth olarak korunacak, generated artifact yeniden build edilecek.
 - **2026-09-19 / conflict resolution:** `src/styles/site.css`, `SiteFooter.tsx`, AuthGate/preview footer çağrıları ve `optik-form.html` için aktif hardening branch sürümü korundu; `origin/main`in conflict dışı proje durum güncellemesi saklandı. Conflict marker kalmadı.
-- **2026-09-19 / merged-base validation:** Conflict çözümü sonrası `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236**) ve `git diff --check` başarılı oldu; merge commit öncesi çalışma ağacı inceleniyor.
+- **2026-09-19 / merged-base validation:** Conflict çözümü sonrası `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236**) ve `git diff --check` başarılı oldu.
+- **2026-09-19 / merge commit:** Güncel `origin/main` conflict çözümüyle aktif branch'e alındı; merge commit `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` oluşturuldu. Bu commit ve PR için remote push/merge sırada.
 
 ---
 
 ## 9. Final submit kaydı
 
-- **Final doğrulama durumu:** ✅ Footer düzeltmesi sonrası build, PDF, typecheck, `npm test` (**236/236 pass, 0 fail**) ve `git diff --check` başarılı.
+- **Son merged-base doğrulaması:** ✅ Build, PDF, typecheck, `npm test` (**236/236 pass, 0 fail**) ve `git diff --check` başarılı.
 - **PDF/build:** ✅ Self-contained `dist/index.html` ve `optik-form.html` yeniden üretildi; PDF 4 A4/566 item/QR geometrisi doğrulandı.
 - **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
 - **Footer commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
-- **Önceki report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'te mevcut.
-- **Footer değişikliği commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
-- **Footer değişikliği push:** ✅ `origin/arena/01a0ba1c-repo123` üzerinde başarılı.
+- **Merge commit:** `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` — güncel `origin/main` ile conflict çözümü sonrası.
+- **PR:** Henüz oluşturulmadı; aktif branch remote'a push edilip PR açılacak ve merge edilecek.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** ✅ Remote HEAD (`7a2e1b9785cf992d1f20663166536e4d9de2ff31`) local HEAD ile eşleşiyor; final `git status --porcelain` temiz döndü.
+- **Son çalışma ağacı durumu:** Rapor güncellemesi dışında temiz; PR/push işlemleri sırada.
