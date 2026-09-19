@@ -53,6 +53,24 @@ describe('geçerlik analizleri kaynak ham puan tablolarına dayanır', () => {
     assert.equal(invalid.validityAnalysis.isValid, false);
   });
 
+  it('üç durumlu geçerlik sınıfı: GECERLI / SUPHELI / GECERSIZ belgelenmiş eşiklere göre', () => {
+    // Temiz profil → GEÇERLİ
+    assert.equal(profile({}).validityAnalysis.status, 'GECERLI');
+    // F ham 16-22 → ŞÜPHELİ (kaynak: "profil geçersiz olabilir")
+    assert.equal(profile({ F: 16 }).validityAnalysis.status, 'SUPHELI');
+    assert.equal(profile({ F: 18 }).validityAnalysis.status, 'SUPHELI');
+    assert.equal(profile({ F: 22 }).validityAnalysis.status, 'SUPHELI');
+    // F ham ≥ 23 → GEÇERSİZ
+    assert.equal(profile({ F: 23 }).validityAnalysis.status, 'GECERSIZ');
+    // Boş ≥ 31 → GEÇERSİZ (F normal olsa bile)
+    assert.equal(profile({ blank: 31 }).validityAnalysis.status, 'GECERSIZ');
+    // Boş 30 ve F normal → GEÇERLİ (uyarı olabilir ama sınıf düşmez)
+    assert.equal(profile({ blank: 30 }).validityAnalysis.status, 'GECERLI');
+    // status, isValid ile tutarlı: yalnızca GECERSIZ isValid=false yapar
+    assert.equal(profile({ F: 18 }).validityAnalysis.isValid, true);
+    assert.equal(profile({ F: 23 }).validityAnalysis.isValid, false);
+  });
+
   it('L bandları: 0-2 Düşük, 3-5 Normal, 6-7 Orta, 8-15 Belirgin', () => {
     assert.equal(finding(profile({ L: 1 }), 'L').band, 'Düşük');
     assert.equal(finding(profile({ L: 5 }), 'L').band, 'Normal');
@@ -296,7 +314,7 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     assert.match(panel, /Kritik Bulgular/);
     assert.match(panel, /Soru Yanıtları/);
     // Profil özeti şeridi
-    assert.match(panel, /Geçerli Profil|Şüpheli/);
+    assert.match(panel, /Geçerli Profil|Şüpheli Profil|Geçersiz Profil/);
     // Dosya adı sayfalarda asla görünmez
     assert.doesNotMatch(panel, /kaynak\.pdf/i);
 
@@ -318,17 +336,35 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
           reason: '',
           followUp: '',
           marital: '',
+          expertNotes: 'Bulgular klinik görüşmeyle birlikte değerlendirildi; izlem önerildi.',
+          notesUpdatedAt: '2026-09-19T10:00:00.000Z',
         },
       }),
     );
     assert.match(print, /MMPI Klinik Raporu/);
+    // B4: uzman notu rapora aktarılır; not boşken bölüm basılmaz (alttaki ayrı render).
+    assert.match(print, /Uzman Değerlendirme Notu/);
+    assert.match(print, /izlem önerildi/);
     assert.match(print, /Profil Grafiği/);
     assert.match(print, /Klinik Ölçekler/);
     assert.match(print, /Geçerlik Analizi/);
     assert.match(print, /Türetilmiş Ölçekler/);
     assert.match(print, /Kritik Bulgular/);
-    assert.match(print, /GEÇERLİ|ŞÜPHELİ/);
+    assert.match(print, /GEÇERLİ|ŞÜPHELİ|GEÇERSİZ/);
     assert.doesNotMatch(print, /kaynak\.pdf/i);
+
+    // Not boş bırakılınca "Uzman Değerlendirme Notu" bölümü hiç basılmaz.
+    const printNoNotes = renderToStaticMarkup(
+      createElement(MMPIPrintReport, {
+        profile: p,
+        meta: {
+          fullName: 'Denek A', testDate: '2026-09-18', reportDate: '2026-09-18',
+          psychologist: 'Uzman', gender: 'Erkek', age: '24', occupation: '', education: '',
+          method: '', duration: '', reason: '', followUp: '', marital: '', expertNotes: '',
+        },
+      }),
+    );
+    assert.doesNotMatch(printNoNotes, /Uzman Değerlendirme Notu/);
 
     const derived = renderToStaticMarkup(createElement(MMPIDerivedSection, { profile: p }));
     assert.match(derived, /Goldberg Ayrım Endeksi/);

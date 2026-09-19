@@ -147,7 +147,15 @@ export function MMPIScoreChart({ scales }: Props) {
             fill={pointFill(s)}
             stroke="#ffffff"
             strokeWidth="1.5"
-          />
+          >
+            {/* '?' klinik T skoru değildir; nokta yalnızca boş madde sayısını görsel
+                ölçeğe taşır (t: null — findings'te doğru şekilde raporlanır). */}
+            <title>
+              {s.id === '?'
+                ? `? — Boş bırakılan madde sayısı: ${s.rawScore} (T skoru değildir)`
+                : `${s.shortName}: T ${s.tScore.toFixed(1)}`}
+            </title>
+          </circle>
         ))}
 
         {/* X ekseni etiketleri */}
@@ -177,7 +185,7 @@ export function MMPIScoreChart({ scales }: Props) {
           <span className="legend-dot" style={{ background: COLOR_HIGH }} /> Klinik Yükseklik (T ≥ 70)
         </span>
         <span className="legend-item">
-          <span className="legend-dot" style={{ background: COLOR_CANNOT }} /> Boş Soru Sınır Uyarısı (?)
+          <span className="legend-dot" style={{ background: COLOR_CANNOT }} /> ? — Boş madde sayısı (klinik T skoru değildir)
         </span>
       </div>
     </div>

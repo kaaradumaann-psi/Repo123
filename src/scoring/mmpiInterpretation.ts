@@ -1,4 +1,4 @@
-import type { MMPIProfile, ScaleResult } from './mmpiScoring';
+import type { MMPIProfile, ScaleResult, ValidityStatus } from './mmpiScoring';
 import type { Gender, ScaleId } from './mmpiKeys';
 import {
   clinicalBands,
@@ -257,4 +257,11 @@ export function tLevelShort(s: ScaleResult): string {
   if (s.tScore >= 56) return 'Orta Yüksek';
   if (s.tScore <= 35) return 'Düşük';
   return 'Normal';
+}
+
+/** GEÇERLİ / ŞÜPHELİ / GEÇERSİZ durumunun ekran etiketi ve ton sınıfı. */
+export function validityStatusDisplay(status: ValidityStatus): { label: string; className: string } {
+  if (status === 'GECERSIZ') return { label: 'Geçersiz Profil', className: 'is-invalid' };
+  if (status === 'SUPHELI') return { label: 'Şüpheli Profil', className: 'is-suspect' };
+  return { label: 'Geçerli Profil', className: 'is-valid' };
 }

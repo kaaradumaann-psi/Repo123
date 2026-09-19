@@ -10,6 +10,8 @@ export function MyRecordsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [confirmTarget, setConfirmTarget] = useState<RecordSummary | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -46,6 +48,9 @@ export function MyRecordsPanel() {
   }
 
   const filtered = records.filter(r => {
+    // Tarih filtresi: uygulama tarihi (YYYY-MM-DD) aralık içinde olmalı.
+    if (dateFrom && r.applicationDate < dateFrom) return false;
+    if (dateTo && r.applicationDate > dateTo) return false;
     const query = searchTerm.toLowerCase().trim();
     if (!query) return true;
     return (
@@ -87,6 +92,40 @@ export function MyRecordsPanel() {
             aria-label="Kayıtlarda ara"
           />
         </div>
+        <div className="date-range-filter">
+          <label className="date-filter-field">
+            <span>Başlangıç</span>
+            <input
+              type="date"
+              value={dateFrom}
+              max={dateTo || undefined}
+              onChange={e => setDateFrom(e.target.value)}
+              aria-label="Uygulama tarihi başlangıç filtresi"
+            />
+          </label>
+          <label className="date-filter-field">
+            <span>Bitiş</span>
+            <input
+              type="date"
+              value={dateTo}
+              min={dateFrom || undefined}
+              onChange={e => setDateTo(e.target.value)}
+              aria-label="Uygulama tarihi bitiş filtresi"
+            />
+          </label>
+          {(dateFrom || dateTo) && (
+            <button
+              type="button"
+              className="btn-secondary btn-sm"
+              onClick={() => {
+                setDateFrom('');
+                setDateTo('');
+              }}
+            >
+              Tarihi temizle
+            </button>
+          )}
+        </div>
       </div>
 
       {loading && (
@@ -118,7 +157,7 @@ export function MyRecordsPanel() {
 
       {!loading && !error && records.length > 0 && filtered.length === 0 && (
         <div className="empty-state-card">
-          <p>Aramanızla eşleşen danışan kaydı bulunamadı. Farklı bir isim deneyin.</p>
+          <p>Arama ve tarih filtrenizle eşleşen danışan kaydı bulunamadı. Filtreleri gevşetmeyi deneyin.</p>
         </div>
       )}
 

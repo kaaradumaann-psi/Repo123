@@ -526,7 +526,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
         <p className="ws-home-sub">
           Danışan bilgisi, veri girişi ve kontrol tek akışta yürür. Girdikleriniz her adımda bu cihaza
           otomatik kaydedilir; F5 ve internet kesintisinde kaybolmaz. Optik okuma mevcut OMR
-          hattını kullanır; klinik puanlama motoru bu sürümde bağlı değildir.
+          hattını kullanır; kayıt sonrası T skorları, geçerlik ve profil analizleri aynı ekranda hesaplanır.
         </p>
 
         {showRestoreBanner && (

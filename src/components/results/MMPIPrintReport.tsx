@@ -17,6 +17,12 @@ export type PrintReportMeta = {
   reason: string;
   followUp: string;
   marital: string;
+  /** Kayıt sonrası uzman değerlendirme notu (boşsa bölüm basılmaz). */
+  expertNotes?: string;
+  /** Notun son güncelleme zamanı (ISO); yalnızca not doluyken gösterilir. */
+  notesUpdatedAt?: string;
+  /** Kaydı üreten puanlama motoru sürümü (izlenebilirlik; eski kayıtlarda yok). */
+  scoringVersion?: string;
 };
 
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
@@ -93,8 +99,13 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
           </div>
           <div>
             <span>Geçerlik Durumu</span>
-            <b style={{ color: validityAnalysis.isValid ? '#0c8a5c' : '#c2372c' }}>
-              {validityAnalysis.isValid ? 'GEÇERLİ' : 'ŞÜPHELİ / GEÇERSİZ'}
+            <b
+              style={{
+                color:
+                  validityAnalysis.status === 'GECERLI' ? '#0c8a5c' : validityAnalysis.status === 'SUPHELI' ? '#96660a' : '#c2372c',
+              }}
+            >
+              {validityAnalysis.status === 'GECERLI' ? 'GEÇERLİ' : validityAnalysis.status === 'SUPHELI' ? 'ŞÜPHELİ' : 'GEÇERSİZ'}
             </b>
           </div>
           <div>
@@ -332,6 +343,20 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
         </section>
       )}
 
+      {meta.expertNotes && meta.expertNotes.trim() !== '' && (
+        <section className="pr-block pr-avoid" aria-label="Uzman değerlendirme notu">
+          <h2>Uzman Değerlendirme Notu</h2>
+          <p className="pr-notes">{meta.expertNotes}</p>
+          {meta.notesUpdatedAt && (
+            <p className="pr-context">
+              Not son güncelleme: {new Date(meta.notesUpdatedAt).toLocaleString('tr-TR', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
+          )}
+        </section>
+      )}
+
       <section className="pr-sign" aria-label="Onay">
         <div>
           <span>Raporu Hazırlayan / Onaylayan Uzman</span>
@@ -342,7 +367,9 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
 
       <p className="pr-foot">
         T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kesme puanları tanı
-        koymaz; klinik karar uygulayıcı uzmana aittir.
+        koymaz; klinik karar uygulayıcı uzmana aittir. Kaynak künyeleri ve doğrulama durumları uygulamanın
+        &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
+        {meta.scoringVersion ? ` Puanlama motoru: v${meta.scoringVersion}.` : ''}
       </p>
     </div>
   );

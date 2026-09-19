@@ -113,7 +113,8 @@ export type ImpressionInput = {
 /**
  * Profilden türetilen klinik bulgular/uyarılar. Kaynak: klasik MMPI yorum
  * rehberlerindeki risk göstergeleri (Dahlstrom 1972; Clopton & Baucom 1979;
- * Reis 1966; Ceyhun çalışmaları). Tanı değil, uzman için uyarı listesidir.
+ * Ries 1966 — bazı ikincil kaynaklarda "Reis" yazımıyla anılır; Ceyhun
+ * çalışmaları). Tanı değil, uzman için uyarı listesidir.
  */
 export function clinicalImpressions(input: ImpressionInput): ClinicalImpression[] {
   const { t, lRaw, kRaw, responses, gender } = input;

@@ -25,10 +25,16 @@ supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 ```
 
-Migration şunları oluşturur:
+Migration'lar şunları oluşturur:
 
 - `profiles`: Auth kullanıcı profili, `ADMIN` / `PSYCHOLOG` rolü ve aktiflik.
 - `mmpi_records`: danışan alanları, ham OMR JSON'u, oluşturan psikolog ve idempotency anahtarı.
+- `mmpi_records.expert_notes` + `notes_updated_at`: kayıt sonrası uzman değerlendirme
+  notu (en fazla 4000 karakter; rapora aktarılır; mevcut update RLS politikası
+  yalnızca kaydın sahibinin yazmasına izin verir).
+- `audit_logs`: sunucu taraflı denetim izi — `mmpi_records` üzerindeki her
+  insert/update/delete, security-definer trigger ile (aktör, eylem, hedef, zaman)
+  olarak yazılır; istemciden yazılamaz/silinemez, yalnızca Admin okuyabilir.
 - Auth kullanıcı trigger'ı.
 - Psikoloğun yalnızca kendi kayıtlarını, Admin'in tüm kayıtları görebildiği RLS.
 - Aktif olmayan kullanıcının kayıt okuyup yazmasını engelleyen RLS fonksiyonları.

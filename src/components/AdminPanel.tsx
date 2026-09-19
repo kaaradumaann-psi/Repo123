@@ -35,6 +35,8 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   const [loadingRecords, setLoadingRecords] = useState(true);
   const [recordsFailed, setRecordsFailed] = useState(false);
   const [recordSearch, setRecordSearch] = useState('');
+  const [recordDateFrom, setRecordDateFrom] = useState('');
+  const [recordDateTo, setRecordDateTo] = useState('');
   const [deletingRecordId, setDeletingRecordId] = useState<string | null>(null);
   const [confirmRecord, setConfirmRecord] = useState<RecordSummary | null>(null);
 
@@ -227,6 +229,9 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
   });
 
   const filteredRecords = records.filter(r => {
+    // Tarih filtresi: uygulama tarihi (YYYY-MM-DD) aralık içinde olmalı.
+    if (recordDateFrom && r.applicationDate < recordDateFrom) return false;
+    if (recordDateTo && r.applicationDate > recordDateTo) return false;
     const q = recordSearch.toLowerCase().trim();
     if (!q) return true;
     return (
@@ -384,6 +389,40 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                 onChange={e => setRecordSearch(e.target.value)}
                 aria-label="Test kayıtlarında ara"
               />
+            </div>
+            <div className="date-range-filter">
+              <label className="date-filter-field">
+                <span>Başlangıç</span>
+                <input
+                  type="date"
+                  value={recordDateFrom}
+                  max={recordDateTo || undefined}
+                  onChange={e => setRecordDateFrom(e.target.value)}
+                  aria-label="Uygulama tarihi başlangıç filtresi"
+                />
+              </label>
+              <label className="date-filter-field">
+                <span>Bitiş</span>
+                <input
+                  type="date"
+                  value={recordDateTo}
+                  min={recordDateFrom || undefined}
+                  onChange={e => setRecordDateTo(e.target.value)}
+                  aria-label="Uygulama tarihi bitiş filtresi"
+                />
+              </label>
+              {(recordDateFrom || recordDateTo) && (
+                <button
+                  type="button"
+                  className="btn-secondary btn-sm"
+                  onClick={() => {
+                    setRecordDateFrom('');
+                    setRecordDateTo('');
+                  }}
+                >
+                  Tarihi temizle
+                </button>
+              )}
             </div>
           </div>
 
