@@ -19,8 +19,13 @@ const result = await build({
   target: 'es2022',
   define: {
     'process.env.NODE_ENV': '"production"',
-    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(buildEnv.VITE_SUPABASE_URL ?? ''),
-    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(buildEnv.VITE_SUPABASE_ANON_KEY ?? ''),
+    // Replace the complete env object rather than only nested properties. This keeps the
+    // IIFE/standalone output free of import.meta (which browsers do not expose in scripts
+    // produced by this build) while preserving the same source contract used by Vite.
+    'import.meta.env': JSON.stringify({
+      VITE_SUPABASE_URL: buildEnv.VITE_SUPABASE_URL ?? '',
+      VITE_SUPABASE_ANON_KEY: buildEnv.VITE_SUPABASE_ANON_KEY ?? '',
+    }),
   },
   legalComments: 'none',
   plugins: [{
@@ -51,7 +56,11 @@ const css = result.outputFiles.find(file => file.path.endsWith('.css')).text;
 const shell = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 // Hash the script exactly as it will appear in the document (after the `</script`
 // escape), because the browser computes the CSP hash over that literal content.
-const scriptBody = js.replaceAll('</script', '<\\/script');
+const scriptBody = js.replaceAll('</script', '<\\/script')
+  // esbuild carries one intentional tab at the end of Supabase's base64 alphabet template
+  // literal. Encode that literal tab so the generated HTML stays whitespace-clean without
+  // changing the value evaluated by JavaScript.
+  .replace(/\t(?=\r?\n)/g, '\\\\t');
 const scriptHash = createHash('sha256').update(scriptBody).digest('base64');
 // The single-file build runs offline by default: no remote fonts or scripts, one
 // hash-pinned inline script, inline styles, and blob URLs for previews and the
@@ -62,13 +71,19 @@ const supabaseOrigin = (() => {
   const raw = (buildEnv.VITE_SUPABASE_URL ?? '').trim();
   if (!raw) return null;
   try {
-    return new URL(raw).origin;
-  } catch {
-    throw new Error(`VITE_SUPABASE_URL geçerli bir URL değil: ${raw}`);
+    const parsed = new URL(raw);
+    const local = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+    if ((!local && parsed.protocol !== 'https:') || (local && !['http:', 'https:'].includes(parsed.protocol)) ||
+      parsed.pathname !== '/' || parsed.username || parsed.password || parsed.search || parsed.hash) {
+      throw new Error('Supabase URL yalnızca güvenli bir origin olmalıdır.');
+    }
+    return parsed.origin;
+  } catch (error) {
+    throw new Error(`VITE_SUPABASE_URL geçerli bir URL değil: ${raw}`, { cause: error });
   }
 })();
 const connectSrc = supabaseOrigin
-  ? `connect-src ${supabaseOrigin} ${supabaseOrigin.replace(/^https:/, 'wss:')}; `
+  ? `connect-src ${supabaseOrigin} ${supabaseOrigin.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:')}; `
   : '';
 const csp = `default-src 'none'; script-src 'sha256-${scriptHash}'; style-src 'unsafe-inline'; ` +
   `img-src blob: data:; worker-src blob:; child-src blob:; font-src 'none'; ${connectSrc}` +

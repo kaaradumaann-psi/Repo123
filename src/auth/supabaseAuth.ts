@@ -12,7 +12,11 @@ type ProfileRow = {
 };
 
 function profileFromRow(row: ProfileRow): AuthenticatedUser {
-  if (!row.email || !row.first_name || !row.last_name || !['ADMIN', 'PSYCHOLOG'].includes(row.role)) {
+  if (typeof row.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(row.id) ||
+    typeof row.email !== 'string' || row.email.length > 254 || !row.email.trim() || /[\u0000-\u001f\u007f]/.test(row.email) ||
+    typeof row.first_name !== 'string' || row.first_name.trim().length < 2 || row.first_name.length > 80 || /[\u0000-\u001f\u007f]/.test(row.first_name) ||
+    typeof row.last_name !== 'string' || row.last_name.trim().length < 2 || row.last_name.length > 80 || /[\u0000-\u001f\u007f]/.test(row.last_name) ||
+    (row.role !== 'ADMIN' && row.role !== 'PSYCHOLOG') || typeof row.active !== 'boolean') {
     throw new Error('Supabase kullanıcı profili eksik veya geçersiz.');
   }
   return { id: row.id, email: row.email, firstName: row.first_name, lastName: row.last_name, role: row.role, active: row.active };

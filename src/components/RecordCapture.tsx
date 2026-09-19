@@ -7,8 +7,9 @@ import type { Gender, MMPIRecord } from '../records/supabaseRecords';
 import type { ScanSet } from '../scanner/pageSequence';
 import { sortedPages } from '../scanner/pageSequence';
 import { Icon } from './Icon';
+import { todayIsoDate } from '../workspace/caseTypes';
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = todayIsoDate;
 
 type RecordCaptureProps = {
   definition: FormDefinition;
@@ -139,6 +140,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
               placeholder="Örn. Ayşe"
               value={firstName}
               onChange={e => setFirstName(e.target.value)}
+              maxLength={80}
               autoComplete="off"
             />
           </div>
@@ -150,6 +152,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
               placeholder="Örn. Yılmaz"
               value={lastName}
               onChange={e => setLastName(e.target.value)}
+              maxLength={80}
               autoComplete="off"
             />
           </div>
@@ -170,7 +173,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
             <input
               required
               type="number"
-              min="0"
+              min="16"
               max="120"
               placeholder="Örn. 28"
               value={age}
@@ -186,6 +189,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
               placeholder="Örn. Mühendis, Öğrenci..."
               value={occupation}
               onChange={e => setOccupation(e.target.value)}
+              maxLength={120}
               autoComplete="off"
             />
           </div>
@@ -197,6 +201,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
               placeholder="Örn. Lisans, Lise..."
               value={education}
               onChange={e => setEducation(e.target.value)}
+              maxLength={120}
               autoComplete="off"
             />
           </div>
@@ -206,6 +211,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
             <input
               required
               type="date"
+              max={today()}
               value={applicationDate}
               onChange={e => setApplicationDate(e.target.value)}
             />
@@ -218,6 +224,7 @@ export function RecordCapture({ definition, scan, actor, onSaved }: RecordCaptur
               placeholder="Örn. Psikiyatri Kliniği, Dr. Ahmet..."
               value={requestedBy}
               onChange={e => setRequestedBy(e.target.value)}
+              maxLength={500}
               autoComplete="off"
             />
           </div>

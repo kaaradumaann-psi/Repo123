@@ -403,7 +403,7 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
             {Object.entries(parsed.rawScales).map(([key, value]) => (
               <div className="detail-item" key={key}>
                 <span className="detail-label">{key}</span>
-                <span className="detail-val">{value === '' ? '—' : String(value)}</span>
+                <span className="detail-val">{String(value)}</span>
               </div>
             ))}
           </div>

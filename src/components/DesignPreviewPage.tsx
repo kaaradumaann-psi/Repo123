@@ -80,7 +80,7 @@ export function DesignPreviewPage({ onExit }: { onExit?: () => void }) {
 
         <MMPIResultsPanel profile={demo.profile} clientName="Örnek Danışan" answers={demo.answers} />
 
-        {/* Kompakt alt bilgi: "Yeni Veri Girişi" bağlantısı #/ hedefiyle kurulum ekranına döndürür. */}
+        {/* Tam alt bilgi: "Yeni Veri Girişi" bağlantısı #/ hedefiyle kurulum ekranına döndürür. */}
         <SiteFooter />
       </div>
 

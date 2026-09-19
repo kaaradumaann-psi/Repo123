@@ -38,6 +38,7 @@ Migration'lar şunları oluşturur:
 - Auth kullanıcı trigger'ı.
 - Psikoloğun yalnızca kendi kayıtlarını, Admin'in tüm kayıtları görebildiği RLS.
 - Aktif olmayan kullanıcının kayıt okuyup yazmasını engelleyen RLS fonksiyonları.
+- Yaş, tarih, ham veri yükü boyutu ve kayıt değişmezliği için veritabanı tarafı korumalar; yalnızca aktif psikolog kayıt yazabilir, profil UPDATE/DELETE işlemleri yalnızca Edge Function üzerinden yapılır.
 
 Supabase Dashboard → Authentication → Providers → Email bölümünde **Allow new
 users / Enable email signup** seçeneğini kapatın. `config.toml` yerel CLI
@@ -69,8 +70,12 @@ supabase secrets set ALLOWED_ORIGINS=https://your-app.example.com
 ```
 
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ve `SUPABASE_ANON_KEY` Supabase
-Edge Functions ortamında otomatik bulunur. Preview kullanırken `ALLOWED_ORIGINS`
-değerine preview origin'ini de ekleyin veya geliştirmede boş bırakın.
+Edge Functions ortamında otomatik bulunur. Production'da `ALLOWED_ORIGINS` boş
+bırakılmamalı; birden fazla origin virgülle ayrılarak yazılmalıdır. Boş allowlist
+yalnızca `http://localhost` ve `http://127.0.0.1` geliştirme origin'lerine izin
+verir. Arena preview origin'i de açıkça eklenmelidir. Hesap silme işlemi Auth
+kullanıcısını siler; `profiles` ve `mmpi_records` üzerindeki `on delete cascade`
+ilişkileri ilişkili uygulama verisini birlikte kaldırır.
 
 Function, çağıranın access token'ını doğrular; aktif Admin değilse psikolog
 oluşturma veya aktiflik değiştirme isteğini reddeder. Password Auth kullanıcısı

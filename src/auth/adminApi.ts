@@ -4,10 +4,10 @@ import type { AuthenticatedUser } from './authTypes';
 function rowToUser(row: unknown): AuthenticatedUser {
   const value = row as Partial<AuthenticatedUser> & { first_name?: string; last_name?: string };
   if (
-    typeof value.id !== 'string' ||
-    typeof value.email !== 'string' ||
-    typeof value.first_name !== 'string' ||
-    typeof value.last_name !== 'string' ||
+    typeof value.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.id) ||
+    typeof value.email !== 'string' || value.email.length > 254 || !value.email.trim() || /[\u0000-\u001f\u007f]/.test(value.email) ||
+    typeof value.first_name !== 'string' || value.first_name.trim().length < 2 || value.first_name.length > 80 || /[\u0000-\u001f\u007f]/.test(value.first_name) ||
+    typeof value.last_name !== 'string' || value.last_name.trim().length < 2 || value.last_name.length > 80 || /[\u0000-\u001f\u007f]/.test(value.last_name) ||
     (value.role !== 'ADMIN' && value.role !== 'PSYCHOLOG') ||
     typeof value.active !== 'boolean'
   ) {
@@ -63,24 +63,11 @@ export async function setPsychologistActive(userId: string, active: boolean): Pr
 }
 
 export async function deletePsychologist(userId: string): Promise<void> {
-  // Try Edge Function first (full auth user + profile deletion)
-  try {
-    const { data, error } = await requireSupabase().functions.invoke('admin-users', {
-      body: { action: 'delete', userId },
-    });
-    if (!error && data?.ok) return;
-  } catch {
-    // If edge function hasn't been re-deployed, fall back to direct DB delete/deactivation
-  }
-
-  // Direct profile deletion attempt (subject to RLS / cascade)
-  const client = requireSupabase();
-  const { error: profileDeleteError } = await client.from('profiles').delete().eq('id', userId);
-  if (!profileDeleteError) return;
-
-  // If deletion has foreign-key constraints (e.g. tests exist), deactivate as a safe fallback
-  const { error: activeError } = await client.from('profiles').update({ active: false }).eq('id', userId);
-  if (activeError) {
-    throw new Error('Kullanıcı silinemedi veya pasifleştirilemedi: ' + (profileDeleteError?.message || activeError.message));
-  }
+  // Account deletion is deliberately Edge-Function-only. A direct profile DELETE would leave an
+  // orphaned Auth user (or cascade data without deleting the credentials) when the function is
+  // unavailable, which is worse than showing an actionable deployment error.
+  const { data, error } = await requireSupabase().functions.invoke('admin-users', {
+    body: { action: 'delete', userId },
+  });
+  if (error || !data?.ok) throw new Error('Kullanıcı hesabı silinemedi. Edge Function bağlantısını kontrol edin.');
 }

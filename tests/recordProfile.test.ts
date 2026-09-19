@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { buildProfileFromAnswers, buildProfileFromRawScoresObject } from '../src/scoring/mmpiScoring';
 import type { ItemAnswer } from '../src/workspace/caseTypes';
-import { parseRecordPayload } from '../src/workspace/caseTypes';
+import { buildCaseMeta, emptyClientIntake, parseRecordPayload } from '../src/workspace/caseTypes';
 import { answersFromOmrPages, profileFromRecord, type PageLike } from '../src/results/recordProfile';
 
 function answersFromPattern(period: number): ItemAnswer[] {
@@ -61,12 +61,28 @@ describe('recordProfile - kayıttan profil hesaplama', () => {
     assert.deepEqual(answers, ['D', 'D', 'D', 'Y', 'D', 'Y']);
   });
 
+  it('a manual review can resolve a missing raw item without inventing other blanks', () => {
+    const pages: PageLike[] = [omrPage(1, 1, 3, 'D')];
+    pages[0].manualReviews = { 'item-4': { choiceId: null } };
+    assert.deepEqual(answersFromOmrPages(pages, 4), ['D', 'D', 'D', null]);
+  });
+
   it('OMR sayfalarından profil üretir (boş madde null döner)', () => {
     const pages: PageLike[] = [omrPage(1, 1, 566, 'Y')];
     const parsed = parseRecordPayload([{ kind: 'case-meta', version: 1, method: 'omr', client: { gender: 'Erkek' } }, ...pages] as unknown[]);
     const profile = profileFromRecord({ gender: 'Erkek' }, parsed);
     assert.ok(profile);
     assert.equal(profile.cannotSayScale.rawScore, 0);
+  });
+
+  it('DB cinsiyeti ile payload metadatası çelişirse profil üretmez', () => {
+    const client = emptyClientIntake();
+    client.firstName = 'A'; client.lastName = 'B'; client.gender = 'Kadın'; client.age = 28; client.testDate = '2026-09-17';
+    const parsed = parseRecordPayload([
+      buildCaseMeta('quick', client),
+      { kind: 'quick-entry', version: 1, answers: new Array(566).fill('Y') },
+    ] as unknown[]);
+    assert.equal(profileFromRecord({ gender: 'Erkek' }, parsed), null);
   });
 
   it('skorlamaya uygun olmayan cinsiyette null döner', () => {

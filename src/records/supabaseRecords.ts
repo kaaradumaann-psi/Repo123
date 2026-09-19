@@ -2,6 +2,8 @@ import type { FormDefinition, Point } from '../omr/omrTypes';
 import type { ItemReadResult, ManualReview, ManualReviewEvent, QualityReport, StoredScanPage } from '../results/scanResultTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { requireSupabase } from '../auth/supabaseClient';
+import { isEffectiveItem } from '../results/resultNormalizer';
+import { isValidRecordPayload, todayIsoDate } from '../workspace/caseTypes';
 
 export type SavedAnswerPage = {
   pageId: string;
@@ -62,9 +64,11 @@ export type RecordInput = {
   };
 };
 
+export const RAW_PAYLOAD_MAX_BYTES = 8 * 1024 * 1024;
+
 function text(value: string, label: string, max = 120): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
-  if (!normalized || normalized.length > max || /[\u0000-\u001f]/.test(normalized)) {
+  if (!normalized || normalized.length > max || /[\u0000-\u001f\u007f]/.test(normalized)) {
     throw new Error(`${label} zorunludur ve geçerli olmalıdır.`);
   }
   return normalized;
@@ -73,10 +77,25 @@ function text(value: string, label: string, max = 120): string {
 function optionalText(value: string, label: string, max = 500): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
   if (!normalized) return '';
-  if (normalized.length > max || /[\u0000-\u001f]/.test(normalized)) {
+  if (normalized.length > max || /[\u0000-\u001f\u007f]/.test(normalized)) {
     throw new Error(`${label} geçerli olmalıdır.`);
   }
   return normalized;
+}
+
+function isValidDateOnly(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function requireUuid(value: string, label: string): string {
+  if (!UUID_PATTERN.test(value)) throw new Error(`${label} geçersiz.`);
+  return value;
 }
 
 export function canCreateRecord(pages: readonly StoredScanPage[], definition: FormDefinition): boolean {
@@ -86,7 +105,8 @@ export function canCreateRecord(pages: readonly StoredScanPage[], definition: Fo
     batches.size === 1 &&
     definition.pages.every(expected => {
       const page = pages.find(candidate => candidate.pageNumber === expected.pageNumber);
-      return !!page && page.fingerprint === definition.fingerprint && /^[A-F0-9]{24}$/.test(page.batchId) && page.items.length > 0;
+      return !!page && page.fingerprint === definition.fingerprint && /^[A-F0-9]{24}$/.test(page.batchId) &&
+        expected.items.every(item => isEffectiveItem(item, page));
     })
   );
 }
@@ -126,9 +146,9 @@ function normalizeClient(input: RecordInput['client']) {
     requestedBy: optionalText(input.requestedBy, 'Başvuru nedeni', 500),
   };
   if (!['Kadın', 'Erkek', 'Belirtmek istemiyor', 'Diğer'].includes(client.gender)) throw new Error('Cinsiyet seçimi geçersiz.');
-  if (!Number.isInteger(client.age) || client.age < 0 || client.age > 120) throw new Error('Yaş 0–120 arasında olmalıdır.');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(client.applicationDate) || Number.isNaN(Date.parse(`${client.applicationDate}T00:00:00Z`))) {
-    throw new Error('Uygulama tarihi geçersiz.');
+  if (!Number.isInteger(client.age) || client.age < 16 || client.age > 120) throw new Error('MMPI için yaş 16–120 arasında olmalıdır.');
+  if (!isValidDateOnly(client.applicationDate) || client.applicationDate > todayIsoDate()) {
+    throw new Error('Uygulama tarihi geçersiz veya ileri tarih olamaz.');
   }
   return client;
 }
@@ -147,6 +167,18 @@ async function upsertRecord(
   }
   if (!Array.isArray(answers) || answers.length === 0) {
     throw new Error('Kayıt için veri yükü boş olamaz.');
+  }
+  try {
+    const serialized = JSON.stringify(answers);
+    if (new TextEncoder().encode(serialized).byteLength > RAW_PAYLOAD_MAX_BYTES) {
+      throw new Error(`Kayıt veri yükü ${RAW_PAYLOAD_MAX_BYTES / (1024 * 1024)} MB sınırını aşıyor.`);
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.includes('sınırını aşıyor')) throw cause;
+    throw new Error('Kayıt veri yükü serileştirilemedi.');
+  }
+  if (!isValidRecordPayload(answers)) {
+    throw new Error('Kayıt veri yükü biçimi geçersiz veya eksik.');
   }
   const payload = {
     idempotency_key: idempotencyKey,
@@ -328,6 +360,7 @@ export async function listAllRecords(): Promise<RecordSummary[]> {
 }
 
 export async function getRecordDetail(recordId: string): Promise<FullRecordDetail> {
+  const id = requireUuid(recordId, 'Kayıt kimliği');
   // Admin'in kayıt detayına erişimi bilinçli ürün kararıdır (denetim/silme görevi);
   // tüm yazma işlemleri sunucu tarafında audit_logs tablosuna kaydedilir (B8).
   // '*' seçimi bilinçlidir: expert_notes/notes_updated_at kolonları migration
@@ -335,7 +368,7 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
   const { data, error } = await requireSupabase()
     .from('mmpi_records')
     .select('*')
-    .eq('id', recordId)
+    .eq('id', id)
     .single();
 
   if (error || !data) throw new Error('Test detayları alınamadı.');
@@ -367,20 +400,24 @@ export const EXPERT_NOTES_MAX = 4000;
  * bölümü olarak aktarılır. Sunucu tarafı 4000 karakter sınırını da zorlar.
  */
 export async function updateExpertNotes(recordId: string, notes: string): Promise<string> {
-  const normalized = notes.replace(/\r\n/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim();
+  const id = requireUuid(recordId, 'Kayıt kimliği');
+  const normalized = notes.replace(/\r\n/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim();
   if (normalized.length > EXPERT_NOTES_MAX) {
     throw new Error(`Uzman notu en fazla ${EXPERT_NOTES_MAX} karakter olabilir.`);
   }
   const updatedAt = new Date().toISOString();
-  const { error } = await requireSupabase()
+  const { data, error } = await requireSupabase()
     .from('mmpi_records')
     .update({ expert_notes: normalized, notes_updated_at: updatedAt })
-    .eq('id', recordId);
-  if (error) throw new Error('Uzman notu kaydedilemedi. Lütfen tekrar deneyin.');
+    .eq('id', id)
+    .select('id')
+    .maybeSingle();
+  if (error || !data) throw new Error('Uzman notu kaydedilemedi. Bu kayıt üzerinde not yazma yetkiniz olmayabilir.');
   return updatedAt;
 }
 
 export async function deleteRecord(recordId: string): Promise<void> {
-  const { error } = await requireSupabase().from('mmpi_records').delete().eq('id', recordId);
-  if (error) throw new Error('Test kaydı silinemedi: ' + error.message);
+  const id = requireUuid(recordId, 'Kayıt kimliği');
+  const { data, error } = await requireSupabase().from('mmpi_records').delete().eq('id', id).select('id').maybeSingle();
+  if (error || !data) throw new Error('Test kaydı silinemedi veya kayıt bulunamadı.');
 }

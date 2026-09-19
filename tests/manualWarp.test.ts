@@ -55,6 +55,16 @@ test('rejects a self-intersecting (bowtie) quadrilateral', () => {
   }), /kesen/);
 });
 
+test('rejects a reflected clockwise corner order', () => {
+  const source = makeFlatRgba(400, 400);
+  assert.throws(() => applyManualCorners({
+    source,
+    corners: [{ x: 50, y: 50 }, { x: 50, y: 350 }, { x: 350, y: 350 }, { x: 350, y: 50 }],
+    pageWidthMm: 210,
+    pageHeightMm: 297,
+  }), /yansıtılmış|ters sırada/);
+});
+
 test('rejects corners that fall outside the source image', () => {
   const source = makeFlatRgba(200, 200);
   assert.throws(() => applyManualCorners({

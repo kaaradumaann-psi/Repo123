@@ -100,6 +100,14 @@ function validateCorners(corners: readonly Point[]): asserts corners is [Point, 
       }
     }
   }
+  // In image coordinates TL → TR → BR → BL is counter-clockwise (positive signed area).
+  // A consistently clockwise polygon is convex too, but mapping it to the canonical order would
+  // mirror the page and silently swap D/Y columns. Reject the reflection explicitly.
+  const signedArea = corners.reduce((sum, point, index) => {
+    const next = corners[(index + 1) % 4]!;
+    return sum + point.x * next.y - point.y * next.x;
+  }, 0) / 2;
+  if (signedArea <= 1e-6) throw new Error('Köşeler yansıtılmış veya ters sırada; TL/TR/BR/BL sırasını kullanın.');
 }
 
 /** Convert RGBA `PixelImage` to grayscale `GrayImage`. */
@@ -122,6 +130,19 @@ function rgbaToGray(image: PixelImage): GrayImage {
  * input the caller can produce.
  */
 export function applyManualCorners(input: ManualWarpInput): ManualWarpResult {
+  if (!input.source || !Number.isInteger(input.source.width) || !Number.isInteger(input.source.height) ||
+    input.source.width < 1 || input.source.height < 1 ||
+    !(input.source.data instanceof Uint8ClampedArray) ||
+    input.source.data.length !== input.source.width * input.source.height * 4) {
+    throw new Error('Kamera görüntüsü RGBA bekliyordu; biçim bozuk.');
+  }
+  if (!Number.isFinite(input.pageWidthMm) || !Number.isFinite(input.pageHeightMm) ||
+    input.pageWidthMm <= 0 || input.pageHeightMm <= 0 || input.pageWidthMm > 1_000 || input.pageHeightMm > 1_000) {
+    throw new Error('Sayfa boyutları geçersiz.');
+  }
+  if (input.pixelsPerMm !== undefined && (!Number.isFinite(input.pixelsPerMm) || input.pixelsPerMm <= 0)) {
+    throw new Error('Çıktı çözünürlüğü geçersiz.');
+  }
   validateCorners(input.corners);
   const dest = physicalDestinations(input.pageWidthMm, input.pageHeightMm);
   // `fitHomography(from, to)` returns a matrix that maps `from` → `to`. We want the matrix the

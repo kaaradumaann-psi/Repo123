@@ -5,7 +5,7 @@ export const SCAN_LIMITS = {
   sourcePixels: 40_000_000, sourceDimension: 16_000, longSide: 2800, pdfWidth: 1680, pdfPages: 12, batchPages: 24,
 } as const;
 
-export type ImageCodec = 'jpeg' | 'png' | 'webp' | 'heic' | 'gif' | 'unknown';
+export type ImageCodec = 'jpeg' | 'png' | 'webp' | 'heic' | 'avif' | 'gif';
 export type SniffResult =
   | { kind: 'image'; codec: ImageCodec }
   | { kind: 'pdf' }
@@ -45,8 +45,46 @@ export function capturePixels(source: CanvasImageSource, width: number, height: 
   } finally { canvas.width = canvas.height = 0; }
 }
 
+/**
+ * Encodes an in-memory RGBA capture as a real browser-decodable image URL. A raw RGBA buffer is
+ * not a PNG, even when it is put in a Blob whose MIME type says image/png; doing that leaves
+ * camera comparison and manual-corner previews as broken images in production. Keeping this
+ * conversion here also gives every preview path the same dimension and memory checks.
+ */
+export async function pixelImageToBlobUrl(image: PixelImage, signal?: AbortSignal): Promise<string> {
+  if (!Number.isInteger(image.width) || !Number.isInteger(image.height) || image.width < 1 || image.height < 1 ||
+    image.width * image.height > SCAN_LIMITS.sourcePixels ||
+    !(image.data instanceof Uint8ClampedArray) || image.data.length !== image.width * image.height * 4) {
+    throw new Error('Önizleme görüntüsü geçersiz veya çok büyük.');
+  }
+  if (signal) checkAborted(signal);
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  let url: string | undefined;
+  try {
+    const context = canvas.getContext('2d', { willReadFrequently: false });
+    if (!context) throw new Error('Görüntü önizleme alanı açılamadı.');
+    const pixels = context.createImageData(image.width, image.height);
+    pixels.data.set(image.data);
+    context.putImageData(pixels, 0, 0);
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(value => value ? resolve(value) : reject(new Error('Görüntü önizlemesi oluşturulamadı.')), 'image/jpeg', .9);
+    });
+    if (signal) checkAborted(signal);
+    url = URL.createObjectURL(blob);
+    if (signal) checkAborted(signal);
+    return url;
+  } catch (error) {
+    if (url) URL.revokeObjectURL(url);
+    throw error;
+  } finally {
+    canvas.width = canvas.height = 0;
+  }
+}
+
 export function checkFileSize(file: Pick<File, 'size'>): void {
-  if (file.size === 0) throw new Error('Dosya boş. Başka bir JPG, PNG, WEBP, HEIC veya PDF seçin.');
+  if (file.size === 0) throw new Error('Dosya boş. Başka bir JPG, PNG, WEBP, AVIF, HEIC veya PDF seçin.');
   if (file.size > SCAN_LIMITS.fileBytes) throw new Error('Dosya 24 MB sınırını aşıyor. Daha küçük bir dosya seçin.');
 }
 
@@ -56,20 +94,27 @@ function ascii(bytes: Uint8Array, start: number, length: number): string {
 
 /** Magic-byte sniff used by both the upload path and unit tests. */
 export function sniffBytes(bytes: Uint8Array): SniffResult {
-  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8) return { kind: 'image', codec: 'jpeg' };
-  if (bytes.length >= 8 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] !== 0x00) {
+    return { kind: 'image', codec: 'jpeg' };
+  }
+  const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (bytes.length >= pngSignature.length && pngSignature.every((value, index) => bytes[index] === value)) {
     return { kind: 'image', codec: 'png' };
   }
   if (bytes.length >= 12 && ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 4) === 'WEBP') {
     return { kind: 'image', codec: 'webp' };
   }
-  if (bytes.length >= 6 && ascii(bytes, 0, 3) === 'GIF') return { kind: 'image', codec: 'gif' };
+  if (bytes.length >= 6 && (ascii(bytes, 0, 6) === 'GIF87a' || ascii(bytes, 0, 6) === 'GIF89a')) {
+    return { kind: 'image', codec: 'gif' };
+  }
   if (bytes.length >= 12 && ascii(bytes, 4, 4) === 'ftyp') {
     const brands = ascii(bytes, 8, Math.min(32, bytes.length - 8)).toLowerCase();
     if (['heic', 'heix', 'heif', 'hevc', 'heim', 'heis', 'mif1', 'msf1'].some(brand => brands.includes(brand))) {
       return { kind: 'image', codec: 'heic' };
     }
-    if (brands.includes('avif') || brands.includes('avis')) return { kind: 'image', codec: 'unknown' };
+    if (['avif', 'avis'].some(brand => brands.includes(brand))) {
+      return { kind: 'image', codec: 'avif' };
+    }
   }
   const signature = [0x25, 0x50, 0x44, 0x46, 0x2d];
   for (let at = 0; at + signature.length <= Math.min(bytes.length, 1024); at++) {
@@ -83,39 +128,46 @@ export async function identifyFile(file: File): Promise<'image' | 'pdf'> {
   const bytes = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
   const sniffed = sniffBytes(bytes);
   if (sniffed.kind === 'image' || sniffed.kind === 'pdf') return sniffed.kind;
-  if (file.type.toLowerCase().startsWith('image/')) return 'image';
-  throw new Error('Dosya biçimi desteklenmiyor. JPG, PNG, WEBP, HEIC veya PDF yükleyin.');
+  // Do not trust the browser-provided MIME type as a content validator. In particular, accepting
+  // `image/svg+xml` here would make an arbitrary XML document part of the image pipeline; every
+  // supported upload format has a magic signature that can be checked before decoding.
+  throw new Error('Dosya biçimi desteklenmiyor. JPG, PNG, WEBP, AVIF, HEIC veya PDF yükleyin.');
 }
 
-function codecMime(codec: ImageCodec): string {
+function codecMime(codec: ImageCodec | 'unknown'): string {
   return ({
-    jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic',
+    jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', avif: 'image/avif',
     gif: 'image/gif', unknown: 'application/octet-stream',
   })[codec];
 }
 
 function decodeFailureMessage(codec: ImageCodec, cause: unknown): string {
   const detail = cause instanceof Error && cause.message ? ` ${cause.message}` : '';
-  if (codec === 'heic') {
-    return 'Bu görüntü HEIC/HEIF biçiminde ve bu tarayıcı açamadı. iPhone’dan gönderirken “En Uyumlu” (JPG) seçin veya fotoğrafı JPG olarak kaydedin.';
+  if (codec === 'heic' || codec === 'avif') {
+    return `Bu görüntü ${codec === 'avif' ? 'AVIF' : 'HEIC/HEIF'} biçiminde ve bu tarayıcı açamadı. iPhone’dan gönderirken “En Uyumlu” (JPG) seçin veya fotoğrafı JPG olarak kaydedin.`;
   }
   if (codec === 'webp') {
     return 'WEBP görüntüsü açılamadı. Dosyayı JPG veya PNG olarak kaydedip yeniden yükleyin.';
   }
-  return `Görüntü açılamadı. Standart JPG, PNG, WEBP veya HEIC kullanın.${detail}`;
+  return `Görüntü açılamadı. Standart JPG, PNG, WEBP, AVIF veya HEIC kullanın.${detail}`;
 }
 
-/** Check encoded dimensions before allocating the decoded bitmap. JPEG/PNG only. */
+/** Check encoded dimensions before allocating the decoded bitmap. */
 export function encodedImageSize(bytes: Uint8Array): { width: number; height: number } {
+  const sniffed = sniffBytes(bytes);
+  if (sniffed.kind !== 'image') throw new Error('ENCODED_SIZE_UNKNOWN');
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  if (bytes.length >= 24 && bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71) {
+  if (sniffed.codec === 'png' && bytes.length >= 24) {
     return { width: view.getUint32(16), height: view.getUint32(20) };
   }
-  if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+  if (sniffed.codec === 'gif' && bytes.length >= 10) {
+    return { width: view.getUint16(6, true), height: view.getUint16(8, true) };
+  }
+  if (sniffed.codec === 'jpeg') {
     let offset = 2;
     while (offset + 4 <= bytes.length) {
       if (bytes[offset] !== 0xff) break;
-      while (bytes[offset] === 0xff) offset++;
+      while (offset < bytes.length && bytes[offset] === 0xff) offset++;
       const marker = bytes[offset++];
       if (marker === undefined || marker === 0xda || marker === 0xd9) break;
       if (marker === 0x01 || marker >= 0xd0 && marker <= 0xd7) continue;
@@ -128,12 +180,44 @@ export function encodedImageSize(bytes: Uint8Array): { width: number; height: nu
       offset += length;
     }
   }
+  if (sniffed.codec === 'webp' && bytes.length >= 20) {
+    let offset = 12;
+    while (offset + 8 <= bytes.length) {
+      const type = ascii(bytes, offset, 4);
+      const chunkSize = view.getUint32(offset + 4, true);
+      const data = offset + 8;
+      if (!Number.isSafeInteger(chunkSize) || data + chunkSize > bytes.length) break;
+      if (type === 'VP8X' && chunkSize >= 10) {
+        const width = 1 + bytes[data + 4]! + (bytes[data + 5]! << 8) + (bytes[data + 6]! << 16);
+        const height = 1 + bytes[data + 7]! + (bytes[data + 8]! << 8) + (bytes[data + 9]! << 16);
+        return { width, height };
+      }
+      if (type === 'VP8L' && chunkSize >= 5 && bytes[data] === 0x2f) {
+        const bits = bytes[data + 1]! | (bytes[data + 2]! << 8) | (bytes[data + 3]! << 16) | (bytes[data + 4]! << 24);
+        return { width: 1 + (bits & 0x3fff), height: 1 + ((bits >>> 14) & 0x3fff) };
+      }
+      if (type === 'VP8 ' && chunkSize >= 10 && bytes[data + 3] === 0x9d && bytes[data + 4] === 0x01 && bytes[data + 5] === 0x2a) {
+        return { width: view.getUint16(data + 6, true) & 0x3fff, height: view.getUint16(data + 8, true) & 0x3fff };
+      }
+      offset = data + chunkSize + (chunkSize & 1);
+    }
+  }
+  if (sniffed.codec === 'heic') {
+    // HEIF/AVIF stores a decoded canvas size in an `ispe` item property. It can occur after
+    // the first box, so scan the already-loaded bounded file rather than trusting MIME metadata.
+    for (let at = 4; at + 16 <= bytes.length; at++) {
+      if (ascii(bytes, at, 4) !== 'ispe') continue;
+      const width = view.getUint32(at + 8);
+      const height = view.getUint32(at + 12);
+      if (width > 0 && height > 0) return { width, height };
+    }
+  }
   throw new Error('ENCODED_SIZE_UNKNOWN');
 }
 
 function guardDimensions(width: number, height: number): void {
-  if (width < 1 || height < 1 || width * height > SCAN_LIMITS.sourcePixels ||
-    Math.max(width, height) > SCAN_LIMITS.sourceDimension) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
+    width * height > SCAN_LIMITS.sourcePixels || Math.max(width, height) > SCAN_LIMITS.sourceDimension) {
     throw new Error('Görüntü çok büyük veya boyutu geçersiz. En çok 40 megapiksel ve 16.000 piksel kenar uzunluğu desteklenir.');
   }
 }
@@ -144,14 +228,13 @@ export async function readImageFile(file: File, signal: AbortSignal): Promise<Pi
   const bytes = new Uint8Array(await file.arrayBuffer());
   checkAborted(signal);
   const sniffed = sniffBytes(bytes);
-  const codec: ImageCodec = sniffed.kind === 'image' ? sniffed.codec : 'unknown';
-  if (codec === 'jpeg' || codec === 'png') {
-    try {
-      const size = encodedImageSize(bytes);
-      guardDimensions(size.width, size.height);
-    } catch (error) {
-      if (!(error instanceof Error) || error.message !== 'ENCODED_SIZE_UNKNOWN') throw error;
-    }
+  if (sniffed.kind !== 'image') throw new Error('Görüntü biçimi doğrulanamadı. JPG, PNG, WEBP, AVIF veya HEIC seçin.');
+  const codec: ImageCodec = sniffed.codec;
+  try {
+    const size = encodedImageSize(bytes);
+    guardDimensions(size.width, size.height);
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== 'ENCODED_SIZE_UNKNOWN') throw error;
   }
   checkAborted(signal);
   const mime = codecMime(codec);
@@ -171,6 +254,10 @@ export async function readImageFile(file: File, signal: AbortSignal): Promise<Pi
 
 export async function normalizedThumbnail(image: GrayImage, signal: AbortSignal): Promise<string> {
   checkAborted(signal);
+  if (!Number.isInteger(image.width) || !Number.isInteger(image.height) || image.width < 1 || image.height < 1 ||
+    !(image.data instanceof Uint8Array) || image.data.length !== image.width * image.height) {
+    throw new Error('Sayfa önizlemesi için görüntü verisi geçersiz.');
+  }
   const canvas = document.createElement('canvas');
   const size = boundedSize(image.width, image.height, 600);
   canvas.width = size.width;

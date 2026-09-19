@@ -23,25 +23,28 @@ export type ComparisonRender = {
  */
 export function buildComparison(normalized: GrayImage, original?: PixelImage,
   mode: EnhancementMode = 'omr', _layout: ComparisonLayout = 'side', maxSide = 1200): ComparisonRender {
-  const processed = enhanceToRgba(applyEnhancement(normalized, mode), maxSide);
+  const processed = grayscaleToRgba(applyEnhancement(normalized, mode), maxSide);
   const originalScaled = original ? scaleRgba(original, maxSide) : undefined;
   return { processed, original: originalScaled, mode };
 }
 
-function enhanceToRgba(image: GrayImage, maxSide: number): PixelImage {
-  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
-  const width = Math.max(1, Math.round(image.width * scale));
-  const height = Math.max(1, Math.round(image.height * scale));
-  return { width, height, data: new Uint8ClampedArray(width * height * 4) };
-  // The actual rendering is performed lazily in `renderComparison` because building ImageData
-  // here would duplicate the bilinear sampling we already do in `warpPerspective`. Callers that
-  // need a raw RGBA buffer use `grayscaleToRgba` instead.
+function scaledSize(width: number, height: number, maxSide: number): { width: number; height: number; scale: number } {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
+    !Number.isFinite(maxSide) || maxSide <= 0) {
+    throw new Error('Karşılaştırma görüntüsü boyutları geçersiz.');
+  }
+  const scale = Math.min(1, maxSide / Math.max(width, height));
+  const scaledWidth = Math.max(1, Math.round(width * scale));
+  const scaledHeight = Math.max(1, Math.round(height * scale));
+  if (scaledWidth * scaledHeight > 8_000_000) throw new Error('Karşılaştırma görüntüsü çok büyük.');
+  return { width: scaledWidth, height: scaledHeight, scale };
 }
 
 export function grayscaleToRgba(image: GrayImage, maxSide = 1200): PixelImage {
-  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
-  const width = Math.max(1, Math.round(image.width * scale));
-  const height = Math.max(1, Math.round(image.height * scale));
+  if (!(image.data instanceof Uint8Array) || image.data.length !== image.width * image.height) {
+    throw new Error('Gri görüntü verisi geçersiz.');
+  }
+  const { width, height, scale } = scaledSize(image.width, image.height, maxSide);
   const data = new Uint8ClampedArray(width * height * 4);
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     const sx = Math.min(image.width - 1, Math.floor(x / scale));
@@ -54,9 +57,10 @@ export function grayscaleToRgba(image: GrayImage, maxSide = 1200): PixelImage {
 }
 
 function scaleRgba(image: PixelImage, maxSide: number): PixelImage {
-  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
-  const width = Math.max(1, Math.round(image.width * scale));
-  const height = Math.max(1, Math.round(image.height * scale));
+  if (!(image.data instanceof Uint8ClampedArray) || image.data.length !== image.width * image.height * 4) {
+    throw new Error('RGBA karşılaştırma görüntüsü geçersiz.');
+  }
+  const { width, height, scale } = scaledSize(image.width, image.height, maxSide);
   const data = new Uint8ClampedArray(width * height * 4);
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     const sx = Math.min(image.width - 1, Math.floor(x / scale));
