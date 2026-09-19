@@ -4,8 +4,12 @@ import { AUTH_STORAGE_KEY, createAuthStorage } from './authStorage';
 
 export { AUTH_STORAGE_KEY, createAuthStorage } from './authStorage';
 
-const url = import.meta.env.VITE_SUPABASE_URL?.trim() ?? '';
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? '';
+// `import.meta.env` yalnızca Vite/esbuild build'lerinde tanımlıdır; Node test
+// koşucusunda (tsx) bulunmaz. Güvenli erişim, modülü test ortamında da
+// içe aktarılabilir kılar (yapılandırılmamış sayılır).
+const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env ?? {};
+const url = viteEnv.VITE_SUPABASE_URL?.trim() ?? '';
+const anonKey = viteEnv.VITE_SUPABASE_ANON_KEY?.trim() ?? '';
 
 export const supabaseConfig = {
   url,

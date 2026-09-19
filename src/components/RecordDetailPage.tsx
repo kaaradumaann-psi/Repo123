@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getRecordDetail } from '../records/supabaseRecords';
+import { EXPERT_NOTES_MAX, getRecordDetail, updateExpertNotes } from '../records/supabaseRecords';
 import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
@@ -67,6 +67,11 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
   const [record, setRecord] = useState<FullRecordDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Uzman notu: kayıt sonrası klinik değerlendirme; rapora aktarılır.
+  const [notesDraft, setNotesDraft] = useState('');
+  const [notesSaved, setNotesSaved] = useState('');
+  const [notesBusy, setNotesBusy] = useState(false);
+  const [notesMessage, setNotesMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -74,7 +79,12 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
     setError('');
     getRecordDetail(recordId)
       .then(detail => {
-        if (active) setRecord(detail);
+        if (active) {
+          setRecord(detail);
+          setNotesDraft(detail.expertNotes);
+          setNotesSaved(detail.expertNotes);
+          setNotesMessage(null);
+        }
       })
       .catch(cause => {
         if (active) setError(cause instanceof Error ? cause.message : 'Test kaydı yüklenemedi.');
@@ -147,6 +157,26 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
     );
   }
 
+  async function saveNotes() {
+    if (notesBusy || !record) return;
+    setNotesBusy(true);
+    setNotesMessage(null);
+    try {
+      const updatedAt = await updateExpertNotes(record.id, notesDraft);
+      const normalized = notesDraft.replace(/\r\n/g, '\n').trim();
+      setNotesSaved(normalized);
+      setNotesDraft(normalized);
+      setRecord(prev => (prev ? { ...prev, expertNotes: normalized, notesUpdatedAt: updatedAt } : prev));
+      setNotesMessage({ kind: 'success', text: 'Uzman notu kaydedildi; yazdırma raporuna eklenecek.' });
+    } catch (cause) {
+      setNotesMessage({ kind: 'error', text: cause instanceof Error ? cause.message : 'Uzman notu kaydedilemedi.' });
+    } finally {
+      setNotesBusy(false);
+    }
+  }
+
+  const notesDirty = notesDraft.trim() !== notesSaved.trim();
+
   const printMeta = {
     fullName,
     testDate: dash(testDate),
@@ -161,6 +191,8 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
     reason: parsed.applicationReason || record.requestedBy || '',
     followUp: parsed.followUp ?? '',
     marital: parsed.maritalStatus ?? '',
+    expertNotes: notesSaved,
+    notesUpdatedAt: record.notesUpdatedAt ?? '',
   };
 
   return (
@@ -271,6 +303,54 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
           </div>
           {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
         </details>
+
+        <section className="report-section expert-notes-section" aria-labelledby="expert-notes-title">
+          <h3 id="expert-notes-title" className="report-section-title">
+            <Icon name="sheet" size={16} /> Uzman Değerlendirme Notu
+          </h3>
+          <p className="ws-muted expert-notes-hint">
+            Kayıt sonrası klinik değerlendirmenizi buraya yazın; not bu kayda kalıcı olarak eklenir ve
+            Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır. Tanısal kesin ifadelerden
+            kaçının; not yalnızca bu kaydı görebilen hesaplarca okunabilir.
+          </p>
+          <textarea
+            className="expert-notes-input"
+            value={notesDraft}
+            onChange={event => setNotesDraft(event.target.value)}
+            rows={5}
+            maxLength={EXPERT_NOTES_MAX}
+            placeholder="Örn. Profil bulguları klinik görüşmeyle tutarlı; izlem önerildi..."
+            aria-label="Uzman değerlendirme notu"
+          />
+          <div className="expert-notes-footer">
+            <span className="ws-muted expert-notes-count">
+              {notesDraft.length} / {EXPERT_NOTES_MAX}
+              {record.notesUpdatedAt
+                ? ` · Son kayıt: ${new Date(record.notesUpdatedAt).toLocaleString('tr-TR', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })}`
+                : ''}
+            </span>
+            <div className="expert-notes-actions">
+              {notesMessage && (
+                <span
+                  className={notesMessage.kind === 'error' ? 'expert-notes-msg is-error' : 'expert-notes-msg is-ok'}
+                  role="status"
+                >
+                  {notesMessage.text}
+                </span>
+              )}
+              <button
+                type="button"
+                className="btn-primary btn-sm"
+                onClick={() => void saveNotes()}
+                disabled={notesBusy || !notesDirty}
+              >
+                {notesBusy ? 'Kaydediliyor…' : 'Notu Kaydet'}
+              </button>
+            </div>
+          </div>
+        </section>
 
         {profile ? (
           <MMPIResultsPanel embedded profile={profile} answers={answers ?? undefined} />

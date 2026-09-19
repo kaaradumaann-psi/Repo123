@@ -182,10 +182,10 @@ const GROUPS: SourceGroup[] = [
         citation: 'Ries, H. A. (1966). The MMPI K scale as a predictor of prognosis. Journal of Clinical Psychology, 22(2), 212–213. https://doi.org/10.1002/1097-4679(196604)22:2<212::AID-JCLP2270220228>3.0.CO;2-T',
         isAp7: true,
         status: 'E',
-        role: 'Kodun “Reis (1966)” olarak anılan atfının özgün kaydı: K ölçeğinin tedavi prognozu göstergesi olarak değerlendirilmesi.',
+        role: 'K ölçeğinin tedavi prognozu göstergesi olarak değerlendirilmesi (bazı ikincil kaynaklarda “Reis” yazımıyla anılır).',
         usedIn: ['Klinik izlenimler', 'mmpiCritical.ts'],
         matchNote:
-          'Uygulamadaki implementasyon özgün kaynakla birebir doğrulanamadı: kodun kullandığı “K ham ≤ 15” eşiği, makalenin tam metni erişilemediği için özgün yayınla eşleştirilemedi. Kod yazımı “Reis”tir; doğrulanmış kayıtta soyad “Ries”tir.',
+          'Uygulamadaki implementasyon özgün kaynakla birebir doğrulanamadı: kodun kullandığı “K ham ≤ 15” eşiği, makalenin tam metni erişilemediği için özgün yayınla eşleştirilemedi. Doğrulanmış kayıttaki soyad “Ries”tir; kod atfı bu yazıma göre düzeltilmiştir.',
       },
     ],
   },

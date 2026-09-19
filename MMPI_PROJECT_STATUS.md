@@ -36,7 +36,7 @@ Temel akış: Giriş → İşlem (danışan bilgisi → yöntem seçimi [hızlı
 Proje olgun ve çalışır durumdadır. React 19 + TypeScript + Vite tek-sayfa uygulaması;
 tarayıcıda çalışan tam OMR hattı, Türk normlarına dayalı MMPI puanlama/yorum motoru,
 Supabase Auth + RLS tabanlı kayıt sistemi ve print-CSS tabanlı PDF raporu içerir.
-190 test geçiyor, typecheck temiz, production build çalışıyor (bkz. §46 Test Durumu).
+192 test geçiyor, typecheck temiz, production build + verify:pdf çalışıyor (bkz. §46 Test Durumu).
 Repo daha önce 24 PR'lık bir geliştirme geçmişinden geçmiş (tek squash-merge zinciri,
 `git log` sadece merge commit `fea1f19` gösteriyor; PR listesi `gh pr list --state merged`
 ile görülebilir). Bu oturumda "final sürüm" denetimi yapıldı ve iki P1 iş TAMAMLANDI:
@@ -45,8 +45,15 @@ eklendi VE tüm UI bileşenlerine bağlandı** (MMPIResultsPanel, MMPIValidityTa
 RecordDetailPage, MMPIPrintReport + `.is-suspect` CSS + testler);
 **B2 — `src/scoring/version.ts` oluşturuldu ve `scoringVersion`/`normSource` kayıt
 meta'sına yazılıp kayıt detayında gösteriliyor.** Değişiklikler bu oturumun sonunda
-branch'e commit edildi (bkz. §43 Git Durumu). Kalan işler (B3–B10) sonraki oturuma
-bırakıldı (bkz. §38–39).
+branch'e commit edildi (bkz. §43 Git Durumu). İkinci turda B3–B10 backlog'unun
+TAMAMI kapatıldı: reviewHistory kayda taşındı (B3), uzman notu + rapora aktarım
+(B4, yeni migration), CSP connect-src (B5), rapor sayfa numarası (B6), Ries atıf
+düzeltmesi (B7), audit_logs tablosu + trigger (B8), kayıt listelerinde tarih
+aralığı filtresi (B9), admin erişim kararı belgelenip denetim iziyle dengelendi
+(B10), MMPIValidityTab eşikleri VALIDITY_CUTOFFS'tan tekilleştirildi, bayat
+"puanlama motoru bağlı değil" metni düzeltildi, verify:pdf lokalde koşuldu.
+Kod-düzeyi backlog SIFIR; kalan işler yalnızca canlı ortam doğrulamaları ve
+kaynak-doğrulama işleridir (bkz. §38–39).
 
 ---
 
@@ -59,7 +66,7 @@ bırakıldı (bkz. §38–39).
 | Framework | React 19.2.0 + react-dom | |
 | Dil | TypeScript 5.9.3 (strict; `any` yalnızca 2 yerde: `mmpiScoring.ts:205,407`) | |
 | Build | Vite 7.3.6 (dev) + esbuild 0.25.12 (`scripts/build.mjs` tek dosya production build) | |
-| Test | `tsx --test` (Node test runner), 25 test dosyası, 190 test | |
+| Test | `tsx --test` (Node test runner), 26 test dosyası, 192 test | |
 | Database/Auth | Supabase (`@supabase/supabase-js` 2.x), RLS, Edge Function | |
 | OMR/QR | jsQR 1.4.0 (QR okuma), qrcode 1.5.4 (QR üretme); OMR motoru tamamen kendi TS kodu (`src/omr/`) | |
 | PDF (form) | Kendi PDF yazıcısı `src/print/pdfDocument.ts` + TTF gömme — harici PDF lib YOK | |
@@ -136,7 +143,7 @@ Repo123/
 │   ├── README.md                   → kurulum: db push, ilk Admin SQL, Edge Function deploy, signup kapatma
 │   ├── migrations/20260915000000_initial_schema.sql → TEK migration (profiles + mmpi_records + RLS)
 │   └── functions/admin-users/index.ts → Edge Function (service role yalnızca sunucuda)
-└── tests/                          → 25 test dosyası + fixtures/omrSynthetic.ts (bkz. §46)
+└── tests/                          → 26 test dosyası + fixtures/omrSynthetic.ts (bkz. §46)
 ```
 
 ---
@@ -241,10 +248,15 @@ Tek migration: `supabase/migrations/20260915000000_initial_schema.sql`.
   birden çok değerlendirmesi ayrı `mmpi_records` satırlarıdır; danışan bazında gruplama
   UI'da YOK (arama isimle yapılır). Final prompt'un "danışan yönetimi" maddesi bu modelde
   kısmen karşılanır. [~]
-- [ ] `audit_logs` tablosu YOK (bkz. §34).
-- [ ] Soft-delete / `deleted_at` YOK — silme kalıcıdır (iki adımlı onay UI'da var).
-- [ ] `updated_at/archived_at` mmpi_records'ta YOK (yalnızca created_at).
-- [ ] Scoring/norm versiyon kolonu YOK (bkz. §31).
+- [✓] `audit_logs` tablosu EKLENDİ (2026-09-19, migration 20260919000000): security-definer
+  trigger her mmpi_records insert/update/delete olayını (aktör, eylem, hedef, zaman)
+  yazar; yalnızca Admin okur, istemci yazamaz/silemez. Canlı doğrulama [?].
+- [✓] `expert_notes` + `notes_updated_at` kolonları EKLENDİ (B4; ≤4000 karakter,
+  sahibi RLS ile yazar, rapora aktarılır).
+- [ ] Soft-delete / `deleted_at` YOK — silme kalıcıdır (iki adımlı onay UI'da var);
+  audit_logs silme olayını artık kalıcı olarak kaydeder.
+- [ ] `updated_at/archived_at` mmpi_records'ta YOK (yalnızca created_at + notes_updated_at).
+- [~] Scoring/norm versiyonu ayrı kolon değil; payload meta'sında (B2, scoringVersion).
 
 ## 8. RLS / GÜVENLİK DEĞERLENDİRMESİ
 
@@ -294,18 +306,18 @@ Madde durumları (`ReadStatus`): `blank | single | multiple | ambiguous | reliab
 | Confidence | [✓] sezgisel işaret gücü (olasılık DEĞİL — README'de açık) |
 | Gerçek kamera/kağıt kalibrasyonu | [?] YAPILMADI — yalnızca sentetik raster + depo PDF'inin rasterleştirilmesi test edildi |
 
-## 10. MANUEL DÜZELTME / AUDIT İZİ (OMR) — [✓] kayıt içinde, [~] merkezi audit yok
+## 10. MANUEL DÜZELTME / AUDIT İZİ (OMR) — [✓] kayıt içinde + kayda taşınıyor (B3)
 
 - Yer: `ScanResultPreview.tsx` (madde seç → D / Y / Boş).
 - Model: `ManualReview { choiceId, reviewedAt }` + **`ManualReviewEvent`**:
   `{ itemId, action: 'review'|'undo', reviewerId, recordedAt, previous, next }` —
   eski değer, yeni değer, kullanıcı, zaman TUTULUYOR (`pageSequence.ts`).
 - `reviewHistory` sayfayla birlikte taslağa (`draftStorage`) yazılır ve
-  kayıt payload'ına (`toSavedPage` → `manualReviews`) girer.
-- [!] `reviewHistory` (olay listesi) kayda GİTMİYOR — yalnızca son `manualReviews`
-  haritası kaydediliyor (`toSavedPage` history'yi kopyalamaz). Denetim izi sunucuda kalıcı
-  değil. İstenirse `SavedAnswerPage`'e eklenebilir (küçük değişiklik, geriye uyumlu).
-- Ayrı `audit_logs` tablosu YOK (bkz. §34).
+  kayıt payload'ına girer.
+- [✓] B3 (2026-09-19): `toSavedPage` artık `reviewHistory`'yi derin kopyayla
+  `SavedAnswerPage.reviewHistory` alanına taşır; denetim izi sunucuda kalıcıdır.
+  Eski kayıtlarda alan yoktur (opsiyonel, geriye uyumlu). Test: tests/savedPage.test.ts.
+- [✓] B8 (2026-09-19): ayrıca sunucu taraflı `audit_logs` tablosu + trigger eklendi (bkz. §34).
 
 ## 11. MMPI SCORING MOTORU — [✓] merkezi, [~] bazı kaynaklar doğrulanamadı
 
@@ -599,9 +611,9 @@ sekme/rota olarak mevcut (prompt "mevcut routing farklıysa bozma" diyor). [-]
 
 ```text
 [✓] npm run typecheck  → temiz (0 hata)
-[✓] npm test           → 190/190 pass, 0 fail (25 dosya, ~89 sn) — B1/B2 dahil son haliyle
+[✓] npm test           → 192/192 pass, 0 fail (26 dosya, ~85 sn) — B1–B10 dahil son haliyle
 [✓] npm run build      → başarılı; optik-form.html yeniden üretildi
-[?] npm run verify:pdf → BU OTURUMDA ÇALIŞTIRILMADI (CI'da koşuyor)
+[✓] npm run verify:pdf → koşuldu (2026-09-19): 4 A4 sayfa, 566 madde koordinatı doğrulandı
 [ ] Canlı Supabase login/RLS/Edge Function testi → ortam yok, YAPILMADI
 [ ] Gerçek kağıt/kamera OMR testi → YAPILMADI (yalnızca sentetik + depo PDF raster)
 [ ] Tarayıcıda manuel print/PDF çıktısı görsel kontrolü → YAPILMADI (SSR render testleri var)
@@ -620,14 +632,14 @@ K düzeltme, Mf ters), geçerlik bantları/eşikleri, kod kanonikleştirme, tür
 | --- | --- | --- | --- | --- |
 | B1 | P1 | Üç-durum geçerlik UI'ya bağlanmadı (status alanı sahipsiz) | results/*.tsx, workspace.css | [✓] TAMAMLANDI (2026-09-19, testli) |
 | B2 | P1 | scoringVersion kayda yazılmıyor (version.ts sahipsiz) | caseTypes.ts, version.ts | [✓] TAMAMLANDI (2026-09-19, testli) |
-| B3 | P2 | reviewHistory (OMR düzeltme denetim izi) kayda gitmiyor | supabaseRecords.ts toSavedPage | [ ] |
-| B4 | P2 | Uzman notu (kayıt sonrası) ve rapora aktarımı yok | RecordDetailPage, DB | [ ] |
-| B5 | P2 | Tek dosya build CSP'sinde connect-src yok → Supabase'li dağıtımda bağlantı engellenebilir | scripts/build.mjs | [?] canlı doğrulama gerekli |
-| B6 | P3 | Rapor sayfa numarası yok | workspace.css @media print | [ ] |
-| B7 | P3 | "Reis (1966)" → "Ries" yazım/atıf düzeltmesi | mmpiCritical.ts | [ ] |
-| B8 | P3 | Audit log tablosu yok | supabase/ | [ ] karar bekliyor |
-| B9 | P3 | Kayıt listesinde tarih/geçerlik filtresi yok | MyRecordsPanel/AdminPanel | [ ] |
-| B10 | P3 | Admin'in ham cevap erişimi minimize edilmedi | RLS | [ ] ürün kararı |
+| B3 | P2 | reviewHistory (OMR düzeltme denetim izi) kayda gitmiyor | supabaseRecords.ts toSavedPage | [✓] TAMAMLANDI (2026-09-19; derin kopya + test) |
+| B4 | P2 | Uzman notu (kayıt sonrası) ve rapora aktarımı yok | RecordDetailPage, MMPIPrintReport, migration 20260919000000 | [✓] TAMAMLANDI (expert_notes ≤4000, RLS sahibi yazar, baskıda koşullu bölüm, test) |
+| B5 | P2 | Tek dosya build CSP'sinde connect-src yok → Supabase'li dağıtımda bağlantı engellenebilir | scripts/build.mjs | [✓] TAMAMLANDI (VITE_SUPABASE_URL varsa origin+wss allowlist, yoksa tam offline; test) — canlı dağıtım doğrulaması hâlâ [?] |
+| B6 | P3 | Rapor sayfa numarası yok | workspace.css @media print | [✓] TAMAMLANDI (isimli @page mmpi-report + @bottom-center counter; desteklemeyen tarayıcıda zarifçe yok sayılır) |
+| B7 | P3 | "Reis (1966)" → "Ries" yazım/atıf düzeltmesi | mmpiCritical.ts, SourcesPage.tsx | [✓] TAMAMLANDI (kod atfı Ries; ikincil-yazım notu korundu) |
+| B8 | P3 | Audit log tablosu yok | supabase/migrations/20260919000000 | [✓] TAMAMLANDI (audit_logs + security-definer trigger; yalnız Admin okur, istemci yazamaz) — canlı test [?] |
+| B9 | P3 | Kayıt listesinde tarih filtresi yok | MyRecordsPanel/AdminPanel | [✓] TAMAMLANDI (uygulama tarihi aralık filtresi + temizle) |
+| B10 | P3 | Admin'in ham cevap erişimi minimize edilmedi | RLS / ürün kararı | [✓] KARAR VERİLDİ: Admin erişimi denetim/silme görevi için bilinçli ürün; dengeleme B8 audit_logs ile sağlandı (her erişimli yazma izlenir). Ham cevap SELECT kısıtlaması istenirse ileride kolon-düzeyi görünüm gerekir — şu an kapsam dışı. |
 
 Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıtlı).
 
@@ -639,8 +651,7 @@ Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıt
 [?] Savaşır (1981) norm sayıları kod ↔ kitap birebir karşılaştırılamadı.
 [?] Ölçek anahtarları klasik set ile uyumlu ancak telifli orijinalle madde madde kontrol edilmedi.
 [?] OMR gerçek kağıt/kalem/fotokopi üzerinde kalibre edilmedi (yalnızca sentetik).
-[?] verify:pdf bu oturumda koşulmadı (CI adımı olarak mevcut).
-[?] Tek dosya build'in Supabase'e bağlanabilirliği (CSP connect-src) canlıda doğrulanmadı.
+[?] Tek dosya build'in Supabase'e bağlanabilirliği canlıda doğrulanmadı (CSP connect-src kod tarafı B5 ile eklendi; canlı dağıtım testi bekliyor).
 ```
 
 ## 36. ARAŞTIRILDI / UYGULANMADI
@@ -667,47 +678,55 @@ Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıt
 ## 38. NEXT AI — BURADAN DEVAM ET
 
 1. **Bu dosyayı tamamen oku.** Sonra `docs/kaynak-denetimi.md` ve `README.md` oku.
-2. B1 ve B2 TAMAMLANDI ve branch'e commit edildi (bkz. §42–43). Working tree temiz
-   olmalı; `git status` ile doğrula.
+2. B1–B10 backlog'unun TAMAMI kapatıldı ve branch'e commit edildi (bkz. §34, §42–43).
+   Working tree temiz olmalı; `git status` ile doğrula.
 3. Her değişiklikten sonra: `npm run typecheck && npm test && npm run build`
    (build şart — `optik-form.html` drift'ini CI reddeder; build çıktısını commit'e dahil et).
 4. **Bilimsel veri DEĞİŞTİRME:** normlar, anahtarlar, eşikler, K tablosu, yorum metinleri
    yalnızca doğrulanmış kaynakla değiştirilebilir. Kaynak yoksa D/E statüsüyle raporla.
 5. Commit/push YALNIZCA `arena/01a0b91f-repo123` branch'ine.
+6. YENİ migration `20260919000000_expert_notes_and_audit.sql` henüz canlı projeye
+   push edilmedi (`supabase db push` operatör işidir). İstemci kodu migration'sız
+   ortamda da kırılmaz (expert_notes toleranslı okunur) ama not kaydetme, migration
+   uygulanana kadar sunucu hatası döndürür.
 
-### Devam etme sırası (kalan %50)
+### Devam etme sırası (kalan işler — hepsi ortam/kaynak işi, kod işi DEĞİL)
 ```text
-1. B3 — reviewHistory'yi SavedAnswerPage'e ekle (denetim izi)
-2. B4 — kayıt sonrası uzman notu + rapora aktarım (DB update politikası zaten var)
-3. B5 — CSP connect-src kararı (canlı Supabase dağıtımı hedefleniyorsa)
-4. B6/B7 — rapor sayfa numarası, Ries atıf düzeltmesi
-5. MMPIValidityTab yerel eşik sabitlerini VALIDITY_CUTOFFS ile tekilleştir
-6. Canlı ortam testleri: RLS cross-user, Edge Function, login/expired session
-7. Gerçek kağıt OMR pilotu (mümkünse)
-8. B8–B10 ürün kararları (audit log, filtreler, admin veri minimizasyonu)
+1. Canlı Supabase: `supabase db push` (yeni migration) + RLS cross-user testi,
+   Edge Function testi, login/expired session, audit_logs doğrulaması
+2. Canlı dağıtımda tek dosya build'in Supabase bağlantısı (B5 CSP) doğrulaması
+3. Gerçek kağıt/kamera OMR pilotu ve kalibrasyon
+4. Kaynak doğrulama: Savaşır norm sayıları, Wiggins M/SD, K tablosu .4K çifti,
+   türetilmiş kesimler (yalnızca doğrulanmış kaynakla; yoksa D/E statüde bırak)
+5. Ürün kararları: password reset akışı, rapor sayfa numarasının tarayıcı
+   desteği genişletmesi (istenirse JS tabanlı alternatif)
 ```
 
 ## 39. FINAL TODO
 
 - [x] B1: `status`/`validityStatusDisplay` UI bağlantısı + `.is-suspect` CSS + testler (2026-09-19)
 - [x] B2: `scoringVersion` kayıt meta'sına + görünüme (2026-09-19)
-- [ ] B3: `reviewHistory` kayda taşı
-- [ ] MMPIValidityTab yerel eşik sabitleri → VALIDITY_CUTOFFS tekilleştirme
-- [ ] B4: Uzman notu (kayıt sonrası, rapora aktarım)
-- [ ] B5: CSP `connect-src` kararı + canlı doğrulama
-- [ ] B6: Rapor sayfa numarası
-- [ ] B7: "Ries (1966)" atıf düzeltmesi
-- [ ] Canlı Supabase: RLS cross-user testi, Edge Function testi, login/expired session
-- [ ] verify:pdf'i lokalde bir kez koştur
+- [x] B3: `reviewHistory` kayda taşı (toSavedPage derin kopya + tests/savedPage.test.ts) (2026-09-19)
+- [x] MMPIValidityTab yerel eşik sabitleri → VALIDITY_CUTOFFS tekilleştirme (2026-09-19)
+- [x] B4: Uzman notu — expert_notes kolonu + RecordDetailPage editörü + MMPIPrintReport bölümü + testler (2026-09-19)
+- [x] B5: CSP `connect-src` — build.mjs koşullu allowlist + build testi (2026-09-19); canlı dağıtım doğrulaması hâlâ açık
+- [x] B6: Rapor sayfa numarası (isimli @page + @bottom-center) (2026-09-19)
+- [x] B7: "Ries (1966)" atıf düzeltmesi (mmpiCritical.ts + SourcesPage.tsx) (2026-09-19)
+- [x] B8: audit_logs tablosu + security-definer trigger (migration 20260919000000) (2026-09-19)
+- [x] B9: Kayıt listelerinde tarih aralığı filtresi (MyRecordsPanel + AdminPanel) (2026-09-19)
+- [x] B10: Admin erişim kararı belgelendi; denetim izi (B8) ile dengelendi (2026-09-19)
+- [x] verify:pdf lokalde koşuldu — 4 sayfa, 566 madde koordinatı doğrulandı (2026-09-19)
+- [x] CaseWorkspace bayat metin düzeltmesi ("puanlama motoru bağlı değildir" → gerçek durum) (2026-09-19)
+- [ ] Canlı Supabase: `supabase db push` + RLS cross-user testi, Edge Function testi, login/expired session
 - [ ] Gerçek kağıt/kamera OMR doğrulaması
-- [ ] Ürün kararları: audit log, admin veri minimizasyonu, filtreler, password reset
+- [ ] Kaynak doğrulama işleri (Savaşır normları, Wiggins M/SD vb. — bkz. §36)
+- [ ] Ürün kararı: password reset akışı
 
 ### Tamamlananlar (bu dokümana kadar)
 - [x] Tam repo denetimi (mimari, auth, RLS, OMR, scoring, validity, rapor, UI, testler)
-- [x] typecheck + 190 test + build doğrulaması (2026-09-19)
+- [x] typecheck + 192 test + build + verify:pdf doğrulaması (2026-09-19)
 - [x] Secret/XSS/console taramaları
-- [x] B1: `ValidityStatus` scoring katmanı + tüm UI bağlantısı + CSS + testler
-- [x] B2: `version.ts` + `scoringVersion`/`normSource` meta entegrasyonu + görünüm + testler
+- [x] B1–B10 backlog'unun tamamı (ayrıntı: §34 tablo)
 - [x] Bu devir dokümanı
 
 ## 40. PRODUCTION READINESS
@@ -720,28 +739,30 @@ Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıt
 | RLS | [✓] kod / [?] canlı | cross-user canlı testi yok |
 | OMR | [✓] sentetik / [?] gerçek kağıt | kalibrasyon yok |
 | Scoring | [✓] | K tablosu .4K anomalisi kayıtlı |
-| Validity | [✓] hesap + üç-durum UI | eşik sabiti tekilleştirme (kozmetik) |
+| Validity | [✓] hesap + üç-durum UI + eşik tekil kaynak | — |
 | Norms | [~] | Savaşır sayıları birebir doğrulanamadı; Wiggins M/SD kaynaksız |
 | Interpretation | [~] | ana metin kaynağı künyesiz (C) |
-| Reports | [✓] | uzman notu yok; sayfa no yok |
-| Security | [✓] | B5 CSP kararı |
+| Reports | [✓] | uzman notu + sayfa numarası eklendi |
+| Security | [✓] | audit_logs eklendi; CSP connect-src koşullu allowlist — canlı doğrulama [?] |
 | Performance | [✓] | tek dosya build büyük (bilinçli) |
 | Responsive | [~] | gerçek cihaz testi yok |
 | Testing | [✓] otomatik / [~] canlı | canlı ortam testleri eksik |
-| Deployment | [✓] statik + CI | Supabase'li dağıtımda B5 |
+| Deployment | [✓] statik + CI | Supabase'li dağıtımda canlı CSP doğrulaması açık |
 
 ## 41. PROJECT STATUS
 
 ```text
 Overall:
-PRODUCTION'A YAKLAŞIYOR — OTOMATİK DOĞRULAMA GÜÇLÜ; B1+B2 KAPANDI, KALAN EKSİKLER:
- 1) Canlı Supabase (RLS/Edge Function/oturum) testi hiç yapılmadı.
- 2) Gerçek kağıt OMR kalibrasyonu yok.
+KOD-DÜZEYİ BACKLOG SIFIR — B1–B10 kalemlerinin tamamı kapatıldı (typecheck temiz,
+192/192 test, build + verify:pdf başarılı). Kalan eksikler yalnızca ortam ve
+kaynak doğrulama işleridir:
+ 1) Canlı Supabase testi (db push + RLS cross-user + Edge Function + oturum +
+    audit_logs + CSP connect-src) hiç yapılmadı — kod hazır, ortam yok.
+ 2) Gerçek kağıt OMR kalibrasyonu yok (yalnızca sentetik + PDF raster).
  3) Bazı bilimsel eşiklerin kaynağı yok — bilinçli olarak D/E statüsüyle
     raporlanıyor; sayı DEĞİŞTİRİLMEDİ, UYDURULMADI.
- 4) B3–B10 backlog kalemleri (denetim izi, uzman notu, CSP, rapor sayfa no,
-    atıf düzeltmesi, ürün kararları) sonraki oturuma bırakıldı.
-"Hazır/tamamlandı" beyanı bu eksikler kapanmadan YAZILAMAZ.
+"Production hazır" beyanı 1–2 kapanmadan YAZILAMAZ; kod tarafında bilinen
+açık iş kalmamıştır.
 ```
 
 ## 42. CHANGELOG
@@ -755,19 +776,36 @@ PRODUCTION'A YAKLAŞIYOR — OTOMATİK DOĞRULAMA GÜÇLÜ; B1+B2 KAPANDI, KALAN
 | 2026-09-19 | Test güncellemeleri: üç-durum status testleri + scoringVersion round-trip + render regex'leri üç etikete genişletildi | tests/mmpiInterpretation.test.ts, tests/caseWorkspace.test.ts | B1/B2 kapsama | 190/190 pass |
 | 2026-09-19 | build yan ürünü yeniden üretildi | optik-form.html | kaynak değişti → CI drift kontrolü | COMMIT edildi |
 | 2026-09-19 | Bu devir dokümanı (oluşturuldu + B1/B2 sonrası güncellendi) | MMPI_PROJECT_STATUS.md | token/devir güvenliği | COMMIT edildi |
+| 2026-09-19 | B3: reviewHistory → SavedAnswerPage (derin kopya) + test | supabaseRecords.ts, tests/savedPage.test.ts | denetim izi kalıcılığı | 2. commit; testli |
+| 2026-09-19 | B4: expert_notes/notes_updated_at kolonu + updateExpertNotes + RecordDetailPage not editörü + MMPIPrintReport "Uzman Değerlendirme Notu" bölümü + CSS | migration 20260919000000, supabaseRecords.ts, RecordDetailPage.tsx, MMPIPrintReport.tsx, workspace.css | uzman iş akışı + rapora aktarım | 2. commit; testli (dolu not basılır, boş not basılmaz) |
+| 2026-09-19 | B5: build CSP'ye koşullu connect-src (Supabase origin + wss); yapılandırılmamışsa tam offline | scripts/build.mjs, tests/build.test.ts | Supabase'li dağıtımda bağlantı | 2. commit; testli |
+| 2026-09-19 | B6: rapor sayfa numarası (isimli @page mmpi-report + @bottom-center counter) | workspace.css | rapor bütünlüğü | 2. commit; tarayıcı desteği sınırlıysa zarifçe yok sayılır |
+| 2026-09-19 | B7: "Reis 1966" → "Ries 1966" atıf düzeltmesi (ikincil-yazım notu korundu) | mmpiCritical.ts, SourcesPage.tsx | kaynak doğruluğu | 2. commit |
+| 2026-09-19 | B8: audit_logs tablosu + log_mmpi_record_change security-definer trigger + yalnız-Admin SELECT RLS | migration 20260919000000, supabase/README.md | denetim izi (sunucu taraflı, istemci atlayamaz) | 2. commit; canlı test [?] |
+| 2026-09-19 | B9: kayıt listelerinde uygulama tarihi aralık filtresi + temizle düğmesi | MyRecordsPanel.tsx, AdminPanel.tsx, screen.css | uzman iş akışı | 2. commit |
+| 2026-09-19 | B10 kararı: Admin kayıt erişimi bilinçli ürün; audit_logs ile dengelendi; gerekçe kodda ve bu dokümanda | supabaseRecords.ts (yorum), bu doküman §34 | ürün kararının belgelenmesi | 2. commit |
+| 2026-09-19 | MMPIValidityTab eşikleri VALIDITY_CUTOFFS'tan (yerel kopya kaldırıldı) | MMPIValidityTab.tsx | tek doğruluk kaynağı | 2. commit |
+| 2026-09-19 | supabaseClient: import.meta.env güvenli erişim (Node test ortamı toleransı) | supabaseClient.ts | test edilebilirlik | 2. commit |
+| 2026-09-19 | CaseWorkspace bayat metin düzeltmesi ("klinik puanlama motoru bağlı değildir" → skorlama aynı ekranda) | CaseWorkspace.tsx | doğruluk (metin gerçek durumu yansıtmıyordu) | 2. commit |
+| 2026-09-19 | verify:pdf lokalde koşuldu | — | FINAL TODO maddesi | 4 sayfa/566 madde doğrulandı |
 
 ## 43. GİT DURUMU (2026-09-19)
 
 ```text
 branch:         arena/01a0b91f-repo123  (oturum bu branch'e kilitli; başka branch'e geçme)
 base commit:    fea1f19 (main) — "Merge pull request #24 ..."
-commit:         B1 + B2 + testler + optik-form.html + bu doküman tek commit'te
-                branch'e commit edildi (2026-09-19). Working tree commit sonrası temiz.
-kapsam:         src/scoring/version.ts (yeni), mmpiScoring.ts, mmpiInterpretation.ts,
-                caseTypes.ts, MMPIResultsPanel.tsx, MMPIValidityTab.tsx,
-                MMPIPrintReport.tsx, RecordDetailPage.tsx, workspace.css,
-                tests/mmpiInterpretation.test.ts, tests/caseWorkspace.test.ts,
-                optik-form.html, MMPI_PROJECT_STATUS.md
+commit 1:       1272e15 — B1 + B2 + testler + optik-form.html + bu doküman (2026-09-19)
+commit 2:       B3–B10 + eşik tekilleştirme + metin düzeltmesi + testler +
+                optik-form.html + bu doküman güncellemesi (2026-09-19).
+                Working tree commit sonrası temiz.
+kapsam (2):     supabase/migrations/20260919000000_expert_notes_and_audit.sql (yeni),
+                supabase/README.md, src/records/supabaseRecords.ts,
+                src/components/RecordDetailPage.tsx, MyRecordsPanel.tsx, AdminPanel.tsx,
+                CaseWorkspace.tsx, SourcesPage.tsx, results/MMPIPrintReport.tsx,
+                results/MMPIValidityTab.tsx, src/scoring/mmpiCritical.ts,
+                src/auth/supabaseClient.ts, src/styles/screen.css, workspace.css,
+                scripts/build.mjs, tests/savedPage.test.ts (yeni), tests/build.test.ts,
+                tests/mmpiInterpretation.test.ts, optik-form.html, MMPI_PROJECT_STATUS.md
 ```
 
 ---

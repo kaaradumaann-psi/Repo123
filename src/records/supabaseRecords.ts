@@ -1,5 +1,5 @@
 import type { FormDefinition, Point } from '../omr/omrTypes';
-import type { ItemReadResult, ManualReview, QualityReport, StoredScanPage } from '../results/scanResultTypes';
+import type { ItemReadResult, ManualReview, ManualReviewEvent, QualityReport, StoredScanPage } from '../results/scanResultTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { requireSupabase } from '../auth/supabaseClient';
 
@@ -14,6 +14,11 @@ export type SavedAnswerPage = {
   warnings: string[];
   sourceName: string;
   manualReviews: Record<string, ManualReview>;
+  /**
+   * Manuel düzeltme denetim izi (kim, ne zaman, önceki/sonraki değer).
+   * Eski kayıtlarda bulunmaz; okuma tarafı alanı opsiyonel saymalıdır.
+   */
+  reviewHistory?: ManualReviewEvent[];
 };
 
 export type MMPIRecord = { id: string; createdAt: string };
@@ -36,6 +41,10 @@ export type RecordSummary = {
 
 export type FullRecordDetail = RecordSummary & {
   rawOmrAnswers: unknown[];
+  /** Kayıt sonrası uzman değerlendirme notu (migration öncesi kayıtlarda boş). */
+  expertNotes: string;
+  /** Not son güncelleme zamanı (hiç not girilmediyse undefined). */
+  notesUpdatedAt?: string;
 };
 
 export type Gender = 'Kadın' | 'Erkek' | 'Belirtmek istemiyor' | 'Diğer';
@@ -82,7 +91,8 @@ export function canCreateRecord(pages: readonly StoredScanPage[], definition: Fo
   );
 }
 
-function toSavedPage(page: StoredScanPage): SavedAnswerPage {
+/** Kaydedilecek sayfa yükü: görüntü içermez; manuel düzeltmeler ve denetim izi korunur. */
+export function toSavedPage(page: StoredScanPage): SavedAnswerPage {
   return {
     pageId: page.pageId,
     pageNumber: page.pageNumber,
@@ -94,6 +104,13 @@ function toSavedPage(page: StoredScanPage): SavedAnswerPage {
     warnings: [...page.warnings],
     sourceName: page.sourceName,
     manualReviews: Object.fromEntries(Object.entries(page.reviews).map(([key, review]) => [key, { ...review }])),
+    // Denetim izi kayda taşınır: her manuel düzeltme/geri alma olayı
+    // (itemId, işlem, reviewer, zaman, önce/sonra) kalıcı olarak saklanır.
+    reviewHistory: page.reviewHistory.map(event => ({
+      ...event,
+      previous: event.previous ? { ...event.previous } : null,
+      next: event.next ? { ...event.next } : null,
+    })),
   };
 }
 
@@ -311,6 +328,10 @@ export async function listAllRecords(): Promise<RecordSummary[]> {
 }
 
 export async function getRecordDetail(recordId: string): Promise<FullRecordDetail> {
+  // Admin'in kayıt detayına erişimi bilinçli ürün kararıdır (denetim/silme görevi);
+  // tüm yazma işlemleri sunucu tarafında audit_logs tablosuna kaydedilir (B8).
+  // '*' seçimi bilinçlidir: expert_notes/notes_updated_at kolonları migration
+  // uygulanmamış ortamlarda bulunmayabilir; okuma toleranslıdır.
   const { data, error } = await requireSupabase()
     .from('mmpi_records')
     .select('*')
@@ -333,7 +354,30 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
     requestedBy: typeof v.requested_by === 'string' ? v.requested_by : undefined,
     createdBy: typeof v.created_by === 'string' ? v.created_by : undefined,
     rawOmrAnswers: Array.isArray(v.raw_omr_answers) ? (v.raw_omr_answers as unknown[]) : [],
+    expertNotes: typeof v.expert_notes === 'string' ? v.expert_notes : '',
+    notesUpdatedAt: typeof v.notes_updated_at === 'string' ? v.notes_updated_at : undefined,
   };
+}
+
+export const EXPERT_NOTES_MAX = 4000;
+
+/**
+ * Kayıt sonrası uzman notunu günceller. RLS gereği yalnızca kaydı oluşturan
+ * aktif psikolog yazabilir; not, yazdırma raporuna "Uzman Değerlendirme Notu"
+ * bölümü olarak aktarılır. Sunucu tarafı 4000 karakter sınırını da zorlar.
+ */
+export async function updateExpertNotes(recordId: string, notes: string): Promise<string> {
+  const normalized = notes.replace(/\r\n/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f]/g, '').trim();
+  if (normalized.length > EXPERT_NOTES_MAX) {
+    throw new Error(`Uzman notu en fazla ${EXPERT_NOTES_MAX} karakter olabilir.`);
+  }
+  const updatedAt = new Date().toISOString();
+  const { error } = await requireSupabase()
+    .from('mmpi_records')
+    .update({ expert_notes: normalized, notes_updated_at: updatedAt })
+    .eq('id', recordId);
+  if (error) throw new Error('Uzman notu kaydedilemedi. Lütfen tekrar deneyin.');
+  return updatedAt;
 }
 
 export async function deleteRecord(recordId: string): Promise<void> {

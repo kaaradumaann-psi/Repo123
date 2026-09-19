@@ -53,11 +53,25 @@ const shell = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 // escape), because the browser computes the CSP hash over that literal content.
 const scriptBody = js.replaceAll('</script', '<\\/script');
 const scriptHash = createHash('sha256').update(scriptBody).digest('base64');
-// The single-file build runs fully offline: no connects, no remote fonts or scripts,
-// one hash-pinned inline script, inline styles, and blob URLs for previews and the
-// hardened pdf.js worker.
+// The single-file build runs offline by default: no remote fonts or scripts, one
+// hash-pinned inline script, inline styles, and blob URLs for previews and the
+// hardened pdf.js worker. When Supabase is configured at build time, connect-src
+// allowlists exactly that origin (REST + Auth + Edge Functions run on the same
+// host over HTTPS/WSS); without it no network connection is allowed at all.
+const supabaseOrigin = (() => {
+  const raw = (buildEnv.VITE_SUPABASE_URL ?? '').trim();
+  if (!raw) return null;
+  try {
+    return new URL(raw).origin;
+  } catch {
+    throw new Error(`VITE_SUPABASE_URL geçerli bir URL değil: ${raw}`);
+  }
+})();
+const connectSrc = supabaseOrigin
+  ? `connect-src ${supabaseOrigin} ${supabaseOrigin.replace(/^https:/, 'wss:')}; `
+  : '';
 const csp = `default-src 'none'; script-src 'sha256-${scriptHash}'; style-src 'unsafe-inline'; ` +
-  `img-src blob: data:; worker-src blob:; child-src blob:; font-src 'none'; ` +
+  `img-src blob: data:; worker-src blob:; child-src blob:; font-src 'none'; ${connectSrc}` +
   `object-src 'none'; base-uri 'none'; form-action 'none'`;
 const licenses = await Promise.all(['react', 'react-dom', 'scheduler'].map(async name =>
   `${name}\n${await readFile(new URL(`../node_modules/${name}/LICENSE`, import.meta.url), 'utf8')}`,

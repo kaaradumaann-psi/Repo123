@@ -336,10 +336,15 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
           reason: '',
           followUp: '',
           marital: '',
+          expertNotes: 'Bulgular klinik görüşmeyle birlikte değerlendirildi; izlem önerildi.',
+          notesUpdatedAt: '2026-09-19T10:00:00.000Z',
         },
       }),
     );
     assert.match(print, /MMPI Klinik Raporu/);
+    // B4: uzman notu rapora aktarılır; not boşken bölüm basılmaz (alttaki ayrı render).
+    assert.match(print, /Uzman Değerlendirme Notu/);
+    assert.match(print, /izlem önerildi/);
     assert.match(print, /Profil Grafiği/);
     assert.match(print, /Klinik Ölçekler/);
     assert.match(print, /Geçerlik Analizi/);
@@ -347,6 +352,19 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     assert.match(print, /Kritik Bulgular/);
     assert.match(print, /GEÇERLİ|ŞÜPHELİ|GEÇERSİZ/);
     assert.doesNotMatch(print, /kaynak\.pdf/i);
+
+    // Not boş bırakılınca "Uzman Değerlendirme Notu" bölümü hiç basılmaz.
+    const printNoNotes = renderToStaticMarkup(
+      createElement(MMPIPrintReport, {
+        profile: p,
+        meta: {
+          fullName: 'Denek A', testDate: '2026-09-18', reportDate: '2026-09-18',
+          psychologist: 'Uzman', gender: 'Erkek', age: '24', occupation: '', education: '',
+          method: '', duration: '', reason: '', followUp: '', marital: '', expertNotes: '',
+        },
+      }),
+    );
+    assert.doesNotMatch(printNoNotes, /Uzman Değerlendirme Notu/);
 
     const derived = renderToStaticMarkup(createElement(MMPIDerivedSection, { profile: p }));
     assert.match(derived, /Goldberg Ayrım Endeksi/);

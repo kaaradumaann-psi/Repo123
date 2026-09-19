@@ -17,6 +17,10 @@ export type PrintReportMeta = {
   reason: string;
   followUp: string;
   marital: string;
+  /** Kayıt sonrası uzman değerlendirme notu (boşsa bölüm basılmaz). */
+  expertNotes?: string;
+  /** Notun son güncelleme zamanı (ISO); yalnızca not doluyken gösterilir. */
+  notesUpdatedAt?: string;
 };
 
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
@@ -333,6 +337,20 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
                 Madde metinleri telifli olduğu için basılmaz; numaralar MMPI-566 formundaki sırayı izler.
               </p>
             </>
+          )}
+        </section>
+      )}
+
+      {meta.expertNotes && meta.expertNotes.trim() !== '' && (
+        <section className="pr-block pr-avoid" aria-label="Uzman değerlendirme notu">
+          <h2>Uzman Değerlendirme Notu</h2>
+          <p className="pr-notes">{meta.expertNotes}</p>
+          {meta.notesUpdatedAt && (
+            <p className="pr-context">
+              Not son güncelleme: {new Date(meta.notesUpdatedAt).toLocaleString('tr-TR', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
           )}
         </section>
       )}

@@ -1,5 +1,6 @@
 import type { MMPIProfile, ValidityFinding } from '../../scoring/mmpiScoring';
 import { SCALE_MEANINGS } from '../../scoring/mmpiInterpretation';
+import { VALIDITY_CUTOFFS } from '../../scoring/mmpiSource';
 import { Icon } from '../Icon';
 
 type Tone = ValidityFinding['tone'];
@@ -7,11 +8,11 @@ type Tone = ValidityFinding['tone'];
 /** Uyarı tonlarının tek renk kaynağı (kart kenarı, rozet ve sayı renkleri). */
 const TONE_COLOR: Record<Tone, string> = { alert: '#d2453a', watch: '#b4770b', ok: '#0e9e6a' };
 
-/** Profili geçersiz kılan eşikler — özet metniyle aynı kaynaktan beslenir. */
-const CANNOT_SAY_CUTOFF = 31;
-const F_CUTOFF = 23;
+/** Eşikler tek kaynaktan (mmpiSource.VALIDITY_CUTOFFS) — yerel kopya tutulmaz. */
+const CANNOT_SAY_CUTOFF = VALIDITY_CUTOFFS.cannotSayInvalid;
+const F_CUTOFF = VALIDITY_CUTOFFS.fInvalid;
 /** F ham 16-22 → şüpheli bant (kaynak: "profil geçersiz olabilir"). */
-const F_SUSPECT = 16;
+const F_SUSPECT = VALIDITY_CUTOFFS.fSuspect;
 
 function toneClass(tone: Tone): string {
   return tone === 'alert' ? 'is-alert' : tone === 'watch' ? 'is-watch' : 'is-ok';

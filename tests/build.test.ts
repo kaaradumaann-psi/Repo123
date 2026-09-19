@@ -54,6 +54,15 @@ test('standalone build is offline and locked down by a script-hash CSP', () => {
   assert.ok(script, 'Satır içi betik bulunamadı');
   const hash = createHash('sha256').update(script!).digest('base64');
   assert.ok(csp![1].includes(`script-src 'sha256-${hash}'`), 'CSP script hashi belgedeki betikle eslesmiyor');
+  // B5: Supabase yapılandırılmamış build tamamen çevrimdışıdır (connect-src yok);
+  // yapılandırılmışsa yalnızca o origin'e izin verilir (script bunu build'de üretir).
+  const supabaseUrl = (process.env.VITE_SUPABASE_URL ?? '').trim();
+  if (supabaseUrl === '') {
+    assert.ok(!csp![1].includes('connect-src'), 'Supabase yapılandırılmamışken connect-src olmamalı');
+  } else {
+    const origin = new URL(supabaseUrl).origin;
+    assert.ok(csp![1].includes(`connect-src ${origin}`), 'CSP connect-src Supabase origin ile sınırlı olmalı');
+  }
 });
 
 test('standalone build embeds the verified form PDF byte for byte', () => {
