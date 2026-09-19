@@ -257,6 +257,9 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / final footer delivery:** Footer commit zinciri remote HEAD `7a2e1b9785cf992d1f20663166536e4d9de2ff31` ile doğrulandı; çalışma ağacı temiz.
 - **2026-09-19 / merge talebi incelemesi:** Kullanıcının merge isteği üzerine aktif branch ve GitHub kontrol edildi. `arena/01a0ba1c-repo123` remote'da mevcut ancak bu branch'e bağlı açık veya kapalı bir PR bulunamadı; `gh pr status` da PR olmadığını doğruladı.
 - **2026-09-19 / PR ve base incelemesi:** Repository PR geçmişinde #27 ve #28 footer PR'larının `main`e merge edildiği görüldü. `origin/main` artık `5a6e959`; aktif branch `c274b95`ten ilerliyor ve merge-base başlangıç hardening commit'i `9db762c`. Aktif branch için gerçek bir PR oluşturulmamış. Kullanıcının istediği merge işlemi için aktif branch'i güncel `origin/main` ile sabitleyip footer/hardening farkını yeni PR olarak açmak gerekiyor; başka bir PR'ı yanlışlıkla merge etmeyeceğim.
+- **2026-09-19 / base merge:** `origin/main` aktif branch'e `--no-ff` ile alınmaya çalışıldı. `optik-form.html` ve `src/styles/site.css` içindeki iki footer uygulaması nedeniyle conflict oluştu; otomatik olarak devam edilmedi. Çözümde güncel hardening branch'inin compact footer tasarımı kaynak-of-truth olarak korunacak, generated artifact yeniden build edilecek.
+- **2026-09-19 / conflict resolution:** `src/styles/site.css`, `SiteFooter.tsx`, AuthGate/preview footer çağrıları ve `optik-form.html` için aktif hardening branch sürümü korundu; `origin/main`in conflict dışı proje durum güncellemesi saklandı. Conflict marker kalmadı.
+- **2026-09-19 / merged-base validation:** Conflict çözümü sonrası `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236**) ve `git diff --check` başarılı oldu; merge commit öncesi çalışma ağacı inceleniyor.
 
 ---
 
