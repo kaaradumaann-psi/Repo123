@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import { APP_TAGLINE, CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, DEVELOPER_CREDIT, SITE_LABEL, SITE_URL } from '../form/attribution';
+import { CONTACT_EMAIL, COPYRIGHT_HOLDER, COPYRIGHT_YEAR, DEVELOPER_CREDIT, SITE_LABEL, SITE_URL } from '../form/attribution';
 
 /** Bilgi sayfalarının hash rotaları — footer'daki bağlantılar ve App.tsx rotası bunu paylaşır. */
 export const INFO_ROUTES = {
@@ -16,24 +16,22 @@ type SiteFooterProps = {
    * gider; kurulum/önizleme ortamında bu doğru hedeftir.
    */
   onNewEntry?: () => void;
-  /** Bilgi sayfası kabuğunda (InfoPageShell) içerik başlığı footer'da tekrar vurgulanmaz. */
-  compact?: boolean;
 };
 
 /**
- * Sitenin tam alt bilgisi — her ekranda (çalışma alanı, bilgi sayfaları,
- * kurulum/giriş ekranları) aynı içerik ve düzenle görünür:
- * marka + slogan, sayfa bağlantıları (Yeni Veri Girişi, SSS, Gizlilik & KVKK,
- * Kullanım Koşulları, Kaynakça), iletişim ve telif/kredi şeridi.
+ * Sitenin kompakt alt bilgisi — her ekranda (çalışma alanı, bilgi sayfaları,
+ * kurulum/giriş ekranları) aynı içerik ve düzenle görünür. Tek bant: üstte
+ * marka ve sayfa bağlantıları yan yana, ince bir çizginin altında tek küçük
+ * puntoyla telif, kredi, iletişim ve yasal uyarı akışı.
  */
-export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
+export function SiteFooter({ onNewEntry }: SiteFooterProps) {
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
         <div className="site-footer-top">
           <div className="site-footer-brand">
             <span className="site-footer-mark" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
+              <svg width="18" height="18" viewBox="0 0 26 26" fill="none">
                 <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
                 <circle cx="10" cy="10" r="1.8" fill="currentColor" />
                 <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
@@ -41,14 +39,10 @@ export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
                 <circle cx="16" cy="16" r="1.8" fill="currentColor" />
               </svg>
             </span>
-            <div>
-              <strong className="site-footer-name">MMPI-566 Çalışma Alanı</strong>
-              {!compact && <p className="site-footer-tagline">{APP_TAGLINE}</p>}
-            </div>
+            <strong className="site-footer-name">MMPI-566 Çalışma Alanı</strong>
           </div>
 
           <nav className="site-footer-nav" aria-label="Site sayfaları">
-            <span className="site-footer-heading">Sayfalar</span>
             {onNewEntry ? (
               <button type="button" className="site-footer-link" onClick={onNewEntry}>
                 Yeni Veri Girişi
@@ -59,10 +53,10 @@ export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
               </a>
             )}
             <a className="site-footer-link" href={INFO_ROUTES.sss}>
-              Sıkça Sorulan Sorular
+              SSS
             </a>
             <a className="site-footer-link" href={INFO_ROUTES.gizlilik}>
-              Gizlilik &amp; KVKK Politikası
+              Gizlilik &amp; KVKK
             </a>
             <a className="site-footer-link" href={INFO_ROUTES.kullanim}>
               Kullanım Koşulları
@@ -71,17 +65,6 @@ export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
               Kaynakça
             </a>
           </nav>
-
-          <div className="site-footer-contact">
-            <span className="site-footer-heading">İletişim</span>
-            <a className="site-footer-link" href={SITE_URL} target="_blank" rel="noopener noreferrer">
-              <span>{SITE_LABEL}</span>
-              <Icon name="external" size={12} />
-            </a>
-            <a className="site-footer-link" href={`mailto:${CONTACT_EMAIL}`}>
-              {CONTACT_EMAIL}
-            </a>
-          </div>
         </div>
 
         <div className="site-footer-bottom">
@@ -91,6 +74,15 @@ export function SiteFooter({ onNewEntry, compact }: SiteFooterProps) {
           <p className="site-footer-credit">{DEVELOPER_CREDIT}</p>
           <p className="site-footer-disclaimer">
             Bu yazılım tek başına tanı aracı değildir; tüm klinik kararlar ilgili uzman sorumluluğundadır.
+          </p>
+          <p className="site-footer-contact">
+            <a className="site-footer-link" href={SITE_URL} target="_blank" rel="noopener noreferrer">
+              <span>{SITE_LABEL}</span>
+              <Icon name="external" size={11} />
+            </a>
+            <a className="site-footer-link" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
           </p>
         </div>
       </div>
