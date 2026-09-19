@@ -511,3 +511,4 @@ Aranan uzantılar: `.jpg .jpeg .png .webp .heic` → **hiçbiri yok.**
 | 2026-09-19 | AŞAMA 8 | G17 ✅ — FIX-1 (manualWarp) + FIX-2 (enhancement) uygulandı ve ölçüm/testle doğrulandı |
 | 2026-09-19 | AŞAMA 9 + SON | G18/G19 ✅ — typecheck PASS · 236/236 · build PASS · yasak yollar 0 diff; A–J raporu yazıldı |
 | 2026-09-19 | Devam (FIX-3) | Kullanıcı onayıyla LOW_RESOLUTION fallback genişletmesi (`ScannerWorkspace.tsx` tek koşul) · kanıt: …526/…539 manuel yol sayfa 2 · 11 işaret · regresyon typecheck PASS · 236/236 · build PASS (2. kez) |
+| 2026-09-19 | Teslim | **PR #32** `arena/01a0bb36-repo123` → `main` **MERGED** (merge commit `3edc0bd`, 2026-09-19 21:13 UTC); oturum branch'i korunuyor (silinmedi) |
