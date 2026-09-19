@@ -34,7 +34,7 @@
   }
 
   .site-footer-inner {
-    max-width: 1040px;
+    max-width: var(--site-footer-max, var(--container));
     margin: 0 auto;
   }
 
@@ -104,14 +104,14 @@
     text-underline-offset: 3px;
   }
 
-  /* Yasal şerit: telif · kredi · uyarı · iletişim, tek küçük punto akışı.
-     Öğeler arasına "." ayırıcılarını CSS yerleştirir; satır sonunda da
-     okunur kalır. */
+  /* Yasal şerit: solda telif ve sorumluluk uyarısı, sağda geliştirici kredisi
+     ve iletişim. Üst banttaki marka/bağlantı hizasını koruyan iki kolon;
+     dar ekranda tek kolona inip sırayla akar (telif, iletişim, kredi, uyarı). */
   .site-footer-bottom {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 6px 40px;
     align-items: baseline;
-    flex-wrap: wrap;
-    gap: 3px 0;
     margin-top: 13px;
     padding-top: 11px;
     border-top: 1px solid var(--hairline);
@@ -120,13 +120,8 @@
     color: var(--muted);
   }
 
-  .site-footer-bottom > * + *::before {
-    content: "·";
-    margin: 0 10px;
-    color: var(--slate-300);
-  }
-
   .site-footer-copyright {
+    grid-area: 1 / 1;
     margin: 0;
     font-size: 12px;
     color: var(--soft);
@@ -139,15 +134,23 @@
     color: var(--text);
   }
 
-  .site-footer-credit,
+  .site-footer-credit {
+    grid-area: 1 / 2;
+    margin: 0;
+    text-align: right;
+  }
+
   .site-footer-disclaimer {
+    grid-area: 2 / 1;
     margin: 0;
   }
 
   .site-footer-contact {
+    grid-area: 2 / 2;
     margin: 0;
     display: inline-flex;
     align-items: baseline;
+    justify-content: flex-end;
     gap: 14px;
   }
 
@@ -163,6 +166,14 @@
   @media (max-width: 860px) {
     .site-footer { padding: 15px 20px 13px; }
     .site-footer-nav { gap: 4px 16px; }
+    .site-footer-bottom {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+    .site-footer-copyright { grid-area: auto; order: 1; }
+    .site-footer-contact { grid-area: auto; order: 2; justify-content: flex-start; }
+    .site-footer-credit { grid-area: auto; order: 3; text-align: left; }
+    .site-footer-disclaimer { grid-area: auto; order: 4; }
   }
 
   @media (max-width: 560px) {
@@ -182,6 +193,9 @@
     display: flex;
     flex-direction: column;
     background: var(--bg);
+    /* Alt bilgi, bilgi sayfalarının içerik ölçüsüyle (1080 px) hizalanır;
+       çalışma alanında varsayılan --container (1440 px) geçerlidir. */
+    --site-footer-max: 1080px;
   }
 
   .info-topbar {
