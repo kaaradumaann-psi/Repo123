@@ -381,6 +381,25 @@ Aranan uzantılar: `.jpg .jpeg .png .webp .heic` → **hiçbiri yok.**
 * **LOW_RESOLUTION kapısı messenger çözünürlüğünü reddediyor ve manuel fallback açılmıyor** (fallback yalnız ALIGNMENT_MISSING'de). Aynı fotoğraflar manuel köşeyle okunabildiğinden bu bir ürün-kararı boşluğu; akış değişikliği gerektirir → minimal-müdahale kuralı gereği fix yapılmadı, öneri olarak bırakıldı.
 * **Canlı overlay bbox'u:** tasarım gereği "rehber" niteliğinde; gerçek 4-köşe canlı tespit bir **özellik eksikliği** (yeni algoritma gerektirir) → bu görevin "minimal fix" kapsamı dışında, son raporda kayıtlı.
 
+### FIX-3 — LOW_RESOLUTION'da manuel 4-köşe fallback (kullanıcı onaylı akış genişletmesi)
+
+* **Dosya:** `src/components/ScannerWorkspace.tsx` (tek koşul + neden cümlesi; `src/omr/**`/`src/scoring/**` `src/form/**` diff=0)
+* **Kural:** yeni algoritma YOK · yeni dependency YOK · manuel akış (**ManualCornerEditor → manualWarp → fitHomography → warpPerspective → analyzePage → OMR**) aynen kullanılıyor · otomatik OMR'da LOW_RESOLUTION yine başarısız/uygunsuz
+* **Koşul değişikliği (önce → sonra):**
+  ```ts
+  // ÖNCE:  if (!result.ok && result.code === 'ALIGNMENT_MISSING') {
+  // SONRA: if (!result.ok && (result.code === 'ALIGNMENT_MISSING' || result.code === 'LOW_RESOLUTION')) {
+  ```
+  Neden cümlesi LOW_RESOLUTION'da "Çözünürlük otomatik okuma için yetersiz." — ALIGNMENT_MISSING metinleri birebir aynı.
+* **Kanıt (`scripts/validation/stage8-lowresFallback.ts`):**
+
+  | Fotoğraf | 1) otomatik | 2) koşul | 3-4) manualWarp | 5-6) manuel analyzePage |
+  |---|---|---|---|---|
+  | `…526` | ❌ LOW_RESOLUTION (semantik korundu) | fallback açılır ✅ | 1680×2376 ✅ | ✅ **sayfa 2 · 11 işaretli** |
+  | `…539` | ❌ LOW_RESOLUTION (semantik korundu) | fallback açılır ✅ | 1680×2376 ✅ | ✅ **sayfa 2 · 11 işaretli** |
+
+* **Regresyon (bu fix sonrası):** typecheck PASS · **236/236 PASS** · build PASS · yasak yol diff=0
+
 `AŞAMA 8 TAMAMLANDI`
 
 ## AŞAMA 9 — REGRESYON ✅
@@ -458,7 +477,7 @@ Aranan uzantılar: `.jpg .jpeg .png .webp .heic` → **hiçbiri yok.**
 1. **[FIX EDİLDİ]** Manuel köşe sırası kadraj-görsel → 90°-yatık sayfada anamorfik sıkışma, manuel fallback ikinci kez başarısız oluyordu (gerçek fotoğraflarla reproduce edildi).
 2. **[FIX EDİLDİ]** ENHANCED modu kliplenmemiş CLAHE → gerçek fotoğrafta noise ×8 + gölge bantlaması; "Geliştirilmiş" etiketi tersine çalışıyordu.
 3. **[KAYITLI — düzeltilmedi]** Canlı kamera tespiti yalnızca bbox: gerçek 4 köşe/perspektif takibi yok; parlak zeminde kutu kadrajı kaplıyor ya da sol üstte takılı kalıyor; >%92 dolulukta (en iyi kadraj) bilinçli reddedilip `too-bright` deniyor.
-4. **[KAYITLI — düzeltilmedi]** Messenger çözünürlüğü (960–1280px) telefon çekimleri `LOW_RESOLUTION` kapısına takılıyor ve bu kod manuel köşe fallback'ini AÇMIYOR; aynı çekimler manuel köşeyle okunabiliyor → ürün-kararı boşluğu (öneri: LOW_RESOLUTION'da da manuel yol öner veya kapıyı gözden geçir).
+4. **[FIX EDİLDİ — FIX-3]** Messenger çözünürlüğü (960–1280px) telefon çekimleri `LOW_RESOLUTION` kapısına takılıyor ve bu kod manuel köşe fallback'ini AÇMIYORDU; koşul genişletildi (otomatik semantik aynı), `…526`/`…539` manuel yoldan sayfa 2 · 11 işaretle okunuyor.
 5. **[KAYITLI — veri vakası]** `5a.jpg`'nin QR kodu 4 rotasyonda da çözülemiyor (bu fiziksel baskıya özgü kalite; pipeline yönelim bug'ı değil).
 6. **[KAYITLI]** `normalizeShadows()` üretimde çağrılmıyor (ölü kod); üretimde yalnızca önizleme OMR modundaki sade kopya çalışıyor. Birleştirme/etkinleştirme ürün kararı.
 
@@ -468,8 +487,9 @@ Aranan uzantılar: `.jpg .jpeg .png .webp .heic` → **hiçbiri yok.**
 |---|---|
 | `src/scanner/manualWarp.ts` | FIX-1: `normalizeCornerOrder()` + `applyManualCorners`'da kullanımı (portre sayfa, kısa-kenar hizalaması) |
 | `src/scanner/enhancement.ts` | FIX-2: `enhanceLocal()` içine CLAHE klip limiti (`clipFactor=3`) + tekdüze yeniden dağıtım |
+| `src/components/ScannerWorkspace.tsx` | FIX-3: fallback koşuluna `LOW_RESOLUTION` eklendi + kod-bazlı neden cümlesi (tek koşul; başka davranış değişmedi) |
 | `optik-form.html` | repo'nun **kendi build scriptinin** çıktısı olarak yeniden üretildi (manuel edit yok) |
-| `scripts/validation/` (yeni) | 7 ölçüm scripti + overlay/sheet kanıt PNG'leri (ürün kodu değil) |
+| `scripts/validation/` (yeni) | 8 ölçüm scripti + overlay/sheet kanıt PNG'leri (ürün kodu değil) |
 | `CAMSCANNER_REAL_PHOTO_VALIDATION.md` (yeni) | bu mühendislik dosyası |
 
 `SON RAPOR TAMAMLANDI`
@@ -490,3 +510,4 @@ Aranan uzantılar: `.jpg .jpeg .png .webp .heic` → **hiçbiri yok.**
 | 2026-09-19 | AŞAMA 7 | G16 ✅ — otomatik E2E 4/8; overlay sorusu kesinleşti; LOW_RESOLUTION boşluğu + 5a QR vakası kayıtlı |
 | 2026-09-19 | AŞAMA 8 | G17 ✅ — FIX-1 (manualWarp) + FIX-2 (enhancement) uygulandı ve ölçüm/testle doğrulandı |
 | 2026-09-19 | AŞAMA 9 + SON | G18/G19 ✅ — typecheck PASS · 236/236 · build PASS · yasak yollar 0 diff; A–J raporu yazıldı |
+| 2026-09-19 | Devam (FIX-3) | Kullanıcı onayıyla LOW_RESOLUTION fallback genişletmesi (`ScannerWorkspace.tsx` tek koşul) · kanıt: …526/…539 manuel yol sayfa 2 · 11 işaret · regresyon typecheck PASS · 236/236 · build PASS (2. kez) |
