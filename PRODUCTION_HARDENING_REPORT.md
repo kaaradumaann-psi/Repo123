@@ -1,6 +1,6 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Implementation ve report finalizasyon commit'leri tamamlandı — push bekleniyor
+**Rapor durumu:** Implementation ve report finalizasyon commit'leri push edildi — final clean-tree kontrolü yapılıyor
 **Rapor güncellemesi:** 2026-09-19 16:21 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
@@ -176,7 +176,7 @@ Uygulama üretim öncesi güvenlik ve veri bütünlüğü hardening'inden geçir
 5. `git diff --check` — ✅ final başarılı
 6. `git status --short` ve generated artifact/diff kontrolü — ⏳ son staging öncesi kontrol
 7. Migration/Edge Function statik son incelemesi — ✅ tamamlandı; canlı apply/deploy ortam dışı
-8. Commit ve aktif branch'e push — ⏳ sıradaki
+8. Commit ve aktif branch'e push — ✅ `ca275121...` implementation + report commit zinciri remote branch'e push edildi
 
 Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktısı ve düzeltme sonucu eklenecek; başarısızlık varken commit/push yapılmayacak.
 
@@ -236,7 +236,8 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / pre-stage inventory:** Final status/name/whitespace kontrolü tamamlandı. `dist/index.html` ve `optik-form.html` byte-for-byte aynı (`302e08fb…174093` SHA-256); yalnızca beklenen kaynak, migration, test, generated artifact ve bu rapor değişiklikleri mevcut.
 - **2026-09-19 / staging:** Beklenen tüm dosyalar stage edildi; `git diff --cached --check` başarılı oldu. Raporun ilk Markdown hardbreak trailing whitespace'i de temizlendi. Commit/push pending.
 - **2026-09-19 / commit:** Hardening değişiklikleri aktif branch'e `ca275121930896162363bbc4ce7b87d0916bbf21` commit'iyle yazıldı. Rapor, amend sonrası oluşan gerçek implementation commit'ini yansıtacak şekilde güncellendi.
-- **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; branch push ve push sonrası clean-tree doğrulaması pending.
+- **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; report commit hash'i `255b36fc52eacc5910a99eae2e3a673b85d65624` oldu.
+- **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. Implementation ve report commit zinciri remote'a ulaştı. Push sonrası çalışma ağacı kontrolü son adım olarak yapılıyor.
 
 ---
 
@@ -244,6 +245,6 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 
 - **Final doğrulama durumu:** Bekliyor. 2026-09-19 final zinciri `npm run build && npm run verify:pdf && npm run typecheck && npm test && git diff --check` başında durdu: shell `tsc: not found` (exit 127); dependency installation/environment recovery gerekiyor.
 - **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
-- **Push:** Bekliyor.
+- **Push:** ✅ `origin/arena/01a0ba1c-repo123` oluşturuldu ve `git push` başarılı.
 - **Branch:** `arena/01a0ba1c-repo123`
-- **Son çalışma ağacı durumu:** Implementation ve report finalizasyon değişiklikleri commit edildi; push ve push sonrası clean-tree doğrulaması yapılacak.
+- **Son çalışma ağacı durumu:** Push öncesi commit edilmiş durum temizdi; bu post-push rapor satırları için final status commit'i oluşturulacak. Push çalışma ağacını değiştirmez; final kontrolde tekrar doğrulanacak.
