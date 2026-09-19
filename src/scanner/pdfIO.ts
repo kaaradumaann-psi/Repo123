@@ -2,7 +2,7 @@ import type { PixelImage } from '../omr/omrTypes';
 import type { RenderTask } from 'pdfjs-dist';
 import { checkAborted, checkFileSize, SCAN_LIMITS, yieldToScreen } from './imageIO';
 
-export type SourcePage = { image: PixelImage; sourceName: string };
+export type SourcePage = { image: PixelImage; sourceName: string; originalImage?: PixelImage };
 
 const PDFJS_VERSION = '6.3.289';
 const PDF_OPERATION_MS = 30_000;

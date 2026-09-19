@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import type { FormDefinition } from '../omr/omrTypes';
+import type { FormDefinition, PixelImage, Point } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { analyzePage } from '../omr/analyzePage';
 import { summarizeResults } from '../results/resultNormalizer';
@@ -12,9 +12,12 @@ import { CameraCapture } from './CameraCapture';
 import { ScanResultPreview } from './ScanResultPreview';
 import { RecordCapture } from './RecordCapture';
 import { MyRecordsPanel } from './MyRecordsPanel';
+import { ManualCornerEditor } from './ManualCornerEditor';
 import { Icon } from './Icon';
 import { MMPI_MAX_BLANK } from '../workspace/caseTypes';
+import { verdictFromQuality } from '../scanner/qualityGate';
 import '../styles/scanner.css';
+import '../styles/scanner-enhancements.css';
 
 export type ScannerWorkspaceProps = {
   definition: FormDefinition;
@@ -65,12 +68,16 @@ function ScannerSession({
   const alertId = useRef(0);
   const [source, setSource] = useState<'files' | 'camera'>('files');
   const [cameraKey, setCameraKey] = useState(0);
+  const [retryHint, setRetryHint] = useState<{ message: string; tips: string[] } | null>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(() => {
     const numbers = initialScan ? Object.keys(initialScan.pages).map(Number).sort((a, b) => a - b) : [];
     return numbers[0] ?? null;
   });
   const [confirmReset, setConfirmReset] = useState(false);
   const [recordsRefresh, setRecordsRefresh] = useState(0);
+  const [manualCorners, setManualCorners] = useState<{
+    image: PixelImage; corners: [Point, Point, Point, Point]; previewUrl: string; sourceName: string;
+  } | null>(null);
   const id = useId();
   const pages = sortedPages(scan);
   const missingPages = missingPageNumbers(scan, definition);
@@ -109,6 +116,12 @@ function ScannerSession({
       // yaşar; yöntem değiştirip dönünce aynı sayfalar ve görseller aynen geri gelir.
       // Açık sıfırlama ve sayfa silme kendi çözümlerini yapar; sekme kapanınca
       // tarayıcı kalan blob'ları zaten temizler.
+      // However, the manual-corner editor's source-image blob is a one-shot URL created only
+      // for the editor and must be revoked when the workspace itself unmounts, otherwise
+      // closing the page mid-editing would leak the image buffer until tab close.
+      if (manualCorners?.previewUrl.startsWith('blob:')) {
+        try { URL.revokeObjectURL(manualCorners.previewUrl); } catch { /* ignore */ }
+      }
       current.current = createScanSet();
     };
   }, []);
@@ -130,15 +143,44 @@ function ScannerSession({
     let processed = 0,
       accepted = 0,
       rejected = 0;
-    const process = async ({ image, sourceName }: SourcePage) => {
+    const process = async ({ image, sourceName, originalImage }: SourcePage) => {
       checkAborted(signal);
       processed++;
       setStatus(`${sourceName}: köşe işaretleri, QR kimliği ve optik cevaplar taranıyor…`);
       await yieldToScreen(signal);
       let previewUrl: string | undefined;
+      let originalImageUrl: string | undefined;
       try {
         const result = await analyzePage(image, definition);
         checkAborted(signal);
+        if (!result.ok && result.code === 'ALIGNMENT_MISSING') {
+          // Auto-detection failed — give the user a manual fallback so the page is not silently
+          // rejected. The original capture goes to ManualCornerEditor which lets the user pick
+          // the four alignment-square centres in image-pixel coordinates.
+          if (alive.current) {
+            const width = image.width, height = image.height;
+            const pad = Math.round(Math.min(width, height) * 0.06);
+            const corners: [Point, Point, Point, Point] = [
+              { x: pad, y: pad },
+              { x: width - pad, y: pad },
+              { x: width - pad, y: height - pad },
+              { x: pad, y: height - pad },
+            ];
+            setManualCorners({
+              image: originalImage ?? image,
+              corners,
+              previewUrl: buildImageBlobUrl(originalImage ?? image),
+              sourceName: `${sourceName} · manuel köşe`,
+            });
+          }
+          rejected++;
+          setRetryHint({
+            message: `${sourceName}: Hizalama kareleri otomatik bulunamadı.`,
+            tips: ['Sayfayı daha düz ve dik açıdan çekin.', 'Yukarıdaki "Manuel Köşe" düzenleyici ile dört köşeyi elle seçin.'],
+          });
+          notify(`${sourceName}: Hizalama kareleri otomatik bulunamadı. Manuel köşe seçimi açıldı — dört köşeyi ayarlayıp tekrar deneyin.`);
+          return;
+        }
         const candidate = acceptPage(current.current, result, definition, { sourceName, previewUrl: '' });
         if (!candidate.ok) {
           rejected++;
@@ -148,7 +190,15 @@ function ScannerSession({
         if (!result.ok) return;
         previewUrl = await normalizedThumbnail(result.normalized, signal);
         checkAborted(signal);
-        const decision = acceptPage(current.current, result, definition, { sourceName, previewUrl });
+        if (originalImage) {
+          try {
+            const blob = new Blob([originalImage.data.buffer instanceof ArrayBuffer ? originalImage.data.buffer : new Uint8Array(originalImage.data).buffer],
+              { type: 'image/png' });
+            originalImageUrl = URL.createObjectURL(blob);
+          } catch { originalImageUrl = undefined; }
+        }
+        const decision = acceptPage(current.current, result, definition,
+          { sourceName, previewUrl, ...(originalImageUrl ? { originalImageUrl } : {}) });
         if (!decision.ok) {
           rejected++;
           notify(`${sourceName}: ${decision.message}`);
@@ -156,17 +206,35 @@ function ScannerSession({
         }
         commit(decision.state);
         previewUrl = undefined;
+        if (originalImageUrl) originalImageUrl = undefined;
         accepted++;
         setSelectedNumber(result.pageNumber);
-        setStatus(result.warnings.length
-          ? `${sourceName}: ${result.pageNumber}. sayfa kabul edildi; otomatik güvenilir cevap yok. ${result.warnings[0]}`
-          : `${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
+        // Quality verdict drives the recovery message: the user sees a concrete next step.
+        const verdict = verdictFromQuality(result.quality);
+        if (verdict.fatal) {
+          // The pipeline returned ok=true but `quality.fatal` means no items were produced —
+          // tell the user the page was read structurally but rejected on quality. Avoid the
+          // contradiction with the success message below by surfacing only the verdict.
+          setRetryHint({ message: `${sourceName}: ${verdict.headline}`, tips: verdict.tips });
+          notify(`${sourceName}: ${result.pageNumber}. sayfa — ${verdict.headline} Yeniden çekmek için aşağıdaki düğmeyi kullanın.`);
+          setStatus(`${sourceName}: ${result.pageNumber}. sayfa okundu ancak kalite yetersiz; yeniden çekin.`);
+        } else if (!verdict.ok) {
+          notify(`${sourceName}: ${result.pageNumber}. sayfa kabul edildi; ${verdict.headline}`);
+          setStatus(result.warnings.length
+            ? `${sourceName}: ${result.pageNumber}. sayfa kabul edildi; otomatik güvenilir cevap yok. ${result.warnings[0]}`
+            : `${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
+        } else {
+          setStatus(result.warnings.length
+            ? `${sourceName}: ${result.pageNumber}. sayfa kabul edildi; otomatik güvenilir cevap yok. ${result.warnings[0]}`
+            : `${sourceName}: ${result.pageNumber}. sayfa başarıyla okundu ve kabul edildi.`);
+        }
       } catch (error) {
         checkAborted(signal);
         rejected++;
         notify(`${sourceName}: Okuma tamamlanamadı. ${error instanceof Error ? error.message : 'Lütfen görseli tekrar deneyin.'}`);
       } finally {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
+        if (originalImageUrl) URL.revokeObjectURL(originalImageUrl);
       }
       await yieldToScreen(signal);
     };
@@ -310,7 +378,8 @@ function ScannerSession({
             </p>
           </div>
         ) : (
-          <CameraCapture key={cameraKey} disabled={busy} onCapture={(image, sourceName) => run([], { image, sourceName })} />
+          <CameraCapture key={cameraKey} disabled={busy}
+            onCapture={(image, sourceName, originalImage) => run([], { image, sourceName, originalImage })} />
         )}
 
         {/* Canlı Durum ve İptal */}
@@ -353,6 +422,83 @@ function ScannerSession({
             </div>
           ))}
         </div>
+      )}
+
+      {/* Yeniden Çek Önerisi: kalite fatal veya hizalama başarısız olduğunda kullanıcıya
+          net bir eylem sunar. Kamera sekmesini açar ve eski hata state'ini temizler. */}
+      {retryHint && !manualCorners && (
+        <div className="status-banner warning-banner" role="alert">
+          <Icon name="alert" size={18} />
+          <div style={{ flex: 1 }}>
+            <strong>{retryHint.message}</strong>
+            {retryHint.tips.length > 0 && (
+              <ul style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+                {retryHint.tips.map(tip => <li key={tip}>{tip}</li>)}
+              </ul>
+            )}
+          </div>
+          <button
+            type="button"
+            className="btn-primary btn-sm"
+            onClick={() => {
+              setRetryHint(null);
+              setSource('camera');
+              setCameraKey(previous => previous + 1);
+            }}
+          >
+            <Icon name="camera" size={14} />
+            <span>Yeniden Çek</span>
+          </button>
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() => setRetryHint(null)}
+            aria-label="Öneriyi kapat"
+          >
+            <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Manuel Köşe Editörü: otomatik hizalama başarısız olduğunda kullanıcıya fallback sunar */}
+      {manualCorners && (
+        <ManualCornerEditor
+          imageWidth={manualCorners.image.width}
+          imageHeight={manualCorners.image.height}
+          imageUrl={manualCorners.previewUrl}
+          corners={manualCorners.corners}
+          pageWidthMm={definition.pageWidthMm}
+          pageHeightMm={definition.pageHeightMm}
+          onChange={corners => setManualCorners({ ...manualCorners, corners })}
+          onCancel={() => {
+            if (manualCorners.previewUrl.startsWith('blob:')) {
+              try { URL.revokeObjectURL(manualCorners.previewUrl); } catch { /* ignore */ }
+            }
+            setManualCorners(null);
+            notify('Manuel köşe seçimi iptal edildi.');
+          }}
+          onConfirm={warped => {
+            const sourceName = manualCorners.sourceName;
+            if (manualCorners.previewUrl.startsWith('blob:')) {
+              try { URL.revokeObjectURL(manualCorners.previewUrl); } catch { /* ignore */ }
+            }
+            setManualCorners(null);
+            notify('Manuel köşeler uygulandı; sayfa OMR hattına gönderiliyor…');
+            // Feed the already-warped grayscale page back into the existing pipeline as a
+            // RGBA PixelImage. `analyzePage` calls `toGrayscale` itself, so this is loss-free:
+            // the warped image is the same physical page the auto pipeline would have produced,
+            // only the homography came from the user instead of the alignment detector.
+            const rgba = grayToRgba(warped);
+            void run([], { image: rgba, sourceName });
+          }}
+          onAuto={() => {
+            if (manualCorners.previewUrl.startsWith('blob:')) {
+              try { URL.revokeObjectURL(manualCorners.previewUrl); } catch { /* ignore */ }
+            }
+            setManualCorners(null);
+            notify('Otomatik algılama yeniden denenecek; sayfayı daha düz ve dik açıdan çekin.');
+          }}
+        />
       )}
 
       {/* İlerleme ve Sayfa Durumu */}
@@ -500,4 +646,26 @@ function ScannerSession({
       {!embedded && actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
     </div>
   );
+}
+
+/**
+ * Build a `blob:` URL for an RGBA PixelImage so the manual corner editor can show the
+ * original capture behind its draggable polygon. The URL is created synchronously and
+ * revoked by the editor when the user confirms or cancels.
+ */
+function buildImageBlobUrl(image: PixelImage): string {
+  const buffer = image.data.buffer instanceof ArrayBuffer
+    ? image.data.buffer : new Uint8Array(image.data).buffer;
+  const blob = new Blob([buffer], { type: 'image/png' });
+  return URL.createObjectURL(blob);
+}
+
+/** Wrap a grayscale `GrayImage` into the RGBA `PixelImage` shape that `analyzePage` accepts. */
+function grayToRgba(image: { width: number; height: number; data: Uint8Array }): PixelImage {
+  const data = new Uint8ClampedArray(image.width * image.height * 4);
+  for (let i = 0; i < image.data.length; i++) {
+    const value = image.data[i]!;
+    data[i * 4] = value; data[i * 4 + 1] = value; data[i * 4 + 2] = value; data[i * 4 + 3] = 255;
+  }
+  return { width: image.width, height: image.height, data };
 }

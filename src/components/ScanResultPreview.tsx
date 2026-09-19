@@ -4,6 +4,9 @@ import type { ManualReview, StoredScanPage } from '../results/scanResultTypes';
 import { readStatusLabel, resolveItem } from '../results/resultNormalizer';
 import { itemRowRect } from '../scanner/reviewGeometry';
 import { scanPageHasImage } from '../workspace/draftStorage';
+import { applyEnhancement } from '../scanner/enhancement';
+import type { EnhancementMode } from '../scanner/enhancement';
+import { ImageEnhancer } from './ImageEnhancer';
 import { Icon } from './Icon';
 
 export type ScanResultPreviewProps = {
@@ -14,6 +17,30 @@ export type ScanResultPreviewProps = {
 };
 
 type RenderedCrop = { item: ItemDefinition; image: StoredScanPage['normalized']; definition: FormDefinition };
+
+function EnhancedSheetCanvas({ image, mode }: { image: StoredScanPage['normalized']; mode: EnhancementMode }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const element = canvas.current;
+    if (!element || image.width <= 0 || image.height <= 0) return;
+    const enhanced = applyEnhancement(image, mode);
+    element.width = enhanced.width;
+    element.height = enhanced.height;
+    const context = element.getContext('2d');
+    if (!context) return;
+    const pixels = context.createImageData(enhanced.width, enhanced.height);
+    for (let i = 0; i < enhanced.data.length; i++) {
+      const value = enhanced.data[i]!;
+      pixels.data[i * 4] = value;
+      pixels.data[i * 4 + 1] = value;
+      pixels.data[i * 4 + 2] = value;
+      pixels.data[i * 4 + 3] = 255;
+    }
+    context.putImageData(pixels, 0, 0);
+    return () => { element.width = element.height = 0; };
+  }, [image, mode]);
+  return <canvas ref={canvas} role="img" aria-label="Geliştirilmiş sayfa önizleme" />;
+}
 
 function ItemCrop({
   item,
@@ -138,6 +165,9 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [offset, setOffset] = useState(0);
   const [renderedCrop, setRenderedCrop] = useState<RenderedCrop | null>(null);
+  const [enhancementMode, setEnhancementMode] = useState<EnhancementMode>('omr');
+  const [comparisonLayout, setComparisonLayout] = useState<'side' | 'stacked'>('side');
+  const [showComparison, setShowComparison] = useState(false);
   const id = useId();
 
   const unresolved = expected.items.filter(item => resolveItem(item, page).unresolved);
@@ -228,6 +258,54 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
               </div>
             )}
           </div>
+
+          {hasImage && (
+            <>
+              <ImageEnhancer mode={enhancementMode} onChange={setEnhancementMode} />
+              <div className="normalized-sheet-card scan-enhanced-card">
+                <EnhancedSheetCanvas image={page.normalized} mode={enhancementMode} />
+              </div>
+              {page.originalImageUrl && (
+                <div className="scan-comparison-block">
+                  <div className="scan-comparison-header">
+                    <button
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      onClick={() => setShowComparison(previous => !previous)}
+                      aria-expanded={showComparison}
+                    >
+                      <Icon name={showComparison ? 'close' : 'sparkles'} size={14} />
+                      <span>{showComparison ? 'Karşılaştırmayı gizle' : 'Orijinal ile karşılaştır'}</span>
+                    </button>
+                    <div className="scan-comparison-toggle" role="group" aria-label="Karşılaştırma düzeni">
+                      <button
+                        type="button"
+                        aria-pressed={comparisonLayout === 'side'}
+                        onClick={() => setComparisonLayout('side')}
+                      >Yan yana</button>
+                      <button
+                        type="button"
+                        aria-pressed={comparisonLayout === 'stacked'}
+                        onClick={() => setComparisonLayout('stacked')}
+                      >Alt alta</button>
+                    </div>
+                  </div>
+                  {showComparison && (
+                    <div className="scan-comparison" data-layout={comparisonLayout}>
+                      <figure className="scan-comparison-figure">
+                        <figcaption>Orijinal fotoğraf</figcaption>
+                        <img src={page.originalImageUrl} alt={`${page.pageNumber}. sayfa orijinal kamera görüntüsü`} />
+                      </figure>
+                      <figure className="scan-comparison-figure">
+                        <figcaption>İyileştirilmiş ({enhancementMode})</figcaption>
+                        <EnhancedSheetCanvas image={page.normalized} mode={enhancementMode} />
+                      </figure>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
 
           {!page.quality.ok && page.quality.reasons.length > 0 && (
             <div className="status-banner warning-banner" role="status">
