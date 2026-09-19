@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Aktif branch güncel `main` ile merge edildi — PR oluşturma/merge ve final push bekleniyor
-**Rapor güncellemesi:** 2026-09-19 17:10 UTC
+**Rapor durumu:** PR merge edildi — final rapor commit'i ve branch senkronizasyonu tamamlanıyor
+**Rapor güncellemesi:** 2026-09-19 17:28 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -183,7 +183,7 @@ Uygulama üretim öncesi güvenlik ve veri bütünlüğü hardening'inden geçir
 5. `git diff --check` — ✅ footer değişikliği sonrası başarılı
 6. `git status --short` ve generated artifact/diff kontrolü — ⏳ footer commit öncesi kontrol
 7. Migration/Edge Function statik son incelemesi — ✅ tamamlandı; canlı apply/deploy ortam dışı
-8. Commit ve aktif branch'e push — ✅ footer commit'i ve rapor status commit'i remote branch'e push edildi
+8. Commit ve aktif branch'e push — ✅ PR #29 merge edildi; final merge sonucu report commit'i aktif branch'e push edilecek
 
 Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktısı ve düzeltme sonucu eklenecek; başarısızlık varken commit/push yapılmayacak.
 
@@ -262,7 +262,8 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / merged-base validation:** Conflict çözümü sonrası `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236**) ve `git diff --check` başarılı oldu.
 - **2026-09-19 / merge commit:** Güncel `origin/main` conflict çözümüyle aktif branch'e alındı; merge commit `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` oluşturuldu. Bu commit remote'a push edildi.
 - **2026-09-19 / PR create:** Aktif branch için PR **#29** oluşturuldu: https://github.com/kaaradumaann-psi/Repo123/pull/29. PR, güncel `main` ile merge edilmiş ve final doğrulama sonuçlarıyla açıldı.
-- **2026-09-19 / PR check:** GitHub `verify` check'i beklemeden izlenerek **pass** oldu (2m29s); PR merge için hazır.
+- **2026-09-19 / PR check:** İlk PR head için GitHub `verify` check'i beklemeden izlenerek **pass** oldu (2m29s). Sonuç rapora yazıldığı için yeni bir report commit'i push edildi; GitHub yeni head (`2b0c1e8`) için ikinci `verify` çalıştırdı ve o da **pass** oldu (2m29s).
+- **2026-09-19 / PR merge:** PR **#29** GitHub tarafından merge edildi. Merge commit: `f6e67e237a2dd24b8b273863772d72d649e16144`; `origin/main` bu merge commit'ine ilerledi.
 
 ---
 
@@ -273,6 +274,7 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
 - **Footer commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
 - **Merge commit:** `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` — güncel `origin/main` ile conflict çözümü sonrası.
-- **PR:** #29 oluşturuldu — https://github.com/kaaradumaann-psi/Repo123/pull/29; GitHub `verify` check'i geçti, merge için hazır.
+- **PR:** #29 ✅ merge edildi — https://github.com/kaaradumaann-psi/Repo123/pull/29.
+- **Merge commit:** `f6e67e237a2dd24b8b273863772d72d649e16144` (`origin/main`).
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** PR check sonucu bu rapora yazıldı; rapor commit edilip push edilecek, ardından PR merge edilecek.
+- **Son çalışma ağacı durumu:** PR merge edildi; bu final merge sonucu rapora yazılıp aktif branch'e son report commit'i push edilecek.
