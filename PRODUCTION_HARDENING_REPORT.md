@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Tamamlandı — doğrulandı, commit edildi ve aktif branch'e push edildi
-**Rapor güncellemesi:** 2026-09-19 16:35 UTC
+**Rapor durumu:** Footer UI düzeltildi — final staging ve branch update bekleniyor
+**Rapor güncellemesi:** 2026-09-19 16:44 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -124,6 +124,13 @@ Uygulama üretim öncesi güvenlik ve veri bütünlüğü hardening'inden geçir
 - Build sonrası `dist/index.html` ve `optik-form.html` üretiliyor.
 - PDF verifier A4 ölçü, madde numarası koordinatı, copyright satırı, kimlik alanı, marking circle koordinatları, QR/set kodu ve dört sayfa/566 item kapsamını kontrol ediyor.
 
+### 3.7 Site footer UI (yeni çalışma)
+
+- Kullanıcı geri bildirimi: site footer'ı görsel olarak fazla yüksek ve sayfa tasarımına göre ağır.
+- İnceleme sonucunda yükseklik; 36 px üst/22 px alt padding, üç kolon boşlukları, uzun marka sloganı, beş link ve üç ayrı alt satır metninin birlikte dikey alan tüketmesinden kaynaklanıyor.
+- Hedef düzen: aynı marka/erişim/yasal içerik korunurken daha kompakt bir footer; sitenin hairline sınır, kâğıt-beyaz yüzey, düşük kontrast metin ve accent diliyle uyumlu; mobilde erişilebilirlik ve link tıklama alanı korunacak.
+- Bu bölüm, footer CSS/component düzeltmesi, visual/build/test sonuçları ve final branch commit'iyle güncellenecek.
+
 ---
 
 ## 4. Güvenlik ve tehdit modeli özeti
@@ -169,14 +176,14 @@ Uygulama üretim öncesi güvenlik ve veri bütünlüğü hardening'inden geçir
 
 ### Final kabul turunda mutlaka yeniden çalıştırılacaklar
 
-1. `npm run build` — ✅ final başarılı
-2. `npm run verify:pdf` — ✅ final başarılı
-3. `npm run typecheck` — ✅ final başarılı
-4. `npm test` — ✅ final 236/236 başarılı
-5. `git diff --check` — ✅ final başarılı
-6. `git status --short` ve generated artifact/diff kontrolü — ⏳ son staging öncesi kontrol
+1. `npm run build` — ✅ footer değişikliği sonrası başarılı
+2. `npm run verify:pdf` — ✅ footer değişikliği sonrası başarılı
+3. `npm run typecheck` — ✅ footer değişikliği sonrası başarılı
+4. `npm test` — ✅ footer değişikliği sonrası 236/236 başarılı
+5. `git diff --check` — ✅ footer değişikliği sonrası başarılı
+6. `git status --short` ve generated artifact/diff kontrolü — ⏳ footer commit öncesi kontrol
 7. Migration/Edge Function statik son incelemesi — ✅ tamamlandı; canlı apply/deploy ortam dışı
-8. Commit ve aktif branch'e push — ✅ `ca275121...` implementation + report commit zinciri remote branch'e push edildi
+8. Commit ve aktif branch'e push — ⏳ footer commit'i sıradaki
 
 Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktısı ve düzeltme sonucu eklenecek; başarısızlık varken commit/push yapılmayacak.
 
@@ -239,15 +246,20 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; report commit hash'i `255b36fc52eacc5910a99eae2e3a673b85d65624` oldu.
 - **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. `git ls-remote` remote HEAD'i doğruladı ve `git status --porcelain` temiz döndü.
 - **2026-09-19 / final status:** Final branch `arena/01a0ba1c-repo123`, remote HEAD ve clean working tree tekrar doğrulandı. Rapor tamamlandı.
+- **2026-09-19 / footer polish başlangıcı:** Kullanıcı footer'ın fazla büyük olduğunu bildirdi. `SiteFooter.tsx`, `src/styles/site.css` ve layout kullanım noktaları incelendi; içerik korunarak daha düşük dikey alan kullanan responsive bir düzen tasarlanacak.
+- **2026-09-19 / visual preview:** Vite preview `0.0.0.0:5173` üzerinde başlatıldı; mevcut footer düzeni tarayıcı önizlemesinde değerlendirilecek, değişiklik sonrası süreç kapatılacak.
+- **2026-09-19 / footer CSS uygulaması:** Footer üst padding'i `36/22 px` seviyesinden `20/14 px` seviyesine indirildi; marka işareti küçültüldü, linkler dikey kolon yerine kontrollü wrap satırlarına alındı, alt bilgi üç kolonlu kompakt grid'e taşındı ve 860/560 px responsive kırılımları korundu. İçerik ve erişilebilir linkler kaldırılmadı.
+- **2026-09-19 / footer doğrulaması:** Footer CSS değişikliği sonrası build, PDF doğrulama, typecheck ve tüm testler tekrar çalıştırıldı; `npm test` **236/236**, build/PDF/diff-check başarılı.
+- **2026-09-19 / footer pre-stage kontrolü:** Yalnızca `src/styles/site.css`, generated `optik-form.html` ve bu rapor değişmiş durumda; generated `dist/index.html`/`optik-form.html` byte-for-byte aynı (`bb8e43ff…c466df` SHA-256), whitespace hatası yok.
 
 ---
 
 ## 9. Final submit kaydı
 
-- **Final doğrulama durumu:** ✅ Tamamlandı. İlk zincir `node_modules` yokluğu nedeniyle `tsc: not found` ile durdu; `npm ci` kilitli dependency kurulumu ve audit'i `0 vulnerability` ile tamamladı. Son zincir başarılı: `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236 pass, 0 fail**) ve `git diff --check`.
-- **PDF/build:** ✅ Self-contained `dist/index.html` ve `optik-form.html` byte-for-byte aynı; 4 A4/566 item/QR geometrisi doğrulandı.
-- **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
-- **Report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'e push edildi.
-- **Push:** ✅ `origin/arena/01a0ba1c-repo123` oluşturuldu; `git ls-remote` ile push edilmiş HEAD doğrulandı.
+- **Final doğrulama durumu:** ✅ Footer düzeltmesi sonrası build, PDF, typecheck, `npm test` (**236/236 pass, 0 fail**) ve `git diff --check` başarılı. Footer/generated artifact için staging ve yeni branch push'u bekliyor.
+- **PDF/build:** ✅ Self-contained `dist/index.html` ve `optik-form.html` yeniden üretildi; PDF 4 A4/566 item/QR geometrisi doğrulandı.
+- **Önceki implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
+- **Önceki report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'te mevcut.
+- **Footer değişikliği commit/push:** ⏳ sırada.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** ✅ Final post-push kontrolünde temiz. Remote HEAD ile local branch eşleşiyor; rapor ve tüm hardening değişiklikleri aktif branch'te.
+- **Son çalışma ağacı durumu:** Footer CSS, generated `optik-form.html` ve bu rapor değişiklikleri commit edilip push edilecek.
