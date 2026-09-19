@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { listOwnRecords, deleteRecord } from '../records/supabaseRecords';
 import type { RecordSummary } from '../records/supabaseRecords';
-import { openTestRecordPage } from '../App';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 
@@ -209,14 +208,13 @@ export function MyRecordsPanel() {
                     </td>
                     <td>
                       <div className="table-row-actions">
-                        <button
-                          type="button"
+                        <a
+                          href={`/kayitlar/${record.id}`}
                           className="action-btn-primary"
-                          onClick={() => openTestRecordPage(record.id)}
                         >
                           <Icon name="eye" size={15} />
                           <span>Testi İncele</span>
-                        </button>
+                        </a>
                         <button
                           type="button"
                           className="action-btn-danger"

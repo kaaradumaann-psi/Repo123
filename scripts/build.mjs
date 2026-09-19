@@ -99,4 +99,8 @@ const html = shell
 await mkdir(new URL('../dist/', import.meta.url), { recursive: true });
 await writeFile(new URL('../dist/index.html', import.meta.url), html);
 await writeFile(new URL('../optik-form.html', import.meta.url), html);
-console.log('Built dist/index.html and optik-form.html (self-contained).');
+// SPA fallback: Cloudflare Pages serves index.html for any route that does
+// not match a static file.  API endpoints (/api/*) are handled by the Worker
+// layer and take priority over _redirects, so they are never rewritten.
+await writeFile(new URL('../dist/_redirects', import.meta.url), '/*    /index.html   200\n');
+console.log('Built dist/index.html, dist/_redirects and optik-form.html (self-contained).');

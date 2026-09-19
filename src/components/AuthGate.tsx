@@ -128,7 +128,7 @@ function SystemSetupScreen() {
         </div>
         <div className="auth-setup-links">
           <p>Bağlantı kurulmadan da sonuç ekranlarının tasarımını örnek veriyle inceleyebilirsiniz.</p>
-          <a className="btn-secondary btn-sm auth-setup-preview" href="#/onizleme">
+          <a className="btn-secondary btn-sm auth-setup-preview" href="/onizleme">
             <Icon name="scan" size={15} />
             <span>Tasarım önizlemesini aç</span>
           </a>

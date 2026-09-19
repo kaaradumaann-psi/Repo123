@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent, ReactNode } from 'react';
+import type { KeyboardEvent } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
@@ -12,7 +12,7 @@ import { MyRecordsPanel } from './components/MyRecordsPanel';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { RecordDetailPage } from './components/RecordDetailPage';
 import { SourcesPage } from './components/SourcesPage';
-import { SiteFooter, INFO_ROUTES } from './components/SiteFooter';
+import { SiteFooter } from './components/SiteFooter';
 import { TermsPage } from './components/TermsPage';
 import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
@@ -20,87 +20,66 @@ import { SITE_URL } from './form/attribution';
 import type { AuthenticatedUser } from './auth/authTypes';
 import { supabaseConfig } from './auth/supabaseClient';
 import { displayName } from './auth/userDisplay';
+import { navigate, useRoute } from './router';
+import type { AppRoute } from './router';
 
 type Workspace = 'case' | 'form' | 'records' | 'admin';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
 
-const WORKSPACE_TAB_KEY = 'mmpi566:workspace-tab';
-/** Test kaydı detayı için hash rotası: #/test/<kayıt-id> */
-const TEST_ROUTE_PREFIX = '#/test/';
-/** Tasarım önizlemesi rotası — yalnızca Supabase yapılandırılmadığında açılır. */
-const PREVIEW_ROUTE = '#/onizleme';
+const TAB_PATH: Record<Workspace, string> = {
+  case: '/islem',
+  form: '/form',
+  records: '/kayitlar',
+  admin: '/yonetim',
+};
 
-type Route = { view: 'workspace' } | { view: 'test'; id: string };
-
-/** Hash'i ele alan üst düzey bilgi sayfaları — oturumdan bağımsız açılır. */
-function readInfoRoute(hash: string): { title: string; kicker: string; page: ReactNode } | null {
-  switch (hash) {
-    case INFO_ROUTES.sss:
-      return {
-        title: 'Sıkça Sorulan Sorular',
-        kicker: 'Yardım',
-        page: <FaqPage />,
-      };
-    case INFO_ROUTES.gizlilik:
-      return {
-        title: 'Gizlilik & KVKK Politikası',
-        kicker: 'Yasal',
-        page: <PrivacyPolicyPage />,
-      };
-    case INFO_ROUTES.kullanim:
-      return {
-        title: 'Kullanım Koşulları',
-        kicker: 'Yasal',
-        page: <TermsPage />,
-      };
-    case INFO_ROUTES.kaynaklar:
-      return {
-        title: 'Kaynakça',
-        kicker: 'Kaynaklar',
-        page: <SourcesPage />,
-      };
+function resolveWorkspace(route: AppRoute): Workspace | null {
+  switch (route.page) {
+    case 'home':
+    case 'islem':
+      return 'case';
+    case 'form':
+      return 'form';
+    case 'kayitlar':
+      return 'records';
+    case 'yonetim':
+      return 'admin';
     default:
       return null;
   }
 }
 
-function readRoute(): Route {
-  const hash = typeof window !== 'undefined' ? window.location.hash : '';
-  if (hash.startsWith(TEST_ROUTE_PREFIX)) {
-    const id = hash.slice(TEST_ROUTE_PREFIX.length);
-    if (id) return { view: 'test', id };
-  }
-  return { view: 'workspace' };
-}
-
-/** Test kaydı detay sayfasını açar (açılır pencere değil, tam sayfa rota). */
-export function openTestRecordPage(recordId: string): void {
-  window.location.hash = `${TEST_ROUTE_PREFIX}${recordId}`;
-}
-
 export default function App() {
-  const [hash, setHash] = useState(() => (typeof window !== 'undefined' ? window.location.hash : ''));
-
-  useEffect(() => {
-    const onHashChange = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  const route = useRoute();
 
   // Bilgi sayfaları (SSS, Gizlilik & KVKK, Kullanım Koşulları, Kaynakça):
   // oturum ve yapılandırmadan bağımsız, kendi kabuğu ve alt bilgisiyle açılır.
-  const infoRoute = readInfoRoute(hash);
-  if (infoRoute) {
+  if (route.page === 'sss') {
     return (
-      <InfoPageShell
-        kicker={infoRoute.kicker}
-        title={infoRoute.title}
-        onBack={() => {
-          window.location.hash = '';
-        }}
-      >
-        {infoRoute.page}
+      <InfoPageShell kicker="Yardım" title="Sıkça Sorulan Sorular" onBack={() => navigate('/')}>
+        <FaqPage />
+      </InfoPageShell>
+    );
+  }
+  if (route.page === 'gizlilik') {
+    return (
+      <InfoPageShell kicker="Yasal" title="Gizlilik & KVKK Politikası" onBack={() => navigate('/')}>
+        <PrivacyPolicyPage />
+      </InfoPageShell>
+    );
+  }
+  if (route.page === 'kullanim') {
+    return (
+      <InfoPageShell kicker="Yasal" title="Kullanım Koşulları" onBack={() => navigate('/')}>
+        <TermsPage />
+      </InfoPageShell>
+    );
+  }
+  if (route.page === 'kaynaklar') {
+    return (
+      <InfoPageShell kicker="Kaynaklar" title="Kaynakça" onBack={() => navigate('/')}>
+        <SourcesPage />
       </InfoPageShell>
     );
   }
@@ -108,13 +87,28 @@ export default function App() {
   // Önizleme rotası: kurulum ekranının yanında, gerçek oturum gerektirmeden
   // sonuç ekranlarının tasarımını gösterir. Yapılandırılmış bir kurulumda rota
   // kapalıdır; üretimde yalnızca giriş akışı çalışır.
-  if (!supabaseConfig.configured && hash === PREVIEW_ROUTE) {
+  if (!supabaseConfig.configured && route.page === 'onizleme') {
+    return <DesignPreviewPage onExit={() => navigate('/')} />;
+  }
+
+  // 404 — bilinmeyen rotalar
+  if (route.page === 'bulunamadi') {
     return (
-      <DesignPreviewPage
-        onExit={() => {
-          window.location.hash = '';
-        }}
-      />
+      <div className="auth-page">
+        <main className="auth-shell">
+          <div className="empty-state-card">
+            <div className="empty-state-icon">
+              <Icon name="alert" size={32} />
+            </div>
+            <h4>Sayfa Bulunamadı</h4>
+            <p>Aradığınız sayfa mevcut değil veya taşınmış olabilir.</p>
+            <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/')}>
+              Ana Sayfaya Dön
+            </button>
+          </div>
+        </main>
+        <SiteFooter compact />
+      </div>
     );
   }
 
@@ -122,28 +116,19 @@ export default function App() {
 }
 
 function SignedInApp({ user, onLogout }: SignedInAppProps) {
-  const [route, setRoute] = useState(readRoute);
+  const route = useRoute();
 
+  // Rol bazlı rota koruması
   useEffect(() => {
-    const onHashChange = () => setRoute(readRoute());
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
-
-  // F5 sonrası sekme korunur: İşlem'deyken yenileyen Form'a düşmez.
-  const [workspace, setWorkspace] = useState<Workspace>(() => {
-    try {
-      const saved = sessionStorage.getItem(WORKSPACE_TAB_KEY);
-      if (saved === 'case' || saved === 'form' || saved === 'records' || saved === 'admin') {
-        if (user.role === 'ADMIN' && saved === 'records') return 'case';
-        if (user.role !== 'ADMIN' && saved === 'admin') return 'case';
-        return saved;
-      }
-    } catch {
-      /* desteksiz ortamda varsayılan */
+    if (route.page === 'yonetim' && user.role !== 'ADMIN') {
+      navigate('/', { replace: true });
     }
-    return 'case';
-  });
+    if (route.page === 'kayitlar' && user.role === 'ADMIN') {
+      navigate('/yonetim', { replace: true });
+    }
+  }, [route.page, user.role]);
+
+  const workspace = resolveWorkspace(route);
   const [recordsTick, setRecordsTick] = useState(0);
   const tabs: Workspace[] =
     user.role === 'ADMIN'
@@ -151,31 +136,23 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
       : ['case', 'form', 'records'];
   const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
 
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(WORKSPACE_TAB_KEY, workspace);
-    } catch {
-      /* yoksay */
-    }
-  }, [workspace]);
-
   function activateTab(next: Workspace) {
-    setWorkspace(next);
+    navigate(TAB_PATH[next]);
     tabRefs.current[next]?.focus();
   }
 
   function onTablistKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const current = Math.max(0, tabs.indexOf(workspace));
+    const current = Math.max(0, tabs.indexOf(workspace ?? 'case'));
     const nextIndex =
       event.key === 'Home'
         ? 0
         : event.key === 'End'
-        ? tabs.length - 1
-        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
-        ? (current + 1) % tabs.length
-        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-        ? (current - 1 + tabs.length) % tabs.length
-        : -1;
+          ? tabs.length - 1
+          : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+            ? (current + 1) % tabs.length
+            : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+              ? (current - 1 + tabs.length) % tabs.length
+              : -1;
     if (nextIndex < 0) return;
     event.preventDefault();
     activateTab(tabs[nextIndex]!);
@@ -193,6 +170,8 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
     records: 'file',
     admin: 'shield',
   };
+
+  const activeWorkspace = workspace;
 
   return (
     <div className="portal-layout">
@@ -225,16 +204,11 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
                   ref={element => {
                     tabRefs.current[tab] = element;
                   }}
-                  aria-selected={workspace === tab && route.view === 'workspace'}
+                  aria-selected={activeWorkspace === tab}
                   aria-controls={`panel-${tab}`}
-                  tabIndex={workspace === tab ? 0 : -1}
-                  onClick={() => {
-                    if (route.view !== 'workspace') {
-                      window.location.hash = '';
-                    }
-                    activateTab(tab);
-                  }}
-                  className={`portal-tab ${workspace === tab && route.view === 'workspace' ? 'active' : ''}`}
+                  tabIndex={activeWorkspace === tab ? 0 : -1}
+                  onClick={() => activateTab(tab)}
+                  className={`portal-tab ${activeWorkspace === tab ? 'active' : ''}`}
                 >
                   <Icon name={tabIcon[tab]} size={16} />
                   <span>{tabLabel[tab]}</span>
@@ -275,12 +249,10 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
       <ConnectivityBanner />
 
       <main className="app-main" id="main">
-        {route.view === 'test' ? (
+        {route.page === 'kayit' ? (
           <RecordDetailPage
             recordId={route.id}
-            onBack={() => {
-              window.location.hash = '';
-            }}
+            onBack={() => navigate(user.role === 'ADMIN' ? '/yonetim' : '/kayitlar')}
           />
         ) : (
           <>
@@ -329,8 +301,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
 
       <SiteFooter
         onNewEntry={() => {
-          window.location.hash = '';
-          activateTab('case');
+          navigate('/islem');
         }}
       />
     </div>

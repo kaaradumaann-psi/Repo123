@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { installLinkInterceptor } from './router';
 import './styles/screen.css';
 import './styles/form.css';
 import './styles/print.css';
@@ -10,6 +11,9 @@ import './styles/workspace.css';
 import './styles/theme.css';
 // Site chrome (footer + info pages: SSS, Gizlilik & KVKK, Kullanım Koşulları, Kaynakça).
 import './styles/site.css';
+
+// Intercept same-origin <a> clicks for SPA navigation.
+installLinkInterceptor();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found.');

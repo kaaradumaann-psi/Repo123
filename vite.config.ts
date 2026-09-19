@@ -7,6 +7,7 @@ import { defineConfig } from 'vite';
  * this app has no backend and never calls a remote API.
  */
 export default defineConfig({
+  appType: 'spa',
   server: { host: '0.0.0.0', allowedHosts: ['.e2b.app'] },
   preview: { host: '0.0.0.0', allowedHosts: ['.e2b.app'] },
 });
