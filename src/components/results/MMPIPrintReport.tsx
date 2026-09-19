@@ -21,6 +21,8 @@ export type PrintReportMeta = {
   expertNotes?: string;
   /** Notun son güncelleme zamanı (ISO); yalnızca not doluyken gösterilir. */
   notesUpdatedAt?: string;
+  /** Kaydı üreten puanlama motoru sürümü (izlenebilirlik; eski kayıtlarda yok). */
+  scoringVersion?: string;
 };
 
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
@@ -365,7 +367,9 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
 
       <p className="pr-foot">
         T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kesme puanları tanı
-        koymaz; klinik karar uygulayıcı uzmana aittir.
+        koymaz; klinik karar uygulayıcı uzmana aittir. Kaynak künyeleri ve doğrulama durumları uygulamanın
+        &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
+        {meta.scoringVersion ? ` Puanlama motoru: v${meta.scoringVersion}.` : ''}
       </p>
     </div>
   );

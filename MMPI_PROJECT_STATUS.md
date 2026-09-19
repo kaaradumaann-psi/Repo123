@@ -788,6 +788,7 @@ açık iş kalmamıştır.
 | 2026-09-19 | supabaseClient: import.meta.env güvenli erişim (Node test ortamı toleransı) | supabaseClient.ts | test edilebilirlik | 2. commit |
 | 2026-09-19 | CaseWorkspace bayat metin düzeltmesi ("klinik puanlama motoru bağlı değildir" → skorlama aynı ekranda) | CaseWorkspace.tsx | doğruluk (metin gerçek durumu yansıtmıyordu) | 2. commit |
 | 2026-09-19 | verify:pdf lokalde koşuldu | — | FINAL TODO maddesi | 4 sayfa/566 madde doğrulandı |
+| 2026-09-19 | 3. tur: '?' grafik netleştirme (lejant + SVG title "T skoru değildir"), rapor footer'ına scoringVersion, final doğrulama raporu (§44) | MMPIScoreChart.tsx, MMPIPrintReport.tsx, RecordDetailPage.tsx, bu doküman | Faz 5/11/19 kapanışı | 3. commit; 192/192 test |
 
 ## 43. GİT DURUMU (2026-09-19)
 
@@ -807,6 +808,58 @@ kapsam (2):     supabase/migrations/20260919000000_expert_notes_and_audit.sql (y
                 scripts/build.mjs, tests/savedPage.test.ts (yeni), tests/build.test.ts,
                 tests/mmpiInterpretation.test.ts, optik-form.html, MMPI_PROJECT_STATUS.md
 ```
+
+## 44. FINAL DOĞRULAMA RAPORU (2026-09-19, 3. tur — production-ready kapanış)
+
+### COMPLETED (kodda uygulandı + otomatik testle doğrulandı)
+- Faz 1 (üç-durum geçerlik UI), Faz 2 (scoringVersion), Faz 3 (reviewHistory + audit_logs),
+  Faz 4 (uzman notu), Faz 5 (rapor: geçerlik durumu + uzman notu + sayfa no + motor sürümü
+  footer'da + tarih/vaka bilgisi + metodoloji/kaynak yönlendirmesi), Faz 6 (CSP connect-src
+  koşullu allowlist), Faz 11 ('?' grafik açıklaması: lejant "? — Boş madde sayısı (klinik
+  T skoru değildir)" + SVG title; t:null findings'te korunuyor), Faz 12 (Ries düzeltmesi),
+  Faz 14 (geriye uyumluluk: legacy payload testleri), Faz 16 (güvenlik taramaları),
+  Faz 18 (kod taramaları: console.log yok, dangerouslySetInnerHTML yok, TODO/FIXME yok,
+  hardcoded secret yok).
+
+### VERIFIED (bu ortamda gerçekten koşuldu)
+- typecheck: PASS · test: 192/192 PASS · build: PASS · verify:pdf: PASS
+  (4 A4 sayfa, 566 madde koordinatı, kimlik alanları yalnız 1. sayfada).
+- OMR güvenli davranış: omrSafety/omrEngine/pdfScanPipeline testleri PASS
+  (yanlış/eksik/yinelenen sayfa reddi, düşük kalite, eğik/gölge, boş/çift işaret →
+  inceleme kuyruğu, QR kimlik reddi, manuel düzeltme + undo).
+
+### NOT VERIFIED (bu ortamda test EDİLEMEDİ — başarısız değil, ortam yok)
+- Canlı Supabase: RLS cross-user (Faz 7 TEST 1-4), logout/expired session (TEST 5-6),
+  Edge Function canlı çağrı (TEST 7). Ortam değişkenleri/credential yok; kod ve
+  politika düzeyinde doğru, canlıda koşulmadı.
+- CSP'nin gerçek tarayıcıda console-violation'sız çalışması (build testi origin
+  allowlist'ini doğruluyor; gerçek tarayıcı oturumu bu ortamda yok).
+- Gerçek kağıt/kalem/telefon fotoğrafı OMR kalibrasyonu (Faz 9): sentetik test
+  başarılı, gerçek kamera/kağıt kalibrasyonu bekliyor.
+
+### SCIENTIFIC ITEMS REQUIRING SOURCE VERIFICATION (Faz 10 — DEĞER DEĞİŞTİRİLMEDİ)
+| Konu | Koddaki değer | Bulunan kaynak | Aynı mı? | Eminlik |
+| --- | --- | --- | --- | --- |
+| K oranları (Hs .5K, Pd .4K, Pt 1K, Sc 1K, Ma .2K) | mmpiKeys.ts K_CORRECTION | Meehl & Hathaway 1946; Butcher ve ark. 2001 (oranlar) | Oranlar EVET | Yüksek (oranlar) |
+| .4K tablosu K=3→+2, K=4→+1 (monotonik değil) | K_ADDITION_TABLE.ratio4 | Klasik tablonun hücre değerleri açık kaynakta bulunamadı | Doğrulanamadı | Kaynak doğrulaması gerekli — DOKUNULMADI |
+| Dy 56 madde (klasik 57 olabilir) | mmpiDerived.ts | Birincil madde listesi bulunamadı | Doğrulanamadı | Kaynak doğrulaması gerekli — DOKUNULMADI |
+| '?' grafik gösterimi | t:null; grafikte ayrı renk + "T skoru değildir" açıklaması | — | Uyumlu | Faz 11 ile netleştirildi |
+| Wiggins TR M/SD | mmpiDerived.ts WIGGINS_NORMS | Bulunamadı | — | Kaynak doğrulaması gerekli (D statü, SourcesPage'de bildirildi) |
+| MAC≥28 / ICAS≥5 / SAP≥16 | mmpiDerived.ts | Birincil kaynak bulunamadı (MAC≥22 Ceyhun & Palabıyıkoğlu 1989 doğrulandı) | Kısmen | Kaynak doğrulaması gerekli |
+| Savaşır (1981) norm sayıları | TURKISH_NORMS | Kitap erişimi yok | Doğrulanamadı | Kaynak doğrulaması gerekli |
+| Ölçek item key'leri | mmpiKeys.ts | Telifli orijinal erişimi yok | Doğrulanamadı | Kaynak doğrulaması gerekli |
+
+### PRODUCTION DEPLOYMENT REQUIREMENTS
+1. `.env` ile VITE_SUPABASE_URL/ANON_KEY tanımla; `npm run build` (CSP origin'i build'de gömülür).
+2. `supabase db push` — 20260919000000 migration'ı (expert_notes + audit_logs) canlıya uygula.
+3. Edge Function deploy + ilk Admin bootstrap (supabase/README.md).
+4. Canlı RLS/oturum/CSP testlerini (yukarıdaki NOT VERIFIED listesi) gerçek ortamda koş.
+
+### REMAINING RISKS
+- Canlı ortam testleri koşulmadan RLS/CSP güvencesi yalnız kod düzeyindedir.
+- Gerçek kağıt OMR kalibrasyonu yapılmadan optik okuma sahada %100 kabul edilemez.
+- Kaynak doğrulaması gerekli bilimsel değerler (üstteki tablo) uzman literatür
+  erişimiyle kapatılmalıdır; uygulama bu değerleri D/E statüsüyle şeffaf raporlar.
 
 ---
 *Bu doküman kanıt-temellidir: her [✓] gerçek kod/test çıktısına, her [?] gerçek bir

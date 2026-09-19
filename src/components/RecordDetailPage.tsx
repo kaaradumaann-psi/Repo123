@@ -193,6 +193,7 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
     marital: parsed.maritalStatus ?? '',
     expertNotes: notesSaved,
     notesUpdatedAt: record.notesUpdatedAt ?? '',
+    scoringVersion: parsed.scoringVersion,
   };
 
   return (
