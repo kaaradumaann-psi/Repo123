@@ -162,7 +162,12 @@ function ScannerSession({
       try {
         const result = await analyzePage(image, definition);
         checkAborted(signal);
-        if (!result.ok && result.code === 'ALIGNMENT_MISSING') {
+        // Manual-corner rescue opens on ALIGNMENT_MISSING and on LOW_RESOLUTION: in both cases
+        // the automatic read is rejected, but the user can still continue with the verified
+        // ManualCornerEditor → manualWarp → analyzePage path (proven to read 960–1280 px phone
+        // captures during real-photo validation). LOW_RESOLUTION stays a failure for automatic
+        // OMR — only the manual option is offered.
+        if (!result.ok && (result.code === 'ALIGNMENT_MISSING' || result.code === 'LOW_RESOLUTION')) {
           // Auto-detection failed — give the user a manual fallback so the page is not silently
           // rejected. The original capture goes to ManualCornerEditor which lets the user pick
           // the four alignment-square centres in image-pixel coordinates.
@@ -195,11 +200,15 @@ function ScannerSession({
             });
           }
           rejected++;
+          // Reason sentence differs by failure code; the rest of the flow is unchanged.
+          const reason = result.code === 'LOW_RESOLUTION'
+            ? 'Çözünürlük otomatik okuma için yetersiz.'
+            : 'Hizalama kareleri otomatik bulunamadı.';
           setRetryHint({
-            message: `${sourceName}: Hizalama kareleri otomatik bulunamadı.`,
+            message: `${sourceName}: ${reason}`,
             tips: ['Sayfayı daha düz ve dik açıdan çekin.', 'Yukarıdaki "Manuel Köşe" düzenleyici ile dört köşeyi elle seçin.'],
           });
-          notify(`${sourceName}: Hizalama kareleri otomatik bulunamadı. Manuel köşe seçimi açıldı — dört köşeyi ayarlayıp tekrar deneyin.`);
+          notify(`${sourceName}: ${reason} Manuel köşe seçimi açıldı — dört köşeyi ayarlayıp tekrar deneyin.`);
           return;
         }
         const candidate = acceptPage(current.current, result, definition, { sourceName, previewUrl: '' });

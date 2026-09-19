@@ -110,6 +110,32 @@ function validateCorners(corners: readonly Point[]): asserts corners is [Point, 
   if (signedArea <= 1e-6) throw new Error('Köşeler yansıtılmış veya ters sırada; TL/TR/BR/BL sırasını kullanın.');
 }
 
+/**
+ * Normalise the corner order so the short adjacent edge lands on the canonical short edge.
+ *
+ * Phones are usually held in portrait while the A4 sheet lies in landscape: the user's visual
+ * TL→TR then runs along the paper's LONG edge, and mapping it onto the canonical 210 mm edge
+ * squeezes the page anamorphically — the alignment squares come out rectangular and the OMR
+ * re-read fails with ALIGNMENT_MISSING even though the picks were accurate (reproduced on real
+ * photos: same corners, one order reads, the long-edge-first order fails). Rotating the order
+ * by one position swaps which adjacent edge is "top"; it preserves the counter-clockwise
+ * orientation that `validateCorners` already enforced, so the homography direction is
+ * unchanged. Pages picked upright are left untouched (their left edge is already the long one).
+ * Only applied for portrait pages; a landscape form keeps the user's order.
+ */
+export function normalizeCornerOrder(
+  corners: readonly [Point, Point, Point, Point],
+  pageWidthMm: number,
+  pageHeightMm: number,
+): [Point, Point, Point, Point] {
+  if (pageHeightMm <= pageWidthMm) return [corners[0], corners[1], corners[2], corners[3]];
+  const [tl, tr, , bl] = corners;
+  const topEdge = Math.hypot(tr.x - tl.x, tr.y - tl.y);
+  const leftEdge = Math.hypot(bl.x - tl.x, bl.y - tl.y);
+  if (leftEdge >= topEdge) return [corners[0], corners[1], corners[2], corners[3]];
+  return [corners[1], corners[2], corners[3], corners[0]];
+}
+
 /** Convert RGBA `PixelImage` to grayscale `GrayImage`. */
 function rgbaToGray(image: PixelImage): GrayImage {
   if (image.data.length !== image.width * image.height * 4) {
@@ -144,10 +170,11 @@ export function applyManualCorners(input: ManualWarpInput): ManualWarpResult {
     throw new Error('Çıktı çözünürlüğü geçersiz.');
   }
   validateCorners(input.corners);
+  const corners = normalizeCornerOrder(input.corners, input.pageWidthMm, input.pageHeightMm);
   const dest = physicalDestinations(input.pageWidthMm, input.pageHeightMm);
   // `fitHomography(from, to)` returns a matrix that maps `from` → `to`. We want the matrix the
   // OMR warp consumes: physical millimetres → source pixels. So we fit mm → pixel.
-  const physicalToSource = fitHomography(dest, input.corners);
+  const physicalToSource = fitHomography(dest, corners);
   const sourceBounds = projectCornerBounds(physicalToSource, input.pageWidthMm, input.pageHeightMm);
   // A small (≤ 1e-6 px) negative projection is floating-point noise from the homography solve
   // — a perfect A4 corner lands at exactly (0, 0), not a hair outside it. Anything below that is
