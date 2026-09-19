@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Implementation ve report finalizasyon commit'leri push edildi — final clean-tree kontrolü yapılıyor
-**Rapor güncellemesi:** 2026-09-19 16:21 UTC
+**Rapor durumu:** Tamamlandı — doğrulandı, commit edildi ve aktif branch'e push edildi
+**Rapor güncellemesi:** 2026-09-19 16:35 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -237,7 +237,8 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / staging:** Beklenen tüm dosyalar stage edildi; `git diff --cached --check` başarılı oldu. Raporun ilk Markdown hardbreak trailing whitespace'i de temizlendi. Commit/push pending.
 - **2026-09-19 / commit:** Hardening değişiklikleri aktif branch'e `ca275121930896162363bbc4ce7b87d0916bbf21` commit'iyle yazıldı. Rapor, amend sonrası oluşan gerçek implementation commit'ini yansıtacak şekilde güncellendi.
 - **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; report commit hash'i `255b36fc52eacc5910a99eae2e3a673b85d65624` oldu.
-- **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. `git ls-remote` remote HEAD'i doğruladı ve `git status --porcelain` temiz döndü. Final rapor doğruluk güncellemesi de aynı branch'e push edilecek.
+- **2026-09-19 / push:** `git push origin arena/01a0ba1c-repo123` başarılı; remote'da yeni branch oluşturuldu. `git ls-remote` remote HEAD'i doğruladı ve `git status --porcelain` temiz döndü.
+- **2026-09-19 / final status:** Final branch `arena/01a0ba1c-repo123`, remote HEAD ve clean working tree tekrar doğrulandı. Rapor tamamlandı.
 
 ---
 
@@ -249,4 +250,4 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **Report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'e push edildi.
 - **Push:** ✅ `origin/arena/01a0ba1c-repo123` oluşturuldu; `git ls-remote` ile push edilmiş HEAD doğrulandı.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** Final status kontrolünde temizdi. Bu son rapor doğruluk güncellemesi de commit edilip aynı branch'e push edilecek; push çalışma ağacını değiştirmediği için son durum temiz kalacaktır.
+- **Son çalışma ağacı durumu:** ✅ Final post-push kontrolünde temiz. Remote HEAD ile local branch eşleşiyor; rapor ve tüm hardening değişiklikleri aktif branch'te.
