@@ -5,7 +5,7 @@ import { analyzePage } from '../omr/analyzePage';
 import { summarizeResults } from '../results/resultNormalizer';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
 import type { ScanSet } from '../scanner/pageSequence';
-import { checkAborted, identifyFile, normalizedThumbnail, readImageFile, SCAN_LIMITS, yieldToScreen } from '../scanner/imageIO';
+import { checkAborted, identifyFile, normalizedThumbnail, pixelImageToBlobUrl, readImageFile, SCAN_LIMITS, yieldToScreen } from '../scanner/imageIO';
 import { readPdfPages } from '../scanner/pdfIO';
 import type { SourcePage } from '../scanner/pdfIO';
 import { CameraCapture } from './CameraCapture';
@@ -78,6 +78,8 @@ function ScannerSession({
   const [manualCorners, setManualCorners] = useState<{
     image: PixelImage; corners: [Point, Point, Point, Point]; previewUrl: string; sourceName: string;
   } | null>(null);
+  const manualCornersRef = useRef(manualCorners);
+  manualCornersRef.current = manualCorners;
   const id = useId();
   const pages = sortedPages(scan);
   const missingPages = missingPageNumbers(scan, definition);
@@ -97,9 +99,10 @@ function ScannerSession({
   function releaseImages(state: ScanSet) {
     sortedPages(state).forEach(page => {
       // Taslaktan dönen sayfalarda blob yok; geçersiz URL'yi çözmeye kalkışma.
-      if (page.previewUrl.startsWith('blob:')) {
+      for (const url of [page.previewUrl, page.originalImageUrl]) {
+        if (!url?.startsWith('blob:')) continue;
         try {
-          URL.revokeObjectURL(page.previewUrl);
+          URL.revokeObjectURL(url);
         } catch {
           /* yoksay */
         }
@@ -119,8 +122,9 @@ function ScannerSession({
       // However, the manual-corner editor's source-image blob is a one-shot URL created only
       // for the editor and must be revoked when the workspace itself unmounts, otherwise
       // closing the page mid-editing would leak the image buffer until tab close.
-      if (manualCorners?.previewUrl.startsWith('blob:')) {
-        try { URL.revokeObjectURL(manualCorners.previewUrl); } catch { /* ignore */ }
+      const editor = manualCornersRef.current;
+      if (editor?.previewUrl.startsWith('blob:')) {
+        try { URL.revokeObjectURL(editor.previewUrl); } catch { /* ignore */ }
       }
       current.current = createScanSet();
     };
@@ -143,6 +147,9 @@ function ScannerSession({
     let processed = 0,
       accepted = 0,
       rejected = 0;
+    // A manual editor can only show one source at a time. Stop a multi-file batch at the first
+    // alignment failure instead of silently replacing that editor with the next failed page.
+    let manualPending = false;
     const process = async ({ image, sourceName, originalImage }: SourcePage) => {
       checkAborted(signal);
       processed++;
@@ -150,6 +157,8 @@ function ScannerSession({
       await yieldToScreen(signal);
       let previewUrl: string | undefined;
       let originalImageUrl: string | undefined;
+      let manualPreviewUrl: string | undefined;
+      let manualPreviewTransferred = false;
       try {
         const result = await analyzePage(image, definition);
         checkAborted(signal);
@@ -157,8 +166,12 @@ function ScannerSession({
           // Auto-detection failed — give the user a manual fallback so the page is not silently
           // rejected. The original capture goes to ManualCornerEditor which lets the user pick
           // the four alignment-square centres in image-pixel coordinates.
+          manualPending = true;
+          const editorImage = originalImage ?? image;
+          manualPreviewUrl = await pixelImageToBlobUrl(editorImage, signal);
+          checkAborted(signal);
           if (alive.current) {
-            const width = image.width, height = image.height;
+            const width = editorImage.width, height = editorImage.height;
             const pad = Math.round(Math.min(width, height) * 0.06);
             const corners: [Point, Point, Point, Point] = [
               { x: pad, y: pad },
@@ -166,11 +179,19 @@ function ScannerSession({
               { x: width - pad, y: height - pad },
               { x: pad, y: height - pad },
             ];
-            setManualCorners({
-              image: originalImage ?? image,
+            manualPreviewTransferred = true;
+            const nextEditor = {
+              image: editorImage,
               corners,
-              previewUrl: buildImageBlobUrl(originalImage ?? image),
+              previewUrl: manualPreviewUrl!,
               sourceName: `${sourceName} · manuel köşe`,
+            };
+            // Keep the ref in sync before React paints. If the parent unmounts during this
+            // async continuation, cleanup can still revoke the newly transferred blob URL.
+            manualCornersRef.current = nextEditor;
+            setManualCorners(previous => {
+              if (previous?.previewUrl.startsWith('blob:')) URL.revokeObjectURL(previous.previewUrl);
+              return nextEditor;
             });
           }
           rejected++;
@@ -192,10 +213,13 @@ function ScannerSession({
         checkAborted(signal);
         if (originalImage) {
           try {
-            const blob = new Blob([originalImage.data.buffer instanceof ArrayBuffer ? originalImage.data.buffer : new Uint8Array(originalImage.data).buffer],
-              { type: 'image/png' });
-            originalImageUrl = URL.createObjectURL(blob);
-          } catch { originalImageUrl = undefined; }
+            originalImageUrl = await pixelImageToBlobUrl(originalImage, signal);
+          } catch (error) {
+            checkAborted(signal);
+            originalImageUrl = undefined;
+            notify(`${sourceName}: orijinal kamera önizlemesi oluşturulamadı; tarama sonucu yine de kullanılabilir.`);
+            void error;
+          }
         }
         const decision = acceptPage(current.current, result, definition,
           { sourceName, previewUrl, ...(originalImageUrl ? { originalImageUrl } : {}) });
@@ -235,6 +259,7 @@ function ScannerSession({
       } finally {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         if (originalImageUrl) URL.revokeObjectURL(originalImageUrl);
+        if (manualPreviewUrl && !manualPreviewTransferred) URL.revokeObjectURL(manualPreviewUrl);
       }
       await yieldToScreen(signal);
     };
@@ -242,6 +267,7 @@ function ScannerSession({
       if (capture) await process(capture);
       for (const file of files) {
         checkAborted(signal);
+        if (manualPending) break;
         if (processed >= SCAN_LIMITS.batchPages) {
           notify('Bir işlemde 24 sayfa sınırına ulaşıldı. Kalan dosyalar işlenmedi.');
           return;
@@ -253,6 +279,7 @@ function ScannerSession({
           if (kind === 'pdf') {
             for await (const page of readPdfPages(file, signal, SCAN_LIMITS.batchPages - processed)) {
               await process(page);
+              if (manualPending) break;
             }
           } else {
             await process({ image: await readImageFile(file, signal), sourceName: file.name });
@@ -283,6 +310,12 @@ function ScannerSession({
   function reset() {
     job.current?.abort('reset');
     releaseImages(current.current);
+    const editor = manualCornersRef.current;
+    if (editor?.previewUrl.startsWith('blob:')) {
+      try { URL.revokeObjectURL(editor.previewUrl); } catch { /* ignore */ }
+    }
+    setManualCorners(null);
+    setRetryHint(null);
     commit(createScanSet());
     setSelectedNumber(null);
     setAlerts([]);
@@ -357,15 +390,15 @@ function ScannerSession({
                 <Icon name="download" size={28} />
               </div>
               <strong className="dropzone-title">Taranmış Formları Buraya Yükleyin</strong>
-              <span className="dropzone-desc">JPG, PNG, WEBP, HEIC veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
+              <span className="dropzone-desc">JPG, PNG, WEBP, AVIF, HEIC veya PDF formatında tekil veya çoklu dosya seçebilirsiniz.</span>
               <span className="btn-primary dropzone-btn">Dosya Seç</span>
             </label>
             <input
               id={`${id}-files`}
               type="file"
-              accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.pdf"
+              accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,.avif,.heic,.heif,.pdf"
               multiple
-              disabled={busy}
+              disabled={busy || !!manualCorners}
               className="file-input-hidden"
               onChange={event => {
                 const files = Array.from(event.currentTarget.files ?? []);
@@ -378,7 +411,7 @@ function ScannerSession({
             </p>
           </div>
         ) : (
-          <CameraCapture key={cameraKey} disabled={busy}
+          <CameraCapture key={cameraKey} disabled={busy || !!manualCorners}
             onCapture={(image, sourceName, originalImage) => run([], { image, sourceName, originalImage })} />
         )}
 
@@ -469,6 +502,7 @@ function ScannerSession({
           corners={manualCorners.corners}
           pageWidthMm={definition.pageWidthMm}
           pageHeightMm={definition.pageHeightMm}
+          disabled={busy}
           onChange={corners => setManualCorners({ ...manualCorners, corners })}
           onCancel={() => {
             if (manualCorners.previewUrl.startsWith('blob:')) {
@@ -616,9 +650,10 @@ function ScannerSession({
           }}
           onRemove={() => {
             const page = current.current.pages[selected.pageNumber];
-            if (page?.previewUrl.startsWith('blob:')) {
+            for (const url of [page?.previewUrl, page?.originalImageUrl]) {
+              if (!url?.startsWith('blob:')) continue;
               try {
-                URL.revokeObjectURL(page.previewUrl);
+                URL.revokeObjectURL(url);
               } catch {
                 /* yoksay */
               }
@@ -646,18 +681,6 @@ function ScannerSession({
       {!embedded && actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
     </div>
   );
-}
-
-/**
- * Build a `blob:` URL for an RGBA PixelImage so the manual corner editor can show the
- * original capture behind its draggable polygon. The URL is created synchronously and
- * revoked by the editor when the user confirms or cancels.
- */
-function buildImageBlobUrl(image: PixelImage): string {
-  const buffer = image.data.buffer instanceof ArrayBuffer
-    ? image.data.buffer : new Uint8Array(image.data).buffer;
-  const blob = new Blob([buffer], { type: 'image/png' });
-  return URL.createObjectURL(blob);
 }
 
 /** Wrap a grayscale `GrayImage` into the RGBA `PixelImage` shape that `analyzePage` accepts. */

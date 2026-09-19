@@ -1,6 +1,7 @@
 import type { FormDefinition } from '../omr/omrTypes';
 import type { ManualReview, ManualReviewEvent, StoredScanPage } from '../results/scanResultTypes';
 import { validatePageResult } from '../results/resultValidator';
+import { isValidReviewTimestamp } from '../validation/dateGuards';
 
 export type ScanSet = {
   batchId: string | null;
@@ -52,7 +53,7 @@ export function setManualReview(state: ScanSet, definition: FormDefinition, page
   const item = definition.pages.find(p => p.pageNumber === pageNumber)?.items.find(i => i.itemId === itemId);
   if (!page || !item) throw new Error('İncelenecek madde veya sayfa bulunamadı.');
   if (review && (review.choiceId !== null && !item.responseAreas.some(a => a.choiceId === review.choiceId) ||
-    typeof review.reviewedAt !== 'string' || !Number.isFinite(Date.parse(review.reviewedAt)))) throw new Error('İnceleme seçeneği veya zamanı geçersiz.');
+    !isValidReviewTimestamp(review.reviewedAt))) throw new Error('İnceleme seçeneği veya zamanı geçersiz.');
   const previous = Object.hasOwn(page.reviews, itemId) ? page.reviews[itemId] : undefined;
   if (review === undefined && !previous) return state;
   const reviews = { ...page.reviews };

@@ -6,6 +6,8 @@ import { ScanResultPreview } from '../src/components/ScanResultPreview';
 import type { FormDefinition } from '../src/omr/omrTypes';
 import type { ManualReview, PageReadSuccess, ReadStatus } from '../src/results/scanResultTypes';
 import { resolveItem, summarizeResults } from '../src/results/resultNormalizer';
+import { canCreateRecord } from '../src/records/supabaseRecords';
+import { scanToAnswers } from '../src/scoring/omrAnswers';
 import { validatePageResult } from '../src/results/resultValidator';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../src/scanner/pageSequence';
 
@@ -174,7 +176,9 @@ test('review histories are item-specific and an undo without an override is a no
 test('invalid manual choices, timestamps and targets cannot append history', () => {
   const { state, definition, item } = fixture();
   for (const candidate of [review('foreign'), { ...review('D'), reviewedAt: 'not-a-date' },
-    { ...review('D'), reviewedAt: 0 }, { ...review('D'), reviewedAt: new String(review('D').reviewedAt) }]) {
+    { ...review('D'), reviewedAt: '2026-02-30T10:00:00.000Z' },
+    { ...review('D'), reviewedAt: '2099-01-01T10:00:00.000Z' }, { ...review('D'), reviewedAt: 0 },
+    { ...review('D'), reviewedAt: new String(review('D').reviewedAt) }]) {
     assert.throws(() => setManualReview(state, definition, 1, item.itemId, candidate as ManualReview));
   }
   assert.throws(() => setManualReview(state, definition, 1, 'foreign-item', review('D')));
@@ -183,12 +187,61 @@ test('invalid manual choices, timestamps and targets cannot append history', () 
   assert.deepEqual(state.pages[1]!.reviewHistory, []);
 });
 
+test('record gate and answer conversion distinguish measured blank, unresolved, and review override', () => {
+  const reliable = fixture(1, 'reliable');
+  const secondReliable = {
+    ...reliable.raw,
+    pageId: 'page-2',
+    pageNumber: 2,
+    items: reliable.raw.items.map(item => ({ ...item, itemId: 'item-2', itemNumber: 2,
+      measurements: item.measurements.map(measurement => ({ ...measurement, responseId: measurement.responseId.replace('1-', '2-') })) })),
+
+  };
+  const complete = acceptPage(reliable.state, secondReliable, reliable.definition, { sourceName: 'page-2', previewUrl: '' });
+  assert.ok(complete.ok, complete.ok ? '' : complete.message);
+  assert.equal(canCreateRecord(sortedPages(complete.state), reliable.definition), true);
+  assert.deepEqual(scanToAnswers(reliable.definition, complete.state), ['D', 'D']);
+
+  const unresolved = fixture(1, 'ambiguous');
+  const secondUnresolved = {
+    ...unresolved.raw,
+    pageId: 'page-2',
+    pageNumber: 2,
+    items: unresolved.raw.items.map(item => ({ ...item, itemId: 'item-2', itemNumber: 2,
+      measurements: item.measurements.map(measurement => ({ ...measurement, responseId: measurement.responseId.replace('1-', '2-') })) })),
+
+  };
+  const unresolvedComplete = acceptPage(unresolved.state, secondUnresolved, unresolved.definition, { sourceName: 'page-2', previewUrl: '' });
+  assert.ok(unresolvedComplete.ok);
+  assert.equal(canCreateRecord(sortedPages(unresolvedComplete.state), unresolved.definition), false);
+  assert.deepEqual(scanToAnswers(unresolved.definition, unresolvedComplete.state), [undefined, undefined]);
+
+  const reviewed = setManualReview(unresolvedComplete.state, unresolved.definition, 1, 'item-1', review(null));
+  const reviewedAgain = setManualReview(reviewed, unresolved.definition, 2, 'item-2', review(null));
+  assert.equal(canCreateRecord(sortedPages(reviewedAgain), unresolved.definition), true);
+  assert.deepEqual(scanToAnswers(unresolved.definition, reviewedAgain), [null, null]);
+
+  const blank = fixture(1, 'blank');
+  const secondBlank = {
+    ...blank.raw,
+    pageId: 'page-2',
+    pageNumber: 2,
+    items: blank.raw.items.map(item => ({ ...item, itemId: 'item-2', itemNumber: 2,
+      measurements: item.measurements.map(measurement => ({ ...measurement, responseId: measurement.responseId.replace('1-', '2-') })) })),
+
+  };
+  const blankComplete = acceptPage(blank.state, secondBlank, blank.definition, { sourceName: 'page-2', previewUrl: '' });
+  assert.ok(blankComplete.ok);
+  assert.equal(canCreateRecord(sortedPages(blankComplete.state), blank.definition), true);
+  assert.deepEqual(scanToAnswers(blank.definition, blankComplete.state), [null, null]);
+});
+
 test('summaries preserve original measurements and never grant clinical transfer after review or undo', () => {
   const { state, definition, item } = fixture();
   const before = summarizeResults(definition, sortedPages(state));
   const reviewed = setManualReview(state, definition, 1, item.itemId, review(null));
   const after = summarizeResults(definition, sortedPages(reviewed));
-  assert.deepEqual(after, { ...before, manuallyReviewed: 1 });
+  assert.deepEqual(after, { ...before, reliableAnswers: 0, blank: 1, manuallyReviewed: 1 });
   assert.equal(after.clinicalTransferAllowed, false);
   const undone = setManualReview(reviewed, definition, 1, item.itemId, undefined);
   assert.deepEqual(summarizeResults(definition, sortedPages(undone)), before);

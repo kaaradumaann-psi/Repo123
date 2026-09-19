@@ -10,6 +10,7 @@ import {
   isNetworkError,
   loadDraft,
   loadOutbox,
+  outboxKey,
   removeOutboxEntry,
   saveDraft,
   serializeScan,
@@ -92,7 +93,7 @@ function fakeScan(): ScanSet {
           metrics: { brightness: 1, shadowSpread: 1, laplacianVariance: 1, borderContrast: 1, pixelsPerMm: 1 },
         },
         normalized: { width: 10, height: 10, data: new Uint8Array(100) },
-        sourceCorners: [{ x: 0, y: 0 }],
+        sourceCorners: [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }],
         warnings: [],
         sourceName: 'test.jpg',
         previewUrl: 'blob:fake',
@@ -125,6 +126,10 @@ test('deserializeScan rejects corrupt pages', () => {
   assert.equal(deserializeScan(null), null);
   assert.equal(deserializeScan({}), null);
   assert.equal(deserializeScan({ batchId: null, reviewerId: '', pages: {} }), null);
+  const valid = serializeScan(fakeScan());
+  const rollover = structuredClone(valid) as typeof valid;
+  rollover.pages['1']!.reviews.i1!.reviewedAt = '2026-02-30T10:00:00.000Z';
+  assert.equal(deserializeScan(rollover), null);
 });
 
 test('draft round-trips through storage and isolates users', () => {
@@ -307,6 +312,26 @@ test('outbox queues, updates and removes entries per user', () => {
 
   removeOutboxEntry('u1', UUID, store);
   assert.equal(loadOutbox('u1', store).length, 0);
+});
+
+test('outbox restore rejects mismatched method shapes and oversized storage values', () => {
+  const store = memoryStore();
+  const client = emptyClientIntake();
+  store.setItem(outboxKey('u1'), JSON.stringify([{
+    idempotencyKey: UUID,
+    method: 'raw',
+    client,
+    answersEncoded: encodeAnswers(emptyAnswers()),
+    raw: null,
+    scan: null,
+    createdAt: new Date().toISOString(),
+    attempts: 0,
+    lastError: '',
+  }]));
+  assert.deepEqual(loadOutbox('u1', store), []);
+  store.setItem(outboxKey('u1'), 'x'.repeat(8 * 1024 * 1024 + 1));
+  assert.deepEqual(loadOutbox('u1', store), []);
+  assert.equal(store.getItem(outboxKey('u1')), null);
 });
 
 test('isNetworkError separates network failures from validation errors', () => {

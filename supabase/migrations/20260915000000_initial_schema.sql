@@ -87,7 +87,7 @@ create table if not exists public.mmpi_records (
   client_first_name text not null,
   client_last_name text not null,
   gender text not null check (gender in ('Kadın', 'Erkek', 'Belirtmek istemiyor', 'Diğer')),
-  age integer not null check (age between 0 and 120),
+  age integer not null check (age between 16 and 120),
   occupation text not null,
   education text not null,
   application_date date not null,
@@ -114,6 +114,19 @@ as $$
   );
 $$;
 
+create or replace function public.is_psychologist()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'PSYCHOLOG' and active = true
+  );
+$$;
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -136,18 +149,10 @@ create policy profiles_select on public.profiles
 for select to authenticated
 using (auth.uid() = id or public.is_admin());
 
--- Admin can update profile records (e.g. active toggle)
+-- Profile mutations are Edge-Function-only. Keeping UPDATE/DELETE out of the browser RLS
+-- surface prevents a direct profile delete from orphaning Auth credentials or cascading records.
 drop policy if exists profiles_update on public.profiles;
-create policy profiles_update on public.profiles
-for update to authenticated
-using (public.is_admin())
-with check (public.is_admin());
-
--- Admin can delete psychologist profiles
 drop policy if exists profiles_delete on public.profiles;
-create policy profiles_delete on public.profiles
-for delete to authenticated
-using (public.is_admin());
 
 -- Psychologists can only read their own records; admins can read all records.
 drop policy if exists mmpi_records_select on public.mmpi_records;
@@ -163,15 +168,15 @@ drop policy if exists mmpi_records_insert on public.mmpi_records;
 create policy mmpi_records_insert on public.mmpi_records
 for insert to authenticated
 with check (
-  created_by = auth.uid() and public.is_active_user()
+  created_by = auth.uid() and public.is_psychologist()
 );
 
 -- Upsert is used only for the client idempotency key. It cannot cross user boundaries.
 drop policy if exists mmpi_records_update on public.mmpi_records;
 create policy mmpi_records_update on public.mmpi_records
 for update to authenticated
-using (created_by = auth.uid() and public.is_active_user())
-with check (created_by = auth.uid() and public.is_active_user());
+using (created_by = auth.uid() and public.is_psychologist())
+with check (created_by = auth.uid() and public.is_psychologist());
 
 -- Admin or owner can delete records
 drop policy if exists mmpi_records_delete on public.mmpi_records;
@@ -179,14 +184,16 @@ create policy mmpi_records_delete on public.mmpi_records
 for delete to authenticated
 using (
   public.is_admin() or
-  (created_by = auth.uid() and public.is_active_user())
+  (created_by = auth.uid() and public.is_psychologist())
 );
 
 revoke all on public.profiles from anon;
 revoke all on public.mmpi_records from anon;
-grant select, update, delete on public.profiles to authenticated;
+grant select on public.profiles to authenticated;
 grant select, insert, update, delete on public.mmpi_records to authenticated;
 revoke all on function public.is_active_user() from public;
+revoke all on function public.is_psychologist() from public;
 revoke all on function public.is_admin() from public;
 grant execute on function public.is_active_user() to authenticated;
+grant execute on function public.is_psychologist() to authenticated;
 grant execute on function public.is_admin() to authenticated;

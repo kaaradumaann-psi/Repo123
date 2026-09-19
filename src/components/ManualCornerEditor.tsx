@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { GrayImage, PixelImage, Point } from '../omr/omrTypes';
 import { applyManualCorners } from '../scanner/manualWarp';
 import { Icon } from './Icon';
@@ -19,6 +19,8 @@ export type ManualCornerEditorProps = {
   pageHeightMm: number;
   onChange: (corners: [Point, Point, Point, Point]) => void;
   onCancel: () => void;
+  /** Prevents confirming while the failed auto-read job is still unwinding. */
+  disabled?: boolean;
   /** Receives the warped grayscale page ready to be passed back to OMR. */
   onConfirm: (warped: GrayImage) => void;
   onAuto: () => void;
@@ -35,7 +37,7 @@ export type ManualCornerEditorProps = {
  */
 export function ManualCornerEditor({
   imageWidth, imageHeight, imageUrl, corners, pageWidthMm, pageHeightMm,
-  onChange, onCancel, onConfirm, onAuto,
+  onChange, onCancel, disabled = false, onConfirm, onAuto,
 }: ManualCornerEditorProps) {
   const id = useId();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -102,11 +104,13 @@ export function ManualCornerEditor({
     setActiveCorner(null);
   }
 
-  // Live warped preview. We try the warp on every corner change so the user sees exactly what
-  // OMR will see — if the warp throws (because the polygon is degenerate), we surface the
-  // Turkish error inline instead of swallowing it.
+  // Live warped preview. We try a low-resolution version of the production warp on every corner
+  // change so dragging stays responsive; confirmation reruns the exact OMR resolution. If the
+  // warp throws (because the polygon is degenerate), we surface the Turkish error inline.
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const previewScale = useMemo(() => Math.min(280 / (pageWidthMm * 8), 280 / (pageHeightMm * 8), 1), [pageWidthMm, pageHeightMm]);
+  // A live drag must not run the full 8 px/mm OMR warp on every pointer event. The preview is
+  // visual guidance only; confirmation below reruns the exact production-resolution warp.
+  const previewPixelsPerMm = 2;
   useEffect(() => {
     const element = previewCanvasRef.current;
     if (!element || !sourceImage) return;
@@ -114,7 +118,7 @@ export function ManualCornerEditor({
     try {
       const result = applyManualCorners({
         source: sourceImage, corners: corners as [Point, Point, Point, Point],
-        pageWidthMm, pageHeightMm,
+        pageWidthMm, pageHeightMm, pixelsPerMm: previewPixelsPerMm,
       });
       element.width = result.normalized.width;
       element.height = result.normalized.height;
@@ -161,13 +165,13 @@ export function ManualCornerEditor({
         <p className="scan-enhancer-hint">Kağıdın dört köşesini sırayla (sol üst, sağ üst, sağ alt, sol alt) sürükleyin. Sağdaki önizleme, mevcut OMR hattına gönderilecek düzeltilmiş görüntüdür.</p>
       </div>
       <div className="manual-corner-actions">
-        <button type="button" className="btn-secondary btn-sm" onClick={onAuto}>
+        <button type="button" className="btn-secondary btn-sm" onClick={onAuto} disabled={disabled}>
           <Icon name="sparkles" size={14} />
           <span>Otomatik Algıla</span>
         </button>
-        <button type="button" className="btn-secondary btn-sm" onClick={onCancel}>Vazgeç</button>
+        <button type="button" className="btn-secondary btn-sm" onClick={onCancel} disabled={disabled}>Vazgeç</button>
         <button type="button" className="btn-primary btn-sm"
-          disabled={!sourceImage || confirming || error.length > 0}
+          disabled={disabled || !sourceImage || confirming || error.length > 0}
           onClick={handleConfirm}>
           <Icon name="check" size={14} />
           <span>Bu Köşeleri Kullan</span>
@@ -207,8 +211,7 @@ export function ManualCornerEditor({
       </svg>
       <aside className="manual-corner-preview">
         <div className="manual-corner-preview-header">OMR önizlemesi</div>
-        <canvas ref={previewCanvasRef} className="manual-corner-preview-canvas"
-          style={{ transform: `scale(${previewScale})`, transformOrigin: 'top left' }} />
+        <canvas ref={previewCanvasRef} className="manual-corner-preview-canvas" />
         {error && <p className="status-banner warning-banner" role="alert">{error}</p>}
       </aside>
     </div>

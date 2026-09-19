@@ -9,6 +9,9 @@ import {
   buildQuickPayload,
   buildRawPayload,
   countAnswers,
+  isValidRecordPayload,
+  isValidQuickEntryPayload,
+  isValidRawScoresPayload,
   emptyAnswers,
   emptyClientIntake,
   emptyRawScores,
@@ -112,6 +115,48 @@ test('intake enforces the Turkish MMPI application conditions (age 16+, at least
   assert.equal(validateIntake(client), null);
   client.education = 'Lisansüstü';
   assert.equal(validateIntake(client), null);
+});
+
+test('intake rejects calendar rollover dates and future dates', () => {
+  const client = emptyClientIntake();
+  client.firstName = 'Deniz';
+  client.lastName = 'Kaya';
+  client.gender = 'Kadın';
+  client.age = 28;
+  client.testDate = '2026-02-30';
+  assert.match(validateIntake(client) ?? '', /tarihi geçersiz/i);
+  client.testDate = '2099-01-01';
+  assert.match(validateIntake(client) ?? '', /ileri olamaz/i);
+});
+
+test('persisted payload guards reject malformed quick/raw data', () => {
+  const client = emptyClientIntake();
+  client.firstName = 'Ayşe';
+  client.lastName = 'Yılmaz';
+  client.gender = 'Kadın';
+  client.age = 28;
+  client.testDate = '2026-09-17';
+  const meta = buildCaseMeta('quick', client);
+  const answers = emptyAnswers();
+  answers.fill('D');
+  const quick = buildQuickPayload(answers);
+  assert.equal(isValidQuickEntryPayload(quick), true);
+  assert.equal(isValidQuickEntryPayload({ ...quick, answers: [...quick.answers.slice(0, -1), 'maybe'] }), false);
+  assert.equal(isValidRecordPayload([meta, quick]), true);
+  assert.equal(isValidRecordPayload([meta, { ...quick, answers: quick.answers.slice(0, -1) }]), false);
+
+  const scores = emptyRawScores();
+  for (const key of Object.keys(scores) as Array<keyof typeof scores>) scores[key] = 1;
+  const raw = buildRawPayload(scores);
+  assert.equal(isValidRawScoresPayload(raw), true);
+  assert.equal(isValidRecordPayload([buildCaseMeta('raw', client), raw]), true);
+  assert.equal(isValidRecordPayload([buildCaseMeta('raw', client), { ...raw, scales: { ...raw.scales, F: 999 } }]), false);
+
+  const conflicting = parseRecordPayload([meta, quick, raw]);
+  assert.equal(conflicting.method, 'quick');
+  assert.equal(conflicting.quickAnswers, undefined);
+  assert.equal(conflicting.rawScales, undefined);
+  assert.equal(isValidRecordPayload([meta, quick, raw]), false);
 });
 
 test('duration is parsed as minutes and judged against the Turkish sample (60–120 dk)', () => {

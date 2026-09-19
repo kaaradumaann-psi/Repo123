@@ -13,7 +13,7 @@ export type CameraCaptureProps = {
 function cameraError(error: unknown): string {
   const name = error instanceof Error ? error.name : '';
   if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-    return 'Kamera izni verilmedi. Tarayıcının site izinlerinden kameraya izin verin veya JPG, PNG, WEBP, HEIC ya da PDF yükleyin.';
+    return 'Kamera izni verilmedi. Tarayıcının site izinlerinden kameraya izin verin veya JPG, PNG, WEBP, AVIF, HEIC ya da PDF yükleyin.';
   }
   if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'Kamera bulunamadı. Bir kamera bağlayın veya görüntü/PDF yükleyin.';
   if (name === 'NotReadableError' || name === 'TrackStartError') return 'Kamera başka bir uygulamada açık olabilir. Diğer uygulamayı kapatıp yeniden deneyin.';
@@ -130,13 +130,12 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
     setError('');
     try {
       const fullWidth = video.current.videoWidth, fullHeight = video.current.videoHeight;
-      const original = capturePixels(video.current, fullWidth, fullHeight);
-      // The second capture samples the preview at the same size; for OMR this is enough because
-      // `capturePixels` already downscales to `SCAN_LIMITS.longSide`. The two arrays are
-      // independent: the original is shown for human reference, the second is the pipeline input.
-      const pipeline = capturePixels(video.current, fullWidth, fullHeight);
+      // `capturePixels` already bounds the frame to the OMR input size. The same immutable pixel
+      // buffer can safely serve both analysis and the human-reference preview; taking a second
+      // full RGBA snapshot would needlessly double peak camera memory.
+      const capture = capturePixels(video.current, fullWidth, fullHeight);
       stop();
-      await onCapture(pipeline, `Kamera · ${new Date().toLocaleString('tr-TR')}`, original);
+      await onCapture(capture, `Kamera · ${new Date().toLocaleString('tr-TR')}`, capture);
     } catch (failure) {
       if (alive.current) setError(failure instanceof Error ? failure.message : 'Çekim alınamadı. Lütfen yeniden deneyin.');
     } finally { capturing.current = false; }

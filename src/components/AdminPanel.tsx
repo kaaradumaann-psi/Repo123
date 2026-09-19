@@ -732,6 +732,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                   placeholder="Örn. Selin"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
+                  maxLength={80}
                   autoComplete="off"
                 />
               </div>
@@ -744,6 +745,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                   placeholder="Örn. Demir"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
+                  maxLength={80}
                   autoComplete="off"
                 />
               </div>

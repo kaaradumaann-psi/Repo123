@@ -124,6 +124,16 @@ function formatClock(iso: string | null): string {
   return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 }
 
+function releaseScanPreviewUrls(scan: ScanSet | null): void {
+  if (!scan) return;
+  for (const page of Object.values(scan.pages)) {
+    for (const url of [page.previewUrl, page.originalImageUrl]) {
+      if (!url?.startsWith('blob:')) continue;
+      try { URL.revokeObjectURL(url); } catch { /* yoksay */ }
+    }
+  }
+}
+
 export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps) {
   /**
    * Taslak geri yükleme (F5 dayanıklılığı): bileşen ilk açıldığında bu uzmanın
@@ -231,6 +241,12 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
   const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved });
   liveRef.current = { step, client, method, answers, currentItem, raw, scan, saved };
+  useEffect(() => () => {
+    // ScannerSession deliberately retains blob URLs while the method tab is hidden so the
+    // parent can restore the same pages. Once the case workspace itself disappears, no owner
+    // remains; release those camera/file previews here instead of leaking them until tab close.
+    releaseScanPreviewUrls(liveRef.current.scan);
+  }, [actor.id]);
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       const live = liveRef.current;
@@ -379,6 +395,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     setAnswers(emptyAnswers());
     setCurrentItem(0);
     setRaw(emptyRawScores());
+    releaseScanPreviewUrls(scan);
     setScan(null);
     setScanKey(key => key + 1);
     setIntakeError('');
@@ -838,6 +855,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           raw={raw}
           scan={scan}
           definition={definition}
+          omrReady={omrReady}
           busy={busy}
           saved={saved}
           error={saveError}
@@ -1009,6 +1027,7 @@ function IntakeForm({
             value={client.occupation}
             onChange={e => set('occupation', e.target.value)}
             autoComplete="off"
+            maxLength={120}
             placeholder="Örn. Öğretmen"
           />
         </div>
@@ -1075,6 +1094,7 @@ function IntakeForm({
             id={`${id}-reason`}
             value={client.applicationReason}
             onChange={e => set('applicationReason', e.target.value)}
+            maxLength={500}
             placeholder="Örn. İşe giriş değerlendirmesi"
           />
         </div>
@@ -1084,6 +1104,7 @@ function IntakeForm({
             id={`${id}-ctx`}
             value={client.clinicalContext}
             onChange={e => set('clinicalContext', e.target.value)}
+            maxLength={2000}
             placeholder="Değerlendirme için gerekli kısa bağlam (isteğe bağlı)"
           />
         </div>
@@ -1114,6 +1135,7 @@ function ReviewPanel({
   raw,
   scan,
   definition,
+  omrReady,
   busy,
   saved,
   error,
@@ -1139,6 +1161,7 @@ function ReviewPanel({
   raw: RawScores;
   scan: ScanSet | null;
   definition: FormDefinition;
+  omrReady: boolean;
   busy: boolean;
   saved: MMPIRecord | null;
   error: string;
@@ -1190,8 +1213,11 @@ function ReviewPanel({
         return buildProfileFromRawScoresObject(raw, gender);
       }
       if (method === 'omr' && scan) {
+        // Do not score incomplete/ambiguous OMR evidence as cannot-say answers. The scanner
+        // keeps unresolved slots pending and the record gate requires every item to be reviewed.
+        if (!omrReady) return null;
         const omrAnswers = scanToAnswers(definition, scan);
-        // OMR'de eksik sayfalar varsa hesaplama yine denenir ama blank yüksek olacaktır
+        if (omrAnswers.some(answer => answer === undefined)) return null;
         return buildProfileFromAnswers(omrAnswers, gender);
       }
       return null;

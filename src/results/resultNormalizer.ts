@@ -1,19 +1,35 @@
 import type { FormDefinition, ItemDefinition } from '../omr/omrTypes';
 import type { ItemReadResult, ManualReview, StoredScanPage } from './scanResultTypes';
 import { hasSuccessfulMeasurements } from './resultValidator';
+import { isValidReviewTimestamp } from '../validation/dateGuards';
 
 export function resolveItem(item: ItemDefinition, page: StoredScanPage) {
   const original = page.items.find(result => result.itemId === item.itemId);
-  const review: ManualReview | undefined = Object.hasOwn(page.reviews, item.itemId) ? page.reviews[item.itemId] : undefined;
+  const candidateReview: ManualReview | undefined = Object.hasOwn(page.reviews, item.itemId) ? page.reviews[item.itemId] : undefined;
+  const review = candidateReview &&
+    isValidReviewTimestamp(candidateReview.reviewedAt) &&
+    (candidateReview.choiceId === null || item.responseAreas.some(area => area.choiceId === candidateReview.choiceId))
+    ? candidateReview
+    : undefined;
   const reliable = original?.status === 'reliable' && hasSuccessfulMeasurements(original, item) &&
     original.choiceId !== null && item.responseAreas.some(area => area.choiceId === original.choiceId);
   return {
     original,
     review,
+    reliable,
     choiceId: review ? review.choiceId : reliable ? original.choiceId : null,
     provenance: review ? 'manual' as const : original ? 'algorithm' as const : 'missing' as const,
     unresolved: !review && !reliable,
   };
+}
+
+/** A page is clinically complete only when every item is a measured reliable answer, a measured
+ * explicit blank, or an explicitly reviewed D/Y/blank override. Missing/ambiguous evidence is not
+ * silently converted to a blank response. */
+export function isEffectiveItem(item: ItemDefinition, page: StoredScanPage): boolean {
+  const resolved = resolveItem(item, page);
+  if (resolved.review || resolved.reliable) return true;
+  return resolved.original?.status === 'blank' && hasSuccessfulMeasurements(resolved.original, item);
 }
 
 export function summarizeResults(definition: FormDefinition, pages: readonly StoredScanPage[]) {
@@ -23,7 +39,14 @@ export function summarizeResults(definition: FormDefinition, pages: readonly Sto
     if (!page) continue;
     for (const item of expectedPage.items) {
       const { original, review } = resolveItem(item, page);
-      if (review) manuallyReviewed++;
+      if (review) {
+        // An explicit D/Y/blank override is resolved clinical input even when the raw OMR
+        // reading was missing. Do not continue to display its old ambiguous/multiple status.
+        manuallyReviewed++;
+        readItems++;
+        if (review.choiceId === null) blank++;
+        continue;
+      }
       if (!hasSuccessfulMeasurements(original, item)) continue;
       readItems++;
       if (original!.status === 'reliable') reliableAnswers++;

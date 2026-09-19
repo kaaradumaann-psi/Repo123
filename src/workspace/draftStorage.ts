@@ -18,8 +18,9 @@
  *   `null`'u ayırt edemediği için 'D'/'Y'/'B'(bilinçli boş)/'-'(henüz girilmedi)
  *   alfabesi kullanılır.
  */
-import { ITEM_COUNT } from './caseTypes';
+import { isOmrPage, ITEM_COUNT, todayIsoDate } from './caseTypes';
 import type { CaseStep, ClientIntake, EntryMethod, ItemAnswer, RawScores } from './caseTypes';
+import { isValidDateOnly, isValidReviewTimestamp } from '../validation/dateGuards';
 import type { ScanSet } from '../scanner/pageSequence';
 import type { StoredScanPage } from '../results/scanResultTypes';
 
@@ -91,7 +92,7 @@ export function decodeAnswers(encoded: unknown): ItemAnswer[] | null {
 /* ------------------------------------------------------------------ */
 
 /** Blob URL + ham piksel hariç saklanan sayfa. Kayıt için yeterlidir. */
-export type SerializedScanPage = Omit<StoredScanPage, 'normalized' | 'previewUrl'> & {
+export type SerializedScanPage = Omit<StoredScanPage, 'normalized' | 'previewUrl' | 'originalImageUrl'> & {
   previewUrl: '';
   normalized: null;
 };
@@ -106,9 +107,10 @@ export type SerializedScanSet = {
 export function serializeScan(scan: ScanSet): SerializedScanSet {
   const pages: Record<string, SerializedScanPage> = {};
   for (const [key, page] of Object.entries(scan.pages)) {
-    const { normalized: _stripped, previewUrl: _url, ...rest } = page;
+    const { normalized: _stripped, previewUrl: _url, originalImageUrl: _originalUrl, ...rest } = page;
     void _stripped;
     void _url;
+    void _originalUrl;
     // Derin kopya: sonradan state mutasyonu taslağı bozmasın.
     pages[key] = JSON.parse(JSON.stringify({ ...rest, previewUrl: '', normalized: null })) as SerializedScanPage;
   }
@@ -131,31 +133,37 @@ export function deserializeScan(data: unknown): ScanSet | null {
     reviewerId?: unknown;
     pages?: unknown;
   };
-  if (batchId !== null && typeof batchId !== 'string') return null;
-  if (typeof reviewerId !== 'string' || !reviewerId) return null;
-  if (!isRecord(pages)) return null;
+  if (batchId !== null && (typeof batchId !== 'string' || !/^[A-F0-9]{24}$/.test(batchId))) return null;
+  if (typeof reviewerId !== 'string' || !reviewerId || reviewerId.length > 160) return null;
+  if (!isRecord(pages) || Object.keys(pages).length > 4) return null;
   const restored: Record<number, StoredScanPage> = {};
   for (const [key, raw] of Object.entries(pages)) {
     const pageNumber = Number(key);
-    if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > 99) return null;
+    if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > 4 || String(pageNumber) !== key) return null;
     if (!isRecord(raw)) return null;
     const page = raw as Record<string, unknown>;
     if (page.ok !== true) return null;
-    if (typeof page.pageId !== 'string' || typeof page.batchId !== 'string') return null;
-    if (typeof page.pageNumber !== 'number' || typeof page.fingerprint !== 'string') return null;
+    if (typeof page.pageId !== 'string' || !page.pageId || typeof page.batchId !== 'string' ||
+      !/^[A-F0-9]{24}$/.test(page.batchId)) return null;
+    if (typeof page.pageNumber !== 'number' || page.pageNumber !== pageNumber ||
+      typeof page.fingerprint !== 'string' || !page.fingerprint || page.fingerprint.length > 160) return null;
     if (!Array.isArray(page.items) || !isRecord(page.quality)) return null;
     if (!Array.isArray(page.sourceCorners) || !Array.isArray(page.warnings)) return null;
     if (typeof page.sourceName !== 'string') return null;
-    if (!isRecord(page.reviews)) return null;
+    if (!isRecord(page.reviews) || !isOmrPage(page)) return null;
     // Görsel yok: boş önizleme + 0 boyutlu normalize. Kayıt etkilenmez;
     // görsel inceleme arayüzü bu durumu algılar ve kör düzeltmeyi kilitler.
+    const { originalImageUrl: _discardedOriginalUrl, ...serializedPage } = raw as unknown as Record<string, unknown>;
+    void _discardedOriginalUrl;
     restored[pageNumber] = {
-      ...(raw as unknown as Omit<StoredScanPage, 'normalized' | 'previewUrl'>),
+      ...(serializedPage as Omit<StoredScanPage, 'normalized' | 'previewUrl' | 'originalImageUrl'>),
       previewUrl: '',
       normalized: { width: 0, height: 0, data: new Uint8Array(0) },
       reviewHistory: Array.isArray(page.reviewHistory) ? (page.reviewHistory as StoredScanPage['reviewHistory']) : [],
     };
   }
+  const pageBatches = new Set(Object.values(restored).map(page => page.batchId));
+  if (pageBatches.size > 1 || (Object.keys(restored).length > 0 && (batchId === null || pageBatches.has(batchId) === false))) return null;
   return { batchId: batchId as string | null, reviewerId, pages: restored, clinicalTransferAllowed: false };
 }
 
@@ -195,17 +203,24 @@ export type DraftSaveResult = { ok: true } | { ok: false; reason: string };
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function draftText(value: unknown, max: number, allowLineBreaks = false): value is string {
+  return typeof value === 'string' && value.length <= max &&
+    (allowLineBreaks
+      ? !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value)
+      : !/[\u0000-\u001f\u007f]/.test(value));
+}
+
 function isClientIntake(value: unknown): value is ClientIntake {
   if (!isRecord(value)) return false;
   const client = value as Record<string, unknown>;
   return (
-    typeof client.firstName === 'string' &&
-    typeof client.lastName === 'string' &&
+    draftText(client.firstName, 80) &&
+    draftText(client.lastName, 80) &&
     (client.gender === '' || client.gender === 'Erkek' || client.gender === 'Kadın') &&
-    typeof client.age === 'number' &&
-    typeof client.testDate === 'string' &&
-    typeof client.testDuration === 'string' &&
-    typeof client.occupation === 'string' &&
+    typeof client.age === 'number' && Number.isInteger(client.age) && client.age >= 0 && client.age <= 120 &&
+    isValidDateOnly(client.testDate) && client.testDate <= todayIsoDate() &&
+    draftText(client.testDuration, 20) &&
+    draftText(client.occupation, 120) &&
     (client.followUp === '' || client.followUp === 'Ayaktan' || client.followUp === 'Yatış') &&
     (client.education === '' ||
       client.education === 'İlkokul' ||
@@ -218,8 +233,8 @@ function isClientIntake(value: unknown): value is ClientIntake {
       client.maritalStatus === 'Evli' ||
       client.maritalStatus === 'Boşanmış' ||
       client.maritalStatus === 'Dul') &&
-    typeof client.applicationReason === 'string' &&
-    typeof client.clinicalContext === 'string'
+    draftText(client.applicationReason, 500) &&
+    draftText(client.clinicalContext, 2000, true)
   );
 }
 
@@ -300,6 +315,12 @@ export function loadDraft(userId: string, store?: KeyValueStore | null): CaseDra
     return null;
   }
   if (!text) return null;
+  // Do not parse attacker-controlled multi-megabyte JSON from localStorage. A valid draft is
+  // comfortably below this ceiling even when it contains all four OMR pages and review history.
+  if (text.length > 8 * 1024 * 1024) {
+    try { target.removeItem(draftKey(userId)); } catch { /* yoksay */ }
+    return null;
+  }
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -316,7 +337,7 @@ export function loadDraft(userId: string, store?: KeyValueStore | null): CaseDra
   const candidate = parsed as Record<string, unknown>;
   if (candidate.version !== DRAFT_VERSION) return null;
   if (candidate.userId !== userId) return null;
-  if (typeof candidate.updatedAt !== 'string' || !Number.isFinite(Date.parse(candidate.updatedAt))) return null;
+  if (!isValidReviewTimestamp(candidate.updatedAt)) return null;
   if (Date.now() - Date.parse(candidate.updatedAt) > DRAFT_TTL_MS) {
     try {
       target.removeItem(draftKey(userId));
@@ -338,7 +359,7 @@ export function loadDraft(userId: string, store?: KeyValueStore | null): CaseDra
   if (candidate.scan !== null && deserializeScan(candidate.scan) === null) return null;
   if (typeof candidate.submissionKey !== 'string' || !UUID_V4.test(candidate.submissionKey)) return null;
   if (candidate.savedId !== null && typeof candidate.savedId !== 'string') return null;
-  if (candidate.savedAt !== null && (typeof candidate.savedAt !== 'string' || !Number.isFinite(Date.parse(candidate.savedAt)))) {
+  if (candidate.savedAt !== null && !isValidReviewTimestamp(candidate.savedAt)) {
     return null;
   }
   return candidate as unknown as CaseDraftV1;
@@ -374,17 +395,23 @@ export type OutboxEntry = {
 function isOutboxEntry(value: unknown): value is OutboxEntry {
   if (!isRecord(value)) return false;
   const entry = value as Record<string, unknown>;
+  const method = entry.method;
+  const answersValid = entry.answersEncoded === null || decodeAnswers(entry.answersEncoded) !== null;
+  const rawValid = entry.raw === null || isRawScores(entry.raw);
+  const scanValid = entry.scan === null || deserializeScan(entry.scan) !== null;
+  const methodShapeValid = method === 'quick'
+    ? entry.answersEncoded !== null && entry.raw === null && entry.scan === null
+    : method === 'raw'
+      ? entry.answersEncoded === null && entry.raw !== null && entry.scan === null
+      : method === 'omr' && entry.answersEncoded === null && entry.raw === null && entry.scan !== null;
   return (
     typeof entry.idempotencyKey === 'string' &&
     UUID_V4.test(entry.idempotencyKey) &&
-    (entry.method === 'quick' || entry.method === 'raw' || entry.method === 'omr') &&
-    isClientIntake(entry.client) &&
-    (entry.answersEncoded === null || decodeAnswers(entry.answersEncoded) !== null) &&
-    (entry.raw === null || isRawScores(entry.raw)) &&
-    (entry.scan === null || deserializeScan(entry.scan) !== null) &&
-    typeof entry.createdAt === 'string' &&
-    typeof entry.attempts === 'number' &&
-    typeof entry.lastError === 'string'
+    (method === 'quick' || method === 'raw' || method === 'omr') &&
+    isClientIntake(entry.client) && answersValid && rawValid && scanValid && methodShapeValid &&
+    typeof entry.createdAt === 'string' && isValidReviewTimestamp(entry.createdAt) &&
+    typeof entry.attempts === 'number' && Number.isInteger(entry.attempts) && entry.attempts >= 0 && entry.attempts <= 100 &&
+    typeof entry.lastError === 'string' && entry.lastError.length <= 2000 && !/[\u0000-\u001f\u007f]/.test(entry.lastError)
   );
 }
 
@@ -398,10 +425,16 @@ export function loadOutbox(userId: string, store?: KeyValueStore | null): Outbox
     return [];
   }
   if (!text) return [];
+  // Outbox entries can contain four pages of measured results; still reject an unbounded
+  // attacker-controlled localStorage value before JSON.parse allocates it.
+  if (text.length > 8 * 1024 * 1024) {
+    try { target.removeItem(outboxKey(userId)); } catch { /* yoksay */ }
+    return [];
+  }
   try {
     const parsed: unknown = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isOutboxEntry);
+    return parsed.filter(isOutboxEntry).slice(-10);
   } catch {
     return [];
   }
