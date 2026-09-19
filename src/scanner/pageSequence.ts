@@ -24,7 +24,7 @@ export function missingPageNumbers(state: ScanSet, definition: FormDefinition): 
 }
 
 export function acceptPage(state: ScanSet, result: unknown, definition: FormDefinition,
-  source: { sourceName: string; previewUrl: string }): PageAcceptance {
+  source: { sourceName: string; previewUrl: string; originalImageUrl?: string }): PageAcceptance {
   const valid = validatePageResult(result, definition);
   if (!valid.ok) return valid;
   const page = valid.result;

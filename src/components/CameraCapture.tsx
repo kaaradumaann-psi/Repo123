@@ -1,9 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { PixelImage } from '../omr/omrTypes';
 import { capturePixels } from '../scanner/imageIO';
+import { adviseCameraFrame } from '../scanner/cameraAdvisor';
+import type { CameraAdvice } from '../scanner/cameraAdvisor';
+import { CameraOverlay } from './CameraOverlay';
 
 export type CameraCaptureProps = {
-  onCapture: (image: PixelImage, sourceName: string) => void | Promise<void>;
+  onCapture: (image: PixelImage, sourceName: string, originalImage: PixelImage) => void | Promise<void>;
   disabled?: boolean;
 };
 
@@ -18,6 +21,24 @@ function cameraError(error: unknown): string {
   return 'Kamera başlatılamadı. Site izinlerini kontrol edin, tekrar deneyin veya dosya yükleyin.';
 }
 
+function frameToGray(source: CanvasImageSource, width: number, height: number) {
+  const stride = 2;
+  const w = Math.max(60, Math.floor(width / stride));
+  const h = Math.max(60, Math.floor(height / stride));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return null;
+  context.drawImage(source, 0, 0, w, h);
+  const data = context.getImageData(0, 0, w, h).data;
+  const gray = new Uint8Array(w * h);
+  for (let i = 0; i < gray.length; i++) {
+    const at = i * 4;
+    gray[i] = Math.round(0.299 * data[at]! + 0.587 * data[at + 1]! + 0.114 * data[at + 2]!);
+  }
+  return { width: w, height: h, data: gray };
+}
+
 export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProps) {
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -29,7 +50,8 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
   const [ready, setReady] = useState(false);
   const [aspect, setAspect] = useState(3 / 4);
   const [error, setError] = useState('');
-  const [advice, setAdvice] = useState<{ brightness: number; blur: number } | null>(null);
+  const [advice, setAdvice] = useState<CameraAdvice | null>(null);
+  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
   const labelId = useId();
 
   function stop() {
@@ -37,7 +59,10 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
     stream.current?.getTracks().forEach(track => { track.onended = null; track.stop(); });
     stream.current = null;
     if (video.current) { video.current.pause(); video.current.srcObject = null; }
-    if (alive.current) { setActive(false); setRequesting(false); setReady(false); setAdvice(null); }
+    if (alive.current) {
+      setActive(false); setRequesting(false); setReady(false); setAdvice(null);
+      setVideoSize({ width: 0, height: 0 });
+    }
   }
 
   useEffect(() => {
@@ -47,39 +72,24 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
 
   useEffect(() => {
     if (!active) return;
-    const canvas = document.createElement('canvas');
+    let cancelled = false;
     const timer = window.setInterval(() => {
       const element = video.current;
       if (!element || element.readyState < 2 || !element.videoWidth) return;
-      canvas.width = 240;
-      canvas.height = Math.max(1, Math.round(240 * element.videoHeight / element.videoWidth));
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      if (!context) return;
-      try {
-        context.drawImage(element, 0, 0, canvas.width, canvas.height);
-        const rgba = context.getImageData(0, 0, canvas.width, canvas.height).data;
-        const gray = new Float32Array(canvas.width * canvas.height);
-        let light = 0, sum = 0, squared = 0, count = 0;
-        for (let i = 0; i < gray.length; i++) {
-          gray[i] = 0.299 * rgba[i * 4]! + 0.587 * rgba[i * 4 + 1]! + 0.114 * rgba[i * 4 + 2]!;
-          light += gray[i]!;
-        }
-        for (let y = 1; y < canvas.height - 1; y++) for (let x = 1; x < canvas.width - 1; x++) {
-          const i = y * canvas.width + x;
-          const lap = 4 * gray[i]! - gray[i - 1]! - gray[i + 1]! - gray[i - canvas.width]! - gray[i + canvas.width]!;
-          sum += lap; squared += lap * lap; count++;
-        }
-        if (count) setAdvice({ brightness: light / gray.length, blur: Math.max(0, squared / count - (sum / count) ** 2) });
-      } catch { setAdvice(null); }
-    }, 850);
-    return () => { window.clearInterval(timer); canvas.width = canvas.height = 0; };
+      const gray = frameToGray(element, element.videoWidth, element.videoHeight);
+      if (!gray) return;
+      const next = adviseCameraFrame(gray);
+      if (!cancelled) setAdvice(next);
+    }, 700);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, [active]);
 
   async function start() {
     if (disabled || requesting || active) return;
     setError('');
-    // The capability check comes first: on an insecure origin the browser does not
-    // expose navigator.mediaDevices at all, and no web page can change that.
     if (!navigator.mediaDevices?.getUserMedia) {
       setError(window.isSecureContext
         ? 'Bu tarayıcı kamera erişimini desteklemiyor. Güncel bir tarayıcı veya dosya yükleme kullanın.'
@@ -119,9 +129,14 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
     capturing.current = true;
     setError('');
     try {
-      const image = capturePixels(video.current, video.current.videoWidth, video.current.videoHeight);
+      const fullWidth = video.current.videoWidth, fullHeight = video.current.videoHeight;
+      const original = capturePixels(video.current, fullWidth, fullHeight);
+      // The second capture samples the preview at the same size; for OMR this is enough because
+      // `capturePixels` already downscales to `SCAN_LIMITS.longSide`. The two arrays are
+      // independent: the original is shown for human reference, the second is the pipeline input.
+      const pipeline = capturePixels(video.current, fullWidth, fullHeight);
       stop();
-      await onCapture(image, `Kamera · ${new Date().toLocaleString('tr-TR')}`);
+      await onCapture(pipeline, `Kamera · ${new Date().toLocaleString('tr-TR')}`, original);
     } catch (failure) {
       if (alive.current) setError(failure instanceof Error ? failure.message : 'Çekim alınamadı. Lütfen yeniden deneyin.');
     } finally { capturing.current = false; }
@@ -134,16 +149,15 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
       <video ref={video} playsInline muted autoPlay aria-label="Canlı kamera görüntüsü"
         onLoadedData={() => {
           if (stream.current && video.current?.videoWidth && video.current.videoHeight) {
-            setReady(true); setAspect(video.current.videoWidth / video.current.videoHeight);
+            setReady(true);
+            setAspect(video.current.videoWidth / video.current.videoHeight);
+            setVideoSize({ width: video.current.videoWidth, height: video.current.videoHeight });
           }
         }} />
+      <CameraOverlay advice={advice} videoWidth={videoSize.width} videoHeight={videoSize.height} />
       <div className="scan-camera-overlay" aria-hidden="true"><span>A4 · tüm sayfa</span></div>
       {requesting && <span className="scan-camera-wait">Kamera izni / görüntü bekleniyor…</span>}
     </div>
-    {advice && <p className="scan-camera-advice" role="status">
-      Işık: {advice.brightness < 80 ? 'düşük; aydınlatın' : advice.brightness > 235 ? 'çok parlak; yansımayı kontrol edin' : 'uygun görünüyor'}.
-      {' '}Netlik: {advice.blur < 55 ? 'düşük olabilir; sabit tutun' : 'yeterli görünüyor'}.
-    </p>}
     <div className="scan-actions">
       {!active && !requesting && <button type="button" className="scan-primary" onClick={() => void start()} disabled={disabled}>Kamerayı başlat</button>}
       {(active || requesting) && <button type="button" onClick={stop}>Kamerayı durdur</button>}

@@ -63,6 +63,12 @@ export type ManualReviewEvent = Readonly<{
 export type StoredScanPage = PageReadSuccess & {
   sourceName: string;
   previewUrl: string;
+  /**
+   * Optional blob URL of the original, unprocessed photo that produced this page. Only set
+   * when the page was loaded through the camera path; file uploads keep only the normalised
+   * preview to avoid keeping stray client-side image data on disk.
+   */
+  originalImageUrl?: string;
   reviews: Record<string, ManualReview>;
   reviewHistory: readonly ManualReviewEvent[];
 };
