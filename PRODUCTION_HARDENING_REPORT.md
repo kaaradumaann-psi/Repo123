@@ -1,7 +1,7 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Footer UI düzeltildi — final staging ve branch update bekleniyor
-**Rapor güncellemesi:** 2026-09-19 16:44 UTC
+**Rapor durumu:** Footer UI commit edildi — branch push ve final status bekleniyor
+**Rapor güncellemesi:** 2026-09-19 16:47 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
 **Kapsam:** Scanner güncellemesi dahil web uygulaması, OMR hattı, manuel inceleme, kayıt/auth/RLS, Supabase Edge Function/migration'ları ve self-contained standalone build.
@@ -183,7 +183,7 @@ Uygulama üretim öncesi güvenlik ve veri bütünlüğü hardening'inden geçir
 5. `git diff --check` — ✅ footer değişikliği sonrası başarılı
 6. `git status --short` ve generated artifact/diff kontrolü — ⏳ footer commit öncesi kontrol
 7. Migration/Edge Function statik son incelemesi — ✅ tamamlandı; canlı apply/deploy ortam dışı
-8. Commit ve aktif branch'e push — ⏳ footer commit'i sıradaki
+8. Commit ve aktif branch'e push — ⏳ footer commit'i (`476d8d24...`) remote'a push edilecek
 
 Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktısı ve düzeltme sonucu eklenecek; başarısızlık varken commit/push yapılmayacak.
 
@@ -251,6 +251,7 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / footer CSS uygulaması:** Footer üst padding'i `36/22 px` seviyesinden `20/14 px` seviyesine indirildi; marka işareti küçültüldü, linkler dikey kolon yerine kontrollü wrap satırlarına alındı, alt bilgi üç kolonlu kompakt grid'e taşındı ve 860/560 px responsive kırılımları korundu. İçerik ve erişilebilir linkler kaldırılmadı.
 - **2026-09-19 / footer doğrulaması:** Footer CSS değişikliği sonrası build, PDF doğrulama, typecheck ve tüm testler tekrar çalıştırıldı; `npm test` **236/236**, build/PDF/diff-check başarılı.
 - **2026-09-19 / footer pre-stage kontrolü:** Yalnızca `src/styles/site.css`, generated `optik-form.html` ve bu rapor değişmiş durumda; generated `dist/index.html`/`optik-form.html` byte-for-byte aynı (`bb8e43ff…c466df` SHA-256), whitespace hatası yok.
+- **2026-09-19 / footer commit:** Kompakt responsive footer ve generated standalone artifact `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` commit'ine yazıldı; rapor push öncesi commit bilgisiyle güncelleniyor.
 
 ---
 
@@ -260,6 +261,7 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **PDF/build:** ✅ Self-contained `dist/index.html` ve `optik-form.html` yeniden üretildi; PDF 4 A4/566 item/QR geometrisi doğrulandı.
 - **Önceki implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
 - **Önceki report/status commits:** `255b36fc52eacc5910a99eae2e3a673b85d65624` ve `e9f7184c2f2f09c2f55ade131b0124b5d61853c0` remote branch'te mevcut.
-- **Footer değişikliği commit/push:** ⏳ sırada.
+- **Footer değişikliği commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
+- **Footer değişikliği push:** ⏳ sırada.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** Footer CSS, generated `optik-form.html` ve bu rapor değişiklikleri commit edilip push edilecek.
+- **Son çalışma ağacı durumu:** Footer commit'i temiz; bu rapor güncellemesi de ayrı status commit'iyle yazılıp footer commit zinciri remote'a push edilecek.
