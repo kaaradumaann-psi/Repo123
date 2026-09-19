@@ -7,7 +7,7 @@ import type { PrintReportMeta } from './results/MMPIPrintReport';
 import { Icon } from './Icon';
 
 /**
- * Tasarım önizlemesi — `#/onizleme` rotasıyla açılır ve yalnızca Supabase
+ * Tasarım önizlemesi — `/onizleme` rotasıyla açılır ve yalnızca Supabase
  * yapılandırılmadığında (kurulum/önizleme ortamı) gösterilir.
  *
  * Buradaki profil, uygulamanın kendi puanlama hattıyla üretilen örnek veriyle

@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react';
 import { Icon } from './Icon';
 
 /**
- * SSS — Sıkça Sorulan Sorular (#/sss).
+ * SSS — Sıkça Sorulan Sorular (/sss).
  *
  * Yanıtlar uygulamanın gerçek davranışını yansıtır: puanlama hattı
  * (T dönüşümü, geçerlik ölçekleri, F-K endeksi), 4 sayfalık optik form ve

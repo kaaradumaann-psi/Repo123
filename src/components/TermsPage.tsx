@@ -2,7 +2,7 @@ import { CONTACT_EMAIL, COPYRIGHT_HOLDER, POLICY_EFFECTIVE_DATE, SITE_URL } from
 import { PolicyDoc, PolicyList, type PolicySection } from './PolicyDoc';
 
 /**
- * Kullanım Koşulları (#/kullanim).
+ * Kullanım Koşulları (/kullanim).
  *
  * Uygulamanın karar destek niteliğini, hesap ve lisans kurallarını,
  * kullanıcı yükümlülüklerini ve sorumluluk sınırlarını düzenler. Metin,

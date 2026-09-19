@@ -55,7 +55,7 @@ function fileDate(value: string | null | undefined): string {
 
 /**
  * Test kaydı detay sayfası — açılır pencere değil, tam sayfa.
- * `#/test/<id>` hash rotasıyla açılır; Supabase RLS erişimi zorlar
+ * `/kayitlar/:id` rotasıyla açılır; Supabase RLS erişimi zorlar
  * (yönetici tüm kayıtları, psikolog yalnız kendi kayıtlarını görür).
  *
  * Ekran: kısa özet şeridi + sekmeli çalışma görünümü (progressive disclosure).
