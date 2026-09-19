@@ -99,7 +99,7 @@ function AuthPageShell({ children }: { children: ReactNode }) {
   return (
     <div className="auth-page">
       {children}
-      <SiteFooter compact />
+      <SiteFooter />
     </div>
   );
 }
