@@ -165,10 +165,22 @@ test('saved payload round-trips client fields, quick answers and raw scores', ()
   for (const key of Object.keys(scores) as Array<keyof typeof scores>) scores[key] = 1;
 
   const meta = buildCaseMeta('quick', client);
+  // Veri bütünlüğü: kayıt meta'sı motor sürümünü ve norm etiketini taşır.
+  assert.equal(typeof meta.scoringVersion, 'string');
+  assert.ok(meta.scoringVersion!.length > 0);
+  assert.equal(typeof meta.normSource, 'string');
   const quick = buildQuickPayload(answers);
   const parsedQuick = parseRecordPayload([meta, quick]);
   assert.equal(parsedQuick.method, 'quick');
   assert.equal(parsedQuick.client?.firstName, 'Ayşe');
+  assert.equal(parsedQuick.scoringVersion, meta.scoringVersion);
+  // Eski kayıt (scoringVersion alanı yok) kırılmadan okunur.
+  const legacyMeta = { ...meta } as Record<string, unknown>;
+  delete legacyMeta.scoringVersion;
+  delete legacyMeta.normSource;
+  const parsedLegacy = parseRecordPayload([legacyMeta, quick]);
+  assert.equal(parsedLegacy.scoringVersion, undefined);
+  assert.equal(parsedLegacy.method, 'quick');
   assert.equal(parsedQuick.followUp, 'Ayaktan');
   assert.equal(parsedQuick.maritalStatus, 'Evli');
   assert.equal(parsedQuick.testDuration, '90 dk');

@@ -1,4 +1,5 @@
 import { FORM } from '../form/layout';
+import { NORM_SOURCE_LABEL, SCORING_ENGINE_VERSION } from '../scoring/version';
 import type { Gender, RecordInput, SavedAnswerPage } from '../records/supabaseRecords';
 
 export const ITEM_COUNT = FORM.totalItems;
@@ -68,6 +69,13 @@ export const RAW_SCORE_MAX: Record<RawScoreKey, number> = Object.fromEntries(
 export type CaseMeta = {
   kind: 'case-meta';
   version: 1;
+  /**
+   * Kaydı üreten puanlama motoru sürümü (veri bütünlüğü). Eski kayıtlarda
+   * bulunmayabilir; okuma tarafı (parseRecordPayload) alanı opsiyonel sayar.
+   */
+  scoringVersion?: string;
+  /** T dönüşümünde kullanılan norm kaynağının kısa etiketi. */
+  normSource?: string;
   method: EntryMethod;
   client: {
     firstName: string;
@@ -302,6 +310,8 @@ export function buildCaseMeta(method: EntryMethod, client: ClientIntake): CaseMe
   return {
     kind: 'case-meta',
     version: 1,
+    scoringVersion: SCORING_ENGINE_VERSION,
+    normSource: NORM_SOURCE_LABEL,
     method,
     client: {
       firstName: client.firstName.trim(),
@@ -380,6 +390,9 @@ export function parseRecordPayload(raw: unknown[]) {
   return {
     method,
     client,
+    /** Kaydı üreten motor sürümü; eski kayıtlarda bulunmaz (undefined). */
+    scoringVersion: typeof meta?.scoringVersion === 'string' ? meta.scoringVersion : undefined,
+    normSource: typeof meta?.normSource === 'string' ? meta.normSource : undefined,
     followUp: client?.followUp || legacyContext?.followUp || '',
     maritalStatus: client?.maritalStatus || legacyContext?.maritalStatus || '',
     testDuration: client?.testDuration || legacyContext?.testDuration || '',

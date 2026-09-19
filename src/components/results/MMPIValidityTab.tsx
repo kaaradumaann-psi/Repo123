@@ -10,6 +10,8 @@ const TONE_COLOR: Record<Tone, string> = { alert: '#d2453a', watch: '#b4770b', o
 /** Profili geçersiz kılan eşikler — özet metniyle aynı kaynaktan beslenir. */
 const CANNOT_SAY_CUTOFF = 31;
 const F_CUTOFF = 23;
+/** F ham 16-22 → şüpheli bant (kaynak: "profil geçersiz olabilir"). */
+const F_SUSPECT = 16;
 
 function toneClass(tone: Tone): string {
   return tone === 'alert' ? 'is-alert' : tone === 'watch' ? 'is-watch' : 'is-ok';
@@ -90,7 +92,7 @@ function warningHeadline(warning: string): string {
  */
 export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
   const { validityAnalysis, itemLevel } = profile;
-  const { fkAnalysis: fk, warnings, isValid, findings } = validityAnalysis;
+  const { fkAnalysis: fk, warnings, status, findings } = validityAnalysis;
 
   const reasons = [
     validityAnalysis.cannotSay >= CANNOT_SAY_CUTOFF
@@ -99,17 +101,23 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
     validityAnalysis.fRaw >= F_CUTOFF ? `F ham puanı ${validityAnalysis.fRaw} (eşik ≥ ${F_CUTOFF})` : null,
   ].filter((reason): reason is string => reason !== null);
 
-  const bannerTone: Tone = !isValid ? 'alert' : warnings.length > 0 ? 'watch' : 'ok';
-  const bannerTitle = !isValid
-    ? 'PROFİL GEÇERSİZ / ŞÜPHELİ'
-    : warnings.length > 0
-      ? 'PROFİL GEÇERLİ — İNCELENMESİ GEREKEN BULGULAR VAR'
-      : 'PROFİL GEÇERLİ';
-  const bannerText = !isValid
-    ? `${reasons.join(' ve ')} eşik değerin üzerinde olduğu için bu profil standart değerlendirmeye uygun değildir. Testin yenilenmesi ya da sonuçların klinik görüşmeyle doğrulanması önerilir.`
-    : warnings.length > 0
-      ? 'Geçerliği düşüren bir bulgu yok; aşağıdaki ölçek ve endeks uyarıları yorumlamada birlikte değerlendirilmelidir.'
-      : 'Yanıtlanmayan madde, uygun olmayan yaşantı ve savunma düzeyi beklenen aralıkta; profil standart yorumlamaya uygundur.';
+  const bannerTone: Tone = status === 'GECERSIZ' ? 'alert' : status === 'SUPHELI' || warnings.length > 0 ? 'watch' : 'ok';
+  const bannerTitle =
+    status === 'GECERSIZ'
+      ? 'PROFİL GEÇERSİZ'
+      : status === 'SUPHELI'
+        ? 'PROFİL ŞÜPHELİ — DİKKATLİ DEĞERLENDİRİLMELİ'
+        : warnings.length > 0
+          ? 'PROFİL GEÇERLİ — İNCELENMESİ GEREKEN BULGULAR VAR'
+          : 'PROFİL GEÇERLİ';
+  const bannerText =
+    status === 'GECERSIZ'
+      ? `${reasons.join(' ve ')} eşik değerin üzerinde olduğu için bu profil standart değerlendirmeye uygun değildir. Testin yenilenmesi ya da sonuçların klinik görüşmeyle doğrulanması önerilir.`
+      : status === 'SUPHELI'
+        ? `F ham puanı ${validityAnalysis.fRaw} (şüpheli aralık ${F_SUSPECT}–${F_CUTOFF - 1}): profil geçersiz olabilir; diğer geçerlilik skalaları ve klinik bağlam birlikte değerlendirilmelidir.`
+        : warnings.length > 0
+          ? 'Geçerliği düşüren bir bulgu yok; aşağıdaki ölçek ve endeks uyarıları yorumlamada birlikte değerlendirilmelidir.'
+          : 'Yanıtlanmayan madde, uygun olmayan yaşantı ve savunma düzeyi beklenen aralıkta; profil standart yorumlamaya uygundur.';
 
   const config = validityAnalysis.validityConfig;
 
@@ -263,9 +271,9 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
             )}
           </div>
 
-          <div className={`mv-panel ${isValid ? 'is-ok' : 'is-alert'}`}>
+          <div className={`mv-panel ${status === 'GECERSIZ' ? 'is-alert' : status === 'SUPHELI' ? 'is-watch' : 'is-ok'}`}>
             <header className="mv-panel-head">
-              <Icon name={isValid ? 'checkCircle' : 'alert'} size={14} />
+              <Icon name={status === 'GECERLI' ? 'checkCircle' : status === 'SUPHELI' ? 'info' : 'alert'} size={14} />
               <span>Genel Değerlendirme</span>
             </header>
             <p className="mv-verdict-text">{validityAnalysis.interpretation}</p>

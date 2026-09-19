@@ -93,8 +93,13 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
           </div>
           <div>
             <span>Geçerlik Durumu</span>
-            <b style={{ color: validityAnalysis.isValid ? '#0c8a5c' : '#c2372c' }}>
-              {validityAnalysis.isValid ? 'GEÇERLİ' : 'ŞÜPHELİ / GEÇERSİZ'}
+            <b
+              style={{
+                color:
+                  validityAnalysis.status === 'GECERLI' ? '#0c8a5c' : validityAnalysis.status === 'SUPHELI' ? '#96660a' : '#c2372c',
+              }}
+            >
+              {validityAnalysis.status === 'GECERLI' ? 'GEÇERLİ' : validityAnalysis.status === 'SUPHELI' ? 'ŞÜPHELİ' : 'GEÇERSİZ'}
             </b>
           </div>
           <div>

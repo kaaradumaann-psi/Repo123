@@ -56,6 +56,15 @@ export type ValidityFinding = {
   tone: Tone;
 };
 
+/**
+ * Protokolün üç durumlu geçerlik sınıfı — yalnızca kaynakta belgelenmiş
+ * kurallara dayanır (VALIDITY_CUTOFFS):
+ * - GECERSIZ: boş ≥ 31 veya F ham ≥ 23,
+ * - SUPHELI: F ham 16–22 (kaynak: "profil geçersiz olabilir"),
+ * - GECERLI: diğer durumlar.
+ */
+export type ValidityStatus = 'GECERLI' | 'SUPHELI' | 'GECERSIZ';
+
 export type ValidityAnalysis = {
   cannotSay: number;
   lRaw: number;
@@ -63,6 +72,8 @@ export type ValidityAnalysis = {
   kRaw: number;
   fMinusK: number;
   isValid: boolean;
+  /** GEÇERLİ / ŞÜPHELİ / GEÇERSİZ — belgelenmiş eşiklere göre. */
+  status: ValidityStatus;
   warnings: string[];
   interpretation: string;
   /** ?, L, F, K için kaynak tabanlı bulgular. */
@@ -314,6 +325,8 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
   // klinik yorum rehberi: Ham 23 ve üstü F → profil geçersizdir.
   const fInvalid = fRaw >= VALIDITY_CUTOFFS.fInvalid;
   const isValid = !(qInvalid || fInvalid);
+  // Kaynak: F ham 16-22 → "profil geçersiz olabilir" (şüpheli bant).
+  const status: ValidityStatus = !isValid ? 'GECERSIZ' : fRaw >= VALIDITY_CUTOFFS.fSuspect ? 'SUPHELI' : 'GECERLI';
 
   if (qInvalid) {
     warnings.push(`Boş madde sayısı ${cannotSay} (Ham ≥ ${VALIDITY_CUTOFFS.cannotSayInvalid}): ${qBand.text}`);
@@ -382,6 +395,7 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     kRaw,
     fMinusK,
     isValid,
+    status,
     warnings,
     interpretation,
     findings,

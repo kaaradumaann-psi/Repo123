@@ -1181,6 +1181,11 @@
     border-color: var(--success-border);
     color: #0a6b49;
   }
+  .mmpi-validity-pill.is-suspect {
+    background: var(--warning-tint);
+    border-color: var(--warning-border);
+    color: #7c5407;
+  }
   .mmpi-validity-pill.is-invalid {
     background: var(--danger-tint);
     border-color: var(--danger-border);

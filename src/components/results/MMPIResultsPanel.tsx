@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ItemAnswer } from '../../workspace/caseTypes';
-import { tColor } from '../../scoring/mmpiInterpretation';
+import { tColor, validityStatusDisplay } from '../../scoring/mmpiInterpretation';
 import type { IconName } from '../Icon';
 import { Icon } from '../Icon';
 import { MMPIScoreChart } from './MMPIScoreChart';
@@ -77,9 +77,9 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
             MMPI <em>Sonuçları</em>
           </h3>
         </div>
-        <div className={`mmpi-validity-pill ${validityAnalysis.isValid ? 'is-valid' : 'is-invalid'}`}>
-          <Icon name={validityAnalysis.isValid ? 'checkCircle' : 'alert'} size={14} />
-          <span>{validityAnalysis.isValid ? 'Geçerli Profil' : 'Şüpheli / Geçersiz Profil'}</span>
+        <div className={`mmpi-validity-pill ${validityStatusDisplay(validityAnalysis.status).className}`}>
+          <Icon name={validityAnalysis.status === 'GECERLI' ? 'checkCircle' : validityAnalysis.status === 'SUPHELI' ? 'info' : 'alert'} size={14} />
+          <span>{validityStatusDisplay(validityAnalysis.status).label}</span>
         </div>
       </header>
       )}

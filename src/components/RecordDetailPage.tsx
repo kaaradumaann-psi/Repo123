@@ -3,6 +3,7 @@ import { getRecordDetail } from '../records/supabaseRecords';
 import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
+import { validityStatusDisplay } from '../scoring/mmpiInterpretation';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import { MMPIPrintReport } from './results/MMPIPrintReport';
 import { Icon } from './Icon';
@@ -192,9 +193,12 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
           </div>
           {profile && (
             <div className="record-page-status">
-              <span className={`mmpi-validity-pill ${profile.validityAnalysis.isValid ? 'is-valid' : 'is-invalid'}`}>
-                <Icon name={profile.validityAnalysis.isValid ? 'checkCircle' : 'alert'} size={14} />
-                <span>{profile.validityAnalysis.isValid ? 'Geçerli Profil' : 'Şüpheli / Geçersiz'}</span>
+              <span className={`mmpi-validity-pill ${validityStatusDisplay(profile.validityAnalysis.status).className}`}>
+                <Icon
+                  name={profile.validityAnalysis.status === 'GECERLI' ? 'checkCircle' : profile.validityAnalysis.status === 'SUPHELI' ? 'info' : 'alert'}
+                  size={14}
+                />
+                <span>{validityStatusDisplay(profile.validityAnalysis.status).label}</span>
               </span>
               {profile.profileCode && <span className="mmpi-chip mmpi-chip-code">Kod: {profile.profileCode}</span>}
               <span className="mmpi-chip">{profile.gender} normları</span>
@@ -258,6 +262,12 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
               <span className="detail-label">Uzman</span>
               <span className="detail-val highlight">{dash(record.psychologistName)}</span>
             </div>
+            {parsed.scoringVersion && (
+              <div className="detail-item">
+                <span className="detail-label">Puanlama motoru</span>
+                <span className="detail-val">v{parsed.scoringVersion}</span>
+              </div>
+            )}
           </div>
           {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
         </details>
