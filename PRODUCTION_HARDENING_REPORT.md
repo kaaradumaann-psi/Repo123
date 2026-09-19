@@ -1,6 +1,6 @@
 # MMPI-566 Üretim Öncesi Hardening Mühendislik Raporu
 
-**Rapor durumu:** Commit tamamlandı — push bekleniyor
+**Rapor durumu:** Implementation ve report finalizasyon commit'leri tamamlandı — push bekleniyor
 **Rapor güncellemesi:** 2026-09-19 16:21 UTC
 **Çalışılan branch:** `arena/01a0ba1c-repo123`
 **Başlangıç commit'i:** `9db762cf101af815acbf8f9944fba70e3d10a4ea`
@@ -235,14 +235,15 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / final validation tekrar:** DB/Edge kaynak değişiklikleri ve outbox hardening sonrası final zincir tekrar çalıştırıldı: build ✅, PDF ✅, typecheck ✅, `npm test` **236/236** ✅, diff-check ✅.
 - **2026-09-19 / pre-stage inventory:** Final status/name/whitespace kontrolü tamamlandı. `dist/index.html` ve `optik-form.html` byte-for-byte aynı (`302e08fb…174093` SHA-256); yalnızca beklenen kaynak, migration, test, generated artifact ve bu rapor değişiklikleri mevcut.
 - **2026-09-19 / staging:** Beklenen tüm dosyalar stage edildi; `git diff --cached --check` başarılı oldu. Raporun ilk Markdown hardbreak trailing whitespace'i de temizlendi. Commit/push pending.
-- **2026-09-19 / commit:** Hardening değişiklikleri aktif branch'e `50dcdba1b8da3d14179e48b280e9b2f17da21d9d` commit'iyle yazıldı. Commit sonrası bu raporun submit durumu güncelleniyor; amend ve push pending.
+- **2026-09-19 / commit:** Hardening değişiklikleri aktif branch'e `ca275121930896162363bbc4ce7b87d0916bbf21` commit'iyle yazıldı. Rapor, amend sonrası oluşan gerçek implementation commit'ini yansıtacak şekilde güncellendi.
+- **2026-09-19 / report commit:** Rapor finalizasyonu ayrı dokümantasyon commit'iyle yazıldı; branch push ve push sonrası clean-tree doğrulaması pending.
 
 ---
 
 ## 9. Final submit kaydı
 
 - **Final doğrulama durumu:** Bekliyor. 2026-09-19 final zinciri `npm run build && npm run verify:pdf && npm run typecheck && npm test && git diff --check` başında durdu: shell `tsc: not found` (exit 127); dependency installation/environment recovery gerekiyor.
-- **Commit:** `50dcdba1b8da3d14179e48b280e9b2f17da21d9d` — `Harden scanner, OMR, records, and standalone build`.
+- **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
 - **Push:** Bekliyor.
 - **Branch:** `arena/01a0ba1c-repo123`
-- **Son çalışma ağacı durumu:** Commit sonrası rapor güncellemesi staged edilip amend edilecek; ardından push ve clean-tree doğrulaması yapılacak.
+- **Son çalışma ağacı durumu:** Implementation ve report finalizasyon değişiklikleri commit edildi; push ve push sonrası clean-tree doğrulaması yapılacak.
