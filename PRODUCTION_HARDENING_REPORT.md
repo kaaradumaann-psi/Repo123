@@ -260,7 +260,9 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **2026-09-19 / base merge:** `origin/main` aktif branch'e `--no-ff` ile alınmaya çalışıldı. `optik-form.html` ve `src/styles/site.css` içindeki iki footer uygulaması nedeniyle conflict oluştu; otomatik olarak devam edilmedi. Çözümde güncel hardening branch'inin compact footer tasarımı kaynak-of-truth olarak korunacak, generated artifact yeniden build edilecek.
 - **2026-09-19 / conflict resolution:** `src/styles/site.css`, `SiteFooter.tsx`, AuthGate/preview footer çağrıları ve `optik-form.html` için aktif hardening branch sürümü korundu; `origin/main`in conflict dışı proje durum güncellemesi saklandı. Conflict marker kalmadı.
 - **2026-09-19 / merged-base validation:** Conflict çözümü sonrası `npm run build`, `npm run verify:pdf`, `npm run typecheck`, `npm test` (**236/236**) ve `git diff --check` başarılı oldu.
-- **2026-09-19 / merge commit:** Güncel `origin/main` conflict çözümüyle aktif branch'e alındı; merge commit `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` oluşturuldu. Bu commit ve PR için remote push/merge sırada.
+- **2026-09-19 / merge commit:** Güncel `origin/main` conflict çözümüyle aktif branch'e alındı; merge commit `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` oluşturuldu. Bu commit remote'a push edildi.
+- **2026-09-19 / PR create:** Aktif branch için PR **#29** oluşturuldu: https://github.com/kaaradumaann-psi/Repo123/pull/29. PR, güncel `main` ile merge edilmiş ve final doğrulama sonuçlarıyla açıldı.
+- **2026-09-19 / PR check:** GitHub `verify` check'i beklemeden izlenerek **pass** oldu (2m29s); PR merge için hazır.
 
 ---
 
@@ -271,6 +273,6 @@ Final turda bir komut başarısız olursa raporun bu bölümüne hata çıktıs�
 - **Implementation commit:** `ca275121930896162363bbc4ce7b87d0916bbf21` — `Harden scanner, OMR, records, and standalone build`.
 - **Footer commit:** `476d8d24be93ed58a0e4f6c9ac9d20ad21fcce9b` — `Polish compact responsive site footer`.
 - **Merge commit:** `4ee606a03e66f34bbd4f56b25eb06bd42208ce94` — güncel `origin/main` ile conflict çözümü sonrası.
-- **PR:** Henüz oluşturulmadı; aktif branch remote'a push edilip PR açılacak ve merge edilecek.
+- **PR:** #29 oluşturuldu — https://github.com/kaaradumaann-psi/Repo123/pull/29; GitHub `verify` check'i geçti, merge için hazır.
 - **Branch:** `arena/01a0ba1c-repo123`.
-- **Son çalışma ağacı durumu:** Rapor güncellemesi dışında temiz; PR/push işlemleri sırada.
+- **Son çalışma ağacı durumu:** PR check sonucu bu rapora yazıldı; rapor commit edilip push edilecek, ardından PR merge edilecek.
