@@ -401,8 +401,6 @@ CI (`.github/workflows/ci.yml`) `npm ci`, typecheck, test, PDF verify, build ve 
 
 ---
 
----
-
 ## 10. Production Deployment (Üretim Dağıtım Kılavuzu)
 
 Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend barındırma ortamlarının uçtan uca senkronizasyonu için gerçek operasyonel adımları tanımlar.
