@@ -1,3 +1,5 @@
+> **Tarihsel rapor:** Bu belge 2026-09-19 scanner incelemesinin kaydıdır. Güncel rota, dosya sayısı, test ve üretim durumu için depo kökündeki `SYSTEM.md` yetkili kaynaktır.
+
 # MMPI Scanner Mimarisi — Analiz Raporu ve Yol Haritası
 
 > **Kapsam:** `kaaradumaann-psi/Repo123` deposu. CamScanner-benzeri, MMPI optiğine özel, **client-side** tarama/ön-işleme hattı.
@@ -13,7 +15,7 @@ Depoyu kökten itibaren okudum:
 
 1. `package.json`, `tsconfig.json`, `vite.config.ts`, `index.html` → framework ve build.
 2. `README.md` (~280 satır) → yüksek düzey mimari, kapsam ve sınırlar.
-3. `src/` ağacı (102 dosya, 14 klasör) → modüler yapı haritası.
+3. `src/` ağacı (mevcut denetimde 117 TypeScript/TSX dosyası) → modüler yapı haritası.
 4. OMR ve scanner modülleri baştan sona:
    - `src/omr/omrTypes.ts`, `formDefinition.ts`, `perspectiveCorrection.ts`,
      `alignmentDetector.ts`, `analyzePage.ts`, `pageIsolation.ts`,
@@ -32,7 +34,7 @@ Depoyu kökten itibaren okudum:
 ### 2.1 Frontend
 - **Framework:** React 19.2.0 + TypeScript 5.9.3 (strict).
 - **Build:** Vite 7.3.6 → tek dosya (`optik-form.html`) inline script ile.
-- **Routing:** Hash tabanlı (`#/optik-form`, `#/kayitlar`, …); SPA ama tek HTML çıktı.
+- **Routing:** History API tabanlı pathname rotaları (`/`, `/islem`, `/form`, `/kayitlar`, …); SPA fallback ile tek HTML çıktı.
 - **State:** Hook tabanlı yerel state + `localStorage` taslak (30 gün TTL).
 - **UI:** Token-temelli (`screen.css` → `theme.css`); DM Sans + Newsreader; düz, editoryal tasarım dili.
 

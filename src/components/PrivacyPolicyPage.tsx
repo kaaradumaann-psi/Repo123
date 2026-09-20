@@ -61,9 +61,9 @@ const SECTIONS: PolicySection[] = [
           ordered
           items={[
             <>
-              <b>Hesap verileri:</b> Ad, soyad, iş e-postası, rol (psikolog/yönetici), hesap
-              aktiflik durumu ve parolanın salt doğrulama amacıyla işlenen özeti. Public kayıt yoktur;
-              hesaplar yalnızca yönetici tarafından açılır.
+              <b>Hesap verileri:</b> Ad, soyad, iş e-postası, rol (psikolog/yönetici) ve hesap
+              aktiflik durumu. Parola uygulamanın tablolarına yazılmaz; kimlik doğrulama Supabase Auth
+              tarafından yürütülür. Public kayıt yoktur; hesaplar yalnızca yönetici tarafından açılır.
             </>,
             <>
               <b>Danışan kayıt verileri:</b> Kaydı oluşturan uzman tarafından girilen ad, soyad,
@@ -142,7 +142,7 @@ const SECTIONS: PolicySection[] = [
         </p>
         <PolicyList
           items={[
-            'Kayıt verilerine, satır güvenliği (RLS) kuralları gereği yalnızca kaydı oluşturan uzman erişebilir;',
+            'Kayıt verilerine, satır güvenliği (RLS) kuralları gereği psikolog kendi kayıtlarıyla, Admin ise yönetim görevi kapsamında tüm kayıtlarla sınırlı olarak erişebilir;',
             'Veriler, yasa gereği talep yetkili mercilerin dışında hiçbir üçüncü kişi/kuruma satılmaz, devredilmez veya paylaşılır hâle getirilmez;',
             'Uygulama üçüncü taraf analitik, reklam veya izleme servisi kullanmaz; yayımlanan derleme yalnızca yapılandırılan veritabanı adresiyle iletişim kurar.',
           ]}
@@ -202,12 +202,13 @@ const SECTIONS: PolicySection[] = [
         <PolicyList
           items={[
             'Oturum anahtarı — sessionStorage: aynı sekmede sayfa yenilemede korunur, sekme kapandığında silinir;',
-            'Aktif çalışma sekmesi tercihi ve işlem taslağı — tarayıcının yerel depolama alanında, cihazınızda tutulur.',
+            'İşlem taslağı ve çevrimdışı kayıt kuyruğu — kullanıcıya özel anahtarla tarayıcının yerel depolama alanında, cihazınızda tutulur; görüntü pikselleri ve blob URL’leri taslağa yazılmaz.',
           ]}
         />
         <p>
-          Bu kayıtları tarayıcı ayarlarınızdan dilediğiniz zaman temizleyebilirsiniz; temizlik
-          sonrasında oturumunuz kapanır, taslak işlem kaybolur.
+          Bu kayıtları tarayıcı ayarlarından dilediğiniz zaman temizleyebilirsiniz. Yerel depolama
+          temizlenirse taslak ve bekleyen çevrimdışı kayıt kuyruğu kaybolur; oturum anahtarı ayrı
+          sessionStorage alanında tutulduğu için yalnızca sessionStorage temizlenirse oturum kapanır.
         </p>
       </>
     ),

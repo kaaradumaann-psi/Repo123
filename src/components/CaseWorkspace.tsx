@@ -111,6 +111,8 @@ type CaseWorkspaceProps = {
    * F5 ('session') mevcut davranışı korur ve kaldığı yerden devam eder.
    */
   flowOrigin: 'session' | 'signin';
+  /** / rotası temiz landing görünümüdür; eski taslak otomatik açılmaz. */
+  landing?: boolean;
 };
 
 function formatDate(value: string): string {
@@ -141,19 +143,19 @@ function releaseScanPreviewUrls(scan: ScanSet | null): void {
   }
 }
 
-export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWorkspaceProps) {
+export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing = false }: CaseWorkspaceProps) {
   /**
-   * Taslak geri yükleme (F5 dayanıklılığı): bileşen ilk açıldığında bu uzmanın
-   * kayıtlı taslağı varsa state ondan beslenir. Boş/bozuk/süresi dolmuş taslak
-   * yok sayılır; uygulama yine tertemiz açılır.
+   * Taslak geri yükleme (F5 dayanıklılığı): /islem doğrudan açıldığında bu
+   * uzmanın kayıtlı taslağı varsa state ondan beslenir. Boş/bozuk/süresi dolmuş
+   * taslak yok sayılır; uygulama yine tertemiz açılır.
    *
-   * Yeni bir girişte ('signin') taslak OKUNMAZ ve otomatik geri yüklenmez:
-   * persisted work, "hangi conclusion'a gidileceği" değil "kullanıcının ileride
-   * devam edebileceği çalışmadır". Landing'deki "Devam et" düğmesi loadDraft'ı bir
-   * kez daha çalıştırarak o çalışmayı kullanıcının isteğiyle açar.
+   * / (landing) ve yeni girişte ('signin') taslak OKUNMAZ ve otomatik geri
+   * yüklenmez. Böylece SSS, gizlilik, kaynakça veya üst geri düğmesinden ana
+   * sayfaya dönmek her zaman temiz başlangıç gösterir. Kullanıcı daha sonra
+   * İşlem sekmesine geçip taslağı kendi isteğiyle açabilir.
    */
   const [boot] = useState(() => {
-    if (flowOrigin === 'signin') return null;
+    if (landing || flowOrigin === 'signin') return null;
     const draft = loadDraft(actor.id);
     if (!draft || !isDraftNonEmpty(draft)) {
       // Kaydedilmiş başarı ekranı da korunur (F5 sonrası "kaydedildi" kaybolmaz).
@@ -246,9 +248,9 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
   /* ---------------- Taslak otomatik kayıt (debounced) ---------------- */
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      // Yeni girişte kullanıcı henüz bir işe başlamadıysa autosave ÇALIŞMAZ: boş
-      // state yazmak, yalnızca okunmak üzere korunan resumable taslağı ezebilir.
-      if (flowOrigin === 'signin' && boot == null && step === 'home' && !hasAnyData) return;
+      // Yeni girişte veya gerçek landing'de kullanıcı henüz bir işe başlamadıysa
+      // autosave ÇALIŞMAZ: boş state yazmak korunmuş taslağı ezebilir.
+      if ((flowOrigin === 'signin' || landing) && boot == null && step === 'home' && !hasAnyData) return;
       // Kullanıcı gerçekten yeni veri girdiği an salt-okunur kalıntı snapshot'ı bu
       // ekrandaki gerçek iş tarafından devralınır.
       setDraftSnapshot(null);
@@ -273,7 +275,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, hasAnyData]);
+  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, landing, hasAnyData]);
 
   /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
   const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved });
@@ -291,7 +293,24 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
       // yüklemediyse (state boş, snapshot bekliyor) boş state'i yazmak eski
       // çalışmayı ezerdi. Yalnızca gerçek devralınmış/boş-sahipli iş yazılır.
       const isPendingResume = flowOrigin === 'signin' && liveDraftRef.current != null;
-      if (!isPendingResume) {
+      const entered = countAnswers(live.answers).entered;
+      const rawCount = RAW_SCORE_FIELDS.filter(field => live.raw[field.key] !== '').length;
+      const scanCount = live.scan ? sortedPages(live.scan).length : 0;
+      const hasIntake =
+        live.client.firstName.trim() !== '' ||
+        live.client.lastName.trim() !== '' ||
+        live.client.gender !== '' ||
+        live.client.age > 0 ||
+        live.client.testDuration.trim() !== '' ||
+        live.client.occupation.trim() !== '' ||
+        live.client.followUp !== '' ||
+        live.client.education !== '' ||
+        live.client.maritalStatus !== '' ||
+        live.client.applicationReason.trim() !== '' ||
+        live.client.clinicalContext.trim() !== '';
+      const hasDraftData = hasIntake || live.method !== null || entered > 0 || rawCount > 0 || scanCount > 0;
+      const isCleanLanding = landing && live.step === 'home' && !live.saved && !hasDraftData;
+      if (!isPendingResume && !isCleanLanding) {
         try {
           saveDraft(actor.id, {
             step: live.step,
@@ -309,20 +328,11 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
           /* kapanış anında sessiz */
         }
       }
-      const entered = countAnswers(live.answers).entered;
-      const rawCount = RAW_SCORE_FIELDS.filter(field => live.raw[field.key] !== '').length;
-      const scanCount = live.scan ? sortedPages(live.scan).length : 0;
-      const partial =
-        live.client.firstName.trim() !== '' ||
-        live.client.lastName.trim() !== '' ||
-        entered > 0 ||
-        rawCount > 0 ||
-        scanCount > 0;
-      if (!live.saved && partial) event.preventDefault();
+      if (!live.saved && hasDraftData) event.preventDefault();
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [actor.id]);
+  }, [actor.id, flowOrigin, landing]);
 
   /* ---------------- Çevrimdışı kuyruk (outbox) ---------------- */
 

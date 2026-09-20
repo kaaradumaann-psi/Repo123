@@ -6,7 +6,9 @@ kullanıcı akışı ve **hazır yazdırılabilir PDF**. React 19 + TypeScript +
 OMR hesaplaması kullanıcının cihazında yapılır; kimlik ve kayıt yetkisi Supabase
 backend'inde doğrulanır.
 
-Bu depo projenin **tek** kaynağıdır; uygulama kök dizinde yaşar.
+Güncel mimari, veri güvenliği, yaşam döngüsü ve üretim doğrulama sözleşmesi için
+[`SYSTEM.md`](SYSTEM.md) dosyasına bakın. `MMPI_PROJECT_STATUS.md` ve scanner raporları
+19 Eylül tarihli tarihsel audit/devir kayıtlarıdır.
 
 ## Hızlı başlangıç
 
@@ -19,7 +21,14 @@ npm run dev             # geliştirme sunucusu -> http://localhost:5173
 ```
 
 Supabase migration ve Edge Function kurulumu için [`supabase/README.md`](supabase/README.md)
-izlenmelidir. Uygulamada public kayıt ekranı yoktur. İlk Admin, Supabase
+izlenmelidir.
+
+Uygulama hash router değil, History API tabanlı pathname yönlendirmesi kullanır: `/`, `/islem`,
+`/form`, `/kayitlar`, `/yonetim`, `/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar` ve
+`/onizleme`. `/kayitlar/<uuid>` kayıt ayrıntısıdır. Production barındırmada SPA fallback
+gerekir; `npm run build` Cloudflare Pages için `dist/_redirects` dosyasını üretir.
+
+Uygulamada public kayıt ekranı yoktur. İlk Admin, Supabase
 Dashboard/SQL ile bir kez oluşturulur; sonraki Psikolog hesaplarını yalnızca
 aktif Admin paneli oluşturabilir. Oturum açıldıktan sonra üç çalışma alanı
 olabilir: **Optik form**, **Tara ve gözden geçir**, Psikolog için Supabase'den
@@ -39,18 +48,18 @@ Desenler / Kritik / Soru Yanıtları); ayrıntılar yalnızca istendiğinde aç�
 verisini taşıyan profesyonel klinik raporu basar (`src/components/results/MMPIPrintReport.tsx`);
 tarayıcının PDF dosya adı önerisi `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>`
 biçiminde test tarihinden üretilir. Uygulamada kullanılan bilimsel/teknik
-kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`#/kaynaklar`, alt
+kaynaklar tek bir **Kaynaklar / Kaynakça** sayfasında (`/kaynaklar`, alt
 bilgiden açılır; sabit içindekiler şeridi ve numaralı bölümlerle) künye +
 uygulamadaki karşılıklarıyla listelenir; raporlara yalnızca kısa yöntem notu
 taşınır. Sitenin tam alt bilgisi (marka + slogan, **Yeni Veri Girişi**, **SSS**,
 **Gizlilik & KVKK Politikası**, **Kullanım Koşulları**, **Kaynakça**, iletişim
 ve telif/kredi şeridi) her ekranda — çalışma alanı, giriş/kurulum, bilgi
-sayfaları — aynı düzenle görünür; SSS (`#/sss`), Gizlilik & KVKK (`#/gizlilik`)
-ve Kullanım Koşulları (`#/kullanim`) sayfaları oturum açmadan da okunabilir
+sayfaları — aynı düzenle görünür; SSS (`/sss`), Gizlilik & KVKK (`/gizlilik`)
+ve Kullanım Koşulları (`/kullanim`) sayfaları oturum açmadan da okunabilir
 (kabuk: `InfoPageShell`, içerik: `FaqPage`, `PrivacyPolicyPage`, `TermsPage`,
 ortak politika düzeni: `PolicyDoc`, stiller: `src/styles/site.css`).
 Supabase yapılandırılmadan önce sonuç
-ekranlarının tamamı `#/onizleme` rotasındaki örnek veriyle incelenebilir (bu
+ekranlarının tamamı `/onizleme` rotasındaki örnek veriyle incelenebilir (bu
 rota yalnızca yapılandırılmamış kurulumda açılır; veriler gerçek kayda ait
 değildir).
 T skorlarının hesabı Savaşır (1981) Türk normlarına ve klasik K düzeltme
@@ -81,8 +90,8 @@ veri sorumluluğu için bkz. Kapsam ve sınırlamalar.) Rol ve kayıt
 erişimi hâlâ RLS + `profiles.active` ile doğrulanır. Parolalar uygulama
 tablolarına yazılmaz. Admin hesap oluşturma/aktiflik değişikliği doğrulanmış
 Edge Function üzerinden yapılır.
-Form sayfasında iki düğme vardır: **Tüm sayfaları yazdır** (doğrulanmış 4
-sayfalık A4 PDF, HTML `window.print()` değil) ve **Hazır PDF'i indir**. İkisi de
+Form sayfasında **Yazdır**, **İndir** ve **Yeni sekmede aç** eylemleri vardır; üçü de doğrulanmış 4
+sayfalık A4 PDF'yi kullanır (HTML `window.print()` değil). Hepsi
 `MMPI-566-optik-cevap-formu.pdf` baytlarını kullanır; bu dosya hem dosyadan geri
 okunup geometrisi doğrulanan (`tests/pdfForm.test.ts`) hem de rasterleştirilip
 gerçek okuma hattından geçirilen (`tests/pdfScanPipeline.test.ts`) dosyadır.
@@ -93,16 +102,17 @@ gerçek okuma hattından geçirilen (`tests/pdfScanPipeline.test.ts`) dosyadır.
 npm run build
 ```
 
-İki çıktı üretir:
+İki HTML çıktısı ve bir SPA fallback kuralı üretir:
 
 | Çıktı | Ne işe yarar |
 | --- | --- |
 | `dist/index.html` | React, CSS ve pdf.js worker'ı gömülü statik çıktı. Supabase URL/anon anahtarı build sırasında `.env`'den alınır. |
-| `optik-form.html` | Aynı dosyanın depo kökündeki kopyası. OMR/form önizlemesi çevrimdışı çalışabilir; giriş ve kayıt için Supabase erişimi gerekir. |
+| `dist/_redirects` | Cloudflare Pages için bilinmeyen pathname'leri `index.html`e yönlendirir. |
+| `optik-form.html` | Aynı self-contained HTML'nin depo kökündeki kopyası. OMR/form önizlemesi çevrimdışı çalışabilir; giriş ve kayıt için Supabase erişimi gerekir. |
 
 Statik frontend barındırmada çalışır (Netlify, Vercel, nginx, S3); Supabase
 backend ayrıca çalışır. Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli
-bağlam ister); localhost bunun dışındadır. Build, inline betiğin SHA-256
+bağlam ister); yerel geliştirmede `localhost` ve `127.0.0.1` güvenli bağlam istisnasıdır. Build, inline betiğin SHA-256
 hash'ine bağlı CSP'yi korur; Supabase çağrıları için yayınlanan origin'in
 Edge Function `ALLOWED_ORIGINS` ayarına eklenmesi gerekir.
 
@@ -153,7 +163,7 @@ tablolar, formlar ve çalışma alanları bunun üzerine kuruludur.
 
 ```sh
 npm run typecheck   # tsc --noEmit
-npm test            # 189 test
+npm test            # tüm test dosyaları
 npm run build       # tip kontrolü + tek dosya çıktı
 npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
@@ -190,11 +200,11 @@ Bunlar tasarım kararları değil, **doğrulanmamış varsayımlardır**.
   kamera, fotokopi, kalem veya baskı üzerinde kalibre edilmemiştir; bu yüzden
   doğruluk yüzdesi iddia edilmez. `confidence` sezgisel bir işaret gücüdür,
   olasılık değildir.
-- Klinik puanlama, raporlama ve sonuç API'si **yoktur**. Kayıt akışı Supabase
-  `mmpi_records` tablosuna yalnızca ham OMR cevaplarını ve danışan metadata'sını
+- Klinik puanlama ve raporlama ekranı vardır; sonuç API'si yoktur. Kayıt akışı Supabase
+  `mmpi_records` tablosuna ham/quick/OMR cevaplarını ve danışan metadata'sını
   yazar; `summarizeResults()` her zaman `clinicalTransferAllowed: false` döndürür.
-  Ekran üstü T skoru / profil grafiği hesabı tamamen istemcide yapılır
-  (`src/scoring/`) ve sunucuya hiçbir klinik sonuc iletmez.
+  T skoru / profil grafiği hesabı tamamen istemcide yapılır (`src/scoring/`) ve
+  sunucuya klinik sonuç özeti yazılmaz.
 - Yalnızca `reliable` maddeler algoritma cevabı sayılır; `single` ve `ambiguous`
   her zaman insan incelemesi ister.
 - Formda kişisel veri saklanmaz. Form kimliği, katılımcı kodu ve tarih yalnızca
@@ -237,7 +247,7 @@ Her sayfanın QR metni: `M566:sürüm:yerleşim özeti:baskı seti:sayfa:toplam`
 Aynı oturumda yazdırılan dört sayfa aynı baskı seti kimliğini taşır; eksik,
 yinelenen veya başka bir sete ait sayfa reddedilir. Depodaki hazır PDF sabit bir
 şablon seti kimliği kullanır (`npm run pdf <dosya> <24 haneli set kimliği>` ile
-değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini üretir.
+değiştirilebilir); uygulamanın FormKit akışı bu doğrulanmış sabit set kodunu kullanır; yeni danışan için **Yeni Set / Sıfırla** akışı kullanılır.
 
 ## Mimari
 
@@ -258,7 +268,7 @@ değiştirilebilir); uygulamanın kendi yazdırma akışı her oturumda yenisini
 | `src/scoring/*` | MMPI puanlama anahtarları, Türk normları, K düzeltmesi ve klinik yorum kaynağına birebir dayanan geçerlik/klinik/kod yorum katmanı; madde düzeyi analiz (TR/Dikkatsizlik endeksleri, konfigürasyonlar, türetilmiş ölçekler, kritik maddeler). |
 | `src/auth/*` | Supabase Auth istemcisi, profil/rol doğrulaması ve Admin Edge Function çağrıları. |
 | `src/workspace/*` | İşlem taslağı (localStorage, 30 gün TTL) ve çevrimdışı kayıt kuyruğu; `ItemAnswer` modeli. |
-| `src/preview/*` | `#/onizleme` tasarım önizlemesi için deterministik demo profilleri (gerçek kayıt yazmaz). |
+| `src/preview/*` | `/onizleme` tasarım önizlemesi için deterministik demo profilleri (gerçek kayıt yazmaz). |
 | `src/records/*` | Ham OMR maddelerini bozmadan Supabase kayıt payload'ı ve idempotent gönderim. |
 | `supabase/*` | Migration, ilişkiler, RLS politikaları, Auth trigger'ı ve Admin Edge Function. |
 | `src/scanner/*` | Görüntü/PDF girişi, boyut sınırları, sayfa sırası, elle inceleme kayıtları. |

@@ -81,6 +81,7 @@ function ScannerSession({
   const manualCornersRef = useRef(manualCorners);
   manualCornersRef.current = manualCorners;
   const id = useId();
+  const sourceTabs = useRef<Record<'files' | 'camera', HTMLButtonElement | null>>({ files: null, camera: null });
   const pages = sortedPages(scan);
   const missingPages = missingPageNumbers(scan, definition);
   const summary = summarizeResults(definition, pages);
@@ -337,6 +338,18 @@ function ScannerSession({
     setStatus('Tarama oturumu sıfırlandı. Yeni form setinin ilk sayfasını yükleyebilirsiniz.');
   }
 
+  function moveSourceTab(event: React.KeyboardEvent<HTMLButtonElement>, current: 'files' | 'camera') {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const order: ('files' | 'camera')[] = ['files', 'camera'];
+    const index = order.indexOf(current);
+    const next: 'files' | 'camera' = event.key === 'Home' ? order[0]!
+      : event.key === 'End' ? order[order.length - 1]!
+        : order[(index + (event.key === 'ArrowRight' ? 1 : -1) + order.length) % order.length]!;
+    setSource(next);
+    sourceTabs.current[next]?.focus();
+  }
+
   return (
     <div className={`scanner-layout-container${embedded ? ' is-embedded' : ''}`} aria-labelledby={`${id}-title`} data-clinical-transfer-allowed="false">
       <div className="scanner-hero-header">
@@ -377,25 +390,45 @@ function ScannerSession({
 
       {/* Tarama Paneli: Yükleme & Kamera */}
       <div className="scanner-input-card card-elevated">
-        <div className="scan-mode-tabs" role="tablist">
+        <div className="scan-mode-tabs" role="tablist" aria-label="Tarama kaynağı">
           <button
+            ref={element => { sourceTabs.current.files = element; }}
+            id={`${id}-files-tab`}
             type="button"
+            role="tab"
+            aria-selected={source === 'files'}
+            aria-controls={`${id}-scan-panel`}
+            tabIndex={source === 'files' ? 0 : -1}
             className={`mode-tab ${source === 'files' ? 'active' : ''}`}
             onClick={() => setSource('files')}
+            onKeyDown={event => moveSourceTab(event, 'files')}
           >
             <Icon name="file" size={16} />
             <span>Dosya Yükle (PDF / görüntü)</span>
           </button>
           <button
+            ref={element => { sourceTabs.current.camera = element; }}
+            id={`${id}-camera-tab`}
             type="button"
+            role="tab"
+            aria-selected={source === 'camera'}
+            aria-controls={`${id}-scan-panel`}
+            tabIndex={source === 'camera' ? 0 : -1}
             className={`mode-tab ${source === 'camera' ? 'active' : ''}`}
             onClick={() => setSource('camera')}
+            onKeyDown={event => moveSourceTab(event, 'camera')}
           >
             <Icon name="camera" size={16} />
             <span>Kamera ile Canlı Çekim</span>
           </button>
         </div>
 
+        <div
+          id={`${id}-scan-panel`}
+          role="tabpanel"
+          aria-labelledby={`${id}-${source}-tab`}
+          tabIndex={0}
+        >
         {source === 'files' ? (
           <div className="dropzone-area">
             <label htmlFor={`${id}-files`} className="dropzone-label">
@@ -427,6 +460,7 @@ function ScannerSession({
           <CameraCapture key={cameraKey} disabled={busy || !!manualCorners}
             onCapture={(image, sourceName, originalImage) => run([], { image, sourceName, originalImage })} />
         )}
+        </div>
 
         {/* Canlı Durum ve İptal */}
         <div className="scanner-status-strip">

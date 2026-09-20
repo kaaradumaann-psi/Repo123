@@ -1,3 +1,5 @@
+> **Tarihsel rapor:** Bu belge önceki scanner mühendislik turunun commit/branch bağlamını korur. Güncel branch, rota, test ve üretim durumu için depo kökündeki `SYSTEM.md` yetkili kaynaktır.
+
 # MMPI Scanner Katmanı — Kesin Mühendislik Raporu
 
 > **Depo:** `kaaradumaann-psi/Repo123`
@@ -32,7 +34,7 @@ ENHANCEMENT PREVIEW → KALİTE GATE → MEVCUT MMPI PIPELINE
 
 ### 1.1 İncelenen yapı
 - `package.json` — React 19.2.0 + TS 5.9.3 + Vite 7.3.6, `@supabase/supabase-js`, `jsqr`, `pdfjs-dist`, `qrcode`, `@noble/hashes`
-- 102 dosya, 14 klasör: `auth/`, `components/`, `form/`, `omr/`, `preview/`, `print/`, `records/`, `results/`, `scanner/`, `scoring/`, `styles/`, `workspace/`
+- Tarihsel snapshot sayımı: 102 dosya, 14 klasör: `auth/`, `components/`, `form/`, `omr/`, `preview/`, `print/`, `records/`, `results/`, `scanner/`, `scoring/`, `styles/`, `workspace/`
 - **Kritik keşif:** Proje zaten tam bir scanner mimarisine sahip — `omr/` modülü 2.000+ satır saf TypeScript OMR (perspective correction, alignment detection, bubble refinement, mark detection, quality assessment); `scanner/` modülü dosya/kamera girişi. Bu mimariyi **korumak** kararı verildi, sıfırdan yazma reddedildi.
 
 ### 1.2 Mevcut OMR pipeline'ı (DOKUNULMADI)

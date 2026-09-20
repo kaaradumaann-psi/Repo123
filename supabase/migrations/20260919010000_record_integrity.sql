@@ -26,7 +26,9 @@ revoke all on function public.is_psychologist() from public;
 grant execute on function public.is_psychologist() to authenticated;
 
 -- Keep direct REST writes aligned with the browser business rule: only an active
--- psychologist may create/update their own clinical record; admins only manage/read it.
+-- psychologist may create records/update their own clinical record. The later
+-- record-actions migration additionally permits Admin notes without permitting
+-- clinical fields to change.
 drop policy if exists mmpi_records_insert on public.mmpi_records;
 create policy mmpi_records_insert on public.mmpi_records
 for insert to authenticated

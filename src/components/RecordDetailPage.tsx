@@ -185,15 +185,14 @@ export function RecordDetailPage({
   }
 
   const notesDirty = notesDraft.trim() !== notesSaved.trim();
-  // Not yazma yetkisi RLS'nin birebir karşılığıdır: kaydı oluşturan AKTİF psikolog
-  // yazabilir; Admin yalnızca okur (denetim). Böylece UI, DB'nin izin verdiği
-  // işlem dışında düzenleme sunmaz ve "Notu Kaydet" asla boşa düşmez.
+  // Not yetkisi RLS ile aynıdır: Admin görünür tüm kayıtlara, aktif psikolog
+  // yalnızca kendi kaydına yazabilir. Klinik alanlar veritabanı trigger'ı ile
+  // değişmez; burada yalnızca expert_notes alanı düzenlenebilir.
   const canWriteNotes =
     viewer != null &&
-    viewer.role === 'PSYCHOLOG' &&
     viewer.active === true &&
-    typeof record?.createdBy === 'string' &&
-    viewer.id === record.createdBy;
+    (viewer.role === 'ADMIN' ||
+      (viewer.role === 'PSYCHOLOG' && typeof record?.createdBy === 'string' && viewer.id === record.createdBy));
 
   const printMeta = {
     fullName,
