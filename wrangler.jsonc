@@ -6,8 +6,9 @@
   // (`@cloudflare/vite-plugin` ekleyip vite.config.ts'i yeniden yazar) ve bu depo
   // Vite ile derlenmediği için "Cannot modify Vite config" hatasıyla durur.
   //
-  // `name` alanı Cloudflare panelindeki Worker/Builds proje adıyla birebir aynı
-  // olmalıdır; aksi halde deploy "project name does not match" hatası verir.
+  // `name`, Cloudflare panelindeki Worker adıyla aynı tutulur. Workers Builds
+  // bağlı Worker'ın adını `WRANGLER_CI_OVERRIDE_NAME` ile ezer; bu satır yerel
+  // `npm run deploy` çağrılarının doğru Worker'a gitmesini sağlar.
   "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
   "name": "mmpi",
   "compatibility_date": "2026-09-18",
