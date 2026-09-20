@@ -1,0 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { detectDocumentQuad } from '../../src/scanner/documentDetection';
+import { toGrayscale } from '../../src/omr/imageQuality';
+import type { PixelImage } from '../../src/omr/omrTypes';
+const img = await loadImage(readFileSync('docs/TestGorselleri/c1.jpg'));
+const w = img.width, h = img.height;
+const c = createCanvas(w, h); const x = c.getContext('2d'); x.drawImage(img as any, 0, 0);
+const rgba: PixelImage = { width: w, height: h, data: new Uint8ClampedArray(x.getImageData(0,0,w,h).data) };
+const q = detectDocumentQuad(toGrayscale(rgba));
+console.log('frame', w, h);
+console.log(JSON.stringify(q?.corners));

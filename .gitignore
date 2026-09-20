@@ -40,3 +40,6 @@ preview-dist/
 
 # Denetim/önizleme çalışma alanı — commit edilmez
 .audit/
+
+# Yerel doğrulama overlay/ara çıktıları — commit edilmez
+scripts/validation/scan-out/
