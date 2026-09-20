@@ -25,7 +25,9 @@ izlenmelidir.
 Uygulama hash router değil, History API tabanlı pathname yönlendirmesi kullanır: `/`, `/islem`,
 `/form`, `/kayitlar`, `/yonetim`, `/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar` ve
 `/onizleme`. `/kayitlar/<uuid>` kayıt ayrıntısıdır. Production barındırmada SPA fallback
-gerekir; `npm run build` Cloudflare Pages için `dist/_redirects` dosyasını üretir.
+gerekir: Cloudflare Workers'ta `wrangler.jsonc` içindeki
+`assets.not_found_handling` bunu sağlar; Cloudflare Pages / Netlify için
+`PAGES_REDIRECTS=1 npm run build` ayrıca `dist/_redirects` dosyasını üretir.
 
 Uygulamada public kayıt ekranı yoktur. İlk Admin, Supabase
 Dashboard/SQL ile bir kez oluşturulur; sonraki Psikolog hesaplarını yalnızca
@@ -101,13 +103,99 @@ gerçek okuma hattından geçirilen (`tests/pdfScanPipeline.test.ts`) dosyadır.
 npm run build
 ```
 
-İki HTML çıktısı ve bir SPA fallback kuralı üretir:
+İki HTML çıktısı üretir (SPA fallback'i barındırmaya göre ayrıca üretilir):
 
 | Çıktı | Ne işe yarar |
 | --- | --- |
 | `dist/index.html` | React, CSS ve pdf.js worker'ı gömülü statik çıktı. Supabase URL/anon anahtarı build sırasında `.env`'den alınır. |
-| `dist/_redirects` | Cloudflare Pages için bilinmeyen pathname'leri `index.html`e yönlendirir. |
 | `optik-form.html` | Aynı self-contained HTML'nin depo kökündeki kopyası. OMR/form önizlemesi çevrimdışı çalışabilir; giriş ve kayıt için Supabase erişimi gerekir. |
+| `dist/_redirects` | Yalnızca `PAGES_REDIRECTS=1 npm run build` ile üretilir; Cloudflare Pages / Netlify SPA fallback kuralıdır (`/*  /index.html  200`). Workers bu catch-all kuralı reddettiği için (code 100324) varsayılan derlemede yazılmaz; SPA davranışını `wrangler.jsonc` içindeki `assets.not_found_handling` sağlar. |
+
+#### Cloudflare Workers'a yayınlama
+
+Depodaki `wrangler.jsonc`, `dist/` klasörünü statik varlık olarak yayınlar
+(sunucu tarafı Worker kodu yoktur; Supabase ayrı çalışır):
+
+```sh
+npm ci
+npm run build          # dist/index.html
+npm run deploy         # = npm run build && npx wrangler deploy
+```
+
+`wrangler.jsonc` olmadan `wrangler deploy`, Vite projesini otomatik
+yapılandırmaya çalışır (`@cloudflare/vite-plugin` kurup `vite.config.ts`'i
+yeniden yazar) ve bu depo Vite ile derlenmediği için
+`Cannot modify Vite config: could not find a valid plugins array` hatasıyla
+durur. Yapılandırma dosyası bu adımı tamamen atlatır, bu yüzden dosya depoda
+tutulur ve silinmemelidir. Aynı nedenle `vite.config.ts` içine boş bir
+`plugins` dizisi eklemek de yanlış çözümdür: o durumda wrangler kurulumu
+tamamlar ve deploy edilen çıktı bu deponun tek dosya derlemesinden değil, Vite
+derlemesinden gelir.
+
+##### `Invalid _redirects configuration` (code 100324)
+
+SPA fallback iki barındırmada iki farklı yolla sağlanır ve **ikisi aynı anda
+kullanılamaz**:
+
+- **Workers:** `assets.not_found_handling: "single-page-application"` —
+  eşleşmeyen pathname'lerde `index.html` döner.
+- **Pages / Netlify:** `_redirects` içindeki `/*  /index.html  200` kuralı.
+
+`dist/_redirects` dosyası Workers yayınında bulunursa wrangler onu ayrıca
+yükleyip API'ye doğrulatır ve deploy şu hatayla durur:
+
+```
+Invalid _redirects configuration:
+Line 1: Infinite loop detected in this rule. [code: 100324]
+```
+
+Kural `/index.html` isteğini yeniden kendine yönlendirdiği için Workers bunu
+sonsuz döngü sayar. Worker'a yayınlıyorsanız `dist/` içinde `_redirects`
+**olmamalıdır**; bu yüzden derleme o dosyayı ne yazar ne de eski kopyasını
+bırakır. Pages/Netlify'a yayınlıyorsanız `PAGES_REDIRECTS=1 npm run build`
+kullanın (bu değişkeni Cloudflare build değişkenlerine eklemeyin, aksi halde
+Workers yayını yine 100324 ile durur).
+
+##### Yapılandırmanın production ile aynı olması
+
+`wrangler.jsonc` içindeki `routes` (custom domain
+`mmpi.halilkaraduman.com.tr`), `workers_dev: false` ve `preview_urls: false`
+paneldeki mevcut durumu yansıtır. Bunlar yazılmazsa `wrangler deploy` uzak
+yapılandırmayı yerel dosyayla ezer: workers.dev adresi açılır ve custom domain
+düşer. Farklı bir hesaba/zone'a yayınlıyorsanız `routes` bloğunu kendi alan
+adınızla güncelleyin ya da silin.
+
+Cloudflare panelinde (Workers & Pages → proje → Settings → Build) beklenen
+ayarlar:
+
+| Ayar | Değer |
+| --- | --- |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Build variables | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (production derlemesi bu değerleri gömer) |
+
+Build değişkenleri build ortamına ulaşmazsa derleme, çevrimdışı bir sürüm
+üretir ve günlüğe hangi değerin eksik olduğunu yazar
+(`UYARI: Supabase yapılandırması eksik — VITE_SUPABASE_URL: var, …`). Bu uyarı
+varsa site açılır ama giriş/kayıt çalışmaz ve CSP'de `connect-src` bulunmaz;
+değerleri panelin **Builds → Variables and secrets** bölümüne ekleyin (runtime
+secrets build zamanında görünmez).
+
+`wrangler.jsonc` içindeki `name`, paneldeki Worker (proje) adıyla aynı
+tutulmalıdır. Workers Builds, bağlı Worker'ın adını
+`WRANGLER_CI_OVERRIDE_NAME` ile geçersiz kılar; yine de yerel `npm run deploy`
+çağrıları doğru Worker'a gitmesi için proje adınız farklıysa (ör. `mmpi-566`)
+`wrangler.jsonc` içindeki `name` alanını paneldeki adla aynı yapın.
+
+Cloudflare **Pages** kullanacaksanız `PAGES_REDIRECTS=1 npm run build` ile
+derleyin ve deploy komutunu
+`npx wrangler pages deploy dist --project-name=<pages-projesi>` yapın.
+
+`wrangler.jsonc` ekleyemediğiniz bir durumda Deploy command'ı
+`npx wrangler deploy --assets=./dist` yapmak da çalışır (yerelde `--dry-run`
+ile doğrulandı); ancak bu durumda SPA fallback ayarı uygulanmaz ve derin
+linkler (`/form`, `/kayitlar/...`) 404 döner. Kalıcı çözüm, yapılandırma
+dosyasının depoda kalmasıdır.
 
 Statik frontend barındırmada çalışır (Netlify, Vercel, nginx, S3); Supabase
 backend ayrıca çalışır. Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli
@@ -273,6 +361,7 @@ değiştirilebilir); uygulamanın FormKit akışı bu doğrulanmış sabit set k
 | `src/print/*` | PDF yazıcısı, TrueType gömme ve form sayfası çizimi (tarayıcı gerektirmez). |
 | `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
 | `scripts/build.mjs` | Tek dosya production derlemesi (`optik-form.html` / `dist/index.html`). |
+| `wrangler.jsonc` | Cloudflare Workers statik varlık yayını: `dist/` + SPA fallback. Wrangler'ın Vite otomatik yapılandırmasına girmesini engeller. |
 | `scripts/generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts` | Yazdırılabilir form PDF üretimi ve bağımsız doğrulama. |
 | `docs/kaynak-denetimi.md` | Puanlama/yorum bileşenlerinin kaynak denetimi: künye–bileşen eşleştirme tabloları ve doğrulanamayan kesimlerin dürüstlük kaydı. |
 

@@ -66,7 +66,7 @@ Router hash router değildir; `src/router.ts` `window.location.pathname` okuyup 
 
 Bilgi sayfasındaki üst **Geri dön**, marka bağlantısı ve 404 düğmesi doğrudan `/`e gider. Bu eylemler son taslağı resume ederek iç rotaya yönlendirmez. Footer'daki **Yeni Veri Girişi** ise oturum açık uygulamada bilinçli olarak `/islem`e gider.
 
-Production'da pathname rotalarının doğrudan açılabilmesi için hosting tarafında SPA fallback gerekir. `npm run build`, `dist/_redirects` içinde `/* /index.html 200` kuralını üretir; Vercel/nginx/S3 benzeri ortamlarda eşdeğer fallback ayrıca yapılandırılmalıdır.
+Production'da pathname rotalarının doğrudan açılabilmesi için hosting tarafında SPA fallback gerekir. Cloudflare Workers yayınında bu davranış `wrangler.jsonc` içindeki `assets.not_found_handling: single-page-application` ile sağlanır ve `dist/_redirects` üretilmez: Workers API'si `/* /index.html 200` catch-all kuralını sonsuz döngü sayıp version oluşturmayı reddeder (code 100324). Cloudflare Pages / Netlify için kural `PAGES_REDIRECTS=1 npm run build` ile üretilir; Vercel/nginx/S3 benzeri ortamlarda eşdeğer fallback ayrıca yapılandırılmalıdır.
 
 ### 2.3 Kaynak haritası
 
@@ -84,7 +84,7 @@ Production'da pathname rotalarının doğrudan açılabilmesi için hosting tara
 | Form PDF | `src/print/*`, `scripts/generate-pdf.ts`, `scripts/verify-pdf.ts` |
 | Screen/PDF styles | `src/styles/screen.css`, `theme.css`, `site.css`, `workspace.css`, `scanner*.css`, `form.css`, `print.css` |
 | Tests/diagnostics | `tests/*.test.ts`, `tests/fixtures/omrSynthetic.ts` |
-| Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `.github/workflows/ci.yml` |
+| Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `wrangler.jsonc`, `.github/workflows/ci.yml` |
 
 `src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form sekmesinin ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur.
 
@@ -371,7 +371,7 @@ Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölg
 | `npm run typecheck` | `tsc --noEmit`, strict/noUnused | **DOĞRULANDI** |
 | `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print ve router | **239/239 DOĞRULANDI** |
 | `npm run verify:pdf` | hazır/üretilmiş form PDF byte/geometri/QR doğrulaması | **DOĞRULANDI** — 4 A4, 566 madde, 1.132 bubble |
-| `npm run build` | typecheck + standalone `dist/index.html`, `dist/_redirects`, tracked `optik-form.html` üretimi | **DOĞRULANDI** |
+| `npm run build` | typecheck + standalone `dist/index.html`, tracked `optik-form.html` üretimi (`dist/_redirects` yalnızca `PAGES_REDIRECTS=1` ile) | **DOĞRULANDI** |
 | `git diff --check` | whitespace/diff hygiene | **DOĞRULANDI** |
 | `npm audit --audit-level=high` | advisory scan | **DOĞRULANDI** — 0 vulnerability |
 
@@ -449,10 +449,12 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    npm ci
    npm run build
    ```
-   Bu komut strict typecheck yapar, `dist/index.html` (tek dosya SPA), `dist/_redirects` (Cloudflare Pages fallback) ve kök dizindeki tracked `optik-form.html` dosyasını derler.
+   Bu komut strict typecheck yapar, `dist/index.html` (tek dosya SPA) ve kök dizindeki tracked `optik-form.html` dosyasını derler. Cloudflare Workers SPA fallback'i `wrangler.jsonc` içindeki `assets.not_found_handling` ile sağlanır; `dist/_redirects` yalnızca Pages/Netlify için (`PAGES_REDIRECTS=1`) üretilir, çünkü Workers API'si catch-all kuralı code 100324 ile reddeder.
 
 7. **Deploy frontend:**
-   `dist/index.html` ve `dist/_redirects` çıktısını barındırma sağlayıcınıza (Cloudflare Pages, Vercel, Netlify, S3/CloudFront) yükleyin. Pathname routing için SPA rewrite kuralının aktif olduğunu doğrulayın.
+   `dist/index.html` çıktısını barındırma sağlayıcınıza (Cloudflare Workers/Pages, Vercel, Netlify, S3/CloudFront) yükleyin. Pathname routing için SPA fallback'in aktif olduğunu doğrulayın (Workers'ta `wrangler.jsonc`, Pages/Netlify'da `PAGES_REDIRECTS=1` ile üretilen `_redirects`).
+
+   Cloudflare Workers statik varlık yayını için depodaki `wrangler.jsonc` (`assets.directory: ./dist`, `not_found_handling: single-page-application`) kullanılır: `npm run deploy`. Bu dosya olmadan `wrangler deploy` Vite otomatik yapılandırmasına girer ve `Cannot modify Vite config` hatasıyla durur; ayrıntı için README'deki *Cloudflare Workers'a yayınlama* bölümüne bakın.
 
 8. **Run smoke tests:**
    Yayınlanan URL'ye tarayıcıdan gidin:
@@ -497,7 +499,7 @@ Bu liste “PASS” yerine gerçek kanıt gerektirir:
 - [x] `npm test` 239/239.
 - [x] `npm ci` ile lockfile kurulumu: 74 paket, 0 vulnerability.
 - [x] `npm run verify:pdf`: 4 A4, 566 madde ve 1.132 bubble doğrulandı.
-- [x] `npm run build`: `dist/index.html`, `dist/_redirects` ve `optik-form.html` üretildi; standalone build testleri başarılı.
+- [x] `npm run build`: `dist/index.html` ve `optik-form.html` üretildi; standalone build testleri başarılı (SPA fallback Workers'ta `wrangler.jsonc`, Pages/Netlify'da `PAGES_REDIRECTS=1` + `_redirects`).
 - [x] `git diff --check`.
 - [x] `npm audit --audit-level=high`: 0 vulnerability.
 - [x] `SYSTEM.md` rota/auth/RLS/scanner/OMR/PDF/help/privacy/limitations sözleşmesini içeriyor.
@@ -538,7 +540,7 @@ Doğrulama kanıtları (yerel):
 - **TypeScript:** `npm run typecheck` temiz.
 - **Test:** `npm test` **239/239 PASS**.
 - **PDF:** `npm run verify:pdf` (4 A4, 566 madde, 1.132 bubble).
-- **Build:** `npm run build` (`dist/index.html`, `dist/_redirects`, `optik-form.html`).
+- **Build:** `npm run build` (`dist/index.html`, `optik-form.html`; `_redirects` yalnızca `PAGES_REDIRECTS=1` ile).
 - **Güvenlik:** `npm audit --audit-level=high` 0; `git diff --check` temiz.
 
 Canlı dağıtım için `supabase db push` ve `supabase functions deploy admin-users` zorunludur.
