@@ -449,7 +449,7 @@ Bu turda güvenli silme kapsamı özellikle dar tutuldu:
 
 Bu bölüm, çalışma tamamlanırken komutların gerçek çıktılarıyla güncellenecek. Komut çalıştırılmadan PASS yazılmaz.
 
-- Branch/HEAD: `arena/01a0beda-repo123` / `32c7acb` (audit başlangıç snapshot'ı).
+- Branch/HEAD: `arena/01a0beda-repo123` / `22ed943` (audit commit; başlangıç snapshot'ı `32c7acb`).
 - PR: `#35`, target `main`, state başlangıçta OPEN; final merge sonucu ayrıca doğrulanmadan “merged” denmez.
 - Local: `npm run typecheck` başarılı.
 - Local: `npm test` **239/239** başarılı.
