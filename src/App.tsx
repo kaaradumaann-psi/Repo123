@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { AuthGate } from './components/AuthGate';
+import type { AuthFlowOrigin } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
 import { CaseWorkspace } from './components/CaseWorkspace';
@@ -25,7 +26,7 @@ import type { AppRoute } from './router';
 
 type Workspace = 'case' | 'form' | 'records' | 'admin';
 
-type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void };
+type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void; flowOrigin: AuthFlowOrigin };
 
 const TAB_PATH: Record<Workspace, string> = {
   case: '/islem',
@@ -33,6 +34,9 @@ const TAB_PATH: Record<Workspace, string> = {
   records: '/kayitlar',
   admin: '/yonetim',
 };
+
+/** Uygulama kökü: yol '/' ise Landing (İşlem sekmesinin 'home' adımı) açılır. */
+const LANDING_PATHS = new Set(['/', '/index.html', '/optik-form.html']);
 
 function resolveWorkspace(route: AppRoute): Workspace | null {
   switch (route.page) {
@@ -112,11 +116,24 @@ export default function App() {
     );
   }
 
-  return <AuthGate>{(user, onLogout) => <SignedInApp user={user} onLogout={onLogout} />}</AuthGate>;
+  return (
+    <AuthGate>
+      {(user, onLogout, flowOrigin) => <SignedInApp user={user} onLogout={onLogout} flowOrigin={flowOrigin} />}
+    </AuthGate>
+  );
 }
 
-function SignedInApp({ user, onLogout }: SignedInAppProps) {
+function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
   const route = useRoute();
+
+  // Yeni giriş (logout → login dahil) her zaman Landing'e düşer. F5/ayrı sekme
+  // (session hydration) mevcut route'u korur — "refresh ≠ yeni login", ve
+  // "persisted work ≠ otomatik yönlendirme" kuralları ayrı tutulur.
+  useEffect(() => {
+    if (flowOrigin === 'signin' && !LANDING_PATHS.has(window.location.pathname)) {
+      navigate('/', { replace: true });
+    }
+  }, [flowOrigin]);
 
   // Rol bazlı rota koruması
   useEffect(() => {
@@ -262,7 +279,7 @@ function SignedInApp({ user, onLogout }: SignedInAppProps) {
               aria-labelledby="tab-case"
               className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
             >
-              <CaseWorkspace definition={formDefinition} actor={user} onSaved={() => setRecordsTick(tick => tick + 1)} />
+              <CaseWorkspace definition={formDefinition} actor={user} flowOrigin={flowOrigin} onSaved={() => setRecordsTick(tick => tick + 1)} />
             </div>
 
             <div
