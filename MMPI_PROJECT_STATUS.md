@@ -1,10 +1,11 @@
-# MMPI PROJESİ — KALICI PROJE DURUMU / DEVİR DOKÜMANI
+# MMPI PROJESİ — TARİHSEL PROJE DURUMU / DEVİR DOKÜMANI
 
-> **Bu dosya projenin tek gerçek durum/devir kaynağıdır.**
-> Son güncelleme: 2026-09-19 · Güncelleyen: Arena.ai Agent (oturum: `arena/01a0b91f-repo123`)
-> Bu dokümandaki her madde gerçek repository incelemesi, gerçek test çıktıları ve
+> **Bu dosya 2026-09-19 tarihli önceki devir/audit kaydını korur; güncel yetkili sistem dokümanı `SYSTEM.md` dosyasıdır.**
+> Aşağıdaki branch, rota, test sayısı ve backlog anlatımı tarihsel snapshot'a aittir ve güncel durumla karıştırılmamalıdır.
+> Son tarihsel güncelleme: 2026-09-19 · Güncelleyen: Arena.ai Agent.
+> Bu dokümandaki her madde o snapshot'ta gerçek repository incelemesi, gerçek test çıktıları ve
 > `docs/kaynak-denetimi.md` kaynak denetimiyle doğrulanmıştır. Uydurma bilgi yoktur;
-> doğrulanamayan her şey `[?]` ile işaretlenmiştir.
+> o tarihte doğrulanamayan her şey `[?]` ile işaretlenmiştir.
 
 ## Durum etiketleri
 

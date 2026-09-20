@@ -80,11 +80,32 @@ export function ManualCornerEditor({
   }
 
   function onPointerDown(index: number, event: React.PointerEvent<SVGCircleElement>) {
+    if (disabled) return;
     event.preventDefault();
     try { (event.target as Element).setPointerCapture(event.pointerId); } catch { /* releasePointerCapture below handles the failure case */ }
     drag.current = index;
     setActiveCorner(index);
     setError('');
+  }
+
+  function onCornerKeyDown(index: number, event: React.KeyboardEvent<SVGCircleElement>) {
+    if (disabled) return;
+    const directions: Record<string, Point> = {
+      ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 },
+    };
+    const direction = directions[event.key];
+    if (!direction) return;
+    event.preventDefault();
+    const step = Math.max(1, Math.round(Math.min(imageWidth, imageHeight) / (event.shiftKey ? 50 : 250)));
+    const next = [...corners] as [Point, Point, Point, Point];
+    next[index] = {
+      x: Math.max(0, Math.min(imageWidth, next[index]!.x + direction.x * step)),
+      y: Math.max(0, Math.min(imageHeight, next[index]!.y + direction.y * step)),
+    };
+    setActiveCorner(index);
+    setError('');
+    onChange(next);
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
@@ -188,13 +209,14 @@ export function ManualCornerEditor({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
-        role="application"
-        aria-label="Kağıt köşelerini sürükleyin"
+        role="group"
+        aria-label="Kağıt köşelerini seçin"
       >
-        <image href={imageUrl} x={0} y={0} width={imageWidth} height={imageHeight} preserveAspectRatio="none" />
+        <image href={imageUrl} x={0} y={0} width={imageWidth} height={imageHeight} preserveAspectRatio="none" aria-hidden="true" />
         <polygon
           points={corners.map(corner => `${corner.x},${corner.y}`).join(' ')}
           className={`manual-corner-polygon ${activeCorner !== null ? 'is-active' : ''}`}
+          aria-hidden="true"
         />
         {corners.map((corner, index) => (
           <circle
@@ -203,9 +225,16 @@ export function ManualCornerEditor({
             cy={corner.y}
             r={Math.max(14, imageWidth * 0.018)}
             className={`manual-corner-handle ${activeCorner === index ? 'is-active' : ''}`}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={`${LABELS[index]} köşe`}
+            aria-disabled={disabled}
+            onFocus={() => setActiveCorner(index)}
+            onBlur={() => setActiveCorner(null)}
+            onKeyDown={event => onCornerKeyDown(index, event)}
             onPointerDown={event => onPointerDown(index, event as unknown as React.PointerEvent<SVGCircleElement>)}
           >
-            <title>{LABELS[index]}</title>
+            <title>{LABELS[index]} köşe. Ok tuşlarıyla taşıyın.</title>
           </circle>
         ))}
       </svg>

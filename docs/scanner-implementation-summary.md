@@ -1,3 +1,5 @@
+> **Tarihsel rapor:** Bu belge scanner güçlendirme turunun uygulama özetidir. Güncel mimari ve doğrulama durumu için depo kökündeki `SYSTEM.md` yetkili kaynaktır.
+
 # MMPI Scanner Güçlendirme — Uygulama Özeti
 
 > **Kapsam:** CamScanner-benzeri, MMPI optiğine özel, **client-side** tarama/ön-işleme hattı.
@@ -12,11 +14,11 @@
 Depo kökten itibaren okundu:
 1. `package.json`, `tsconfig.json`, `vite.config.ts`, `index.html`
 2. `README.md` (~280 satır)
-3. `src/` ağacı (102 dosya, 14 klasör)
+3. `src/` ağacı (o tarihli snapshot sayımı: 102 dosya, 14 klasör)
 4. OMR modülleri: `omrTypes.ts`, `formDefinition.ts`, `perspectiveCorrection.ts`, `alignmentDetector.ts`, `analyzePage.ts`, `pageIsolation.ts`, `imageQuality.ts`, `bubbleRingRefinement.ts`, `markDetector.ts`, `qrDecoder.ts`, `orientation.ts`, `alignmentVerification.ts`
 5. Scanner modülleri: `imageIO.ts`, `pdfIO.ts`, `pageSequence.ts`, `reviewGeometry.ts`
 6. UI: `ScannerWorkspace.tsx` (503 satır), `CameraCapture.tsx` (154 satır), `ScanResultPreview.tsx` (475 satır), `RecordCapture.tsx`
-7. Test altyapısı: 25 mevcut test dosyası, 189 başlangıç testi → 211'e genişledi
+7. Test altyapısı: 25 mevcut test dosyası, 189 başlangıç testi → 211'e genişledi (o tarihli test snapshot'ı)
 
 ---
 
@@ -58,7 +60,7 @@ Yalnızca algoritmik/mimari referans olarak:
 **HAYIR.**
 
 **Nedenleri:**
-1. **Mevcut OMR hattı zaten tam bir scanner içeriyor.** `omr/` modülü 2.000+ satır saf TypeScript OMR kodu; `scanner/` modülü dosya/kamera girişini yönetiyor; 4 sayfalık set kabul, manuel inceleme, perspektif düzeltme, kalite değerlendirmesi tamamen çalışıyor. 189 test ile korunuyor.
+1. **Mevcut OMR hattı zaten tam bir scanner içeriyor.** `omr/` modülü 2.000+ satır saf TypeScript OMR kodu; `scanner/` modülü dosya/kamera girişini yönetiyor; 4 sayfalık set kabul, manuel inceleme, perspektif düzeltme, kalite değerlendirmesi tamamen çalışıyor. Bu tarihsel snapshot'ta 189 test ile korunuyordu.
 2. **Prompt "mevcut çalışan kodu yeniden yazma" diyor.** Sıfırdan yazılsaydı 4.026 satır OMR + UI kodu çöpe giderdi.
 3. **GitHub scanner'lar genel amaçlı** — form-spesifik QR + 4 alignment karesi yaklaşımı bilmiyorlar. Bu projede her sayfada **5×5 mm 4 siyah kare** + **26×26 mm QR kodu** (sayfa kimliği) var; genel Canny+contour çöplüğü yaratır.
 4. **Privacy gereksinimi** — OMR zaten client-side; üçüncü taraf OpenCV.js WASM yüklemesi gereksiz saldırı yüzeyi ekler.

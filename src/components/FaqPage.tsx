@@ -105,13 +105,13 @@ const GROUPS: FaqGroup[] = [
       {
         q: 'Optik formu nereden alırım, nasıl yazdırılır?',
         a: [
-          'Form sekmesindeki “Tüm sayfaları yazdır” ve “Hazır PDF’i indir” düğmeleri, doğrulanmış dört sayfalık A4 belgeyi verir. Formun geometrisi (işaret alanları, hizalama işaretleri ve sayfa QR kodları) depoda otomatik testlerle doğrulanır; yazdırmada sayfa ölçeğinin %100 (fit-to-page kapalı) ve siyah-beyaz olması yeterlidir.',
+          'Form sekmesindeki “Yazdır”, “İndir” ve “Yeni sekmede aç” eylemleri aynı doğrulanmış dört sayfalık A4 PDF’yi kullanır. Formun geometrisi (işaret alanları, hizalama işaretleri ve sayfa QR kodları) depoda otomatik testlerle doğrulanır; yazdırmada sayfa ölçeğinin %100 (fit-to-page kapalı) ve siyah-beyaz olması yeterlidir.'
         ],
       },
       {
         q: 'Taramayı hangi cihazla yapabilirim?',
         a: [
-          'İki yol vardır: (1) düz yataklı tarayıcıdan elde edilen görüntü/dosya yükleme — önerilen yöntem; (2) doğrudan kamera ile çekim. Kamera yalnızca güvenli bağlamda (HTTPS) çalışır; localhost bunun dışındadır. Her iki yolda da sayfa QR kodları sayfa kimliğini belirler, hizalama işaretleri perspektif düzeltmesini sağlar.',
+          'İki yol vardır: (1) düz yataklı tarayıcıdan elde edilen görüntü/dosya yükleme — önerilen yöntem; (2) doğrudan kamera ile çekim. Kamera yalnızca güvenli bağlamda (HTTPS) çalışır; yerel geliştirmede localhost güvenli bağlam istisnasıdır. Her iki yolda da sayfa QR kodları sayfa kimliğini belirler, hizalama işaretleri perspektif düzeltmesini sağlar.'
         ],
       },
       {
@@ -231,7 +231,7 @@ export function FaqPage() {
   );
 }
 
-/** Hash tabanlı bölüm atlaması: rota korunur, sayfa içinde kaydırılır. */
+/** Sayfa içi bölüm atlaması: uygulama rotası korunur, içerik içinde kaydırılır. */
 function goToSection(id: string) {
   return (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();

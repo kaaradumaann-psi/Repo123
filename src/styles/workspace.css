@@ -1910,7 +1910,7 @@
   .mmpi-tbar-mark.is-limit { width: 2px; background: color-mix(in srgb, var(--danger) 75%, transparent); }
 
   /* ========================================================================
-     TASARIM ÖNİZLEMESİ (#/onizleme) — gerçek sonuç panelleriyle aynı düzen
+     TASARIM ÖNİZLEMESİ (/onizleme) — gerçek sonuç panelleriyle aynı düzen
      ======================================================================== */
   .preview-page {
     display: flex;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
@@ -23,33 +23,60 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
   const [flowOrigin, setFlowOrigin] = useState<AuthFlowOrigin>('session');
+  // Profile hydration is asynchronous. Invalidate older requests when logout, token
+  // refresh, or a newer session event arrives so a late response cannot restore a
+  // user after the UI has already signed out.
+  const authRequest = useRef(0);
+  const signInPending = useRef(false);
 
   useEffect(() => {
     if (!supabase) { setChecking(false); return; }
     let alive = true;
     async function hydrate() {
+      const requestId = ++authRequest.current;
       try {
         const session = await getSession();
         const profile = await userFromSession(session);
-        if (alive) { setUser(profile); setError(''); }
+        if (alive && requestId === authRequest.current) { setUser(profile); setError(''); }
       } catch (cause) {
-        if (alive) setError(cause instanceof Error ? cause.message : 'Kullanıcı oturumu doğrulanamadı.');
-      } finally { if (alive) setChecking(false); }
+        if (alive && requestId === authRequest.current) {
+          setError(cause instanceof Error ? cause.message : 'Kullanıcı oturumu doğrulanamadı.');
+        }
+      } finally {
+        if (alive && requestId === authRequest.current) setChecking(false);
+      }
     }
     void hydrate();
-    const { data } = onAuthChange((_event, session) => {
-      // Oturum açıkken gelen SIGNED_IN olayı yalnızca F5/hydration/refresh kaynaklıdır;
-      // bu ekrandaki giriş formu kendi handleSignIn üzerinden 'signin' olarak işaretlenir.
-      if (!session) { if (alive) setUser(null); return; }
+    const { data } = onAuthChange((event, session) => {
+      // A visible sign-in event can race with the signIn() promise below. Capture
+      // its origin so the callback cannot turn a new login into a resumable session.
+      const explicitSignIn = signInPending.current && event === 'SIGNED_IN';
+      const requestId = ++authRequest.current;
+      if (explicitSignIn && alive) setFlowOrigin('signin');
+      if (!session) {
+        if (alive) { setUser(null); setError(''); setChecking(false); }
+        return;
+      }
       window.setTimeout(() => {
         void userFromSession(session).then(profile => {
-          if (alive) { setUser(profile); setError(''); setChecking(false); }
+          if (alive && requestId === authRequest.current) {
+            setUser(profile);
+            setError('');
+            setChecking(false);
+            if (explicitSignIn && window.location.pathname.replace(/\/+$/, '') !== '') {
+              navigate('/', { replace: true });
+            }
+          }
         }).catch(cause => {
-          if (alive) { setUser(null); setError(cause instanceof Error ? cause.message : 'Kullanıcı yetkisi doğrulanamadı.'); setChecking(false); }
+          if (alive && requestId === authRequest.current) {
+            setUser(null);
+            setError(cause instanceof Error ? cause.message : 'Kullanıcı yetkisi doğrulanamadı.');
+            setChecking(false);
+          }
         });
       }, 0);
     });
-    return () => { alive = false; data.subscription.unsubscribe(); };
+    return () => { alive = false; authRequest.current++; data.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -70,14 +97,23 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
   }, [user]);
 
   async function handleSignIn(email: string, password: string) {
-    const profile = await signIn(email, password);
-    setUser(profile);
-    setError('');
-    // Yeni giriş = her zaman Landing. Olası eski bir rota/iç ekran URL'de kalmışsa
-    // yerine yaz (replace) ki Back/Sıradaki çalışmalar Landing'den başlasın.
-    setFlowOrigin('signin');
-    if (window.location.pathname.replace(/\/+$/, '') !== '') {
-      navigate('/', { replace: true });
+    const requestId = ++authRequest.current;
+    signInPending.current = true;
+    try {
+      const profile = await signIn(email, password);
+      // A logout/session replacement may have happened while Supabase was resolving
+      // the password sign-in. Do not let that late result repopulate the workspace.
+      if (requestId !== authRequest.current) return;
+      setUser(profile);
+      setError('');
+      // Yeni giriş = her zaman Landing. Olası eski bir rota/iç ekran URL'de kalmışsa
+      // yerine yaz (replace) ki Back/Sıradaki çalışmalar Landing'den başlasın.
+      setFlowOrigin('signin');
+      if (window.location.pathname.replace(/\/+$/, '') !== '') {
+        navigate('/', { replace: true });
+      }
+    } finally {
+      signInPending.current = false;
     }
   }
 
@@ -98,6 +134,8 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     return (
       <>
         {children(user, () => {
+          authRequest.current++;
+          signInPending.current = false;
           void signOut().catch(() => {});
           setUser(null);
         }, flowOrigin)}

@@ -12,7 +12,7 @@ export const INFO_ROUTES = {
 type SiteFooterProps = {
   /**
    * "Yeni Veri Girişi" bağlantısı, oturum açıkken çalışma alanının İşlem
-   * sekmesine döndürür. Verilmezse bağlantı yalnızca uygulama köküne (hash '')
+   * sekmesine döndürür. Verilmezse bağlantı yalnızca uygulama köküne (`/`)
    * gider; kurulum/önizleme ortamında bu doğru hedeftir.
    */
   onNewEntry?: () => void;
