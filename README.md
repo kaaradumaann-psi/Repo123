@@ -149,6 +149,12 @@ Cloudflare **Pages** kullanacaksanız deploy komutunu
 `npx wrangler pages deploy dist --project-name=<pages-projesi>` yapın; SPA
 fallback'ini yine `dist/_redirects` sağlar.
 
+Kod değiştirmeden yalnızca panelden düzeltmek isterseniz Deploy command'ı
+`npx wrangler deploy --assets=./dist` yapmak da çalışır (yerelde `--dry-run`
+ile doğrulandı). Bu durumda SPA fallback'ini `wrangler.jsonc` yerine
+`dist/_redirects` sağlar; Workers statik varlıkları `_redirects` dosyasını
+destekler. Kalıcı çözüm yine de dosyanın depoda kalmasıdır.
+
 Statik frontend barındırmada çalışır (Netlify, Vercel, nginx, S3); Supabase
 backend ayrıca çalışır. Kamera için **HTTPS zorunludur** (`getUserMedia` güvenli
 bağlam ister); yerel geliştirmede `localhost` ve `127.0.0.1` güvenli bağlam istisnasıdır. Build, inline betiğin SHA-256
