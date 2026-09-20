@@ -2,7 +2,7 @@
 
 **Belgenin amacı:** Bu dosya, depo kodundan türetilmiş güncel mimari ve üretim işletim sözleşmesidir. Yeni bir özellik tasarımı değildir; uygulamanın gerçekten yaptığı şeyleri, güvenlik sınırlarını, doğrulanmış kontrolleri ve doğrulanamayan üretim bağımlılıklarını ayırır.
 
-**Denetim snapshot'ı:** 20 Eylül 2026 · branch `arena/01a0beda-repo123` · bu audit turundaki yerel doğrulama: `npm ci`, `npm run typecheck`, `npm test` **239/239**, `npm run verify:pdf`, `npm run build`, `npm audit --audit-level=high` ve `git diff --check` başarılıdır.
+**Denetim snapshot'ı:** 20 Eylül 2026 · teslim branch'i · yerel doğrulama: `npm ci`, `npm run typecheck`, `npm test` **239/239**, `npm run verify:pdf`, `npm run build`, `npm audit --audit-level=high` ve `git diff --check`.
 
 Durum etiketleri:
 
@@ -11,7 +11,7 @@ Durum etiketleri:
 - **DOĞRULANMADI:** Bu ortamda gerekli gerçek proje, cihaz, tarayıcı veya manuel akış yoktu.
 - **SINIR:** Ürünün bilinçli veya mevcut teknik kısıtı.
 
-> `MMPI_PROJECT_STATUS.md`, 19 Eylül tarihli tarihsel devir kaydıdır. Güncel rota, dosya haritası, test durumu ve üretim checklist'i için bu dosya yetkili kaynaktır.
+> Güncel rota, dosya haritası, test durumu ve üretim checklist'i için bu dosya yetkili kaynaktır.
 
 ---
 
@@ -46,7 +46,7 @@ Form tanımı kod içinde `source: 'unverified-template'` olarak işaretlidir. D
 
 ### 2.2 Gerçek rotalar
 
-Router hash router değildir; `src/router.ts` `window.location.pathname` okuyup History API `pushState`/`replaceState` kullanır. Aynı origin `<a>` tıklamaları SPA olarak yakalanır; `mailto:`, `tel:`, `target="_blank"`, modifier tuşları ve dış origin'ler normal davranır.
+Router hash router değildir; `src/router.ts` `window.location.pathname` okuyup History API `pushState`/`replaceState` kullanır. Aynı origin `<a>` tıklamaları SPA olarak yakalanır; `mailto:`, `tel:`, `blob:`/`data:`, `download`, `target="_blank"`, modifier tuşları ve dış origin'ler normal davranır.
 
 | Rota | Davranış | Erişim |
 | --- | --- | --- |
@@ -83,10 +83,10 @@ Production'da pathname rotalarının doğrudan açılabilmesi için hosting tara
 | Records | `src/records/supabaseRecords.ts`, `RecordDetailPage.tsx`, `MyRecordsPanel.tsx`, `AdminPanel.tsx` |
 | Form PDF | `src/print/*`, `scripts/generate-pdf.ts`, `scripts/verify-pdf.ts` |
 | Screen/PDF styles | `src/styles/screen.css`, `theme.css`, `site.css`, `workspace.css`, `scanner*.css`, `form.css`, `print.css` |
-| Tests/diagnostics | `tests/*.test.ts`, `tests/fixtures/omrSynthetic.ts`, `scripts/validation/*` |
+| Tests/diagnostics | `tests/*.test.ts`, `tests/fixtures/omrSynthetic.ts` |
 | Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `.github/workflows/ci.yml` |
 
-`src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form sekmesinin ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur. Tracked `scripts/validation/out/*.png` dosyaları görsel regresyon kanıtı olarak belgelenmiştir; generated göründükleri için silinmemiştir.
+`src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form sekmesinin ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur.
 
 ---
 
@@ -401,8 +401,6 @@ CI (`.github/workflows/ci.yml`) `npm ci`, typecheck, test, PDF verify, build ve 
 
 ---
 
----
-
 ## 10. Production Deployment (Üretim Dağıtım Kılavuzu)
 
 Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend barındırma ortamlarının uçtan uca senkronizasyonu için gerçek operasyonel adımları tanımlar.
@@ -411,8 +409,8 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
 
 1. **Pull latest code:**
    ```bash
-   git checkout arena/01a0bf13-repo123
-   git pull origin arena/01a0bf13-repo123
+   git checkout main
+   git pull origin main
    ```
    Çalışma ağacının temiz olduğunu (`git status`) ve conflict bulunmadığını doğrulayın.
 
@@ -428,7 +426,7 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    Supabase CLI ile projeye bağlanın ve tüm bekleyen migration'ları uygulayın:
    ```bash
    npx supabase login
-   npx supabase link --project-ref lgtahyruhyfozhueawft
+   npx supabase link --project-ref <SUPABASE_PROJECT_REF>
    npx supabase db push
    ```
    *(CLI kullanılamıyorsa, `supabase/migrations/` dosyalarındaki SQL ifadeleri Supabase Dashboard SQL Editor üzerinden sırayla çalıştırılabilir).*
@@ -524,40 +522,23 @@ Checklist'teki `[ ]` maddeler, yerel testlerin başarısız olduğu anlamına ge
 
 ---
 
-## 13. Cleanup ve belirsiz dosya kararları
+## 13. Teslim düzeni
 
-Bu turda güvenli silme kapsamı özellikle dar tutuldu:
+- `src/components/FormPage.tsx` test/rendering twin olarak `formIdentity.test.ts` ve `printLayout.test.ts` tarafından kullanıldığı için korunur.
+- `FormKit`, `FormPage`, standalone `optik-form.html` ve gömülü doğrulanmış PDF farklı roller taşır (runtime, geometri testi, çevrimdışı teslim).
+- Ad-hoc `scripts/validation/`, `docs/TestGorselleri/` ve tarihsel kök raporlar teslimden çıkarıldı. Kaynak denetimi `docs/kaynak-denetimi.md` korunur.
+- Supabase migration, fixture ve config dosyaları “import grep” ile dead kabul edilmez.
 
-- `src/components/FormPage.tsx`, test/rendering twin olarak `formIdentity.test.ts` ve `printLayout.test.ts` tarafından kullanıldığı için silinmedi.
-- `FormKit`, `FormPage`, standalone `optik-form.html` ve embedded verified PDF birbirinin kanıtlanmamış duplicate'i sayılmadı; canlı/runtime, geometri testi ve offline teslimat rolleri farklıdır.
-- `scripts/validation/out/*.png`, scanner raporlarının gerçek görsel kanıtı olarak tracked'dir; generated göründükleri için silinmedi.
-- Supabase migrationları, fixtures, configs, source maps veya dynamic asset'ler “import grep” ile dead kabul edilmedi.
-- Unused/dead/debug taramasında silme için kesin kanıt bulunmayan hiçbir source, migration, fixture, config veya evidence dosyası kaldırılmadı.
-- Bunun yerine doğrulanmış stale route/çıktı açıklamaları README, FAQ, KVKK, route comments ve tarihsel rapor başlıklarında düzeltildi; tarihsel raporların geçmiş test sayıları ve branch bağlamı sessizce değiştirilmedi.
+## 14. Üretim senkronizasyonu
 
-## 14. Final audit evidence log ve production senkronizasyon durumu
+Canlı Supabase projesinin migration geçmişi, Edge Function sürümü ve `ALLOWED_ORIGINS` secret'ı depo şemasıyla **ayrıca** doğrulanmalıdır. Bu ortamda canlı `db push` yapılmadı.
 
-### 14.1 Canlı Supabase ve Repository Fark Analizi (Production vs Repository Difference)
+Doğrulama kanıtları (yerel):
 
-Aşağıdaki tablo, repository'deki yetkili kod tabanı ile canlı `lgtahyruhyfozhueawft` Supabase ortamı arasındaki doğrulanmış durum farklarını özetler:
-
-| Alan | Repository | Production (`lgtahyruhyfozhueawft`) | Durum |
-| --- | --- | --- | --- |
-| Migration history | 5 migration (`20260915000000` - `20260920000000`) | Yalnızca ilk şema (`20260915000000`, 5 gün önce) | MISMATCH |
-| mmpi_records | `expert_notes`, `notes_updated_at` kolonları tanımlı | Kolonlar eksik (Postgres `42703`, PostgREST HTTP 400) | MISMATCH |
-| expert_notes | `text not null default '' check(<=4000)` | Veritabanında kolon mevcut değil | MISMATCH |
-| notes_updated_at | `timestamptz null` | Veritabanında kolon mevcut değil | MISMATCH |
-| RLS | Admin her kayıtta not/silme; Psikolog kendi kaydında | Eski RLS (Admin not update yok; silme 0 count/400) | MISMATCH |
-| audit_logs | Tablo, trigger (`log_mmpi_record_change`), RLS | Tablo ve trigger eksik | MISMATCH |
-| admin-users | `delete`, `set_active`, `create` güncel eylemler | 5 gün önceki deploy (`delete` eylemi eksik/tanımsız) | MISMATCH |
-| ALLOWED_ORIGINS | Sıkı origin kontrolü; production domain gerektirir | Secret tanımsız (yalnız localhost izinli, canlıda 403) | MISMATCH |
-
-### 14.2 Doğrulama ve Çalışma Zamanı Kanıtları
-
-- **Branch:** `arena/01a0bf13-repo123` (origin/main `a4af11e` üzerinden).
-- **TypeScript:** `npm run typecheck` temiz (0 hata).
+- **TypeScript:** `npm run typecheck` temiz.
 - **Test:** `npm test` **239/239 PASS**.
-- **PDF Form Doğrulaması:** `npm run verify:pdf` başarılı (4 A4 sayfa, 566 madde, 1.132 bubble; ortak set kodu `1F49F315B2636DCB4C18C2E4`).
-- **Production Build:** `npm run build` başarılı (`dist/index.html`, `dist/_redirects`, `optik-form.html`).
-- **Güvenlik Denetimi:** `npm audit --audit-level=high` 0 vulnerability; diff hygiene `git diff --check` temiz.
-- **Canlı Supabase Ortamı (`lgtahyruhyfozhueawft`):** Tarayıcı konsolu ve arayüz hata mesajları, canlı projenin `20260919000000` ve sonraki migration'ları ile güncel Edge Function'ı henüz almadığını kesin olarak kanıtlamaktadır. Dağıtım için `supabase db push` ve `supabase functions deploy admin-users` adımları zorunludur.
+- **PDF:** `npm run verify:pdf` (4 A4, 566 madde, 1.132 bubble).
+- **Build:** `npm run build` (`dist/index.html`, `dist/_redirects`, `optik-form.html`).
+- **Güvenlik:** `npm audit --audit-level=high` 0; `git diff --check` temiz.
+
+Canlı dağıtım için `supabase db push` ve `supabase functions deploy admin-users` zorunludur.

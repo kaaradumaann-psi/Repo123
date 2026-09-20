@@ -7,8 +7,7 @@ OMR hesaplaması kullanıcının cihazında yapılır; kimlik ve kayıt yetkisi 
 backend'inde doğrulanır.
 
 Güncel mimari, veri güvenliği, yaşam döngüsü ve üretim doğrulama sözleşmesi için
-[`SYSTEM.md`](SYSTEM.md) dosyasına bakın. `MMPI_PROJECT_STATUS.md` ve scanner raporları
-19 Eylül tarihli tarihsel audit/devir kayıtlarıdır.
+[`SYSTEM.md`](SYSTEM.md) dosyasına bakın.
 
 ## Hızlı başlangıç
 
@@ -146,7 +145,6 @@ dili kullanır: kâğıt beyazı yüzeyler, mürekkep siyahı metin, kıl payı 
 | --- | --- | --- |
 | Token'lar | `src/styles/screen.css` → `:root` | Sitenin paleti, yazı tipi yığınları, yarıçaplar ve gölgeler. `--slate-*` / `--primary-*` adları bileşenlerin zaten kullandığı adlara eşlenir. |
 | Tasarım katmanı | `src/styles/theme.css` | Token'ları bileşenlere uygular. `main.tsx`'te **en son** içe aktarılır; böylece diğer üç stil dosyasının kurallarını davranışına dokunmadan inceltir. Tamamı `@media screen` içindedir: yazdırılabilir A4 sayfası bu dosyadan tek bir bildirim almaz. |
-| Referans sayfası | `docs/tasarim-dili.html` | Renk, tipografi, düğme, kart, tablo ve form örneklerini gerçek sınıf adlarıyla gösterir (`npm run dev` → `/docs/tasarim-dili.html`). |
 
 Site 780 px'lik tek bir editoryal sayfa olduğu için birebir düzen değil, **dil**
 taşınmıştır: aynı token'lar, aynı tipografi hiyerarşisi, aynı yüzey anlayışı;
@@ -276,9 +274,7 @@ değiştirilebilir); uygulamanın FormKit akışı bu doğrulanmış sabit set k
 | `src/components/*` | Form sayfaları, önizleme, kamera, tarama alanı, sonuç incelemesi. |
 | `scripts/build.mjs` | Tek dosya production derlemesi (`optik-form.html` / `dist/index.html`). |
 | `scripts/generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts` | Yazdırılabilir form PDF üretimi ve bağımsız doğrulama. |
-| `scripts/run-photos.mts` | Gerçek telefon fotoğrafları üzerinde `analyzePage` regresyon harness'i (production import zincirinde yok). |
 | `docs/kaynak-denetimi.md` | Puanlama/yorum bileşenlerinin kaynak denetimi: künye–bileşen eşleştirme tabloları ve doğrulanamayan kesimlerin dürüstlük kaydı. |
-| `docs/tasarim-dili.html` | Arayüz tasarım dili referansı (`npm run dev` → `/docs/tasarim-dili.html`). |
 
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
 paylaşır; koordinat kaynağı tektir.

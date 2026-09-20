@@ -42,4 +42,4 @@ preview-dist/
 .audit/
 
 # Yerel doğrulama overlay/ara çıktıları — commit edilmez
-scripts/validation/scan-out/
+/scripts/validation/
