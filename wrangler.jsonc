@@ -1,0 +1,23 @@
+{
+  // Cloudflare Workers statik varlık yapılandırması.
+  //
+  // Bu dosya depoda olduğu sürece `wrangler deploy` doğrudan bu ayarları kullanır.
+  // Dosya yoksa wrangler, Vite projesini otomatik yapılandırmaya çalışır
+  // (`@cloudflare/vite-plugin` ekleyip vite.config.ts'i yeniden yazar) ve bu depo
+  // Vite ile derlenmediği için "Cannot modify Vite config" hatasıyla durur.
+  //
+  // `name` alanı Cloudflare panelindeki Worker/Builds proje adıyla birebir aynı
+  // olmalıdır; aksi halde deploy "project name does not match" hatası verir.
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "mmpi",
+  "compatibility_date": "2026-09-18",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    // `npm run build` çıktısı: dist/index.html + dist/_redirects
+    "directory": "./dist",
+    // Pathname tabanlı History API router'ı için SPA fallback.
+    "not_found_handling": "single-page-application"
+  }
+}

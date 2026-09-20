@@ -65,6 +65,12 @@ test('standalone build is offline and locked down by a script-hash CSP', () => {
   }
 });
 
+test('standalone build ships the SPA fallback rule for Cloudflare hosting', () => {
+  // Bulut barındırmada pathname yönlendirmesi bu kural olmadan 404 verir.
+  const redirects = readFileSync('dist/_redirects', 'utf8');
+  assert.match(redirects, /^\/\*\s+\/index\.html\s+200$/m, 'SPA fallback kuralı eksik ya da bozuk');
+});
+
 test('standalone build embeds the verified form PDF byte for byte', () => {
   // The site offers this file for download, so a drift between the committed PDF and the embedded
   // copy would hand out a form the reader was never verified against.

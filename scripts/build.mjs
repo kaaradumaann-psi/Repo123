@@ -7,6 +7,14 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const buildEnv = loadEnv('production', root, 'VITE_');
+if (!buildEnv.VITE_SUPABASE_URL || !buildEnv.VITE_SUPABASE_ANON_KEY) {
+  // Barındırma platformlarında (ör. Cloudflare Builds) bu değerler build değişkeni olarak
+  // tanımlanmadıysa derleme sessizce çevrimdışı bir sürüm üretir: giriş, kayıt ve Supabase
+  // yazma çalışmaz. Sessiz kalmak yerine günlükte açıkça uyar.
+  console.warn('UYARI: VITE_SUPABASE_URL ve/veya VITE_SUPABASE_ANON_KEY derlemede tanımlı değil. ' +
+    'Bu derleme çevrimdışıdır; giriş, kayıt ve Supabase erişimi kapalı olur (yalnızca /onizleme açılır). ' +
+    'Barındırma platformunun build değişkenlerini kontrol edin.');
+}
 
 const result = await build({
   absWorkingDir: root,
@@ -99,8 +107,8 @@ const html = shell
 await mkdir(new URL('../dist/', import.meta.url), { recursive: true });
 await writeFile(new URL('../dist/index.html', import.meta.url), html);
 await writeFile(new URL('../optik-form.html', import.meta.url), html);
-// SPA fallback: Cloudflare Pages serves index.html for any route that does
-// not match a static file.  API endpoints (/api/*) are handled by the Worker
-// layer and take priority over _redirects, so they are never rewritten.
+// SPA fallback: Cloudflare (Pages ya da Workers statik varlıkları) eşleşmeyen
+// pathname'lerde index.html döndürür. Workers yayınında aynı davranış
+// `wrangler.jsonc` içindeki `assets.not_found_handling` ile de sağlanır.
 await writeFile(new URL('../dist/_redirects', import.meta.url), '/*    /index.html   200\n');
 console.log('Built dist/index.html, dist/_redirects and optik-form.html (self-contained).');

@@ -84,7 +84,7 @@ Production'da pathname rotalarının doğrudan açılabilmesi için hosting tara
 | Form PDF | `src/print/*`, `scripts/generate-pdf.ts`, `scripts/verify-pdf.ts` |
 | Screen/PDF styles | `src/styles/screen.css`, `theme.css`, `site.css`, `workspace.css`, `scanner*.css`, `form.css`, `print.css` |
 | Tests/diagnostics | `tests/*.test.ts`, `tests/fixtures/omrSynthetic.ts` |
-| Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `.github/workflows/ci.yml` |
+| Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `wrangler.jsonc`, `.github/workflows/ci.yml` |
 
 `src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form sekmesinin ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur.
 
@@ -449,10 +449,12 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    npm ci
    npm run build
    ```
-   Bu komut strict typecheck yapar, `dist/index.html` (tek dosya SPA), `dist/_redirects` (Cloudflare Pages fallback) ve kök dizindeki tracked `optik-form.html` dosyasını derler.
+   Bu komut strict typecheck yapar, `dist/index.html` (tek dosya SPA), `dist/_redirects` (Cloudflare fallback; hem Pages hem Workers statik varlıkları) ve kök dizindeki tracked `optik-form.html` dosyasını derler.
 
 7. **Deploy frontend:**
-   `dist/index.html` ve `dist/_redirects` çıktısını barındırma sağlayıcınıza (Cloudflare Pages, Vercel, Netlify, S3/CloudFront) yükleyin. Pathname routing için SPA rewrite kuralının aktif olduğunu doğrulayın.
+   `dist/index.html` ve `dist/_redirects` çıktısını barındırma sağlayıcınıza (Cloudflare Workers/Pages, Vercel, Netlify, S3/CloudFront) yükleyin. Pathname routing için SPA rewrite kuralının aktif olduğunu doğrulayın.
+
+   Cloudflare Workers statik varlık yayını için depodaki `wrangler.jsonc` (`assets.directory: ./dist`, `not_found_handling: single-page-application`) kullanılır: `npm run deploy`. Bu dosya olmadan `wrangler deploy` Vite otomatik yapılandırmasına girer ve `Cannot modify Vite config` hatasıyla durur; ayrıntı için README'deki *Cloudflare Workers'a yayınlama* bölümüne bakın.
 
 8. **Run smoke tests:**
    Yayınlanan URL'ye tarayıcıdan gidin:

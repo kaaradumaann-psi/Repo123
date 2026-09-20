@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "build": "tsc --noEmit && node scripts/build.mjs",
+    "deploy": "npm run build && npx wrangler deploy",
     "pdf": "tsx scripts/generate-pdf.ts",
     "verify:pdf": "tsx scripts/verify-pdf.ts"
   },

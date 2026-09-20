@@ -29,6 +29,11 @@ dist/
 supabase/.temp/
 *.tsbuildinfo
 
+# Wrangler yerel durumu ve yerel deploy değişkenleri — commit edilmez
+.wrangler/
+.dev.vars
+.dev.vars.*
+
 # Local diagnostic dumps — never commit
 *.pgm
 /crops/
