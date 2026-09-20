@@ -1,0 +1,30 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { autoScanAndAnalyze, SCAN_STRATEGIES } from '../../src/scanner/scanAndAnalyze';
+import { autoScanDocument, grayToPixelImage, isotropicUpscale } from '../../src/scanner/documentScan';
+import { normalizeShadows } from '../../src/scanner/shadowNormalization';
+import { analyzePage } from '../../src/omr/analyzePage';
+import { decodePageQr } from '../../src/omr/qrDecoder';
+import { isolatePaper } from '../../src/omr/pageIsolation';
+import { toGrayscale } from '../../src/omr/imageQuality';
+import { formDefinition } from '../../src/omr/formDefinition';
+import type { PixelImage } from '../../src/omr/omrTypes';
+const name = process.argv[2]!;
+const img = await loadImage(readFileSync(join('docs/TestGorselleri', `${name}.jpg`)));
+const w = img.width, h = img.height;
+const c = createCanvas(w, h); const x = c.getContext('2d'); x.drawImage(img as any, 0, 0);
+const rgba: PixelImage = { width: w, height: h, data: new Uint8ClampedArray(x.getImageData(0,0,w,h).data) };
+// manual S3 replica
+const gray = toGrayscale(rgba);
+const factor = Math.min(3, Math.sqrt(9_000_000 / (w * h)));
+const up = isotropicUpscale(gray, factor);
+const cleaned = normalizeShadows(up, { force: true, radiusFraction: 0.08 });
+const rep = grayToPixelImage(cleaned);
+const r1 = await analyzePage(rep, formDefinition);
+console.log(`manual S3 (${rep.width}x${rep.height}): ${r1.ok ? 'OK' : r1.code}; qr=${decodePageQr(isolatePaper(toGrayscale(rep)).image) ? 'Y' : 'N'}`);
+// ladder S3
+const a = await autoScanAndAnalyze(rgba, formDefinition);
+console.log(`ladder: ${a.attempts.map((t, i) => `S${i}=${t.ok ? 'OK' : t.code}`).join(' ')} => ${a.result.ok ? 'OK' : a.result.code}`);
+const s3scan = autoScanDocument(rgba, { upscale: true as any, clean: 'shadow' } as any);
+console.log('note:', a.scan.note);

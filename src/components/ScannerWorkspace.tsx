@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormDefinition, PixelImage, Point } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
-import { analyzePage } from '../omr/analyzePage';
+import { autoScanAndAnalyze } from '../scanner/scanAndAnalyze';
 import { summarizeResults } from '../results/resultNormalizer';
 import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
 import type { ScanSet } from '../scanner/pageSequence';
@@ -160,7 +160,11 @@ function ScannerSession({
       let manualPreviewUrl: string | undefined;
       let manualPreviewTransferred = false;
       try {
-        const result = await analyzePage(image, definition);
+        // Automatic scan ladder: the raw capture is rectified into a flatbed-looking page and
+        // handed to the untouched OMR engine; the first strategy it accepts wins
+        // (see scanner/scanAndAnalyze). Failures keep the exact same codes, so the manual
+        // corner fallback below behaves as before.
+        const { result } = await autoScanAndAnalyze(image, definition);
         checkAborted(signal);
         // Manual-corner rescue opens on ALIGNMENT_MISSING and on LOW_RESOLUTION: in both cases
         // the automatic read is rejected, but the user can still continue with the verified
