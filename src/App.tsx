@@ -269,6 +269,7 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
         {route.page === 'kayit' ? (
           <RecordDetailPage
             recordId={route.id}
+            viewer={user}
             onBack={() => navigate(user.role === 'ADMIN' ? '/yonetim' : '/kayitlar')}
           />
         ) : (

@@ -6,6 +6,7 @@ import { answersFromRecordPayload, profileFromRecord } from '../results/recordPr
 import { validityStatusDisplay } from '../scoring/mmpiInterpretation';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import { MMPIPrintReport } from './results/MMPIPrintReport';
+import type { AuthenticatedUser } from '../auth/authTypes';
 import { Icon } from './Icon';
 
 function dash(value: string | number | null | undefined): string {
@@ -63,7 +64,15 @@ function fileDate(value: string | null | undefined): string {
  * (`MMPIPrintReport`); yazdırma dosya adı document.title üzerinden
  * `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>` olarak önerilir.
  */
-export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBack: () => void }) {
+export function RecordDetailPage({
+  recordId,
+  viewer,
+  onBack,
+}: {
+  recordId: string;
+  viewer?: AuthenticatedUser | null;
+  onBack: () => void;
+}) {
   const [record, setRecord] = useState<FullRecordDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -176,6 +185,15 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
   }
 
   const notesDirty = notesDraft.trim() !== notesSaved.trim();
+  // Not yazma yetkisi RLS'nin birebir karşılığıdır: kaydı oluşturan AKTİF psikolog
+  // yazabilir; Admin yalnızca okur (denetim). Böylece UI, DB'nin izin verdiği
+  // işlem dışında düzenleme sunmaz ve "Notu Kaydet" asla boşa düşmez.
+  const canWriteNotes =
+    viewer != null &&
+    viewer.role === 'PSYCHOLOG' &&
+    viewer.active === true &&
+    typeof record?.createdBy === 'string' &&
+    viewer.id === record.createdBy;
 
   const printMeta = {
     fullName,
@@ -314,15 +332,21 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
             Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır. Tanısal kesin ifadelerden
             kaçının; not yalnızca bu kaydı görebilen hesaplarca okunabilir.
           </p>
-          <textarea
-            className="expert-notes-input"
-            value={notesDraft}
-            onChange={event => setNotesDraft(event.target.value)}
-            rows={5}
-            maxLength={EXPERT_NOTES_MAX}
-            placeholder="Örn. Profil bulguları klinik görüşmeyle tutarlı; izlem önerildi..."
-            aria-label="Uzman değerlendirme notu"
-          />
+          {canWriteNotes ? (
+            <textarea
+              className="expert-notes-input"
+              value={notesDraft}
+              onChange={event => setNotesDraft(event.target.value)}
+              rows={5}
+              maxLength={EXPERT_NOTES_MAX}
+              placeholder="Örn. Profil bulguları klinik görüşmeyle tutarlı; izlem önerildi..."
+              aria-label="Uzman değerlendirme notu"
+            />
+          ) : (
+            record.expertNotes && (
+              <p className="expert-notes-readonly ws-muted">{record.expertNotes}</p>
+            )
+          )}
           <div className="expert-notes-footer">
             <span className="ws-muted expert-notes-count">
               {notesDraft.length} / {EXPERT_NOTES_MAX}
@@ -332,24 +356,26 @@ export function RecordDetailPage({ recordId, onBack }: { recordId: string; onBac
                   })}`
                 : ''}
             </span>
-            <div className="expert-notes-actions">
-              {notesMessage && (
-                <span
-                  className={notesMessage.kind === 'error' ? 'expert-notes-msg is-error' : 'expert-notes-msg is-ok'}
-                  role="status"
+            {canWriteNotes && (
+              <div className="expert-notes-actions">
+                {notesMessage && (
+                  <span
+                    className={notesMessage.kind === 'error' ? 'expert-notes-msg is-error' : 'expert-notes-msg is-ok'}
+                    role="status"
+                  >
+                    {notesMessage.text}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="btn-primary btn-sm"
+                  onClick={() => void saveNotes()}
+                  disabled={notesBusy || !notesDirty}
                 >
-                  {notesMessage.text}
-                </span>
-              )}
-              <button
-                type="button"
-                className="btn-primary btn-sm"
-                onClick={() => void saveNotes()}
-                disabled={notesBusy || !notesDirty}
-              >
-                {notesBusy ? 'Kaydediliyor…' : 'Notu Kaydet'}
-              </button>
-            </div>
+                  {notesBusy ? 'Kaydediliyor…' : 'Notu Kaydet'}
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
