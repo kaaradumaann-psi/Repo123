@@ -400,6 +400,15 @@
   height: auto;
 }
 
+/* Tam sayfa iyileştirilmiş önizleme: canvas container'a responsive sığar, A4 oranı
+   bozulmaz ve sayfanın tamamı görünür (sol/sağ/üst/alt kenarlar kırpılmaz). */
+.scan-enhanced-card canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
 .scan-row-location {
   position: absolute;
   background: rgba(37, 99, 235, 0.25);

@@ -123,6 +123,27 @@
   border-color: var(--primary-border, #b9caff);
 }
 
+/* Uzun etiketli piller (ör. "OMR için optimize") dar kolonda satıra sığmayıp taşmasın. */
+.scan-enhancer-pill span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 148px;
+}
+
+.scan-enhancer-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--slate-500, #64748b);
+}
+
+.scan-enhancer-note svg {
+  flex: none;
+}
+
 /* Manual Corner Editor ----------------------------------------------------- */
 
 .manual-corner-editor {
