@@ -400,10 +400,10 @@ export const EXPERT_NOTES_MAX = 4000;
  * PostgREST/veritabanı hatalarını kullanıcıya dürüst ama hassas detay
  * sızdırmayan bir kategoriye çevirir. PostgRest hata `code`ları:
  *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / yetki yok
- *   - 42703      → tanımsız kolon (şema/migration eksik — örn. expert_notes)
- *   - PGRST301   → JWT süresi dolmuş / geçersiz (PGRST300/301 serisi)
- *   - 22P02      → geçersiz UUID gibi tip hatası (çağrı katmanı zaten korur)
- *   - 23503/23505 → FK / uniqueness bütünlük ihlali
+ *   - 42703/PGRST204 → tanımsız kolon (şema/migration eksik — örn. expert_notes)
+ *   - PGRST301       → JWT süresi dolmuş / geçersiz (PGRST300/301 serisi)
+ *   - 22P02          → geçersiz UUID gibi tip hatası (çağrı katmanı zaten korur)
+ *   - 23503/23505/23514 → FK, uniqueness veya check bütünlük ihlali
  * Ağ hataları tarayıcı kaynaklıdır (Failed to fetch vb.).
  */
 function describeMutationError(cause: unknown, fallback: string): string {
@@ -412,22 +412,26 @@ function describeMutationError(cause: unknown, fallback: string): string {
   }
   const code = typeof cause === 'object' && cause !== null ? String((cause as { code?: unknown }).code ?? '') : '';
   if (code === '42501') return 'Bu işlem için yetkiniz bulunmuyor.';
-  if (code === '42703') return 'Bu özellik için veritabanı şeması güncel değil; sistem yöneticinizle iletişime geçin.';
+  if (code === '42703' || code === 'PGRST204') {
+    return 'Kayıt işlemleri için veritabanı güncellemesi gerekiyor; yöneticiniz supabase db push çalıştırmalı.';
+  }
   if (/^PGRST30[01]$/.test(code)) return 'Oturumunuzun süresi dolmuş olabilir; lütfen yeniden giriş yapın.';
   if (code === '22P02') return 'İşlem hedefi geçersiz; sayfayı yenileyip tekrar deneyin.';
-  if (code === '23503' || code === '23505') return 'Kayıt bütünlüğü korunamadı; tekrar deneyin.';
+  if (code === '23503' || code === '23505' || code === '23514') return 'Kayıt bütünlüğü korunamadı; tekrar deneyin.';
   return fallback;
 }
 
 /**
- * Kayıt sonrası uzman notunu günceller. RLS gereği yalnızca kaydı oluşturan
- * aktif psikolog yazabilir; not, yazdırma raporuna "Uzman Değerlendirme Notu"
- * bölümü olarak aktarılır. Sunucu tarafı 4000 karakter sınırını da zorlar.
+ * Kayıt sonrası uzman notunu günceller. Admin tüm görünür kayıtlara, aktif
+ * psikolog ise yalnızca kendi kaydına not yazabilir. Not, yazdırma raporuna
+ * "Uzman Değerlendirme Notu" bölümü olarak aktarılır; sunucu tarafı 4000
+ * karakter sınırını da zorlar.
  *
- * Not tek kolonda (kayıt başına tek not, ayrı satır yok) tutulduğu için INSERT
- * yerine UPDATE kullanılır; boş metin gönderilirse not boşaltılmış olur (silme
- * davranışı). UPSERT gerekmez: satır zaten kayıt oluştururken default '' ile
- * mevcuttur.
+ * Mutasyondan sonra `.select()` zincirlenmez. Bazı PostgREST/Supabase
+ * kurulumlarında UPDATE/DELETE + RETURNING (yani `?select=id`) RLS veya eski
+ * API katmanı nedeniyle 400 dönebiliyor. `count: 'exact'` ile temsil gövdesi
+ * istemeden etkilenen satırı doğruluyoruz; böylece hem 400 kalkıyor hem de RLS
+ * tarafından sessizce filtrelenen 0 satır başarı gibi gösterilmiyor.
  */
 export async function updateExpertNotes(recordId: string, notes: string): Promise<string> {
   const id = requireUuid(recordId, 'Kayıt kimliği');
@@ -435,23 +439,26 @@ export async function updateExpertNotes(recordId: string, notes: string): Promis
   if (normalized.length > EXPERT_NOTES_MAX) {
     throw new Error(`Uzman notu en fazla ${EXPERT_NOTES_MAX} karakter olabilir.`);
   }
-  const updatedAt = new Date().toISOString();
-  const { data, error } = await requireSupabase()
+  const client = requireSupabase();
+  const requestedAt = new Date().toISOString();
+  const { count, error } = await client
     .from('mmpi_records')
-    .update({ expert_notes: normalized, notes_updated_at: updatedAt })
-    .eq('id', id)
-    .select('id')
-    .maybeSingle();
+    .update({ expert_notes: normalized, notes_updated_at: requestedAt }, { count: 'exact' })
+    .eq('id', id);
   if (error) throw new Error(describeMutationError(error, 'Uzman notu kaydedilemedi; lütfen tekrar deneyin.'));
-  // RLS, erişilemeyen satırı hatasız 0 sonuç olarak döndürür: kayıt ya yok ya
-  // da bu hesabın not yazma yetkisi dışında. Varlığı sızdırmadan ikisini ayırırız.
-  if (!data) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde not yazma yetkiniz bulunmuyor.');
-  return updatedAt;
+  // RLS, yetkisiz UPDATE'i hata vermeden 0 satır olarak filtreleyebilir.
+  if (count !== 1) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde not yazma yetkiniz bulunmuyor.');
+  return requestedAt;
 }
 
 export async function deleteRecord(recordId: string): Promise<void> {
   const id = requireUuid(recordId, 'Kayıt kimliği');
-  const { data, error } = await requireSupabase().from('mmpi_records').delete().eq('id', id).select('id').maybeSingle();
+  const client = requireSupabase();
+
+  // DELETE + select=id, bazı PostgREST/RLS kombinasyonlarında gereksiz bir
+  // 400 üretir. Temsil istemeden sil; exact count, RLS'nin satırı gerçekten
+  // etkileyip etkilemediğini doğrular.
+  const { count, error } = await client.from('mmpi_records').delete({ count: 'exact' }).eq('id', id);
   if (error) throw new Error(describeMutationError(error, 'Test kaydı silinemedi; lütfen tekrar deneyin.'));
-  if (!data) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde silme yetkiniz bulunmuyor.');
+  if (count !== 1) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde silme yetkiniz bulunmuyor.');
 }

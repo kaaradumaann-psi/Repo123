@@ -142,7 +142,7 @@ const GROUPS: FaqGroup[] = [
       {
         q: 'Danışan verisini kimler görebilir?',
         a: [
-          'Erişim, veritabanı düzeyinde satır güvenliği (RLS) ile sınırlandırılmıştır: kayıtlara yalnızca kaydı oluşturan uzman erişir. Yönetici hesapları kullanıcı açma/kapatma ve rol yönetimi yapar; parolalar uygulama tablolarına hiçbir zaman yazılmaz.',
+          'Erişim, veritabanı düzeyinde satır güvenliği (RLS) ile sınırlandırılmıştır: psikolog yalnızca kendi kayıtlarını, Admin ise yönetim görevi için tüm kayıtları görür. Not ve silme işlemleri de bu role göre sınırlandırılır; parolalar uygulama tablolarına hiçbir zaman yazılmaz.',
         ],
       },
       {

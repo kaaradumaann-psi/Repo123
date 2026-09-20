@@ -4,8 +4,9 @@
 -- ---------------------------------------------------------------------------
 -- 1. Uzman notu kolonu
 -- ---------------------------------------------------------------------------
--- Not yalnızca kaydı oluşturan aktif psikolog tarafından güncellenebilir
--- (mevcut mmpi_records_update RLS politikası bunu zaten zorlar).
+-- Not Admin tarafından tüm görünür kayıtlarda, kaydı oluşturan aktif
+-- psikolog tarafından ise kendi kaydında güncellenebilir. Son yetki politikası
+-- 20260920000000 migration'ında bu iş akışına göre kesinleştirilir.
 alter table public.mmpi_records
   add column if not exists expert_notes text not null default '',
   add column if not exists notes_updated_at timestamptz;

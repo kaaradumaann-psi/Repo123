@@ -280,7 +280,14 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
               aria-labelledby="tab-case"
               className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
             >
-              <CaseWorkspace definition={formDefinition} actor={user} flowOrigin={flowOrigin} onSaved={() => setRecordsTick(tick => tick + 1)} />
+              <CaseWorkspace
+                key={route.page === 'home' ? 'clean-landing' : 'case-workspace'}
+                definition={formDefinition}
+                actor={user}
+                flowOrigin={flowOrigin}
+                landing={route.page === 'home'}
+                onSaved={() => setRecordsTick(tick => tick + 1)}
+              />
             </div>
 
             <div

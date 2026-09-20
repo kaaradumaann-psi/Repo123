@@ -239,7 +239,7 @@ Tek migration: `supabase/migrations/20260915000000_initial_schema.sql`.
   raw_omr_answers (jsonb, `jsonb_typeof='array'` check), created_by (profiles FK), created_at.
 - İndeks: `(created_by, created_at desc)`. [✓] Liste sorgusuyla uyumlu.
 - RLS: select = admin VEYA (sahibi VE aktif); insert = `created_by = auth.uid()` VE aktif;
-  update = yalnızca sahibi+aktif (idempotent upsert için); delete = admin VEYA sahibi+aktif.
+  update = Admin veya sahibi+aktif (klinik alanlar immutable trigger ile korunur); delete = admin VEYA sahibi+aktif.
 - [✓] `created_by` asla formdan alınmaz (payload'da istemci gönderir ama RLS
   `with check created_by = auth.uid()` ile zorlar).
 
@@ -252,7 +252,9 @@ Tek migration: `supabase/migrations/20260915000000_initial_schema.sql`.
   trigger her mmpi_records insert/update/delete olayını (aktör, eylem, hedef, zaman)
   yazar; yalnızca Admin okur, istemci yazamaz/silemez. Canlı doğrulama [?].
 - [✓] `expert_notes` + `notes_updated_at` kolonları EKLENDİ (B4; ≤4000 karakter,
-  sahibi RLS ile yazar, rapora aktarılır).
+  Admin tüm görünür kayıtlara, aktif psikolog kendi kaydına RLS ile yazar; rapora aktarılır).
+- [✓] `20260920000000_record_actions.sql`: not/silme mutasyonları `select=id`
+  döndürmeye zorlamaz; exact count ile doğrulanır ve Admin not yetkisi açılır.
 - [ ] Soft-delete / `deleted_at` YOK — silme kalıcıdır (iki adımlı onay UI'da var);
   audit_logs silme olayını artık kalıcı olarak kaydeder.
 - [ ] `updated_at/archived_at` mmpi_records'ta YOK (yalnızca created_at + notes_updated_at).
@@ -640,7 +642,7 @@ K düzeltme, Mf ters), geçerlik bantları/eşikleri, kod kanonikleştirme, tür
 | B1 | P1 | Üç-durum geçerlik UI'ya bağlanmadı (status alanı sahipsiz) | results/*.tsx, workspace.css | [✓] TAMAMLANDI (2026-09-19, testli) |
 | B2 | P1 | scoringVersion kayda yazılmıyor (version.ts sahipsiz) | caseTypes.ts, version.ts | [✓] TAMAMLANDI (2026-09-19, testli) |
 | B3 | P2 | reviewHistory (OMR düzeltme denetim izi) kayda gitmiyor | supabaseRecords.ts toSavedPage | [✓] TAMAMLANDI (2026-09-19; derin kopya + test) |
-| B4 | P2 | Uzman notu (kayıt sonrası) ve rapora aktarımı yok | RecordDetailPage, MMPIPrintReport, migration 20260919000000 | [✓] TAMAMLANDI (expert_notes ≤4000, RLS sahibi yazar, baskıda koşullu bölüm, test) |
+| B4 | P2 | Uzman notu (kayıt sonrası) ve rapora aktarımı yok | RecordDetailPage, MMPIPrintReport, migrations 20260919000000 + 20260920000000 | [✓] TAMAMLANDI (expert_notes ≤4000, Admin/aktif sahibi RLS yazar, baskıda koşullu bölüm, test) |
 | B5 | P2 | Tek dosya build CSP'sinde connect-src yok → Supabase'li dağıtımda bağlantı engellenebilir | scripts/build.mjs | [✓] TAMAMLANDI (VITE_SUPABASE_URL varsa origin+wss allowlist, yoksa tam offline; test) — canlı dağıtım doğrulaması hâlâ [?] |
 | B6 | P3 | Rapor sayfa numarası yok | workspace.css @media print | [✓] TAMAMLANDI (isimli @page mmpi-report + @bottom-center counter; desteklemeyen tarayıcıda zarifçe yok sayılır) |
 | B7 | P3 | "Reis (1966)" → "Ries" yazım/atıf düzeltmesi | mmpiCritical.ts, SourcesPage.tsx | [✓] TAMAMLANDI (kod atfı Ries; ikincil-yazım notu korundu) |
@@ -693,10 +695,11 @@ Bilinen ÇÖKME/BOZULMA yok; mevcut akış uçtan uca çalışıyor (test kanıt
 4. **Bilimsel veri DEĞİŞTİRME:** normlar, anahtarlar, eşikler, K tablosu, yorum metinleri
    yalnızca doğrulanmış kaynakla değiştirilebilir. Kaynak yoksa D/E statüsüyle raporla.
 5. Commit/push YALNIZCA `arena/01a0b91f-repo123` branch'ine.
-6. YENİ migration `20260919000000_expert_notes_and_audit.sql` henüz canlı projeye
-   push edilmedi (`supabase db push` operatör işidir). İstemci kodu migration'sız
-   ortamda da kırılmaz (expert_notes toleranslı okunur) ama not kaydetme, migration
-   uygulanana kadar sunucu hatası döndürür.
+6. Yeni not/denetim/aksiyon migration'ları (`20260919000000_expert_notes_and_audit.sql`,
+   `20260919010000_record_integrity.sql`, `20260919020000_record_immutability.sql` ve
+   `20260920000000_record_actions.sql`) canlı projeye push edilmelidir (`supabase db push`
+   operatör işidir). İstemci, migration eksikliğini açık bir şema güncelleme hatası olarak
+   gösterir; yetki ve not kaydetme ancak migration'lar uygulandıktan sonra çalışır.
 
 ### Devam etme sırası (kalan işler — hepsi ortam/kaynak işi, kod işi DEĞİL)
 ```text
@@ -860,7 +863,8 @@ kapsam (2):     supabase/migrations/20260919000000_expert_notes_and_audit.sql (y
 
 ### PRODUCTION DEPLOYMENT REQUIREMENTS
 1. `.env` ile VITE_SUPABASE_URL/ANON_KEY tanımla; `npm run build` (CSP origin'i build'de gömülür).
-2. `supabase db push` — 20260919000000 migration'ı (expert_notes + audit_logs) canlıya uygula.
+2. `supabase db push` — expert_notes, audit/RLS bütünlük ve `20260920000000_record_actions.sql`
+   dahil tüm migration'ları canlıya uygula.
 3. Edge Function deploy + ilk Admin bootstrap (supabase/README.md).
 4. Canlı RLS/oturum/CSP testlerini (yukarıdaki NOT VERIFIED listesi) gerçek ortamda koş.
 

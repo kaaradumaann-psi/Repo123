@@ -142,7 +142,7 @@ const SECTIONS: PolicySection[] = [
         </p>
         <PolicyList
           items={[
-            'Kayıt verilerine, satır güvenliği (RLS) kuralları gereği yalnızca kaydı oluşturan uzman erişebilir;',
+            'Kayıt verilerine, satır güvenliği (RLS) kuralları gereği psikolog kendi kayıtlarıyla, Admin ise yönetim görevi kapsamında tüm kayıtlarla sınırlı olarak erişebilir;',
             'Veriler, yasa gereği talep yetkili mercilerin dışında hiçbir üçüncü kişi/kuruma satılmaz, devredilmez veya paylaşılır hâle getirilmez;',
             'Uygulama üçüncü taraf analitik, reklam veya izleme servisi kullanmaz; yayımlanan derleme yalnızca yapılandırılan veritabanı adresiyle iletişim kurar.',
           ]}
