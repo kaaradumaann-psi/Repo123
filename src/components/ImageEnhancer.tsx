@@ -35,5 +35,9 @@ export function ImageEnhancer({ mode, onChange }: ImageEnhancerProps) {
         </button>
       ))}
     </div>
+    <p className="scan-enhancer-note">
+      <Icon name="sparkles" size={13} />
+      <span>Yalnızca önizleme içindir; otomatik okuma sonucunu değiştirmez.</span>
+    </p>
   </div>;
 }

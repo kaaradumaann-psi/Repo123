@@ -32,7 +32,7 @@ import {
   serializeScan,
   updateOutboxEntry,
 } from '../workspace/draftStorage';
-import type { OutboxEntry } from '../workspace/draftStorage';
+import type { CaseDraftV1, OutboxEntry } from '../workspace/draftStorage';
 import {
   EDUCATION_OPTIONS,
   FOLLOW_UP_OPTIONS,
@@ -104,6 +104,13 @@ type CaseWorkspaceProps = {
   definition: FormDefinition;
   actor: AuthenticatedUser;
   onSaved?: () => void;
+  /**
+   * Oturumun bu yüklemede nasıl kurulduğu. Yeni bir girişte ('signin') persisted
+   * taslak otomatik geri yüklenmez ve 'home' adımına yönlenilmez — landing üzerinde,
+   * kullanıcı isterse 'Devam et/kaldığın yerden devam' ile kendisi açar. Aynı oturumda
+   * F5 ('session') mevcut davranışı korur ve kaldığı yerden devam eder.
+   */
+  flowOrigin: 'session' | 'signin';
 };
 
 function formatDate(value: string): string {
@@ -134,13 +141,19 @@ function releaseScanPreviewUrls(scan: ScanSet | null): void {
   }
 }
 
-export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps) {
+export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWorkspaceProps) {
   /**
    * Taslak geri yükleme (F5 dayanıklılığı): bileşen ilk açıldığında bu uzmanın
    * kayıtlı taslağı varsa state ondan beslenir. Boş/bozuk/süresi dolmuş taslak
    * yok sayılır; uygulama yine tertemiz açılır.
+   *
+   * Yeni bir girişte ('signin') taslak OKUNMAZ ve otomatik geri yüklenmez:
+   * persisted work, "hangi conclusion'a gidileceği" değil "kullanıcının ileride
+   * devam edebileceği çalışmadır". Landing'deki "Devam et" düğmesi loadDraft'ı bir
+   * kez daha çalıştırarak o çalışmayı kullanıcının isteğiyle açar.
    */
   const [boot] = useState(() => {
+    if (flowOrigin === 'signin') return null;
     const draft = loadDraft(actor.id);
     if (!draft || !isDraftNonEmpty(draft)) {
       // Kaydedilmiş başarı ekranı da korunur (F5 sonrası "kaydedildi" kaybolmaz).
@@ -179,6 +192,23 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   const online = useOnlineStatus();
   const stepIndex = STEPS.findIndex(item => item.id === step);
 
+  // Yeni girişte ('signin') persisted taslak state'e otomatik yüklenmez (bkz. `boot`).
+  // Yine de kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur
+  // bir anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o
+  // kalıntıya dokunulmaz; başlayınca temizlenir (bkz. autosave effect + startNew).
+  // Yeni girişte persisted taslak state'e otomatik yüklenmez (bkz. `boot`). Yine de
+  // kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur bir
+  // anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o kalıntıya
+  // dokunulmaz. `liveDraftRef`, pending-resume (snapshot bekleyen) durumu belirtir: o
+  // durumda beforeunload boş state yazmaz ki henüz geri yüklenmemiş çalışma ezilmesin.
+  const liveDraftRef = useRef<CaseDraftV1 | null>(null);
+  const [draftSnapshot, setDraftSnapshot] = useState<CaseDraftV1 | null>(() => {
+    if (flowOrigin !== 'signin') return null;
+    const snapshot = loadDraft(actor.id);
+    if (snapshot && isDraftNonEmpty(snapshot)) liveDraftRef.current = snapshot;
+    return snapshot;
+  });
+
   const omrReady = scan ? canCreateRecord(sortedPages(scan), definition) : false;
   const quickCounts = countAnswers(answers);
   const quickReady = quickCounts.entered === ITEM_COUNT;
@@ -216,6 +246,13 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   /* ---------------- Taslak otomatik kayıt (debounced) ---------------- */
   useEffect(() => {
     const timer = window.setTimeout(() => {
+      // Yeni girişte kullanıcı henüz bir işe başlamadıysa autosave ÇALIŞMAZ: boş
+      // state yazmak, yalnızca okunmak üzere korunan resumable taslağı ezebilir.
+      if (flowOrigin === 'signin' && boot == null && step === 'home' && !hasAnyData) return;
+      // Kullanıcı gerçekten yeni veri girdiği an salt-okunur kalıntı snapshot'ı bu
+      // ekrandaki gerçek iş tarafından devralınır.
+      setDraftSnapshot(null);
+      liveDraftRef.current = null;
       const result = saveDraft(actor.id, {
         step,
         client,
@@ -236,7 +273,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved]);
+  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, hasAnyData]);
 
   /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
   const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved });
@@ -250,21 +287,27 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       const live = liveRef.current;
-      try {
-        saveDraft(actor.id, {
-          step: live.step,
-          client: live.client,
-          method: live.method,
-          answersEncoded: encodeAnswers(live.answers),
-          currentItem: live.currentItem,
-          raw: live.raw,
-          scan: live.scan ? serializeScan(live.scan) : null,
-          submissionKey: submissionKey.current,
-          savedId: live.saved?.id ?? null,
-          savedAt: live.saved?.createdAt ?? null,
-        });
-      } catch {
-        /* kapanış anında sessiz */
+      // Pending-resume koruması: yeni girişte, kullanıcı taslağı henüz geri
+      // yüklemediyse (state boş, snapshot bekliyor) boş state'i yazmak eski
+      // çalışmayı ezerdi. Yalnızca gerçek devralınmış/boş-sahipli iş yazılır.
+      const isPendingResume = flowOrigin === 'signin' && liveDraftRef.current != null;
+      if (!isPendingResume) {
+        try {
+          saveDraft(actor.id, {
+            step: live.step,
+            client: live.client,
+            method: live.method,
+            answersEncoded: encodeAnswers(live.answers),
+            currentItem: live.currentItem,
+            raw: live.raw,
+            scan: live.scan ? serializeScan(live.scan) : null,
+            submissionKey: submissionKey.current,
+            savedId: live.saved?.id ?? null,
+            savedAt: live.saved?.createdAt ?? null,
+          });
+        } catch {
+          /* kapanış anında sessiz */
+        }
       }
       const entered = countAnswers(live.answers).entered;
       const rawCount = RAW_SCORE_FIELDS.filter(field => live.raw[field.key] !== '').length;
@@ -390,6 +433,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   function startNew() {
     setConfirmNew(false);
     clearDraft(actor.id);
+    setDraftSnapshot(null);
     setClient(emptyClientIntake());
     setMethod(null);
     setAnswers(emptyAnswers());
@@ -410,11 +454,48 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
   }
 
   function requestNew() {
+    if (draftSnapshot && isDraftNonEmpty(draftSnapshot)) {
+      // Salt-okunur da olsa kullanıcının kayıtlı bir çalışması var; temiz başlamayı onaylat.
+      setConfirmNew(true);
+      return;
+    }
     if (saved || !hasAnyData) {
       startNew();
       return;
     }
     setConfirmNew(true);
+  }
+
+  /** Landing'in birincil "Yeni MMPI işlemi" eylemi — resumable taslak varsa onay ister. */
+  function requestNewEntry() {
+    if (draftSnapshot && isDraftNonEmpty(draftSnapshot)) {
+      setConfirmNew(true);
+      return;
+    }
+    startNew();
+  }
+
+  /** Landing'den "Kaldığın yerden devam et" — salt-okunur kalıntıyı gerçek state'e açar. */
+  function openDraftSnapshot() {
+    if (!draftSnapshot) return;
+    releaseScanPreviewUrls(scan);
+    submissionKey.current = draftSnapshot.submissionKey;
+    setClient(draftSnapshot.client);
+    setMethod(draftSnapshot.method);
+    setAnswers(decodeAnswers(draftSnapshot.answersEncoded) ?? emptyAnswers());
+    setCurrentItem(draftSnapshot.currentItem);
+    setRaw(draftSnapshot.raw);
+    setScan(draftSnapshot.scan ? deserializeScan(draftSnapshot.scan) : null);
+    // Kayıt sonrası başarı durumu da korunur: resume edilen iş zaten kaydedilmişse
+    // "saved" aynen geri gelsin, "Analizi başlat" tekrar gerekmeyecektir.
+    if (draftSnapshot.savedId && draftSnapshot.savedAt && draftSnapshot.step === 'review') {
+      setSaved({ id: draftSnapshot.savedId, createdAt: draftSnapshot.savedAt });
+    }
+    setRestoredAt(draftSnapshot.updatedAt);
+    setLastSavedAt(draftSnapshot.updatedAt);
+    setDraftSnapshot(null);
+    liveDraftRef.current = null;
+    setStep(draftSnapshot.step !== 'home' ? draftSnapshot.step : 'intake');
   }
 
   function goBack() {
@@ -451,6 +532,11 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
       return;
     }
     setIntakeError('');
+    // Yeni geçerli danışan: varsa eski (salt-okunur) kayıt kalıntısı artık bu işe aittir.
+    if (draftSnapshot) {
+      clearDraft(actor.id);
+      setDraftSnapshot(null);
+    }
     setStep('method');
   }
 
@@ -459,6 +545,10 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     // state'lerde yaşar; kayıt ve hazırlık kontrolleri seçili `method`'a göre
     // dallandığı için eski bir tarama başka yöntemle asla kaydedilemez.
     if (method !== next) setMethod(next);
+    if (draftSnapshot) {
+      clearDraft(actor.id);
+      setDraftSnapshot(null);
+    }
     setStep('entry');
   }
 
@@ -526,6 +616,9 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
     }
   }
 
+  const hasResumableDraft =
+    flowOrigin === 'signin' ? (draftSnapshot != null && isDraftNonEmpty(draftSnapshot)) : (boot != null && isDraftNonEmpty(boot));
+
   const showRestoreBanner = restoredAt !== null && !restoreDismissed;
   const draftStatusText = !online
     ? 'Çevrimdışı — taslak bu cihazda korunuyor'
@@ -545,6 +638,38 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
           otomatik kaydedilir; F5 ve internet kesintisinde kaybolmaz. Optik okuma mevcut OMR
           hattını kullanır; kayıt sonrası T skorları, geçerlik ve profil analizleri aynı ekranda hesaplanır.
         </p>
+
+        {flowOrigin === 'signin' && hasResumableDraft && draftSnapshot && (
+          <div className="ws-restore-card" role="status">
+            <div className="ws-restore-icon">
+              <Icon name="refresh" size={20} />
+            </div>
+            <div className="ws-restore-body">
+              <strong className="ws-restore-title">Devam edilebilecek çalışma bulundu</strong>
+              <p className="ws-restore-desc">
+                Cihazda bu hesaba ait kayıtlı bir çalışma var{' '}
+                (son düzenleme <b>{formatDraftTime(draftSnapshot.updatedAt)}</b>). İsterseniz kaldığınız yerden devam
+                edebilirsiniz — otomatik açılmaz.
+              </p>
+              <div className="ws-restore-meta">
+                <span className="ws-chip">Kayıtlı çalışma</span>
+                <span className="ws-muted">
+                  {draftSnapshot.client.firstName ? `${draftSnapshot.client.firstName} ${draftSnapshot.client.lastName}` : 'Danışan bilgisi'}{' '}
+                  · {draftSnapshot.method ? methodLabel(draftSnapshot.method) : 'Yöntem seçilmedi'}
+                </span>
+              </div>
+            </div>
+            <div className="ws-restore-actions">
+              <button type="button" className="btn-primary btn-sm" onClick={openDraftSnapshot}>
+                Kaldığın yerden devam et
+                <Icon name="arrowRight" size={14} />
+              </button>
+              <button type="button" className="btn-secondary btn-sm" onClick={() => setDraftSnapshot(null)}>
+                Kapat
+              </button>
+            </div>
+          </div>
+        )}
 
         {showRestoreBanner && (
           <div className="ws-restore-card" role="status">
@@ -607,7 +732,7 @@ export function CaseWorkspace({ definition, actor, onSaved }: CaseWorkspaceProps
               </button>
             </>
           ) : (
-            <button type="button" className="btn-primary" onClick={startNew}>
+            <button type="button" className="btn-primary" onClick={requestNewEntry}>
               Yeni MMPI işlemi
               <Icon name="arrowRight" size={16} />
             </button>

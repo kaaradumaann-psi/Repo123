@@ -3,13 +3,26 @@ import type { FormEvent, ReactNode } from 'react';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
+import { navigate } from '../router';
 import { Icon } from './Icon';
 import { SiteFooter } from './SiteFooter';
 
-export function AuthGate({ children }: { children: (user: AuthenticatedUser, onLogout: () => void) => ReactNode }) {
+/**
+ * Bu yüklemede kullanıcı oturumunun nasıl kurulduğunu ayırt eder:
+ *  - 'session' — zaten var olan oturumun hydrate edilmesi (F5 / aynı sekme yenileme).
+ *  - 'signin'  — bu sekmede kullanıcının açıkça giriş yapması.
+ *
+ * Bu ayrım, "yarım kalan iş" davranışını doğru kurmak için gereklidir:
+ * aynı oturumda F5 kaldığın yeri koruyabilir; ama YENİ bir giriş her zaman
+ * Landing'e düşmeli ve persisted taslak otomatik açılmamalıdır.
+ */
+export type AuthFlowOrigin = 'session' | 'signin';
+
+export function AuthGate({ children }: { children: (user: AuthenticatedUser, onLogout: () => void, flowOrigin: AuthFlowOrigin) => ReactNode }) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
+  const [flowOrigin, setFlowOrigin] = useState<AuthFlowOrigin>('session');
 
   useEffect(() => {
     if (!supabase) { setChecking(false); return; }
@@ -25,6 +38,8 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     }
     void hydrate();
     const { data } = onAuthChange((_event, session) => {
+      // Oturum açıkken gelen SIGNED_IN olayı yalnızca F5/hydration/refresh kaynaklıdır;
+      // bu ekrandaki giriş formu kendi handleSignIn üzerinden 'signin' olarak işaretlenir.
       if (!session) { if (alive) setUser(null); return; }
       window.setTimeout(() => {
         void userFromSession(session).then(profile => {
@@ -58,6 +73,12 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
     const profile = await signIn(email, password);
     setUser(profile);
     setError('');
+    // Yeni giriş = her zaman Landing. Olası eski bir rota/iç ekran URL'de kalmışsa
+    // yerine yaz (replace) ki Back/Sıradaki çalışmalar Landing'den başlasın.
+    setFlowOrigin('signin');
+    if (window.location.pathname.replace(/\/+$/, '') !== '') {
+      navigate('/', { replace: true });
+    }
   }
 
   if (!supabaseConfig.configured) return <AuthPageShell><SystemSetupScreen /></AuthPageShell>;
@@ -79,7 +100,7 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
         {children(user, () => {
           void signOut().catch(() => {});
           setUser(null);
-        })}
+        }, flowOrigin)}
       </>
     );
   }

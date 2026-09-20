@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { Icon } from './Icon';
 import { SiteFooter } from './SiteFooter';
+import { navigate } from '../router';
 
 type InfoPageShellProps = {
   /** Üst şeritteki sayfa etiketi (kicker). */
@@ -21,7 +22,15 @@ export function InfoPageShell({ kicker, title, onBack, children }: InfoPageShell
     <div className="info-shell">
       <header className="info-topbar">
         <div className="info-topbar-inner">
-          <a className="info-brand" href="#/" aria-label="MMPI-566 çalışma alanına dön">
+          <a
+            className="info-brand"
+            href="/"
+            aria-label="MMPI-566 çalışma alanına dön"
+            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+              event.preventDefault();
+              navigate('/');
+            }}
+          >
             <span className="info-brand-mark" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
                 <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />

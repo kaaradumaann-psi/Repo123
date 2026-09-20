@@ -2405,6 +2405,16 @@
     gap: 10px;
   }
   .expert-notes-count { font-size: 11.5px; }
+  .expert-notes-readonly {
+    margin: 0 0 8px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.5;
+  }
   .expert-notes-actions { display: flex; align-items: center; gap: 10px; }
   .expert-notes-msg { font-size: 12px; }
   .expert-notes-msg.is-ok { color: #0c8a5c; }

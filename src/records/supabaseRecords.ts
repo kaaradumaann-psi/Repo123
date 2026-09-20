@@ -4,6 +4,7 @@ import type { AuthenticatedUser } from '../auth/authTypes';
 import { requireSupabase } from '../auth/supabaseClient';
 import { isEffectiveItem } from '../results/resultNormalizer';
 import { isValidRecordPayload, todayIsoDate } from '../workspace/caseTypes';
+import { isNetworkError } from '../workspace/draftStorage';
 
 export type SavedAnswerPage = {
   pageId: string;
@@ -371,7 +372,8 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
     .eq('id', id)
     .single();
 
-  if (error || !data) throw new Error('Test detayları alınamadı.');
+  if (error) throw new Error(describeMutationError(error, 'Test detayları alınamadı; lütfen tekrar deneyin.'));
+  if (!data) throw new Error('Kayıt bulunamadı veya bu kayda erişim yetkiniz bulunmuyor.');
 
   const v = data as Record<string, unknown>;
   return {
@@ -395,9 +397,37 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
 export const EXPERT_NOTES_MAX = 4000;
 
 /**
+ * PostgREST/veritabanı hatalarını kullanıcıya dürüst ama hassas detay
+ * sızdırmayan bir kategoriye çevirir. PostgRest hata `code`ları:
+ *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / yetki yok
+ *   - 42703      → tanımsız kolon (şema/migration eksik — örn. expert_notes)
+ *   - PGRST301   → JWT süresi dolmuş / geçersiz (PGRST300/301 serisi)
+ *   - 22P02      → geçersiz UUID gibi tip hatası (çağrı katmanı zaten korur)
+ *   - 23503/23505 → FK / uniqueness bütünlük ihlali
+ * Ağ hataları tarayıcı kaynaklıdır (Failed to fetch vb.).
+ */
+function describeMutationError(cause: unknown, fallback: string): string {
+  if (isNetworkError(cause)) {
+    return 'Bağlantı kurulamadı; veriniz korundu, lütfen tekrar deneyin.';
+  }
+  const code = typeof cause === 'object' && cause !== null ? String((cause as { code?: unknown }).code ?? '') : '';
+  if (code === '42501') return 'Bu işlem için yetkiniz bulunmuyor.';
+  if (code === '42703') return 'Bu özellik için veritabanı şeması güncel değil; sistem yöneticinizle iletişime geçin.';
+  if (/^PGRST30[01]$/.test(code)) return 'Oturumunuzun süresi dolmuş olabilir; lütfen yeniden giriş yapın.';
+  if (code === '22P02') return 'İşlem hedefi geçersiz; sayfayı yenileyip tekrar deneyin.';
+  if (code === '23503' || code === '23505') return 'Kayıt bütünlüğü korunamadı; tekrar deneyin.';
+  return fallback;
+}
+
+/**
  * Kayıt sonrası uzman notunu günceller. RLS gereği yalnızca kaydı oluşturan
  * aktif psikolog yazabilir; not, yazdırma raporuna "Uzman Değerlendirme Notu"
  * bölümü olarak aktarılır. Sunucu tarafı 4000 karakter sınırını da zorlar.
+ *
+ * Not tek kolonda (kayıt başına tek not, ayrı satır yok) tutulduğu için INSERT
+ * yerine UPDATE kullanılır; boş metin gönderilirse not boşaltılmış olur (silme
+ * davranışı). UPSERT gerekmez: satır zaten kayıt oluştururken default '' ile
+ * mevcuttur.
  */
 export async function updateExpertNotes(recordId: string, notes: string): Promise<string> {
   const id = requireUuid(recordId, 'Kayıt kimliği');
@@ -412,12 +442,16 @@ export async function updateExpertNotes(recordId: string, notes: string): Promis
     .eq('id', id)
     .select('id')
     .maybeSingle();
-  if (error || !data) throw new Error('Uzman notu kaydedilemedi. Bu kayıt üzerinde not yazma yetkiniz olmayabilir.');
+  if (error) throw new Error(describeMutationError(error, 'Uzman notu kaydedilemedi; lütfen tekrar deneyin.'));
+  // RLS, erişilemeyen satırı hatasız 0 sonuç olarak döndürür: kayıt ya yok ya
+  // da bu hesabın not yazma yetkisi dışında. Varlığı sızdırmadan ikisini ayırırız.
+  if (!data) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde not yazma yetkiniz bulunmuyor.');
   return updatedAt;
 }
 
 export async function deleteRecord(recordId: string): Promise<void> {
   const id = requireUuid(recordId, 'Kayıt kimliği');
   const { data, error } = await requireSupabase().from('mmpi_records').delete().eq('id', id).select('id').maybeSingle();
-  if (error || !data) throw new Error('Test kaydı silinemedi veya kayıt bulunamadı.');
+  if (error) throw new Error(describeMutationError(error, 'Test kaydı silinemedi; lütfen tekrar deneyin.'));
+  if (!data) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde silme yetkiniz bulunmuyor.');
 }
