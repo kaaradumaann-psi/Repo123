@@ -196,9 +196,18 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
   // Yine de kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur
   // bir anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o
   // kalıntıya dokunulmaz; başlayınca temizlenir (bkz. autosave effect + startNew).
-  const [draftSnapshot, setDraftSnapshot] = useState<CaseDraftV1 | null>(() =>
-    flowOrigin === 'signin' ? loadDraft(actor.id) : null,
-  );
+  // Yeni girişte persisted taslak state'e otomatik yüklenmez (bkz. `boot`). Yine de
+  // kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur bir
+  // anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o kalıntıya
+  // dokunulmaz. `liveDraftRef`, pending-resume (snapshot bekleyen) durumu belirtir: o
+  // durumda beforeunload boş state yazmaz ki henüz geri yüklenmemiş çalışma ezilmesin.
+  const liveDraftRef = useRef<CaseDraftV1 | null>(null);
+  const [draftSnapshot, setDraftSnapshot] = useState<CaseDraftV1 | null>(() => {
+    if (flowOrigin !== 'signin') return null;
+    const snapshot = loadDraft(actor.id);
+    if (snapshot && isDraftNonEmpty(snapshot)) liveDraftRef.current = snapshot;
+    return snapshot;
+  });
 
   const omrReady = scan ? canCreateRecord(sortedPages(scan), definition) : false;
   const quickCounts = countAnswers(answers);
@@ -239,10 +248,11 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
     const timer = window.setTimeout(() => {
       // Yeni girişte kullanıcı henüz bir işe başlamadıysa autosave ÇALIŞMAZ: boş
       // state yazmak, yalnızca okunmak üzere korunan resumable taslağı ezebilir.
-      if (flowOrigin === 'signin' && step === 'home' && !hasAnyData) return;
+      if (flowOrigin === 'signin' && boot == null && step === 'home' && !hasAnyData) return;
       // Kullanıcı gerçekten yeni veri girdiği an salt-okunur kalıntı snapshot'ı bu
       // ekrandaki gerçek iş tarafından devralınır.
       setDraftSnapshot(null);
+      liveDraftRef.current = null;
       const result = saveDraft(actor.id, {
         step,
         client,
@@ -277,21 +287,27 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       const live = liveRef.current;
-      try {
-        saveDraft(actor.id, {
-          step: live.step,
-          client: live.client,
-          method: live.method,
-          answersEncoded: encodeAnswers(live.answers),
-          currentItem: live.currentItem,
-          raw: live.raw,
-          scan: live.scan ? serializeScan(live.scan) : null,
-          submissionKey: submissionKey.current,
-          savedId: live.saved?.id ?? null,
-          savedAt: live.saved?.createdAt ?? null,
-        });
-      } catch {
-        /* kapanış anında sessiz */
+      // Pending-resume koruması: yeni girişte, kullanıcı taslağı henüz geri
+      // yüklemediyse (state boş, snapshot bekliyor) boş state'i yazmak eski
+      // çalışmayı ezerdi. Yalnızca gerçek devralınmış/boş-sahipli iş yazılır.
+      const isPendingResume = flowOrigin === 'signin' && liveDraftRef.current != null;
+      if (!isPendingResume) {
+        try {
+          saveDraft(actor.id, {
+            step: live.step,
+            client: live.client,
+            method: live.method,
+            answersEncoded: encodeAnswers(live.answers),
+            currentItem: live.currentItem,
+            raw: live.raw,
+            scan: live.scan ? serializeScan(live.scan) : null,
+            submissionKey: submissionKey.current,
+            savedId: live.saved?.id ?? null,
+            savedAt: live.saved?.createdAt ?? null,
+          });
+        } catch {
+          /* kapanış anında sessiz */
+        }
       }
       const entered = countAnswers(live.answers).entered;
       const rawCount = RAW_SCORE_FIELDS.filter(field => live.raw[field.key] !== '').length;
@@ -450,6 +466,15 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
     setConfirmNew(true);
   }
 
+  /** Landing'in birincil "Yeni MMPI işlemi" eylemi — resumable taslak varsa onay ister. */
+  function requestNewEntry() {
+    if (draftSnapshot && isDraftNonEmpty(draftSnapshot)) {
+      setConfirmNew(true);
+      return;
+    }
+    startNew();
+  }
+
   /** Landing'den "Kaldığın yerden devam et" — salt-okunur kalıntıyı gerçek state'e açar. */
   function openDraftSnapshot() {
     if (!draftSnapshot) return;
@@ -461,9 +486,15 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
     setCurrentItem(draftSnapshot.currentItem);
     setRaw(draftSnapshot.raw);
     setScan(draftSnapshot.scan ? deserializeScan(draftSnapshot.scan) : null);
+    // Kayıt sonrası başarı durumu da korunur: resume edilen iş zaten kaydedilmişse
+    // "saved" aynen geri gelsin, "Analizi başlat" tekrar gerekmeyecektir.
+    if (draftSnapshot.savedId && draftSnapshot.savedAt && draftSnapshot.step === 'review') {
+      setSaved({ id: draftSnapshot.savedId, createdAt: draftSnapshot.savedAt });
+    }
     setRestoredAt(draftSnapshot.updatedAt);
     setLastSavedAt(draftSnapshot.updatedAt);
     setDraftSnapshot(null);
+    liveDraftRef.current = null;
     setStep(draftSnapshot.step !== 'home' ? draftSnapshot.step : 'intake');
   }
 
@@ -701,7 +732,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
               </button>
             </>
           ) : (
-            <button type="button" className="btn-primary" onClick={startNew}>
+            <button type="button" className="btn-primary" onClick={requestNewEntry}>
               Yeni MMPI işlemi
               <Icon name="arrowRight" size={16} />
             </button>
