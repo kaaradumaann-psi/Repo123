@@ -22,12 +22,20 @@ Supabase CLI ile proje ref'ini `supabase/config.toml` içine yazıp tüm migrati
 ```sh
 supabase login
 supabase link --project-ref YOUR_PROJECT_REF
-supabase db push
+supabase db push          # 6 migration'ın tamamı
+npm run diagnose:supabase # canlı projeyi doğrula (bkz. TROUBLESHOOTING.md)
 ```
 
 Özellikle `20260920000000_record_actions.sql`, not kaydı ve silme akışındaki
 RLS/şema uyumunu düzeltir; bu migration uygulanmadan uygulama kodu tek başına
-canlı Supabase yetkilerini değiştiremez.
+canlı Supabase yetkilerini değiştiremez. `20260920120000_repair_record_actions_and_audit.sql`
+onarım migration'ıdır: eksik `expert_notes` kolonunu, RLS/grant sözleşmesini ve
+`audit_logs.actor NOT NULL` hatasını tek seferde kapatır (idempotent'tır, sağlıklı
+kurulumda hiçbir şeyi değiştirmez).
+
+Migration uygulanmadığında görülen belirtiler ve çözüm sırası `TROUBLESHOOTING.md`
+içinde; `npm run diagnose:supabase` hangi maddenin eksik olduğunu canlı projeden okuyup
+söyler (`--allow-destructive` ile uçtan uca silme akışını da test eder).
 
 Migration'lar şunları oluşturur:
 
@@ -37,8 +45,12 @@ Migration'lar şunları oluşturur:
   notu (en fazla 4000 karakter; rapora aktarılır; Admin tüm görünür kayıtlara,
   aktif psikolog kendi kaydına yazabilir).
 - `audit_logs`: sunucu taraflı denetim izi — `mmpi_records` üzerindeki her
-  insert/update/delete, security-definer trigger ile (aktör, eylem, hedef, zaman)
-  olarak yazılır; istemciden yazılamaz/silinemez, yalnızca Admin okuyabilir.
+  insert/update/delete, security-definer trigger ile (aktör, aktör tipi, eylem, hedef,
+  zaman) olarak yazılır; istemciden yazılamaz/silinemez, yalnızca Admin okuyabilir.
+  `actor` **nullable**'dır: Auth üzerinden gelen CASCADE silmede JWT olmadığı için
+  `auth.uid()` NULL döner ve satır `actor_kind = 'service'` ile yazılır. Trigger ayrıca
+  hataya dayanıklıdır — denetim izi yazılamazsa klinik işlem geri alınmaz, yalnızca
+  `warning` loglanır.
 - Auth kullanıcı trigger'ı.
 - Psikoloğun yalnızca kendi kayıtlarını, Admin'in tüm kayıtları görebildiği RLS.
 - Aktif olmayan kullanıcının kayıt okuyup yazmasını engelleyen RLS fonksiyonları.
@@ -71,7 +83,12 @@ Function, service role anahtarını yalnızca Supabase sunucusunda kullanır:
 ```sh
 supabase functions deploy admin-users
 supabase secrets set ALLOWED_ORIGINS=https://your-app.example.com
+supabase secrets list   # ALLOWED_ORIGINS görünüyor mu?
 ```
+
+`ALLOWED_ORIGINS` boşsa fonksiyon üretimde hiçbir origin'i kabul etmez ve Admin
+panelindeki hesap işlemleri "Kullanıcı hesabı silinemedi. Edge Function bağlantısını
+kontrol edin." hatasıyla düşer (tarayıcı konsolunda CORS/403).
 
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` ve `SUPABASE_ANON_KEY` Supabase
 Edge Functions ortamında otomatik bulunur. Production'da `ALLOWED_ORIGINS` boş

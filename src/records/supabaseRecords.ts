@@ -399,25 +399,46 @@ export const EXPERT_NOTES_MAX = 4000;
 /**
  * PostgREST/veritabanı hatalarını kullanıcıya dürüst ama hassas detay
  * sızdırmayan bir kategoriye çevirir. PostgRest hata `code`ları:
- *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / yetki yok
+ *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / grant eksik
  *   - 42703/PGRST204 → tanımsız kolon (şema/migration eksik — örn. expert_notes)
+ *   - 42P01/PGRST205 → tanımsız tablo (migration hiç uygulanmamış)
  *   - PGRST301       → JWT süresi dolmuş / geçersiz (PGRST300/301 serisi)
  *   - 22P02          → geçersiz UUID gibi tip hatası (çağrı katmanı zaten korur)
+ *   - 23502          → NOT NULL ihlali (örn. audit_logs.actor → onarım migration'ı gerekir)
  *   - 23503/23505/23514 → FK, uniqueness veya check bütünlük ihlali
+ *   - P0001          → trigger içinde `raise exception` (PostgREST bunu 400 yapar)
  * Ağ hataları tarayıcı kaynaklıdır (Failed to fetch vb.).
+ *
+ * Ham hata ayrıca konsola yazılır: ekrandaki mesaj kategoridir, teşhis için
+ * `code`/`message`/`details` gerekir (`npm run diagnose:supabase` aynı bilgiyi
+ * canlı projeden toplar).
  */
-function describeMutationError(cause: unknown, fallback: string): string {
+export function describeMutationError(cause: unknown, fallback: string): string {
   if (isNetworkError(cause)) {
     return 'Bağlantı kurulamadı; veriniz korundu, lütfen tekrar deneyin.';
   }
-  const code = typeof cause === 'object' && cause !== null ? String((cause as { code?: unknown }).code ?? '') : '';
-  if (code === '42501') return 'Bu işlem için yetkiniz bulunmuyor.';
+  const record = typeof cause === 'object' && cause !== null ? (cause as { code?: unknown; message?: unknown; details?: unknown }) : {};
+  const code = String(record.code ?? '');
+  if (code) {
+    try { console.error('[supabase] kayıt işlemi hatası', { code, message: record.message, details: record.details }); } catch { /* konsol yoksa yut */ }
+  }
+  if (code === '42501') return 'Bu işlem için yetkiniz bulunmuyor (veritabanı yetkisi/RLS). Yönetici `supabase db push` ile güncel politikaları uygulamalı.';
   if (code === '42703' || code === 'PGRST204') {
     return 'Kayıt işlemleri için veritabanı güncellemesi gerekiyor; yöneticiniz supabase db push çalıştırmalı.';
   }
+  if (code === '42P01' || code === 'PGRST205') {
+    return 'Veritabanı şeması eksik; yöneticiniz supabase db push çalıştırmalı.';
+  }
   if (/^PGRST30[01]$/.test(code)) return 'Oturumunuzun süresi dolmuş olabilir; lütfen yeniden giriş yapın.';
   if (code === '22P02') return 'İşlem hedefi geçersiz; sayfayı yenileyip tekrar deneyin.';
+  if (code === '23502') {
+    return 'Veritabanı denetim izi (audit_logs) bu işlemi kaydedemedi; yönetici 20260920120000_repair_record_actions_and_audit.sql migration’ını uygulamalı (supabase db push).';
+  }
   if (code === '23503' || code === '23505' || code === '23514') return 'Kayıt bütünlüğü korunamadı; tekrar deneyin.';
+  if (code === 'P0001') {
+    const detail = typeof record.message === 'string' ? record.message.trim() : '';
+    return detail ? `Veritabanı işlemi reddetti: ${detail.slice(0, 160)}` : fallback;
+  }
   return fallback;
 }
 
@@ -447,7 +468,12 @@ export async function updateExpertNotes(recordId: string, notes: string): Promis
     .eq('id', id);
   if (error) throw new Error(describeMutationError(error, 'Uzman notu kaydedilemedi; lütfen tekrar deneyin.'));
   // RLS, yetkisiz UPDATE'i hata vermeden 0 satır olarak filtreleyebilir.
-  if (count !== 1) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde not yazma yetkiniz bulunmuyor.');
+  if (count !== 1) {
+    throw new Error(
+      'Kayıt bulunamadı veya bu kayıt üzerinde not yazma yetkiniz bulunmuyor. ' +
+      'Sunucu hatası yok ama 0 satır etkilendi: canlı RLS politikası güncel değilse yönetici `supabase db push` çalıştırmalı.',
+    );
+  }
   return requestedAt;
 }
 
@@ -460,5 +486,11 @@ export async function deleteRecord(recordId: string): Promise<void> {
   // etkileyip etkilemediğini doğrular.
   const { count, error } = await client.from('mmpi_records').delete({ count: 'exact' }).eq('id', id);
   if (error) throw new Error(describeMutationError(error, 'Test kaydı silinemedi; lütfen tekrar deneyin.'));
-  if (count !== 1) throw new Error('Kayıt bulunamadı veya bu kayıt üzerinde silme yetkiniz bulunmuyor.');
+  if (count !== 1) {
+    throw new Error(
+      'Kayıt bulunamadı veya bu kayıt üzerinde silme yetkiniz bulunmuyor. ' +
+      'Sunucu hatası yok ama 0 satır silindi: kayıt zaten silinmiş ya da canlı RLS politikası bu rol için DELETE’e izin vermiyor. ' +
+      'Yönetici `supabase db push` ile güncel politikaları uygulayıp sayfayı yenilemeli.',
+    );
+  }
 }

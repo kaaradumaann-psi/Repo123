@@ -1,7 +1,10 @@
-project_id = "replace-with-your-project-ref"
+# Canlı proje ref'i (Dashboard → Project Settings → API). `supabase link/db push` bunu kullanır.
+project_id = "lgtahyruhyfozhueawft"
 
 [auth]
 enable_signup = false
 
 [functions.admin-users]
 verify_jwt = true
+# ALLOWED_ORIGINS secret'ı CLI ile verilir: supabase secrets set ALLOWED_ORIGINS=https://uygulama-adresiniz
+# Boş bırakılırsa fonksiyon üretimde hiçbir origin'i kabul etmez (bkz. TROUBLESHOOTING.md).

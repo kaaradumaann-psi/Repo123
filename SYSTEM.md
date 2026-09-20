@@ -152,8 +152,9 @@ Admin'in kayıt ayrıntısında klinik cevap ve profil görmesi mevcut bilinçli
 3. `20260919010000_record_integrity.sql`: profil browser mutation'larını kaldırır; yaş/payload sınırlarını ve aktif psikolog yazma politikasını güçlendirir.
 4. `20260919020000_record_immutability.sql`: clinical intake/raw payload değişmezliği ve yeni payload şekli trigger'ı.
 5. `20260920000000_record_actions.sql`: Admin not update'i ile Admin/owner delete action surface'ini açar; `expert_notes <= 4000` check'i ve son RLS sözleşmesini garanti eder.
+6. `20260920120000_repair_record_actions_and_audit.sql`: **onarım** migration'ı. Yarım kalmış canlı kurulumu tek `db push` ile çalışır hale getirir: eksik `expert_notes`/`notes_updated_at` kolonları, `is_admin()`/`is_psychologist()`/`is_active_user()` yardımcıları, SELECT/INSERT/UPDATE/DELETE politikaları, `authenticated` grant'ları ve `audit_logs.actor_kind` yeniden yazılır; ayrıca `audit_logs.actor` NOT NULL kısıtı kaldırılır. İdempotent'tir; sağlıklı kurulumda veri değiştirmez.
 
-Klinik kayıt alanlarını koruyan trigger, not güncellemesini mümkün kılarken danışan alanları, `created_by`, idempotency key, tarih ve raw JSON'un değiştirilmesini reddeder. Audit trigger'ı insert/update/delete olayını actor/action/target/time olarak kaydeder; audit tablosuna browser yazma/silme yetkisi verilmez.
+Klinik kayıt alanlarını koruyan trigger, not güncellemesini mümkün kılarken danışan alanları, `created_by`, idempotency key, tarih ve raw JSON'un değiştirilmesini reddeder. Audit trigger'ı insert/update/delete olayını actor/actor_kind/action/target/time olarak kaydeder; audit tablosuna browser yazma/silme yetkisi verilmez. `actor` nullable'dır ve trigger `exception when others` ile sarılıdır: Auth üzerinden gelen CASCADE silmede JWT olmadığı için `auth.uid()` NULL döner; bu durumda satır `actor_kind = 'service'` ile yazılır, denetim izi yazılamazsa klinik işlem geri alınmaz (yalnızca `warning`). Önceki NOT NULL sözleşmesi, Edge Function ile psikolog silmeyi veritabanı tarafında imkânsız hale getiriyordu.
 
 ### 4.2 `profiles`
 
@@ -169,7 +170,9 @@ Klinik kayıt alanlarını koruyan trigger, not güncellemesini mümkün kılark
 
 İstemci `TextEncoder` ile 8 MiB payload sınırı uygular; DB'de yeni write'lar için JSONB array/shape, yaş, tarih, payload byte ve immutability kontrolleri bulunur. Legacy kayıtlar okunabilir; parser legacy/current biçimleri birbirine karıştırmaz ve eksik/ambiguous OMR maddesini sessizce boş saymaz.
 
-`updateExpertNotes()` ve `deleteRecord()` mutation yanıt gövdesi istemeden `count: 'exact'` kullanır. Hata yok ama RLS satırı etkilememişse `count !== 1` başarısız sayılır; UI sahte başarı göstermez. Bu, önceki `UPDATE/DELETE + ?select=id` kaynaklı 400 akışının yerine geçen bilinçli düzeltmedir. Canlı RLS ve PostgREST davranışı bu sandbox'ta **DOĞRULANMADI**.
+`updateExpertNotes()` ve `deleteRecord()` mutation yanıt gövdesi istemeden `count: 'exact'` kullanır. Hata yok ama RLS satırı etkilememişse `count !== 1` başarısız sayılır; UI sahte başarı göstermez. Bu, önceki `UPDATE/DELETE + ?select=id` kaynaklı 400 akışının yerine geçen bilinçli düzeltmedir.
+
+`describeMutationError()` PostgREST `code` değerini kullanıcı mesajına çevirir ve ham hatayı (`code`/`message`/`details`) konsola yazar: `42703`/`PGRST204` → "supabase db push çalıştırmalı", `42P01` → şema eksik, `42501` → yetki/RLS, `23502` → `audit_logs` onarım migration'ı, `P0001` → trigger mesajı aynen gösterilir, `PGRST301` → oturum süresi. Canlı RLS ve PostgREST davranışı bu sandbox'ta **DOĞRULANMADI**; canlı doğrulama `npm run diagnose:supabase -- --allow-destructive` ile yapılır (bkz. `TROUBLESHOOTING.md`).
 
 ### 4.4 Admin Edge Function
 
@@ -181,7 +184,9 @@ Klinik kayıt alanlarını koruyan trigger, not güncellemesini mümkün kılark
 - Request body'yi 32 KiB ile sınırlar; email/ad/soyad/parola/UUID/role dışı action'ları reddeder.
 - Kullanıcı oluştururken Auth → profile kontrolü yapar; profile başarısızsa Auth user rollback edilir.
 - Aktiflik değişikliğinde Auth ban durumu ile profile active yazımını eşler, ikinci yazım başarısızsa best-effort rollback dener.
-- Silmede Auth user önce silinir; FK cascade uygulama verilerini temizler; istemciye iç hata ayrıntısı sızdırılmaz.
+- Silmede Auth user önce silinir; FK cascade uygulama verilerini temizler. Auth silmesi veritabanı kaynaklı bir hatayla düşerse (ör. `23502`/trigger/RLS metni) fonksiyon **500** ve "veritabanı şeması güncel değil, `supabase db push`" mesajı döner; diğer hatalar 400 kalır. Ham veritabanı ayrıntısı istemciye sızdırılmaz.
+
+İstemci tarafında `src/auth/adminApi.ts → explainEdgeFunctionError()` bu yanıtı gerçek nedene çevirir: 403 `Origin not allowed` → `supabase secrets set ALLOWED_ORIGINS=...`, 403 `Admin role required` → rol/aktiflik, 401 → oturum yenileme, 404 → hedef psikolog yok, 500 → `db push`, `FunctionsFetchError` → CORS/ağ. Önceki sürüm tümünü tek cümlede ("Edge Function bağlantısını kontrol edin") ezdiği için teşhis edilemiyordu.
 
 Service-role secret yalnız Supabase Function secret ortamında bulunmalıdır. `VITE_*` veya tracked HTML içine konmaz.
 
@@ -375,12 +380,13 @@ Build çıktıları:
 ### Supabase
 
 1. `supabase link --project-ref PROJECT_REF`.
-2. `supabase db push`; beş migration'ın sırasıyla uygulandığını doğrulayın.
+2. `supabase db push`; **altı** migration'ın sırasıyla uygulandığını doğrulayın (`npm run diagnose:supabase` migration geçmişini canlıdan okur).
 3. Dashboard'da public email signup'ı kapatın.
 4. İlk Auth user'ı Dashboard'dan oluşturup SQL ile bir kez `ADMIN` yapın.
 5. `supabase functions deploy admin-users`.
 6. `supabase secrets set ALLOWED_ORIGINS=https://app.example` (birden çok origin virgülle ayrılır). Service-role secret Supabase tarafından yönetilir; `.env`/frontend'e kopyalanmaz.
-7. Gerçek project'te RLS, Edge Function, trigger ve delete cascade testlerini iki rol ile uygulayın; sonuçları ayrı operasyon kaydına yazın.
+7. Gerçek project'te RLS, Edge Function, trigger ve delete cascade testlerini iki rol ile uygulayın; sonuçları ayrı operasyon kaydına yazın. `npm run diagnose:supabase -- --allow-destructive` bu testin büyük bölümünü otomatik yapar (geçici diagnostik kullanıcısı oluşturur ve siler).
+8. Beklenmeyen bir `400` / "silme yetkiniz bulunmuyor" / "Kullanıcı hesabı silinemedi" durumunda `TROUBLESHOOTING.md` içindeki kök neden tablosunu ve hata kodu eşlemesini kullanın.
 
 ---
 
@@ -417,7 +423,8 @@ Bu liste “PASS” yerine gerçek kanıt gerektirir:
 
 ### Backend/hosting
 
-- [ ] `supabase db push` canlı project'te beş migration ile tamamlandı.
+- [ ] `supabase db push` canlı project'te altı migration ile tamamlandı (20260920120000 onarım migration'ı dahil).
+- [ ] `npm run diagnose:supabase -- --allow-destructive` canlı projede 0 sorun döndürdü.
 - [ ] İki rol ile canlı RLS/IDOR/note/delete/audit testleri.
 - [ ] Edge Function deploy, secret ve exact `ALLOWED_ORIGINS`.
 - [ ] Public signup kapalı, ilk Admin bootstrap tamam.

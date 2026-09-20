@@ -191,6 +191,18 @@ Deno.serve(async request => {
       const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(userId);
       if (deleteAuthError) {
         console.error('Admin user deletion failed', deleteAuthError);
+        // Auth silmesi, mmpi_records → audit_logs AFTER DELETE trigger'ını service-role
+        // bağlamında (auth.uid() = NULL) çalıştırır. 20260920120000 öncesi şemada
+        // audit_logs.actor NOT NULL olduğu için bu, tüm silme işlemini geri alıyordu ve
+        // arayüz yalnızca "Kullanıcı hesabı silinemedi" görüyordu. Nedeni ayırt edilebilir
+        // biçimde döndür: 500 = veritabanı tarafı, 400 = Auth/istemci tarafı.
+        const detail = String((deleteAuthError as { message?: unknown }).message ?? deleteAuthError);
+        const databaseSide = /23502|null value|audit_logs|trigger|row-level security|42501|42703|42P01/i.test(detail);
+        if (databaseSide) {
+          return response(request, 500, {
+            error: 'Kullanıcı silinemedi: veritabanı şeması güncel değil. Yönetici `supabase db push` çalıştırmalı (audit_logs.actor NOT NULL onarımı gerekir).',
+          });
+        }
         return response(request, 400, { error: 'Kullanıcı silinirken hata oluştu' });
       }
       return response(request, 200, { ok: true });
