@@ -11,7 +11,7 @@ import type { GrayImage, Point } from '../omr/omrTypes';
  * perspective correction. Here we extract the real convex quadrilateral so the existing
  * `fitHomography` / `warpPerspective` pair can flatten the page.
  *
- * Why brightness alone is not enough (measured on the real photos in `docs/TestGorselleri`):
+ * Why brightness alone is not enough (measured on real desk photos during development):
  * the sheets are photographed on a *white desk*. A pure "largest bright blob" — which is what the
  * two existing bounding-box detectors do — merges paper and desk into one component and returns
  * the whole frame. So the mask here is grown under two simultaneous constraints:

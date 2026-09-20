@@ -87,8 +87,9 @@ export function useRoute(): AppRoute {
  * clicks and uses the History API instead of full-page navigation. Every
  * <a> in the app gets SPA behaviour without modifying individual components.
  *
- * Skipped: hash anchors, mailto / tel links, target=_blank, cross-origin,
- * /api/* paths, and clicks with modifier keys.
+ * Skipped: hash anchors, mailto / tel / blob / data links, download
+ * attributes, target=_blank, cross-origin, /api/* paths, and clicks with
+ * modifier keys.
  */
 export function installLinkInterceptor(): void {
   document.addEventListener('click', (e) => {
@@ -101,6 +102,8 @@ export function installLinkInterceptor(): void {
     const href = anchor.getAttribute('href');
     if (!href) return;
     if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    if (href.startsWith('blob:') || href.startsWith('data:')) return;
+    if (anchor.hasAttribute('download')) return;
     if (anchor.target === '_blank') return;
     if (anchor.origin !== window.location.origin) return;
     if (href.startsWith('/api/')) return;
