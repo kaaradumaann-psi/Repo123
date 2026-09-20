@@ -141,49 +141,99 @@ Admin'in kayıt ayrıntısında klinik cevap ve profil görmesi mevcut bilinçli
 
 ---
 
-## 4. Supabase veri modeli ve güvenlik
+## 4. Supabase veri modeli, mimarisi ve güvenlik sözleşmesi
 
-### 4.1 Migration sırası
+### 4.1 Supabase mimarisi ve migration sistemi
 
-`supabase/migrations/` dosyaları zaman sıralı uygulanmalıdır:
+Uygulamanın backend veri katmanı Supabase (PostgreSQL, Supabase Auth, PostgREST ve Deno Edge Functions) üzerinde çalışır. Depo (`supabase/migrations/`), veritabanı şemasının tek gerçek kaynağıdır (source of truth).
 
-1. `20260915000000_initial_schema.sql`: `profiles`, `mmpi_records`, roller, Auth trigger'ı, temel RLS ve security-definer yardımcıları.
-2. `20260919000000_expert_notes_and_audit.sql`: `expert_notes`, `notes_updated_at`, Admin okuyabilen `audit_logs`, kayıt değişiklik trigger'ı.
-3. `20260919010000_record_integrity.sql`: profil browser mutation'larını kaldırır; yaş/payload sınırlarını ve aktif psikolog yazma politikasını güçlendirir.
-4. `20260919020000_record_immutability.sql`: clinical intake/raw payload değişmezliği ve yeni payload şekli trigger'ı.
-5. `20260920000000_record_actions.sql`: Admin not update'i ile Admin/owner delete action surface'ini açar; `expert_notes <= 4000` check'i ve son RLS sözleşmesini garanti eder.
+Migration'lar zaman damgalı beş SQL dosyasından oluşur ve kesin sıralı uygulanmalıdır:
 
-Klinik kayıt alanlarını koruyan trigger, not güncellemesini mümkün kılarken danışan alanları, `created_by`, idempotency key, tarih ve raw JSON'un değiştirilmesini reddeder. Audit trigger'ı insert/update/delete olayını actor/action/target/time olarak kaydeder; audit tablosuna browser yazma/silme yetkisi verilmez.
+1. `20260915000000_initial_schema.sql`: Temel `profiles` ve `mmpi_records` tabloları, `user_role` enum'u (`ADMIN`, `PSYCHOLOG`), Auth trigger'ı (`handle_new_auth_user`), temel RLS politikaları ve security-definer yardımcı fonksiyonları (`is_admin`, `is_psychologist`, `is_active_user`).
+2. `20260919000000_expert_notes_and_audit.sql`: `mmpi_records` tablosuna `expert_notes` (≤ 4000 karakter) ve `notes_updated_at` kolonlarının eklenmesi; sunucu taraflı `audit_logs` denetim tablosu ve her insert/update/delete işlemini kaydeden `log_mmpi_record_change()` security-definer trigger'ı.
+3. `20260919010000_record_integrity.sql`: İstemci tarafından doğrudan `profiles` mutasyonlarının engellenmesi (revoke insert/update/delete); aktif psikolog kontrolünün güncellenmesi; `mmpi_records` için yaş (`16-120`) ve ham veri yükü boyutu (`<= 8 MiB`) constraint'leri.
+4. `20260919020000_record_immutability.sql`: Klinik kayıt alanlarının (`client_*`, `gender`, `age`, `raw_omr_answers`, `created_by`, `created_at` vb.) oluşturulduktan sonra değiştirilmesini engelleyen `protect_mmpi_record_fields()` trigger'ı ve yeni kayıt yükünü doğrulayan `validate_mmpi_record_intake()` trigger'ı.
+5. `20260920000000_record_actions.sql`: Admin'in tüm kayıtlara uzman notu ekleyebilmesini, aktif psikoloğun ise kendi kaydına not ekleyebilmesini sağlayan güncel `mmpi_records_update` RLS politikası; Admin'in her kaydı, psikoloğun yalnızca kendi kaydını silebilmesini sağlayan `mmpi_records_delete` politikası; eksik kurulumlar için `expert_notes` kolonlarının güvenli idempotency kontrolü.
 
-### 4.2 `profiles`
+**Öncelik ve senkronizasyon kuralı:** Elle ad-hoc SQL çalıştırmak yerine `supabase db push` ile migration geçmişinin uygulanması esastır. Öncelik sırası:
+`migration history → schema → RLS → functions → secrets`.
 
-`profiles.id` `auth.users(id)` foreign key'idir (`on delete cascade`); parola bu tabloda değildir. Auth kullanıcı trigger'ı yeni kullanıcıyı varsayılan düşük yetkiyle `PSYCHOLOG` profile ekler. İlk Admin, public signup kapalıyken Dashboard/SQL ile bir kez atanır. Browser'dan profile insert/update/delete yoktur; hesap yaşam döngüsü Edge Function'dadır.
+### 4.2 Veritabanı şeması ve kısıtlamaları
 
-### 4.3 `mmpi_records`
+- **`public.profiles`**:
+  * `id uuid primary key references auth.users(id) on delete cascade`
+  * `email text`, `first_name text not null`, `last_name text not null`
+  * `role public.user_role not null default 'PSYCHOLOG'`
+  * `active boolean not null default true`
+  * `created_at timestamptz`, `updated_at timestamptz`
+  * İsim uzunluk constraint'i (2–80 karakter). Browser'dan INSERT/UPDATE/DELETE revoked; mutasyonlar yalnızca servis rolü kullanan Edge Function tarafından yapılır.
 
-İlişkisel alanlar: UUID `id`, unique UUID `idempotency_key`, danışan adı/soyadı, dört izinli gender değeri, yaş, occupation, education, application date, requested_by, `raw_omr_answers` JSONB array, `created_by`, `created_at`, ayrıca uzman notu ve not zamanı. İstemci payload'ı kayıt meta/quick/raw/OMR şekillerinden biri olur:
+- **`public.mmpi_records`**:
+  * `id uuid primary key default gen_random_uuid()`
+  * `idempotency_key uuid not null unique`
+  * `client_first_name text not null`, `client_last_name text not null` (1–80 karakter)
+  * `gender text not null check (gender in ('Kadın', 'Erkek', 'Belirtmek istemiyor', 'Diğer'))`
+  * `age integer not null check (age between 16 and 120)`
+  * `occupation text not null`, `education text not null`
+  * `application_date date not null` (Türkiye yerel saatine göre geleceğe kaçamaz)
+  * `requested_by text not null`
+  * `raw_omr_answers jsonb not null check (jsonb_typeof(raw_omr_answers) = 'array')`
+  * `expert_notes text not null default '' check (char_length(expert_notes) <= 4000)`
+  * `notes_updated_at timestamptz null`
+  * `created_by uuid not null references public.profiles(id) on delete cascade`
+  * `created_at timestamptz not null default timezone('utc', now())`
 
-- `[case-meta, quick-entry]` ve tam 566 cevap;
-- `[case-meta, raw-scores]` ve tanımlı ölçekler;
-- `[case-meta, dört SavedAnswerPage]`, distinct sayfa numarası ve aynı batch.
+- **`public.audit_logs`**:
+  * `id uuid primary key default gen_random_uuid()`
+  * `actor uuid null` (işlemi yapan `auth.uid()`)
+  * `action text not null check (action in ('record_insert', 'record_update', 'record_delete'))`
+  * `target_table text not null` (`mmpi_records`)
+  * `target_id uuid null`
+  * `created_at timestamptz not null default timezone('utc', now())`
+  * İstemciden INSERT/UPDATE/DELETE revoked; yalnızca Admin SELECT yetkisine sahiptir.
 
-İstemci `TextEncoder` ile 8 MiB payload sınırı uygular; DB'de yeni write'lar için JSONB array/shape, yaş, tarih, payload byte ve immutability kontrolleri bulunur. Legacy kayıtlar okunabilir; parser legacy/current biçimleri birbirine karıştırmaz ve eksik/ambiguous OMR maddesini sessizce boş saymaz.
+### 4.3 RLS (Row Level Security) ve rol matrisi
 
-`updateExpertNotes()` ve `deleteRecord()` mutation yanıt gövdesi istemeden `count: 'exact'` kullanır. Hata yok ama RLS satırı etkilememişse `count !== 1` başarısız sayılır; UI sahte başarı göstermez. Bu, önceki `UPDATE/DELETE + ?select=id` kaynaklı 400 akışının yerine geçen bilinçli düzeltmedir. Canlı RLS ve PostgREST davranışı bu sandbox'ta **DOĞRULANMADI**.
+RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçbir koşulda `disable row level security` veya `using (true)` uygulanmaz.
 
-### 4.4 Admin Edge Function
+| Tablo / Eylem | Anonim | Psikolog (`PSYCHOLOG`, aktif) | Yönetici (`ADMIN`, aktif) |
+| --- | --- | --- | --- |
+| `profiles` SELECT | Engelli | Yalnız kendi profili (`auth.uid() = id`) | Tüm profiller |
+| `profiles` INSERT/UPDATE/DELETE | Engelli | Engelli (Edge Function) | Engelli (Edge Function) |
+| `mmpi_records` SELECT | Engelli | Yalnız kendi oluşturduğu kayıtlar (`created_by = auth.uid()`) | Tüm kayıtlar |
+| `mmpi_records` INSERT | Engelli | Yalnız kendi adına (`created_by = auth.uid()`) | Engelli (klinik kayıt açamaz) |
+| `mmpi_records` UPDATE | Engelli | Yalnız kendi kaydında uzman notu (`expert_notes`, `notes_updated_at`) | Tüm kayıtlarda uzman notu |
+| `mmpi_records` DELETE | Engelli | Yalnız kendi oluşturduğu kaydı silebilir | Tüm kayıtları silebilir |
+| `audit_logs` SELECT | Engelli | Engelli | Tüm loglar (`is_admin()`) |
+| `audit_logs` YAZMA | Engelli | Yalnız trigger (`security definer`) | Yalnız trigger (`security definer`) |
 
-`supabase/functions/admin-users/index.ts`:
+### 4.4 Admin Edge Function (`admin-users`)
 
-- `ALLOWED_ORIGINS`'i normalize eder; production'da boş allowlist yalnız localhost'a izin verir, yayın origin'i açıkça eklenmelidir.
-- `OPTIONS`/POST method ve CORS varyantını kontrol eder.
-- Bearer access token'ı service-role server client ile doğrular; çağıranın aktif Admin profile'ını arar.
-- Request body'yi 32 KiB ile sınırlar; email/ad/soyad/parola/UUID/role dışı action'ları reddeder.
-- Kullanıcı oluştururken Auth → profile kontrolü yapar; profile başarısızsa Auth user rollback edilir.
-- Aktiflik değişikliğinde Auth ban durumu ile profile active yazımını eşler, ikinci yazım başarısızsa best-effort rollback dener.
-- Silmede Auth user önce silinir; FK cascade uygulama verilerini temizler; istemciye iç hata ayrıntısı sızdırılmaz.
+- **Konum:** `supabase/functions/admin-users/index.ts`
+- **Yetki:** `SUPABASE_SERVICE_ROLE_KEY` yalnızca bu sunucu tarafı çalışma zamanında kullanılır.
+- **Doğrulama:**
+  1. Gelen isteğin `Authorization: Bearer <token>` başlığı çözülür ve Supabase Auth üzerinden doğrulanır.
+  2. Çağıran kullanıcının `profiles` tablosundaki kaydı sorgulanır; `role === 'ADMIN'` ve `active === true` değilse işlem `403 Forbidden` ile reddedilir.
+- **Desteklenen Eylemler:**
+  * `create`: Yeni psikolog hesabı oluşturur (Auth `createUser` → `profiles` senkronizasyonu; profil oluşturulamazsa Auth kullanıcısı rollback edilir).
+  * `set_active`: Psikolog hesabını aktif veya pasif yapar (Auth `ban_duration` ve profil `active` senkronizasyonu).
+  * `delete`: Psikolog hesabını siler. Veri bütünlüğü için **önce Auth kullanıcısı silinir** (`adminClient.auth.admin.deleteUser(userId)`). `profiles` ve `mmpi_records` üzerindeki `ON DELETE CASCADE` ilişkisi sayesinde ilişkili tüm profil ve test kayıtları veritabanı tarafından temizlenir.
+- **Hata Yönetimi:** Tüm reddedilmeler yapılandırılmış `{ error: string }` JSON yanıtı döner; istemciye hassas yığın izi sızdırılmaz.
 
-Service-role secret yalnız Supabase Function secret ortamında bulunmalıdır. `VITE_*` veya tracked HTML içine konmaz.
+### 4.5 Secrets, CORS ve `ALLOWED_ORIGINS` güvenlik sözleşmesi
+
+- Edge Function, tarayıcıdan gelen `Origin` başlığını sıkı bir kontrolden geçirir (`isAllowedOrigin`).
+- **`ALLOWED_ORIGINS` secret'ı:** Production ortamında uygulamanın barındırıldığı gerçek alan adları (örn. `https://app.example.com`, `http://localhost:5173`) Supabase Dashboard veya CLI üzerinden secret olarak tanımlanmalıdır:
+  `supabase secrets set ALLOWED_ORIGINS="https://alanadiniz.com,http://localhost:5173"`
+- **Boş allowlist davranışı:** `ALLOWED_ORIGINS` tanımlanmamışsa güvenlik gereği `*` (wildcard) uygulanmaz; yalnızca yerel `localhost` ve `127.0.0.1` origin'lerine izin verilir. Canlı ortamda secret ayarlanmadığında harici origin istekleri `403 Forbidden` veya CORS preflight engeliyle karşılaşır.
+- Secret değerleri asla koda, commit'e, `.env.example` dosyasına veya frontend bundle'ına yazılmaz.
+
+### 4.6 Kayıt yaşam döngüsü, değişmezlik ve uzman notu
+
+1. **Oluşturma (Insert):** Aktif psikolog tarafından istemcide tamamlanan test `upsertRecord` ile `mmpi_records` tablosuna yazılır. İdempotency anahtarı ile mükerrer gönderim önlenir.
+2. **Değişmezlik (Immutability):** `protect_mmpi_record_fields()` trigger'ı sayesinde klinik alanlar (`client_*`, `gender`, `age`, `raw_omr_answers`, `created_by`, `created_at` vb.) oluşturulduktan sonra asla güncellenemez.
+3. **Uzman Değerlendirme Notu:** Kayıt sonrasında `updateExpertNotes()` ile güncellenir. Yalnızca `expert_notes` ve `notes_updated_at` kolonları mutasyona uğrar. Metin istemcide ve veritabanı check constraint'i ile **en fazla 4000 karakter** olarak sınırlandırılır. Bu not yazdırma raporunda (`MMPIPrintReport`) "Uzman Değerlendirme Notu" başlığı altında rapora aktarılır.
+4. **Silme (Delete):** Admin her kaydı, psikolog ise kendi kaydını kalıcı olarak silebilir. `count: 'exact'` doğrulaması kullanılır. Silme işlemi sonrasında `audit_logs` tablosuna `record_delete` kaydı işlenir. Soft-delete yoktur.
 
 ---
 
@@ -351,36 +401,76 @@ CI (`.github/workflows/ci.yml`) `npm ci`, typecheck, test, PDF verify, build ve 
 
 ---
 
-## 10. Deployment runbook
+---
 
-### Frontend
+## 10. Production Deployment (Üretim Dağıtım Kılavuzu)
 
-1. Node.js **22+** kullanın.
-2. `npm ci`.
-3. `.env` içine yalnız frontend-safe değerleri koyun:
-   ```sh
-   VITE_SUPABASE_URL=https://PROJECT_REF.supabase.co
-   VITE_SUPABASE_ANON_KEY=PUBLIC_ANON_OR_PUBLISHABLE_KEY
+Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend barındırma ortamlarının uçtan uca senkronizasyonu için gerçek operasyonel adımları tanımlar.
+
+### Mantıksal ve Operasyonel Dağıtım Akışı (10 Adım)
+
+1. **Pull latest code:**
+   ```bash
+   git checkout arena/01a0bf13-repo123
+   git pull origin arena/01a0bf13-repo123
    ```
-4. `npm run build` çalıştırın.
-5. `dist/index.html` + `dist/_redirects` ve statik asset çıktısını SPA fallback destekleyen hosting'e yayınlayın. `optik-form.html` tracked/self-contained teslimattır; onu tek başına farklı bir path altında yayınlıyorsanız `/islem` gibi direct URL'ler için host rewrite kuralını ayrıca sağlayın.
-6. Yayın origin'ini Supabase Edge Function `ALLOWED_ORIGINS` içine ekleyin. Kamera için HTTPS sağlayın.
+   Çalışma ağacının temiz olduğunu (`git status`) ve conflict bulunmadığını doğrulayın.
 
-Build çıktıları:
+2. **Verify migrations:**
+   `supabase/migrations/` altındaki 5 migration dosyasının varlığını ve sırasını kontrol edin:
+   - `20260915000000_initial_schema.sql`
+   - `20260919000000_expert_notes_and_audit.sql`
+   - `20260919010000_record_integrity.sql`
+   - `20260919020000_record_immutability.sql`
+   - `20260920000000_record_actions.sql`
 
-- `dist/index.html`: inline React/CSS/pdf worker ve build-time env ile standalone HTML;
-- `dist/_redirects`: Cloudflare Pages fallback;
-- `optik-form.html`: aynı self-contained HTML'nin tracked kopyası.
+3. **Apply migrations:**
+   Supabase CLI ile projeye bağlanın ve tüm bekleyen migration'ları uygulayın:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref lgtahyruhyfozhueawft
+   npx supabase db push
+   ```
+   *(CLI kullanılamıyorsa, `supabase/migrations/` dosyalarındaki SQL ifadeleri Supabase Dashboard SQL Editor üzerinden sırayla çalıştırılabilir).*
 
-### Supabase
+4. **Deploy Edge Functions:**
+   Kullanıcı oluşturma, aktiflik yönetimi ve kullanıcı silme işlemlerini yürüten güncel Edge Function'ı deploy edin:
+   ```bash
+   npx supabase functions deploy admin-users
+   ```
 
-1. `supabase link --project-ref PROJECT_REF`.
-2. `supabase db push`; beş migration'ın sırasıyla uygulandığını doğrulayın.
-3. Dashboard'da public email signup'ı kapatın.
-4. İlk Auth user'ı Dashboard'dan oluşturup SQL ile bir kez `ADMIN` yapın.
-5. `supabase functions deploy admin-users`.
-6. `supabase secrets set ALLOWED_ORIGINS=https://app.example` (birden çok origin virgülle ayrılır). Service-role secret Supabase tarafından yönetilir; `.env`/frontend'e kopyalanmaz.
-7. Gerçek project'te RLS, Edge Function, trigger ve delete cascade testlerini iki rol ile uygulayın; sonuçları ayrı operasyon kaydına yazın.
+5. **Verify secrets & CORS:**
+   Uygulamanın çalıştığı origin'lerin (production domain ve localhost) Edge Function tarafından kabul edilmesi için `ALLOWED_ORIGINS` secret'ını ayarlayın:
+   ```bash
+   npx supabase secrets set ALLOWED_ORIGINS="https://app.example.com,http://localhost:5173"
+   ```
+   `SUPABASE_URL` ve `SUPABASE_SERVICE_ROLE_KEY` Supabase çalışma zamanı tarafından otomatik sağlanır.
+
+6. **Build frontend:**
+   ```bash
+   npm ci
+   npm run build
+   ```
+   Bu komut strict typecheck yapar, `dist/index.html` (tek dosya SPA), `dist/_redirects` (Cloudflare Pages fallback) ve kök dizindeki tracked `optik-form.html` dosyasını derler.
+
+7. **Deploy frontend:**
+   `dist/index.html` ve `dist/_redirects` çıktısını barındırma sağlayıcınıza (Cloudflare Pages, Vercel, Netlify, S3/CloudFront) yükleyin. Pathname routing için SPA rewrite kuralının aktif olduğunu doğrulayın.
+
+8. **Run smoke tests:**
+   Yayınlanan URL'ye tarayıcıdan gidin:
+   - `/` (temiz landing) yüklenmeli,
+   - Public rotalar (`/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar`) oturum açmadan açılmalı,
+   - Bilinmeyen rota (`/rastgele`) 404 sayfasına düşmeli.
+
+9. **Verify auth & RLS:**
+   - İlk Admin kullanıcısının aktif ve ADMIN rolünde olduğunu doğrulayın.
+   - Admin olarak giriş yapın: `/yonetim` açılmalı.
+   - Psikolog hesabı oluşturun ve psikolog olarak giriş yapın: `/kayitlar` açılmalı, `/yonetim`e erişim engellenmeli.
+
+10. **Verify critical CRUD:**
+    - **Psychologist:** Test oluştur → Kaydet → Test detayında Uzman Notu gir ve kaydet → Notun kalıcı olduğunu doğrula (F5) → Raporu yazdır/PDF incele → Kendi kaydını sil.
+    - **Admin:** Tüm kayıtlar listesinde testi görüntüle → Uzman notu ekle/düzenle → Kaydı sil → Kullanıcılar sekmesinden psikolog hesabını sil (`delete` action).
+    - **Audit Log:** Silme ve güncelleme işlemlerinin `audit_logs` tablosuna `record_delete`, `record_update` olarak işlendiğini SQL ile teyit edin.
 
 ---
 
@@ -445,18 +535,29 @@ Bu turda güvenli silme kapsamı özellikle dar tutuldu:
 - Unused/dead/debug taramasında silme için kesin kanıt bulunmayan hiçbir source, migration, fixture, config veya evidence dosyası kaldırılmadı.
 - Bunun yerine doğrulanmış stale route/çıktı açıklamaları README, FAQ, KVKK, route comments ve tarihsel rapor başlıklarında düzeltildi; tarihsel raporların geçmiş test sayıları ve branch bağlamı sessizce değiştirilmedi.
 
-## 14. Final audit evidence log
+## 14. Final audit evidence log ve production senkronizasyon durumu
 
-Bu bölüm, çalışma tamamlanırken komutların gerçek çıktılarıyla güncellenecek. Komut çalıştırılmadan PASS yazılmaz.
+### 14.1 Canlı Supabase ve Repository Fark Analizi (Production vs Repository Difference)
 
-- Branch/HEAD: `arena/01a0beda-repo123` / `22ed943` (audit commit; başlangıç snapshot'ı `32c7acb`).
-- PR: `#35`, target `main`, state başlangıçta OPEN; final merge sonucu ayrıca doğrulanmadan “merged” denmez.
-- Local: `npm run typecheck` başarılı.
-- Local: `npm test` **239/239** başarılı.
-- Local: `npm run verify:pdf`: **DOĞRULANDI** — 4 A4 sayfa, 566 madde, 1.132 bubble; ortak set kodu `1F49F315B2636DCB4C18C2E4`.
-- Local: `npm run build`: **DOĞRULANDI** — `dist/index.html`, `dist/_redirects`, `optik-form.html`; standalone build/PDF/footer/CSP testleri suite içinde başarılı.
-- Local: `git diff --check`: **DOĞRULANDI**.
-- Local: `npm audit --audit-level=high`: **DOĞRULANDI** — 0 vulnerability.
-- Local Vite HTTP smoke: **DOĞRULANDI** — `/`, `/islem`, `/form`, `/kayitlar`, `/yonetim`, `/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar`, `/onizleme` ve bilinmeyen path'ler HTTP 200; `dist/_redirects` mevcut.
-- Live Supabase/RLS/Edge: **NOT VERIFIED**.
-- Real camera/paper/AT/hosting: **NOT VERIFIED**.
+Aşağıdaki tablo, repository'deki yetkili kod tabanı ile canlı `lgtahyruhyfozhueawft` Supabase ortamı arasındaki doğrulanmış durum farklarını özetler:
+
+| Alan | Repository | Production (`lgtahyruhyfozhueawft`) | Durum |
+| --- | --- | --- | --- |
+| Migration history | 5 migration (`20260915000000` - `20260920000000`) | Yalnızca ilk şema (`20260915000000`, 5 gün önce) | MISMATCH |
+| mmpi_records | `expert_notes`, `notes_updated_at` kolonları tanımlı | Kolonlar eksik (Postgres `42703`, PostgREST HTTP 400) | MISMATCH |
+| expert_notes | `text not null default '' check(<=4000)` | Veritabanında kolon mevcut değil | MISMATCH |
+| notes_updated_at | `timestamptz null` | Veritabanında kolon mevcut değil | MISMATCH |
+| RLS | Admin her kayıtta not/silme; Psikolog kendi kaydında | Eski RLS (Admin not update yok; silme 0 count/400) | MISMATCH |
+| audit_logs | Tablo, trigger (`log_mmpi_record_change`), RLS | Tablo ve trigger eksik | MISMATCH |
+| admin-users | `delete`, `set_active`, `create` güncel eylemler | 5 gün önceki deploy (`delete` eylemi eksik/tanımsız) | MISMATCH |
+| ALLOWED_ORIGINS | Sıkı origin kontrolü; production domain gerektirir | Secret tanımsız (yalnız localhost izinli, canlıda 403) | MISMATCH |
+
+### 14.2 Doğrulama ve Çalışma Zamanı Kanıtları
+
+- **Branch:** `arena/01a0bf13-repo123` (origin/main `a4af11e` üzerinden).
+- **TypeScript:** `npm run typecheck` temiz (0 hata).
+- **Test:** `npm test` **239/239 PASS**.
+- **PDF Form Doğrulaması:** `npm run verify:pdf` başarılı (4 A4 sayfa, 566 madde, 1.132 bubble; ortak set kodu `1F49F315B2636DCB4C18C2E4`).
+- **Production Build:** `npm run build` başarılı (`dist/index.html`, `dist/_redirects`, `optik-form.html`).
+- **Güvenlik Denetimi:** `npm audit --audit-level=high` 0 vulnerability; diff hygiene `git diff --check` temiz.
+- **Canlı Supabase Ortamı (`lgtahyruhyfozhueawft`):** Tarayıcı konsolu ve arayüz hata mesajları, canlı projenin `20260919000000` ve sonraki migration'ları ile güncel Edge Function'ı henüz almadığını kesin olarak kanıtlamaktadır. Dağıtım için `supabase db push` ve `supabase functions deploy admin-users` adımları zorunludur.

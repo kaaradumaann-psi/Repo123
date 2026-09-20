@@ -33,6 +33,18 @@ export async function listPsychologists(): Promise<AuthenticatedUser[]> {
   return (data ?? []).map(rowToUser);
 }
 
+function extractFunctionError(data: unknown, error: unknown, fallback: string): string {
+  const serverMsg =
+    typeof data === 'object' && data !== null && 'error' in data && typeof (data as { error: unknown }).error === 'string'
+      ? (data as { error: string }).error
+      : null;
+  if (serverMsg) return `${fallback} (${serverMsg})`;
+  if (error instanceof Error && error.message && error.message !== 'Edge Function returned a non-2xx status code') {
+    return `${fallback} (${error.message})`;
+  }
+  return fallback;
+}
+
 export async function createPsychologist(input: {
   firstName: string;
   lastName: string;
@@ -48,8 +60,9 @@ export async function createPsychologist(input: {
       password: input.password,
     },
   });
-  if (error) throw new Error('Psikolog hesabı oluşturulamadı.');
-  if (!data?.profile) throw new Error('Psikolog hesabı oluşturuldu ancak profil bilgisi alınamadı.');
+  if (error || !data?.profile) {
+    throw new Error(extractFunctionError(data, error, 'Psikolog hesabı oluşturulamadı.'));
+  }
   return rowToUser(data.profile);
 }
 
@@ -57,8 +70,9 @@ export async function setPsychologistActive(userId: string, active: boolean): Pr
   const { data, error } = await requireSupabase().functions.invoke('admin-users', {
     body: { action: 'set_active', userId, active },
   });
-  if (error) throw new Error('Hesap durumu değiştirilemedi.');
-  if (!data?.profile) throw new Error('Güncel kullanıcı profili alınamadı.');
+  if (error || !data?.profile) {
+    throw new Error(extractFunctionError(data, error, 'Hesap durumu değiştirilemedi.'));
+  }
   return rowToUser(data.profile);
 }
 
@@ -69,5 +83,7 @@ export async function deletePsychologist(userId: string): Promise<void> {
   const { data, error } = await requireSupabase().functions.invoke('admin-users', {
     body: { action: 'delete', userId },
   });
-  if (error || !data?.ok) throw new Error('Kullanıcı hesabı silinemedi. Edge Function bağlantısını kontrol edin.');
+  if (error || !data?.ok) {
+    throw new Error(extractFunctionError(data, error, 'Kullanıcı hesabı silinemedi. Edge Function bağlantısını kontrol edin.'));
+  }
 }
