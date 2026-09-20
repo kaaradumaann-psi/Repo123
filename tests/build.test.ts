@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { Script } from 'node:vm';
 import test from 'node:test';
 
@@ -65,10 +65,13 @@ test('standalone build is offline and locked down by a script-hash CSP', () => {
   }
 });
 
-test('standalone build ships the SPA fallback rule for Cloudflare hosting', () => {
-  // Bulut barındırmada pathname yönlendirmesi bu kural olmadan 404 verir.
-  const redirects = readFileSync('dist/_redirects', 'utf8');
-  assert.match(redirects, /^\/\*\s+\/index\.html\s+200$/m, 'SPA fallback kuralı eksik ya da bozuk');
+test('standalone build ships no catch-all _redirects rule (Workers code 100324)', () => {
+  // Workers API'si `/*  /index.html  200` kuralını sonsuz döngü sayıp version
+  // oluşturmayı reddeder (code 100324). SPA fallback'i `wrangler.jsonc`
+  // içindeki assets.not_found_handling sağlar; kural yalnızca Pages/Netlify
+  // için PAGES_REDIRECTS=1 ile üretilir.
+  assert.equal(existsSync('dist/_redirects'), false,
+    'dist/_redirects Workers yayınını code 100324 ile bozar; gerekiyorsa PAGES_REDIRECTS=1 kullanın');
 });
 
 test('standalone build embeds the verified form PDF byte for byte', () => {
