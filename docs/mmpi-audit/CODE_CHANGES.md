@@ -366,3 +366,37 @@ Ayrıca dosya başlığına **"kaynak dışı klinik derleme"** uyarısı eklend
 - `npm test` → **313/313 PASS** · 23 suite
 - `npm run build` → **PASS** · `optik-form.html` senkron
 - **REGRESSION YOK**
+
+---
+
+## CHANGE-012 — 40/04 kodunda tıbbi terim kaynağa çekildi (P2)
+
+Date: 2026-09-21
+Type: **İçerik düzeltmesi** (yanlış terim → kaynak terimi)
+Priority: **P2**
+Source: `SOURCE-CODE-PD-017` · CONFLICT-035 · DECISION-027
+
+File: `src/scoring/mmpiSourceCodes.ts` — `CODES['04']` (40/04 Kodu)
+
+| Before | After |
+|---|---|
+| "…psikomotor retardasyon ya da **negatifik** depresyon belirtileri yerine…" | "…psikomotor retardasyon ya da **vegetatif** depresyon belirtileri yerine…" |
+
+**Kaynak kanıtı:** kitap s.120, **400 dpi görsel** `v_pd120_0404e.png` —
+"gerçek, psikomotor retardasyon ya da **vegetatif** depresyon belirtileri yerine
+depresif düşünce ve duygulara ilişkindir."
+
+**Neden hemen düzeltildi (CONFLICT-025 gibi bekletilmedi):** bu bir **eksik
+içerik** değil **yanlış içerik**tir; "negatifik depresyon" yerleşik bir tanı
+değildir ve cümle depresyonun tipini ayırt eden işlevsel bir ayrım yapıyor.
+Eksik koşullu cümleler tüm kod seti çıkarılana kadar bilinçli bekletilir (kural),
+yanlış bilgi bekletilmez.
+
+### Doğrulama
+
+- `npm run typecheck` → **0 hata**
+- `tests/mmpiKeyIntegrity.test.ts` → **29/29 PASS** (+3 yeni test: terim var /
+  yanlış terim yok / gövde regresyonu)
+- `npm test` (tam suite) → **316/316 PASS** · 24 suite (önceki 313/313, 23 suite)
+- `npm run build` → **PASS** — `optik-form.html` senkron
+- **REGRESSION YOK**

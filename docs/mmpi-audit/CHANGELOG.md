@@ -1068,3 +1068,51 @@ CONFLICT-027: **23 → 26 koşul**.
 ### Kod değişikliği
 
 **YOK** (salt okuma + doğrulama turu).
+
+---
+
+## PHASE 9/10 — batch 13: Pd (4) kod bloğu III + **Pd BLOĞU KAPANIŞI** + Mf geçişi (kitap s.118-121)
+
+Tarih: 2026-09-21 · Kaynak: **s.118-121** (PDF p67 L – p68 R)
+
+| s. | İçerik | Sonuç |
+|---|---|---|
+| 118 | **482/842/824** Kodları | ❌ **YOK** |
+| 118 | **489/849** Kodları | ❌ **YOK** |
+| 118-119 | `49/94` Kodu + koşullar | ✅ VAR (gövde + diagnosis MATCH) · koşullar ❌ |
+| 119 | **493/943** | ❌ **YOK** |
+| 119 | **495/945** | ❌ **YOK** |
+| 120 | **496/946** | ❌ **YOK** |
+| 120 | **498/948** | ❌ **YOK** |
+| 120 | `40/04` | ✅ VAR · **terim sapması** → CONFLICT-035 |
+| **121** | **5. Mf Alt Testi girişi** | **yeni blok başladı** (Tablo 12 → sıradaki) |
+
+### 🎯 Pd (4) bloğu TAMAMLANDI (s.107-120)
+
+**20 kod incelendi · 7 VAR / 13 YOK** (kod kaydı olarak 9 VAR).
+Pd bloğundan **2 yeni çelişki**: CONFLICT-034 (yaş/eğitim/cinsiyet direktifi),
+CONFLICT-035 (terim sapması).
+
+### Kod değişikliği — **CHANGE-012 (P2)**
+
+`CODES['04']` → "**negatifik**" → "**vegetatif**" depresyon (kaynak s.120,
+400 dpi görsel; DECISION-027). Gerekçe: **yanlış içerik bekletilmez**.
+
+### Genişletilen çelişkiler
+
+| ID | Önce | Sonra |
+|---|---|---|
+| CONFLICT-024 (kod seti kapsamı) | 33 VAR / 64 YOK | **36 VAR / 70 YOK** |
+| CONFLICT-025 (koşullu cümle) | 7 örnek | **10 örnek** |
+| CONFLICT-027 (T-eşiği koşulu) | 26 örnek | **32 örnek** |
+| CONFLICT-030 (kırpma) | 28 örnek | **34 örnek** |
+
+### Görsel doğrulamalar (hepsi 340-400 dpi)
+
+`v_pd119_cond.png` (49/94 koşul cümlesi) · `v_pd120_496.png` (496/946 K<50) ·
+`v_pd120_0404c/d/e.png` (40/04 üçüncü yüksek test + **vegetatif** terimi)
+
+### Testler
+
+`typecheck` 0 · `npm test` **316/316 PASS** (24 suite) · `build` PASS ·
+**REGRESSION YOK**.

@@ -293,5 +293,30 @@ nedeniyle başka bir metne** düşüyor.
 | Hy (s.95-101) | 8 | 8 |
 | Nevrotik üçlü profilleri (s.103-106) | 0 | 4 |
 | Pd (s.111-113) — batch 11 | 5 | 4 |
-| **Pd (s.114-117) — batch 12** | **2** | **8** |
-| **Toplam** | **33** | **64** |
+| Pd (s.114-117) — batch 12 | 2 | 8 |
+| **Pd (s.118-121) — batch 13** | **2** | **6** |
+| **Toplam** | **36** | **70** |
+
+## Pd (4) kod bloğu III (s.118-121) — **2 VAR / 6 YOK** — **Pd BLOĞU KAPANDI**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | **`482/842/824`** | s.118 | **YOK** ❌ | 48/84 + depresyon/anksiyete/intihar girişimi |
+| 2 | **`489/849`** | s.118 | **YOK** ❌ | 48/84 + eyleme vuruk/şiddet |
+| 3 | `49/94` | s.118-119 | **VAR** ✅ | gövde + diagnosis MATCH |
+| 4 | **`493/943`** | s.119 | **YOK** ❌ | 49/94 + pasif-agresif |
+| 5 | **`495/945`** | s.119 | **YOK** ❌ | Mf yükselmesi + cinsel yönelim |
+| 6 | **`496/946`** | s.120 | **YOK** ❌ | homisidal davranış |
+| 7 | **`498/948`** | s.120 | **YOK** ❌ | doğal olmayan davranış |
+| 8 | `40/04` | s.120 | **VAR** ✅ | gövde MATCH · **"negatifik" ↔ "vegetatif"** sapması → CONFLICT-035 |
+
+### Pd (4) bloğu — birleşik özet (s.107-120)
+
+| | Sayı |
+|---|---|
+| İncelenen kod başlığı | **20** |
+| Kodda VAR | **7** (`41/14`, `42/24`, `43/34`, `45/54`, `46/64`, `47/74`, `48/84`, `49/94`, `40/04` → kod kaydı olarak 9 kayıt) |
+| Kodda YOK | **13** |
+
+**Pd bloğundan açılan yeni çelişkiler:** CONFLICT-034 (yaş/eğitim/cinsiyet
+direktifi) · CONFLICT-035 (terim sapması)

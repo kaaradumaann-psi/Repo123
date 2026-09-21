@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd I-II (s.111-117)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 28 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd TAMAMI (s.107-120)**; Mf (5) sırada; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 34 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,21 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**117** (48/84 Kodu sonu) — PDF p66 R
-Sonraki hedef: **s.118+** — Pd kod bloğu devamı / Mf (5) bloğu, PDF p67+
+**121** (Mf (5) girişi) — PDF p68 R
+Sonraki hedef: **s.122+** — **Mf (5) bloğu**: Tablo 12 (anahtar) + T bantları, PDF p69+
 
 Last completed:
+**PHASE 9/10 batch 13 — Pd (4) kod bloğu III + Pd BLOĞU KAPANIŞI (s.118-121) DONE:**
+`482/842/824` **YOK** ❌ · `489/849` **YOK** ❌ · `49/94` **VAR** ✅ (gövde+diagnosis
+MATCH) · `493/943` **YOK** ❌ · `495/945` **YOK** ❌ · `496/946` **YOK** ❌ ·
+`498/948` **YOK** ❌ · `40/04` **VAR** ✅. **🆕 CONFLICT-035 (P2):** `40/04`
+metninde "**negatifik** depresyon" ↔ kaynak "**vegetatif** depresyon"
+(400 dpi görsel) → **FIXED** (DECISION-027 + **CHANGE-012**). **Kırpma kanıtı:**
+`'482','489'`→`48/84`; `'493','495','496','498'`→`49/94`.
+**🎯 Pd (4) BLOĞU TAMAMLANDI (s.107-120): 20 kod · 7 VAR / 13 YOK.**
+**s.121'de Mf (5) bloğu BAŞLADI** (+ Tablo 12 atfı). Testler **316/316 PASS**.
+
+Önceki:
 **PHASE 9/10 batch 12 — Pd (4) kod bloğu II (kitap s.114-117) DONE:**
 `46/64` kapanışı (40 T koşulu) MATCH ✅ · **`468/648` YOK** ❌ (paranoid şizofreni +
 **K<50 ∧ 5/4/6 5 T alanı ∧ 9&2>70 T** koşulu — 340 dpi görsel) · **`469` YOK** ❌
@@ -257,8 +268,10 @@ Sıradaki batch'ler (öncelik sırası):
 9b. ~~**Pd kod bloğu I — s.111-113**~~ ✅ **TAMAMLANDI** (batch 11) →
    CONFLICT-034 açıldı; `456` ve `Yüksek 4/Düşük 5` kodda yok
 9c. ~~**Pd kod bloğu II — s.114-117**~~ ✅ **TAMAMLANDI** (batch 12)
-9d. **Pd kod bloğu III — s.118+ (PDF p67 L+)** → kalan Pd kodları + Mf (5)
-   bloğuna geçiş → sonra Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
+9d. ~~**Pd kod bloğu III — s.118-121**~~ ✅ **TAMAMLANDI** (batch 13) —
+   **Pd bloğu kapandı**; Mf (5) başladı
+9e. **Mf (5) bloğu — s.122+ (PDF p69 L+)** → **Tablo 12 (Mf anahtarı)** +
+   T bantları + kod bloğu → sonra Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
    → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
    sonra, tek tasarım kararı olarak)
 
@@ -312,6 +325,7 @@ Bilinen kısıtlar:
 | CHANGE-009 | `src/scoring/mmpiValidityConfigs.ts` + test | **`all-true` `F>120` → `F>=120`** (T kırpma nedeniyle ölü kuralı canlandırma, P1) |
 | CHANGE-010 | `src/scoring/mmpiValidityConfigs.ts` + test | **`credible` `K<=65` kaldırıldı** (kaynakta yok, P2) |
 | CHANGE-011 | `src/scoring/mmpiCritical.ts` + test | **14 kritik madde etiketi kaynak metnine göre düzeltildi** (P2, DECISION-026) |
+| CHANGE-012 | `src/scoring/mmpiSourceCodes.ts` + test | **40/04: "negatifik" → "vegetatif" depresyon** (P2, DECISION-027) |
 | — | `tests/mmpiExtended.test.ts` | all-false testi DECISION-020 gerekçesiyle güncellendi |
 
 ## Tests
@@ -321,7 +335,7 @@ Bilinen kısıtlar:
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
 | `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** (batch 3 + Ek 1: +4 kritik madde testi) |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **313/313 PASS** · 23 suite (bu oturumda kod değişmedi; s.63-87 salt okuma) |
+| `npm test` | **316/316 PASS** · 24 suite (CHANGE-012 sonrası) |
 | `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
@@ -363,14 +377,16 @@ Bilinen kısıtlar:
 | CONFLICT-032 | P3 | `345/435/534` başlık varyantı erişilemez (kayıt) | OPEN |
 | CONFLICT-033 | P1 | **Nevrotik üçlü profil konfigürasyonları** (4 konfig, s.103-106) kodda yok | OPEN |
 | CONFLICT-034 | P2 | **"Yaşı, eğitimi ve cinsiyeti dikkate alınarak yorumlanmalıdır"** direktifi kod kayıtlarında yok (s.112) | OPEN |
+| CONFLICT-035 | P2 | 40/04'te "**negatifik**" ↔ kaynak "**vegetatif**" depresyon (s.120) | ✅ **FIXED** (CHANGE-012) |
 
 Kalan açık: **15 çelişki** → 0 P0 · 8 P1 (003, 004, 005, 024, 027, 030, 031, 033) · 5 P2 (006, 007, 022, 025, 034) · 2 P3 (026, 032).
-**Güncel kapsam (CONFLICT-024):** kod seti **33 VAR / 64 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd I 4+Pd II 8).
+FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
+**Güncel kapsam (CONFLICT-024):** kod seti **36 VAR / 70 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd 13).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 6: **PHASE 9/10 batch 12 — Pd kod bloğu II** (s.114-117); kapalı döngü kanıtı 11 kod
+2026-09-21 — Oturum 6: **PHASE 9/10 batch 13 — Pd bloğu KAPANDI** (s.118-121); CHANGE-012 (terim düzeltmesi), CONFLICT-035 FIXED, Mf (5) başladı
 Önceki: **PHASE 9/10 batch 11 — Pd kod bloğu I** (s.111-113)
 Önceki: Oturum 5: **PHASE 9/10 batch 10 — Pd anahtarı + T bantları** (s.107-110)
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
@@ -396,6 +412,9 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p63-p64 (kitap s.111-113: Pd kod bloğu I — 45/54, 456, 46/64),
                 p65-p66 (kitap s.114-117: Pd kod bloğu II — 468/648, 469, 47/74,
                          478/748, 472/742, 48/84),
+                p67-p68 (kitap s.118-121: Pd kod bloğu III + KAPANIŞ →
+                         482/842/824, 489/849, 493/943, 495/945, 496/946,
+                         498/948, 40/04 + Mf (5) girişi),
                 p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
                 p61-p63 (kitap s.107-110: TABLO 11 Pd anahtarı + Pd T bantları),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),

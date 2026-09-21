@@ -1333,3 +1333,87 @@ kodda hiç yok → CONFLICT-030 örnekleri **17 → 28**'e çıktı.
 **Kapalı döngü kanıtı:** `47/74`'ün `seeAlso`'su kullanıcıyı `247/427/274`'e
 yolluyor; bu kodların **kaydı yok**, çağrıldıklarında **başka metin** dönüyor.
 `48/84`'ün `seeAlso`'su `482/842, 486/846, 489/849`'a yolluyor → aynı durum.
+
+---
+
+## CONFLICT-035 — 40/04 kodunda tıbbi terim sapması: "negatifik" ↔ "vegetatif" (P2)
+
+Area: `mmpiSourceCodes.ts` → `CODES['04']` (40/04)
+
+Source (**Visual: CONFIRMED**, 400 dpi `v_pd120_0404e.png`, s.120):
+> "Yüksek puanla görülen bir depresyon durumu varsa bu çoğunlukla gerçek,
+> psikomotor retardasyon ya da **vegetatif depresyon** belirtileri yerine
+> depresif düşünce ve duygulara ilişkindir."
+
+Current implementation:
+> "…gerçek psikomotor retardasyon ya da **negatifik** depresyon belirtileri
+> yerine depresif düşünce ve duygulara ilişkindir;"
+
+Impact: **Klinik terim** yanlış aktarılmış. "Negatifik depresyon" yerleşik bir
+tanı/terim değildir; kaynağın kastettiği **vegetatif (bitkisel) belirtiler**dir
+(DSM'deki "vegetative symptoms"). Bu cümle, depresyonun **tipini** ayırt eden
+işlevsel bir ayrım yapıyor → yanlış terim yorumu saptırır (P2 — yorum katmanı,
+sayısal değer değil).
+
+Status: **OPEN** — düzeltme tek kelime (kod değişikliği), DECISION gerektirir.
+Not: Kaynak cümlesinin geri kalanı birebir; sapma **yalnız bu kelimede**.
+
+---
+
+## CONFLICT-024 · genişletme (Pd bloğu III — s.118-121)
+
+| # | Kaynak başlığı | Sayfa | Durum |
+|---|---|---|---|
+| 1 | **`482/842/824`** | s.118 | **YOK** ❌ (`48/84.seeAlso` işaret ediyor) |
+| 2 | **`489/849`** | s.118 | **YOK** ❌ (`48/84.seeAlso` işaret ediyor) |
+| 3 | **`493/943`** | s.119 | **YOK** ❌ |
+| 4 | **`495/945`** | s.119 | **YOK** ❌ |
+| 5 | **`496/946`** | s.120 | **YOK** ❌ (`498/948.seeAlso` işaret ediyor) |
+| 6 | **`498/948`** | s.120 | **YOK** ❌ |
+| 7 | `49/94` | s.118-119 | **VAR** ✅ |
+| 8 | `40/04` | s.120 | **VAR** ✅ (1 terim sapması → CONFLICT-035) |
+
+→ **Pd (4) bloğu TAMAMLANDI** (s.107-120): **20 kod incelendi · 7 VAR /
+13 YOK** (batch 11: 5/4 · batch 12: 2/8 · batch 13: 2/6 — `49/94` ve `40/04`
+batch 11-12'de sayılanlarla aynı kayıtlar, toplamda tekrar sayılmadı).
+
+**Kod seti güncel toplam: 36 VAR / 70 YOK.**
+
+## CONFLICT-025 · genişletme ("üçüncü yüksek test" kuralları)
+
+Kaynak **her kod bloğunda** "üçüncü en yüksek/yükselen test" listesi veriyor;
+kodda bunların **hiçbiri yok**:
+
+| Kod | Kaynak listesi | Sayfa |
+|---|---|---|
+| `49/94` | "**Erkekler için test 8, 5 ve 3**; **kadınlar için test 8, 3 ve 6**, sıklıkla üçüncü en yüksek testtir" | s.119 |
+| `40/04` | "sıklıkla **üçüncü yüksek test 2, 6 ve 8**'dir" | s.120 |
+| `40/04` | "**Üçlü kodda sıklıkla Si'nin alınmaması** ve sonra kalan ikili koda ilişkin yorumların elde edilmesi ve buna yüksek Si testine ait bilginin eklenmesi yararlı olur" | s.120 |
+
+→ CONFLICT-025 örnekleri **7 → 10**'a çıktı.
+
+## CONFLICT-027 · genişletme (Pd bloğu III — s.119-120, hepsi görsel doğrulandı)
+
+| # | Kaynak koşulu | Sayfa |
+|---|---|---|
+| 1 | **49/94:** "Eğer **K testi 50 T puanının üzerinde** ise ve/veya **test 2, 5, 7 ya da 0 70 T puanı üstünde üçüncü yükselen test** ise … suç işleme ya da antisosyal davranış olasılığı daha azdır" | s.119 |
+| 2 | **49/94:** "**Alt test Si 50 T puanının altında** olduğunda … bireyin sosyal ilişkileri iyidir" | s.119 |
+| 3 | **493/943:** "**Alt test 3, test 4'ün 5 T puanı alanı içinde** ise 34/43 kod tipinin özellikleri de bulunabilir" | s.119 |
+| 4 | **495/945:** "Özellikle **test 4 ve 9'un orta derecede yükseldiği ve test 7'nin de 70 T puanı ya da üstü** olduğu durumlarda" | s.119 |
+| 5 | **496/946:** "özellikle eğer **K alt testi 50'nin altında** ise" | s.120 |
+| 6 | **498/948:** "**20 yaşın üstündeki** bireylerde … majör ve uzun süreli psikopatoloji" | s.120 |
+
+→ CONFLICT-027 örnekleri **26 → 32**'ye çıktı.
+
+## CONFLICT-030 · genişletme (Pd bloğu III)
+
+| Çağrı | Dönen | Beklenen |
+|---|---|---|
+| `'482'` | `48/84` | 482/842/824 |
+| `'489'` | `48/84` | 489/849 |
+| `'493'` | `49/94` | 493/943 |
+| `'495'` | `49/94` | 495/945 |
+| `'496'` | `49/94` | 496/946 |
+| `'498'` | `49/94` | 498/948 |
+
+→ CONFLICT-030 örnekleri **28 → 34**'e çıktı.

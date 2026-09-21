@@ -689,3 +689,30 @@ izler ve **değişmez**.
 **Sonuç:** CONFLICT-001, 002 ve **028** → **REJECTED (kod doğru)**.
 Bu kural, norm katmanında ortaya çıkacak **her yeni metin/Tablo 30 çelişkisi**
 için öncelikli olarak uygulanır.
+
+---
+
+## DECISION-027 — 40/04 kodundaki tıbbi terim kaynağa göre düzeltilir
+
+Tarih: 2026-09-21 · PHASE 9/10 batch 13
+
+**Durum:** `CODES['04']` (40/04 Kodu) metninde "gerçek psikomotor retardasyon ya
+da **negatifik** depresyon belirtileri yerine…" yazıyor. Kaynak (s.120, **400 dpi
+görsel**, `v_pd120_0404e.png`): "…gerçek psikomotor retardasyon ya da **vegetatif**
+depresyon belirtileri yerine…"
+
+**Karar:** Kaynak terim **aynen uygulanır** → `negatifik` → **`vegetatif`**.
+(CHANGE-012)
+
+**Gerekçe:**
+1. Kaynak **açık ve görsel doğrulanmış**; sapma tek kelime.
+2. **"Negatifik depresyon" yerleşik bir tanı/terim değildir**; kaynağın kastettiği
+   DSM'deki **vegetatif belirtiler**dir. Cümle, depresyonun **tipini ayırt eden**
+   işlevsel bir ayrım yapıyor → yanlış terim yorumu saptırır.
+3. Bu bir **"eksik içerik"** değil **"yanlış içerik"**tir. Eksik koşullu cümleler
+   (CONFLICT-025) tüm kod seti çıkarılana kadar bilinçli bekletiliyor; **yanlış
+   bilgi bekletilmez** (kaynak otoritesi ilkesi).
+4. Düzeltme **tek kelime**, başka hiçbir kaydı etkilemez, geri alınabilir.
+
+**Sonuç:** CONFLICT-035 → **FIXED**. Regresyon testi: `mmpiKeyIntegrity.test.ts`
+→ kaynak teriminin kodda bulunduğu ve yanlış terimin **bulunmadığı** doğrulanır.

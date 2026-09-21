@@ -91,6 +91,10 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **115** | **p65 R** | **468/648 Kodu** + **469 Kodu** + **47/74 Kodu** başlangıcı | **DONE** (340 dpi görsel ×3) |
 | **116** | **p66 L** | **47/74** devamı (478/748 · 472/742 atıfları) + **48/84 Kodu** başlangıcı | **DONE** |
 | **117** | **p66 R** | **48/84** devamı (ergen + yetişkin) | **DONE** |
+| **118** | **p67 L** | **482/842/824** Kodları + **489/849** Kodları + **49/94** Kodu | **DONE** |
+| **119** | **p67 R** | 49/94 devamı (koşullar) + **493/943** + **495/945** | **DONE** (340 dpi görsel) |
+| **120** | **p68 L** | **496/946** + **498/948** + **40/04** Kodu (**Pd bloğu kapanışı**) | **DONE** (400 dpi görsel ×4) |
+| **121** | **p68 R** | **5. Kadınlık-Erkeklik (Mf) Alt Testi girişi** + Tablo 12 atfı | **DONE** |
 | 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |

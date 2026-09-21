@@ -2006,3 +2006,147 @@ bozukluğu']`; `seeAlso: '482/842, 486/846, 489/849'`
 Status: gövde **VERIFIED** · `482/842`, `486/846`, `489/849` **kayıtları yok** →
 CONFLICT-024 (isimleri `seeAlso`'da var, gövdeleri yok — 46/64'teki `468/648`
 ile aynı kalıp)
+
+---
+
+# PHASE 9/10 batch 13 — Pd (4) kod bloğu III + **Pd BLOĞU KAPANIŞI** (kitap s.118-121)
+
+## SOURCE-CODE-PD-012 · 482/842/824 Kodları (s.118, p67 L)
+
+Fact — aynen:
+> "**482/842/824 Kodları**
+> Daha önce verilen 48/84 tanımlarına ek olarak, bu bireylerde **depresyon,
+> anksiyete, gerginlik, sinirlilik** yaygındır. Bunların duyguları çok çeşitlidir,
+> ancak genellikle **suçluluk, aşağılık ve umutsuzluk** duyguları görülür.
+> **İntihar girişimi göreceli olarak fazladır.** Kalıcı (uzun süreli) kişilerarası
+> ilişkileri (özellikle heteroseksüel) yoktur. Genelde bu bireyler bekârdır ya da
+> sorunlu evlilikleri vardır […]"
+
+Kod: **`482/842/824` kaydı YOK** ❌ — `codeInterpretation('482')` = `48/84`
+(48/84'ün `seeAlso`'su bu kodu işaret ediyor ama gövdesi yok → **kapalı döngü**)
+Status: **MISSING** → CONFLICT-024
+
+## SOURCE-CODE-PD-013 · 489/849 Kodları (s.118, p67 L)
+
+Fact — aynen:
+> "**489/849 Kodları**
+> **Yüksek 9 testinin yanı sıra, 48/84 kodu yorumlarının eklenmesi** tuhaf, hatta
+> garip ve öngörülmez şekillerde **eyleme vuruk davranışların** ifade edilmesi
+> olasılığını artırır. Davranışsal ajitasyon sıklıkla görülür; bu **saldırma,
+> savaşma ve hatta şiddet gösterme** biçiminde ortaya çıkar."
+
+Kod: **`489/849` kaydı YOK** ❌ (48/84'ün `seeAlso`'sunda adı var)
+Status: **MISSING** → CONFLICT-024
+
+## SOURCE-CODE-PD-014 · 49/94 Kodu + sayısal koşullar (s.118-119)
+
+Fact — gövde aynen (s.118):
+> "Hem yetişkinler, hem de ergenler için, bu kod kendi isteklerini ön plana
+> çıkarma ve sınırlar, kurallar ve düzenlemelere kızma ile bağlantılıdır.
+> Benmerkezci, narsisistik ve bencildirler […] Sosyal standartların ve değerlerin
+> onlar için önemi çok azdır […]"
+
+**Sayısal/koşullu kısım — aynen (Visual: CONFIRMED, 340 dpi `v_pd119_cond.png`):**
+> "**Eğer K testi 50 T puanının üzerinde ise ve/veya test 2, 5, 7 ya da 0 70 T
+> puanı üstünde üçüncü yükselen test ise hem ergenler, hem de yetişkinlerde suç
+> işleme ya da antisosyal davranış olasılığı daha azdır. Alt test Si 50 T puanının
+> altında olduğunda 49/94 özelliklerine sahip olsa bile bireyin sosyal ilişkileri
+> iyidir.** Sıklıkla bu bireyler dışa vuruk davranışları göstermek yerine,
+> diğerlerini antisosyal davranışlar yönünde manipüle ederler. **Erkekler için,
+> test 8, 5 ve 3, sıklıkla üçüncü en yüksek testtir. Kadınlar için test 8, 3 ve 6,
+> sıklıkla üçüncü yüksek testtir.** Bu bireyler için psikoterapi prognozu
+> genellikle çok kötüdür, yaşla gelen olgunluk yararlı olabilir. […] Çoğu tedaviyi
+> erken bitirir ve tedavi sırasında genellikle sinirli ve düşmanca bir tutum
+> sergilerler. **Olası tanı: Antisosyal kişilikle birlikte bazı tip karakter
+> bozuklukları · Pasif agresif kişilik bozukluğu, agresif tip**"
+
+Kod: `CODES['49']` → gövde + 2 `diagnosis` **MATCH** ✅ (K 50 T ve Si 50 T
+cümleleri de gövdede **VAR**)
+**Eksik:** "üçüncü en yüksek/yükselen test" listeleri (erkek 8-5-3, kadın 8-3-6)
+ve "test 2, 5, 7 ya da 0 70 T üstünde üçüncü yükselen test" koşulu → CONFLICT-025/027
+Status: **VERIFIED** (gövde) · koşul listeleri **MISSING**
+
+## SOURCE-CODE-PD-015 · 493/943 Kodları (s.119, p67 R)
+
+Fact — aynen:
+> "**493/943 Kodları**
+> 49/94 özelliklerine ek olarak, birey benmerkezcidir ve kendilerine yönelik
+> içgörüleri yoktur. Bunlarda eyleme vuruk davranış olasılığı nadirdir ve olumsuz
+> duygularını daha çok **pasif-agresif ve dolaylı yollardan** gösterirler.
+> **Alt test 3, test 4'ün 5 T puanı alanı içinde ise 34/43 kod tipinin özellikleri
+> de bulunabilir (bakınız 34/43 kodları).** Böylece, bu koddaki bazı bireyler
+> kızgınlıklarını sadece hiddetlenme şeklinde (genellikle bir aile üyesine karşı)
+> açığa çıkarmak üzere biriktirebilirler."
+
+Kod: **`493/943` kaydı YOK** ❌ (kırpma: `'493'`→`49/94`)
+Status: **MISSING** → CONFLICT-024 · T-eşiği koşulu → CONFLICT-027
+
+## SOURCE-CODE-PD-016 · 495/945 Kodları + 496/946 + 498/948 (s.119-120)
+
+Fact — 495/945 aynen (s.119):
+> "**495/945 Kodları**
+> Alt test 5'in ek olarak yükselmesi ya bireyin açık ve küstah bir biçimde doğal
+> olmayan bir cinsel yönelimi (genellikle homoseksüel) kabul etmesini gösterir ya
+> da daha sıklıkla çok iyi eğitim görmüş, ilgi alanları geniş […] daha sosyal bir
+> bireyle bağlantılıdır. […] (**Özellikle test 4 ve 9'un orta derecede yükseldiği
+> ve test 7'nin de 70 T puanı ya da üstü olduğu durumlarda.**) […]"
+
+Fact — 496/946 aynen (s.120, **Visual: CONFIRMED** `v_pd120_496.png`):
+> "**496/946 Kodları**
+> Kod saldırgan, zarar verici ve hatta homisidal davranışı olan bireyi
+> göstermektedir. (**Özellikle eğer test 8 de yükselmişse.**) […] Yargılamaları ve
+> olumsuz duygularını kontrolleri kötüdür (**özellikle eğer K alt testi 50'nin
+> altında ise**)."
+
+Fact — 498/948 aynen (s.120, **Visual: CONFIRMED** `v_pd120_0404b.png`):
+> "**498/948 Kodları** (Ayrıca 489/849 ve 496/946 kodlarına bakınız.)
+> 49/94 özelliklerine ek olarak, doğal olmayan, hatta tuhaf davranış olasılığı çok
+> yüksektir. **20 yaşın üstündeki bireylerde, bu kod genellikle majör ve uzun
+> süreli bir psikopatolojiyi gösterir.** Ergenlerde, kod sıklıkla (bu kodda daha
+> yaşlı bireylerde daha sıklıkla bulunan yeni başlayan ya da açık psikozdan çıkma)
+> durumsal güçlükler ve yoğun bir ergenlik dönemi isyanı ile bağlantılıdır."
+
+Kod: **`495/945`, `496/946`, `498/948` kayıtları YOK** ❌
+Status: **MISSING** → CONFLICT-024 · 3 T-eşiği koşulu → CONFLICT-027
+
+## SOURCE-CODE-PD-017 · 40/04 Kodu + **bölüm kapanışı** (s.120, p68 L)
+
+Fact — aynen (**Visual: CONFIRMED**, 400 dpi `v_pd120_0404c/d/e.png`):
+> "**40/04 Kodu**
+> Nadir görülen bu kod tipinde **sıklıkla üçüncü yüksek test 2, 6 ve 8'dir.**
+> Koddaki bireyler hem kızgındırlar, hem de kişilerarası ilişkilerde geri
+> çekilmişlerdir. Tipik olarak kızgınlıklarını açık biçimde ifade etmezler […]
+> Şüpheci, küskün ve utangaçtırlar, pasif olarak direnme eğilimindedirler.
+> **Ek yorumlama üçlü kod ya da diğer 2'li kodların analizine (örn. yüksek 4,
+> düşük 5) dayanır. Üçlü kodda sıklıkla Si'nin alınmaması ve sonra kalan ikili
+> koda ilişkin yorumların elde edilmesi ve buna yüksek Si testine ait bilginin
+> eklenmesi yararlı olur.** Yüksek puanla görülen bir depresyon durumu varsa bu
+> çoğunlukla gerçek, psikomotor retardasyon ya da **vegetatif depresyon**
+> belirtileri yerine depresif düşünce ve duygulara ilişkindir. […]"
+
+**Kritik — kod sapması (yeni çelişki):** kodda bu cümle "**negatifik** depresyon
+belirtileri" olarak yazılmış; kaynak **"vegetatif depresyon"** (400 dpi görsel,
+`v_pd120_0404e.png`). "Negatifik" Türkçe psikiyatri literatüründe yerleşik bir
+terim değildir → **CONFLICT-035**.
+
+Kod: `CODES['04']` → gövde büyük ölçüde MATCH ✅ · **eksik:** "sıklıkla üçüncü
+yüksek test 2, 6 ve 8'dir" + "Ek yorumlama üçlü kod…" cümleleri → CONFLICT-025/027
+Status: gövde **VERIFIED (1 terim sapması ile)** → CONFLICT-035
+
+## SOURCE-CL-010 · 5. Kadınlık-Erkeklik (Mf) Alt Testi — **BLOK GEÇİŞİ** (s.121, p68 R)
+
+Fact — aynen:
+> "**5. Kadınlık-Erkeklik (Mf) Alt Testi**
+> Bu alt test, **cinsel kimlikteki sapmaları değerlendirmek amacıyla**
+> geliştirilmiştir. Maddeler oldukça heterojendir. Çeşitli mesleklere karşı ilgi,
+> boş zaman faaliyetleri, uğraşlar, sosyal aktivitelerle ilgili maddelerden başka
+> **korkular, endişeler ve bireysel duyarlılıklarla** ilgili maddeler
+> bulunmaktadır. Doğrudan doğruya **cinsel içerikli maddeler** de vardır. Mf alt
+> testini oluşturan maddeler ve puanlama yönü **Tablo 12**'de gösterilmiştir.
+> **Mf alt testinde yüksek puan alan bir erkek (Graham 1987):** 1. Cinsel kimliğine
+> ilişkin çatışması vardır, depresyon ve psikotik semptomlar göstermez, hoşnuttur,
+> durağandır. 2. **Erkek rolünde güvensizdir.**"
+
+**Pd (4) BLOĞU KAPANDI** (s.107-120: anahtar + T bantları + 20 kod).
+Sıradaki: **Mf (5) bloğu** — Tablo 12 (anahtar) + T bantları + kodlar.
+Status: **VERIFIED** (giriş metni) · Tablo 12 → sıradaki batch

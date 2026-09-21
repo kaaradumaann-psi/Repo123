@@ -483,3 +483,44 @@ Kod değişikliği **YOK** (salt P0 doğrulama turu).
 
 Yeni araç: `scripts/mmpi-audit/cmp-tablo11.ts` — Tablo 11 ↔ `SCORING_KEYS.Pd`
 birebir karşılaştırma (**24+26=50 MATCH**).
+
+
+---
+
+# Oturum 6 (devam) — PHASE 9/10 batch 13: Pd bloğu III + kapanış
+
+Tarih: 2026-09-21 · Kapsam: kitap s.118-121 (PDF p67 L – p68 R)
+
+## Kod değişikliği
+
+`CHANGE-012` (P2) — `CODES['04']` (40/04): "**negatifik**" → "**vegetatif**"
+depresyon (kaynak s.120, 400 dpi görsel · DECISION-027).
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **29/29 PASS** (+3) |
+| `npm test` (tam suite) | **316/316 PASS** · 24 suite · ~150 s |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+Önceki tur: 313/313 (23 suite) → **+3 test, +1 suite**.
+
+## Yeni testler (PHASE 9/10 batch 13 — 3 test)
+
+1. `40/04` metni kaynağın "**vegetatif depresyon**" terimini taşır
+2. `40/04` metni kaynakta olmayan "**negatifik**" terimini **taşımaz**
+3. `40/04` gövdesinin kalanı kaynakla uyumlu kalır (regresyon: kızgın / geri
+   çekilmiş / pasif olarak direnme / psikomotor retardasyon)
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.** 316/316 geçti; `optik-form.html` build ile yeniden üretildi
+ve senkron.
+
+## Not
+
+Bu turda **sandbox bağımlılıkları yeniden kuruldu** (`npm install`, `tsx` +
+`typescript`): `tsc: not found` hatası alındı → bağımlılıklar kuruldu →
+typecheck/build yeniden koşuldu ve geçti.

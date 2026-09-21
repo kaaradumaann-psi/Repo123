@@ -1,4 +1,5 @@
 import { describe, it } from 'node:test';
+import { codeInterpretation } from '../src/scoring/mmpiSourceCodes';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, type ScaleRule } from '../src/scoring/mmpiKeys';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
@@ -510,5 +511,35 @@ describe('PHASE 2/5 — kritik madde etiketleri madde metniyle uyumlu', () => {
     assert.equal(etiket(215), 'Alkol/Madde Sorunları');
     assert.equal(etiket(339), 'İntihar Riski / Depresyon');
     assert.equal(etiket(350), 'Sanrısal Düşünce / Ruhsal Kayıp');
+  });
+});
+
+/**
+ * PHASE 9/10 batch 13 — 40/04 (Pd) kodu tıbbi terim uyumu.
+ *
+ * Kaynak (kitap s.120, 400 dpi görsel): "gerçek psikomotor retardasyon ya da
+ * VEGETATİF depresyon belirtileri yerine depresif düşünce ve duygulara
+ * ilişkindir". Kod bu terimi "negatifik" olarak aktarmıştı → DECISION-027,
+ * CHANGE-012 ile düzeltildi.
+ */
+describe('PHASE 9/10 batch 13 — 40/04 kodu kaynak terimine uyar', () => {
+  it('40/04 metni kaynağın "vegetatif depresyon" terimini taşır', () => {
+    const e = codeInterpretation('40');
+    assert.ok(e, '40/04 kaydı bulunmalı');
+    assert.match(e!.text, /vegetatif depresyon/i);
+  });
+
+  it('40/04 metni kaynakta olmayan "negatifik" terimini taşımaz', () => {
+    const e = codeInterpretation('04');
+    assert.ok(e);
+    assert.ok(!/negatifik/i.test(e!.text), 'kaynakta "negatifik" terimi yok');
+  });
+
+  it('40/04 gövdesinin kalanı kaynakla uyumlu kalır (regresyon)', () => {
+    const e = codeInterpretation('40')!;
+    assert.match(e.text, /kızgın/);
+    assert.match(e.text, /geri çekilmiş/);
+    assert.match(e.text, /pasif olarak direnme/);
+    assert.match(e.text, /psikomotor retardasyon/);
   });
 });
