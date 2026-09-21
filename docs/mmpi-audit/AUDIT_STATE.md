@@ -172,7 +172,7 @@ Kalan açık: **6 çelişki** → 0 P0, 4 P1 (003/004/005/016), 2 P2 (006/007).
 
 ```
 Phase:          PHASE 0, 1, 2, 3, 6 — DONE
-                PHASE 4 — IN_PROGRESS (s.56-61 DONE; s.43-55 + s.62 açık)
+                PHASE 4 — IN_PROGRESS (s.43-47 + s.56-61 DONE; s.48-55 + s.62 açık)
                 PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
                 PHASE 14 — IN_PROGRESS (14 denetim testi)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
