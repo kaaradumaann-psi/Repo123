@@ -68,9 +68,10 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 59 | p37 R | **TR endeksi kesme puanı (≥3)** + F-K 8-11 / >16 bantları + Greene 1979 | **DONE** (görsel doğrulandı) |
 | 60 | p38 L | **Tablo 6 — TR: aynı olan 16 madde çifti** | **DONE** |
 | 61 | p38 R | **Tablo 7 — Dikkatsizlik alt testi: 12 çift + puanlama yönü** | **DONE** |
-| 62 | p39 L | TR/dikkatsizlik tartışmasının devamı | NOT_STARTED |
-| 63-66 | p39 R – p41 L | Bölüm 5 girişi, klinik ölçek değerlendirmesi genel kuralları | NOT_STARTED |
-| 67-78 | p41 L – p46 R | Hs (1) alt testi + kod tipleri (12/21, 123, 1234, 13/31, 138/318 …) | NOT_STARTED |
+| 62 | p39 L | TR/dikkatsizlik kapanışı (dikkatsizlik kesmesi 4 — DECISION-022) | **DONE** |
+| 63-66 | p39 R – p41 L | Bölüm 5 girişi + **Tablo 8 (Hs: 11 Doğru / 22 Yanlış, madde 33; X̄ 13.19/15.89)** | **DONE** (Tablo 8 görsel doğrulandı) |
+| 67-69 | p41 R – p42 R | Hs alt testi T-puan bantları (60-74 T, 21-49 T …) + Hs yorumu | **IN_PROGRESS** |
+| 70-78 | p43 L – p46 R | Hs kod tipleri (12/21, 123, 1237, 12378, 1270, 13/31, 132/312, 138/318, 139 …) | **IN_PROGRESS** (PHASE 9/10) |
 | 79-94 | p47 L – p54 R | D (2) alt testi + kod tipleri (21/12, 23, 213/231, 24/42, 28/82 …) | NOT_STARTED |
 | 95-110 | p55 L – p62 R | Hy (3) alt testi + kod tipleri (32, 321, 34/43, 346, 39/93, 30/03) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |

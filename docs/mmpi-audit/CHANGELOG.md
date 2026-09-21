@@ -558,3 +558,18 @@ Tarih: 2026-09-21 · Kaynak: **Ek 1, s.215-233** (PDF p115 R – p124 R)
 - **Kod değişikliği YOK.** CONFLICT-023 kararı bekliyor (a) etiketleri kaynak
   metnine göre düzelt, (b) listeyi kaldır, (c) kaynak dışı işaretleyerek koru.
 - Testler etkilenmedi (yalnız doküman + yeni araç eklendi).
+
+---
+
+## CONFLICT-023 kapanışı — kritik madde etiketleri (CHANGE-011)
+
+Tarih: 2026-09-21 · Karar: DECISION-026 · Öncelik: P2
+
+- **14 etiket** kaynak madde metnine göre düzeltildi (kanıt: 300-350 dpi görsel,
+  s.216-226) — ör. `#151` "Sosyal Çekilme / Yabancılaşma" → **"Zehirlenme
+  Sanrısı / Şüphecilik"**.
+- Liste **kaynak dışı** olduğu için kod başlığında belgelendi (kaynakta kritik
+  madde listesi yok — `SOURCE-ITEM-002`).
+- Madde numaraları ve D/Y yönleri **değişmedi**; `#74` cinsiyet ayrımı korundu.
+- Doğrulama: `typecheck` 0 · `mmpiKeyIntegrity` **26/26** · `npm test`
+  **313/313 PASS** (23 suite) · `build` PASS · **REGRESSION YOK**.

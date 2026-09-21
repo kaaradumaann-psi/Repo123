@@ -478,3 +478,31 @@ Kanıt dosyaları: `.audit/items/gl2_1.png`, `gl2_2.png`, `gl2_3.png`,
 | 31 | Sık sık geceleri kabus geçiririm |
 | 41 | Kendimi toparlayamadığım için günler, haftalar hatta aylarca hiçbir şeye el sürmediğim olur |
 | 339 | Çoğu zaman ölmüş olmayı isterdim |
+
+---
+
+# PHASE 5 — Klinik ölçekler (kaynak tarafı doğrulaması)
+
+## Hs (1) — Tablo 8, s.66 (görsel doğrulandı)
+
+| Öğe | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| Doğru maddeler | 11 (23, 29, 43, 62, 72, 108, 114, 125, 161, 189, 273) | aynı 11 madde | ✅ **MATCH** |
+| Yanlış maddeler | 22 (2, 3, 7, 9, 18, 51, 55, 63, 68, 103, 130, 153, 155, 163, 175, 188, 190, 192, 230, 243, 274, 281) | aynı 22 madde | ✅ **MATCH** |
+| Toplam madde | **33** | 11 + 22 = 33 | ✅ **MATCH** |
+| K düzeltmesi | "K Eklemmeli" | `K_ADDITION_TABLE` Hs oranı 0.5 | ✅ niteliksel MATCH (oran kaynakta yok → UNVERIFIED) |
+| Erkek ortalaması | **13.19** (Savaşır 1981) | 13.19 | ✅ **MATCH** |
+| Kadın ortalaması | **15.89** (Savaşır 1981) | 15.89 | ✅ **MATCH** |
+
+Diğer klinik ölçeklerin madde anahtarları **Ek 9** (s.244-256) ile doğrulanmıştı
+(46/46 MATCH, PHASE 2). Bölüm 5 ayrıca madde tablosu **içermez**
+(`SOURCE-CL-005`) → klinik ölçek anahtar katmanı **kaynak tarafında kapandı**.
+
+## Kod tipi yorum katmanı (Bölüm 5-6, s.63-170)
+
+- Kod dosyası: `src/scoring/mmpiSourceCodes.ts` (kanonik ikili kodlar + yorum
+  metni + olası tanılar + `seeAlso`).
+- Örnek karşılaştırma `CODES['12']` (12/21) ↔ s.68: **birebir özet** ✓,
+  kaynağın sayısal kuralı ("5 T puanı fark") korunmuş ✓.
+- Kapsamlı karşılaştırma (tüm kodlar + üçlü/dörtlü kodlar) **PHASE 9/10**
+  kapsamında sürüyor.

@@ -1185,3 +1185,52 @@ Aşağıdaki 24 madde **görsel doğrulandı** ve etiketi kaynak metniyle tutarl
 | 350 | Yalnızken garip şeyler duyarım | Sanrısal Düşünce / Ruhsal Kayıp | ✓ |
 
 → **14 kayıtta etiket kaynak metniyle UYUŞMUYOR** (38 benzersiz maddeden) → CONFLICT-023.
+
+---
+
+# Bölüm 5 — Klinik testlerin değerlendirilmesi (kitap s.63-158) — yapı ve Tablo 8
+
+## SOURCE-CL-004 · Tablo 8 — Hipokondriazis (Hs) alt testi: madde numaraları ve puanlama yönü (s.66)
+
+Fact — **görsel doğrulandı** (320 dpi, `.audit/pages/v_tablo8.png`):
+> "**Tablo 8. Hipokondriazis alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 33)**"
+> **Doğru** (11): 23, 29, 43, 62, 72, 108, 114, 125, 161, 189, 273
+> **Yanlış** (22): 2, 3, 7, 9, 18, 51, 55, 63, 68, 103, 130, 153, 155, 163, 175,
+> 188, 190, 192, 230, 243, 274, 281
+> **"K Eklemmeli"** (K düzeltmesi uygulanır)
+> "Erkeklerde ortalama: **13.19**, kadınlarda: **15.89** (Savaşır, 1981)"
+
+**Karşılaştırma — `src/scoring/mmpiKeys.ts`:**
+`Hs.trueItems` = 11 madde → **birebir MATCH** ✓
+`Hs.falseItems` = 22 madde → **birebir MATCH** ✓
+`TURKISH_NORMS.Hs` → Erkek mean **13.19** / Kadın mean **15.89** → **MATCH** ✓
+`K_ADDITION_TABLE` Hs oranı 0.5 → kaynak "K eklemmeli" ✓ (oran kaynakta verilmez → UNVERIFIED)
+Status: **VERIFIED** · `SOURCE-CL-004`
+
+## SOURCE-CL-005 · Bölüm 5'in yapısı — kod tipi yorumları (s.63-158)
+
+Fact (s.63, `SOURCE-CL-003` ile birlikte; s.66-75 taramasıyla doğrulandı):
+> "Bu bölümde verilecek olan **kod tipleri ve profil yorumlamaları** klinik
+> bilgilere dayanmaktadır. […] Kod yorumlamaları MMPI'da kullanılan **ikili
+> kodların hepsini, üçlü ve dörtlü kodların çoğunluğunu** içermektedir.
+> Kodların yorumlanması **alt testlerin sayısal sıralamasına göre** yapılmıştır."
+Kaynak listesi: Archer 1987; Butcher 1969, 1984, 1987; Butcher & Graham 1990;
+Ceyhun 1986; Dahlstrom ve ark. 1972; Erol 1982; Friedman & Graham 1987;
+Greene 1979; Lachar 1974; Levitt 1989; Savaşır 1978, 1981; Webb 1978.
+> Hedef kitle: "ilkokul mezunu, ortaokul düzeyinde eğitimi olan, zekâ düzeyi
+> normale yakın ve genellikle yetişkinler".
+
+**Yapı bulgusu (denetim için kritik):** Bölüm 5'te **her ölçek için madde
+tablosu YOKTUR** — klinik ölçek madde anahtarlarının kaynağı **Ek 9**
+(s.244-256) ve Hs için **Tablo 8**'dir. Bölüm 5 = **kod tipi yorumları +
+T-puan bant yorumları**.
+
+Kod karşılığı: `src/scoring/mmpiSourceCodes.ts` — "iki noktalı kod yorumları
+(Kod Analizleri)"; anahtar kanonik biçimde (küçük rakam önce: "21" → "12").
+**Örnek doğrulama (s.68 ↔ `CODES['12']`):** kaynak
+*"bedensel işlevleri ile çok fazla ilgilidirler […] herhangi bir tıbbi
+müdahale olabildiğince kısıtlı olmalıdır"* ↔ kod metni birebir özet ✓;
+kaynak *"12 kodunda 1 ve 2 alt testleri arasında 5 T puanı kadar fark varsa
+21'e bakılır"* ↔ kod metninde korunmuş ✓.
+Status: **VERIFIED (yapı + örnek)** · PHASE 9/10 kapsamı belirlendi

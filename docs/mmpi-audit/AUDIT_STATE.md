@@ -33,12 +33,12 @@ Sayfa eşleme:
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi · **Ek 1 madde metinleri (s.215-233) DONE** — 1-566 bütünlük ✓; kritik madde etiketlerinde 14 uyuşmazlık → CONFLICT-023 |
 | 3 | Validity (kitap s.29-42) | **DONE** |
 | 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-62) | ✅ **DONE** — 15/15 konfig · F-K ✓ · TR ✓ · K+ ✓ · dikkatsizlik 12 çift/max 12/kesim 4 ✓ |
-| 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
+| 5 | Clinical scales (kitap s.63-158) | **DONE (kaynak tarafı)** — **Tablo 8: Hs 11D/22Y = 33 ✓ birebir**, X̄ 13.19/15.89 ✓ MATCH; diğer anahtarlar Ek 9 ile doğrulandı (46/46); Bölüm 5 madde tablosu **içermez** |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | NOT_STARTED |
-| 10 | Interpretation (Bölüm 6) | NOT_STARTED |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — `mmpiSourceCodes.ts` ↔ s.63-158 karşılaştırması; örnek `CODES['12']` ✓ birebir |
+| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** (kod tipi yorumlarıyla birlikte yürütülüyor) |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
@@ -257,9 +257,10 @@ Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalan
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
 Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
-Next:           Bölüm 5 / kod tipleri (s.64+, PDF p40 L) → PHASE 5;
-                sonra PHASE 9-13 (kod tipleri, yorum, UI, rapor, test) ve
-                FINAL doğrulamalar (OCR-only sayım + DECISION-011)
+Next:           PHASE 9/10 — kod tipi yorumları (s.63-158) ↔
+                `src/scoring/mmpiSourceCodes.ts`: kod **kapsam** analizi +
+                sayısal kural doğrulaması; sonra PHASE 11-13 ve FINAL
+                doğrulamalar (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```
 
