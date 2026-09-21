@@ -408,3 +408,23 @@ Sandbox sıfırlanması sonrası ortam yeniden kuruldu:
 `npm install` (58 paket) · `pip3 install --break-system-packages pymupdf
 opencv-python-headless rapidocr-onnxruntime` · `opencv-python-headless`
 **force-reinstall** (libGL.so.1 hatası → çözüldü).
+
+
+---
+
+# Oturum 5 — PHASE 9/10 batch 7: D kod bloğu kapanışı (s.88-92)
+
+Kod değişikliği **YOK** (salt okuma + karşılaştırma turu; CONFLICT-024/027/030
+kararı tüm kod seti çıkarıldıktan sonra verilecek).
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | **0 hata** |
+| `npm test` (tam suite) | **313/313 PASS** · 23 suite |
+| `npm run build` | **PASS** — `optik-form.html` **değişmedi** (senkron korundu) |
+
+**REGRESSION YOK.**
+
+Yeni araç: `scripts/mmpi-audit/cmp-d-batch7.ts` — `codeInterpretation()` çağrısının
+**kırpma davranışını** (CONFLICT-030) kanıtlayan karşılaştırma scripti
+(`273/723` → `27/72` vb. eşlemesi + `seeAlso` döngü testi).

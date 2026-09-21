@@ -1053,3 +1053,81 @@ raporlanacaktı.
 
 Resolution: **OCR-UNCERTAIN → görsel ile ÇÖZÜLDÜ.** Kod anahtarı kaynakla
 birebir uyumlu. Kural kaydı: `OCR_ISSUES.md` → **TABLE-ROW-SHIFT**.
+
+---
+
+## CONFLICT-030 — 3+ ölçekli kodlar **yanlış yoruma** eşleniyor (P1, OPEN)
+
+Area: `src/scoring/mmpiSourceCodes.ts:305` — `codeInterpretation()`
+
+**Kök neden (satır kanıtı):**
+```ts
+// src/scoring/mmpiSourceCodes.ts:303
+export function codeInterpretation(code: string | undefined): CodeInterpretation | undefined {
+  if (!code || code.length < 2) return undefined;
+  return CODES[canonicalCode(code.slice(0, 2))];   // ← ilk 2 karakter, gerisi ATILIR
+}
+```
+`CODES` yalnızca **45 adet iki-ölçekli** anahtar içerir
+(`12 13 14 … 09`). Bu yüzden **üç ve dört ölçekli her kod sessizce kırpılır**.
+
+**Amprik kanıt (bu oturumda koşuldu — `cmp-d-batch7.ts`):**
+
+| Çağrı | Dönen kayıt | Sorun |
+|---|---|---|
+| `codeInterpretation('273/723')` | `27/72` | kaynakta **ayrı başlık** (s.88) |
+| `codeInterpretation('274/724')` | `27/72` | kaynakta **ayrı başlık** (s.88) — intihar düşünce/planı, kronik alkolizm |
+| `codeInterpretation('275/725')` | `27/72` | kaynakta **ayrı başlık** (s.88/89) |
+| `codeInterpretation('278/728')` | `27/72` | kaynakta **ayrı başlık** (s.89) — obsesif/mükemmeliyetçi + intihar eşikleri |
+| `codeInterpretation('270')` | `27/72` | kaynakta **ayrı başlık** (s.90) — şizoid kişilik bozukluğu |
+| `codeInterpretation('207')` | `20/02` | kaynakta **ayrı başlık** (s.92) — şizoid içe çekilme |
+| `codeInterpretation('213/231')` | `12/21` | "Ayrıca 123 koduna bakınız" (s.83) |
+| `codeInterpretation('231/321')` | `23` | **"En sık üçlü kodlar"** (s.83) |
+| `codeInterpretation('247/427')` | `24/42` | kaynakta atıf (s.85) |
+| `codeInterpretation('248')` | `24/42` | kaynakta ayrı (s.86) |
+| `codeInterpretation('742')` | `47/74` | kaynakta ayrı (s.85) |
+
+**Ağırlaştırıcı kanıt — KAPALI DÖNGÜ:**
+`codeInterpretation('274/724')` → `27/72` kaydını döndürür; **o kaydın `seeAlso`
+alanı ise şunu yazar:** *"273/723, 274/724, 275/725, 278/728, 270 kodlarına da
+bakınız."* → Kullanıcı `274/724` için **daima `27/72` metnini** görür ve metin onu
+**yine `274/724`'e** yollar. **274/724'ün kendi yorumu sisteme hiç girmediği için
+bu kod tipinin içeriği kullanıcıya ASLA ulaşmaz.**
+
+**Yanlış metin eşlemesi (içerik kanıtı):**
+`27/72` kaydının 6 cümlesinin **tamamı kaynağın s.88'deki `273/723` alt-kodunun
+metniyle birebir aynıdır** ("Bu hastalar pasiftir…", "Korunduklarında…", "Çok
+yüksek standartlar…", "Stresleri arttığında…", "Bu görünen çaresizlik…",
+"Hs alt testi de yükselmişse…"). Kaynağın **`27/72` ana kodunun** metni (s.87:
+"Psikiyatri polikliniklerine başvuranlar arasında çok görülür… aşırı kontrollüdürler…
+duygularını açık olarak ifade etmekte zorluk… cinsel alanda çatışma") kodda
+**hiç yoktur** (`SOURCE-CODE-012`). → Kod, `27/72` etiketi altında `273/723`
+içeriğini sunmaktadır.
+
+Impact: **Yanlış klinik yorum.** Örnek: `278/728` (obsesif-mükemmeliyetçi örüntü,
+intihar eşikleriyle) bir kullanıcıya `27/72` metni gösterilir; `284/824`
+(şizoid/şizofrenik, F yükselmiş) `28/82` metnini alır. P1.
+
+Status: **OPEN** — düzeltme `CONFLICT-024` (üçlü kod seti yok) ile **aynı tasarım
+kararına** bağlıdır: kod modeli tek-anahtarlı olduğu sürece kırpma sürer. Karar
+**tüm klinik ölçek blokları çıkarıldıktan sonra** verilecek (bkz. `AUDIT_STATE`).
+
+**Kod değişikliği YAPILMADI** (karar bekliyor).
+
+---
+
+## CONFLICT-027 (GENİŞLETME — s.88-89 örnekleri)
+
+Mevcut tabloya ek **T-eşiği / ölçek-koşulu** örnekleri:
+
+| Kod | Kaynak koşulu | Kaynak |
+|---|---|---|
+| `278/728` | "**K ve Hs, 50 T puanının altında** olduğunda **ve/veya Ma alt testi yükseldiğinde** intihar olasılığı dikkatle değerlendirilmelidir" + **Si**/**Pd** ölçek koşulları | s.89 (**görsel doğrulandı**) |
+| `274/724` | "**test 4 ve 7 birbirlerinin 5 T puanı alanı içindeyse** 247 ve 427 kod yorumlarına da bakınız" | s.88 (**görsel doğrulandı**) |
+| `275/725` | "**4 alt testi düşük olduğunda** daha belirgindir" | s.88 |
+| `273/723` | "**Hs alt testi de yükselmişse**… sosyal geri çekilme gösterirler" | s.88 |
+| `274/724` | "**Alt test 3 yükseldiğinde** kronik alkolizm olasılığı fazladır" | s.88 |
+| `284/824` | "**test 4, test 2 ya da 8'in 5 T puanı alanı içinde ise** 482/842 kodlarının yorumuna bakınız" | s.91 |
+
+→ CONFLICT-027 kapsamı **13 örneğe** çıktı; hiçbiri kodda koşul olarak yok
+(`CodeInterpretation` tipinde koşul alanı bulunmuyor).

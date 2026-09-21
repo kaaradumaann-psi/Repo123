@@ -323,3 +323,26 @@ Not: Kayıp satır başları, ilgili madde metninin bir önceki maddeye
 **birleştirilmiş** olarak OCR'lanmasına yol açmış olabilir (ör. `#48` kaydına
 "ateş basar" cümlesi karışmış — bkz. `OCR_ISSUES.md` ITEM-ORDER). Ek 1 tam
 madde listesi gerektiğinde **sayfa bazlı tam görsel okuma** zorunludur.
+
+
+---
+
+# PHASE 9/10 batch 7 — doğrulanamayan/eksik içerik
+
+## UNVERIFIED-CODE-001 — `27/72` kaydının metni kaynağın `273/723` metnidir
+
+Kod: `CODES['27']` metni = kaynak **s.88 `273/723`** metni (6/6 cümle birebir).
+Kaynak **s.87 `27/72` ana kod** metni (psikiyatri polikliniklerinde çok görülme,
+aşırı kontrollülük, duyguları ifade etmekte zorluk, cinsel alanda çatışma, 85 T
+koşulu) kodda **bulunmuyor**.
+
+Durum: **UNVERIFIED / CONFLICT-030** — kodun hangi kaynak metnini temsil ettiği
+belirsiz; iki farklı kodun içeriği tek etikette birleşmiş görünüyor.
+
+## UNVERIFIED-CODE-002 — 18 D kod tipinin içeriği hiç doğrulanmadı
+
+`270`, `273/723`, `274/724`, `275/725`, `278/728`, `207`, `281/821`, `284/824`,
+`482/842`, `287/827`, `213/231`, `231/321`, `234/324`, `237/327`, `243/432`,
+`247/427/472`, `742`, `248` (+`Yüksek F` alt-kodu) — kaynakta **ayrı başlıklar**
+(s.83-92), kodda **kayıt yok**. Bu kodlar geldiğinde `slice(0,2)` kırpılmasıyla
+**başka bir kodun metni** gösterilir (CONFLICT-030).

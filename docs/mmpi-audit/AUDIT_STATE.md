@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-87) blokları DONE**; **CONFLICT-024** (kod seti eksik) + **CONFLICT-027** (T-eşiği koşulları yok) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) blokları DONE** (D blok KAPANDI); **CONFLICT-024** (40 kod tipi yok) + **CONFLICT-027** (13 T-eşiği koşulu) + **CONFLICT-030** (yanlış kod eşlemesi) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,27 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**87** (27/72 Kodu) — PDF p51 R
-Sonraki hedef: **s.88** (D kod bloğu devamı + Hy (3) girişi, PDF p52 L)
+**92** (207 Kodu — D kod bloğu KAPANIŞI) — PDF p54 L
+Sonraki hedef: **s.95** (Hy (3) kod bloğu, PDF p55 L) — s.93-94 (Hy girişi + Tablo 10)
+batch 6'da tamamlanmıştı
 
 Last completed:
+**PHASE 9/10 batch 7 — D kod bloğu KAPANIŞI (kitap s.88-92) DONE:**
+`273/723`, `274/724`, `275/725` (s.88) + **`278/728`** (s.89) + **`29/92` kapanışı,
+`20/02`, `207`** (s.92) okundu; 300 dpi görsel doğrulamayla **T-eşiği koşulları**
+teyit edildi ("test 4 ve 7 birbirlerinin **5 T puanı** alanı içindeyse";
+"**K ve Hs, 50 T puanının altında** olduğunda ve/veya Ma yükseldiğinde").
+**Kritik bulgu — CONFLICT-030 (P1):** `mmpiSourceCodes.ts:305`
+`CODES[canonicalCode(code.slice(0, 2))]` → **13 üçlü/dörtlü kod yanlış iki-ölçekli
+kayda düşüyor**; `274/724` çağrısı `27/72` metnini döndürüyor ve o kaydın
+`seeAlso`'su kullanıcıyı **tekrar `274/724`'e yolluyor (kapalı döngü)**. Ayrıca
+`27/72` kaydının **6 cümlesi kaynağın `273/723` metniyle birebir aynı** → yanlış
+metin eşlemesi. `29/92` ve `20/02` içerikleri **MATCH** ✓; `20/02` için OCR'ın
+**tam bir cümleyi atladığı** görselle yakalandı → yeni kural `OCR_ISSUES.md`
+**SENTENCE-SKIP**. CONFLICT-027 **13 örneğe** genişletildi. D bloğu kapsamı:
+**kodda 9 VAR / 18 YOK** (`CONFLICT-024_KAPSAM.md`). **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 4 — D anahtarı + D kod bloğu (kitap s.79-87) DONE:**
 **P0 katmanı:** Tablo 9 → D anahtarı **60/60 BİREBİR MATCH** ✅ · norm
 **20.63/23.86 MATCH** ✅ · D T bantları **6/6 etiket MATCH** ✅ (kaynağın 79
@@ -131,12 +148,14 @@ K+ profili tanımı ✓ · **F-K endeksi ✓** · **TR endeksi ✓ (kesme puanı
 düzeltildi)** · **Tablo 6 (16 çift) ✓ birebir** · **Tablo 7 (12 çift) ✓ birebir**
 
 Current section:
-**PHASE 9/10 — Bölüm 5 kod tipleri (s.63-158).** Hs (1) alt testi işleniyor;
-s.63-69 DONE, s.70+ (Hs kod tipleri devamı) sırada.
+**PHASE 9/10 — Bölüm 5 kod tipleri (s.63-158).** **Hs (1) bloğu (s.63-78) ve
+D (2) bloğu (s.79-92) DONE**; **Hy (3) bloğu (s.95-110) sırada** (girişi + Tablo 10
+batch 6'da yapıldı).
 
 Status:
 **PHASE 9/10 IN_PROGRESS** — Bölüm 5 kod tipleri. **CONFLICT-024 (P1) açık:**
-üçlü kod tipleri yok. Kaynağın üçlü kod seti tamamen çıkarılmadan karar verme.
+40 kod tipi (Hs 22 + D 18) kodda yok. **CONFLICT-030 (P1) açık:** kırpma nedeniyle
+bu kodlar **yanlış metne** düşüyor. Tüm klinik ölçek blokları çıkarılmadan karar verme.
 
 ## Next action
 
@@ -162,9 +181,11 @@ Sıradaki batch'ler (öncelik sırası):
 7. ~~PHASE 9/10 s.63-69 (Hs yorumu + ilk kod tipleri)~~ ✅ **TAMAMLANDI**
 8. ~~s.70-78 — Hs kod bloğu~~ ✅ **TAMAMLANDI** (31 kod tipi; CONFLICT-024 kapsamı)
 8b. ~~s.79-87 — D anahtarı + T bantları + D kod bloğu~~ ✅ **TAMAMLANDI**
-8c. **s.88-94 — D kod bloğu devamı + Hy (3) alt testi (PDF p52 L – p54 R)** → PHASE 9/10
-9. **D (2) alt testi (s.79-94)** → Hy (3) → Pd (4) → … → **CONFLICT-024 kararı**
-   (üçlü kod seti tamamlandıktan sonra)
+8c. ~~**s.88-94 — D kod bloğu devamı + Hy (3) alt testi**~~ ✅ **TAMAMLANDI**
+   (batch 6: s.93-94 Hy girişi + Tablo 10; batch 7: s.88-92 D bloğu KAPANIŞI)
+9. **Hy (3) kod bloğu — s.95-110 (PDF p55 L – p62 R)** → sonra Pd (4), Mf (5),
+   Pa (6), Pt (7), Sc (8), Ma (9), Si (0) → **CONFLICT-024 / 030 kararı**
+   (tüm kod seti çıkarıldıktan sonra, tek tasarım kararı olarak)
 
 ## Last completed task
 
@@ -262,12 +283,14 @@ Bilinen kısıtlar:
 | CONFLICT-026 | P3 | Hs düşük puan 5 maddesi + 40 yaş notu + 21-49 örüntü koşulu + D düşük puan 18 maddesi eksik | OPEN |
 | CONFLICT-027 | P1 | **Kod yorumlarındaki T-puan eşikleri tespit edilmiyor** (26/62: Pa&4&8>70; 27/72: 85+; 13/31; 138; 19/91; 136/316; 12/21) | OPEN |
 
-Kalan açık: **10 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
+| CONFLICT-030 | P1 | **3+ ölçekli kodlar yanlış yoruma eşleniyor** (`slice(0,2)` kırpması; kapalı döngü) | OPEN |
+
+Kalan açık: **11 çelişki** → 0 P0 · 6 P1 (003, 004, 005, 024, 027, 030) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 3 devam: **PHASE 2/5 Ek 1 kapandı** (madde 1-566 + kritik madde etiketleri; CHANGE-011)
+2026-09-21 — Oturum 5: **PHASE 9/10 batch 7 — D kod bloğu KAPANDI** (s.88-92); CONFLICT-030 açıldı
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
 ## CHECKPOINT
@@ -285,28 +308,32 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p32-p35 (kitap s.48-55: Konf. 6-13 — BÖLÜM 4 TAMAM),
                 p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
                 p39    (kitap s.62-63: dikkatsizlik kapanışı + Bölüm 5 girişi),
+                p48-p51 (kitap s.80-87: D anahtarı Tablo 9 + D kod bloğu I-III),
+                p52-p54 (kitap s.88-92: D kod bloğu IV-V + KAPANIŞ),
+                p55    (kitap s.93-94: Hy girişi + Tablo 10),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
                 p115-p124 (kitap s.215-233: EK 1 madde metinleri — yapı + 39 kritik madde),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
-Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
+Verified:       ? , L , F , K , Hs , D , Hy  (anahtarlar + normlar + bantlar)
+                Tablo 8/9/10 → BİREBİR MATCH (Hs 33, D 60, Hy 60 madde)
                 46 madde anahtarı → 46/46 MATCH
                 26 norm hücresi  → 26/26 MATCH (Tablo 30)
                 Tablo 6 → 16/16 · Tablo 7 → 12/12 çift MATCH
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
                 Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
-Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Open conflicts: 6 (3 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Fixed:          9 (008..012, 015, 017, 019, 020-kısmi) + 0 regression
+Open conflicts: 11 (6 P1 · 4 P2 · 1 P3) — P0 AÇIK ÇELİŞKİ KALMADI
+                (003, 004, 005, 024, 027, 030 · 006, 007, 022, 025 · 026)
+Fixed:          10 (008..012, 015, 017, 019, 020-kısmi, 023) + 0 regression
 Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
 Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
 Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
-Next:           PHASE 9/10 — kod tipi yorumları (s.63-158) ↔
-                `src/scoring/mmpiSourceCodes.ts`: kod **kapsam** analizi +
-                sayısal kural doğrulaması; sonra PHASE 11-13 ve FINAL
-                doğrulamalar (OCR-only sayım + DECISION-011)
+Next:           PHASE 9/10 — **Hy (3) kod bloğu s.95-110** (PDF p55 L – p62 R),
+                aynı yöntem (`inventory.py` → görsel doğrulama → `cmp-*.ts`);
+                sonra Pd (4)…Si (0) → **CONFLICT-024/030 tek tasarım kararı**;
+                ardından PHASE 11-13 + FINAL (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```
 

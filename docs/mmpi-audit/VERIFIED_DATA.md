@@ -569,3 +569,22 @@ FAZLA 0, EKSİK 0.
 
 **Doğrulanmış anahtar tablosu (P0 katmanı):** Tablo 8 (Hs) ✅ · Tablo 9 (D) ✅ ·
 **Tablo 10 (Hy) ✅** · Ek 9 ile 46/46 ✅
+
+
+---
+
+# PHASE 9/10 batch 7 — D kod bloğu kapanışı (kitap s.88-92)
+
+## Kodda VAR olan ve içeriği doğrulanan kod tipleri
+
+| Kod | Kaynak | İçerik karşılaştırması | Sonuç |
+|---|---|---|---|
+| `29/92` | s.91-92 | 5 cümle = benmerkezci/narsisistik + yüksek enerji (kontrol kaybı telafisi) + **üç tip birey** (ajite depresyon / manik savunma / organik beyin sendromu) | ✅ **MATCH** (kaynağın "üçüncü en yüksek test 3 ya da 4" cümlesi eksik → CONFLICT-025) |
+| `20/02` | s.92 | 6 cümle = sinirlilik/zayıflık/yorgunluk + kronik depresyon + ailevi/sosyal beceri + **"fiziksel olarak çekici olmadığını düşünür"** + uykusuzluk/suçluluk + **tanı: Pasif-agresif kişilik** | ✅ **MATCH** (kaynağın "üçüncü en yüksek test 7 ya da 4" cümlesi eksik → CONFLICT-025) |
+| `28/82` | s.90-91 | anksiyete+ajitasyon şiddetli depresyon, tanı makinesi: manik depresif psikoz/melankoli/şizoaffektif, seeAlso 281/821·284/824·287/827 | ✅ **MATCH** |
+
+## Metin kaynağı doğrulaması (kritik)
+
+`codeInterpretation('274/724')` çağrısı `27/72` kaydını döndürür; **o kaydın 6
+cümlesinin tamamı kaynağın s.88'deki `273/723` metniyle birebir aynıdır** →
+kaynağın `27/72` **ana kod** metni (s.87) kodda yoktur → **CONFLICT-030**.

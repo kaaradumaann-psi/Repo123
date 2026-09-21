@@ -74,7 +74,9 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **70-78** | **p43 L – p47 L** | **Hs kod bloğu TAMAMI** — 1237, 1270, 12378, 128/218, 129/219, 120/210, 13/31 (+Yüksek K, Düşük 2), 132/312, 134/314, 1342, 136/316, 137, 138/318, 1382, 139, 14/41, Yüksek1/Düşük4, 146, 1469, 15/51, 16/61, 17/71, 18/81, 19/91, 10/01 | **DONE** (görsel doğrulandı) · 22 kod tipi kodda YOK → CONFLICT-024 |
 | **79** | **p47 R** | **D (2) alt testi girişi** + yüksek puan 21 maddesi (Graham 1987) | **DONE** (görsel doğrulandı) |
 | **80-87** | **p48 L – p51 R** | **Tablo 9 (D anahtarı, 60 madde) + D T bantları + D kod bloğu (23, 24/42, 243/432, 247/427, 248, 25/52, 26/62, 27/72 …)** | **DONE** (görsel doğrulandı) · anahtar/norm/norm bantları MATCH · 12+ kod tipi kodda YOK → CONFLICT-024 · **T-eşiği koşulları** → CONFLICT-027 |
-| 88-94 | p51 R – p54 R | D kod bloğu devamı (28/82 …) + Hy (3) girişi | NOT_STARTED |
+| **88-89** | **p52 L – p52 R** | **D kod bloğu IV-V**: 273/723, 274/724, 275/725, **278/728** + T-eşiği koşulları (5 T fark; K/Hs<50 T) | **DONE** (300 dpi görsel doğrulandı) · 4 kod kodda YOK · **CONFLICT-030** · CONFLICT-027 genişletildi |
+| **90-92** | **p53 L – p54 L** | **D kod bloğu VI + kapanış**: 270, 28/82, 281/821, 284/824, 482/842, 287/827, 29/92, **20/02**, **207** | **DONE** · 29/92 ve 20/02 içeriği ✓ MATCH · 6 kod YOK · **D kod bloğu KAPANDI** |
+| **93-94** | **p54 R – p55 L** | **Hy (3) alt testi girişi + Tablo 10 (Hy anahtarı)** | **DONE** (birebir MATCH — `SOURCE-CL-014/015`) |
 | 95-110 | p55 L – p62 R | Hy (3) alt testi + kod tipleri (32, 321, 34/43, 346, 39/93, 30/03) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |

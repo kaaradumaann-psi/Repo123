@@ -1624,3 +1624,51 @@ Fact — aynen:
 > çocuksuluk, çabuk sinirlenme, neşe…"
 
 Kod karşılaştırması: `HY_T_BANDS` ve Hy yorumu → sonraki batch (s.95+)
+
+## SOURCE-CODE-014 · D kod bloğu IV (s.88, p52 L) — **Visual: CONFIRMED**
+
+| Kod | Özet / **kritik sayısal koşul** |
+|---|---|
+| **273/723 Kodları** | **Pasif hastalar**; kişiler arası ilişkilerinde **bağımlı olduklarında kendilerini çok rahat hissederler**; **korunduklarında ve başkalarının bakımı altına alındıklarında bu duruma çok kolay uyum sağlarlar**; kendileri için **çok yüksek standartlar belirleyerek stres yaşarlar**; stres arttığında **başkalarından yardım isterler**, **depresyon ve endişeleri içinde belirgin biçimde ve yapışırcasına bağımlı hale gelirler**; **görünen çaresizlik, uysallık ve kendini değersizleştirme düşünceleri başkalarını onları kurtarma ve korumaya yöneltir**; "**Hs alt testi de yükselmişse**, bu bireyler kaygıyla bağlantılı somatik yakınmaların yanı sıra, **kendine acıma, suçlama ve başkalarının onlara bakmasını istemelerine karşın sosyal geri çekilme gösterirler**." |
+| **274/724 Kodları** | **⚠️ KOŞUL:** "(Eğer **test 4 ve 7 birbirlerinin 5 T puanı alanı içindeyse** 247 ve 427 kod yorumlarına da bakınız.)" **Yoğun yetersizlik ve suçluluk duyguları**; **kendilerini küçülterek zayıflık ve yetersizlikleriyle sürekli uğraşırlar**; **diğer kişilere olan aşırı bağımlılıklarını kabul etmezler**; "**Çoklu nevrotik belirtilerin gerçek bir düşünce bozukluğunu maskelemesi ihtimali dikkatle incelenmelidir. İntihar düşünceleri, niyeti ve planı sıklıkla görülür. Bu açıdan değerlendirilmelidir.**" **Olası klinik tanı depresif reaksiyon**, ancak **kişilik yapıları oldukça kalıcıdır**; **temel anksiyetelerini ve davranış biçimlerini değiştirmek çok zordur**. **Erkekler** çoğunlukla **annelerine bağımlıdır**; bağımlı ilişki ararlar ama **eşlik eden kontrolü istemez ve ilişkiyi sonlandırırlar**; "**Alt test 3 yükseldiğinde kronik alkolizm olasılığı fazladır**" (alkol kaygıyı azaltmak ve depresyonla başa çıkmak için). **Kadınlar** sıklıkla **babaları tarafından ilgi ve övünme nesnesi olmuşlardır**; **kendilerini izole ederler, zayıf ve çekingen görünmeye çalışırlar** (**özellikle alt test 5 düşükse**); **evli erkeklerle uzun süreli ilişkileri olabilir**. |
+| **275/725 Kodları** | (erkekler için önerilen kod) **Endişe, depresyon ve aşırı düzeyde aynı şeyler üzerinde durmaya ek olarak çekingenlik**; **kronik bir başarısızlık duygusu** ya da **kendilik değeri konusunda ambivalans**; **kendilerini yetersiz, zayıf, aşağılanmış, suçlu ve pasif olarak tanımlarlar** (**4 alt testi düşük olduğunda daha belirgindir**); **sürekli başkalarının onları küçümsediği ilişkiler arayarak depresyonları için bedel öderler** ve bu ilişkilerde **çok rahat ederler**; **karşı cinsle ilişkilerde güçlükler** vardır. |
+
+## SOURCE-CODE-015 · D kod bloğu V — 278/728 (s.89, p52 R) — **Visual: CONFIRMED**
+
+Fact — aynen (**kritik koşul 300 dpi görselle doğrulandı**):
+> **278/728 Kodları** — **Gergin, kaygılı, depresif, aşırı biçimde aynı şeyler üstünde
+> duran ve kendilerine ilişkin kuşkularla dolu** olan bu bireylerde **intihar
+> düşüncesi ya da girişimi olasılığı yüksektir**. **Obsesif düşünme, korkular ve
+> fobiler** çok görülür; **kendi başarısızlıkları üzerinde yoğunlaşırlar**; **çok
+> titiz ve mükemmeliyetçidirler**; kendileri ve başkaları için **çok yüksek
+> standartlar** koyarlar ve ulaşamadıklarında **çok fazla suçluluk** yaşarlar;
+> **aşırı kendini sorgulama ve kendine baskı** → **belirli bir şeye odaklanma
+> güçlükleri ve performansta düşme** → depresyon ve kaygı artar. **Karşı cinsle
+> duygusal bağlantı kurmada özel zorluklar**; **ilişkilerin çok ufak ayrıntıları
+> üzerinde odaklanma**; **kontrol, eleştiri, kabul edilme ve kızgınlığın ifadesi
+> sorun alanlarıdır**.
+
+**⚠️ KRİTİK KOŞUL (T eşikleri):**
+> "Bu kodda, özellikle alt testlerden **K ve Hs, 50 T puanının altında** olduğunda
+> **ve/veya Ma alt testi yükseldiğinde intihar olasılığı dikkatle
+> değerlendirilmelidir.** Bu kodda **Ma alt testinin yükselmesi, depresyonun ajite
+> yönünü gösterir.** Eğer **Si** alt testi yükselmişse bireyin depresyonu **daha çok
+> kroniktir**… Alt testlerden **Pd düşük olduğunda pasiflik ve çekingenlik ön
+> plandadır**, sıklıkla **cinsel ilgilerde azalma ve cinsel yetersizlik** eşlik eder."
+
+**Kadınlar (5 alt testi düşmüşse):** **bedel ödemeleri gerektiğini hissederler**,
+**başkalarının kızgınlığını arttırırlar**, **mazohistik biçimde kendilerine
+kızarlar**; **baş ağrıları, sırt ağrıları ve cinsel güçlükleri içeren çok çeşitli
+fiziksel yakınmalar**; **çoklu nevrotik semptomlar**; **depresyon, sinirlilik,
+obsesyonlar**; **kararsızlık, şüphe ve kaygı**; **düşünce bozukluğunun
+değerlendirilmesi önemlidir**; **sosyal açıdan yetersiz**; "**Aşırı obsesyonları
+için psikofarmolojik tedavi gerekir. Psikoterapide daha çok problem çözücü ve
+destekleyici terapi tercih edilmelidir.**"
+
+## SOURCE-CODE-016 · D kod bloğu KAPANIŞI (s.92, p54 L) — **Visual: CONFIRMED**
+
+| Kod | Özet |
+|---|---|
+| **29/92 (devamı)** | **Yüksek enerji düzeyi** ancak bu **"bir kontrol kaybını telafi etme girişimini"** temsil eder. **Üç tip birey bu kodu elde eder:** (1) **Ajite depresyon** — ağlama, feryat etme, depresif ruminasyonlar; **çocuklar gibi ilgi çekmek için çok fazla duygusal** olabilirler. (2) **Alttaki depresyonla manik savunmalar kullanarak başa çıkmaya çalışanlar** — büyüklük düşünceleri ve inkâr depresyonu maskelemede yeterli olabilir, **ancak çoğunlukla uzun süre etkili değildir**; sonrasında **çok fazla içki içme davranışı** ortaya çıkar. (3) **Organik beyin sendromu olanlar** — işlevsellik ve yeteneklerindeki azalmanın farkında ama **inkâr etmeye ve saklamaya çalışan** bireyler; **daha önce kolaylıkla yaptıkları şeyleri yapamamanın eksikliğine bağlı ajitasyon** gösterirler. "**Sıklıkla test 3 ya da 4, üçüncü en yüksek testtir.**" |
+| **20/02 Kodu** | **Sinirlilik, zayıflık, yorgunluk, benlik değerinde düşme** belirgin özelliklerdir; kod **"sosyal olarak geri çekilmiş hafif, ancak kronik depresyonu"** gösterir; **depresyon sıklıkla kişiler arası ve sosyal becerilerin kötü olmasıyla bağlantılıdır** ve **aşağılık ve utangaçlık duyguları** ile birliktedir; **hem yetişkinler hem ergenler özellikle sosyal ilişkilerde sinirlidirler**, **engellenmiş hissederler**, **çok az arkadaşları vardır**; "**Çoğu (özellikle test 1 düşük ise) fiziksel olarak çekici olmadığını da düşünür.**" **Uykusuzluk, suçluluk duyguları ve endişe** sıklıkla vardır; "**Bu kod tipinde çoğunlukla test 7 ya da 4, üçüncü en yüksek testtir.**" **Olası tanı: Pasif-agresif kişilik** |
+| **207 Kodu** | **Gergin, kaygılı, ürkek** kişilerdir; **kendilik değerinde düşme**; **şizoid içe çekilme**; **sosyal ortamlarda yetersizlik duygusu ve gerçek sosyal beceri eksikliği** ile **içe dönük tutum**; **insanlarla etkileşimlerinde güvensiz**; **karşı cinsle ilişkilerinde mutsuz**; **depresyonları ile yaşamayı öğrenmişlerdir**; "**Bu bireylerin saldırganlık ve öfke patlamaları göstermesi beklenmez.**" |

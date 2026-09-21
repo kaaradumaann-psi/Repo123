@@ -260,3 +260,23 @@ Görsel doğrulama ile kodun doğru olduğu kanıtlandı (13 + 47 = 60 BİREBİR
 3. Toplam madde sayısı **kitabın başlığıyla** (ör. "Madde Sayısı: 60")
    çapraz kontrol edilir — bu, sessiz madde kaybını/eklenmesini yakalar.
 4. Karşılaştırma **her zaman** `Doğru n + Yanlış n = kitap n` kontrolünü içerir.
+
+## SENTENCE-SKIP — OCR tam bir cümleyi atlar (2026-09-21, PHASE 9/10 batch 7)
+
+**Bulgu:** `p054_L` (kitap s.92, `20/02 Kodu`) OCR metninde şu cümle **yok**:
+
+> "Çoğu (özellikle test 1 düşük ise) fiziksel olarak çekici olmadığını da düşünür."
+
+300 dpi görsel okumada cümle **açıkça vardır** (satır kayması değil; OCR cümleyi
+tamamen düşürmüştür). Kod karşılaştırmasında `20/02` kaydı bu cümleyi **içeriyor**;
+yalnızca OCR'a bakılsaydı kod **"fazla cümle içeriyor"** sanılacak ve **sahte bir
+"kaynakta yok" bulgusu** üretilecekti.
+
+**Kural:** Kod içeriği ile kaynak arasında **cümle düzeyinde** fark bulunduğunda
+(özellikle "kodda fazla içerik var" yönünde), fark **OCR yokluğuna değil görsele**
+dayandırılır. OCR'da cümle atlaması **sessizdir** — eksik cümle, olmayan cümle gibi
+görünür. Bu yüzden içerik farkları **≥300 dpi görsel** ile doğrulanır.
+
+Ek doğrulama kuralı: `274/724` gibi **koşul parantezleri** (ör. "Eğer test 4 ve 7
+birbirlerinin 5 T puanı alanı içindeyse…") OCR'da başlıkla birleşip kaybolabilir →
+başlık çevresi her zaman görselden okunur.

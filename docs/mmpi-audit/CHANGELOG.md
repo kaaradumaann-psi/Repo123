@@ -763,3 +763,69 @@ ve sayısal kuralları** çıkarır (bağlam ekonomisi: tam OCR metni okunmaz).
 ### Kod değişikliği
 
 **YOK** — kanıt toplama aşaması sürüyor (kaynağın kalan klinik ölçek blokları).
+
+---
+
+## PHASE 9/10 — batch 7: D kod bloğu KAPANIŞI (kitap s.88-92)
+
+Tarih: 2026-09-21 · Kaynak: **s.88-89 (p52)** + **s.92 (p54 L)**
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 88 | p52 L | `273/723`, `274/724`, `275/725` + **T-eşiği:** "test 4 ve 7 birbirlerinin **5 T puanı** alanı içindeyse" | 3 kod **kodda YOK** |
+| 89 | p52 R | **`278/728`** + **T-eşiği:** "**K ve Hs, 50 T puanının altında** olduğunda ve/veya Ma yükseldiğinde intihar olasılığı dikkatle değerlendirilmelidir" | kod **YOK** (görsel doğrulandı) |
+| 92 | p54 L | `29/92` kapanışı (3 tip birey) · **`20/02`** · **`207`** | `29/92` ✓ MATCH · `20/02` ✓ MATCH · `207` **YOK** |
+
+**D (2) alt testi kod bloğu KAPANDI** (s.82-92).
+
+### ⚠️ Kritik bulgu — CONFLICT-030 (P1, OPEN)
+
+`src/scoring/mmpiSourceCodes.ts:305`:
+```ts
+return CODES[canonicalCode(code.slice(0, 2))];
+```
+**3+ ölçekli her kod ilk 2 haneye kırpılıyor.** Amprik olarak koşuldu: `273/723`,
+`274/724`, `275/725`, `278/728`, `270` → hepsi **`27/72`** kaydını döndürüyor;
+`207` → `20/02`; `213/231` → `12/21`; `231/321` → `23`; `248` → `24/42`;
+`742` → `47/74`.
+
+**Kapalı döngü kanıtı:** `27/72` kaydının `seeAlso` alanı *"273/723, 274/724,
+275/725, 278/728, 270 kodlarına da bakınız"* diyor → kullanıcı `274/724` için
+`27/72` metnini görür ve metin onu **tekrar `274/724`'e** yollar. **Bu kod
+tiplerinin içeriği kullanıcıya asla ulaşmaz.**
+
+**Yanlış metin eşlemesi:** `27/72` kaydının **6 cümlesinin tamamı** kaynağın
+s.88'deki **`273/723`** metniyle birebir aynıdır; kaynağın `27/72` **ana kod**
+metni (s.87) kodda **hiç yoktur** → `UNVERIFIED-CODE-001`.
+
+### CONFLICT-027 genişletmesi
+
+Altı yeni koşul belgelendi (`278/728` K·Hs<50 T; `274/724` 5 T fark;
+`275/725` 4 düşük; `273/723` Hs yükselmiş; `274/724` 3 yükselmiş; `284/824`
+4·2·8 5 T alanı) → kapsam **13 örneğe** çıktı. `CodeInterpretation` tipinde
+**koşul alanı yok**.
+
+### Yeni OCR kuralı
+
+`OCR_ISSUES.md` → **SENTENCE-SKIP**: OCR, s.92'de bir cümleyi
+("Çoğu (özellikle test 1 düşük ise) fiziksel olarak çekici olmadığını da düşünür.")
+**tamamen atladı**; kod bu cümleyi içerdiği için OCR'a güvenilseydi **sahte
+"kaynakta yok" bulgusu** üretilecekti.
+
+### Kapsam tablosu (CONFLICT-024)
+
+| Blok | Kodda VAR | Kodda YOK |
+|---|---|---|
+| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
+| D (s.79-92) | 9 | 18 |
+| **Toplam** | **18** | **40** |
+
+### Doğrulama
+
+Kod değişikliği **YOK** (karar tüm kod seti çıkarıldıktan sonra verilecek).
+`npm run typecheck` · `npm test` · `npm run build` → aşağıda.
+
+### Çelişki tablosu
+
+Açık **11** → 0 P0 · **6 P1** (003, 004, 005, 024, 027, **030**) · 4 P2 (006,
+007, 022, 025) · 1 P3 (026). FIXED 10 · REJECTED 7.

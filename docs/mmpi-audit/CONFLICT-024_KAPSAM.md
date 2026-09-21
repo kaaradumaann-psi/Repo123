@@ -134,3 +134,58 @@ Kodda üçlü kod altyapısı **hiç yok** (CONFLICT-024).
 
 **D bloğu güncel sayım:** Kodda **VAR 6** (`21/12`, `23`, `24/42`, `25/52`,
 `26/62`, `27/72`, `28/82`, `29/92`) · **YOK 16+**
+
+
+---
+
+## D (2) alt testi kod bloğu — KAPANIŞ (s.82-92) · batch 7
+
+| Kod | Kaynak | Kodda | Not |
+|---|---|---|---|
+| `21/12` | s.82 | ✅ VAR | |
+| `23` | s.82-83 | ✅ VAR | |
+| `24/42` | s.84 | ✅ VAR | |
+| `25/52` | s.86 | ✅ VAR | |
+| `26/62` | s.87 | ✅ VAR | |
+| `27/72` | s.87 | ⚠️ VAR ama **metni 273/723'ün** (CONFLICT-030) | |
+| `28/82` | s.90 | ✅ VAR | |
+| `29/92` | s.91-92 | ✅ VAR | 3 tip birey + yüksek enerji ✓ |
+| `20/02` | s.92 | ✅ VAR | tanı: Pasif-agresif ✓ |
+| `270` | s.90 | ❌ YOK | → `27/72` kaydına düşüyor |
+| `273/723` | s.88 | ❌ YOK | → `27/72` kaydına düşüyor |
+| `274/724` | s.88 | ❌ YOK | → `27/72` kaydına düşüyor |
+| `275/725` | s.88-89 | ❌ YOK | → `27/72` kaydına düşüyor |
+| `278/728` | s.89 | ❌ YOK | → `27/72` kaydına düşüyor |
+| `207` | s.92 | ❌ YOK | → `20/02` kaydına düşüyor |
+| `281/821` | s.90 | ❌ YOK | |
+| `284/824` | s.91 | ❌ YOK | |
+| `482/842` | s.91 | ❌ YOK | atıf |
+| `287/827` | s.91 | ❌ YOK | |
+| `213/231` | s.83 | ❌ YOK | → `12/21`e düşüyor |
+| `231/321`, `234/324`, `237/327` | s.83 | ❌ YOK | **"en sık üçlü kodlar"** |
+| `243/432` | s.85 | ❌ YOK | |
+| `247/427/472`, `742` | s.85 | ❌ YOK | → `24/42` · `47/74`e düşüyor |
+| `248` (+`Yüksek F` alt-kodu) | s.86 | ❌ YOK | → `24/42`ye düşüyor |
+| `271/721`, `270/720` | s.87 | ❌ YOK | **"en sık üçlü kodlar"** |
+
+### D bloğu özeti
+
+**Kodda VAR: 9** (`21/12`, `23`, `24/42`, `25/52`, `26/62`, `27/72`, `28/82`,
+`29/92`, `20/02`) · **Kodda YOK: 18** (yukarıdaki ❌ satırları).
+
+### ⚠️ Mekanizma kanıtı (batch 7 — CONFLICT-030)
+
+`mmpiSourceCodes.ts:305` → `CODES[canonicalCode(code.slice(0, 2))]`
+
+**Kırpma yalnızca "eksik" değil, "yanlış" sonuç üretir:** 13 farklı üçlü/dörtlü
+kod **yanlış** iki-ölçekli kayda düşer. Örnek: `274/724` → `27/72` metni +
+`seeAlso` **kullanıcıyı tekrar `274/724`'e yollar** (kapalı döngü).
+Ayrıntı ve tam tablo: `CONFLICTS.md` → **CONFLICT-030**.
+
+### Hs + D blokları toplamı (CONFLICT-024 kapsamı tamamlandı)
+
+| Blok | Kodda VAR | Kodda YOK |
+|---|---|---|
+| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
+| D (s.79-92) | 9 | 18 |
+| **Toplam** | **18** | **40** |
