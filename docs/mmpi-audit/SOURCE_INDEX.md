@@ -99,6 +99,11 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **123** | **p69 R** | Mf yüksek puan (15 madde) + **eğitim düzeyi düşük/yüksek kadınlar** + **"Erkeklerde Mf değerlendirilmesi: 80 ve üstü T"** | **DONE** |
 | **124** | **p70 L** | **Mf T bantları — Erkek** (80+/70-79/60-69/41-59/**26-40**) + **Kadın >65** | **DONE** · **5/5 MATCH** (LOWCONF kurtarma ×2) |
 | **125** | **p70 R** | **Mf T bantları — Kadın** (56-65/41-55/26-40) + **"Erkeklerde sadece Mf yükselmesi"** + **Mf kodları** (51/15 … 57/75) | **DONE** · **4/4 MATCH** · eşik farkı → CONFLICT-027 |
+| **126** | **p71 L** | **Mf kodları II** (58/85, 59/95, 50/05) | **DONE** · 3/3 VAR · **Mf bloğu kapandı** |
+| **127** | **p71 R** | **6. Paranoya (Pa) Alt Testi girişi** + yüksek puan listesi (Graham 1987) + orta düzey liste (T: 65-70) | **DONE** · listeler ❌ yok → CONFLICT-026 |
+| **128** | **p72 L** | **Tablo 13 — Pa anahtarı (40 madde)** + norm + düşük/aşırı düşük listeleri | **DONE** · **P0 BİREBİR MATCH** (125 dpi görsel) |
+| **129** | **p72 R** | Pa listeleri devamı + **80 ve üstü T puanı** | **DONE** |
+| **130** | **p73 L** | **Pa T bantları** (70-79/60-69/45-59/27-44) | **DONE** · **5/5 MATCH** |
 | 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |

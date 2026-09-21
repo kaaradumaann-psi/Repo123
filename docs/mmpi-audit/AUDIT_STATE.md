@@ -33,11 +33,11 @@ Sayfa eşleme:
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi · **Ek 1 madde metinleri (s.215-233) DONE** — 1-566 bütünlük ✓; kritik madde etiketlerinde 14 uyuşmazlık → CONFLICT-023 |
 | 3 | Validity (kitap s.29-42) | **DONE** |
 | 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-62) | ✅ **DONE** — 15/15 konfig · F-K ✓ · TR ✓ · K+ ✓ · dikkatsizlik 12 çift/max 12/kesim 4 ✓ |
-| 5 | Clinical scales (kitap s.63-158) | **DONE (kaynak tarafı)** — **Tablo 8: Hs 11D/22Y = 33 ✓ birebir**, X̄ 13.19/15.89 ✓ MATCH; diğer anahtarlar Ek 9 ile doğrulandı (46/46); Bölüm 5 madde tablosu **içermez** |
+| 5 | Clinical scales (kitap s.63-158) | **DONE (kaynak tarafı)** — **Tablo 8: Hs 33 ✓** · **Tablo 9: D 60 ✓** · **Tablo 10: Hy ✓** · **Tablo 11: Pd 50 ✓** · **Tablo 12: Mf 60 ✓** · **Tablo 13: Pa 40 ✓** — beşi de **birebir MATCH**; diğer anahtarlar Ek 9 (46/46) |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd TAMAMI (s.107-120) + Mf anahtar/bantlar (s.122-125)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd TAMAMI (s.107-120) + Mf TAMAMI (s.121-126) + Pa anahtar/bantlar (s.127-130)**; Pa kod bloğu sırada; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,22 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**125** (Mf kodları) — PDF p70 R
-Sonraki hedef: **s.126+** — Mf kod bloğu devamı (`57/75`), PDF p71+
+**130** (Pa T bantları) — PDF p73 L
+Sonraki hedef: **s.131+** — Pa kod bloğu, PDF p73 R+
 
 Last completed:
+**PHASE 9/10 batch 15 — Mf kodları II + Pa (6) anahtarı ve bantları (s.126-130) DONE:**
+**🎯 İKİ P0 KATMANI TAM MATCH:** **Tablo 13 (Pa anahtarı)** → Doğru **25** +
+Yanlış **15** = **40** (kitabın "(Madde Sayısı: 40)" başlığıyla uyumlu) ✅ ·
+Pa normları **11.12 / 11.93** MATCH ✅ · **Pa T bantları 5/5 MATCH** ✅
+(80+/70-79/60-69/45-59/**27-44**, 55-59 alt notu dahil). **Mf bloğu kapandı:**
+`58/85`, `59/95`, `50/05` **3/3 VAR** ✅ → Mf (s.121-126) **9 VAR / 1 YOK**.
+**🔴 CONFLICT-026 genişledi:** kaynağın **4 Pa kontrol listesi** kodda **YOK**
+(yüksek 8 madde · orta-yüksek **T: 65-70** 6+ · düşük **T: 35-45** 18 · aşırı
+düşük **T<35** 17) — ayrıca kodun en düşük Pa bandı **T 27-44** olduğu için
+**T:35-45 / T<35 ayrımı hiç üretilemez**. **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 14 — Mf (5) bloğu: Tablo 12 + T bantları + kodlar (s.122-125) DONE:**
 **🎯 P0 — Tablo 12 (Mf anahtarı) BİREBİR MATCH:** Doğru **28** + Yanlış **32** =
 **60** (kitabın "(Madde Sayısı: 60)" başlığıyla uyumlu) ✅ · (*) kadınlarda ters
@@ -287,8 +299,10 @@ Sıradaki batch'ler (öncelik sırası):
    **Pd bloğu kapandı**; Mf (5) başladı
 9e. ~~**Mf (5) bloğu — s.122-125**~~ ✅ **TAMAMLANDI** (batch 14) —
    **Tablo 12 birebir MATCH**, bantlar 9/9 MATCH; `564/654` eksik
-9f. **Mf kod bloğu devamı — s.126+ (PDF p71 L+)** → `57/75` + Pa (6) bloğuna
-   geçiş → sonra Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
+9f. ~~**Mf kod bloğu II + Pa anahtarı/bantları — s.126-130**~~ ✅ **TAMAMLANDI**
+   (batch 15) — **Tablo 13 BİREBİR MATCH**, Pa bantları 5/5 MATCH
+9g. **Pa kod bloğu — s.131+ (PDF p73 R+)** → sonra Pt (7), Sc (8), Ma (9),
+   Si (0)
    → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
    sonra, tek tasarım kararı olarak)
 
@@ -404,7 +418,8 @@ FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 01
 
 ## Last update
 
-2026-09-21 — Oturum 6: **PHASE 9/10 batch 14 — Mf bloğu: Tablo 12 BİREBİR MATCH** (s.122-125); bantlar 9/9, CONFLICT-027 P1 eşik farkı
+2026-09-21 — Oturum 6: **PHASE 9/10 batch 15 — Pa anahtarı (Tablo 13) BİREBİR MATCH + Pa bantları 5/5** (s.126-130); Mf bloğu kapandı, CONFLICT-026 genişledi
+Önceki: **PHASE 9/10 batch 14 — Mf: Tablo 12 BİREBİR MATCH** (s.122-125)
 Önceki: **PHASE 9/10 batch 13 — Pd bloğu KAPANDI** (s.118-121); CHANGE-012, CONFLICT-035 FIXED
 Önceki: **PHASE 9/10 batch 11 — Pd kod bloğu I** (s.111-113)
 Önceki: Oturum 5: **PHASE 9/10 batch 10 — Pd anahtarı + T bantları** (s.107-110)
@@ -436,6 +451,8 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                          498/948, 40/04 + Mf (5) girişi),
                 p69-p70 (kitap s.122-125: Tablo 12 Mf anahtarı BİREBİR MATCH +
                          Mf T bantları 9/9 MATCH + Mf kodları),
+                p71-p73 (kitap s.126-130: Mf kodları II + Pa (6) girişi +
+                         Tablo 13 Pa anahtarı BİREBİR MATCH + Pa T bantları 5/5),
                 p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
                 p61-p63 (kitap s.107-110: TABLO 11 Pd anahtarı + Pd T bantları),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),

@@ -2262,3 +2262,122 @@ Kod durumu:
 | `57/75` | **VAR** ✅ | |
 
 Status: 6/7 VAR · `564/654` **MISSING** → CONFLICT-024
+
+---
+
+# PHASE 9/10 batch 15 — Mf kod bloğu II + **Pa (6) anahtarı ve bantları** (kitap s.126-130)
+
+## SOURCE-CL-016 · Mf kod bloğu II (s.126, p71 L)
+
+Fact — aynen:
+> "**58/85 Kodu**
+> Bu koddaki erkekler içe dönüktür ve zamanlarının çoğunu düşünme ile
+> geçirirler. Genellikle konfüzyonda, mutsuz ve diğerlerine yabancılaşmış oldukları
+> duygusunu yaşarlar ve ev çatışmaları vardır. **Yorum yapılırken 5 dikkate
+> alınmadan diğer yükselen iki alt teste bakılmalıdır.**"
+> "**59/95 Kodu**
+> Erkeklerde 5'in yükselmesi açık eyleme vuruk davranışların azaldığını gösterir,
+> burada **entelektüalizasyonun, inkârın, rasyonalizasyonun aşırı kullanımı**
+> vardır. Aslında bu koddaki erkeklerin çoğu akademik olarak başarılıdır.
+> Duygusal bağımlılık (anne bağımlılığı) ve benlik atılganlığının olmaması sorun
+> alanlarıdır. Kadınlarda 5 alt testinin yükselmesi saldırganlığın açığa
+> çıkmasını gösterir, yarışmacıdırlar (erkeklerle yarışırlar) […]"
+> "**50/05 Kodu**
+> Bu koddaki erkekler içe dönüktür ve genellikle kişisel ve entelektüel izolasyon
+> yaşarlar […] Aşırı kontrollüdürler ve her şeyi aşırı idealize ederler. Sosyal
+> açıdan beceriksizdirler […]"
+
+Kod: `58/85` **VAR** ✅ · `59/95` **VAR** ✅ · `50/05` **VAR** ✅ (üçü de gövde MATCH)
+Status: **VERIFIED** — **Mf bloğu tam kapandı** (s.121-126)
+
+## SOURCE-CL-017 · Pa (6) alt testi girişi + yüksek puan listesi (s.127, p71 R)
+
+Fact — aynen:
+> "**6. Paranoya (Pa) Alt Testi**
+> Paranoya geç erişkinlik döneminde başlayan ve değişik koşullar altında ortaya
+> çıkan başkalarının davranışını kötü niyetli olarak yorumlayan sürekli bir
+> güvensizlik ve kuşkuculuk durumudur. Pa alt testini oluşturan maddeler ve
+> puanlama yönü **Tablo 13**'de gösterilmektedir.
+> **Pa alt testinde yüksek puan alan bir birey: (Graham 1987)**
+> 1. Açık psikotik bir davranış gösterir. 2. Düşünce bozukluğu vardır.
+> 3. Perseküsyon ve/veya grandioz türünde delüzyonları vardır.
+> 4. Referans fikirleri vardır. 5. Kendine kötü davranıldığını ya da kendisiyle
+> alay edildiğini düşünür. 6. Öfkeli ve güceniktir, kıskançlık içindedir.
+> 7. Savunma mekanizması olarak **yansıtmayı** kullanır.
+> 8. Tanı sıklıkla **şizofrenik ya da paranoid bozukluktur**."
+> "**Pa alt testinde orta düzeyde yüksek puan alan birey: (T: 65-70)** 1. Paranoid
+> uğraşları vardır. 2. Diğerlerinin tepkilerine aşırı duyarlıdır. 3. Kendini
+> yaşamda haksızlığa uğramış gibi hisseder. 4. Rasyonalize eder, kendi sorunları
+> için diğerlerini suçlar. 5. Şüpheci, savunucudur. […]"
+
+Kod: **her iki liste de YOK** ❌ → CONFLICT-026 kapsamı
+Status: **MISSING** (giriş metni okundu; listeler yok)
+
+## SOURCE-CL-018 · **Tablo 13 — Pa anahtarı (P0)** (s.128, p72 L)
+
+Fact — 125 dpi tam sayfa GÖRSEL okuma (`v_pa_tablo13_full.png`):
+> **Tablo 13. Paranoya alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 40)**
+> **Doğru (25 madde):** 15, 16, 22, 24, 27, 35, 110, 121, 123, 127, 151, 157,
+> 158, 202, 275, 284, 291, 293, 299, 305, 317, 338, 341, 364, 365
+> **Yanlış (15 madde):** 93, 107, 109, 111, 117, 124, 268, 281, 294, 313, 316,
+> 319, 327, 347, 348
+> **Erkeklerde ortalama: 11.12, kadınlarda ortalama: 11.93 (Savaşır, 1981).**
+
+**Kod karşılaştırması** (`cmp-tablo13.ts`):
+| | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| Doğru | 25 | 25 | **birebir** ✅ |
+| Yanlış | 15 | 15 | **birebir** ✅ |
+| Toplam | **40** | **40** | kitabın "(Madde Sayısı: 40)" başlığıyla **uyumlu** ✅ |
+| Norm erkek | 11.12 | 11.12 | ✅ |
+| Norm kadın | 11.93 | 11.93 | ✅ |
+
+Status: **VERIFIED** — P0 katmanı **TAM MATCH**
+
+## SOURCE-CL-019 · Pa düşük / aşırı düşük puan kontrol listeleri (s.128-129)
+
+Fact — aynen:
+> "**Pa alt testinde düşük puan alan bir birey: (T: 35-45)**
+> 1. Psikiyatrik hasta değilse ve herhangi bir sorunu yoksa: a. Kibar, duygusal ve
+> naziktir. b. Huzurlu ve yumuşak kalplidir. […] l. Kendine güveni azalmıştır.
+> m. Beklenti düzeyi yüksektir, endişeye eğilimlidir.
+> 2. Eğer psikiyatrik hastaysa ve başka uyumsuzlukları da varsa: a. Yaşama daha
+> paranoid bir uyumu vardır. […] e. Öfkeli ve güceniktir."
+> "**Pa alt testinde aşırı derecede düşük puan alan bir birey: (T<35)**
+> 1. Açık paranoid bozukluğu olabilir. 2. Delüzyonları olabilir, şüpheler,
+> etkilenme düşünceleri gösterebilir. 3. Semptomları Pa alt testinde yüksek puan
+> alan bireylerden daha belirsizdir. 4. Baştan savıcı ve savunucudur. 5. Utangaç,
+> sırlarla dolu ve içe çekilmiştir."
+> (T: 35-45 ve T<35 listelerinin devamı s.129'da: "a. Neşelidir. […] ı. Kendini
+> kontrol eder, temkinlidir." / "2. Eğer psikiyatrik hastaysa ya da uyumsuzluğun
+> diğer göstergeleri varsa: … l. Psikotik semptomlar pek görülmez, bu nedenle
+> psikoz tanısı konulmaz.")
+
+Kod: **dört kontrol listesinin hiçbiri YOK** ❌ (`grep` ile doğrulandı: "Kibar,
+duygusal ve nazik", "Açık paranoid bozukluğu olabilir", "Baştan savıcı ve
+savunucudur", "İnsiyatif gösterir" → hepsi **YOK**)
+**Not:** Bu listeler **T: 35-45** ve **T<35** eşiklerine bağlı; kodun en düşük
+Pa bandı **T 27-44**'tür → kod bu alt ayrımı **yapamaz**.
+Status: **MISSING** → CONFLICT-026 (genişletme)
+
+## SOURCE-CL-020 · Pa T bantları (s.129-130, p72 R – p73 L)
+
+Fact — aynen (**Visual: CONFIRMED** `v_pa_tablo13_full.png` + OCR p73_L):
+> "**80 ve üstü T puanı:** Kuşkulu, kızgın, küskün ve durumların doğrudan
+> kendilerine yöneldiği biçiminde yorum yapan kişilerdir. Bu bireylerin çoğu
+> paranoyaktır, referans fikirleri vardır, temel savunma mekanizması yansıtmadır.
+> Gerçeği değerlendirme bozuktur, delüzyonlar perseküsyon ve/veya grandioz
+> biçimindedir."
+> "**70-79 T puanı:** Diğerlerini suçlama ve hostilite temel özelliklerdir. […]"
+> "**60-69 T puanı:** Duyarlı bireylerdir, kendilerinin ve diğerlerinin
+> duygularının [kolayca incinebileceği türünde düşünceleri vardır] […]"
+> "**45-59 T puanı:** Bu kişiler diğerlerini değerlendirmede esnektirler. […]
+> **55-59 T puanı arasında olan bireyler anlayışlı, duyarlı kişilerdir.**"
+> "**27-44 T puanı:** İki tip insan bu puanı verebilir: Diğerlerine duyarlılığı
+> olmayan kişiler ve çok fazla şüphesi ve endişesi olan kişiler (bunlar paranoya
+> maddelerini atlarlar) […]"
+
+Kod: `PA_T_BANDS` → **5/5 sınır + metin BİREBİR MATCH** ✅
+(`T ≥ 80`, `T 70-79`, `T 60-69`, `T 45-59`, `T 27-44`; 55-59 alt notu dahil)
+Status: **VERIFIED**

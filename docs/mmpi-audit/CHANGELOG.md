@@ -1167,3 +1167,41 @@ CONFLICT-027: **32 → 33 örnek**.
 
 **YOK** (salt okuma + doğrulama; eşik farkı CONFLICT-027'de kayıtlı, karar
 tüm kod seti çıkarıldıktan sonra verilecek).
+
+---
+
+## PHASE 9/10 — batch 15: Mf kodları II + **Pa (6) anahtarı ve bantları** (kitap s.126-130)
+
+Tarih: 2026-09-21 · Kaynak: **s.126-130** (PDF p71 L – p73 L)
+
+### 🎯 İki P0 katmanı daha TAM MATCH
+
+| | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Tablo 13 (Pa anahtarı)** | 25 + 15 = **40** | 25 + 15 = 40 | ✅ **BİREBİR MATCH** |
+| Pa normları | 11.12 / 11.93 | 11.12 / 11.93 | ✅ MATCH |
+| **Pa T bantları** | 80+/70-79/60-69/45-59/27-44 | `PA_T_BANDS` | ✅ **5/5 MATCH** |
+
+### Mf bloğu tam kapandı (s.121-126)
+
+`58/85` ✅ · `59/95` ✅ · `50/05` ✅ → **Mf bloğu 9 VAR / 1 YOK**
+(yalnız `564/654` eksik).
+
+### Yeni bulgu — CONFLICT-026 genişletmesi
+
+Kaynağın **Pa kontrol listeleri** kodda **yok** (4 liste):
+- yüksek puan (Graham 1987, 8 madde)
+- **orta düzeyde yüksek** puan, **T: 65-70** (6+ madde)
+- **düşük** puan, **T: 35-45** (13+5 madde)
+- **aşırı derecede düşük** puan, **T<35** (5+12 madde)
+
+**Ek sorun:** kodun en düşük Pa bandı **T 27-44** olduğu için **T: 35-45** ve
+**T<35** ayrımı **hiç üretilemez** (band ikisini de kapsıyor).
+
+### Görsel doğrulamalar
+
+`v_pa_tablo13_full.png` (125 dpi tam sayfa — Tablo 13 + Pa listeleri + 80+ bandı)
+
+### Kod değişikliği
+
+**YOK** (salt okuma + doğrulama).

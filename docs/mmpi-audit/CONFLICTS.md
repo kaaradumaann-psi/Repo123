@@ -1453,3 +1453,36 @@ kaynak eşiği henüz doğrulanmadı; **Mf'de doğrulandı ve sapma kanıtlandı
 | `'564'` | `56/65` | 564/654 |
 
 → CONFLICT-030 örnekleri **34 → 35**.
+
+---
+
+## CONFLICT-026 · genişletme (Pa bloğu — s.127-129) — **kontrollü liste katmanı**
+
+Hs ve D bloklarında olduğu gibi, Pa'da da kaynağın **T eşiğine bağlı kontrol
+listeleri** kodda **yok**:
+
+| # | Kaynak listesi | T eşiği | Madde sayısı | Kod |
+|---|---|---|---|---|
+| 1 | "Pa alt testinde **yüksek** puan alan bir birey (Graham 1987)" | — | 8 | **YOK** ❌ |
+| 2 | "Pa alt testinde **orta düzeyde yüksek** puan alan birey" | **T: 65-70** | 6+ | **YOK** ❌ |
+| 3 | "Pa alt testinde **düşük** puan alan bir birey" | **T: 35-45** | 13 + 5 | **YOK** ❌ |
+| 4 | "Pa alt testinde **aşırı derecede düşük** puan alan bir birey" | **T<35** | 5 + 12 | **YOK** ❌ |
+
+**Ek sorun:** 3 ve 4 numaralı listeler **T: 35-45** ve **T<35** eşiklerini
+kullanır; kodun en düşük Pa bandı **T 27-44**'tür → kod bu alt ayrımı **hiçbir
+şekilde üretemez** (band aralığı iki kaynak eşiğini de kapsıyor ve ayırmıyor).
+
+→ CONFLICT-026 örnekleri genişledi (Hs 5 madde + D 18 madde → **+4 Pa listesi**).
+
+---
+
+## CONFLICT-024 · genişletme (Mf bloğu II — s.126)
+
+| # | Kaynak başlığı | Sayfa | Durum |
+|---|---|---|---|
+| 1 | `58/85` | s.126 | **VAR** ✅ |
+| 2 | `59/95` | s.126 | **VAR** ✅ |
+| 3 | `50/05` | s.126 | **VAR** ✅ |
+
+→ **Mf bloğu tam kapandı (s.121-126): 9 VAR / 1 YOK.** Kod seti toplamı
+değişmedi: **36 VAR / 71 YOK.**

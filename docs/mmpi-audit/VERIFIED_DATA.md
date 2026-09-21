@@ -688,3 +688,22 @@ kadrajı** (spine tablonun 5. sütunundan geçiyor) · **Ek 9 ile çapraz kontro
 
 **Kanıt script'i:** `scripts/mmpi-audit/cmp-tablo12.ts` (kaynak listeleri gömülü,
 yeniden koşulabilir).
+
+
+---
+
+# PHASE 9/10 batch 15 — Pa (6) anahtarı ve bantları (kitap s.127-130)
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Tablo 13 anahtarı (P0)** | Doğru **25** + Yanlış **15** = **40** | 25 + 15 = 40 | ✅ **BİREBİR MATCH** |
+| Norm — erkek | 11.12 (Savaşır 1981) | 11.12 | ✅ MATCH |
+| Norm — kadın | 11.93 (Savaşır 1981) | 11.93 | ✅ MATCH |
+| **Pa T bantları (5 bant)** | 80+/70-79/60-69/45-59/**27-44** | `PA_T_BANDS` | ✅ **5/5 MATCH** (metin + 55-59 alt notu dahil) |
+| **Pa kontrol listeleri (4)** | yüksek (8) · orta-yüksek T:65-70 (6+) · düşük T:35-45 (18) · aşırı düşük T<35 (17) | **hiçbiri yok** | ❌ **MISSING** → CONFLICT-026 |
+| Mf kodları II | `58/85`, `59/95`, `50/05` | **3/3 VAR** | ✅ MATCH |
+
+**Kitabın kendi başlığı doğrulandı:** Tablo 13 "(Madde Sayısı: 40)" → 25 + 15 =
+**40** ✓ (kaynak içi tutarlılık).
+
+**Kanıt script'i:** `scripts/mmpi-audit/cmp-tablo13.ts`.
