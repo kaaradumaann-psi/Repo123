@@ -1270,3 +1270,38 @@ Tarih: 2026-09-22 · Kaynak: **s.137-141** (PDF p76 R – p78 R)
 
 `cmp-tablo14.ts` (anahtar birebir) · `cmp-pt-batch17.ts` (kod kapsamı) ·
 typecheck **0** · testler **316/316 PASS** · **kod değişikliği YOK**.
+
+---
+
+## PHASE 9/10 — batch 18: Pt kapanışı + Sc (8) bloğu TAMAMI (kitap s.142-148)
+
+Tarih: 2026-09-22 · Kaynak: **s.142-148** (PDF p79 L – p82 L)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 142 | p79 L | Pt kapanışı: `794`, `70/07` | 2/2 **VAR** ✅ → **Pt: 16 VAR / 1 YOK** |
+| 143 | p79 R | **Sc (8) Alt Testi** başlığı + Graham 1987 yüksek puan listesi | — |
+| 144 | p80 L | **Tablo 15 (Sc anahtarı — 78 madde)** + norm + düşük puan listesi | 🎯 **BİREBİR MATCH** |
+| 145 | p80 R | **Sc T bantları** (100+ / 75+ / 60-74) | bantlar MATCH |
+| 146 | p81 L | Sc bantları devamı (45-59 / 21-44) + **Sc kod bloğu I** (`81/18`…`87/78`, `8726`) | 7 VAR / 1 YOK |
+| 147 | p81 R | **Şekil 22 — Pa·Pt·Sc Paranoid Vadi** + `89/98` | VAR ✅ · vadi konfigi **YOK** |
+| 148 | p82 L | `80/08` + Tablo 16 atfı | VAR ✅ → **Sc: 9 VAR / 1 YOK** |
+| 149 | p82 R | **Ma (9) Alt Testi** başlıyor | sıradaki blok |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 15 birebir MATCH:** Doğru 59 + Yanlış 19 = **78** (kitap başlığı 78)
+- **🎯 Sc normları birebir MATCH:** erkek **29.82** / kadın **31.06**
+- **Sc T bantları 5/5 MATCH** (`100+ / 75-99 / 60-74 / 45-59 / 21-44`)
+- **Sc kod bloğu 9 VAR / 1 YOK** — `8726/Yüksek 9` ("Ajite şizofren") çok-ölçekli kod yok
+- **🔴 CONFLICT-038 (P2, yeni):** "paranoid vadi" **iki farklı sayıyla** tanımlı:
+  s.132 (`6,8 ≈ 70 T`, `7 = 10 T aşağıda`) ↔ s.146 (`6,8 > 80 T`, `7 = 70 T`)
+  → kaynak içi tutarsızlık; kod s.146 sürümünü izler ama "7 de 70 T" koşulu yok
+- **CONFLICT-033: 6. konfig** — Şekil 22 Pa·Pt·Sc paranoid vadi (kodda yok)
+- **Kümülatif: 141 başlık → 103 VAR / 40 YOK**
+
+### Doğrulama
+
+`cmp-tablo15.ts` (anahtar + norm birebir) · `cmp-sc-batch18.ts` (kod kapsamı) ·
+`cmp-pt-batch18.ts` (Pt kapanışı) · typecheck **0** · testler **316/316 PASS** ·
+**kod değişikliği YOK**.

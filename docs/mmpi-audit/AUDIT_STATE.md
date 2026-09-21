@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs + D + Hy + Pd + Mf + Pa + Pt TAMAMI (s.63-141)**; sıradaki **Sc (8)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs + D + Hy + Pd + Mf + Pa + Pt + Sc TAMAMI (s.63-148)**; sıradaki **Ma (9)** (s.149); **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D + Hy + Pd + Mf + Pa yorum katmanı DONE; **CONFLICT-036 (Pa `64/46` gövdesi eksik + yanlış blok metni)**; CONFLICT-024/025/026/027/030/031 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,25 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**141** (Pt kod bloğu — `789`, `79/97`) — PDF p78 R
-Sonraki hedef: **s.142+** — Pt bloğu devamı/kapanışı → **Sc (8) Alt Testi** → `Ma (9)` → `Si (0)`
+**148** (`80/08` — Sc bloğu kapandı) — PDF p82 L
+Sonraki hedef: **s.149 = Ma (9) Alt Testi** (PDF p82 R) → Tablo 16 (Ma anahtarı, s.150) → Ma bantları → Ma kod bloğu → sonra **Si (0)**
 
 Last completed:
+**PHASE 9/10 batch 18 — Pt kapanışı + Sc (8) bloğu TAMAMI (s.142-148) DONE:**
+**Pt kapandı:** `794` ✅ + `70/07` ✅ → **Pt: 16 VAR / 1 YOK**.
+**🎯 İKİ P0 KATMANI BİREBİR MATCH:** **Tablo 15 (Sc anahtarı)** → Doğru **59** +
+Yanlış **19** = **78** (kitabın "Madde Sayısı: 78" başlığıyla uyumlu) ✅ ve
+**Sc normları 29.82 / 31.06** ✅ (140 dpi tam sayfa görsel okuma). **Sc T bantları
+5/5 MATCH** ✅ (`100+ / 75-99 / 60-74 / 45-59 / 21-44`). **Sc kod bloğu:
+9 VAR / 1 YOK** — yalnız **`8726/Yüksek 9`** ("Ajite şizofren") çok-ölçekli kod
+eksik. **🔴 YENİ CONFLICT-038 (P2):** "paranoid vadi" **iki farklı sayıyla**
+tanımlı — s.132 "6,8 ≈ **70 T**, 7 ondan **10 T** aşağıda" ↔ s.146 "6,8 **80
+üstünde**, 7 de **70 T**" → **kaynak içi tutarsızlık**; kod s.146 sürümünü izler
+ama "**7 de 70 T**" koşulunu taşımaz → CONFLICT-027 genişlemesi.
+**Şekil 22 (Pa·Pt·Sc Paranoid Vadi)** kodda yok → CONFLICT-033 **6. konfig**.
+**Kümülatif: 141 başlık → 103 VAR / 40 YOK.** Kod değişikliği YOK.
+
+Önceki:
 **PHASE 9/10 batch 17 — Pt (7) Psikasteni bloğu (s.137-141) DONE:**
 **🎯 P0 — Tablo 14 (Pt anahtarı) BİREBİR MATCH:** Doğru **39** + Yanlış **9** =
 **48** (kitabın "Madde Sayısı: 48" başlığıyla uyumlu) ✅ — 125 dpi tam sayfa
@@ -334,8 +349,12 @@ Sıradaki batch'ler (öncelik sırası):
    (batch 16) — 9 VAR / 6 YOK; CONFLICT-036 açıldı; s.136 BOŞ
 9h. ~~**Pt (7) anahtarı + T bantları + kod bloğu — s.137-141**~~ ✅ **TAMAMLANDI**
    (batch 17) — Tablo 14 birebir MATCH, bantlar 5/5, 14 VAR / 1 YOK (`789`)
-9ı. **Pt bloğu devamı/kapanışı — s.142+ (PDF p79 L+)** → **Sc (8)** → `Ma (9)` →
-   `Si (0)` → **CONFLICT-024 / 030 / 031 / 033 KARARI**
+9ı. ~~**Pt kapanışı + Sc (8) bloğu — s.142-148 (PDF p79 L – p82 L)**~~
+   ✅ **TAMAMLANDI** (batch 18) — Tablo 15 birebir MATCH, bantlar 5/5,
+   Sc bloğu 9 VAR / 1 YOK
+9j. **Ma (9) — s.149+ (PDF p82 R+)**: Tablo 16 (anahtar, s.150) → bantlar →
+   Ma kod bloğu → sonra **Si (0)** → **CONFLICT-024 / 027 / 030 / 031 / 033 / 038
+   KARARI**
    → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
    sonra, tek tasarım kararı olarak)
 
@@ -444,11 +463,13 @@ Bilinen kısıtlar:
 | CONFLICT-035 | P2 | 40/04'te "**negatifik**" ↔ kaynak "**vegetatif**" depresyon (s.120) | ✅ **FIXED** (CHANGE-012) |
 | CONFLICT-036 | P1 | **Pa bloğu `64/46` gövdesi kodda yok**; `64` çağrısı Pd `46/64` metnini döndürüyor (s.130-131) | OPEN |
 | CONFLICT-037 | P2 | Pt normu: s.138 metni 29.90 (Savaşır 1981 atfı) ↔ Tablo 30 29.20 | ✅ **REJECTED** (kod Tablo 30'u izler) |
+| CONFLICT-038 | P2 | **"Paranoid vadi" iki farklı sayıyla tanımlı** (s.132: 70 T/10 T ↔ s.146: 80 üstü/70 T) | OPEN |
 
-Kalan açık: **16 çelişki** → 0 P0 · 9 P1 (003, 004, 005, 024, 027, 030, 031, 033, 036) · 5 P2 (006, 007, 022, 025, 034) · 2 P3 (026, 032).
+Kalan açık: **17 çelişki** → 0 P0 · 9 P1 (003, 004, 005, 024, 027, 030, 031, 033, 036) · 6 P2 (006, 007, 022, 025, 034, 038) · 2 P3 (026, 032).
 **CONFLICT-027 örnek sayısı: 36** (+3: paranoid vadi · `698/968` 5 T kuralı · 456 örüntüsü).
 **CONFLICT-033 kapsamı: 5 konfig** (+1: Scarlett O'Hara vadisi, Şekil 21).
-**CONFLICT-024 kümülatif kapsam: 93 VAR / 39 YOK** (Pt bloğu 14/1).
+**CONFLICT-024 kümülatif kapsam: 103 VAR / 40 YOK** (Sc bloğu 9/1).
+**CONFLICT-033 kapsamı: 6 konfig** (+Pa·Pt·Sc paranoid vadi, Şekil 22).
 **FIXED: 11** · **REJECTED: 8** (001, 002, 013, 014, 016, 018, 021, 037).
 FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 **Güncel kapsam (CONFLICT-024):** kod seti **36 VAR / 71 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd 13+Mf 1).

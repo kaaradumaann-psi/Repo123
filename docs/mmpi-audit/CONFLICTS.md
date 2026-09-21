@@ -1554,3 +1554,43 @@ atıf farkı**.
 
 Resolution: **REJECTED (kod doğru).** Kod Tablo 30'u izlemeye devam eder. Fark,
 gelecekteki bir değişiklikte yanlışlıkla "düzeltme" yapılmaması için belgelendi.
+
+
+---
+
+## CONFLICT-038 — "Paranoid vadi" iki farklı sayıyla tanımlı (kaynak içi fark) (P2, OPEN)
+
+**Source A** (s.132, `68/86` bağlamı, *Visual: CONFIRMED*):
+> "Paranoid vadide 6 ve 8 alt testleri **70 T puanı civarındadır** ve 7 alt testi
+> **10 T puanı aşağıdadır**."
+
+**Source B** (s.146, `86/68` bağlamı, *Visual: CONFIRMED*):
+> "**6 ve 8'in T puanı 80'nin üstünde, 7 de 70 T puanındadır.** … 'Paranoid vadi'
+> ya da 'Psikotik V' olarak adlandırılır."
+
+**Değerlendirme:** Kitap aynı kavramı iki yerde **farklı sayılarla** tanımlıyor
+(70 civarı/10 T altı ↔ 80 üstü/70). Bu bir **kaynak içi tutarsızlıktır**
+(DECISION-015 sınıfı). Uzlaştırıcı yorum: s.132 "vadinin tabanı/orta şiddet"
+durumunu, s.146 "belirgin vadi" durumunu anlatıyor olabilir; ancak bu **çıkarım**
+olup kaynakta yazılı değildir.
+
+**Current implementation:** kod `68/86` metni s.146 sürümünü izler ama sayısal
+koşulu yumuşatır: "6 ve 8'in T puanı 80'in üzerinde **ve 7 daha düşükse**" —
+kaynağın "**7 de 70 T puanındadır**" ifadesi **kodda yok**.
+
+Status: **OPEN** — (a) hangi tanımın normatif olduğu, (b) kodun sayısal koşulu
+taşıyıp taşımayacağı, CONFLICT-024/027/030/031/033 ile birlikte **tek tasarım
+kararında** ele alınacak. Kod değişikliği YOK.
+
+---
+
+## CONFLICT-027 genişlemesi — Sc bloğu (batch 18)
+
+| # | Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|---|
+| 1 | `86/68` paranoid vadi: "6 ve 8 **80 T üstünde**, 7 de **70 T**" | s.146 | YOK (kod "7 daha düşükse" der) |
+| 2 | `8726`/Yüksek 9: "Ajite şizofren bir hastayı göstermektedir" | s.146 | YOK (çok-ölçekli kod) |
+| 3 | Sc "Düşük Puanlar: **T 45**" alt sınır etiketi | s.146 | kod bandı `21-44` (etiket farkı, P3) |
+
+**CONFLICT-033 kapsamı (2. vadi):** **Şekil 22 — Pa · Pt · Sc paranoid vadi**
+("hepsini doğru yanıtlaması şeklinde de ortaya çıkar") kodda yok. Kapsam: 6 konfig.

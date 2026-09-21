@@ -2699,3 +2699,120 @@ Kod karşılaştırması (`cmp-pt-batch17.ts`):
 
 **Pt bloğu kapsamı: 14 VAR / 1 YOK.**
 Status: **VERIFIED** (kaynak + kod karşılaştırması)
+
+---
+
+# PHASE 9/10 batch 18 — Pt kapanışı + Sc (8) anahtarı/bantları/kod bloğu (kitap s.142-148)
+
+Sayfa eşlemesi (OCR başlıklarıyla doğrulandı): **p79 L = 142 · p79 R = 143 ·
+p80 L = 144 · p80 R = 145 · p81 L = 146 · p81 R = 147 · p82 L = 148 ·
+p82 R = 149 (Ma başlıyor)**
+
+## SOURCE-PT-007 · Pt bloğu kapanışı (s.142) — **Visual: CONFIRMED**
+
+`794` (s.142): "…**2 ve 8 alt testleri, en sık görülen üçüncü yüksekliktir.**
+… **Kadınlarda eğer 5 alt testi, 40 T puanının altında ise aynı örüntü vardır.**"
+`70/07` (s.142): utangaç, içedönük, sosyal becerilerden yoksun, gergin ve endişeli…
+
+Kod: `794` → `79/97` **VAR** ✅ · `70/07` → `70/07` **VAR** ✅ (gövde MATCH)
+Status: **VERIFIED** → **Pt bloğu kapandı: 16 VAR / 1 YOK**
+
+## SOURCE-SC-001 · Tablo 15 — Sc anahtarı (s.144) — **Visual: CONFIRMED** (140 dpi tam sayfa)
+
+> "**Tablo 15. Şizofreni alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 78)**"
+
+| | Madde numaraları |
+|---|---|
+| **Doğru** (5 satır = 59) | 15 16 21 22 24 32 33 35 38 40 41 47 · 52 76 97 104 121 156 157 159 168 179 182 194 · 202 210 212 238 241 251 259 266 273 282 291 297 · 301 303 305 307 312 320 324 325 332 334 335 339 · 341 345 349 350 352 354 355 356 360 363 364 |
+| **Yanlış** (2 satır = 19) | 8 17 20 37 65 103 119 177 178 187 192 · 196 220 276 281 306 309 322 330 |
+| **K Eklemeli** | ✓ |
+| **Norm** | "Erkeklerde ortalama: **29.82**, kadınlarda ortalama: **31.06** (Savaşır, 1981)" |
+
+Kod `SCORING_KEYS.Sc`: Doğru **59** + Yanlış **19** = **78** → **BİREBİR MATCH** ✅
+Norm `TURKISH_NORMS.Sc`: erkek **29.82** / kadın **31.06** → **BİREBİR MATCH** ✅
+Status: **VERIFIED** — script: `cmp-tablo15.ts`
+
+## SOURCE-SC-002 · Sc T bantları (s.145-146) — **Visual: CONFIRMED**
+
+> "**100 T puanı ve üstü:** Akut bozukluğun eşlik ettiği uzun süreli ciddi bir
+> stresin sonucunda ortaya çıkar. Bu kişiler tipik olarak şizofren değillerdir.
+> Daha çok akut psikotik reaksiyon içine giren hastalardır. Ayrıca kimlik
+> krizindeki ergenlerde de bu aralığa rastlanır. **T>95'in üzerinde olan değerler
+> akut durumsal stres ve ciddi özdeşim krizlerini gösterir.**"
+> "**75 T puanı ve üstü:** Yabancılaşma yaşayan ve doğru düşünemeyen bireyler
+> tarafından verilir. […] **T puanı 80'e yaklaştığında, mantıkta ve düşünmede
+> tuhaflık belirginleşirler. Gerçek şizoid düşünce süreci gözlenebilir.** […]"
+> "**60-74 T puanı:** Bu yükselme değerlendirilirken profilin tümü ele alınmalıdır.
+> 1. Bu yükselmenin alt sınırında ve nevrotik profillerde yükselme varsa…
+> 2. **65-74 T puanı aralığındaki değerlendirmede genel bir yabancılaşma ya da
+> örtük psikoz olup olmadığı araştırılmalıdır.**"
+> "**Düşük Puanlar: T 45** · **45-59 T puanı:** Bu bireylerin kuramsal ve pratik
+> görüşlerini normal bir biçimde bir araya getirdiklerini göstermektedir.
+> **21-44 T puanı:** Pratik ve gelenekseldirler…"
+
+Kod (`clinicalBands('Sc')`): `T ≥ 100` · `T 75-99` · `T 60-74` · `T 45-59` ·
+`T 21-44` → **5/5 bant MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-SC-003 · Sc kod bloğu — 10 başlık (s.146-148) — **Visual: CONFIRMED**
+
+`81/18` · `82/28` · `83/38` · `84/48` · `85/58` · `86/68` · `87/78` ·
+`8726/Yüksek 9` (s.146) · `89/98` (s.147) · `80/08` (s.148)
+
+Kod karşılaştırması (`cmp-sc-batch18.ts`):
+- **9 iki-ölçek kod → 9/9 VAR** ✅
+- **`8726` (çok-ölçekli) → YOK** ❌ → `codeInterpretation('8726')` = `78/87`
+  (kaynak: "**Ajite şizofren bir hastayı göstermektedir.**") → CONFLICT-030 kanıtı
+
+**Sc bloğu: 9 VAR / 1 YOK**
+Status: **VERIFIED**
+
+## SOURCE-SC-004 · `86/68` — Paranoid Vadi / Psikotik V (s.146) — **Visual: CONFIRMED**
+
+> "**86/68 Kodu:** **6 ve 8'in T puanı 80'nin üstünde, 7 de 70 T puanındadır.**
+> Bu profil psikiyatri hastalarında sıklıkla görülür. '**Paranoid vadi**' ya da
+> '**Psikotik V**' olarak adlandırılır."
+
+`87/78`: "Endişeli, kendi kendini tetkik edebilen, derin düşünceye dalan
+kişilerdir, kişilik güçlükleri kroniktir. Bağımsız, kendine güvenen kimseler
+değillerdir, daha çok pasif bağımlıdır…"
+
+`80/08` (s.148): "Bu kod tipindeki **7 ve 2 alt testleri en yüksek üçüncü
+testtir.**… **Olası tanı: Sizoid Kişilik**"
+
+**⚠️ KAYNAK İÇİ FARK (yeni):** "Paranoid vadi" iki farklı yerde **farklı sayılarla**
+tanımlanıyor:
+- **s.132:** "Paranoid vadide 6 ve 8 alt testleri **70 T puanı civarındadır** ve
+  7 alt testi **10 T puanı aşağıdadır**."
+- **s.146:** "**6 ve 8'in T puanı 80'nin üstünde, 7 de 70 T puanındadır.**"
+
+→ **CONFLICT-038 (P2)** · kod `68/86` metni **s.146 sürümünü** izler ama sayıyı
+yumuşatır: kodda **"6 ve 8'in T puanı 80'in üzerinde ve 7 daha düşükse"** —
+kaynağın **"7 de 70 T puanındadır"** koşulu **YOK** → CONFLICT-027 genişlemesi
+Status: **VERIFIED** (kaynak) · sayısal koşul **EKSİK**
+
+## SOURCE-SC-005 · Şekil 22 — Paranoid Vadi (s.147) — **Visual: CONFIRMED**
+
+Şekil 22 (s.147): eksen **Pa · Pt · Sc**; orta vadi (Pt düşük, Pa ve Sc yüksek).
+> "Bu örüntüyü gösteren hastalar, duygusal olarak geri çekilmişlerdir, sosyal
+> izolasyon içindedirler, şüpheci, düşmanlık duyguları taşıyan ve davranışları
+> hakkında içgörüsü olmayan kişilerdir. Ayrıca düşünce bozuklukları, hallüsinasyon
+> ve delüzyonlara rastlanabilir. Genellikle **paranoid şizofreni** tanısına
+> uygundurlar. **Bu örüntü, hepsini doğru yanıtlaması şeklinde de ortaya çıkar.**"
+
+Kod: Pa-Pt-Sc **paranoid vadi** konfigürasyonu **YOK** → CONFLICT-033 kapsamı
+(2. vadi: ilki Scarlett O'Hara, bu Pa/Pt/Sc vadi) — ayrıca **"hepsini doğru
+yanıtlama"** bağlantısı CONFLICT-019 ile ilişkili.
+Status: **VERIFIED** (kaynak) · **YOK** (kod)
+
+## Sc (8) bloğu — birleşik özet (s.143-148)
+
+| | Sayı |
+|---|---|
+| İncelenen kod başlığı | **10** |
+| Kodda VAR | **9** |
+| Kodda YOK | **1** (`8726` — çok-ölçekli) |
+| 🎯 P0 anahtar | **BİREBİR MATCH** (59+19 = 78) |
+| 🎯 Norm | **BİREBİR MATCH** (29.82 / 31.06) |
+| T bantları | **5/5 MATCH** |
