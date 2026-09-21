@@ -88,19 +88,16 @@ Wiggins normları (s.178-181) → Bölüm 5 (s.64+)
 ## Next action
 
 Continue from:
-**PHASE 4 kapandı (s.43-62).** Sıradaki: **CONFLICT-019 kararı (P1)** →
-**CONFLICT-016/020 kararı** → **Wiggins normları s.178-181** → **Bölüm 5 / kod
-tipleri (s.64+)**
+**PHASE 4 kapandı + CONFLICT-016/019/020 kararları verildi (DECISION-023).**
+Sıradaki: **Wiggins normları s.178-181 (p97 L – p98 R)** → **Bölüm 5 / kod
+tipleri (s.64+)** → FINAL öncesi OCR-only sayım + DECISION-011 doğrulaması
 
 Sıradaki batch'ler (öncelik sırası):
 
 1. ~~**PDF p39 L** — kitap s.62~~ ✅ **TAMAMLANDI** (PHASE 4 kapandı)
-2. **CONFLICT-019 kararı (P1)** — "tümüne doğru" örüntüsü uygulanamaz durumda:
-   T kırpması mı yükseltilecek, ham cevap örüntüsünden mi tespit edilecek?
-   **Tasarım kararı** — acele etme.
-3. **CONFLICT-016 + CONFLICT-020 kararı (P1/P2)** — kaynakta olmayan /
-   tek yönlü sınırlar (Konf. 2, 4, 5, 9, 12). Konfigürasyon **sırası** (ilk
-   eşleşen kazanır) üzerindeki etkisi analiz edilmeden değişiklik yapma.
+2. ~~**CONFLICT-019 kararı**~~ ✅ **FIXED** (CHANGE-009, DECISION-023)
+3. ~~**CONFLICT-016/020 kararı**~~ ✅ **verildi** — 016 REJECTED · 020 kısmen
+   FIXED (CHANGE-010); kalan 3 madde gerekçeli-belgeli
 4. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins normları** → PHASE 8
    (doğrulanmamış son norm katmanı)
 5. **PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni → PHASE 2/5
@@ -136,7 +133,7 @@ Bilinen kısıtlar:
 
 ## Code changes so far
 
-**8 değişiklik — 2026-09-21:**
+**10 değişiklik — 2026-09-21:**
 
 | ID | Dosya | Ne |
 |---|---|---|
@@ -148,6 +145,8 @@ Bilinen kısıtlar:
 | CHANGE-006 | `tests/mmpiKeyIntegrity.test.ts` | **YENİ** 7 test (PHASE 2) |
 | CHANGE-007 | `src/scoring/mmpiConsistency.ts` + test | **TR kesme puanı `<=3` → `<=2`** (P1) |
 | CHANGE-008 | `src/scoring/mmpiValidityConfigs.ts` + test | **4 konfig eşiği kaynağa çekildi** (P1): `ascending` +F45-55, `descending` +K≥40, `all-true` 40→35, `help-seeking` 105→100 |
+| CHANGE-009 | `src/scoring/mmpiValidityConfigs.ts` + test | **`all-true` `F>120` → `F>=120`** (T kırpma nedeniyle ölü kuralı canlandırma, P1) |
+| CHANGE-010 | `src/scoring/mmpiValidityConfigs.ts` + test | **`credible` `K<=65` kaldırıldı** (kaynakta yok, P2) |
 | — | `tests/mmpiExtended.test.ts` | all-false testi DECISION-020 gerekçesiyle güncellendi |
 
 ## Tests
@@ -155,9 +154,9 @@ Bilinen kısıtlar:
 | Komut | Sonuç |
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
-| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **20/20 PASS** (batch 3: +6 konfig eşiği testi) |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **22/22 PASS** (batch 3 + kapanış: +8 konfig testi) |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **307/307 PASS** · 22 suite · ~120 s (baseline 287 → 297 → 301 → 307) |
+| `npm test` | **309/309 PASS** · 22 suite · ~116 s (baseline 287 → 297 → 301 → 307 → 309) |
 | `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
@@ -181,14 +180,14 @@ Bilinen kısıtlar:
 | CONFLICT-013 | P2 | F-K = 0 sahte-iyilik etiketi | ✅ **REJECTED** (kaynak içi gerilim) |
 | CONFLICT-014 | P2 | Konf. 15 L: kaynak nokta (60) ↔ kod bant (55-65) | ✅ **REJECTED** (ilk bulgu hatalıydı) |
 | CONFLICT-015 | P1 | TR kesme puanı 1 puan kaymış | ✅ **FIXED** (CHANGE-007) |
-| CONFLICT-016 | P1 | Konf. 2/4/5'te F ve K aralıkları tek yönlü | **FIXED kısmen** (4,5 düzeltildi; 2 açık) |
+| CONFLICT-016 | P1 | Konf. 2/4/5'te F ve K aralıkları tek yönlü | ✅ **FIXED/REJECTED** (4,5 düzeltildi; 2 → kod doğru) |
 | CONFLICT-017 | P1 | Konf. 4/5/7/9 eşikleri kaynaktan sapmış | ✅ **FIXED** (CHANGE-008) |
 | CONFLICT-018 | P2 | Konf. 8 eşiği (80) kaynak içi tutarsız | ✅ **REJECTED** (DECISION-020) |
-| CONFLICT-019 | P1 | Konf. 7 (tümüne doğru) tetiklenemez (F>120 vs kırpma) | OPEN |
-| CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | OPEN |
+| CONFLICT-019 | P1 | Konf. 7 (tümüne doğru) tetiklenemez (F>120 vs kırpma) | ✅ **FIXED** (CHANGE-009) |
+| CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | ✅ **FIXED kısmen** (12 kaldırıldı; 2/9 gerekçeli) |
 
-Kalan açık: **8 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 016-kısmi, 019) · 3 P2 (006, 007, 020).
-FIXED: 007 (008-012, 015, 017) · REJECTED: 5 (001, 002, 013, 014, 018).
+Kalan açık: **5 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 2 P2 (006, 007).
+FIXED: 9 (008-012, 015, 017, 019, 020-kısmi) · REJECTED: 6 (001, 002, 013, 014, 016, 018).
 
 ## Last update
 
@@ -199,6 +198,7 @@ FIXED: 007 (008-012, 015, 017) · REJECTED: 5 (001, 002, 013, 014, 018).
 ```
 Phase:          PHASE 0, 1, 2, 3, 6 — DONE
                 PHASE 4 — ✅ **DONE** (s.43-62 tamamı)
+                PHASE 4+ kararlar — CONFLICT-016/019/020 → DECISION-023 (DONE)
                 PHASE 5 — NOT_STARTED (Bölüm 5 kod tipleri; s.63 girişi okundu)
                 PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
                 PHASE 14 — IN_PROGRESS (20 denetim testi)
@@ -217,12 +217,13 @@ Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
                 Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
 Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Fixed:          7 (CONFLICT-008..012, 015, 017) + 0 regression
-Rejected:       5 (001, 002, 013, 014, 018 — kod doğru / kaynak içi tutarsızlık)
-Code changes:   8 (5 anahtar + 1 TR kesme + 1 konfig eşiği + 1 test dosyası)
-Tests:          307/307 PASS (22 suite) · typecheck PASS · build PASS
-Next:           CONFLICT-019 kararı (T kırpma [20,120] ↔ kaynak F>120);
-                sonra CONFLICT-016/020; sonra Wiggins normları (s.178-181)
+Open conflicts: 5 (3 P1 · 2 P2) — P0 AÇIK ÇELİŞKİ KALMADI
+Fixed:          9 (008..012, 015, 017, 019, 020-kısmi) + 0 regression
+Rejected:       6 (001, 002, 013, 014, 016, 018 — kod doğru / kaynak içi tutarsızlık)
+Code changes:   10 (5 anahtar + 1 TR kesme + 5 konfig/test)
+Tests:          309/309 PASS (22 suite) · typecheck PASS · build PASS
+Next:           Wiggins normları (s.178-181, PDF p97 L – p98 R) → PHASE 8;
+                sonra Bölüm 5 / kod tipleri (s.64+, PDF p40 L)
 Blocking:       none
 ```
 

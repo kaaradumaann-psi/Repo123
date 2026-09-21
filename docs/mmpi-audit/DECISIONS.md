@@ -542,3 +542,45 @@ uyuşuyor → `UNVERIFIED-TR-001` **VERIFIED** olarak kapatılır.
 atfı (Greene 1980) artık belgeli. Değişiklik gereksiz.
 
 **Sonuç:** Kayıt `VERIFIED_DATA.md`'ye taşındı; SOURCE-CL-002 eklendi.
+
+---
+
+## DECISION-023 — Konfigürasyon erişilebilirlik kararı (CHANGE-009 + CHANGE-010)
+
+Tarih: 2026-09-21 · PHASE 4 sonrası (CONFLICT-016/019/020)
+
+**Yöntem:** `detectValidityConfig` **ilk eşleşen kazanır** sırasını kullanır →
+her sınır değişikliği başka örüntüleri erişilemez kılabilir. Bu yüzden önce
+15 konfigürasyonun sırası ve koşulları döküldü, sonra sınır davranışı
+sınandı; **kararlar erişilebilirlik kanıtına dayandırıldı**.
+
+### Karar 1 — `all-true`: `F > 120` → **`F >= 120`** (CHANGE-009) ✅
+
+- Kaynak (s.49) F > 120 ister; T puanı [20,120] kırpıldığı için kural **ölü**.
+- Ampirik: tümüne-"Doğru" profili F = 120.0 üretir → örüntü hiç raporlanmıyordu.
+- Kırpma altında "> 120"nin tek temsili tam üst sınırdır.
+- **Not:** T kırpması ileride kaldırılırsa koşul `> 120`'ye **geri alınmalıdır**
+  (kod içine yorum düşüldü). Kırpmanın kendisi ayrı bir `UNVERIFIED` konudur
+  (`UNVERIFIED-CONFIG-T-001`) ve bu kararın kapsamı dışındadır.
+
+### Karar 2 — `credible`: `K <= 65` sınırı **kaldırıldı** (CHANGE-010) ✅
+
+- Kaynak (s.54) K için yalnız alt sınır verir ("K, T 50'nin üstünde") → 65
+  kaynakta **yok**.
+- Kanıt: L=50, F=65, K=70 profili kaynağa göre Konf. 12 iken kodda **hiçbir
+  konfigürasyona girmiyordu**.
+- Erişilebilirlik: `unconventional`, `frank`, `reverse-v`, `virtuous`, `rigid`
+  etkilenmez (bantlar ayrık); `acute-chronic` için davranış değişmez
+  (L ∈ (50,55] zaten `credible` tarafından alınıyordu).
+
+### Karar 3 — Değiştirilmeyenler (bilinçli)
+
+| Konu | Karar | Gerekçe |
+|---|---|---|
+| Konf. 2 `v-shape` F ≤ 55 (CONFLICT-016) | **REJECTED** | `closed-v` (F<50) + `v-shape` sırası pratikte F ∈ [50,55] verir; üst sınır kaldırılırsa Konf. 10/14 profilleri yanlış etiketlenir |
+| Konf. 9 `help-seeking` F ≥ 70 (CONFLICT-020) | **KORUNDU** | kaldırılırsa `frank` ve `credible` örüntüleri erişilemez olur; `UNVERIFIED` olarak belgeli |
+| Konf. 5 `descending` F sınırı | **eklenmedi** | kaynak niteliksel der ("F yaklaşık 50"); L>F>K sıralaması zaten sınırlar |
+| T kırpması [20,120] | **ertelendi** | geniş etki (UI/grafik/test); ayrı karar gerekir |
+
+**Sonuç:** CONFLICT-016 **REJECTED** · CONFLICT-019 **FIXED** ·
+CONFLICT-020 **FIXED kısmen** (1/4; kalan 3 belgeli-gerekçeli).

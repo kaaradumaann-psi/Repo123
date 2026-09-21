@@ -693,3 +693,75 @@ Status: **OPEN** — CONFLICT-016 ile aynı sınıfın devamı; karar
 **DECISION-021** ile birlikte verilmedi çünkü alt sınır eklemek/çıkarmak
 konfigürasyon sırası (ilk eşleşen kazanır) nedeniyle başka örüntülerin
 erişilebilirliğini değiştirir. Ayrı bir karar gerektirir.
+
+---
+
+## CONFLICT-016 — Konf. 2: `v-shape` F üst sınırı (P1) → **REJECTED (kod doğru)**
+
+Area: `v-shape` (Konfigürasyon 2)
+
+Source (s.44): "L ve K en az 60 T düzeyinde … F alt testi 50 T puanına yakın"
+→ F için **niteliksel** ifade, sayısal aralık yok.
+
+Current implementation: `L ≥ 60 ∧ K ≥ 60 ∧ F ≤ 55`
+
+**Erişilebilirlik analizi (bu oturumda koşuldu):**
+`detectValidityConfig` **ilk eşleşen kazanır** sırasını kullanır ve
+`closed-v` (indeks 1) `F < 50 ∧ L > 60 ∧ K > 60` koşulunu taşır. Dolayısıyla:
+
+| Profil | Kod sonucu | Kaynak |
+|---|---|---|
+| L=62, K=62, F=45 | `closed-v` (Çok Kapalı) | Konf. 3 (F<50) ✓ |
+| L=62, K=62, F=52 | `v-shape` | Konf. 2 ✓ |
+| L=62, K=62, F=80 | `unconventional` / başka | Konf. 10 ✓ (yüksek F) |
+
+→ `v-shape` pratikte **F ∈ [50, 55]** aralığında çalışır; bu, kaynağın
+"F 50'ye yakın" ifadesinin doğru karşılığıdır. **Üst sınır kaldırılırsa**
+yüksek-F profilleri (Konf. 10/14) yanlışlıkla "V Şekli" olarak etiketlenir.
+
+Resolution: **REJECTED — kod doğru.** Sınır, örüntüleri ayrık tutmak için
+gereklidir. İlgili karar: **DECISION-023**.
+
+---
+
+## CONFLICT-019 — Konf. 7 (tümüne "doğru") hiç tetiklenemiyor (P1) → **FIXED**
+
+Area: `all-true`
+
+Source (**Visual: CONFIRMED**, s.49): "… **F alt testinin 120'nin üzerinde**
+yer almasını gerektirir."
+
+Current implementation (önce): `v.F > 120 && v.L <= 35 && v.K <= 35`
+`mmpiScoring.ts`: T puanları `Math.max(20, Math.min(120, t))` ile **[20, 120]**
+aralığına kırpılır → `F > 120` **hiçbir zaman** doğru olamaz.
+
+**Ampirik kanıt:** 566 maddenin tamamına "Doğru" yanıtı → L 26.5 · **F 120.0** ·
+K 22.1 → **konfigürasyon YOK** dönerdi (kaynağın tanımladığı örüntü kayıptı).
+
+Resolution: **FIXED** — CHANGE-009: `F > 120` → **`F >= 120`**. Kırpma altında
+kaynağın "> 120" koşulunun tek temsili tam üst sınırdır; kırpma kaldırılırsa
+koşul `> 120`'ye dönmelidir (kod içinde not düşüldü). Karar: **DECISION-023**.
+
+---
+
+## CONFLICT-020 — Konfigürasyonlarda kaynakta olmayan ek sınırlar (P2) → **FIXED kısmen**
+
+| # | Kod sınırı | Kaynakta karşılığı | Sonuç |
+|---|---|---|---|
+| 12 (`credible`) | `K ≤ 65` | yalnız "K, T 50'nin **üstünde**" | ✅ **KALDIRILDI** (CHANGE-010) |
+| 9 (`help-seeking`) | `F ≥ 70` | kaynak yalnız üst sınır verir | ⚠️ **KORUNDU** (gerekçeli, aşağıda) |
+| 5 (`descending`) | F sınırı yok | "F yaklaşık 50" (niteliksel) | ✅ sınır **eklenmedi** (doğru) |
+| 2 (`v-shape`) | `F ≤ 55` | "F 50'ye yakın" | ✅ **REJECTED** — CONFLICT-016'ya bkz. |
+
+**`credible` kanıtı (boşluk kapatıldı):** L=50, F=65, **K=70** profili kaynağa
+göre Konfigürasyon 12'dir; eski kodda **hiçbir konfigürasyona girmiyordu**
+(`YOK`). CHANGE-010 sonrası → "Güvenilir Cevaplayıcı" ✅
+Erişilebilirlik kontrolü: kaldırılan sınır `unconventional` (indeks 9),
+`frank` (10), `reverse-v` (0), `virtuous` (13), `rigid` (14) örüntülerinden
+hiçbirini etkilemez (F/K bantları ayrık).
+
+**`help-seeking` F ≥ 70 neden KORUNDU:** alt sınır kaldırılırsa `help-seeking`
+(indeks 8) `L < 66 ∧ K < 66 ∧ F ≤ 100` ile **`frank`** (indeks 10,
+`F 60-70`) ve **`credible`** (indeks 11) örüntülerini de yutar → iki örüntü
+erişilemez hale gelir. Kaynağın Şekil 9'daki yükselmiş-F eğrisi de alt sınırı
+destekler. → `UNVERIFIED-CONFIG-F-001` (belgeli, kaynak dışı ama gerekli).

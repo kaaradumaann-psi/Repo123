@@ -86,8 +86,14 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'all-true',
     name: 'Tümüne "Doğru" Yanıt Verme',
-    rule: 'F, T 120 üzerinde; L ve K, T 35\'i aşmaz (kaynak s.49)',
-    isMatch: v => v.F > 120 && v.L <= 35 && v.K <= 35,
+    // Kaynak s.49: "L ve K alt testinin 35 T puanını aşmasını, F alt testinin
+    // 120'nin üzerinde yer almasını gerektirir."
+    // ANCAK: T puanları [20, 120] aralığına kırpılır (mmpiScoring.ts), bu
+    // yüzden "F > 120" matematiksel olarak ULAŞILAMAZ ve örüntü hiç tespit
+    // edilemezdi. Kırpma altında "> 120"nin tek temsili tam üst sınırdır.
+    // Not: T kırpması kaldırılırsa bu koşul yeniden `> 120` olmalıdır.
+    rule: 'F, T 120 (kırpma üst sınırı) ve üzeri; L ve K, T 35\'i aşmaz (kaynak s.49)',
+    isMatch: v => v.F >= 120 && v.L <= 35 && v.K <= 35,
     interpretation:
       'Bireyin tüm maddelere "Doğru" yanıtı verdiği bir örüntüdür; profil klinik olarak yorumlanamaz. Testin yönergesi yeniden anlatılarak uygulama tekrarlanmalıdır.',
     validity: 'şüpheli',
@@ -141,8 +147,13 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'credible',
     name: 'Güvenilir Cevaplayıcı',
-    rule: 'L, T 45-55; F, T 70 altında; K, T 50-65 arası',
-    isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50 && v.K <= 65,
+    // Kaynak s.54: "L alt testi 50 T puanına yakın, F alt testi 70 T puanının
+    // altında, K alt testi 50 T puanının üstündedir." → K için ÜST SINIR YOK.
+    // Eski koddaki `K <= 65` kaynakta bulunmayan bir sınırdı ve kaynağın
+    // Konfigürasyon 12 sayacağı profilleri (ör. L=50, F=65, K=70) hiçbir
+    // konfigürasyona sokmuyordu. Kaldırıldı (CHANGE-010, DECISION-023).
+    rule: 'L, T 45-55; F, T 70 altında; K, T 50 üzerinde',
+    isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50,
     interpretation:
       'Geçerli bir profildir. Birey yönergeleri dikkatle okuyup anlamış ve uygulamıştır; yanıtlar içtendir ve bireyin durumunu yansıtmaktadır.',
     validity: 'geçerli',

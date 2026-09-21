@@ -287,3 +287,41 @@ F ≥ 70 → CONFLICT-020 (ayrı karar).
   → **46/46 PASS**
 - Tam suite → **307/307 PASS** (22 suite, ~120 s) — önceki 301/301 (21 suite)
 - **REGRESSION YOK** · `build` PASS · `optik-form.html` senkron
+
+---
+
+## CHANGE-009 — Konf. 7 (`all-true`): ölü kural canlandırıldı (P1)
+
+Date: 2026-09-21 · Type: **Davranış değişikliği** · Priority: **P1**
+Source: SOURCE-CONFIG-007 (s.49) · CONFLICT-019 · DECISION-023
+
+```
+- isMatch: v => v.F > 120 && v.L <= 35 && v.K <= 35,
++ isMatch: v => v.F >= 120 && v.L <= 35 && v.K <= 35,
+```
+
+**Neden:** T puanları [20,120] kırpılır (`mmpiScoring.ts`) → `F > 120` hiç
+sağlanamaz. Ampirik: 566 maddenin tamamına "Doğru" → L 26.5 · F **120.0** ·
+K 22.1 → konfigürasyon **YOK** dönerdi.
+**Geri alma koşulu:** T kırpması kaldırılırsa koşul `> 120` olmalıdır
+(kod içinde yorum olarak belgeli).
+
+## CHANGE-010 — Konf. 12 (`credible`): kaynakta olmayan K üst sınırı kaldırıldı (P2)
+
+Date: 2026-09-21 · Type: **Davranış değişikliği** · Priority: **P2**
+Source: SOURCE-CONFIG-012 (s.54) · CONFLICT-020 · DECISION-023
+
+```
+- isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50 && v.K <= 65,
++ isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50,
+```
+
+**Neden:** Kaynak K için üst sınır vermez. Eski kod, kaynağın Konfigürasyon 12
+sayacağı profilleri (L=50, F=65, K=70) **hiçbir** konfigürasyona sokmuyordu.
+Erişilebilirlik kontrolü yapıldı: başka örüntü etkilenmiyor.
+
+### Doğrulama (her iki değişiklik)
+
+- `npm run typecheck` → **0 hata**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **22/22 PASS** (+2 test)
+- Tam suite → aşağıda TEST_AUDIT kaydı

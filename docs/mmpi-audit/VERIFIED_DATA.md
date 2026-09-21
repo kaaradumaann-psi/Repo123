@@ -393,3 +393,17 @@ kaynağın "F > 120" koşulu matematiksel olarak sağlanamaz.
 → Önceki `UNVERIFIED-TR-001` **kapandı**. Tablo 7 karşılaştırması (12/12 çift
 birebir) bu sayfadaki "12 çift / max 12 / kesim 4" ifadeleriyle birlikte
 **tam doğrulandı**.
+
+
+---
+
+# CONFLICT-019/020 düzeltmeleri — doğrulanan davranış (2026-09-21)
+
+| Profil (L, F, K) | Önce | Sonra | Kaynak dayanağı |
+|---|---|---|---|
+| 26.5, **120**, 22.1 (tümüne "Doğru") | `YOK` | **Tümüne "Doğru"** | Konf. 7 (s.49), SOURCE-CONFIG-007 |
+| 50, 65, **70** | `YOK` | **Güvenilir Cevaplayıcı** | Konf. 12 (s.54), SOURCE-CONFIG-012 |
+| 81.2, 75.3, 82.3 (tümüne "Yanlış") | Tümüne "Yanlış" | değişmedi | Konf. 8 (s.50) |
+| 62, 62, 45 | "Çok Kapalı" | değişmedi | Konf. 3 (s.45) |
+| 62, 62, 52 | "V Şekli" | değişmedi | Konf. 2 (s.44) |
+| 55, 80, 55 | Tersine V | değişmedi | Konf. 1 (s.43) |

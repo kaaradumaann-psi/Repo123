@@ -454,3 +454,31 @@ Kayıt: SOURCE-CL-003.
 **PHASE 4 (K düzeltmesi + geçerlik konfigürasyonları) ✅ DONE** — s.43-62
 tamamen işlendi. Açık çelişki **8** (5 P1 · 3 P2), **açık P0 yok**.
 Testler: **307/307 PASS** (22 suite) · typecheck 0 · build PASS · REGRESSION YOK.
+
+---
+
+## CONFLICT-016/019/020 kararları — konfigürasyon erişilebilirlik turu
+
+Tarih: 2026-09-21
+
+**Yöntem:** `detectValidityConfig` ilk-eşleşen-kazanır olduğu için önce 15
+konfigürasyonun sırası/koşulları döküldü, sınır davranışı sınandı; kararlar
+erişilebilirlik kanıtına dayandırıldı (DECISION-023).
+
+| Çelişki | Karar |
+|---|---|
+| CONFLICT-019 (Konf. 7 ölü kural) | ✅ **FIXED** — `F > 120` → **`F >= 120`** (CHANGE-009) |
+| CONFLICT-020 (Konf. 12 `K ≤ 65`) | ✅ **FIXED** — sınır **kaldırıldı** (CHANGE-010) |
+| CONFLICT-020 (Konf. 9 `F ≥ 70`) | ⚠️ **korundu** — kaldırılırsa `frank`+`credible` erişilemez |
+| CONFLICT-016 (Konf. 2 `F ≤ 55`) | ✅ **REJECTED** — `closed-v` sırası zaten F∈[50,55] verir |
+
+**Kanıt (kod içi koşum):** tümüne-"Doğru" profili (L 26.5 / F 120.0 / K 22.1)
+ve L=50, F=65, K=70 profili önceden **hiçbir konfigürasyona girmiyordu**;
+her ikisi de artık doğru örüntüye eşleşiyor.
+
+**Doğrulama:** typecheck 0 · `mmpiKeyIntegrity` 22/22 (+2 test) · tam suite
+**309/309 PASS** (22 suite) · build PASS · `optik-form.html` senkron ·
+**REGRESSION YOK**.
+
+**Güncel çelişki tablosu:** açık **5** (3 P1: 003/004/005 · 2 P2: 006/007) ·
+FIXED **9** · REJECTED **6**. **Açık P0 yok.**

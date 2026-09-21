@@ -288,3 +288,18 @@ en yüksek puan 12'dir. **Greene (1980) geçersiz profilleri belirlemede 4'ün
 kesim puanı olarak alınabileceğini belirtmiştir.**" → kodun `score < 4`
 (normal) eşiği ve 12 çiftlik set **birebir MATCH**. Kayıt: SOURCE-CL-002.
 Kapatan karar: DECISION-022.
+
+
+---
+
+## GÜNCELLEME — CONFLICT-019/020 kararları sonrası (DECISION-023)
+
+- **`UNVERIFIED-CONFIG-F-001`** (`help-seeking` F ≥ 70): **geçerli** — alt sınır
+  kaldırılırsa `frank` + `credible` örüntüleri erişilemez olur; belgeli-gerekçeli
+  korundu (CONFLICT-020 içinde raporlandı).
+- **`UNVERIFIED-CONFIG-K-001`** (`credible` K ≤ 65): **KAPANDI** — sınır
+  kaynakta olmadığı için **kaldırıldı** (CHANGE-010, DECISION-023).
+- **`UNVERIFIED-CONFIG-T-001`** (T kırpma [20,120]): **geçerli** — kırpma
+  kaynakta belgeli değil; Konf. 7'nin "F > 120" koşulunu ölü kılıyordu.
+  CHANGE-009 ile operasyonel olarak köprülendi (`F >= 120`); kırpmanın kendisi
+  ayrı karar bekliyor (kodda geri-alma notu var).

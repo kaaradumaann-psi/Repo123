@@ -425,6 +425,19 @@ describe('PHASE 4 batch 3 — konfigürasyon eşikleri kaynağa uyar', () => {
     assert.ok(!disi || !/Azalan/.test(disi.name), 'K=35 kaynağın 40-45 aralığı dışında');
   });
 
+  it('Konf. 7 kırpma farkındalığı: F = 120 (üst sınır) bu örüntüyü tetikler', () => {
+    // Kaynak F > 120 der; T puanı [20,120] kırpıldığı için tek temsil F = 120.
+    // End-to-end: 566 maddenin tamamına "Doğru" → L 26.5 / F 120 / K 22.1.
+    assert.match(detectValidityConfig(26.5, 120, 22.1)!.name, /Doğru/);
+  });
+
+  it('Konf. 12: kaynakta olmayan K üst sınırı kaldırıldı (K = 70 artık eşleşir)', () => {
+    // Kaynak s.54 yalnızca "K, T 50'nin üstünde" der → K=70 de Konfigürasyon 12.
+    const c = detectValidityConfig(50, 65, 70);
+    assert.ok(c, 'K=70 hiçbir konfigürasyona girmiyordu (eski kod)');
+    assert.match(c!.name, /Güvenilir/);
+  });
+
   it('Konf. 10 (geleneksel olmayan) birebir: L<66 ∧ F>69 ∧ K>65', () => {
     assert.match(detectValidityConfig(60, 70, 66)!.name, /Geleneksel Olmayan/);
     assert.ok(!detectValidityConfig(60, 69, 66) || !/Geleneksel Olmayan/.test(detectValidityConfig(60, 69, 66)!.name));

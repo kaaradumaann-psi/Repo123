@@ -335,3 +335,44 @@ biri kaynak içi tutarsızlık (REJECTED), diğeri gerçek bir uygulama boşluğ
 
 **REGRESSION YOK.** 307/307 geçti; `optik-form.html` build ile yeniden
 üretildi ve senkron.
+
+---
+
+# Oturum 3 (devam 2) — PHASE 4 kapanışı + CONFLICT-019/020 düzeltmeleri
+
+Tarih: 2026-09-21
+
+## Kod değişiklikleri
+
+- `CHANGE-009` (P1): `all-true` `F > 120` → `F >= 120` (T kırpma nedeniyle ölü
+  kural canlandırıldı)
+- `CHANGE-010` (P2): `credible` `K <= 65` sınırı kaldırıldı (kaynakta yok)
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **22/22 PASS** (+2 test) |
+| `npm test` (tam suite) | **309/309 PASS** · 22 suite · ~116 s (301 → 307 → 309) |
+| `npm run build` | **PASS** — `optik-form.html` yeniden üretildi ve senkron |
+
+## Yeni testler (+2)
+
+1. **Konf. 7 kırpma farkındalığı:** `detectValidityConfig(26.5, 120, 22.1)` →
+   "Tümüne Doğru" (end-to-end profil değerleriyle; önceden `YOK` dönüyordu)
+2. **Konf. 12 sınır düzeltmesi:** `detectValidityConfig(50, 65, 70)` →
+   "Güvenilir Cevaplayıcı" (önceden `YOK` dönüyordu)
+
+## Erişilebilirlik analizi (regresyon güvencesi)
+
+`detectValidityConfig` ilk-eşleşen-kazanır olduğundan, sınır değişikliklerinin
+diğer örüntüleri erişilemez kılmadığı **15 konfigürasyonun sırası ve koşulları
+dökülerek** doğrulandı (DECISION-023). Etkilenmeyenler: `reverse-v`,
+`closed-v`, `v-shape`, `ascending`, `descending`, `random`, `all-false`,
+`help-seeking`, `unconventional`, `frank`, `acute-chronic`, `virtuous`,
+`rigid`.
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.** 309/309; `optik-form.html` build ile güncel.
