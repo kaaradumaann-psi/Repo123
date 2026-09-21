@@ -402,3 +402,82 @@ Kod değişikliği **yoktur**. `tests/mmpiKeyIntegrity.test.ts` içinde
 `EXPECTED_SPECIAL.OH = 31` olarak, kaynak çelişkisi yorumla birlikte kaydedilmiştir.
 
 Status: **VERIFIED** (kaynak çelişkisi kayıt altında; kod tarafı MATCH)
+
+---
+
+# Bölüm 8 + Tablo 30 — TÜRK NORMLARI (kitap s.195)
+
+## SOURCE-NORM-001 · Tablo 30 — Normal Türk, Erkek ve Kadınların MMPI Alt Testlerindeki Ortalama ve Standart Sapmaları
+
+Page: **PDF p105 R = kitap s.195**
+Visual: **CONFIRMED** — tam sayfa yüksek çözünürlüklü görsel okuma.
+**OCR bu sayfayı BOŞ döndürdü** (p105_R.txt = 0 satır); yalnızca görsel
+okuma ile elde edildi. Karşılaştırma betiği: `scripts/mmpi-audit/compare-norms.py`
+
+### Örneklem (kitap s.191, Bölüm 8 "Standardizasyon çalışması")
+
+- **Erkek N = 1003**, **Kadın N = 663**, toplam **1666** normal kişi
+- 16-50 yaş, en az ilkokul eğitimi, psikiyatrik yardım almamış / başvurmamış
+- Toplama yeri ağırlıklı Ankara (Hacettepe, DTCF, ODTÜ, Kız Teknik, Hemşire
+  Yüksekokulu, GATA), ayrıca İzmir, Erzurum, Ordu, Bursa, Eskişehir
+- %85 bekâr, %15 evli; örneklem 16-30 yaşta yoğunlaşmış; %84.88 büyük kent
+- Eğitim: orta+lise %54.29, üniversite %47.21
+  → **Not:** bu, "normal Türk toplumu" değil **genç + eğitimli + kentli** bir
+  örneklemdir. Norm yorumunda bu sınır bilinmelidir.
+- Kaynak kitap uyarısı (s.192): "31-50 yaş arasının sayı açısından **yetersiz
+  temsil edildiği** düşünülmektedir."
+
+### Tablo 30 değerleri (K düzeltmesi UYGULANMIŞ satırlar)
+
+| Alt test | Erkek X̄ | Erkek SD | Kadın X̄ | Kadın SD |
+|---|---|---|---|---|
+| L | 6.45 | 2.74 | 6.00 | 2.25 |
+| F | 8.30 | 4.62 | 9.38 | 5.16 |
+| K | 13.98 | 4.65 | 11.82 | 3.80 |
+| Hs (+.5K) | 13.19 | 4.07 | 15.89 | 4.88 |
+| D | 20.63 | 4.76 | 23.86 | 5.08 |
+| Hy | 19.31 | 4.71 | 18.12 | 5.31 |
+| Pd (+.4K) | 22.22 | 4.45 | 22.84 | 4.51 |
+| Mf | 29.21 | 3.82 | 32.98 | 3.67 |
+| Pa | 11.12 | 4.03 | 11.93 | 4.17 |
+| Pt (+1K) | 27.90 | 6.30 | 29.20 | 6.59 |
+| Sc (+1K) | 29.82 | 9.05 | 31.06 | 8.20 |
+| Ma (+.2K) | 19.96 | 4.40 | 19.72 | 4.36 |
+| Si | 23.86 | 7.97 | 29.88 | 7.52 |
+
+**Kritik:** Tablo, K düzeltmesi **uygulanmış ve uygulanmamış** satırları AYRI
+AYRI verir. Kod, T dönüşümünden önce K düzeltmesini uygulandığı için
+(`mmpiScoring.ts` → `computeT`) doğru satırlar **K eklenmiş** olanlardır.
+Bu, kodun `K_CORRECTION` tasarımını **doğrular**.
+
+### K düzeltmesi UYGULANMAMIŞ ham satırlar (kayıt amaçlı; kod kullanmaz)
+
+| Alt test | Erkek X̄ | Erkek SD | Kadın X̄ | Kadın SD |
+|---|---|---|---|---|
+| Hs | 6.20 | 4.65 | 9.98 | 5.31 |
+| Pd | 16.62 | 4.87 | 22.33 | 4.82 |
+| Pt | 13.91 | 8.88 | 19.08 | 8.30 |
+| Sc | 13.83 | 11.75 | 19.24 | 10.03 |
+| Ma | 17.16 | 4.83 | 17.35 | 4.62 |
+
+### Kaynak içi tutarsızlık (kayıt)
+
+Tablo 30 başlığı "Normal Türk, Erkek ve Kadınlar…" der; **Kadın N sütununun K
+satırında 963** yazar (diğer tüm kadın satırları 663, metin de 663 der).
+Metin (s.191) açıkça **663 kadın** der → **tablodaki 963 bir dizgi hatasıdır.**
+Kod bu değeri zaten kullanmaz (N norm hesabında yer almaz).
+
+Status: **VERIFIED**
+
+### Türetilen bulgu — kaynak iki yerde çelişiyor
+
+Aynı kitap, F ve K normlarını **iki farklı yerde tutarsız** verir:
+
+| Değer | Geçerlik bölümü (s.34 / s.38) | Standardizasyon Tablo 30 (s.195) |
+|---|---|---|
+| F kadın X̄ | **10.11** | **9.38** |
+| K erkek X̄ | **13.90** | **13.98** |
+| K kadın X̄ | **13.54** | **11.82** |
+
+Kod **Tablo 30'u izler** ve doğrudur → `CONFLICT-001` ve `CONFLICT-002`
+**REJECTED**.

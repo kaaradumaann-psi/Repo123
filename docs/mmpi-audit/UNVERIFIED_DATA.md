@@ -151,7 +151,38 @@ ancak dürüstlük kaydı olarak açık tutulur.
 
 ---
 
-## Ek 10 — tanılara göre ortalama ve SD (kitap s.257-260) — KISMEN OKUNDU
+## ~~TURKISH_NORMS 24 hücre~~ → **ÇÖZÜLDÜ (VERIFIED)**
+
+Status:
+**RESOLVED (2026-09-21, Oturum 4)**
+
+Önceki kayıt: "`TURKISH_NORMS` içindeki L, F, K dışındaki 24 norm hücresi için
+şu an hiçbir kaynak kanıtı yok."
+
+Çözüm: Norm kaynağı bulundu → **Tablo 30, kitap s.195** (Bölüm 8,
+standardizasyon çalışması, N=1003 erkek / 663 kadın). 26 hücrenin tamamı
+görsel okumayla doğrulandı ve `compare-norms.py` ile karşılaştırıldı →
+**26/26 MATCH**. Ayrıntı: `VERIFIED_DATA.md` (Norm katmanı), `SOURCE-NORM-001`.
+
+---
+
+## Ek 10 — tanılara göre ortalama ve SD (kitap s.257-260) — TANIMLANDI
+
+Status:
+**IDENTIFIED — norm kaynağı DEĞİL**
+
+Çözüm (2026-09-21, Oturum 4): Ek 10, **tanı gruplarına** ait ortalamaları verir
+(Psikopati N=48/16, Şizofreni Akut N=115/55, Şizofreni Kronik N=128/27,
+Depresif Psikoz N=51/12, Borderline N=20/5, Psikotik, Nevrotik, Kişilik
+Bozukluğu…). **Normal popülasyon değildir**, `TURKISH_NORMS` ile
+karşılaştırılmaz → `DECISION-016`.
+
+Kodda karşılığı olmadığı için düzeltme gerektirmez. Hücre hücre okunması
+PHASE 10 (yorumlama) karşılaştırmaları için yararlı olabilir.
+
+---
+
+## (eski kayıt) Ek 10 — OCR yapısı
 
 Status:
 **NEEDS_REVIEW** (OCR alındı, yapı çözülemedi)

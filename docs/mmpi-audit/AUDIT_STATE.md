@@ -31,10 +31,10 @@ Sayfa eşleme:
 | 0 | Denetim altyapısı | **DONE** |
 | 1 | Kaynak yapısı / indeks | **DONE** |
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi |
-| 3 | Validity (kitap s.29-42) | **IN_PROGRESS** (~85%; s.41-42 kaldı) |
+| 3 | Validity (kitap s.29-42) | **DONE** |
 | 4 | K correction (kitap s.40-42, 57-58) | NOT_STARTED |
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
-| 6 | Norms (kitap s.191-195, 257-260) | **NEEDS_REVIEW** (Ek 10 yapısı çözülemedi) |
+| 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | **IN_PROGRESS** (anahtarlar DONE, normlar YOK) |
 | 9 | Code types (Bölüm 5-6) | NOT_STARTED |
@@ -42,38 +42,37 @@ Sayfa eşleme:
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** (7 yeni test eklendi) |
+| 14 | Tests | **IN_PROGRESS** (10 yeni test eklendi) |
 
 ## Current position
 
 Current book page:
-**42** (Bölüm 3 sonu — K–klinik ilişkisi) — PDF p29 L
+**195** (Tablo 30 — Türk normaları) — PDF p105 R
 
-Last completed book page:
-**40** (K T bantları + yapısal kural) — PDF p28 L
+Last completed:
+Bölüm 3 (s.29-42) **DONE** · Bölüm 8 + Tablo 30 (s.189-195) **DONE** (normlar)
 
 Current section:
-Bölüm 3 — Geçerlik testlerinin değerlendirilmesi (kapanış)
-**+ PHASE 2 kapanışı ve düzeltme paketi tamamlandı.**
+**PHASE 3 ve PHASE 6 tamamlandı.** Kod doğrulandı, 2 P0 çelişki REJECTED.
 
 Status:
-**IN_PROGRESS** — düzeltme paketi DONE; sıradaki iş Bölüm 3 kapanışı
+**IN_PROGRESS** — sıradaki iş Bölüm 4 (geçerlik konfigürasyonları)
 
 ## Next action
 
 Continue from:
-**kitap s.41-42 → PDF p28 R + p29 R** (Bölüm 3 sonu; K düzeyi–SED
-etkileşimi, K–klinik ölçek ilişkisi) → sonra **PHASE 3 = DONE**
+**Bölüm 4 — Geçerlik konfigürasyonları, kitap s.43-56** → **PDF p29 R – p36 L**
 
 Sıradaki batch'ler (öncelik sırası):
 
-1. **PDF p28 R + p29 R** — kitap s.41-42 → **PHASE 3 DONE** + CHECKPOINT
-2. **PDF p136 R – p138 L** — kitap s.257-260, **Ek 10 norm tabloları**
-   (hücre hücre görsel okuma; OCR yetmiyor) → **PHASE 6** → CONFLICT-001/002 hakemi
-3. **PDF p103 R – p105 R** — kitap s.191-195, **Bölüm 8 standardizasyon**
-   (normların kaynağı, örneklem) → **PHASE 6**
-4. **PDF p29 R – p31 L** — kitap s.43-48, Bölüm 4 konfigürasyonları → PHASE 4/9
-5. **PDF p36 R – p38 R** — kitap s.57-61, K+ profilleri + F-K endeksi → PHASE 4
+1. **PDF p36 R – p38 R** — kitap s.57-61, **K+ profilleri + F-K endeksi +
+   TR endeksi** → **PHASE 4** (K düzeltmesi + tutarlılık endeksleri)
+2. **PDF p29 R – p31 L** — kitap s.43-48, Bölüm 4 konfigürasyonları
+   (Konfigürasyon 1 = Tersine V zaten doğrulandı; kalan 12 örüntü) → PHASE 4/9
+3. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins içerik skalaları metni**
+   → `WIGGINS_NORMS` için tek kalan doğrulanmamış norm katmanı → PHASE 8
+4. **PDF p115 L – p124 L** — kitap s.215-233, **Ek 1: MMPI test kitabı**
+   (566 madde metni) → madde metni doğrulaması → PHASE 2/5
 
 ## Last completed task
 
@@ -146,27 +145,38 @@ Kalan açık: **7 çelişki** → 2 P0 (norm), 3 P1, 2 P2.
 ## CHECKPOINT
 
 ```
-Phase:          PHASE 2 — DONE (checkpoint)
-                PHASE 3 — IN_PROGRESS (%85)
+Phase:          PHASE 0, 1, 2, 3, 6 — DONE
+                PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
+                PHASE 14 — IN_PROGRESS (10 yeni test)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
-                p22-p28 (kitap s.29-40),
-                p130-p136 (kitap s.244-256: EK 9 TAMAMI)
+                p22-p28 (kitap s.29-40 geçerlik),
+                p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
+                p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
-                46 madde anahtarı → 46/46 MATCH (düzeltme sonrası)
-Open conflicts: 7 (2 P0 norm · 3 P1 · 2 P2)
-Fixed conflicts: 5 (CONFLICT-008..012) + 0 regression
+                46 madde anahtarı → 46/46 MATCH
+                26 norm hücresi  → 26/26 MATCH (Tablo 30)
+Open conflicts: 5 (3 P1 · 2 P2) — P0 AÇIK ÇELİŞKİ KALMADI
+Fixed:          5 (CONFLICT-008..012) + 0 regression
+Rejected:       2 (CONFLICT-001/002 — kod doğruydu; kitap kendi içinde tutarsız)
 Code changes:   6 (5 düzeltme + 1 yeni test dosyası)
-Tests:          294/294 PASS · typecheck PASS · build PASS
-New discovery:  OH ölçeğinde kaynak içi tutarsızlık (başlık 33 / tablo 31)
-                → SOURCE-INTERNAL-OH-001, kod doğru, değişiklik yok
-Next:           PDF p28 R + p29 R → PHASE 3 DONE
+Tests:          297/297 PASS · typecheck PASS · build PASS
+Next:           PDF p36 R – p38 R → PHASE 4 (K+ profilleri, F-K endeksi)
 Blocking:       none
 ```
 
 ## Bir sonraki oturum için 3 satırlık özet
 
-1. **Nerede kaldık:** PHASE 2 bitti — Ek 9'un tamamı denetlendi, 5 P0 anahtar
-   hatası düzeltildi ve regresyon testi eklendi (294/294 PASS).
-2. **Sıradaki iş:** kitap s.41-42 (PDF p28 R + p29 R) okuyup PHASE 3'ü DONE yap.
-3. **Sonra:** norm doğrulaması — Ek 10 (kitap s.257-260) + Bölüm 8 (s.191-195).
-   **CONFLICT-001/002 (2 P0 norm hatası) bu iki bölüm olmadan düzeltilemez.**
+1. **Nerede kaldık:** PHASE 3 (geçerlik s.29-42) ve PHASE 6 (normlar) **DONE**.
+   Ek 9'un tamamı + Tablo 30 normları doğrulandı. 5 P0 anahtar hatası düzeltildi,
+   2 P0 norm "hatası" ise **kod doğru** çıktı (REJECTED). **Açık P0 yok.**
+2. **Sıradaki iş:** kitap s.57-61 (PDF p36 R – p38 R) → **PHASE 4**:
+   K+ profilleri, F-K endeksi, test-tekrar test ve dikkatsizlik (TR) endeksi.
+3. **Sonra:** Bölüm 4 konfigürasyonları (kalan 12 örüntü) ve Wiggins normları
+   (`WIGGINS_NORMS` — doğrulanmamış son norm katmanı).
+
+### Bilinen kısıtlar (engelleyici değil)
+
+- 33 anahtar yalnızca OCR doğrulamalı (`OCR-CONFIRMED`, DECISION-011)
+- Ek 10 hücre hücre okunmadı (norm kaynağı değil, DECISION-016)
+- `WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8
+- Türkçe OCR modeli yok → tüm sayısal fact'ler görsel doğrulamalı

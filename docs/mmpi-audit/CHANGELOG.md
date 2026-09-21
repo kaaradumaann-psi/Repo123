@@ -166,3 +166,83 @@ Yüksek DPI görsel doğrulamayla teyit edildi → `SOURCE-INTERNAL-OH-001`,
 | **CONFLICT-008..012** | **P0** | **5 anahtar hatası** | **✅ FIXED** |
 
 Kalan açık: **7 çelişki** (2 P0 norm, 3 P1, 2 P2).
+
+---
+
+## 2026-09-21 — Oturum 4: PHASE 3 KAPANIŞI + PHASE 6 NORM DOĞRULAMASI
+
+### PHASE 3 — DONE
+
+- Kitap s.41-42 okundu ve **Bölüm 3 tamamlandı**
+- Kitap s.42'nin boş olduğu görsel olarak doğrulandı (Bölüm 4'ün karşı sayfası)
+- K T bantları TAM görsel doğrulandı: `72+` / `61-72` / `46-60` / `27-45`
+- Yapısal kural teyit edildi: "K, profili geçersiz yapacak belirgin değerlerin
+  olmadığı **tek** alt testtir" → bugünkü kod bu davranışı doğru uygular
+
+### PHASE 6 — EN ÖNEMLİ BULGU: NORM KAYNAĞI BULUNDU
+
+- **Tablo 30** (kitap s.195, PDF p105 R) bulundu ve tam sayfa görsel okundu:
+  "Normal Türk, Erkek ve Kadınların MMPI Alt Testlerindeki Ortalama ve
+  Standart Sapmaları", N = 1003 erkek / **663 kadın**
+- OCR bu sayfayı **boş** döndürmüştü → yalnızca görsel okuma ile elde edildi
+- Yeni araç: `scripts/mmpi-audit/compare-norms.py`
+- **SONUÇ: `TURKISH_NORMS` 26/26 HÜCRE BİREBİR MATCH**
+
+### ⚑ İKİ P0 ÇELİŞKİ REJECTED — kod doğruydu
+
+| Çelişki | Sanılan | Gerçek |
+|---|---|---|
+| CONFLICT-001 (F kadın) | Kod 9.38 yanlış, kaynak 10.11 | **Kod doğru** (Tablo 30); geçerlik dipnotu (s.34) Tablo 30 ile çelişiyor |
+| CONFLICT-002 (K normları) | Kod 13.98/11.82 yanlış | **Kod doğru** (Tablo 30); geçerlik dipnotu (s.38) Tablo 30 ile çelişiyor |
+
+**Kitap kendi içinde tutarsız**: geçerlik bölümü dipnotları (s.34, s.38)
+standardizasyon tablosu (s.195) ile uyuşmuyor. Kod standardizasyon tablosunu
+izler — bu **doğru seçimdir**.
+
+> `DECISION-004` ("kaynağı tam doğrulamadan kod değiştirme") burada kritik oldu:
+> iki "P0 hata" erken düzeltilseydi **doğru olan kod bozulacaktı.**
+
+### Ek doğrulama: K düzeltmesi tasarımı
+
+Tablo 30, K düzeltmesi **uygulanmış ve uygulanmamış** satırları ayrı verir
+(Hs+.5K, Pd+.4K, Pt+1K, Sc+1K, Ma+.2K). Kod T dönüşümünden önce K düzeltmesini
+uyguladığı için **doğru satırları** kullanır → `K_CORRECTION` tasarımı
+bağımsız olarak doğrulandı.
+
+### Ek 10 — tanımlandı, norm kaynağı DEĞİL
+
+Ek 10 (s.257-260), **tanı gruplarına** ait ortalamaları verir (Psikopati,
+Şizofreni Akut/Kronik, Depresif Psikoz, Borderline, Psikotik, Nevrotik…).
+Normal popülasyon değildir → `DECISION-016`. Kodda karşılığı yok.
+
+### Örneklem sınırı (yorum katmanı için uyarı)
+
+Norm örneklemi "normal Türk toplumu" değil: **16-30 yaş ağırlıklı, eğitimli,
+kentli** (%85 bekâr, %84.88 büyük kent, orta+lise %54.29 + üniversite %47.21).
+Kaynak kitap da 31-50 yaş aralığının **yetersiz temsil edildiğini** söyler
+(s.192). Bu, yorum metinlerinde "norm sınırı" iddiaları için önemlidir
+→ PHASE 10/13'te ele alınacak.
+
+### Kod değişikliği
+
+**YOK.** Bu oturumda yalnızca test (+3) ve dokümantasyon eklendi.
+`compare-norms.py` aracı eklendi.
+
+### Testler
+
+**297/297 PASS** · typecheck **PASS** · build **PASS** · REGRESSION **YOK**
+
+### Güncel çelişki tablosu
+
+| ID | Öncelik | Konu | Durum |
+|---|---|---|---|
+| CONFLICT-001 | P0 | F kadın normu | ✅ **REJECTED** (kod doğru) |
+| CONFLICT-002 | P0 | K normları | ✅ **REJECTED** (kod doğru) |
+| CONFLICT-003 | P1 | L T bandı alt sınırı (59 ↔ 56) | OPEN |
+| CONFLICT-004 | P1 | F ham bant sınırları | OPEN |
+| CONFLICT-005 | P1 | L/K ham bant tabloları kaynakta yok | INVESTIGATING |
+| CONFLICT-006 | P2 | F/K T bant sınır yazımı | CONFIRMED (kabul) |
+| CONFLICT-007 | P2 | `docs/kaynak-denetimi.md` depoda yok | CONFIRMED |
+| CONFLICT-008..012 | P0 | 5 anahtar hatası | ✅ FIXED |
+
+**P0 açık çelişki kalmadı.** Kalan: 3 P1 + 2 P2.

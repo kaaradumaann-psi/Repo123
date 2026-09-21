@@ -183,3 +183,46 @@ kümeleri ayrık, tüm maddeler 1-566 aralığında.
    (şu an yalnızca uzunluk). Öneri: `compare-keys.py` çıktısından üretilen
    golden fixture ile F/Es/FEM/AVD/HST için tam liste karşılaştırması.
 2. `TURKISH_NORMS` 24 hücresi için kaynak kanıtı (Ek 10 + Bölüm 8) → PHASE 6.
+
+---
+
+## Norm denetimi sonrası — 2026-09-21 (Oturum 4)
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **PASS** |
+| `npm test` | **297 / 297 PASS** (20 suite) |
+| `npm run build` | **PASS** |
+
+Test sayısı: 294 → **297** (+3 norm testi, `mmpiKeyIntegrity.test.ts` içinde).
+
+### Yeni norm testleri (aynı dosyaya eklendi)
+
+| Test | Ne doğrular |
+|---|---|
+| 26 norm hücresi | `TURKISH_NORMS` = Tablo 30 (kitap s.195) birebir |
+| K-eklenmiş satır kontrolü | K düzeltmeli ölçekler ham (K'sız) satırları kullanmıyor |
+| Regresyon koruması | Geçerlik bölümünün **tutarsız** dipnotları (10.11 / 13.90 / 13.54) koda sızmamış |
+
+Üçüncü test kasıtlı olarak bir **"yanlış düzeltme önleyici"** testtir: gelecekte
+biri kitabın s.34/s.38 dipnotuna bakıp "kod yanlış" diye düzeltme yaparsa,
+test kırmızıya döner ve gerekçeyi (`CONFLICT-001/002 → REJECTED`) hatırlatır.
+
+### REGRESSION kaydı
+
+**REGRESSION YOK.** Bu oturumda **hiç kod değişikliği yapılmadı** — yalnızca
+test ve dokümantasyon eklendi. Denetim sonucu iki P0 çelişki **REJECTED**
+(kod doğruydu).
+
+### Test kapsamı boşluğu — KAPANDI
+
+`TEST_AUDIT.md` (Oturum 1) şunu kaydetmişti:
+> "`TURKISH_NORMS` (13 ölçek × 2 cinsiyet = 26 hücre) ve `WIGGINS_NORMS` buradan
+> doğrulanacak. `mmpiKeys.ts` içinde L, F, K dışındaki 24 norm hücresi için şu an
+> **hiçbir kaynak kanıtı yok**."
+
+Artık 26 hücrenin tamamı kaynaklı ve testle korunuyor.
+
+Kalan açık: **`WIGGINS_NORMS`** (13 ölçek) için hâlâ kaynak kanıtı yok.
+Wiggins normları kitapta Ek 9'da verilmez; Bölüm 7 (s.178-181) metni
+okunmalıdır → PHASE 8.

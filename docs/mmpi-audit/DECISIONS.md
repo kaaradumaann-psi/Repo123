@@ -313,3 +313,73 @@ Değişiklik yalnızca CSP `script-src` sha256 hash'idir (kaynak kod değiştiğ
 için beklenen ve zorunlu).
 
 Status: **APPROVED**
+
+---
+
+## DECISION-015
+
+Date: 2026-09-21
+Issue: CONFLICT-001 ve CONFLICT-002 — norm farkları (başlangıçta 2 P0)
+
+Decision:
+**İki çelişki de REJECTED.** Kod değişikliği **yapılmaz.**
+`TURKISH_NORMS` içindeki 26 hücrenin tamamı kaynakla birebir uyuşmaktadır.
+
+Reason:
+Kitap, F ve K normlarını iki farklı yerde **tutarsız** verir:
+
+| Değer | Geçerlik bölümü | **Tablo 30 (s.195)** | Kod |
+|---|---|---|---|
+| F kadın X̄ | 10.11 (s.34) | **9.38** | 9.38 ✔ |
+| K erkek X̄ | 13.90 (s.38) | **13.98** | 13.98 ✔ |
+| K kadın X̄ | 13.54 (s.38) | **11.82** | 11.82 ✔ |
+
+**Tablo 30, standardizasyon çalışmasının normatif veri tablosudur**
+(N=1003 erkek / 663 kadın, "Normal Türk, Erkek ve Kadınların MMPI Alt
+Testlerindeki Ortalama ve Standart Sapmaları"). Geçerlik bölümündeki dipnotlar
+ikincil aktarımlardır ve Tablo 30 ile uyuşmazlar.
+
+Ek olarak Tablo 30, K düzeltmesi uygulanmış/uygulanmamış satırları **ayrı ayrı**
+verir; kod T dönüşümünden önce K düzeltmesini uyguladığı için
+(`computeT`) **doğru satırları** kullanmaktadır. Bu, `K_CORRECTION`
+tasarımını bağımsız olarak doğrular.
+
+Action:
+- `CONFLICT-001`, `CONFLICT-002` → `REJECTED`
+- `SOURCE-NORM-001` oluşturuldu (Tablo 30 tam sayfa görsel okuması)
+- `scripts/mmpi-audit/compare-norms.py` eklendi (26 hücre karşılaştırması)
+- `VERIFIED_DATA.md` normlar bölümü VERIFIED'a yükseltildi
+- Kod değişikliği yok
+
+> **Denetim dersi:** `DECISION-004` ("kaynağı tam doğrulamadan kod değiştirme")
+> burada işe yaradı. İki P0 sanılan fark, kaynağın **kendi içi tutarsızlığı**
+> çıktı; erken düzeltilseydi **doğru olan kod bozulacaktı.**
+
+Status: **APPROVED**
+
+---
+
+## DECISION-016
+
+Date: 2026-09-21
+Issue: Ek 10 (kitap s.257-260) norm kaynağı mı?
+
+Decision:
+**Ek 10 norm kaynağı DEĞİLDİR.** `TURKISH_NORMS` ile karşılaştırılmaz.
+Yalnızca tanı grubu referansı olarak `SOURCE_FACTS.md`'ye kaydedilir.
+
+Reason:
+Başlık: "Ek 10: Ayrıntılı tanılara göre ortalama ve standart sapmalar
+(Tablo 35-38)". Tablolar **tanı gruplarına** aittir (Psikopati N=48/16,
+Şizofreni Akut N=115/55, Şizofreni Kronik N=128/27, Depresif Psikoz N=51/12,
+Borderline N=20/5, Psikotik, Nevrotik, Kişilik Bozukluğu …) — **normal
+popülasyon değil**.
+
+Normların kaynağı **Tablo 30** (kitap s.195, Bölüm 8) ve doğrulandı
+(`SOURCE-NORM-001`).
+
+Action:
+Ek 10 hücre hücre okunmadan `VERIFIED` sayılmaz; kodda karşılığı olmadığı için
+şu an düzeltme gerektirmez.
+
+Status: **APPROVED**

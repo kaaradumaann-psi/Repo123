@@ -40,7 +40,7 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 38 | p27 L | **Tablo 5 — K maddeleri (30 madde)** + K normu + K yüksek/ortalama | **DONE** |
 | 39 | p27 R | K düşük puan profili; K ekleme tartışması | DONE |
 | 40 | p28 L | **K T bantları** (≥72 / 61-72 / 46-60 / 27-45) + K'nin tek gecersiz-yapmayan alt test olmasi | **DONE** (gorsel dogrulandi) |
-| 41-42 | p28 R – p29 L | K–klinik ilişkisi, K düzeyi–SED etkileşimi | IN_PROGRESS |
+| 41-42 | p28 R – p29 L | K–klinik ilişkisi, K düzeyi–SED etkileşimi | **DONE** (s.42 boş doğrulandı) |
 | 43-56 | p29 R – p36 L | Bölüm 4: Geçerlik konfigürasyonları (V, tersine V, tümü doğru/yanlış, rastgele) | NOT_STARTED |
 | 57-58 | p36 R – p37 L | **K+ profilleri**, **F-K endeksi** | NOT_STARTED |
 | 59-62 | p37 R – p39 L | Test-tekrar test endeksi, **dikkatsizlik (TR) alt testi** | NOT_STARTED |
@@ -61,7 +61,8 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 178-181 | p97 L – p98 R | **Wiggins içerik skalaları** | NOT_STARTED |
 | 182-188 | p98 R – p102 L | Aşırı Kontrol-Hostilite, Ego gücü, Welsh A/R, Üstünlük, Bağımlılık | NOT_STARTED |
 | 189-190 | p102 R – p103 L | Bölüm 8: Türkiye uyarlanması, tarihçe | NOT_STARTED |
-| 191-195 | p103 R – p105 R | **Standardizasyon çalışması** ← norm kaynağı | NOT_STARTED |
+| 191-194 | p103 R – p105 L | Standardizasyon çalışması: örneklem, yöntem, demografi (N=1003 E / 663 K) | **DONE** |
+| **195** | **p105 R** | **Tablo 30 — NORMAL TÜRK NORMLARI** ← **norm kaynağı** | **DONE** (görsel; OCR boş döndü) |
 | 196-200 | p106 L – p108 L | Türk toplumu için geçerlik çalışması | NOT_STARTED |
 | 201-208 | p108 R – p112 L | Bölüm 9: Türkiye'de kullanıldığı araştırma ve yayınlar | NOT_STARTED |
 | 209-214 | p112 R – p115 L | Bölüm 10: Kaynaklar (künye listesi) | NOT_STARTED |
@@ -89,3 +90,15 @@ değerlerini Tablo 3/4/5 dipnotlarında **doğrudan** vermektedir. Bu nedenle
 `src/scoring/mmpiSource.ts` içindeki yorum metinleri ise bu kitaptan çevrilmiş
 gibi görünmekle birlikte **sayfa numaraları bu kitaba değil** başka bir
 rehbere ("klinik yorum rehberi") işaret etmektedir → bkz. `UNVERIFIED_DATA.md`.
+
+---
+
+## Norm kaynağı — kesin referans (Oturum 4)
+
+**`TURKISH_NORMS`'un kaynağı: Tablo 30, kitap s.195 (PDF p105 R).**
+
+> Bölüm 8 standardizasyon (s.191-194) + Tablo 30 (s.195), birlikte norm künyesini
+> oluşturur. Ek 10 (s.257-260) norm kaynağı **değildir** (`DECISION-016`).
+
+Metinde geçen diğer tablolar (norm olmayan): Tablo 23-29 demografi (s.192-194),
+Tablo 35-38 tanı grupları = Ek 10 (s.257-260).

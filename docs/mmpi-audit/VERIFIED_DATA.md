@@ -3,6 +3,44 @@
 Kaynakta **kesin olarak doğrulanan** veriler. Hızlı referans dosyası.
 Her değer `SOURCE_FACTS.md` içindeki bir ID'ye bağlıdır.
 
+## ⚑ NORM KATMANI — `TURKISH_NORMS` 26/26 HÜCRE VERIFIED
+
+Kaynak: **Tablo 30**, "Normal Türk, Erkek ve Kadınların MMPI Alt Testlerindeki
+Ortalama ve Standart Sapmaları", **kitap s.195** (PDF p105 R) · `SOURCE-NORM-001`
+Örneklem: 1003 erkek / 663 kadın (Bölüm 8 standardizasyon, s.191)
+Doğrulama: tam sayfa görsel okuma (OCR bu sayfayı boş döndürdü) +
+`scripts/mmpi-audit/compare-norms.py` → **MATCH=26 DIFF=0**
+Kalıcı test: `tests/mmpiKeyIntegrity.test.ts` → "Türk normları — Tablo 30"
+
+| Ölçek | Erkek X̄ | SD | Kadın X̄ | SD |
+|---|---|---|---|---|
+| L | 6.45 | 2.74 | 6.00 | 2.25 |
+| F | 8.30 | 4.62 | 9.38 | 5.16 |
+| K | 13.98 | 4.65 | 11.82 | 3.80 |
+| Hs | 13.19 | 4.07 | 15.89 | 4.88 |
+| D | 20.63 | 4.76 | 23.86 | 5.08 |
+| Hy | 19.31 | 4.71 | 18.12 | 5.31 |
+| Pd | 22.22 | 4.45 | 22.84 | 4.51 |
+| Mf | 29.21 | 3.82 | 32.98 | 3.67 |
+| Pa | 11.12 | 4.03 | 11.93 | 4.17 |
+| Pt | 27.90 | 6.30 | 29.20 | 6.59 |
+| Sc | 29.82 | 9.05 | 31.06 | 8.20 |
+| Ma | 19.96 | 4.40 | 19.72 | 4.36 |
+| Si | 23.86 | 7.97 | 29.88 | 7.52 |
+
+**K düzeltmesi doğrulandı:** Tablo 30, K eklenmiş (Hs+.5K, Pd+.4K, Pt+1K,
+Sc+1K, Ma+.2K) ve eklenmemiş satırları ayrı verir. Kod, T dönüşümünden önce
+K düzeltmesini uyguladığı için **doğru satırları** kullanır.
+
+**Kaynak iki yerde çelişir (kayıt):** Geçerlik bölümü dipnotları
+(s.34: F kadın 10.11 · s.38: K erkek 13.90, K kadın 13.54) Tablo 30 ile
+uyuşmaz. Kod Tablo 30'u izler → `CONFLICT-001`/`CONFLICT-002` **REJECTED**.
+
+**Örneklem sınırı (yorum için önemli):** Örneklem "normal Türk toplumu" değil,
+**16-30 yaş ağırlıklı, eğitimli, kentli** bir gruptur (%85 bekâr; %84.88 büyük
+kent; orta+lise %54.29 + üniversite %47.21). Kaynak kitap da 31-50 yaş
+aralığının **yetersiz temsil edildiğini** belirtir (s.192).
+
 ---
 
 ## Sürüm

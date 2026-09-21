@@ -10,7 +10,7 @@ Durumlar: `OPEN` · `INVESTIGATING` · `CONFIRMED` · `FIXED` · `REJECTED` · `
 
 ---
 
-## CONFLICT-001 — F alt testi kadın normu (K P0)
+## CONFLICT-001 — F alt testi kadın normu — **REJECTED (ÇÖZÜLDÜ)**
 
 Area:
 Türk normları / F geçerlik alt testi (T puanı dönüşümü)
@@ -41,9 +41,28 @@ Status:
 s.191-195) ve Ek 10 (kitap s.257-260) okunduktan sonra karara bağlanacak.
 Karar `DECISIONS.md`'ye yazılmadan kod değişmeyecek.
 
+### ÇÖZÜM (2026-09-21, Oturum 4)
+
+**Kod DOĞRU; değişiklik gerekmez.**
+
+Kanıt: Kitap, F kadın normunu **iki farklı yerde tutarsız** verir:
+- Geçerlik bölümü, Tablo 4 dipnotu (s.34): `kadınlarda ortalama: 10.11`
+- **Tablo 30** "Normal Türk, Erkek ve Kadınların… Ortalama ve Standart Sapmaları"
+  (s.195, Bölüm 8 standardizasyon): `Kadın F X̄ = 9.38, SD = 5.16`
+
+Kodun değeri (9.38 / 5.16) **Tablo 30 ile birebir aynıdır.** Tablo 30,
+standardizasyon çalışmasının normatif veri tablosudur (N=1003 erkek / 663 kadın);
+geçerlik bölümündeki dipnot ise ikincil bir aktarımdır. Norm kaynağı olarak
+Tablo 30 esas alınır.
+
+Doğrulama: `scripts/mmpi-audit/compare-norms.py` → 26/26 hücre MATCH.
+Kanıt: `SOURCE-NORM-001`.
+
+Status: **REJECTED** (önceki OPEN kaydı tarihsel olarak korunur; DECISION-015)
+
 ---
 
-## CONFLICT-002 — K alt testi normları (K P0)
+## CONFLICT-002 — K alt testi normları — **REJECTED (ÇÖZÜLDÜ)**
 
 Area:
 Türk normları / K geçerlik alt testi
@@ -77,6 +96,28 @@ Kadın K normu kaynaktaki Savaşır (1981) değeriyle uyuşmuyor.
 Status:
 **OPEN** — PHASE 4 (K düzeltmesi) + PHASE 6 (normlar) sonrası karar.
 Özellikle: Bölüm 8 standardizasyon metni (s.191-195) bağımsız teyit sağlayacak.
+
+### ÇÖZÜM (2026-09-21, Oturum 4)
+
+**Kod DOĞRU; değişiklik gerekmez.**
+
+Kanıt: Kitap, K normlarını **iki farklı yerde tutarsız** verir:
+- Geçerlik bölümü, Tablo 5 dipnotu (s.38): `13.90` (E) / `13.54` (K)
+- **Tablo 30** (s.195, standardizasyon): `K X̄ = 13.98, SD = 4.65` (E) /
+  `K X̄ = 11.82, SD = 3.80` (K)
+
+Kodun değerleri **Tablo 30 ile birebir aynıdır.** Kullanıcı adına kritik olan
+nokta: K hem bir alt test olarak yorumlanır hem de Hs/Pd/Pt/Sc/Ma
+düzeltmesinde kullanılır; bu yüzden *normatif tablo* (Tablo 30) esas alınmalıdır.
+
+Not: Erkek K değerindeki fark (13.90 ↔ 13.98) başlangıçta "yazım hatası" olarak
+değerlendirilmişti; aslında **kod doğru**, geçerlik bölümünün dipnotu Tablo 30
+ile uyuşmuyor.
+
+Doğrulama: `scripts/mmpi-audit/compare-norms.py` → 26/26 hücre MATCH.
+Kanıt: `SOURCE-NORM-001`.
+
+Status: **REJECTED** (önceki OPEN kaydı tarihsel olarak korunur; DECISION-015)
 
 ---
 

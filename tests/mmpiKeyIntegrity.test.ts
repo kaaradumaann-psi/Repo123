@@ -219,3 +219,86 @@ describe('MMPI anahtar bütünlüğü — Ek 9 madde sayıları (kitap s.244-256
     }
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Türk normları — Tablo 30 (kitap s.195)                              */
+/* ------------------------------------------------------------------ */
+
+import { TURKISH_NORMS, K_CORRECTION } from '../src/scoring/mmpiKeys';
+
+/**
+ * Tablo 30: "Normal Türk, Erkek ve Kadınların MMPI Alt Testlerindeki Ortalama
+ * ve Standart Sapmaları" — kitap s.195 (PDF p105 R).
+ *
+ * Değerler tam sayfa yüksek çözünürlüklü GÖRSEL okumayla alınmıştır; OCR bu
+ * sayfayı boş döndürmüştü. Örneklem: 1003 erkek / 663 kadın normal kişi
+ * (Bölüm 8 standardizasyon çalışması, kitap s.191).
+ *
+ * ÖNEMLİ: Tablo 30, K düzeltmesi UYGULANMIŞ ve UYGULANMAMIŞ satırları ayrı
+ * ayrı verir. Kod T dönüşümünden önce K düzeltmesini uyguladığı için burada
+ * **K eklenmiş** satırlar esas alınır (Hs+.5K, Pd+.4K, Pt+1K, Sc+1K, Ma+.2K).
+ *
+ * Bu test neden var:
+ * Denetimde, kitabın geçerlik bölümündeki (s.34 / s.38) F ve K norm
+ * dipnotlarının Tablo 30 ile ÇELİŞTİĞİ bulundu (CONFLICT-001/002). Kod
+ * Tablo 30'u izlediği için doğruydu. Bu test, norm katmanının Tablo 30'a
+ * bağlı kalmasını garanti eder — geçerlik bölümünün tutarsız dipnotlarına
+ * göre "düzeltme" yapılmasını engeller.
+ */
+const TABLE30: Record<'Erkek' | 'Kadın', Record<string, [number, number]>> = {
+  Erkek: {
+    L: [6.45, 2.74], F: [8.3, 4.62], K: [13.98, 4.65],
+    Hs: [13.19, 4.07], D: [20.63, 4.76], Hy: [19.31, 4.71],
+    Pd: [22.22, 4.45], Mf: [29.21, 3.82], Pa: [11.12, 4.03],
+    Pt: [27.9, 6.3], Sc: [29.82, 9.05], Ma: [19.96, 4.4],
+    Si: [23.86, 7.97],
+  },
+  Kadın: {
+    L: [6.0, 2.25], F: [9.38, 5.16], K: [11.82, 3.8],
+    Hs: [15.89, 4.88], D: [23.86, 5.08], Hy: [18.12, 5.31],
+    Pd: [22.84, 4.51], Mf: [32.98, 3.67], Pa: [11.93, 4.17],
+    Pt: [29.2, 6.59], Sc: [31.06, 8.2], Ma: [19.72, 4.36],
+    Si: [29.88, 7.52],
+  },
+};
+
+describe('Türk normları — Tablo 30 (kitap s.195)', () => {
+  it('26 norm hücresinin tamamı kaynak Tablo 30 ile birebir aynıdır', () => {
+    let checked = 0;
+    for (const gender of ['Erkek', 'Kadın'] as const) {
+      for (const [scale, [mean, sd]] of Object.entries(TABLE30[gender])) {
+        const norm = TURKISH_NORMS[gender][scale as keyof (typeof TURKISH_NORMS)[typeof gender]];
+        assert.ok(norm, `${gender}/${scale} normu tanımlı değil`);
+        assert.equal(norm.mean, mean, `${gender}/${scale} ortalaması (Tablo 30)`);
+        assert.equal(norm.sd, sd, `${gender}/${scale} standart sapması (Tablo 30)`);
+        checked++;
+      }
+    }
+    assert.equal(checked, 26, 'karşılaştırılan hücre sayısı 26 olmalı');
+  });
+
+  it('K düzeltmesi uygulanan ölçekler Tablo 30 K-eklenmiş satırlarını kullanır', () => {
+    // Kod K düzeltmesini T dönüşümünden önce uygular → normlar K-eklenmiş
+    // satırlardan alınmalıdır. K-eklenmemiş satırlarla karıştırılmamalıdır.
+    const naiveHam: Record<string, number> = { Hs: 6.20, Pd: 16.62, Pt: 13.91, Sc: 13.83, Ma: 17.16 };
+    for (const [scale, hamMean] of Object.entries(naiveHam)) {
+      assert.ok(
+        K_CORRECTION[scale] > 0,
+        `${scale} K düzeltmesi bekleniyor`,
+      );
+      assert.notEqual(
+        TURKISH_NORMS.Erkek[scale as 'Hs'].mean,
+        hamMean,
+        `${scale} normu K-eklenmemiş ham satırı kullanmamalı`,
+      );
+    }
+  });
+
+  it('geçerlik bölümü dipnotlarındaki tutarsız değerler koda sızmamıştır (CONFLICT-001/002)', () => {
+    // Bu üç değer kitaptaki geçerlik bölümünde geçer ama Tablo 30 ile çelişir.
+    // Kod Tablo 30'u izlemelidir.
+    assert.equal(TURKISH_NORMS.Kadın.F.mean, 9.38, 'F kadın: Tablo 30 (9.38), s.34 dipnotu (10.11) değil');
+    assert.equal(TURKISH_NORMS.Erkek.K.mean, 13.98, 'K erkek: Tablo 30 (13.98), s.38 dipnotu (13.90) değil');
+    assert.equal(TURKISH_NORMS.Kadın.K.mean, 11.82, 'K kadın: Tablo 30 (11.82), s.38 dipnotu (13.54) değil');
+  });
+});
