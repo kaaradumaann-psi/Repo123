@@ -2517,20 +2517,6 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
-  .ai-disclaimer {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin: 0;
-    padding: 10px 12px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--muted);
-    background: var(--bg-soft);
-    border: 1px dashed var(--hairline);
-    border-radius: var(--radius-md);
-  }
-  .ai-disclaimer svg { flex: none; margin-top: 2px; }
 
   @media (max-width: 720px) {
     .ai-hero { flex-direction: column; align-items: stretch; }

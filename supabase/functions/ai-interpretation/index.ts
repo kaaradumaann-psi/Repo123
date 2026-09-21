@@ -229,8 +229,7 @@ function systemPrompt(): string {
     'Geçerlik bulguları (boş, L, F, K, F-K) klinik yorumdan ÖNCE ele alınsın; profil şüpheli/geçersizse bunun sınırlaması açıkça söylesin.',
     `YAPI (başlıklarla): 1) Geçerlik değerlendirmesi 2) Klinik profil özeti (en yüksek T skorları ve kod) 3) Dikkat çeken bulgular 4) Uzman için öneriler.`,
     'En fazla 650 kelime. Türkçe. Kısa, net, paragraf başına en fazla 3 cümle.',
-    "Çıktının en sonuna aynen şu notu ekle: 'Bu yorum yapay zekâ destekli bir karar destek çıktısıdır; tanı koyamaz ve klinik kararın yerine geçmez. Nihai değerlendirme uygulayıcı uzmana aittir.'",
-    'Sadece yorum metnini döndür; JSON, markdown başlık işareti (#) veya ek açıklama ekleme.',
+    'Yorumun sonuna sorumluluk reddi, yasal uyarı ya da "tanı koymaz" türünde bir not ekleme; bu tür notlar arayüz tarafından gösterilmez. Yalnızca dört başlıklı yorum metnini döndür; JSON, markdown başlık işareti (#) veya ek açıklama ekleme.',
   ].join('\n');
 }
 
