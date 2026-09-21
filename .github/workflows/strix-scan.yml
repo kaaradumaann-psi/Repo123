@@ -1,0 +1,78 @@
+# Strix Security Scan (manuel / opt-in).
+#
+# Strix (https://github.com/usestrix/strix, Apache-2.0), Docker sandbox'ında ajantik
+# sızma testi çalıştıran açık kaynaklı bir güvenlik aracıdır. Uygunluk analizi:
+# docs/strix-degerlendirme.md
+#
+# Bilinçli tercihler:
+#  - Yalnızca workflow_dispatch ile tetiklenir. Her PR'da otomatik koşmaz: tarama
+#    LLM token'ı harcar ve STRIX_LLM/LLM_API_KEY secret'ları tanımlı değilken her
+#    PR kırmızı yanardı. Secret'lar girildikten sonra elle çalıştırın.
+#  - Hedef, kaynak kodu ve derleme çıktısıdır (./). Production'a veya canlı
+#    Supabase'e istek açılmaz: uygulama KVKK kapsamında hasta verisi işler;
+#    canlı uç nokta testi yalnız staging/lokal stack'e karşı yapılmalıdır
+#    (bkz. docs/strix-degerlendirme.md).
+#  - Strix bulgu bulunursa exit code 2 ile çıkar ve iş fail olur: bu bilinçli
+#    bir davranıştır (bulguyu görmeden geçme). Rapor her durumda artifact'tır.
+#  - Kurulum pipx + PyPI üzerinden sürüm sabitli yapılır (curl | bash yerine);
+#    yeni sürüm kontrollü biçimde buradan yükseltilmelidir.
+
+name: Strix Security Scan (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strix-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Derleme çıktısını üret (taranan artefakt gerçeği yansıtsın)
+        run: |
+          npm ci
+          npm run build
+
+      - name: Secret kontrolü
+        id: secrets
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          if [ -z "$STRIX_LLM" ] || [ -z "$LLM_API_KEY" ]; then
+            echo "::notice::STRIX_LLM ve/veya LLM_API_KEY secret'ı tanımlı değil; tarama atlandı. (Settings → Secrets and variables → Actions)"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Strix kurulumu (pinned)
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          python3 -m pipx install "strix-agent==1.6.2"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Strix taraması (kaynak + derleme çıktısı, quick mod)
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: strix -n -t ./ --scan-mode quick
+
+      - name: Tarama raporunu artifact olarak kaydet
+        if: always() && steps.secrets.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: strix-scan-report
+          path: strix_runs/
+          if-no-files-found: ignore

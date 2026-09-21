@@ -74,6 +74,25 @@ test('standalone build ships no catch-all _redirects rule (Workers code 100324)'
     'dist/_redirects Workers yayınını code 100324 ile bozar; gerekiyorsa PAGES_REDIRECTS=1 kullanın');
 });
 
+test('standalone build writes HTTP security headers for the deployment', () => {
+  // <meta> CSP frame-ancestors'ı uygulamaz; clickjacking/nosniff/referrer/
+  // permissions/HSTS sertleştirmeleri yalnız HTTP başlığıyla gelir. Build,
+  // Workers/Pages/Netlify'nin ortak anladığı dist/_headers dosyasını üretir.
+  const lines = readFileSync('dist/_headers', 'utf8').trim().split('\n');
+  assert.equal(lines[0], '/*', 'Başlıklar tüm rotalara uygulanmalı');
+  const directives = lines.slice(1).map(line => line.trim());
+  assert.ok(directives.includes('X-Content-Type-Options: nosniff'));
+  assert.ok(directives.includes('X-Frame-Options: DENY'));
+  assert.ok(directives.includes("Content-Security-Policy: frame-ancestors 'none'"),
+    'Tıklama kaçırma koruması frame-ancestors ile başlıkta olmalı');
+  assert.ok(directives.includes('Referrer-Policy: strict-origin-when-cross-origin'));
+  assert.ok(directives.some(d => /^Strict-Transport-Security: max-age=\d+$/.test(d)));
+  assert.ok(directives.some(d => d.startsWith('Permissions-Policy: camera=(self),')),
+    'Kamera tarama özelliği için yalnız kendi origin\'de açık olmalı');
+  assert.ok(directives.includes('Cross-Origin-Opener-Policy: same-origin'));
+  assert.ok(directives.includes('Cross-Origin-Resource-Policy: same-origin'));
+});
+
 test('standalone build embeds the verified form PDF byte for byte', () => {
   // The site offers this file for download, so a drift between the committed PDF and the embedded
   // copy would hand out a form the reader was never verified against.

@@ -110,6 +110,7 @@ npm run build
 | `dist/index.html` | React, CSS ve pdf.js worker'ı gömülü statik çıktı. Supabase URL/anon anahtarı build sırasında `.env`'den alınır. |
 | `optik-form.html` | Aynı self-contained HTML'nin depo kökündeki kopyası. OMR/form önizlemesi çevrimdışı çalışabilir; giriş ve kayıt için Supabase erişimi gerekir. |
 | `dist/_redirects` | Yalnızca `PAGES_REDIRECTS=1 npm run build` ile üretilir; Cloudflare Pages / Netlify SPA fallback kuralıdır (`/*  /index.html  200`). Workers bu catch-all kuralı reddettiği için (code 100324) varsayılan derlemede yazılmaz; SPA davranışını `wrangler.jsonc` içindeki `assets.not_found_handling` sağlar. |
+| `dist/_headers` | Her derlemede üretilir; tüm rotalara HTTP güvenlik başlıkları ekler (HSTS, `X-Content-Type-Options`, `X-Frame-Options` + `frame-ancestors`, `Referrer-Policy`, `Permissions-Policy`, COOP/CORP). Workers statik varlıkları, Pages ve Netlify bu dosyayı yerel olarak destekler; dosyanın kendisi servis edilmez. |
 
 #### Cloudflare Workers'a yayınlama
 
