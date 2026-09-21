@@ -303,3 +303,23 @@ Kapatan karar: DECISION-022.
   kaynakta belgeli değil; Konf. 7'nin "F > 120" koşulunu ölü kılıyordu.
   CHANGE-009 ile operasyonel olarak köprülendi (`F >= 120`); kırpmanın kendisi
   ayrı karar bekliyor (kodda geri-alma notu var).
+
+---
+
+# Ek 1 (s.215-233) — OCR'da kayıp 25 madde
+
+Aşağıdaki madde numaralarının satır başı **hiçbir OCR koşumunda** (200 ve 300
+dpi) yakalanamadı → metinleri **tek tek görsel okunmalıdır**. Bunlar arasında
+**1 kritik madde** vardır: **#139** (görsel okundu → `SOURCE-FACTS.md`
+SOURCE-ITEM-003).
+
+```
+18, 36, 66*, 96, 99, 139*, 186, 224, 238, 241, 250, 255, 268, 271, 299,
+320, 351, 361, 397, 438, 443, 469, 485, 548, 553
+```
+(\* işaretliler sonradan **görsel olarak** okundu: 66, 139 → doğrulandı.)
+
+Not: Kayıp satır başları, ilgili madde metninin bir önceki maddeye
+**birleştirilmiş** olarak OCR'lanmasına yol açmış olabilir (ör. `#48` kaydına
+"ateş basar" cümlesi karışmış — bkz. `OCR_ISSUES.md` ITEM-ORDER). Ek 1 tam
+madde listesi gerektiğinde **sayfa bazlı tam görsel okuma** zorunludur.

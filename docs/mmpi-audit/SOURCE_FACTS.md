@@ -1117,3 +1117,71 @@ Fact — aynen (**Visual: CONFIRMED**):
 - Wiggins'in orijinal çalışmasında 7 ayrı grup karşılaştırılmıştır
   (Hava Kuvvetleri erkek personel N=261, yatan/ayaktan hastalar, öğrenciler).
 Status: **VERIFIED** (bilgi kaydı)
+
+---
+
+# Ek 1 — MMPI Test Kitabı, 566 madde metni (kitap s.215-233)
+
+## SOURCE-ITEM-001 — Madde metinleri kaynaktan okunabilir ve numaralandırma 1-566
+
+Fact: Ek 1 (s.215) şu başlıkla başlar:
+> "Ek 1: MMPI Test Kitabı — Minnesota Çok Yönlü Kişilik Envanteri"
+> "Başla demeden bu defteri açmayınız. […] Her soruyu okuyarak KENDİ
+> DURUMUNUZA GÖRE DOĞRU YA DA YANLIŞ olup olmadığına karar veriniz. […]
+> **Soru sizin durumunuza uymuyor ya da bu konuda bir şey bilmiyorsanız cevap
+> kağıdının üzerine hiç bir işaret koymayınız.** […] MÜMKÜNSE her soruya
+> cevaplandırmaya çalışınız."
+
+Sayfa numaralandırması bütünlüğü: s.215-233 boyunca **1→566 aralığı kesintisiz**
+(OCR ile satır başı numaraları tarandı; ardışıklık boşluğu yok, kopya yok —
+iki "kopya" bulgusu OCR artefaktı, kitapta numara hatası **yok**).
+
+Yöntem: OCR yalnız **numaranın konumunu** bulmak için kullanıldı; **metin
+yüksek DPI görselden okundu** (300-350 dpi). Gerekçe: OCR blok sırası
+güvenilmez (bkz. `OCR_ISSUES.md` → ITEM-ORDER).
+Status: **VERIFIED (yapı)** · `SOURCE-ITEM-001`
+
+## SOURCE-ITEM-002 — Kaynakta "kritik madde" listesi YOK
+
+Fact: Kaynağın hiçbir yerinde (Bölüm 3/4/5/6, Ek 1, Ek 9, Ek 10) **"kritik
+madde"** adı altında bir liste bulunmaz. Kaynakta bulunanlar:
+- **Ek 9** (s.244-256): ölçek ↔ madde numarası ve puanlama yönü **(D/Y)**
+- **Ek 1** (s.215-233): madde **metinleri**
+- **Ek 10** (s.257-260): tanı gruplarına göre ortalama/SD
+
+Dolayısıyla projedeki `CRITICAL_ITEMS` listesi **kaynak dışı** bir derlemedir
+(proje kendi etiketlerini ve yönünü yazmıştır).
+Status: **VERIFIED (yokluk kanıtı)** · `SOURCE-ITEM-002` · CONFLICT-023
+
+## SOURCE-ITEM-003 — Doğrulanan kritik madde metinleri (görsel)
+
+Aşağıdaki 24 madde **görsel doğrulandı** ve etiketi kaynak metniyle tutarlı
+(dosya: `.audit/items/gl2_*.png`, `gl3.png`, `gl4.png`; toplam 39 kayıt):
+
+| # | Kaynak metni (özet) | Kod etiketi | Durum |
+|---|---|---|---|
+| 48 | Başkaları ile bir arada iken kulağıma çok garip şeyler gelmesinden rahatsız olurum | Ruhsal Kontrol Kaybı | ✓ |
+| 66 | Etrafından başkalarının görmedikleri eşya, hayvanlar veya insanlar görürüm | Gerçek Dışılık / Sanrısal Düşünce | ✓ |
+| 74 | Çoğu zaman kız olmayı isterdim. (Şayet kız iseniz) Kız olduğuma hiç üzülmedim | Cinsel Uyumsuzluk / Kimlik Kaygısı | ✓ (cinsiyete göre D/Y doğru) |
+| 114 | Çoğu zaman başım sıkı çember içindeymiş gibi hissederim | Bedensel/Organik Belirti | ✓ |
+| 121 | Aleyhimde bazı tertipler kurulduğuna inanıyorum | Gerçek Dışılık / Sanrısal Düşünce | ✓ |
+| 123 | Beni takip edenler olduğuna inanıyorum | Şüphecilik / Alınganlık | ✓ |
+| 139 | Bazen sanki kendimi ya da başkasını incitmek zorundaymışım gibi hissederim | Kendine/Başkasına Zarar Verme | ✓ |
+| 156 | Bir şeyler yapıp sonra ne yaptığımı hatırlayamadığım zamanlar oldu | Bedensel/Organik Belirti | ✓ |
+| 182 | Aklımı oynatmaktan korkuyorum | Fobik Kaygı | ✓ |
+| 184 | Sık sık nereden geldiğini bilmediğim sesler duyarım | Ruhsal Kontrol Kaybı | ✓ |
+| 200 | Fikir ve düşüncelerimi çalmak isteyen biri var | Gerçek Dışılık / Sanrısal Düşünce | ✓ |
+| 202 | Kendimi cezayı hakketmiş suçlu bir insan olarak görüyorum | İntihar Riski / Depresyon | ✓ |
+| 205 | Bazen çalmaktan ya da dükkânlardan eşya aşırmaktan kendimi alamam | Sosyal Uyumsuzluk | ✓ |
+| 209 | Günahlarımın affedilmeyeceğine inanıyorum | Depresif Karamsarlık | ✓ |
+| 215 | Çok içki kullandım | Alkol/Madde Sorunları | ✓ |
+| 251 | Kendimi kaybedip yaptığım işi aksattığım ve etrafımda olup bitenlerin farkında olmadığım zamanlar oldu | Bedensel/Organik Belirti | ✓ |
+| 275 | Birisi zihnimi kontrol ediyor | Ruhsal Kontrol Kaybı | ✓ |
+| 291 | Hayatımda bir ya da birkaç kere birisinin beni hipnotize ederek bana bir şeyler yaptığını hissettim | Ruhsal Kontrol Kaybı | ✓ |
+| 293 | Birisi zihnimi etkilemeye çalışıyor | Şüphecilik / Sanrısal Düşünce | ✓ |
+| 339 | Çoğu zaman ölmüş olmayı isterdim | İntihar Riski / Depresyon | ✓ |
+| 345 | Sıklıkla olup bitenler bana gerçek değilmiş gibi gelir | Sanrısal Düşünce / Ruhsal Kayıp | ✓ |
+| 349 | Acayip ve tuhaf düşüncelerim vardır | Şüphecilik / Sanrısal Düşünce | ✓ |
+| 350 | Yalnızken garip şeyler duyarım | Sanrısal Düşünce / Ruhsal Kayıp | ✓ |
+
+→ **14 kayıtta etiket kaynak metniyle UYUŞMUYOR** (38 benzersiz maddeden) → CONFLICT-023.

@@ -189,3 +189,36 @@ gerçekte 4.87). Bu, doğrudan T-puanı hatasına yol açardı.
 > Önce deskew + sütun y-merkezi doğrulaması, sonra görsel okuma. Tablo
 > sütunlarının kayma miktarı satır aralığının yarısına yaklaşırsa (±50 px)
 > otomatik olarak ±1 satır hatası beklenir.
+
+---
+
+## ITEM-ORDER — OCR madde numarası ile metni farklı bloklarda döndürür
+
+**Belirti:** RapidOCR, madde numarasını metinden **ayrı** bir blok olarak
+okur ve blok sırası sayfadan sayfaya değişir:
+- s.216 (p116 L): `"Babam iyi bir adamdır."` → sonra `"17."` (metin ÖNCE)
+- s.217 (p116 R): `"50. Bazen ruhum vücudumdan ayrılır."` (birleşik)
+- s.220 (p118 L): `"144. Asker olmak isterim."` (numaralı)
+- s.226 (p120 L): `"336. …"`, `"337. …"` (numaralı)
+
+**Etkisi:** "satır başı = madde numarası" varsayımıyla yapılan eşleme
+**kayar** — ilk denemede 39 kritik maddenin tamamına yakını yanlış maddeye
+bağlandı (ör. #33'e kaynakta #34 olan metin geldi).
+
+**Kural (kalıcı):** Ek 1 madde metinleri **OCR'dan okunmaz**. Numara yalnız
+`regex (^\d{1,3}\.\s)` ile **konum** için bulunur; metin **≥300 dpi görselden**
+okunur. Araç: `scripts/mmpi-audit/verify-items.py`.
+
+## PAGE-NUMBER-AS-ITEM — sayfa numarası madde sanılır
+
+**Belirti:** Sayfa numarası (`215`, `217` …) ya tek başına ya da birleşik blok
+olarak döner (`"215"`, `"216"`). Noktasız sayı, aralık dışı sayı → madde değil.
+
+**Kural:** Yalnız `\d{1,3}\.` (noktalı) ve `1 ≤ n ≤ 566` kabul edilir.
+Sayfa numaraları **hariç** tutulur; ayrıca sayfa üst/alt %6'lık bant taranmaz.
+
+## SPINE-CLIP (Ek 1 varyantı)
+
+Ek 1 sayfalarında dikiş tarafındaki maddeler kırpılır (ör. `#20`, `#37`
+bandında yalnız üst yarı okunabildi). Görsel doğrulamada **bindirmeli kadraj**
+(orta çizgiyi %2-3 aşan) kullanılmalıdır.

@@ -92,7 +92,7 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 196-200 | p106 L – p108 L | Türk toplumu için geçerlik çalışması | NOT_STARTED |
 | 201-208 | p108 R – p112 L | Bölüm 9: Türkiye'de kullanıldığı araştırma ve yayınlar | NOT_STARTED |
 | 209-214 | p112 R – p115 L | Bölüm 10: Kaynaklar (künye listesi) | NOT_STARTED |
-| 215-233 | p115 L – p124 L | **Ek 1: MMPI test kitabı (566 madde metni)** | NOT_STARTED |
+| 215-233 | p115 R – p124 R | **Ek 1: MMPI test kitabı (566 madde metni)** | **DONE** (yapı; madde 1-566 kesintisiz) · kritik madde metinleri görsel doğrulandı (39 kayıt) → **CONFLICT-023** (14 etiket uyuşmuyor) |
 | 234-235 | p124 R – p125 R | Ek 2-3: Kitap / bilgisayar formu cevap kağıdı | NOT_STARTED |
 | 236-239 | p125 R – p127 L | Ek 4-6: Kart formu işaretleme, profil örnekleri (E/K) | NOT_STARTED |
 | 240-243 | p127 R – p129 L | Ek 7-8: Madde değişim tabloları (kart↔kitap formu) | NOT_STARTED |

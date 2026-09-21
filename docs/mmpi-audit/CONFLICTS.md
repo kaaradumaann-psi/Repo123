@@ -812,3 +812,52 @@ tarif ediyor.
 
 Status: **OPEN** — yorum katmanı işi (PHASE 10) kapsamında karara bağlanacak;
 sayısal veri (norm/madde listesi) etkilenmez. Acele karar verilmedi.
+
+---
+
+## CONFLICT-023 — Kritik madde etiketleri kaynak metniyle uyuşmuyor (P2) — **OPEN**
+
+Area: `src/scoring/mmpiCritical.ts` → `CRITICAL_ITEMS` (39 kayıt, 38 benzersiz madde)
+
+Source: **Ek 1 (kitap s.215-233)** — madde metinleri; **görsel doğrulandı**
+(`.audit/items/gl2_*.png`, `gl3.png`, `gl4.png`); Ek 9 (s.244-256) ölçek/yön
+kanıtı.
+
+**Ön bulgu (kaynakta liste yok):** Kaynakta hiçbir yerde "kritik madde" listesi
+yoktur (`SOURCE-ITEM-002`) → listenin **varlığı** kaynak dışıdır; ancak
+etiketler kaynak metniyle **çeliştiği** için ayrıca çelişki kaydı gerekir.
+
+**Uyuşmayan 14 kayıt:**
+
+| # | Kaynak metni (görsel) | Kod etiketi | Ek 9 ölçeği | Değerlendirme |
+|---|---|---|---|---|
+| 20 | Cinsel yaşamımdan memnunum | Alkol/Madde Sorunları | F(Y), Pd(Y), Sc(Y) | ❌ etiket yanlış (cinsel doyum) |
+| 27 | Bazen kötü ruhların beni etkileri altına aldığını hissederim | Ruhsal/Bilişsel Karmaşa | F(D), Pa(D) | ❌ "etkilenme/sanrı" olmalı |
+| 33 | Başımdan çok garip ve tuhaf şeyler geçti | Sosyal Çekilme | Pd(D), Sc(D), Si(Y) | ❌ etiket yanlış |
+| 37 | Cinsel yaşamım yüzünden başım hiç derde girmedi | Ruhsal Sıkıntı | Pd(Y), Sc(Y) | ❌ etiket yanlış |
+| 69 | Ensemde nadiren ağrı hissederim | Sosyal/Ailevi Huzursuzluk | (klinik ölçekte yok) | ❌ etiket yanlış (ağrı) |
+| 85 | …başkalarının ayakkabı, eldiven vb. özel eşyaları o kadar hoşuma gider ki **dokunmak ve aşırmak isterim** | Ruhsal Sıkıntı / Kaygı | F(D) | ❌ dürtü kontrolü/aşırma |
+| 133 | Hiçbir zaman normal olmayan cinsel ilişkilere girişmedim | Ailevi Sorunlar | (klinik ölçekte yok) | ❌ etiket yanlış (cinsellik) |
+| 146 | Seyahat edip gezip tozmadıkça mutlu olamam | Sosyal Uyumsuzluk | F(D) | ❌ etiket yanlış |
+| 151 | **Biri beni zehirlemeye çalışıyor** | Sosyal Çekilme / Yabancılaşma | F(D), Pa(D) | ❌ sanrısal içerik |
+| 168 | Zihnimde bir gariplik var | Bağımlılık Potansiyeli | F(D), Sc(D) | ❌ bilişsel karmaşa |
+| 179 | Cinsel konularda sıkıntım vardır | Bedensel/Organik Belirti | Hy(D), Sc(D) | ❌ cinsel sıkıntı |
+| 334 | Bazen tuhaf kokular duyarım | Depresif Çökkünlük | Sc(D) | ❌ algı bozukluğu (koku) |
+| 337 | Çoğunlukla bir takım şeyler ve kimseler için meraklanıp huzursuzlaşırım | Depresif Çökkünlük | Pt(D) | ❌ anksiyete/huzursuzluk |
+| 354 | Bıçak gibi çok keskin ve sivri şeyler kullanmaktan korkarım | Bedensel / Nörolojik Belirti | Sc(D) | ❌ fobik kaygı |
+
+Impact: Kritik madde listesi **UI** (`MMPICriticalSection.tsx`) ve **basılı
+rapor** (`MMPIPrintReport.tsx`) üzerinde etiketleriyle görünür → yanlış etiket
+klinisyeni yanlış yönlendirir (P2). Puanlama etkilenmez.
+
+Comparison: **CONFLICT (etiket ↔ kaynak metni)** + **EXTRA (liste kaynakta yok)**
+
+Status: **OPEN** — karar seçenekleri (DECISION bekliyor):
+(a) etiketleri kaynak metnine göre düzelt (görsel kanıtla madde bazında),
+(b) kaynakta böyle bir liste olmadığı için listeyi kaldır,
+(c) liste kalsın ama "kaynak dışı klinik derleme" olarak işaretlensin.
+**Karar verilmeden kod değiştirilmedi.**
+
+Not (lehte delil): #74 cinsiyete göre yön ayrımı **doğru** (#74 kaynakta
+"Şayet kız iseniz" koşullu metni vardır) ve 24 kayıt kaynak metniyle tutarlıdır
+→ liste tümüyle hatalı değil; içinde hem doğru hem hatalı kayıt var.

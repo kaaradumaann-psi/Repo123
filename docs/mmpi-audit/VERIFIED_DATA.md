@@ -440,3 +440,41 @@ karşılaştırmasında **46/46 MATCH**.
 
 `AUDIT_STATE` kısıtı "**`WIGGINS_NORMS` (13 ölçek) için hiç kaynak kanıtı yok**"
 → **KAPANDI** (DECISION-025). PHASE 8'in norm katmanı tamamlandı.
+
+---
+
+# PHASE 2/5 — Ek 1: MMPI madde metinleri (kitap s.215-233)
+
+**Yöntem:** OCR yalnız numara konumu için; **metin 300-350 dpi görselden
+okundu** (konum tabanlı kırpma aracı: `scripts/mmpi-audit/verify-items.py`).
+
+## Doğrulanan yapı
+
+| Bulgu | Sonuç |
+|---|---|
+| Madde numaralandırması | **1 → 566 kesintisiz** (boşluk/kopya yok) |
+| Ek 1 başlangıç | s.215 — "Ek 1: MMPI Test Kitabı" + test yönergesi |
+| Ek 1 bitiş | s.233 — madde 566 |
+| Yönerge | D/Y işaretleme; **boş bırakma** (`?`) kuralı kaynakta açık |
+| Kaynakta kritik madde listesi | **YOK** (Ek 1 metin, Ek 9 anahtar, Ek 10 norm) |
+
+## Görsel doğrulanan kritik madde metinleri (39 kayıt / 38 madde)
+
+Tam liste: `SOURCE_FACTS.md` → `SOURCE-ITEM-003`.
+- **24 kayıt** kaynak metniyle **tutarlı** ✓
+- **14 kayıt** kaynak metniyle **uyuşmuyor** → CONFLICT-023 (P2, OPEN)
+
+Kanıt dosyaları: `.audit/items/gl2_1.png`, `gl2_2.png`, `gl2_3.png`,
+`gl3.png` (20/37/74/133), `gl4.png` (85), `.audit/pages/v_item66*.png`,
+`v_item139.png`, `v_item337.png`.
+
+## Kritik madde olmayan ama doğrulanan metinler (örnekler)
+
+| # | Metin (görsel) |
+|---|---|
+| 17 | Babam iyi bir adamdır |
+| 19 | Yeni bir işe girince kimin gözüne girme gerektiğini öğrenmek isterim |
+| 22 | Arasıra kontrol edemediğim gülme ve ağlama nöbetlerine tutulurum |
+| 31 | Sık sık geceleri kabus geçiririm |
+| 41 | Kendimi toparlayamadığım için günler, haftalar hatta aylarca hiçbir şeye el sürmediğim olur |
+| 339 | Çoğu zaman ölmüş olmayı isterdim |

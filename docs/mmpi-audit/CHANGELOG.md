@@ -515,3 +515,46 @@ satırları 4. sütunda **bir alt satıra** yazıyordu (sessiz ±1 satır hatas�
 
 Açık çelişki **6** (3 P1: 003/004/005 · 3 P2: 006/007/022) · FIXED **9** ·
 REJECTED **7**. **Açık P0 yok.** Sonraki: **Bölüm 5 — kod tipleri (s.64+)**.
+
+---
+
+## PHASE 2/5 — Ek 1: MMPI madde metinleri (kitap s.215-233)
+
+Tarih: 2026-09-21 · Kaynak: **Ek 1, s.215-233** (PDF p115 R – p124 R)
+
+### Yöntem
+
+- 19 sayfa **iki aşamalı OCR** (200 dpi → 300 dpi) ile alındı.
+- **Kritik bulgu:** OCR, madde numarası ile metni farklı bloklarda ve
+  sayfadan sayfaya **değişen sırada** döndürüyor → satır başı eşlemesi 1-2
+  madde kayıyor. Bu yüzden madde metinleri **görselden** okundu.
+- Yeni araç: **`scripts/mmpi-audit/verify-items.py`** — OCR yalnız numara
+  **konumu** için; metin ≥300 dpi görselden; 13'lük parçalar hâlinde çıktı.
+- Yeni OCR kuralları: `OCR_ISSUES.md` → **ITEM-ORDER**, **PAGE-NUMBER-AS-ITEM**.
+
+### Bulgular
+
+| Bulgu | Sonuç |
+|---|---|
+| Madde numaralandırması | **1 → 566 kesintisiz** (boşluk/kopya yok) |
+| Kaynakta kritik madde listesi | **YOK** → `SOURCE-ITEM-002` (liste kaynak dışı) |
+| 39 kritik madde kaydı (38 madde) | metinler görsel doğrulandı |
+| Etiketi tutarlı | **24 kayıt** ✓ |
+| Etiketi uyuşmayan | **14 kayıt** ❌ → **CONFLICT-023 (P2, OPEN)** |
+| OCR'da kayıp madde | 25 numara → `UNVERIFIED_DATA.md` (2'si görsel okundu: 66, 139) |
+
+**Örnek uyuşmazlıklar (görsel kanıtlı):**
+- `#33` kod: "Sosyal Çekilme" ↔ kaynak: *"Başımdan çok garip ve tuhaf şeyler geçti"*
+- `#151` kod: "Sosyal Çekilme / Yabancılaşma" ↔ kaynak: *"Biri beni zehirlemeye çalışıyor"*
+- `#337` kod: "Depresif Çökkünlük" ↔ kaynak: *"Çoğunlukla bir takım şeyler ve kimseler için meraklanıp huzursuzlaşırım"*
+- `#334` kod: "Depresif Çökkünlük" ↔ kaynak: *"Bazen tuhaf kokular duyarım"*
+- `#20` kod: "Alkol/Madde Sorunları" ↔ kaynak: *"Cinsel yaşamımdan memnunum"*
+
+**Lehte delil:** `#74` cinsiyet koşullu yön ayrımı kaynakla **tutarlı**;
+24 kayıt doğru etiketli → liste tümüyle hatalı değil.
+
+### Durum
+
+- **Kod değişikliği YOK.** CONFLICT-023 kararı bekliyor (a) etiketleri kaynak
+  metnine göre düzelt, (b) listeyi kaldır, (c) kaynak dışı işaretleyerek koru.
+- Testler etkilenmedi (yalnız doküman + yeni araç eklendi).

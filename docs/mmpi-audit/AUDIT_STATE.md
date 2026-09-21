@@ -30,7 +30,7 @@ Sayfa eşleme:
 |---|---|---|
 | 0 | Denetim altyapısı | **DONE** |
 | 1 | Kaynak yapısı / indeks | **DONE** |
-| 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi |
+| 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi · **Ek 1 madde metinleri (s.215-233) DONE** — 1-566 bütünlük ✓; kritik madde etiketlerinde 14 uyuşmazlık → CONFLICT-023 |
 | 3 | Validity (kitap s.29-42) | **DONE** |
 | 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-62) | ✅ **DONE** — 15/15 konfig · F-K ✓ · TR ✓ · K+ ✓ · dikkatsizlik 12 çift/max 12/kesim 4 ✓ |
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
@@ -47,10 +47,19 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**181** (Wiggins — Türkçe uyarlama) — PDF p98 R
+**233** (Ek 1 sonu — madde 566) — PDF p124 R
 Sonraki hedef: **s.64** (Bölüm 5 — kod tipleri, PDF p40 L)
 
 Last completed:
+**PHASE 2/5 — EK 1 MADDE METİNLERİ (kitap s.215-233) DONE:**
+Madde numaralandırması **1-566 kesintisiz** (boşluk/kopya yok) ✓ ·
+39 kritik madde kaydının (38 madde) metinleri **300-350 dpi görselden** okundu
+(OCR'a bırakılmadı) · **24 kayıt etiketle tutarlı** ✓ · **14 kayıt uyuşmuyor**
+→ **CONFLICT-023 (P2, OPEN)** · kaynakta **kritik madde listesi YOK**
+(SOURCE-ITEM-002) · yeni araç `scripts/mmpi-audit/verify-items.py` ·
+yeni OCR kuralı: `OCR_ISSUES.md` → ITEM-ORDER / PAGE-NUMBER-AS-ITEM
+
+Önceki:
 **PHASE 8 — WIGGINS NORMLARI DOĞRULANDI (kitap s.178-181):**
 Tablo 20 (Normal Grup n=1000) ↔ `WIGGINS_NORMS` = **26/26 BİREBİR MATCH** ✅ ·
 13 skalalık madde sayıları 12/13 match; SOC metin "26" ↔ kitabın kendi listesi
@@ -98,9 +107,9 @@ Wiggins normları (s.178-181) → Bölüm 5 (s.64+)
 ## Next action
 
 Continue from:
-**PHASE 4 kapandı + CONFLICT-016/019/020 kararları verildi (DECISION-023).**
-Sıradaki: **Wiggins normları s.178-181 (p97 L – p98 R)** → **Bölüm 5 / kod
-tipleri (s.64+)** → FINAL öncesi OCR-only sayım + DECISION-011 doğrulaması
+**Ek 1 tamamlandı (s.215-233).** Sıradaki: **CONFLICT-023 kararı (P2)** →
+**Bölüm 5 / kod tipleri (s.64+, PDF p40 L)** → FINAL öncesi OCR-only sayım +
+DECISION-011 doğrulaması
 
 Sıradaki batch'ler (öncelik sırası):
 
@@ -110,7 +119,12 @@ Sıradaki batch'ler (öncelik sırası):
    FIXED (CHANGE-010); kalan 3 madde gerekçeli-belgeli
 4. ~~**PDF p97 L – p98 R** — Wiggins normları~~ ✅ **TAMAMLANDI**
    (`WIGGINS_NORMS` 26/26 MATCH; DECISION-024/025)
-5. **PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni → PHASE 2/5
+5. ~~**PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni~~ ✅ **TAMAMLANDI**
+   (madde 1-566 bütünlük + 39 kritik madde görsel doğrulaması; CONFLICT-023)
+6. **CONFLICT-023 kararı (P2):** kritik madde listesi kaynakta yok + 14 etiket
+   uyuşmuyor → (a) etiketleri kaynak metnine göre düzelt, (b) listeyi kaldır,
+   (c) kaynak dışı olduğunu işaretleyerek koru. **Kanıtlı karar gerekir.**
+7. **Bölüm 5 — kod tipleri (s.64+)** → PHASE 5
 
 ## Last completed task
 
@@ -201,8 +215,9 @@ Bilinen kısıtlar:
 | CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | ✅ **FIXED kısmen** (12 kaldırıldı; 2/9 gerekçeli) |
 | CONFLICT-021 | P1 | Wiggins SOC metin "26" ↔ kitabın listesi 27 | ✅ **REJECTED** (DECISION-024) |
 | CONFLICT-022 | P2 | Wiggins SOC yorum yönü | OPEN (PHASE 10) |
+| CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | OPEN |
 
-Kalan açık: **6 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 3 P2 (006, 007, 022).
+Kalan açık: **7 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 4 P2 (006, 007, 022, 023).
 FIXED: 9 (008-012, 015, 017, 019, 020-kısmi) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
@@ -225,6 +240,7 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
                 p39    (kitap s.62-63: dikkatsizlik kapanışı + Bölüm 5 girişi),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
+                p115-p124 (kitap s.215-233: EK 1 madde metinleri — yapı + 39 kritik madde),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
@@ -237,10 +253,11 @@ Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
 Open conflicts: 6 (3 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
 Fixed:          9 (008..012, 015, 017, 019, 020-kısmi) + 0 regression
 Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
+Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   10 (5 anahtar + 1 TR kesme + 5 konfig/test)
 Tests:          309/309 PASS (22 suite) · typecheck PASS · build PASS
-Next:           Bölüm 5 / kod tipleri (s.64+, PDF p40 L) → PHASE 5;
-                sonra Ek 1 madde metni (s.215-233) ve FINAL doğrulamalar
+Next:           CONFLICT-023 kararı (P2) → Bölüm 5 / kod tipleri (s.64+,
+                PDF p40 L) → PHASE 5; sonra FINAL doğrulamalar
 Blocking:       none
 ```
 
