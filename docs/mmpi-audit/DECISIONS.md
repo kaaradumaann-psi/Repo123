@@ -623,3 +623,34 @@ standard sapmaları" (s.179), Normal Grup (n=1000) sütunları.
 **Yöntem notu:** Tablo ~2.87° dönük tarandığı için sütunlar arası dikey kayma
 var; **deskew edilerek** ve sütun y-merkezleri programatik doğrulanarak okundu
 (`OCR_ISSUES.md` → ROTATED-TABLE). Kısıt listesindeki ilgili madde kapatıldı.
+
+---
+
+## DECISION-026 — Kritik madde etiketleri kaynak metnine göre düzeltildi, liste "kaynak dışı" olarak işaretlendi
+
+Tarih: 2026-09-21 · PHASE 2/5 (Ek 1 denetimi)
+
+**Durum:** `src/scoring/mmpiCritical.ts` → `CRITICAL_ITEMS` (39 kayıt / 38 madde).
+Kritik madde listesi **kaynakta yoktur** (`SOURCE-ITEM-002`). 38 maddenin
+14'ünde etiket, işaret ettiği maddenin **gerçek metniyle** çelişiyordu
+(CONFLICT-023).
+
+**Karar:** Üç yönlü karar uygulandı:
+1. **Etiketler düzeltildi** (14 kayıt) — her yeni etiket o maddenin **görsel
+   doğrulanmış metninin** konusunu birebir yansıtır (ör. `#151` "Sosyal Çekilme
+   / Yabancılaşma" → **"Zehirlenme Sanrısı / Şüphecilik"**, çünkü kaynak metin
+   *"Biri beni zehirlemeye çalışıyor"*).
+2. **Liste korundu** — kaldırmak, raporda/ekranda kullanılan bir klinisyen
+   kontrol listesini işlevsiz bırakırdı; liste tanı değil uyarı listesidir.
+3. **Kaynak dışı olduğu kod içinde belgelendi** — dosya başlığına, listenin
+   kaynak dışı bir derleme olduğu ve etiketlerin kaynak madde metinleriyle
+   uyumlu tutulduğu yazıldı.
+
+**Ölçüt:** Etiket = maddenin **metninde geçen** konunun adı. Kaynak metniyle
+desteklenmeyen hiçbir etiket bırakılmadı; yorum/tanı iddiası eklenmedi.
+
+**Değişmeyenler:** Madde **numaraları ve D/Y yönleri** (kaynak yok, dokunulmadı);
+`#74` cinsiyet koşullu yön ayrımı (kaynakla tutarlı, korundu).
+
+**Sonuç:** CHANGE-011 · CONFLICT-023 **FIXED** · +4 regresyon testi
+(`tests/mmpiKeyIntegrity.test.ts`).

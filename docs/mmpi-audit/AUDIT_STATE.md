@@ -121,10 +121,8 @@ Sıradaki batch'ler (öncelik sırası):
    (`WIGGINS_NORMS` 26/26 MATCH; DECISION-024/025)
 5. ~~**PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni~~ ✅ **TAMAMLANDI**
    (madde 1-566 bütünlük + 39 kritik madde görsel doğrulaması; CONFLICT-023)
-6. **CONFLICT-023 kararı (P2):** kritik madde listesi kaynakta yok + 14 etiket
-   uyuşmuyor → (a) etiketleri kaynak metnine göre düzelt, (b) listeyi kaldır,
-   (c) kaynak dışı olduğunu işaretleyerek koru. **Kanıtlı karar gerekir.**
-7. **Bölüm 5 — kod tipleri (s.64+)** → PHASE 5
+6. ~~**CONFLICT-023 kararı**~~ ✅ **FIXED** (DECISION-026 + CHANGE-011)
+7. **Bölüm 5 — kod tipleri (s.64+)** → PHASE 5 (Bölüm 5 girişi s.63 okundu)
 
 ## Last completed task
 
@@ -175,6 +173,7 @@ Bilinen kısıtlar:
 | CHANGE-008 | `src/scoring/mmpiValidityConfigs.ts` + test | **4 konfig eşiği kaynağa çekildi** (P1): `ascending` +F45-55, `descending` +K≥40, `all-true` 40→35, `help-seeking` 105→100 |
 | CHANGE-009 | `src/scoring/mmpiValidityConfigs.ts` + test | **`all-true` `F>120` → `F>=120`** (T kırpma nedeniyle ölü kuralı canlandırma, P1) |
 | CHANGE-010 | `src/scoring/mmpiValidityConfigs.ts` + test | **`credible` `K<=65` kaldırıldı** (kaynakta yok, P2) |
+| CHANGE-011 | `src/scoring/mmpiCritical.ts` + test | **14 kritik madde etiketi kaynak metnine göre düzeltildi** (P2, DECISION-026) |
 | — | `tests/mmpiExtended.test.ts` | all-false testi DECISION-020 gerekçesiyle güncellendi |
 
 ## Tests
@@ -182,9 +181,9 @@ Bilinen kısıtlar:
 | Komut | Sonuç |
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
-| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **22/22 PASS** (batch 3 + kapanış: +8 konfig testi) |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** (batch 3 + Ek 1: +4 kritik madde testi) |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **309/309 PASS** · 22 suite · ~116 s (baseline 287 → 297 → 301 → 307 → 309) |
+| `npm test` | **313/313 PASS** · 23 suite · ~120 s (baseline 287 → 297 → 301 → 307 → 309 → 313) |
 | `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
@@ -215,14 +214,15 @@ Bilinen kısıtlar:
 | CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | ✅ **FIXED kısmen** (12 kaldırıldı; 2/9 gerekçeli) |
 | CONFLICT-021 | P1 | Wiggins SOC metin "26" ↔ kitabın listesi 27 | ✅ **REJECTED** (DECISION-024) |
 | CONFLICT-022 | P2 | Wiggins SOC yorum yönü | OPEN (PHASE 10) |
-| CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | OPEN |
+| CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | ✅ **FIXED** (DECISION-026) |
 
-Kalan açık: **7 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 4 P2 (006, 007, 022, 023).
-FIXED: 9 (008-012, 015, 017, 019, 020-kısmi) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
+Kalan açık: **6 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 3 P2 (006, 007, 022).
+FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 3 devam: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
+2026-09-21 — Oturum 3 devam: **PHASE 2/5 Ek 1 kapandı** (madde 1-566 + kritik madde etiketleri; CHANGE-011)
+Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
 ## CHECKPOINT
 
@@ -253,11 +253,13 @@ Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
 Open conflicts: 6 (3 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
 Fixed:          9 (008..012, 015, 017, 019, 020-kısmi) + 0 regression
 Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
+Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
-Code changes:   10 (5 anahtar + 1 TR kesme + 5 konfig/test)
-Tests:          309/309 PASS (22 suite) · typecheck PASS · build PASS
-Next:           CONFLICT-023 kararı (P2) → Bölüm 5 / kod tipleri (s.64+,
-                PDF p40 L) → PHASE 5; sonra FINAL doğrulamalar
+Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
+Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
+Next:           Bölüm 5 / kod tipleri (s.64+, PDF p40 L) → PHASE 5;
+                sonra PHASE 9-13 (kod tipleri, yorum, UI, rapor, test) ve
+                FINAL doğrulamalar (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```
 

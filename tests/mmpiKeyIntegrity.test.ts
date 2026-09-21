@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, type ScaleRule } from '../src/scoring/mmpiKeys';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
 import { detectValidityConfig } from '../src/scoring/mmpiValidityConfigs';
+import { CRITICAL_ITEMS } from '../src/scoring/mmpiCritical';
 import type { ResponseMap } from '../src/scoring/mmpiScoring';
 import {
   PERSONALITY_KEYS,
@@ -447,5 +448,67 @@ describe('PHASE 4 batch 3 — konfigürasyon eşikleri kaynağa uyar', () => {
     assert.match(detectValidityConfig(58, 60, 62)!.name, /Akut/);
     const uzak = detectValidityConfig(58, 60, 70);
     assert.ok(!uzak || !/Akut/.test(uzak.name), '|F−K|=10 > 6 → akut/süreğen değil');
+  });
+});
+
+/**
+ * PHASE 2/5 — Kritik madde etiketleri kaynak madde metinleriyle uyumlu olmalı.
+ *
+ * Kaynak kitapta "kritik madde" listesi yoktur (Ek 1 = madde metni,
+ * Ek 9 = ölçek anahtarı). Bu liste kaynak dışı klinik derlemedir; ancak
+ * etiketler, işaret ettikleri maddenin GERÇEK metnini yansıtmak zorundadır.
+ * Görsel doğrulama (300-350 dpi): kitap s.216-226.
+ * Ayrıntı: CONFLICTS.md → CONFLICT-023 · DECISION-026
+ */
+describe('PHASE 2/5 — kritik madde etiketleri madde metniyle uyumlu', () => {
+  const etiket = (id: number, gender?: 'Erkek' | 'Kadın') =>
+    CRITICAL_ITEMS.find(i => i.id === id && (gender === undefined || i.gender === gender))?.label ?? '';
+
+  it('düzeltilen 14 etiket kaynak metnini yansıtır (s.216-226)', () => {
+    // Kaynak metinleri (görsel doğrulandı) — etiket metnin konusunu içermeli
+    assert.equal(etiket(20), 'Cinsel Doyumsuzluk');          // "Cinsel yaşamımdan memnunum"
+    assert.equal(etiket(27), 'Etkilenme / Sanrısal Deneyim'); // "kötü ruhların beni etkileri altına aldığını"
+    assert.equal(etiket(33), 'Tuhaf/Bizar Yaşantı');          // "Başımdan çok garip ve tuhaf şeyler geçti"
+    assert.equal(etiket(37), 'Cinsel Sorunlar');              // "Cinsel yaşamım yüzünden başım hiç derde girmedi"
+    assert.equal(etiket(69), 'Bedensel Ağrı');                // "Ensemde nadiren ağrı hissederim"
+    assert.equal(etiket(85), 'Dürtü Kontrolü / Aşırma İsteği'); // "dokunmak ve aşırmak isterim"
+    assert.equal(etiket(133), 'Cinsel Uyumsuzluk');           // "normal olmayan cinsel ilişkilere girişmedim"
+    assert.equal(etiket(146), 'Sosyal Aktivite İhtiyacı');    // "Seyahat edip gezip tozmadıkça mutlu olamam"
+    assert.equal(etiket(151), 'Zehirlenme Sanrısı / Şüphecilik'); // "Biri beni zehirlemeye çalışıyor"
+    assert.equal(etiket(168), 'Bilişsel Karmaşa');            // "Zihnimde bir gariplik var"
+    assert.equal(etiket(179), 'Cinsel Sıkıntı');              // "Cinsel konularda sıkıntım vardır"
+    assert.equal(etiket(334), 'Algı Bozukluğu (Koku)');       // "Bazen tuhaf kokular duyarım"
+    assert.equal(etiket(337), 'Huzursuzluk / Anksiyete');     // "meraklanıp huzursuzlaşırım"
+    assert.equal(etiket(354), 'Kesici Alet Korkusu (Fobi)');  // "keskin ve sivri şeyler kullanmaktan korkarım"
+  });
+
+  it('eski yanlış etiketlerden hiçbiri kalmaz', () => {
+    const yanlis = [
+      [33, 'Sosyal Çekilme'], [151, 'Sosyal Çekilme / Yabancılaşma'],
+      [337, 'Depresif Çökkünlük'], [334, 'Depresif Çökkünlük'],
+      [20, 'Alkol/Madde Sorunları'], [69, 'Sosyal/Ailevi Huzursuzluk'],
+      [168, 'Bağımlılık Potansiyeli'], [85, 'Ruhsal Sıkıntı / Kaygı'],
+      [354, 'Bedensel / Nörolojik Belirti'], [179, 'Bedensel/Organik Belirti'],
+      [133, 'Ailevi Sorunlar'], [146, 'Sosyal Uyumsuzluk'],
+      [37, 'Ruhsal Sıkıntı'], [27, 'Ruhsal/Bilişsel Karmaşa'],
+    ] as const;
+    for (const [id, kotu] of yanlis) {
+      assert.notEqual(etiket(id), kotu, `#${id} eski (kaynakla uyuşmayan) etiketi taşımamalı`);
+    }
+  });
+
+  it('74. madde cinsiyete göre yön ayrımı korunur (kaynak koşullu metin)', () => {
+    const e = CRITICAL_ITEMS.find(i => i.id === 74 && i.gender === 'Erkek');
+    const k = CRITICAL_ITEMS.find(i => i.id === 74 && i.gender === 'Kadın');
+    assert.equal(e?.expected, 1);
+    assert.equal(k?.expected, 0);
+  });
+
+  it('doğru kalan 24 kayıt değişmedi (örneklem)', () => {
+    assert.equal(etiket(66), 'Gerçek Dışılık / Sanrısal Düşünce');
+    assert.equal(etiket(139), 'Kendine/Başkasına Zarar Verme');
+    assert.equal(etiket(215), 'Alkol/Madde Sorunları');
+    assert.equal(etiket(339), 'İntihar Riski / Depresyon');
+    assert.equal(etiket(350), 'Sanrısal Düşünce / Ruhsal Kayıp');
   });
 });

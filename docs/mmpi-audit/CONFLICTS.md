@@ -852,11 +852,14 @@ klinisyeni yanlış yönlendirir (P2). Puanlama etkilenmez.
 
 Comparison: **CONFLICT (etiket ↔ kaynak metni)** + **EXTRA (liste kaynakta yok)**
 
-Status: **OPEN** — karar seçenekleri (DECISION bekliyor):
-(a) etiketleri kaynak metnine göre düzelt (görsel kanıtla madde bazında),
-(b) kaynakta böyle bir liste olmadığı için listeyi kaldır,
-(c) liste kalsın ama "kaynak dışı klinik derleme" olarak işaretlensin.
-**Karar verilmeden kod değiştirilmedi.**
+Status: **FIXED** (DECISION-026, CHANGE-011 — 2026-09-21).
+
+Resolution: Üç yön birlikte uygulandı — (a) **14 etiket kaynak metnine göre
+düzeltildi**, (b) liste **korundu** (raporda/ekranda klinisyen kontrol listesi
+olarak kullanılıyor), (c) listenin **kaynak dışı** olduğu kod başlığında ve
+`SOURCE_FACTS`'ta belgelendi. Madde numaraları ve D/Y yönleri değişmedi.
+Regresyon: +4 test; `tests/mmpiKeyIntegrity.test.ts` 26/26 · `npm test`
+313/313 PASS.
 
 Not (lehte delil): #74 cinsiyete göre yön ayrımı **doğru** (#74 kaynakta
 "Şayet kız iseniz" koşullu metni vardır) ve 24 kayıt kaynak metniyle tutarlıdır

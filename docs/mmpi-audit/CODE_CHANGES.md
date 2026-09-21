@@ -325,3 +325,44 @@ Erişilebilirlik kontrolü yapıldı: başka örüntü etkilenmiyor.
 - `npm run typecheck` → **0 hata**
 - `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **22/22 PASS** (+2 test)
 - Tam suite → aşağıda TEST_AUDIT kaydı
+
+---
+
+## CHANGE-011 — Kritik madde etiketleri kaynak metniyle uyumlu hâle getirildi (P2)
+
+Date: 2026-09-21
+Type: **Etiket/metin düzeltmesi** (klinik yönlendirme metni)
+Priority: **P2**
+Source: Ek 1 (s.216-226, görsel doğrulama) · CONFLICT-023 · DECISION-026
+
+File: `src/scoring/mmpiCritical.ts` (+ `tests/mmpiKeyIntegrity.test.ts`)
+
+| # | Before | After | Kaynak metni (kanıt) |
+|---|---|---|---|
+| 20 | Alkol/Madde Sorunları | **Cinsel Doyumsuzluk** | "Cinsel yaşamımdan memnunum" |
+| 27 | Ruhsal/Bilişsel Karmaşa | **Etkilenme / Sanrısal Deneyim** | "kötü ruhların beni etkileri altına aldığını hissederim" |
+| 33 | Sosyal Çekilme | **Tuhaf/Bizar Yaşantı** | "Başımdan çok garip ve tuhaf şeyler geçti" |
+| 37 | Ruhsal Sıkıntı | **Cinsel Sorunlar** | "Cinsel yaşamım yüzünden başım hiç derde girmedi" |
+| 69 | Sosyal/Ailevi Huzursuzluk | **Bedensel Ağrı** | "Ensemde nadiren ağrı hissederim" |
+| 85 | Ruhsal Sıkıntı / Kaygı | **Dürtü Kontrolü / Aşırma İsteği** | "dokunmak ve aşırmak isterim" |
+| 133 | Ailevi Sorunlar | **Cinsel Uyumsuzluk** | "normal olmayan cinsel ilişkilere girişmedim" |
+| 146 | Sosyal Uyumsuzluk | **Sosyal Aktivite İhtiyacı** | "Seyahat edip gezip tozmadıkça mutlu olamam" |
+| 151 | Sosyal Çekilme / Yabancılaşma | **Zehirlenme Sanrısı / Şüphecilik** | "Biri beni zehirlemeye çalışıyor" |
+| 168 | Bağımlılık Potansiyeli | **Bilişsel Karmaşa** | "Zihnimde bir gariplik var" |
+| 179 | Bedensel/Organik Belirti | **Cinsel Sıkıntı** | "Cinsel konularda sıkıntım vardır" |
+| 334 | Depresif Çökkünlük | **Algı Bozukluğu (Koku)** | "Bazen tuhaf kokular duyarım" |
+| 337 | Depresif Çökkünlük | **Huzursuzluk / Anksiyete** | "meraklanıp huzursuzlaşırım" |
+| 354 | Bedensel / Nörolojik Belirti | **Kesici Alet Korkusu (Fobi)** | "keskin ve sivri şeyler kullanmaktan korkarım" |
+
+Ayrıca dosya başlığına **"kaynak dışı klinik derleme"** uyarısı eklendi
+(kaynakta kritik madde listesi yoktur; bkz. SOURCE-ITEM-002).
+
+**Değişmeyen:** madde numaraları, D/Y yönleri, `#74` cinsiyet ayrımı.
+
+### Doğrulama
+
+- `npm run typecheck` → **0 hata**
+- `tests/mmpiKeyIntegrity.test.ts` → **26/26 PASS** (+4 yeni test)
+- `npm test` → **313/313 PASS** · 23 suite
+- `npm run build` → **PASS** · `optik-form.html` senkron
+- **REGRESSION YOK**
