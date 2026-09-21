@@ -460,3 +460,60 @@ Kod: `consistent = score <= 3` → 3 puanda **uyarı yok**.
 **Sonuç:** CHANGE-007 uygulandı; CONFLICT-015 → **FIXED**.
 Mevcut testler (1 puan uyarı yok, 4 puan uyarı var) etkilenmedi; 3 puan için
 yeni regresyon testi eklendi.
+
+---
+
+## DECISION-020 — Konfigürasyon 8: kaynak eşiği uygulanmaz, kod korunur
+
+Tarih: 2026-09-21 · PHASE 4 batch 3
+
+**Durum:** Kaynak (s.50, görsel doğrulanmış) "tümüne yanlış" konfigürasyonu için
+**L, F ve K tümü > 80 T** der. Kod `≥ 75` kullanır.
+
+**Ampirik bulgu:** Kitabın kendi anahtarı + Tablo 30 normlarıyla **gerçek bir
+"tümüne yanlış" yanıtlayıcı** şu değerleri üretir:
+`L = 81.2` · **`F = 75.3`** · `K = 82.3` → kaynağın **F > 80** koşulu sağlanamaz.
+
+**Karar:** Kod **korumuş** (75 eşiği). Kod içinde gerekçe yorumu belgelendi.
+
+**Gerekçe:**
+- Kaynak kendi kuralını kendi verisiyle çürütür (kaynak içi tutarsızlık →
+  DECISION-015 sınıfı).
+- Kaynağın eşiği uygulanırsa örüntü **hiçbir zaman tespit edilemez** (ölü kural);
+  bu, kaynağın amacına hizmet etmez.
+- Fark, örüntünün **tanınmasını** etkiler, kaynağın sayısal bir değerini
+  yanlış göstermez.
+
+**Sonuç:** CONFLICT-018 **REJECTED**. Kaynaktan sapma belgelendi (bilinçli).
+
+---
+
+## DECISION-021 — Konfigürasyon eşikleri kaynağa çekildi (CHANGE-008)
+
+Tarih: 2026-09-21 · PHASE 4 batch 3
+
+**Durum:** Dört konfigürasyonda kod, kaynağın **açıkça verdiği** sayıdan
+sapıyordu (CONFLICT-017).
+
+**Karar:** Kaynakta açık sayı olarak verilen dört sınır **uygulanır**:
+
+| Konf. | Kaynak | Yeni kod |
+|---|---|---|
+| 4 (`ascending`) | "F alt testi **45-55 T**" | `F ≥ 45 ∧ F ≤ 55` **eklendi** |
+| 5 (`descending`) | "K alt testi **40-45 T puanı arasındadır**" | `K ≥ 40` **eklendi** |
+| 7 (`all-true`) | "L ve K alt testinin **35 T puanını aşmasını**" | `L ≤ 35 ∧ K ≤ 35` (40 → **35**) |
+| 9 (`help-seeking`) | "F alt testi **100 T puanına yakın ya da altında**" | `F ≤ 100` (105 → **100**) |
+
+**Ölçüt (bu oturumda benimsenen kural):** Kod, kaynağın **açık sayısına**
+uydurulur. Kaynağın **niteliksel** verdiği yerlerde ("yakın", "hemen hemen
+eşit") ±5 tolerans uygulanır ve bu tolerans `UNVERIFIED` olarak belgelenir.
+Kaynakta **hiç olmayan** sınırlar (CONFLICT-020) **bu karara dahil edilmedi**,
+çünkü sınır ekleme/çıkarma konfigürasyon **sırası** nedeniyle başka örüntülerin
+erişilebilirliğini değiştirir → ayrı karar gerekir.
+
+**Neden acele edilmedi (CONFLICT-014 dersi):** Her değişiklik yalnızca kaynağın
+birebir söylediği sayıyla sınırlandı; "mantıklı görünen" ek sıkılaştırmalar
+yapılmadı (ör. `credible` için K üst sınırını kaldırmak) — bunlar ayrı bir
+kararın konusudur.
+
+**Sonuç:** CHANGE-008 uygulandı; CONFLICT-017 **FIXED**; +6 regresyon testi.

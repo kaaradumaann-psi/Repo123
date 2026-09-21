@@ -56,8 +56,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'ascending',
     name: 'Yükselen Eğilim',
-    rule: 'L < F < K; L düşük (≤ 45), K yüksek (≥ 55)',
-    isMatch: v => v.L < v.F && v.F < v.K && v.L <= 45 && v.K >= 55,
+    rule: 'L < F < K; L ≈ 40 (≤ 45), F 45-55, K ≈ 60 (≥ 55)',
+    isMatch: v => v.L < v.F && v.F < v.K && v.L <= 45 && v.F >= 45 && v.F <= 55 && v.K >= 55,
     interpretation:
       'Birey kendini iyi göstermeye çalışır ancak bu çaba etkisizdir; sorunlarını kabul etmekten hoşlanmaz. Klinik ölçekler (özellikle nevrotik üçlü) genellikle yükselir; düşük eğitim ve sosyo-ekonomik düzeydeki bireylerde daha sık görülür.',
     validity: 'şüpheli',
@@ -66,8 +66,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'descending',
     name: 'Azalan Eğilim',
-    rule: 'L > F > K; L yüksek (≥ 55), K düşük (≤ 45)',
-    isMatch: v => v.L > v.F && v.F > v.K && v.L >= 55 && v.K <= 45,
+    rule: 'L > F > K; L ≈ 60 (≥ 55), F ≈ 50, K 40-45',
+    isMatch: v => v.L > v.F && v.F > v.K && v.L >= 55 && v.K >= 40 && v.K <= 45,
     interpretation:
       'Birey sorunlarını açıkça ortaya koymakta ve yardım aramaktadır; kendini olduğundan kötü gösterme eğilimi yoktur ancak yakınmalar abartılı bulunabilir. Klinik başvuruda tipik bir yardım arama örüntüsüdür.',
     validity: 'geçerli',
@@ -86,8 +86,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'all-true',
     name: 'Tümüne "Doğru" Yanıt Verme',
-    rule: 'F, T 120 üzerinde; L ve K, T 40 altında',
-    isMatch: v => v.F > 120 && v.L <= 40 && v.K <= 40,
+    rule: 'F, T 120 üzerinde; L ve K, T 35\'i aşmaz (kaynak s.49)',
+    isMatch: v => v.F > 120 && v.L <= 35 && v.K <= 35,
     interpretation:
       'Bireyin tüm maddelere "Doğru" yanıtı verdiği bir örüntüdür; profil klinik olarak yorumlanamaz. Testin yönergesi yeniden anlatılarak uygulama tekrarlanmalıdır.',
     validity: 'şüpheli',
@@ -96,7 +96,12 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'all-false',
     name: 'Tümüne "Yanlış" Yanıt Verme',
-    rule: 'L, F ve K tümü T 75-80 üzerinde',
+    // Kaynak s.50: "L, F ve K testlerinin tümü 80 T puanının üzerindedir."
+    // ANCAK: kitabın kendi anahtarı + Tablo 30 normlarıyla, gerçek bir
+    // "tümüne yanlış" yanıtlayıcı L=81.2, F=**75.3**, K=82.3 üretir → kaynağın
+    // F>80 koşulu bu formda ULAŞILAMAZ (kaynak içi tutarsızlık, DECISION-020).
+    // Bu yüzden pratik eşik korunur; bkz. CONFLICTS.md CONFLICT-018.
+    rule: 'L, F ve K tümü T 75 üzerinde',
     isMatch: v => v.L >= 75 && v.F >= 75 && v.K >= 75,
     interpretation:
       'Bireyin tüm maddelere "Yanlış" yanıtı verdiği bir örüntüdür; kendisini aşırı olumlu gösterme çabası tüm ölçekleri yükseltir. Profil klinik olarak yorumlanamaz; uygulama tekrarlanmalıdır.',
@@ -106,8 +111,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'help-seeking',
     name: 'Psikolojik Yardım İsteği',
-    rule: 'L ve K, T 66 altında; F, T 70-105 arası',
-    isMatch: v => v.L < 66 && v.K < 66 && v.F >= 70 && v.F <= 105,
+    rule: 'L ve K, T 66 altında; F, T 100 ve altı (kaynak s.51)',
+    isMatch: v => v.L < 66 && v.K < 66 && v.F >= 70 && v.F <= 100,
     interpretation:
       'Birey psikolojik sıkıntısını açıkça ortaya koymakta ve yardım istemektedir; sorunlarını abartıyor olabilir ancak yardım aramaya isteklidir. Klinik ölçekler bireyin yakınmalarına göre değerlendirilmelidir.',
     validity: 'geçerli',

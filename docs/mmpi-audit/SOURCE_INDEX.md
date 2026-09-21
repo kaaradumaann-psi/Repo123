@@ -46,7 +46,15 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **45** | **p30 R** | **Konfigürasyon 3 — "V" (Çok Kapalı)** (F<50 ∧ L,K>60) + Şekil 3 | **DONE** |
 | **46** | **p31 L** | **Konfigürasyon 4 — Yükselen Eğilim** (L=40, F 45-55, K=60) + Şekil 4 | **DONE** (K değeri görsel doğrulandı) |
 | **47** | **p31 R** | **Konfigürasyon 5 — Azalan Eğilim** (L=60, F≈50, K 40-45) + Şekil 5 | **DONE** |
-| 48-55 | p32 L – p36 L | Bölüm 4 konfigürasyonları (6-13: tümü doğru/yanlış, rastgele, yardım arayan …) | NOT_STARTED |
+| **48** | **p32 L** | **Konfigürasyon 6 — Rastgele cevaplama** (L,K=55; F>105) | **DONE** (görsel doğrulandı) |
+| **49** | **p32 R** | **Konfigürasyon 7 — Tümüne "doğru"** (L,K≤35; F>120) | **DONE** (görsel doğrulandı) |
+| **50** | **p33 L** | **Konfigürasyon 8 — Tümüne "yanlış"** (L,F,K>80) | **DONE** (görsel doğrulandı) |
+| **51** | **p33 R** | **Konfigürasyon 9 — Yardım isteği** (L,K<66; F≈100 veya altı) | **DONE** (görsel doğrulandı) |
+| **52** | **p34 L** | **Konfigürasyon 10 — Geleneksel olmayan** (L<66; F>69; K>65) | **DONE** (görsel doğrulandı) |
+| **53** | **p34 R** | **Konfigürasyon 11 — Açık ve tavizsiz** (L<55; F≈64; K<45) | **DONE** (görsel doğrulandı) |
+| **54** | **p35 L** | **Konfigürasyon 12 — Güvenilir cevaplayıcı** (L≈50; F<70; K>50) | **DONE** |
+| **55** | **p35 R** | **Konfigürasyon 13 — Akut/süreğen** (L>50; F≈K>55) | **DONE** |
+| 56 | p36 L | **Konfigürasyon 14** + **Konfigürasyon 15** | **DONE** |
 | **56** | **p36 L** | **Konfigürasyon 14 — erdemli görünme isteği** (L>55, F<60, K 59-64) + Şekil 14 | **DONE** (görsel doğrulandı) |
 | 57 | p36 R | **Konfigürasyon 15** (L=60, F>70, K<40) + Şekil 15 + **K+ profili** tanımı (Mark & Seeman 1963) | **DONE** (şekil görsel doğrulandı) |
 | 58 | p37 L | **F-K endeksi** (kesim 11→9; 0-9 geçerli, >9 sahte-kötülük, 0 sahte-iyilik; X̄ 8.66/SD 5.94) | **DONE** (görsel doğrulandı) |

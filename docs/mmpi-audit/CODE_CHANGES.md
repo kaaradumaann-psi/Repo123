@@ -253,3 +253,37 @@ kaynak uyumu":
 - Mevcut TR testleri etkilenmedi (1 puan uyarı yok, 4 puan uyarı var → ikisi de
   yeni kuralda da doğru)
 - Tam suite sonucu: `TEST_AUDIT.md`
+
+---
+
+## CHANGE-008 — Geçerlik konfigürasyon eşikleri kaynağa çekildi (P1)
+
+Date: 2026-09-21
+Type: **Davranış değişikliği** (validity config eşleştirme)
+Priority: **P1**
+Source: `SOURCE-CONFIG-004/005/007/009` · CONFLICT-017 · DECISION-021
+
+File: `src/scoring/mmpiValidityConfigs.ts` (+ testler)
+
+| id | Before | After | Kaynak |
+|---|---|---|---|
+| `ascending` | `L<F<K ∧ L≤45 ∧ K≥55` | `… ∧ F≥45 ∧ F≤55 ∧ …` | "F alt testi 45-55 T" (s.46) |
+| `descending` | `L>F>K ∧ L≥55 ∧ K≤45` | `… ∧ K≥40 ∧ K≤45` | "K alt testi 40-45 T puanı arasındadır" (s.47) |
+| `all-true` | `F>120 ∧ L≤40 ∧ K≤40` | `F>120 ∧ L≤35 ∧ K≤35` | "L ve K alt testinin 35 T puanını aşmasını" (s.49) |
+| `help-seeking` | `L<66 ∧ K<66 ∧ F 70-105` | `… ∧ F ≤ 100` | "F 100 T puanına yakın ya da altında" (s.51) |
+
+Ayrıca `rule` metinleri kaynağa göre güncellendi ve `all-false` için kaynak
+sapması **gerekçeli yorum** olarak kod içine yazıldı (CONFLICT-018,
+DECISION-020 — kod değişmedi).
+
+**Değişmeyenler (bilinçli):** `all-false` 75 eşiği (DECISION-020);
+`credible` K ≤ 65, `v-shape` F ≤ 55, `descending` F sınırı, `help-seeking`
+F ≥ 70 → CONFLICT-020 (ayrı karar).
+
+### Doğrulama
+
+- `npm run typecheck` → **0 hata**
+- `tests/mmpiKeyIntegrity.test.ts` (PHASE 4 batch 3, +6 test) + `mmpiExtended`
+  → **46/46 PASS**
+- Tam suite → **307/307 PASS** (22 suite, ~120 s) — önceki 301/301 (21 suite)
+- **REGRESSION YOK** · `build` PASS · `optik-form.html` senkron

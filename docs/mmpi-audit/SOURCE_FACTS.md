@@ -829,3 +829,140 @@ Kod: `descending` → `L > F ∧ F > K ∧ L ≥ 55 ∧ K ≤ 45`
   **alt sınır yok** (K = 20 de kabul edilir) → **eksik** → CONFLICT-016
 
 Status: sıralama + L **VERIFIED**, F ve K alt sınırı **NEEDS_REVIEW**
+
+---
+
+# Bölüm 4 — Geçerlik Konfigürasyonları (kitap s.48-55) — batch 3
+
+## SOURCE-CONFIG-006 · Konfigürasyon 6 — Rastgele cevaplama (s.48, p32 L)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 6: L ve K alt testleri **55 T**, F alt testi **105 T puanının
+> üstündedir**." — Şekil 6. Rastgele cevaplama.
+> "Profil, hastanın maddeleri rastgele cevaplamasından dolayı geçersizdir.
+> Durum hastanın konfüzyonundan, öfkesinden, test durumuna karşı direncinden
+> ya da zekâ faktöründen kaynaklanıyor olabilir. […] testi hastaya tekrar
+> vermelidir."
+
+Kod: `random` → `F > 105 ∧ L 50-60 ∧ K 50-60`
+Karşılaştırma: F **birebir** ✓; L,K kaynakta **nokta (55)** ↔ kod ±5 bant → kaynak
+değeri bandın merkezinde ✓ → **MATCH (toleranslı)**
+Status: **VERIFIED**
+
+## SOURCE-CONFIG-007 · Konfigürasyon 7 — Tümüne "doğru" (s.49, p32 R)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 7: Tümünü doğru olarak işaretleme. L ve K alt testinin **35 T
+> puanını aşmasını**, F alt testinin **120'nin üzerinde** yer almasını
+> gerektirir. Ek olarak, klinik testlerden **Pd, Pa, Pt, Sc ve Ma 90 T puanının
+> üzerinde** yer alır."
+Ek liste: 1. Her soruyu 'doğru' olarak işaretleme · 2. "Yardım çağrısı" profili ·
+3. Ergenlerde akut bir rahatsızlık yaşanması (özellikle erkek ergenler) ·
+4. Yetişkinlerde çok dirençli olma · 5. Sahte-kötülük profili (F-K indeksi 11
+puanı aşmaktadır).
+
+Kod: `all-true` → `F > 120 ∧ L ≤ 35 ∧ K ≤ 35` (düzeltildi, CHANGE-008)
+- L,K: kaynak "35'i aşmasın" = **≤ 35** → ✅ MATCH (eski kod 40 idi → düzeltildi)
+- F: kaynak "**120'nin üzerinde**" = `> 120` → kod aynı **ama**
+  **T puanı [20,120] aralığına kırpıldığı için ULAŞILAMAZ** → CONFLICT-019
+
+Status: L,K **VERIFIED** · F koşulu **ULAŞILAMAZ (CONFLICT-019, P1, OPEN)**
+
+## SOURCE-CONFIG-008 · Konfigürasyon 8 — Tümüne "yanlış" (s.50, p33 L)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 8: Bireyin bütün soruları 'Yanlış' olarak işaretlemesidir.
+> Şekil 8'de gösterildiği gibi **L, F ve K testlerinin tümü 80 T puanının
+> üzerindedir**. Ek olarak **Hy, D, Hs ve Pd** alt testleri 80 T ve üstüne
+> yükselmiştir."
+> "Profil geçersizdir. Hasta tüm maddelere yanlış olarak cevap verme
+> eğilimindedir. […] testi tekrar verebilir."
+
+Kod: `all-false` → `L ≥ 75 ∧ F ≥ 75 ∧ K ≥ 75` (kaynak **> 80** der)
+**KAYNAK İÇİ TUTARSIZLIK — ampirik kanıt:**
+Kitabın kendi anahtarı + Tablo 30 normlarıyla, **tam "tümüne yanlış"** yanıt
+veren bir kişi şu profili üretir:
+`L: ham 15 → T 81.2` · `F: ham 20 → T **75.3**` · `K: ham 29 → T 82.3`
+→ Kaynağın istediği **F > 80 koşulu bu formda ulaşılamaz**; ulaşan tek yol
+"tümüne yanlış" yanıtı değildir. (Kaynak kendi kuralını kendi verisiyle
+çürütüyor.)
+Status: **REJECTED (kod doğru)** → CONFLICT-018 · DECISION-020
+
+## SOURCE-CONFIG-009 · Konfigürasyon 9 — Yardım isteği (s.51, p33 R)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 9: L ve K alt testleri **66 T puanının altında**, F alt testi
+> ise **100 T puanına yakın ya da altındadır**."
+> "Bu profil **geçerlidir**. Geçerlik konfigürasyonu hastanın dile getirmek
+> istediği psikolojik sorunları olduğunu göstermektedir. Bu tür konfigürasyon
+> veren hastalar karamsar, dik kafalı, huzursuz ve asi kişilerdir. Kendilerini
+> aşırı eleştirirler, psikolojik sorunlarını kabul etmeye hazırdırlar. […]
+> kolay incinebilirler."
+
+Kod: `help-seeking` → `L < 66 ∧ K < 66 ∧ F 70-100` (üst sınır düzeltildi, CHANGE-008)
+- L < 66 ✅ · K < 66 ✅
+- F üst sınırı: kaynak "100'e yakın ya da altında" → **≤ 100** ✅ (eski kod 105)
+- F **alt sınırı 70 kaynakta YOK** → kod ekliyor → `UNVERIFIED_DATA.md`
+Status: **VERIFIED (üst sınır düzeltildi)** · alt sınır **UNVERIFIED**
+
+## SOURCE-CONFIG-010 · Konfigürasyon 10 — Geleneksel olmayan örüntü (s.52, p34 L)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 10: L alt testi **66 T puanının altında**, F alt testi **69 T
+> puanının** ve K alt testi **65 T puanının üstündedir**."
+> "Profil geçerli gibi görünse de geçerlik konfigürasyonu geleneksel olmayan bir
+> cevap örüntüsünün varlığını göstermektedir. […] Patolojinin açık gösterimi ve
+> savunucu kontrol arasındaki denge bu kişilerde durağan değildir ve
+> yordanamaz."
+
+Kod: `unconventional` → `L < 66 ∧ F > 69 ∧ K > 65` → **birebir MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-CONFIG-011 · Konfigürasyon 11 — Açık ve tavizsiz (s.53, p34 R)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "Konfigürasyon 11: L alt testi **55 T puanının altında**, F alt testi **64 T
+> puanına yakın**, K alt testi **45 T puanının altında**."
+> "Bu profil geçerlidir. Benzer profil veren bireyler konuşma ve tavırlarında
+> açıktırlar ve laflarını sakınmazlar. Ergen grubu dışında kalan bireylerde ego
+> gücünde düşüklük ve yetersiz savunma mekanizmaları vardır. Eğer açık bir
+> psikolojik bozukluk yoksa hastada nevrotik bir uyum olduğu görülmektedir."
+
+Kod: `frank` → `L < 55 ∧ K < 45 ∧ F 60-70`
+- L < 55 ✅ · K < 45 ✅
+- F: kaynak **nokta 64** ("yakın") ↔ kod 60-70 bandı → 64 bandın içinde ✓
+  (bant 64'ü kapsar; ancak bandın merkezi 65'tir, kaynak noktası 64)
+Status: **VERIFIED** (F bandı tolerans olarak kabul)
+
+## SOURCE-CONFIG-012 · Konfigürasyon 12 — Güvenilir cevaplayıcı (s.54, p35 L)
+
+Fact — aynen:
+> "Konfigürasyon 12: L alt testi **50 T puanına yakın**, F alt testi **70 T
+> puanının altında**, K alt testi **50 T puanının üstündedir**."
+> "Bu geçerli bir profildir. Birey yönergeleri dikkatli bir biçimde okuyarak
+> anlamış ve yapmıştır. Yanıtlar olduğu gibi doğrudur ve hastanın durumunu
+> yansıtmaktadır."
+
+Kod: `credible` → `L 45-55 ∧ F < 70 ∧ K > 50 ∧ K ≤ 65`
+- L: kaynak nokta **50** ↔ kod 45-55 bandı ✓ (tolerans)
+- F < 70 ✅ · K > 50 ✅
+- **K ≤ 65 üst sınırı kaynakta YOK** (kaynak K için üst sınır koymaz → K=70 de
+  config 12'dir) → `UNVERIFIED_DATA.md`
+Status: **VERIFIED** · K üst sınırı **UNVERIFIED (fazladan sınır)**
+
+## SOURCE-CONFIG-013 · Konfigürasyon 13 — Akut / süreğen (s.55, p35 R)
+
+Fact — aynen:
+> "Konfigürasyon 13: Bu konfigürasyonda L alt testi **50 T puanının üstünde**,
+> F ve K alt testleri **hemen hemen eşittir ve 55 T puanının üstündedir**."
+Ek liste: 1. Akut bozukluk · 2. Ciddi bozukluğu olmasına karşın oldukça
+savunucu olan ancak yine de hasta görünen kişiler.
+> "Bu örüntüdeki kişilerin başa çıkma yetenekleri iyidir. […] testi 70 T
+> puanının üzerinde olsa bile bu bireyler, sadece şimdiki semptom ya da
+> problemleri için yardım almak isterler ve tipik olarak durumsal stres
+> azaldığında rahatlarlar."
+
+Kod: `acute-chronic` → `L > 50 ∧ F > 55 ∧ K > 55 ∧ |F−K| ≤ 6`
+- L > 50 ✅ · F,K > 55 ✅ · "hemen hemen eşit" ↔ |F−K| ≤ 6 (niceleme yok, makul
+  eşitleme) ✓
+Status: **VERIFIED (birebir)**

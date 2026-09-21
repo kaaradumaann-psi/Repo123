@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, type ScaleRule } from '../src/scoring/mmpiKeys';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
+import { detectValidityConfig } from '../src/scoring/mmpiValidityConfigs';
 import type { ResponseMap } from '../src/scoring/mmpiScoring';
 import {
   PERSONALITY_KEYS,
@@ -383,5 +384,55 @@ describe('PHASE 4 — tutarlılık endeksleri kaynak uyumu', () => {
     // 8-11 aralığı her iki dalda da "abartma" notunu taşır (kaynak s.59)
     assert.match(fkIndexAnalysis(18, 10).interpretation, /8-11 aralığı/, '8-9 dalı');
     assert.match(fkIndexAnalysis(20, 10).interpretation, /8-11 aralığı/, '10-11 dalı');
+  });
+});
+
+/**
+ * PHASE 4 batch 3 — Geçerlik konfigürasyonları kaynak uyumu (kitap s.43-55).
+ *
+ * Kaynak, 15 konfigürasyonun eşiklerini açık sayılarla verir:
+ * "L ve K alt testinin 35 T puanını aşmasını" (s.49), "L, F ve K testlerinin
+ * tümü 80 T puanının üzerindedir" (s.50), "F alt testi ise 100 T puanına yakın
+ * ya da altındadır" (s.51), "F alt testi 45-55 T" (s.46),
+ * "K alt testi 40-45 T puanı arasındadır" (s.47).
+ */
+describe('PHASE 4 batch 3 — konfigürasyon eşikleri kaynağa uyar', () => {
+  it('Konf. 7 (tümüne doğru): L ve K 35 T puanını aşmaz', () => {
+    const ok = detectValidityConfig(30, 125, 30);
+    assert.match(ok!.name, /Doğru/);
+    const bos = detectValidityConfig(38, 125, 38);
+    assert.ok(!bos || !/Doğru/.test(bos.name), 'L,K=38 kaynağın 35 sınırını aşar');
+  });
+
+  it('Konf. 9 (yardım isteği): F 100 ve altı; 101 bu örüntü değil', () => {
+    const ok = detectValidityConfig(65, 100, 65);
+    assert.match(ok!.name, /Yardım İsteği/);
+    const ustu = detectValidityConfig(65, 101, 65);
+    assert.ok(!ustu || !/Yardım İsteği/.test(ustu.name), 'F=101 kaynak üst sınırını aşar');
+  });
+
+  it('Konf. 4 (yükselen): F 45-55 aralığı zorunlu', () => {
+    const ok = detectValidityConfig(40, 50, 60);
+    assert.match(ok!.name, /Yükselen/);
+    const disi = detectValidityConfig(40, 62, 65);
+    assert.ok(!disi || !/Yükselen/.test(disi.name), 'F=62 kaynağın 45-55 aralığı dışında');
+  });
+
+  it('Konf. 5 (azalan): K 40-45 aralığı zorunlu', () => {
+    const ok = detectValidityConfig(60, 50, 42);
+    assert.match(ok!.name, /Azalan/);
+    const disi = detectValidityConfig(60, 50, 35);
+    assert.ok(!disi || !/Azalan/.test(disi.name), 'K=35 kaynağın 40-45 aralığı dışında');
+  });
+
+  it('Konf. 10 (geleneksel olmayan) birebir: L<66 ∧ F>69 ∧ K>65', () => {
+    assert.match(detectValidityConfig(60, 70, 66)!.name, /Geleneksel Olmayan/);
+    assert.ok(!detectValidityConfig(60, 69, 66) || !/Geleneksel Olmayan/.test(detectValidityConfig(60, 69, 66)!.name));
+  });
+
+  it('Konf. 13 (akut/süreğen): L>50 ∧ F,K>55 ∧ |F−K|≤6', () => {
+    assert.match(detectValidityConfig(58, 60, 62)!.name, /Akut/);
+    const uzak = detectValidityConfig(58, 60, 70);
+    assert.ok(!uzak || !/Akut/.test(uzak.name), '|F−K|=10 > 6 → akut/süreğen değil');
   });
 });

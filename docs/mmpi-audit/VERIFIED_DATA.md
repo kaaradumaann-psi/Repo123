@@ -351,3 +351,31 @@ edilmez" → geçerlik konfigürasyonları yalnızca L, F, K üzerinden kurulur
 
 K düzeltmesi ek bilgi (s.46): klinik ölçeğe **5-10 T puanı** eklenir (Greene
 1980); K, F'ten **20 ya da daha çok** T puanı yüksekse …
+
+
+---
+
+# PHASE 4 — Geçerlik Konfigürasyonları batch 3 (kitap s.48-55) — **TÜM 15 KONFİGÜRASYON TAMAM**
+
+| # | Kaynak koşul | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| 6 | L,K **=55**; F **>105** | `random`: F>105 ∧ L,K 50-60 | ✅ MATCH (nokta ±5) | **V** |
+| 7 | L,K **≤35**; F **>120** | `all-true`: F>120 ∧ L,K≤35 | L,K ✅ (düzeltildi) · F **ulaşılamaz** → CONFLICT-019 | **V** |
+| 8 | L,F,K **>80** | `all-false`: hepsi ≥75 | ⚠️ kaynak içi tutarsızlık → REJECTED (DECISION-020) | **V** |
+| 9 | L,K **<66**; F **≈100 ya da altı** | `help-seeking`: L,K<66 ∧ F 70-100 | ✅ üst sınır düzeltildi · alt sınır kaynakta yok | **V** |
+| 10 | L**<66** ∧ F**>69** ∧ K**>65** | `unconventional` birebir | ✅ MATCH | **V** |
+| 11 | L**<55**; F**≈64**; K**<45** | `frank`: L<55 ∧ K<45 ∧ F 60-70 | ✅ MATCH (64 bantta) | **V** |
+| 12 | L**≈50**; F**<70**; K**>50** | `credible`: L 45-55 ∧ F<70 ∧ K>50 ∧ K≤65 | ✅ MATCH · K≤65 kaynakta yok | **V** |
+| 13 | L**>50**; F**≈K** ve **>55** | `acute-chronic`: L>50 ∧ F,K>55 ∧ |F−K|≤6 | ✅ birebir MATCH | **V** |
+
+**Bölüm 4 tamamlandı: 15/15 konfigürasyon kaynakla karşılaştırıldı.**
+
+## Ampirik profil testleri (bu oturumda koşuldu)
+
+| Yanıt örüntüsü | L T | F T | K T | Tespit edilen konfigürasyon |
+|---|---|---|---|---|
+| Tümüne **"Yanlış"** | 81.2 (ham 15) | **75.3** (ham 20) | 82.3 (ham 29) | "Tümüne yanlış" ✅ |
+| Tümüne **"Doğru"** | 26.5 (ham 0) | **120.0** (ham 44, üst sınır) | 22.1 (ham 1) | **YOK** ❌ (CONFLICT-019) |
+
+Not: T puanları **[20, 120]** aralığına kırpılır (`mmpiScoring.ts`), bu yüzden
+kaynağın "F > 120" koşulu matematiksel olarak sağlanamaz.

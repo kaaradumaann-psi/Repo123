@@ -283,3 +283,55 @@ kaldırıldı. Ayrıntı: `CODE_CHANGES.md`.
 - **Dikkatsizlik kesme puanı (4)** ve **F-K negatif eşiği (−8)**: kaynakta
   bulunamadı → `UNVERIFIED_DATA.md`.
 - **K+ profili örüntüsü**: kaynakta tanımlı, kodda yok → `MISSING-KPLUS-001` (P3).
+
+---
+
+# Oturum 3 (devam) — PHASE 4 batch 3: Konfigürasyon 6-13
+
+Tarih: 2026-09-21 · Kapsam: kitap s.48-55 (PDF p32 L – p35 R)
+
+## Kod değişikliği
+
+`CHANGE-008` (P1) — dört konfigürasyon eşiği kaynağa çekildi:
+`ascending` (+F 45-55) · `descending` (+K ≥ 40) · `all-true` (40→35) ·
+`help-seeking` (105→100). Ayrıntı: `CODE_CHANGES.md`.
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts tests/mmpiExtended.test.ts` | **46/46 PASS** |
+| `npm test` (tam suite) | **307/307 PASS** · 22 suite · ~120 s |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+Önceki tur: 301/301 (21 suite) → **+6 test, +1 suite**.
+
+## Yeni testler (PHASE 4 batch 3 — 6 test)
+
+1. Konf. 7: L,K = 30 → "tümüne doğru"; L,K = 38 → değil (kaynak 35)
+2. Konf. 9: F = 100 → "yardım isteği"; F = 101 → değil
+3. Konf. 4: F = 50 → "yükselen"; F = 62 → değil (kaynak aralığı 45-55)
+4. Konf. 5: K = 42 → "azalan"; K = 35 → değil (kaynak aralığı 40-45)
+5. Konf. 10: F = 70 → "geleneksel olmayan"; F = 69 → değil (sınır > 69)
+6. Konf. 13: |F−K| = 2 → "akut/süreğen"; |F−K| = 10 → değil (sınır ≤ 6)
+
+Ayrıca `mmpiExtended.test.ts` içindeki "tümüne yanlış" testi, kaynak içi
+tutarsızlığı (DECISION-020) yorumlayacak biçimde gerekçelendirildi.
+
+## Ampirik keşif (bu turda koşuldu)
+
+| Yanıt | L T | F T | K T | Konfigürasyon |
+|---|---|---|---|---|
+| Tümüne "Yanlış" | 81.2 | **75.3** | 82.3 | "Tümüne yanlış" ✅ |
+| Tümüne "Doğru" | 26.5 | **120.0** (kırpma sınırı) | 22.1 | **YOK** → CONFLICT-019 |
+
+Bu iki koşum, kaynağın Konf. 8 (80) ve Konf. 7 (120) eşiklerinin
+uygulanabilirliğini **kanıta dayalı** olarak değerlendirmeyi sağladı:
+biri kaynak içi tutarsızlık (REJECTED), diğeri gerçek bir uygulama boşluğu
+(OPEN).
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.** 307/307 geçti; `optik-form.html` build ile yeniden
+üretildi ve senkron.

@@ -593,3 +593,103 @@ s.48-55 batch'i tamamlandıktan sonra tek bir DECISION ile:
 (a) tüm konfigürasyonlara kaynak aralıklarını **iki yönlü** uygula, veya
 (b) "±5 tolerans" kuralını tüm sette tutarlı kabul et ve aralık verilen
 yerlerde aralığı **zorunlu** kıl.
+
+---
+
+## CONFLICT-017 — Konfigürasyon eşikleri kaynaktan sapmış (P1) → **FIXED**
+
+Area: `VALIDITY_CONFIGS` — Konfigürasyon 4, 5, 7, 9
+
+Source: `SOURCE-CONFIG-004`, `005`, `007`, `009` (kitap s.46, 47, 49, 51)
+
+| # | Kaynak ifadesi | Eski kod | Sonuç |
+|---|---|---|---|
+| 4 | "F alt testi **45-55 T**" | `ascending`: F için **hiç sınır yok** | kaynak aralığı uygulanmıyor |
+| 5 | "K alt testi **40-45 T puanı arasındadır**" | `descending`: `K ≤ 45` (alt sınır yok) | K=20 de eşleşiyordu |
+| 7 | "L ve K alt testinin **35 T puanını aşmasını**" | `all-true`: `L ≤ 40 ∧ K ≤ 40` | 5 puan gevşek |
+| 9 | "F alt testi **100 T puanına yakın ya da altında**" | `help-seeking`: `F ≤ 105` | üst sınır 5 puan yüksek |
+
+Impact: Yorum katmanı — yanlış örüntü etiketi. Puanlama etkilenmez (P1).
+
+Resolution: **FIXED** — CHANGE-008 (2026-09-21): kaynakta açıkça verilen dört
+sayı/sınır koda uygulandı. İlgili karar: **DECISION-021**.
+
+Regresyon testleri: `tests/mmpiKeyIntegrity.test.ts` → PHASE 4 batch 3 (6 test).
+
+---
+
+## CONFLICT-018 — Konfigürasyon 8: kaynak eşiği kendi verisiyle çelişiyor (P2) → **REJECTED**
+
+Area: `all-false` konfigürasyonu (tümüne "yanlış")
+
+Source (**Visual: CONFIRMED**, s.50): "Şekil 8'de gösterildiği gibi **L, F ve K
+testlerinin tümü 80 T puanının üzerindedir**."
+
+Current implementation: `v.L >= 75 && v.F >= 75 && v.K >= 75`
+
+**Ampirik test (bu oturumda koşuldu):**
+Kitabın kendi madde anahtarı + Tablo 30 normlarıyla, **tam "tümüne yanlış"**
+yanıtlayan bir kişi:
+```
+L: ham 15 → T 81.2   |   F: ham 20 → T 75.3   |   K: ham 29 → T 82.3
+```
+→ Kaynağın istediği **F > 80** koşulu, gerçek bir "tümüne yanlış"
+yanıtlayıcıda **sağlanamaz**. Kaynak, kendi kuralını kendi verisiyle çürütür.
+
+Comparison: **kaynak içi tutarsızlık** — DECISION-015'in sınıfı.
+
+Resolution: **REJECTED (kod doğru).** Kodun 75 eşiği, örüntünün gerçekten
+yakalanabilmesini sağlar; kaynaktaki 80 eşiği pratikte ölü kuraldır ve
+uygulanırsa "tümüne yanlış" hiç tespit edilemez. İlgili karar: **DECISION-020**.
+
+Not: Kodun `rule` metni "L, F ve K tümü T 75 üzerinde" olarak bırakıldı ve
+kaynaktan sapma kod içinde gerekçesiyle belgelendi (yorum bloğu).
+
+---
+
+## CONFLICT-019 — Konfigürasyon 7 (tümüne "doğru") pratikte tetiklenemez (P1)
+
+Area: `all-true` konfigürasyonu
+
+Source (**Visual: CONFIRMED**, s.49): "L ve K alt testinin 35 T puanını
+aşmasını, **F alt testinin 120'nin üzerinde yer almasını gerektirir.**"
+
+Current implementation:
+- `mmpiScoring.ts`: T puanları `Math.max(20, Math.min(120, t))` ile **[20, 120]**
+  aralığına kırpılır.
+- `all-true` kuralı: `v.F > 120` → **hiçbir zaman doğru olamaz**.
+
+Ampirik kanıt (bu oturumda koşuldu): **tüm maddelere "Doğru"** yanıtı veren
+profil `F = 120 T` (tam üst sınır) üretir → konfigürasyon **YOK** döner.
+Aynı profilde L = 26.5 ve K = 22.1 (kaynağın ≤ 35 koşulunu sağlar).
+
+Impact: "Tümüne doğru" örüntüsü **hiçbir zaman raporlanmaz**; bu, kaynağın
+açıkça tanımladığı bir geçerlik durumudur (P1 — geçerlilik değerlendirmesi).
+
+Status: **OPEN** — düzeltme bir eşik kopyası değil, **tasarım kararı** gerektirir:
+(a) T kırpmasını yükselt (tüm profil görünümünü etkiler), **veya**
+(b) bu örüntüyü T puanından değil **ham cevap örüntüsünden** tespit et
+(ör. "tüm maddeler Doğru" + klinik ölçekler > 90), **veya**
+(c) eşiği kaynak dışı bir değere çek ve `UNVERIFIED` olarak belgele.
+Karar verilmeden **kod değiştirilmedi**.
+
+---
+
+## CONFLICT-020 — Konfigürasyonlarda kaynakta olmayan ek sınırlar (P2, OPEN)
+
+Aşağıdaki sınırlar kaynakta **yok**, kod ekliyor:
+
+| # | Kod sınırı | Kaynakta karşılığı |
+|---|---|---|
+| 2 (`v-shape`) | `F ≤ 55` (alt sınır yok) | "F **50'ye yakın**" (niteliksel) |
+| 5 (`descending`) | `F` için sınır yok | "F **yaklaşık 50**" (niteliksel) |
+| 9 (`help-seeking`) | `F ≥ 70` | kaynak yalnızca üst sınır verir ("100'e yakın ya da altında") |
+| 12 (`credible`) | `K ≤ 65` | kaynak: yalnızca "K **50'nin üstünde**" |
+
+Impact: Aşırı/eksik eşleşme — ör. `credible` K = 70 olan bir profili
+reddederken kaynak kabul eder.
+
+Status: **OPEN** — CONFLICT-016 ile aynı sınıfın devamı; karar
+**DECISION-021** ile birlikte verilmedi çünkü alt sınır eklemek/çıkarmak
+konfigürasyon sırası (ilk eşleşen kazanır) nedeniyle başka örüntülerin
+erişilebilirliğini değiştirir. Ayrı bir karar gerektirir.

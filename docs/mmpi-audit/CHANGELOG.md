@@ -372,3 +372,54 @@ aralık** verdiği hâllerde ortaya çıkar.
 
 Bu batch'te **kod değişikliği yok** · yeni test yok.
 Önceki doğrulama zinciri geçerli: 301/301 PASS · typecheck 0 · build 0.
+
+---
+
+## PHASE 4 — batch 3: Bölüm 4 konfigürasyonları 6-13 — **BÖLÜM TAMAMLANDI**
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.48-55** (PDF p32 L – p35 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 48 | p32 L | Konf. 6 — Rastgele cevaplama (L,K=55; F>105) | ✅ MATCH |
+| 49 | p32 R | Konf. 7 — Tümüne "doğru" (L,K≤35; F>120) | L,K düzeltildi · F **ulaşılamaz** → CONFLICT-019 |
+| 50 | p33 L | Konf. 8 — Tümüne "yanlış" (L,F,K>80) | kaynak içi tutarsızlık → **REJECTED** |
+| 51 | p33 R | Konf. 9 — Yardım isteği (L,K<66; F≈100↓) | ✅ düzeltildi |
+| 52 | p34 L | Konf. 10 — Geleneksel olmayan (L<66; F>69; K>65) | ✅ **birebir MATCH** |
+| 53 | p34 R | Konf. 11 — Açık ve tavizsiz (L<55; F≈64; K<45) | ✅ MATCH |
+| 54 | p35 L | Konf. 12 — Güvenilir cevaplayıcı (L≈50; F<70; K>50) | ✅ MATCH |
+| 55 | p35 R | Konf. 13 — Akut/süreğen (L>50; F≈K>55) | ✅ **birebir MATCH** |
+
+**Bölüm 4 (15/15 konfigürasyon) tamamlandı.**
+
+### Kod değişikliği
+
+**CHANGE-008 (P1)** — `ascending` +F 45-55 · `descending` +K ≥ 40 ·
+`all-true` 40→**35** · `help-seeking` 105→**100**. +6 regresyon testi.
+
+### Çelişkiler
+
+| ID | Konu | Sonuç |
+|---|---|---|
+| CONFLICT-017 | Konf. 4/5/7/9 eşikleri kaynaktan sapmış | ✅ **FIXED** (CHANGE-008) |
+| CONFLICT-018 | Konf. 8 eşiği (80) kaynak içi tutarsız | ✅ **REJECTED** (DECISION-020) |
+| CONFLICT-019 | Konf. 7 hiç tetiklenemiyor (F>120 vs [20,120] kırpma) | ⚠️ OPEN |
+| CONFLICT-020 | Konf. 2/9/12'de kaynakta olmayan sınırlar | ⚠️ OPEN |
+
+### Ampirik kanıtlar (bu turda koşuldu)
+
+- **Tümüne "Yanlış"** → L 81.2 · **F 75.3** · K 82.3 → kaynağın "F>80" koşulu
+  gerçek bir "tümüne yanlış" yanıtlayıcıda **sağlanamaz** → kaynak içi tutarsızlık.
+- **Tümüne "Doğru"** → F 120.0 (kırpma sınırı) → kaynağın "F>120" koşulu
+  **matematiksel olarak imkânsız** → konfigürasyon hiç raporlanmıyor.
+
+### Testler
+
+`typecheck` 0 · `npm test` **307/307 PASS** (22 suite) · `build` PASS ·
+**REGRESSION YOK**.
+
+### Güncel çelişki tablosu
+
+Açık **8** (5 P1: 003/004/005/016-kısmi/019 · 3 P2: 006/007/020) ·
+FIXED **7** (008-012, 015, 017) · REJECTED **5** (001, 002, 013, 014, 018).
+**P0 açık çelişki yok.**

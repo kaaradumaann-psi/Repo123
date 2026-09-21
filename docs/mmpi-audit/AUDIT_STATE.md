@@ -32,7 +32,7 @@ Sayfa eşleme:
 | 1 | Kaynak yapısı / indeks | **DONE** |
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi |
 | 3 | Validity (kitap s.29-42) | **DONE** |
-| 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-61) | **IN_PROGRESS** — Konf.1-5 ✓, 14-15 ✓, F-K ✓, TR ✓, K+ ✓; Konf.6-13 (s.48-55) + s.62 açık |
+| 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-61) | **IN_PROGRESS** — **Konf. 1-15 TAMAM** ✓ · F-K ✓ · TR ✓ · K+ ✓; yalnız s.62 kapanışı açık |
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
@@ -42,14 +42,21 @@ Sayfa eşleme:
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** (14 denetim testi) |
+| 14 | Tests | **IN_PROGRESS** (20 denetim testi) |
 
 ## Current position
 
 Current book page:
-**47** (Konfigürasyon 5 — Azalan Eğilim) — PDF p31 R
+**55** (Konfigürasyon 13 — Akut/süreğen) — PDF p35 R
 
 Last completed:
+**PHASE 4 batch 3 — kitap s.48-55 (PDF p32 L – p35 R) DONE — BÖLÜM 4 TAMAM:**
+Konf. 6 (rastgele) ✓ · Konf. 7 (tümüne doğru) ✓/❌ ulaşılamaz → CONFLICT-019 ·
+Konf. 8 (tümüne yanlış) → kaynak içi tutarsızlık, REJECTED (DECISION-020) ·
+Konf. 9 (yardım isteği) ✓ düzeltildi · Konf. 10 ✓ birebir · Konf. 11 ✓ ·
+Konf. 12 ✓ · Konf. 13 ✓ birebir → **CHANGE-008 (4 eşik düzeltmesi)**
+
+Önceki batch:
 **PHASE 4 batch 2 — kitap s.43-47 (PDF p29 R – p31 R) DONE:**
 Konfigürasyon 1 (Tersine V) ✓ birebir · Konfigürasyon 2 (L,K≥60, F≈50) ✓/⚠️ ·
 Konfigürasyon 3 ("V" Çok Kapalı) ✓ birebir · Konfigürasyon 4 (Yükselen, K=60
@@ -70,22 +77,22 @@ Status:
 ## Next action
 
 Continue from:
-**Bölüm 4 — Konfigürasyonlar 6-13, kitap s.48-55** → **PDF p32 L – p36 L**
+**Bölüm 4 kapandı (s.43-55).** Sıradaki: **s.62 (p39 L)** kapanışı →
+**CONFLICT-019/020 kararları** → sonra Wiggins normları
 
 Sıradaki batch'ler (öncelik sırası):
 
-1. **PDF p32 L – p34 L** — kitap s.48-52, Konfigürasyon **6-9**
-   (tümü doğru / tümü yanlış / rastgele yanıtlama vb.) → PHASE 4
-   **DİKKAT:** her konfigürasyonda **metin + şekil** yüksek DPI okunmalı
-   (CONFLICT-014 dersi); sayıyı OCR'dan alma.
-2. **PDF p34 R – p36 L** — kitap s.53-55, Konfigürasyon **10-13** → PHASE 4
-3. **PDF p37 R – p39 L** — s.62 (p39 L) TR/dikkatsizlik tartışmasının devamı
-   → PHASE 4 kapanışı
-4. **CONFLICT-016 kararı (P1)** — tüm konfigürasyon seti okunduktan SONRA,
-   tek bir DECISION ile: kaynak aralıklarını iki yönlü uygula **veya** ±5
-   tolerans kuralını tüm sette tutarlı kabul et. **Acele etme.**
-5. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins normları** → PHASE 8
-6. **PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni → PHASE 2/5
+1. **PDF p39 L** — kitap s.62, TR/dikkatsizlik tartışmasının devamı
+   → **PHASE 4 kapanışı** (SOURCE_INDEX + CHECKPOINT + doküman senkronu)
+2. **CONFLICT-019 kararı (P1)** — "tümüne doğru" örüntüsü uygulanamaz durumda:
+   T kırpması mı yükseltilecek, ham cevap örüntüsünden mi tespit edilecek?
+   **Tasarım kararı** — acele etme.
+3. **CONFLICT-016 + CONFLICT-020 kararı (P1/P2)** — kaynakta olmayan /
+   tek yönlü sınırlar (Konf. 2, 4, 5, 9, 12). Konfigürasyon **sırası** (ilk
+   eşleşen kazanır) üzerindeki etkisi analiz edilmeden değişiklik yapma.
+4. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins normları** → PHASE 8
+   (doğrulanmamış son norm katmanı)
+5. **PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni → PHASE 2/5
 
 ## Last completed task
 
@@ -160,9 +167,14 @@ Bilinen kısıtlar:
 | CONFLICT-013 | P2 | F-K = 0 sahte-iyilik etiketi | ✅ **REJECTED** (kaynak içi gerilim) |
 | CONFLICT-014 | P2 | Konf. 15 L: kaynak nokta (60) ↔ kod bant (55-65) | ✅ **REJECTED** (ilk bulgu hatalıydı) |
 | CONFLICT-015 | P1 | TR kesme puanı 1 puan kaymış | ✅ **FIXED** (CHANGE-007) |
-| CONFLICT-016 | P1 | Konf. 2/4/5'te F ve K aralıkları tek yönlü | OPEN (tüm set beklenecek) |
+| CONFLICT-016 | P1 | Konf. 2/4/5'te F ve K aralıkları tek yönlü | **FIXED kısmen** (4,5 düzeltildi; 2 açık) |
+| CONFLICT-017 | P1 | Konf. 4/5/7/9 eşikleri kaynaktan sapmış | ✅ **FIXED** (CHANGE-008) |
+| CONFLICT-018 | P2 | Konf. 8 eşiği (80) kaynak içi tutarsız | ✅ **REJECTED** (DECISION-020) |
+| CONFLICT-019 | P1 | Konf. 7 (tümüne doğru) tetiklenemez (F>120 vs kırpma) | OPEN |
+| CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | OPEN |
 
-Kalan açık: **6 çelişki** → 0 P0, 4 P1 (003/004/005/016), 2 P2 (006/007).
+Kalan açık: **8 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 016-kısmi, 019) · 3 P2 (006, 007, 020).
+FIXED: 007 (008-012, 015, 017) · REJECTED: 5 (001, 002, 013, 014, 018).
 
 ## Last update
 
@@ -174,10 +186,11 @@ Kalan açık: **6 çelişki** → 0 P0, 4 P1 (003/004/005/016), 2 P2 (006/007).
 Phase:          PHASE 0, 1, 2, 3, 6 — DONE
                 PHASE 4 — IN_PROGRESS (s.43-47 + s.56-61 DONE; s.48-55 + s.62 açık)
                 PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
-                PHASE 14 — IN_PROGRESS (14 denetim testi)
+                PHASE 14 — IN_PROGRESS (20 denetim testi)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p22-p28 (kitap s.29-40 geçerlik),
                 p29-p31 (kitap s.43-47: Konf. 1-5),
+                p32-p35 (kitap s.48-55: Konf. 6-13 — BÖLÜM 4 TAMAM),
                 p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
@@ -186,13 +199,14 @@ Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
                 26 norm hücresi  → 26/26 MATCH (Tablo 30)
                 Tablo 6 → 16/16 · Tablo 7 → 12/12 çift MATCH
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
-Open conflicts: 6 (4 P1 · 2 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Fixed:          6 (CONFLICT-008..012, 015) + 0 regression
-Rejected:       4 (001, 002, 013, 014 — kod doğru / kaynak içi tutarsızlık)
-Code changes:   7 (5 anahtar düzeltmesi + 1 TR kesme puanı + 1 test dosyası)
-Tests:          301/301 PASS · typecheck PASS · build PASS
-Next:           PDF p32 L – p34 L → Konfigürasyon 6-9 (s.48-52); sonra
-                CONFLICT-016 kararı (tüm set okunduktan sonra)
+                Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
+Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
+Fixed:          7 (CONFLICT-008..012, 015, 017) + 0 regression
+Rejected:       5 (001, 002, 013, 014, 018 — kod doğru / kaynak içi tutarsızlık)
+Code changes:   8 (5 anahtar + 1 TR kesme + 1 konfig eşiği + 1 test dosyası)
+Tests:          307/307 PASS (22 suite) · typecheck PASS · build PASS
+Next:           PDF p39 L (s.62) → PHASE 4 kapanışı; sonra CONFLICT-019/020
+                kararları ve Wiggins normları (s.178-181)
 Blocking:       none
 ```
 

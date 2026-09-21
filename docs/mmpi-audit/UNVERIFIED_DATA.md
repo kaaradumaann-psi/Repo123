@@ -245,3 +245,35 @@ Durum: **MISSING (P3 — kapsam eksiği, hatalı değer değil)**.
 Kaynak elverişli olduğu hâlde kod bu örüntüyü tanımıyor. Ölçütler doğrulanmış
 olduğundan ileride `VALIDITY_CONFIGS`'e eklenebilir; ancak bu bir **yeni özellik**
 olduğu için ayrı bir karar gerektirir (DECISION gerekir; bu batch'te eklenmedi).
+
+
+---
+
+# PHASE 4 batch 3 — Konfigürasyonlarda kaynakta doğrulanamayan sınırlar
+
+## UNVERIFIED-CONFIG-F-001 — `help-seeking` F alt sınırı (70)
+
+Kod: `v.L < 66 ∧ v.K < 66 ∧ v.F >= 70 ∧ v.F <= 100`
+Kaynak (s.51): "L ve K alt testleri 66 T puanının altında, F alt testi ise
+**100 T puanına yakın ya da altındadır**." → **alt sınır verilmez**.
+Durum: **UNVERIFIED** — 70 alt sınırı kaynakta yok.
+Neden korundu: alt sınır kaldırılırsa bu örüntü, kendisinden SONRA gelen
+`frank` (Konf. 11) örüntüsünün erişilebilirliğini yok eder (ilk eşleşen
+kazanır). Sınır, örüntüleri ayrık tutmak için var → CONFLICT-020 (ayrı karar).
+
+## UNVERIFIED-CONFIG-K-001 — `credible` K üst sınırı (65)
+
+Kod: `v.L 45-55 ∧ v.F < 70 ∧ v.K > 50 ∧ v.K <= 65`
+Kaynak (s.54): "K alt testi **50 T puanının üstündedir**." → **üst sınır yok**.
+Durum: **UNVERIFIED** — 65 üst sınırı kaynakta yok; kaynak K = 70 olan profili
+de Konfigürasyon 12 sayar. → CONFLICT-020
+
+## UNVERIFIED-CONFIG-T-001 — T puanı kırpması (20-120) kaynakla çelişiyor
+
+Kod: `mmpiScoring.ts` → `Math.max(20, Math.min(120, t))`
+Kaynak (s.49): Konfigürasyon 7 için "F alt testinin **120'nin üzerinde** yer
+almasını gerektirir." → kaynak T ölçeğinin 120'nin üzerine çıkabildiğini
+varsayar.
+Durum: **UNVERIFIED/CONFLICT-019** — kırpma değeri (20/120) kaynakta
+belgelenmemiştir; kaynağın kendi kuralını uygulanamaz kılar. Düzeltme tasarım
+kararı gerektirir (T kırpması mı, ham örüntü tespiti mi).
