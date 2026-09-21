@@ -229,14 +229,6 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
           </p>
         </section>
       )}
-
-      <p className="ai-disclaimer" role="note">
-        <Icon name="info" size={13} />
-        <span>
-          Karar destek çıktısıdır — tanı koymaz, tedavi önermez; yalnızca bu analizin sayısal profil özetinden
-          üretilir. Nihai değerlendirme uygulayıcı uzmana aittir.
-        </span>
-      </p>
     </div>
   );
 }

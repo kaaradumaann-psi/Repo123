@@ -49,6 +49,22 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const TRANSIENT_RETRY_DELAY_MS = 1_200;
 
 /**
+ * Eski istem sürümleri, modelin çıktısının sonuna bir sorumluluk notu ekletiyordu;
+ * bu not kaldırıldı (arayüzde ayrıca gösterilmiyor, tekrar bilgilendirme yaratıyor).
+ * 24 saatlik önbellekteki eski sonuçlarda not hâlâ bulunabildiğinden, okuma ve
+ * üretim anında sıyrılır.
+ */
+const LEGACY_DISCLAIMER_NOTE =
+  'Bu yorum yapay zekâ destekli bir karar destek çıktısıdır; tanı koyamaz ve klinik kararın yerine geçmez. Nihai değerlendirme uygulayıcı uzmana aittir.';
+
+function stripLegacyDisclaimerNote(text: string): string {
+  const trimmed = text.trimEnd();
+  return trimmed.endsWith(LEGACY_DISCLAIMER_NOTE)
+    ? trimmed.slice(0, trimmed.length - LEGACY_DISCLAIMER_NOTE.length).trimEnd()
+    : trimmed;
+}
+
+/**
  * MMPIProfile'dan LLM'e gidecek sayısal özeti üretir (tüm alanlar doğrulanmış
  * sayıdır). Danışanın adı/soyadı özetin hiçbir alanına yazılmaz: yorum yalnız
  * sayısal profil + yaş/cinsiyet bağlamından üretilir, dolayısıyla LLM sağlayıcısına
@@ -215,7 +231,7 @@ export async function requestAiInterpretation(request: AiInterpretationRequest):
         throw err;
       }
       const result: AiInterpretationResult = {
-        text: payload.text,
+        text: stripLegacyDisclaimerNote(payload.text),
         model: typeof payload.model === 'string' ? payload.model : 'yapay zekâ',
         generatedAt: typeof payload.generatedAt === 'string' ? payload.generatedAt : new Date().toISOString(),
       };
