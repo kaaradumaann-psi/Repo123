@@ -223,7 +223,7 @@ export function MyRecordsPanel() {
                           title="Kaydı düzenle (yeni revizyon oluşturur)"
                           aria-label={`${record.firstName} ${record.lastName} kaydını düzenle`}
                         >
-                          <Icon name="refresh" size={15} />
+                          <Icon name="edit" size={15} />
                         </button>
                         <button
                           type="button"

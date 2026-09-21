@@ -222,6 +222,8 @@ export function RecordDetailPage({
     expertNotes: notesSaved,
     notesUpdatedAt: record.notesUpdatedAt ?? '',
     scoringVersion: parsed.scoringVersion,
+    revisionOf: parsed.revisionOf,
+    revisionReason: parsed.revisionReason,
   };
 
   return (
@@ -243,7 +245,7 @@ export function RecordDetailPage({
               onClick={() => navigate(`/islem?duzenle=${record.id}`)}
               title="Kaydı düzenle: cevaplar yeni bir revizyon kaydı olarak düzenlenir, orijinal kayıt değişmez"
             >
-              <Icon name="refresh" size={15} />
+              <Icon name="edit" size={15} />
               <span>Kaydı Düzenle</span>
             </button>
           )}

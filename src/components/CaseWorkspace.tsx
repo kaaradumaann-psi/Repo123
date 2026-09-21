@@ -958,30 +958,33 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         {storageWarning && <span className="ws-hint is-error">{storageWarning}</span>}
       </div>
 
-      {/* "Kaydı Düzenle" çalışması: revizyon bağlamı her adımda görünür. */}
-      {revisionNote && !saved && (
+      {/* "Kaydı Düzenle" çalışması: revizyon bağlamı her adımda görünür ve
+          kapatılamaz — sonuç orijinale bağlanmamış bir kayıt olmasın diye.
+          Metin: tam not (applyRecordEdit) yoksa orijinal id'den türetilen kısa
+          metin — taslak üzerinden geri dönüşte bile bağlam kaybolmaz. */}
+      {revisionOf && !saved && (
         <div className="status-banner info-banner ws-revision-banner" role="status">
           <Icon name="refresh" size={16} />
           <span style={{ flex: 1 }}>
-            {revisionNote}{' '}
-            {revisionOf && (
-              <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
-                Orijinal kaydı görüntüle
-              </a>
-            )}
+            {revisionNote ?? `Bu çalışma ${revisionOf.slice(0, 8)}… kaydının düzenlemesidir; orijinal kayıt değişmez.`}{' '}
+            <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+              Orijinal kaydı görüntüle
+            </a>
           </span>
-          <button
-            type="button"
-            className="close-banner-btn"
-            onClick={() => {
-              setRevisionOf(null);
-              setRevisionReason(null);
-              setRevisionNote(null);
-            }}
-            aria-label="Düzenleme bağlamını kapat"
-          >
-            <Icon name="close" size={14} />
-          </button>
+        </div>
+      )}
+
+      {/* Revizyon kaydedildiyse: orijinalin değişmediğinin açık onayı + bağlantı. */}
+      {revisionOf && saved && saved.id !== 'local' && (
+        <div className="status-banner success-banner" role="status">
+          <Icon name="checkCircle" size={16} />
+          <span style={{ flex: 1 }}>
+            Revizyon <strong>{saved.id}</strong> olarak yazıldı; orijinal kayıt{' '}
+            <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+              {revisionOf.slice(0, 8)}…
+            </a>{' '}
+            değişmeden korundu.
+          </span>
         </div>
       )}
 

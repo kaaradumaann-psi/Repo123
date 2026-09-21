@@ -23,6 +23,10 @@ export type PrintReportMeta = {
   notesUpdatedAt?: string;
   /** Kaydı üreten puanlama motoru sürümü (izlenebilirlik; eski kayıtlarda yok). */
   scoringVersion?: string;
+  /** Revizyon zinciri: bu rapor bir "Düzenle" revizyonuna aitse orijinal kayıt id'si. */
+  revisionOf?: string;
+  /** Revizyonun kısa nedeni. */
+  revisionReason?: string;
 };
 
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
@@ -64,6 +68,15 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
           </span>
         </div>
       </header>
+
+      {/* Revizyon kökeni: basılı rapor, kağıt dosyada da izlenebilirlik taşır. */}
+      {meta.revisionOf && (
+        <p className="pr-revision">
+          Bu rapor <b>{meta.revisionOf}</b> kaydının düzenlenmiş (revizyon) halinin değerlendirmesidir
+          {meta.revisionReason ? ` · Neden: ${meta.revisionReason}` : ''}; orijinal kayıt veritabanında
+          değiştirilemez olarak korunur.
+        </p>
+      )}
 
       <section className="pr-block pr-avoid" aria-label="Danışan bilgileri">
         <div className="pr-client-grid">

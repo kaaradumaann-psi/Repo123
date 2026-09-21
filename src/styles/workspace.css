@@ -2806,6 +2806,17 @@
     font-size: 10.5px;
     line-height: 1.45;
   }
+  .pr-revision {
+    margin: 2px 0 0;
+    padding: 4px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #4a5560;
+    background: #f2f4f7;
+    border: 1px solid #d8dde4;
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+  }
   .pr-head {
     display: flex;
     justify-content: space-between;
