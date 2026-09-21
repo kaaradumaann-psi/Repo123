@@ -762,4 +762,34 @@ kaldığı yerden geçerli; Tablo 16 ve norm çifti zaten doğruydu.
 görsel kadrajlar `tbl16_L`/`tbl16_R` (430 dpi bindirmeli), `b19_ma89_age.png`,
 `b19_ma8008.png` (300 dpi) · OCR sayım kanıtı `OCR_ISSUES.md` TABLO-NUMBERS.
 
-**PHASE 5'e kalan:** Tablo 17 (Si anahtarı) — batch 21 hedefi.
+---
+
+## PHASE 9/10 batch 20 — Ma bant/kod bloğu + 🎯 Tablo 17 (Si anahtarı) (kitap s.151-156)
+
+| Alan | Kaynak | Kod | Durum |
+|---|---|---|---|
+| **🎯 Tablo 17 — Si anahtarı (s.156)** | Doğru **34** + Yanlış **36** = **70** | `SCORING_KEYS.Si` | ✅ **BİREBİR MATCH** (500 dpi bindirmeli kadraj) |
+| Yırtık hattındaki sütun | `124·304·427` / `119·309·451` | — | ✅ kesişimde iki kez okundu |
+| Si normu (Kadın) | 29.88 (Tablo 17 dipnotu) | `TURKISH_NORMS.Kadın.Si.mean` | ✅ MATCH |
+| Si normu (Erkek) | **dipnot 26.86 ↔ Tablo 30 (s.195) 23.86** | `23.86` | ✅ kod Tablo 30'u izler → **CONFLICT-040 REJECTED** |
+| Si norm SD | 7.97 / 7.52 (Tablo 30) | aynı | ✅ MATCH |
+| K ekleme | Tablo 17'de "(K Eklemeli)" **yok** | `K_CORRECTION`'da `Si` yok | ✅ tutarlı |
+| **Ma T bantları (s.151-152)** | 5 bant (85+ / 70-84 / 60-69 / 45-59 / 21-44) | `MA_T_BANDS` | ✅ **23/23 kaynak parçası mevcut** |
+| "60- 75 T" etiketi (s.151) | kaynak hatası (70-84 ile çakışır) | ayrı bant yok; metin 60-69'da | ✅ içerik korundu (çelişki değil) |
+| `90/09` gövdesi (s.153) | 5 cümle | `CODES['09']` | ✅ **5/5 sadık** |
+| `91/19` gövdesi (s.153) | 5 cümle ("Ender görülmektedir…") | `CODES['19']` = **s.77 Hs metni** | ❌ YOK → **CONFLICT-036 vaka 2** |
+| `Yüksek 9/Yüksek K` + `Yüksek 9/Düşük K` (s.152-153) | 2 örüntü + 4 sayısal koşul | — | ❌ YOK → **CONFLICT-039** · 027 (40→44) |
+| 7 `Bakınız` çapraz ref (s.153) | hedefler diğer bloklarda | `CODES['29','39','49','59','69','79','89']` | ✅ UYUMLU |
+| "Eyleme vuruk davranış ile ilgilidir" (s.153) | `94/49` notu | — | ❌ YOK → CONFLICT-025 (+1) |
+| s.152 "ilişki" paragrafı | 5 cümle | — | ❌ YOK → CONFLICT-025 (+5) |
+| Si Graham listeleri (s.155-156) | 20 + 14 satır | — | ❌ YOK → CONFLICT-026 (+2) |
+| **s.154** | **BOŞ SAYFA** (PDF p85 L; koyu piksel %4.2) | — | ✅ sayfa eşleme teyidi |
+
+**Kod değişikliği: YOK.** **🎯 PHASE 5 KAYNAK TARAFI KAPANDI — Tablo 8-17'nin
+tamamı birebir doğrulandı** (Hs 33 · D 60 · Hy 60 · Pd 50 · Mf 60 · Pa 40 · Pt 48 ·
+Sc 78 · Ma 46 · **Si 70** = 10 klinik anahtar).
+
+**Kanıt script'leri:** `scripts/mmpi-audit/cmp-ma-si-batch20.ts` · kadrajlar
+`b20_t17_L/R` (500 dpi), `b20_t17_norm2` (560 dpi), `b20_tablo30_R` (250 dpi),
+`b20_s151_top`/`b20_s151_bands`/`b20_ma_bands2`/`b20_s152_kkodu`/`b20_s153_codes`
+· OCR sayım kanıtı `OCR_ISSUES.md` (TABLO-NUMBERS 2. ölçüm, ASCII-FOLD, BLANK-PAGE).

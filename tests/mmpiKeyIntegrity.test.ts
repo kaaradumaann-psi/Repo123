@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import { codeInterpretation } from '../src/scoring/mmpiSourceCodes';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, K_CORRECTION, TURKISH_NORMS, type ScaleRule, type ScoringRule } from '../src/scoring/mmpiKeys';
-import { SC_T_BANDS } from '../src/scoring/mmpiSource';
+import { SC_T_BANDS, MA_T_BANDS } from '../src/scoring/mmpiSource';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
 import { detectValidityConfig } from '../src/scoring/mmpiValidityConfigs';
 import { CRITICAL_ITEMS } from '../src/scoring/mmpiCritical';
@@ -685,5 +685,96 @@ describe('PHASE 9/10 batch 19 — Sc (8) bloğu kapanışı (s.147-148) regresyo
     assert.match(e.text, /kendi ailelerinden bile uzaklaşırlar/);
     assert.match(e.text, /danışmanlık görüşmelerinde genellikle konuşmazlar/);
     assert.deepEqual(e.diagnosis, ['Şizoid Kişilik']);
+  });
+});
+
+/**
+ * PHASE 9/10 batch 20 — Si (0) anahtarı (Tablo 17) + Ma (9) bant/kod bloğu.
+ *
+ * Kaynak (kitap s.156, 500 dpi bindirmeli iki kırpma `b20_t17_L`/`b20_t17_R`):
+ * "Tablo 17. Sosyal içedönüklük alt testi: Madde numaraları ve puanlama yönü
+ * (Madde Sayısı: 70)" → Doğru 34 + Yanlış 36; dipnot "Erkeklerde ortalama:26.86,
+ * kadınlarda ortalama: 29.88 (Savaşır 1981)". Yırtık (scan) çizgisi
+ * 124·304·427 / 119·309·451 sütunundan geçiyor.
+ * Tablo 30 (s.195, 250 dpi görselden yeniden okundu): Si X̄ 23.86 / 29.88, SD 7.97 / 7.52.
+ */
+const SI_KAYNAK_DORU = [
+  32, 67, 82, 111, 117, 124, 138, 147, 171, 172, 180, 201, 236, 267, 278, 292, 304, 316, 321, 332, 336, 342,
+  357, 377, 383, 398, 411, 427, 436, 455, 473, 487, 549, 564,
+];
+const SI_KAYNAK_YANLIS = [
+  25, 33, 57, 91, 99, 119, 126, 143, 193, 208, 229, 231, 254, 262, 281, 296, 309, 353, 359, 371, 391, 400,
+  415, 440, 446, 449, 450, 451, 462, 469, 479, 481, 482, 505, 521, 547,
+];
+
+describe('PHASE 9/10 batch 20 — Si (0) Tablo 17 anahtarı kaynağa birebir bağlıdır (PHASE 5 kapanışı)', () => {
+  it('Si madde sayısı kitabın başlığıyla uyumlu: 34 + 36 = 70', () => {
+    const si = SCORING_KEYS.Si as ScoringRule;
+    assert.equal(si.trueItems.length, 34);
+    assert.equal(si.falseItems.length, 36);
+  });
+
+  it('Si Doğru listesi Tablo 17 ile birebir aynıdır (fazla/eksik yok)', () => {
+    const si = SCORING_KEYS.Si as ScoringRule;
+    const k = new Set(SI_KAYNAK_DORU);
+    const c = new Set(si.trueItems);
+    assert.deepEqual(si.trueItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(SI_KAYNAK_DORU.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+  });
+
+  it('Si Yanlış listesi Tablo 17 ile birebir aynıdır (yırtık hattı 119/309/451 + OCRın düştüğü 99 dahil)', () => {
+    const si = SCORING_KEYS.Si as ScoringRule;
+    const k = new Set(SI_KAYNAK_YANLIS);
+    const c = new Set(si.falseItems);
+    assert.deepEqual(si.falseItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(SI_KAYNAK_YANLIS.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+    for (const n of [119, 309, 451, 99]) assert.ok(si.falseItems.includes(n), `${n} yırtık/OCR hattında düşmüş olamaz`);
+    assert.equal(new Set([...si.trueItems, ...si.falseItems]).size, 70, '70 benzersiz madde olmalı');
+  });
+
+  it('Si normları Tablo 30u izler; Tablo 17 dipnotundaki 26.86 kaynak içi çelişkidir (CONFLICT-037 emsali)', () => {
+    assert.equal(TURKISH_NORMS.Erkek.Si.mean, 23.86);
+    assert.equal(TURKISH_NORMS.Kadın.Si.mean, 29.88);
+    assert.equal(TURKISH_NORMS.Erkek.Si.sd, 7.97);
+    assert.equal(TURKISH_NORMS.Kadın.Si.sd, 7.52);
+    assert.ok(!('Si' in K_CORRECTION), 'Tablo 17 "(K Eklemeli)" taşımaz → K_CORRECTION.Si de olmamalı');
+  });
+});
+
+describe('PHASE 9/10 batch 20 — Ma (9) T bantları ve kod bloğu (s.151-153)', () => {
+  it('Ma bant kapsamı kaynakla birebir: 85+ / 70-84 / 60-69 / 45-59 / 21-44', () => {
+    assert.deepEqual(MA_T_BANDS.map((b) => [b.min, b.max === Infinity ? null : b.max]), [
+      [85, null],
+      [70, 84],
+      [60, 69],
+      [45, 59],
+      [0, 44],
+    ]);
+    const all = MA_T_BANDS.map((b) => b.text).join(' ');
+    // 60-69 bandı kaynaktaki İKİ paragrafı taşır ("60- 75 T" + "60- 69 T")
+    assert.match(all, /enerjik, dışadönük ve aktif bireyleri gösterir/i);
+    assert.match(all, /Hoş, enerjik, meraklı, sosyal, kolay ilişki kuran/);
+    assert.match(all, /büyüklük sanrıları ve hiperaktivite gibi/);
+    assert.match(all, /Özellikle 2 alt testinin yükselmediği durumlarda depresyon düşünülmelidir/);
+    assert.match(all, /45 yaşın altında düşük/);
+  });
+
+  it('BİLİNEN EKSİK (CONFLICT-026/025): s.152 "Yalnızca alt test 9u kullanarak…" paragrafı kodda yoktur', () => {
+    const all = MA_T_BANDS.map((b) => b.text).join(' ') + JSON.stringify(MA_T_BANDS);
+    assert.doesNotMatch(all, /Yalnızca alt test 9/);
+    assert.doesNotMatch(all, /diğer alt testlerle ilişkisi/);
+  });
+
+  it('90/09 gövdesi sadık; 91/19 gövdesi kanonik anahtar çarpışmasına kurban gidiyor (CONFLICT-031 kilidi)', () => {
+    const e90 = codeInterpretation('90')!;
+    assert.equal(e90.code, '90/09');
+    assert.match(e90.text, /Kod oldukça nadirdir, özellikle erkeklerde çok az görülür/);
+    assert.match(e90.text, /Si alt testinin yükselmesi bırakılarak yorum/);
+    const e91 = codeInterpretation('91')!;
+    // kitap s.153 "91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)" AYRI bir gövdedir;
+    // kanonikleştirme ("91" → "19") onu s.77deki Hs bloğu metniyle çarpıştırıyor:
+    assert.equal(e91.code, '19/91');
+    assert.doesNotMatch(e91.text, /Ender görülmektedir/);
+    assert.doesNotMatch(e91.text, /hipomanik durumdadırlar/);
   });
 });

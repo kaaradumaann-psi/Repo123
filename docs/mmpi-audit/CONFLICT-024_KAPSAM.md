@@ -452,3 +452,27 @@ cümlesinde mevcut; yalnız "7 de 70 T puanındadır" eşiği kayıp (CONFLICT-0
 **Blok toplamı (Sc, s.143-148): 10 başlık → 8 VAR / 2 YOK.** s.149-150'de (Ma
 girişi + Tablo 16 + Graham listeleri) kod tipi başlığı yok → kapsam sayımı
 değişmez.
+
+## Ma (9) bloğu + Si (0) girişi (s.149-156) — batch 20 sayımı
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| — | '9. Hipomani (Ma) Alt Testi' girişi + **Tablo 16** + Graham listeleri | s.149-150 | (kod tipi değil) | Tablo 16 P0 ✅ MATCH (batch 19); listeler CONFLICT-026 |
+| 1 | **Yüksek 9/Yüksek K Kodu** | s.152 | **YOK** ❌ | 4 sayısal koşul → CONFLICT-039 + 027 (+4) |
+| 2 | **Yüksek 9/Düşük K Kodu** | s.153 | **YOK** ❌ | CONFLICT-039 |
+| 3 | **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** | s.153 | **YOK** ❌ | kanonik `'19'` = s.77 Hs gövdesi → **CONFLICT-036 vaka 2** |
+| — | `92/29 · 93/39 · 94/49 · 95/59 · 96/69 · 97/79 · 98/89` **(Bakınız)** | s.153 | ✅ UYUMLU | 7 çapraz ref, hedefler mevcut → başlık sayılmaz |
+| — | not: 'Eyleme vuruk davranış ile ilgilidir' | s.153 | **YOK** ❌ | CONFLICT-025 (+1) — başlık değil |
+| 4 | **90/09 Kodu** | s.153 | **VAR** ✅ | gövde 5/5 sadık |
+| — | Si girişi + **Tablo 17** + Si listeleri | s.154-156 | (kod tipi değil) | **s.154 BOŞ SAYFA**; Tablo 17 P0 ✅ MATCH → CONFLICT-026 (listeler) |
+
+**Batch 20 deltası: +4 başlık → 1 VAR / 3 YOK.**
+
+| | Başlık | VAR | YOK |
+|---|---|---|---|
+| **Kümülatif (batch 20 sonrası)** | **146** | **103** | **45** |
+
+> ⚠️ **TOPLAM satırlarında tarihî tutarsızlık** (VAR + YOK ≠ Başlık; kök neden: Hs
+> satırının 31|31|0 kaydı ile anlatının '9 VAR / 22 YOK' demesi). Batch deltaları
+> kesindir; **kesin toplam FINAL'da `SOURCE_INDEX` üzerinden yeniden sayılacak**
+> (sessizce 'düzeltme' yapılmıyor).

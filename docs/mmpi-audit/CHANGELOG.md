@@ -1365,3 +1365,73 @@ Tarih: 2026-09-22 · Kaynak: **s.147-150** (PDF p81 R – p83 L)
 `mmpiKeyIntegrity.test.ts` **43/43 PASS** (+6 kilit: Tablo 16 birebirlik, dikiş
 `148` kontrolü, K+norm, `89/98` ve `80/08` regresyonu) · testler **330/330 PASS** ·
 `npm run build` **PASS** (`optik-form.html` senkron).
+
+---
+
+## PHASE 9/10 — batch 20: Ma bantları + Ma kod bloğu KAPANIŞI + 🎯 Tablo 17 (Si) (kitap s.151-156)
+
+Tarih: 2026-09-22 · Kaynak: **s.151-156** (PDF p83 R – p86 L)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 151 | p83 R | Ma yüksek-puan listesi sonu + **Ma T bantları** (`85 T` · `70-84` · **`60- 75`** · `60-69` · `45-59`) | `MA_T_BANDS` kapsamı **tam** (23/23 parça) |
+| 152 | p84 L | `21-44` bandı + "Yalnızca alt test 9'u…" paragrafı + **"Ma alt testinin diğer alt testlerle ilişkisi:"** + **Yüksek 9/Yüksek K Kodu** | 5 cümle YOK (025 +5) · K-örüntüsü YOK (**CONFLICT-039**) · 4 sayısal koşul → **027 40→44** |
+| 153 | p84 R | **Yüksek 9/Düşük K** + **`91/19`** + 7 `Bakınız` + "Eyleme vuruk…" notu + **`90/09`** → **Ma bloğu BİTER** | 4 başlık → **1 VAR / 3 YOK** · `91/19` = **CONFLICT-036 vaka 2** |
+| 154 | p85 L | **BOŞ SAYFA** | sayfa eşleme teyidi · `OCR_ISSUES.md` → **`BLANK-PAGE`** kuralı |
+| 155 | p85 R | **0. Sosyal İçedönüklük (Si) girişi** + Graham yüksek 1-20 + düşük 1 | listeler kodda YOK → CONFLICT-026 (+2) |
+| 156 | p86 L | 🎯 **Tablo 17 — Si anahtarı (Madde Sayısı: 70)** + norm dipnotu + Si düşük 2-14 + yorum paragrafları | **P0 BİREBİR MATCH** (34+36) |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 17 (s.156) BİREBİR MATCH:** **Doğru 34 + Yanlış 36 = 70** ✅ →
+  **PHASE 5 kaynak tarafı TAMAMI kapandı** (Tablo 8-17: Hs 33 · D 60 · Hy 60 ·
+  Pd 50 · Mf 60 · Pa 40 · Pt 48 · Sc 78 · Ma 46 · **Si 70**). Kadraj 500 dpi
+  **bindirmeli iki** kesit (`b20_t17_L`/`b20_t17_R`); fiziksel **yırtık çizgisi**
+  `124·304·427 / 119·309·451` sütunundan geçtiği için bu 6 değer kesişimde ikinci
+  kez okundu.
+- **Si normları:** Tablo 17 dipnotu "Erkeklerde ortalama:**26.86**, kadınlarda
+  29.88 (Savaşır 1981)" ↔ `TURKISH_NORMS` E **23.86** / K 29.88. **Tablo 30
+  (s.195) bu oturumda yeniden okundu → `1003 · 23.86 · SD 7.97 / 663 · 29.88 ·
+  7.52`** → **kod Tablo 30'u izler** → **CONFLICT-040 REJECTED**
+  (CONFLICT-001/002/037 emsali; Si'de K düzeltmesi olmadığı için dipnot-Tablo 30
+  eşitliği beklenir, kadın tarafı eşit, erkek değil → dipnot baskı hatası).
+  **Tablo 17'de "(K Eklemeli)" yok** ↔ `K_CORRECTION`'da `Si` yok ✅.
+- **CONFLICT-036 · 2. SOMUT VAKA:** `91/19 Kodu` (s.153, "Ender görülmektedir.
+  Hastalar hipomanik durumdadırlar…") **5/5 YOK** — `codeInterpretation('91')`
+  kanonik `'19'` kaydına düşüyor ve orada **s.77'deki Hs bloğu `19/91` gövdesi**
+  duruyor. Kitap ikisini **ayrı başlık** olarak tutuyor ("Ayrıca 19/91 Koduna da
+  Bakınız") → **kusur `slice(0,2)` kırpması olmadan, 2 haneli kodda da var**:
+  blok-bazlı gövde tek-anahtarlı `CODES` modeline sığmıyor (CONFLICT-031'in en
+  doğrudan kanıtı).
+- **🆕 CONFLICT-039 (P2):** "X alt testinin diğer alt testlerle ilişkisi:" bölümü
+  **her blokta var** (Sc s.146 · Ma s.152 · **Si s.157**) ve **K-ilişkili örüntüleri**
+  taşıyor: `Yüksek 9/Yüksek K` (4 sayısal koşul: 9 ve K > 70 T · 2 < 50 T · K > 70 T ·
+  5 < 40 T) + `Yüksek 9/Düşük K`. "K" rakam olmadığı için `CodeInterpretation`
+  anahtarıyla **adreslenemez** → 030/031/036 ile **tek tasarımsal karar**.
+- **Ma T bantları:** kod **5/5 bandı** eksiksiz taşıyor (85+/70-84/60-69/45-59/21-44;
+  23/23 kaynak parçası) + **kaynak etiket hatası** belgelendi: kitap `60- 75 T`
+  paragrafı veriyor (70-84 ile çakışır); kod bu metni **60-69 bandına birleştirerek**
+  korumuş → **çelişki değil, kayıt**. Trivial farklar: "Kendilik değer**lerini**"→
+  "değer**ini**", "aşırı çaba **göstermek**"→"**sarf etmek**".
+- **CONFLICT-025 +6 cümle** (s.152 ilişki paragrafı 5 · s.153 "Eyleme vuruk davranış
+  ile ilgilidir") · **CONFLICT-026 +2** (Si yüksek 1-20 + düşük 1-14) ·
+  **CONFLICT-027 40 → 44** (K-örüntüsündeki 4 eşik).
+- **Kapsam:** Ma bloğu **4 başlık → 1 VAR / 3 YOK** (7 `Bakınız` ref'i hedef
+  kayıtlarda mevcut → uyumlu); kümülatif **146 → 103 VAR / 45 YOK**
+  (TOPLAM satırlarındaki tarihî tutarsızlık FINAL'da yeniden sayılacak).
+- **🆕 OCR kuralları:** **`ASCII-FOLD`** — OCR çıktıları diacritic'te tutarsız;
+  `grep "ilişkisi"` 0 döndürüp Sc/Si'deki bölümü **"yok" gibi** gösterdi (python +
+  katlama ile bulundu) → OCR üzerinde ham Türkçe arama **bulunamadı kanıtı olamaz**.
+  **`BLANK-PAGE`** — 0 satır OCR = araç hatası değil, **boş sayfa** olabilir
+  (s.154: koyu piksel %4.2 vs dolu sayfa %11.9). **`TABLO-NUMBERS`** 2. ölçüm:
+  Tablo 17'nin 70 numarasından **69** kurtarıldı, `99` düştü (+25 gürültü token).
+- **Kod değişikliği YOK** (yalnız `tests/` + denetim aracı/docs).
+
+### Doğrulama
+
+`cmp-ma-si-batch20.ts` · typecheck **0** · `mmpiKeyIntegrity.test.ts` **50/50 PASS**
+(+7) · `npm test` **337/337 PASS** (30 suite) · `npm run build` PASS (üretim farkı
+yok) · docs: SOURCE_FACTS (`SOURCE-MA-003/004`, `SOURCE-SI-001`), CONFLICTS
+(036 vaka 2, **039 yeni**, **040 REJECTED**, 025/026/027 genişletmeleri),
+CONFLICT-024_KAPSAM, SOURCE_INDEX (151-156 DONE · **s.154 boş** · bayat 155-158
+satırı kaldırıldı), VERIFIED_DATA, OCR_ISSUES (3 kural), TEST_AUDIT, AUDIT_STATE.

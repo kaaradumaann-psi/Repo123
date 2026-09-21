@@ -1681,3 +1681,112 @@ direktifle aynı kök).
    (`"Danışmanlık görüşmelerinde…"`) aranamaz — **karşılaştırma duyarsız
    yapılmalı** (`cmp-ma-batch19.ts` `toLowerCase()`; aksi halde sahte FINDING
    üretiliyordu, batch sırasında düzeltildi).
+
+---
+
+# BATCH 20 genişletmeleri (kitap s.151-156 · Ma kapanışı + Si girişi + Tablo 17)
+
+## CONFLICT-036 · 2. SOMUT VAKA — Ma bloğu `91/19` gövdesi kodda yok (P1, OPEN)
+
+Pa `64/46` vakasında görülen kusurun **ikinci ve daha saf örneği**: `91/19`
+(kitap s.153) iki-ölçekli bir koddur; `slice(0,2)`/3+ ölçek kırpmasına gerek
+kalmadan, **yalnızca kanonik sıralama** ("91" → `'19'`) yüzünden gövde kayboluyor.
+
+| Çağrı | Dönen kayıt | Kaynakta doğru olan |
+|---|---|---|
+| `codeInterpretation('91')` | `19/91` — **s.77** Hs bloğu gövdesi ("Hastalar gergin ve kaygılı olarak tanımlanır… Sindirim sorunları…") | **s.153** Ma bloğu: "Ender görülmektedir. Hastalar hipomanik durumdadırlar, ancak gergindirler ve yerlerinde duramazlar…" (5/5 cümle **YOK**) |
+
+**Kusurun kaynağı modelde:** `CODES` tek bir `Record<kanonik-anahtar>` olduğu için
+**aynı rakam çiftinin blok-bazlı ikinci anlatımı sığmıyor.** Kitap ikisini açıkça
+ayrı tutuyor — başlık: "**91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)**".
+Bu, CONFLICT-031'in (blok-bazlı yorum modeli) **en doğrudan kanıtıdır**: daha önce
+yalnız 3+ haneli kodlarda (`789`, `794`, `8726`) görülüyordu; artık **2 haneli**
+kodda da var.
+**Kod değişikliği YOK** (içerik eksiği; DECISION-028 → bekletilir, toplu karar).
+
+---
+
+## CONFLICT-039 (YENİ · P2 · OPEN) — "X alt testinin diğer alt testlerle ilişkisi" bölümü ve **K-ilişkili örüntüler** modelde temsil edilemiyor
+
+**Kaynak yapısı (görselden + OCR'dan doğrulandı):** her klinik blok sonu
+`… alt testinin diğer alt testlerle ilişkisi:` başlıklı bir bölüm taşıyor:
+**Sc (s.146)**, **Ma (s.152)**, **Si (s.157)**. Bu bölümde (a) diğer bloklara
+yönelten `Bakınız` çapraz referansları ve (b) **K geçerlilik ölçeğini içeren
+örüntüler** var:
+
+| Örüntü (kaynak) | Sayfa | Gövde özeti | Kodda |
+|---|---|---|---|
+| **Yüksek 9/Yüksek K Kodu** | s.152 | "Eğer 9 ve K alt testlerinde puanlar **70 T puanında** (2 alt testi **T: 50'nin altında ise**) ise… Genellikle çok iyi yöneticidirler…" + "**K alt testi 70 T puanının üzerine çıkarsa**…" + "(eğer **5 alt testinde T:40'ın altında ise**)…" | ❌ YOK |
+| **Yüksek 9/Düşük K Kodu** | s.153 | "Narsisistik kişilerdir. Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine çekerler." | ❌ YOK |
+| (Sc) **8726/Yüksek 9** | s.146 | "Ajite şizofren bir hastayı göstermektedir." | ❌ YOK (batch 18 kaydı) |
+| (Si) `049` ve devamı | s.157+ | batch 21'de okunacak | — |
+
+**Neden `CODES`'a eklenemiyor:** anahtar iki rakamdan oluşuyor
+(`canonicalCode(code.slice(0, 2))`); "K" rakam değil, dolayısıyla
+`Yüksek 9/Yüksek K` gibi bir örüntü **mevcut tipte (`CodeInterpretation`)
+adreslenemiyor**. Ayrıca bu örnekler K düzeltmesinin **yorumla iç içe**
+olduğunu gösteriyor (K hem düzeltme katsayısı hem yorum ekseni).
+**Aksiyon:** PHASE 9/10 tasarım kararına dâhil (CONFLICT-030/031/036 ile **tek**
+karar: kod kimliğinin `blok + sıralı-kod + K` üçlüsüyle modellenmesi gerekebilir).
+**Kod değişikliği YOK.**
+
+---
+
+## CONFLICT-025 · +6 cümle (batch 20)
+
+1. **s.152 "ilişki" paragrafı, 5 cümle**: "Yalnızca alt test 9'u kullanarak bir
+   yoruma gitmek güçtür." · "Diğer klinik alt testlerdeki yükselmelerle bu enerji
+   artışının nedeni araştırılmalıdır." · "Hipomani alt testiyle birlikte alt test
+   4'ü yükselen bir hastanın yorumu, alt test 8 ile 9'u birlikte yükseltmiş
+   hastadan farklıdır." · "Bunlara ek olarak, beyin hasarı olan bir hasta,
+   hiperaktivite ve tepkisel davranışlar gösterebilir." · "Yine bu hastalarda
+   duygusal tepkiler depresyon şeklinde ortaya çıkabilir."
+2. **s.153**: "Eyleme vuruk davranış ile ilgilidir" (`94/49` satırının altındaki
+   tek cümlelik not; `CODES['49']` gövdesinde yok).
+
+## CONFLICT-027 · 40 → **44 örnek** (batch 20)
+
+Kodda tespit edilemeyen **yeni sayısal koşullar** (hepsi s.152 `Yüksek 9/Yüksek K`
+gövdesinde): `9 ve K > 70 T` · `2 alt testi < 50 T` · `K > 70 T` · `5 alt testi < 40 T`.
+
+## CONFLICT-026 · +2 (batch 20) — Si (0) Graham listeleri
+
+- "Si alt testinde **yüksek puan** alan bir birey (Graham 1987):" **1-20** (s.155)
+- "Si alt testinde **düşük puan** alan bir birey:" **1-14** (s.155-156)
+  + s.156'daki düz yorum paragrafları ("Psikiyatrik ve normal populasyon için…",
+  "Alt test Si'deki puanlar **yaşla birlikte artar**. Ergenler ve yüksekokul
+  öğrencileri genellikle **40 ile 50 T**… yaşlı kişiler **50 ile 60**…") — hiçbiri
+  kodda yok. (Yaş/T aralığı ayrıca **CONFLICT-034/027** kapsamında not edildi.)
+
+---
+
+## CONFLICT-040 (YENİ · **REJECTED**) — Si normu: Tablo 17 dipnotu **26.86** ↔ Tablo 30 **23.86**
+
+**Area:** `src/scoring/mmpiKeys.ts` → `TURKISH_NORMS.Erkek.Si.mean = 23.86`
+**Kaynak:** Tablo 17 dipnotu (s.156, 560 dpi kadraj `b20_t17_norm2.png`):
+"Erkeklerde ortalama:**26.86**, kadınlarda ortalama: 29.88 (Savaşır 1981)."
+**Çözüm:** Tablo 30 (s.195) bu oturumda **yeniden okundu** → Si satırı
+`1003 · X̄ 23.86 · SD 7.97 / 663 · X̄ 29.88 · SD 7.52` — kod bunu izliyor
+(PHASE 6'da 26/26 MATCH ile doğrulanmıştı). Si'de **K düzeltmesi olmadığı için**
+dipnot ile Tablo 30'un aynı değeri vermesi beklenir; kadın tarafı aynı (29.88),
+erkek tarafı farklı → **kitabın dipnotundaki 26.86 yanlış okuma/baskı** olarak
+değerlendirildi.
+**Karar: REJECTED — kod Tablo 30'u izler (CONFLICT-001/002/037 emsali).**
+**Kadın 29.88 = MATCH ✅.** Test kilidi: `mmpiKeyIntegrity.test.ts`
+("Si normları Tablo 30u izler; Tablo 17 dipnotundaki 26.86 kaynak içi çelişkidir").
+
+---
+
+## ✅ Bu turda ÇELİŞKİ ÜRETMEYEN doğrulamalar (batch 20)
+
+1. **🎯 P0 — Tablo 17 (s.156) BİREBİR MATCH**: 34 + 36 = **70** ("Madde Sayısı:
+   70" başlığıyla uyumlu) → **PHASE 5 kaynak tarafı TAMAMI kapandı (Tablo 8-17)**.
+2. **Ma T bantları** 5/5 bant **tam kapsam** (23/23 kaynak parçası) — tek fark
+   Trivial: kod "Kendilik değer**ini**" (kaynak: değerlerini), "aşırı çaba
+   **sarf etmek**" (kaynak: göstermek) → anlam kaybı yok.
+3. **"60- 75 T" etiketi** kaynak kendi hatası (70-84 ile çakışan aralık); kod bu
+   paragrafı 60-69 bandına birleştirerek **içeriği korumuş** → **etiket
+   uydurmamış**, çelişki değil.
+4. **`90/09`** gövdesi 5/5 sadık; **7 `Bakınız` çapraz referansı** hedef
+   kayıtlarda mevcut → UYUMLU (CONFLICT-024 dışı).
+5. **`K_CORRECTION`'da `Si` yok** ↔ Tablo 17'de "(K Eklemeli)" yok ✅.

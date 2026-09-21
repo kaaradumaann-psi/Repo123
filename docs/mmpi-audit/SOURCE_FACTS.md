@@ -2908,3 +2908,78 @@ Kanıt: `scripts/mmpi-audit/cmp-ma-batch19.ts` + regresyon kilidi
 `tests/mmpiKeyIntegrity.test.ts` ("Ma Doğru/Yanlış listesi Tablo 16 ile birebir").
 **PHASE 5 kapanışına kalan tek klinik anahtar: Tablo 17 (Si).**
 Status: **VERIFIED**
+
+---
+
+## SOURCE-MA-003 · Ma (9) T bantları — kitap s.151-152 (PDF p83 R – p84 L)
+
+Sayfa görselden okundu (150 dpi tam sayfa + `b20_s151_top`/`b20_s151_bands`/
+`b20_ma_bands2` 380-420 dpi kadrajlar). Bant etiketler **kaynakta** şöyle:
+
+| Kaynak etiketi (s.151-152) | Gövde özeti | Kod |
+|---|---|---|
+| `85 T puanı ve üstü` | "Ajitasyon ya da manik dönem olabilir. Birey hiperaktif, davranışları yordanamaz, fikir uçuşmaları vardır. Kendilik **değerlerini** abartır." | `MA_T_BANDS` `T ≥ 85` ✅ (4/4 parça) |
+| `70-84 T puanı` | "Enerjik, konuşkan, eylemi düşünceye tercih eden kişilerdir… **büyüklük sanrıları ve hiperaktivite gibi.**" + ayrı paragraf: "Ergenlerde bu yükselme, artmış hareketliliği gösterir… Grandiözite ve **çağrışımlarında** artmalar vardır. İletişim güçlükleri ve suça eğilim görülebilir." | `T 70-84` ✅ (6/6; her iki paragraf birleştirilmiş) |
+| `60- 75 T puanı aralığındaki puanlar` | "…enerjik, dışadönük ve aktif bireyleri gösterir. Bunlar, diğerleri tarafından hoş ve yeterli olarak görülürler… lise ya da lise mezunu öğrencilerde çok sıktır… onay ve statü kazanmak için çaba harcarlar…" | ⚠️ **kaynak etiketi 70-84 bandıyla çakışıyor** (420 dpi kadrajda doğrulandı; `60- 75` yazıyor). Kod bu paragrafı **`T 60-69` bandına birleştirmiş** → içerik korunuyor, **etiket yok** → ÇELİŞKİ DEĞİL (kayıt) |
+| `60- 69 T puanı` | "Hoş, enerjik, meraklı, sosyal, kolay ilişki kuran, ilgi alanları geniş kişilerdir. Bu hallerinden kendileri de memnundur. İyimserlik, bağımsızlık ve kendine güven vardır." | `T 60-69` ✅ (5/5 — iki paragraf birlikte) |
+| `45-59 T puanı` | "Normal aralığıdır. Puan normal aralıktan yükseldikçe mani düzeyinin arttığı düşünülür… daha çok ortalarda puan alan hastaların teşhisinde yardımcı olabilir." | `T 45-59` ✅ (3/3) |
+| `21-44 T puanı` | "Düşük enerji düzeyi, güdü azlığı ve hatta apatiyi gösterir… **Özellikle 2 alt testinin yükselmediği durumlarda depresyon düşünülmelidir.** Yaşlı insanlarda 9'un düşüklüğü beklenen bir durumdur… **45 yaşın altında düşük olması beklenen bir durum değildir** ve dikkat edilmesi gerekir." | `T 21-44` ✅ (5/5) |
+
+**s.152 kapanış paragrafı (kodda YOK):** "Ma alt testinin diğer alt testlerle
+ilişkisi:" başlığından önce: "Yalnızca alt test 9'u kullanarak bir yoruma gitmek
+güçtür. Diğer klinik alt testlerdeki yükselmelerle bu enerji artışının nedeni
+araştırılmalıdır. Hipomani alt testiyle birlikte alt test 4'ü yükselen bir hastanın
+yorumu, alt test 8 ile 9'u birlikte yükseltmiş hastadan farklıdır. Bunlara ek
+olarak, beyin hasarı olan bir hasta, hiperaktivite ve tepkisel davranışlar
+gösterebilir. Yine bu hastalarda duygusal tepkiler depresyon şeklinde ortaya
+çıkabilir." → **CONFLICT-025 (+5 cümle) + CONFLICT-039** (yapısal: aynı bölüm
+Sc'de s.146 ve Si'de s.157'de de var → her blokta standart).
+Status: **VERIFIED**
+
+---
+
+## SOURCE-MA-004 · Ma (9) kod bloğu — kitap s.152-153 (PDF p84 L – p84 R)
+
+| Başlık (kaynak) | Gövde | Kodda |
+|---|---|---|
+| **Yüksek 9/Yüksek K Kodu** (s.152) | "Eğer 9 ve K alt testlerinde puanlar **70 T puanında** (2 alt testi **T: 50'nin altında ise**) ise bu kişiler enerjik, organize, diğerlerinin kendileri üzerine otorite kurmasını istemeyen kişilerdir. Genellikle çok iyi yöneticidirler…" + "Bu bireylerin çoğu yarışmacıdır. **K alt testi 70 T puanının üzerine çıkarsa**… Kadınlar fiziksel çekicilik konusunda teşhircidirler (**eğer 5 alt testinde T:40'ın altında ise**)…" | ❌ **YOK** (K-ilişkili örüntü `CODES` modelinde anahtarsız) → **CONFLICT-039**, eşikleri → **CONFLICT-027 (+4)** |
+| **Yüksek 9/Düşük K Kodu** (s.153) | "Narsisistik kişilerdir. Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine çekerler." | ❌ **YOK** → CONFLICT-039 |
+| **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** (s.153) | "Ender görülmektedir. Hastalar hipomanik durumdadırlar, ancak gergindirler ve yerlerinde duramazlar. İhtiraslıdırlar. Başarısızlıkla engellenmişlerdir. Hipokondriak sorunlarıyla karşılaştıkları durumsal güçlükler arasındaki ilişkiyi ispatlamak kolaydır." | ❌ **5/5 YOK** — `codeInterpretation('91')` → kanonik `'19'` = **s.77'deki Hs bloğu `19/91` gövdesi** → **CONFLICT-036'nın 2. somut vakası** (Pa `64/46`'dan sonra) |
+| `92/29 · 93/39 · 94/49 · 95/59 · 96/69 · 97/79 · 98/89` Kodu (Bakınız …) | yalnız **çapraz referans** (gövde diğer bloklarda) | ✅ **UYUMLU** (CONFLICT-024 dışı) |
+| — "Eyleme vuruk davranış ile ilgilidir" (s.153, `94/49` satırı altındaki not) | tek cümlelik ek not | ❌ YOK (`CODES['49']` gövdesinde yok) → CONFLICT-025 (+1) |
+| **90/09 Kodu** (s.153) | "Kod oldukça nadirdir, özellikle erkeklerde çok az görülür. Bu koddaki bireyler enerjik ve olasılıkla ajitedirler. Genellikle yalnız kişilerdir. Si alt testinin yükselmesi bırakılarak yorum, yükselen diğer iki alt test ile yapılmalıdır. Daha sonra eğer gerekliyse Si alt testi yorumlanmalıdır." | ✅ **5/5 VAR** (sadık; tek fark "yapılmalıdır"→"yapılmaktadır") |
+
+**Blok yapısı (yapısal bulgu):** her klinik blok sonu
+"**X alt testinin diğer alt testlerle ilişkisi:**" bölümü taşıyor — Sc (s.146),
+Ma (s.152) ve Si (s.157) OCR'larında doğrulandı; bu bölüm çapraz ref listesi +
+K-ilişkili örüntülerden oluşuyor → **CONFLICT-039 (P2, yeni)**.
+Status: **VERIFIED**
+
+---
+
+## SOURCE-SI-001 · Si (0) girişi + 🎯 **Tablo 17** — kitap s.154-156 (PDF p85 L – p86 L)
+
+**s.154 (PDF p85 L) BOŞ SAYFADIR** — OCR 0 satır döndürdü; 150 dpi görselde yalnız
+kenar gölgesi/kırışık var (koyu piksel oranı %4.2 vs dolu sayfada %11.9); sayı
+numarası yok. Si bloğu **s.155'te (sağ sayfada)** başlıyor → **"OCR boş döndürme =
+araç hatası" varsayımı yanlıştır; boş sayfa olabilir** (`OCR_ISSUES.md`).
+
+| Alan | Kaynak (görselden okundu) | Kod | Sonuç |
+|---|---|---|---|
+| Giriş | "**0. Sosyal İçedönüklük (Si) Alt Testi** — Standart MMPI profiline sonradan eklenmiş bir alt testtir… Si alt testini oluşturan maddeler ve puanlama yönü **Tablo 17**'de gösterilmiştir." | — | Yorum katmanı (CONFLICT-026 sınıfı) |
+| Yüksek puan listesi | "Si alt testinde yüksek puan alan bir birey (Graham 1987):" **1-20** (s.155) | — | ❌ YOK → CONFLICT-026 |
+| Düşük puan listesi | "Si alt testinde düşük puan alan bir birey:" **1-14** (s.155-156) | — | ❌ YOK → CONFLICT-026 |
+| 🎯 **Tablo 17 (s.156)** | "Tablo 17. Sosyal içedönüklük alt testi: Madde numaraları ve puanlama yönü **(Madde Sayısı: 70)**" — **Doğru 34** `32 67 82 111 117 124 138 147 171 172 180 / 201 236 267 278 292 304 316 321 332 336 342 / 357 377 383 398 411 427 436 455 473 487 549 / 564` · **Yanlış 36** `25 33 57 91 99 119 126 143 193 208 229 / 231 254 262 281 296 309 353 359 371 391 400 / 415 440 446 449 450 451 462 469 479 481 482 / 505 521 547` | `SCORING_KEYS.Si` | ✅ **BİREBİR MATCH (34 + 36 = 70)** — 500 dpi **bindirmeli iki kadraj** (`b20_t17_L`/`b20_t17_R`) |
+| K ekleme | Tablo 17'de **"(K Eklemeli)" YOK** | `K_CORRECTION`'da `Si` yok | ✅ tutarlı |
+| Norm dipnotu | "**Erkeklerde ortalama:26.86**, kadınlarda ortalama: **29.88** (Savaşır 1981)." | `TURKISH_NORMS` E **23.86** / K 29.88 | ⚠️ **Kadın MATCH**; Erkek: dipnot 26.86 ↔ **Tablo 30 (s.195) 23.86** → **kod Tablo 30'u izler** → **CONFLICT-040 REJECTED** (CONFLICT-037 emsali) |
+| Si norm SD | (dipnotta yok) | `7.97 / 7.52` | ✅ Tablo 30 |
+
+**Tablo 30 bu oturumda yeniden okundu** (`b20_tablo30_R.png`, 250 dpi, PDF p105 R):
+Si satırı = `N 1003 · X̄ 23.86 · SD 7.97 / N 663 · X̄ 29.88 · SD 7.52` → kodla ve
+`VERIFIED_DATA.md` PHASE 6 kaydıyla **birebir**.
+**Yırtık/scan çizgisi** tablonun `124 · 304 · 427` ve `119 · 309 · 451` sütunundan
+geçiyor → altı değer bindirme bölgesinde ikinci kez okundu ✅.
+**OCR ölçümü (200 dpi, p86_L):** 70 numaradan **69** kurtarıldı, **`99` düştü** +
+25 tablo-dışı token → `TABLO-NUMBERS` kuralı tekrar doğrulandı (OCR'a dayansaydık
+"99 fazlalık" diye **yanlış P0 çelişkisi** üretilecekti).
+Status: **VERIFIED** · **PHASE 5 KAYNAK TARAFI KAPANDI: Tablo 8-17'nin tamamı birebir.**

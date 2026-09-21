@@ -399,3 +399,51 @@ tablo verisiyle karıştı).
    görsel kadrajla yapıldı.
 3. Bindirme paylı **iki** kadraj şart: tek kadrajda dikiş sütunu (`64/181/251/148`)
    yarım görünüyor.
+
+---
+
+## batch 20 · ölçülen üç yeni kural
+
+### `TABLO-NUMBERS` (güncellendi — ikinci ölçüm)
+Tablo 17'nin (s.156) **70** madde numarasını 200 dpi OCR:
+
+| Ölçüm | Değer |
+|---|---|
+| Kurtarılan | **69 / 70** |
+| Düşen | **`99`** (Yanlış listesi) |
+| Tablo dışı gürültü token | 25 (`156` sayfa no, `1981`, `26`, `86`, `88`, liste numaraları 1-14, `40`/`50`/`60`/`70` T eşikleri) |
+| 500 dpi bindirmeli iki kadraj | **70/70** ✅ |
+
+Tablo 16'da 44/46 idi → **kural sabit: OCR oranı %94-99 arasında değişiyor ama
+hiçbir turda tam değil.** OCR'a dayansaydık `99` için "koddaki 99 fazlalık" diye
+**yanlış P0 çelişkisi** üretilecekti.
+
+### `ASCII-FOLD` (YENİ · kritik)
+Bu depodaki OCR çıktıları **Türkçe işaretlerde tutarsız**: aynı kelime bir sayfada
+`ilişkisi`, diğerinde `iliskisi` olarak yazılabiliyor. Bu yüzden `.audit/ocr/*.txt`
+içinde **Türkçe karakterli `grep` sessizce 0 sonuç veriyor** ve "kaynakta yok"
+sonucuna götürüyor.
+**Ölçülen near-miss:** batch 20'de "diğer alt testlerle ilişkisi" bölümü Sc
+(s.146) ve Si'de (s.157) **var olduğu halde** `grep "ilişkisi"` 0 döndürdü; python
+tarafında diacritic katlayarak arayınca 3 sayfa da çıktı → konunun
+**CONFLICT-039** olarak kaydı böylece mümkün oldu.
+**Kural:** OCR metninde arama yapmadan önce **iki tarafı da ASCII'ye katla**
+(`ı→i, ğ→g, ş→s, ö→o, ü→u, ç→c, â→a` + NFKD); `grep` ile ham Türkçe aramayı
+"bulunamadı" kanıtı **yapma**.
+
+### `BLANK-PAGE` (YENİ)
+`extract.py ocr` bir yarı sayfa için **0 satır** döndürdüğünde bu otomatik olarak
+"OCR başarısız" demek değildir: **kaynakta boş sayfa** olabilir.
+**Kanıt:** kitap **s.154 (PDF p85 L)** gerçekten boş — koyu piksel oranı **%4.2**
+(dolu sayfa %11.9), sayfa numarası yok, yalnız kenar gölgesi/kırışık izi.
+**Kural:** 0 satır OCR → **görseli aç ve bak**; (a) boş sayfa ise `DONE (boş)`
+olarak işaretle, (b) doluysa yeniden render/OCR et. Sayfa eşleme formülü
+(`leaf = kitap + 15`) boş sayfaları da sayar; bu yüzden blok başlangıçları
+genelde **sağ sayfaya** (s.155 gibi) kayar.
+
+### Dikiş/yırtık hattı — tablolarda bindirme şart
+Tablo 17'yi kesen **fiziksel yırtık** `124·304·427 / 119·309·451` sütunundan
+geçiyor; tek kadrajda bu 6 değer kısmi. Çözüm: **bindirmeli iki kadraj**
+(`b20_t17_L` 100–340 pt, `b20_t17_R` 310–560 pt, 500 dpi) → kesişimde 6 değer de
+tam okundu. **Kural:** kadraj sınırını sayfa ortasına değil, **tablodaki ilk tam
+sütunun ötesine** koy.

@@ -618,5 +618,48 @@ görüşmelerinde…" ve "Bu kod tipindeki 7 ve 2…" **olmadığı halde YOK** 
 **Kalıcı testlere alınanlar:** Tablo 16 Doğru/Yanlış **birebirlik**, 46 toplam,
 Ma norm + `K_CORRECTION.Ma`, `89/98` (yaş/üçüncü yükselen **hariç** tam metin) ve
 `80/08` gövde + Olası Tanı kilitleri. **Kod değişikliği yok** → `npm test`
-**330/330 PASS** (26 suite), `mmpiKeyIntegrity` **43/43 PASS**, `npm run build`
+**330/330 PASS** (28 suite), `mmpiKeyIntegrity` **43/43 PASS**, `npm run build`
 **PASS** (`optik-form.html` senkron).
+
+---
+
+## batch 20 (2026-09-22) — Ma bant/kod bloğu + 🎯 Tablo 17 (Si)
+
+**Koşulan komutlar:**
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | ✅ **0 hata** |
+| `npx tsx scripts/mmpi-audit/cmp-ma-si-batch20.ts` | **6/6 P0 OK** (Tablo 17 birebir + norm/K) · Ma bantları **23/23 parça** · **7 FARK** = beklenen içerik eksikleri (025/026/027/036/039) |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **50/50 PASS** (batch 19: 43 → +7) |
+| `npm test` | **337/337 PASS** · 30 suite |
+| `npm run build` | ✅ PASS (`optik-form.html` değişmedi — `src/` dokunulmadı) |
+
+**Eklenen 7 kalıcı test:**
+1. `Si madde sayısı kitabın başlığıyla uyumlu: 34 + 36 = 70`
+2. `Si Doğru listesi Tablo 17 ile birebir` (fazla/eksik iki yönlü küme farkı)
+3. `Si Yanlış listesi Tablo 17 ile birebir` — **OCR'ın düştüğü `99`** ve
+   **yırtık hattındaki `119/309/451`** ayrıca doğrulanır + 70 benzersiz madde
+4. `Si normları Tablo 30'u izler; Tablo 17 dipnotundaki 26.86 kaynak içi çelişkidir`
+   (23.86/29.88 + SD 7.97/7.52 + **`K_CORRECTION`'da `Si` OLMAMALI** negatifi)
+5. `Ma bant kapsamı kaynakla birebir: 85+ / 70-84 / 60-69 / 45-59 / 21-44`
+   (bant sınırları `deepEqual` + 5 kaynak cümlesi; `60-75` paragrafının 60-69'da
+   korunduğu dahil)
+6. `BİLİNEN EKSİK (CONFLICT-026/025)` — **negatif kilit**: `doesNotMatch(/Yalnızca alt test 9/)`;
+   içerik eklendiğinde test **bilinçli** güncellenmek zorunda (sessiz düzelme yok)
+7. `90/09 gövdesi sadık; 91/19 gövdesi kanonik anahtar çarpışmasına kurban gidiyor`
+   — `codeInterpretation('91').code === '19/91'` ve `doesNotMatch(/Ender görülmektedir/)`
+   (**CONFLICT-036 vaka 2** kilidi)
+
+**Araç notu:** `cmp-ma-si-batch20.ts` batch 19 kuralını uygular — tüm parça
+aramaları `toLowerCase()` + boşluk/noktalama katlaması (`norm()`); ayrıca Tablo 17
+kaynak listesi **script içine gömülü** (OCR'dan alınmadı, `TABLO-NUMBERS`).
+`CODES` dışa aktarılmadığı için denetim `KNOWN_CODES` + `codeInterpretation()`
+üzerinden yapılıyor (kamusal API üzerinden test = kırılgan olmayan bağlantı).
+`src/` değişmedi → `optik-form.html` yeniden üretildi, **fark yok** (doğrulandı).
+
+> **Sayaç notu (batch 20):** `npm test` çıktısındaki `# suites` değeri node'un
+> `describe`/dosya sayımına göre değiştiği için tarihsel satırlarda (24/26/28)
+> tutarsız görünüyor; **yetkili sayı `# tests` / `# pass`** değerleridir
+> (batch 18: 324 · batch 19: 330 · batch 20: **337**, hepsi fail 0). Yeni
+> kayıtlarda suite sayısı yerine test sayısı yazılacak.

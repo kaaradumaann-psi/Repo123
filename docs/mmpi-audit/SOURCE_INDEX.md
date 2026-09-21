@@ -119,9 +119,13 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **148** | **p82 L** | `89/98` kapanışı (Olası Tanı: Şizofreni · Madde kullanımına bağlı psikoz; "Yaşı 27'den küçük…" notu) + **`80/08 Kodu`** (+ Şizoid Kişilik) → **Sc bloğu BİTER** | **DONE** (batch 19) · 2/2 başlık **VAR** · 2 eksik cümle → CONFLICT-025/027/034 |
 | **149** | **p82 R** | **9. Hipomani (Ma) Alt Testi girişi** + Graham 1987 yüksek puan **1-25** | **DONE** (batch 19) · liste kodda YOK → CONFLICT-026 |
 | **150** | **p83 L** | 🎯 **Tablo 16 — Ma anahtarı (Madde Sayısı: 46)** + "(K Eklemeli)" + norm 19.96/19.72 + Graham 26-42 + Ma düşük puan 1-2 | **DONE** (batch 19) · **P0 BİREBİR MATCH** (35+11) · 430 dpi bindirmeli kadraj; OCR `180/267`yi kaçırdı → `OCR_ISSUES.md` TABLO-NUMBERS |
-| 151-156 | p83 R – p86 L | Ma bantları (85+ / 70-84 / 60-69 / 45-59 / 21-44) + **Ma kod bloğu** (`91/19` … `90/09`) + Si (0) girişi | NOT_STARTED — **sıradaki batch 20** |
-| 152-156 | p83 R – p85 R | Ma (9) alt testi + kod tipleri (91/19, 90/09) | NOT_STARTED |
-| 155-158 | p85 L – p86 R | Si (0) alt testi, 049 / 027(8) kodları | NOT_STARTED |
+| **151** | **p83 R** | Ma yüksek-puan listesinin sonu (3-14) + **Ma T bantları**: `85 T ve üstü`, `70-84 T`, **'60- 75 T'** (kaynak hatası), `60- 69 T`, `45-59 T` başlangıcı | **DONE** (batch 20) · 420 dpi kadraj · `MA_T_BANDS` kapsamı **tam** (23/23 parça) |
+| **152** | **p84 L** | `21-44 T` bandı + **'Yalnızca alt test 9'u kullanarak…'** paragrafı + **'Ma alt testinin diğer alt testlerle ilişkisi:'** + **Yüksek 9/Yüksek K Kodu** | **DONE** (batch 20) · 5 cümle kodda YOK → CONFLICT-025 · K-örüntüsü YOK → CONFLICT-039 (+4 sayısal koşul → 027) |
+| **153** | **p84 R** | **Yüksek 9/Düşük K** + **`91/19` (Ayrıca `19/91`)** + 7 `Bakınız` ref + 'Eyleme vuruk…' notu + **`90/09`** → **Ma bloğu BİTER** | **DONE** (batch 20) · 4 başlık → **1 VAR (`90/09`) / 3 YOK** · `91/19` = **CONFLICT-036 vaka 2** |
+| **154** | **p85 L** | **BOŞ SAYFA** (kaynak yerleşimi; OCR 0 satır = doğru sonuç) | **DONE** (batch 20) · sayfa eşleme teyidi: s.154 boş, Si bloğu s.155'te (sağ sayfa) başlıyor |
+| **155** | **p85 R** | **0. Sosyal İçedönüklük (Si) Alt Testi** girişi + Graham yüksek puan **1-20** + düşük puan 1 | **DONE** (batch 20) · listeler kodda YOK → CONFLICT-026 |
+| **156** | **p86 L** | 🎯 **Tablo 17 — Si anahtarı (Madde Sayısı: 70)** + norm dipnotu (E 26.86 / K 29.88, Savaşır 1981) + Si düşük puan 2-14 + yorum paragrafları | **DONE** (batch 20) · **P0 BİREBİR MATCH** (34+36) · 500 dpi bindirmeli kadraj (`b20_t17_L/R`) · **PHASE 5 kaynak tarafı KAPANDI** |
+| 157-158 | p86 R – p87 L | **Si T bantları** + `01/10`…`09/90` `Bakınız` listesi + **`049 Kodu`** ve Si kodları + Bölüm 5 kapanışı | NOT_STARTED — **sıradaki batch 21** |
 | 159-170 | p87 R – p93 L | Bölüm 6: Yorumlama (kod tipi belirleme, konversiyon V, paranoid V, kuş kanadı …) | NOT_STARTED |
 | 171-177 | p93 R – p96 R | Bölüm 7: Kişilik bozuklukları, intihar davranışı, alkol ölçekleri | NOT_STARTED |
 | 178-179 | p97 L – p97 R | **Wiggins içerik skalaları** — tanımlar + **Tablo 20 (normlar)** | **DONE** (deskew görsel; normlar 26/26) |
