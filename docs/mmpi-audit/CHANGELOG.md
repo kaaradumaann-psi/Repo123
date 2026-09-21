@@ -1435,3 +1435,45 @@ yok) · docs: SOURCE_FACTS (`SOURCE-MA-003/004`, `SOURCE-SI-001`), CONFLICTS
 (036 vaka 2, **039 yeni**, **040 REJECTED**, 025/026/027 genişletmeleri),
 CONFLICT-024_KAPSAM, SOURCE_INDEX (151-156 DONE · **s.154 boş** · bayat 155-158
 satırı kaldırıldı), VERIFIED_DATA, OCR_ISSUES (3 kural), TEST_AUDIT, AUDIT_STATE.
+
+---
+
+## PHASE 9/10 — batch 21: Si (0) KAPANIŞI → **BÖLÜM 5 KAYNAK TARAMASI BİTTİ** (kitap s.157-158)
+
+Tarih: 2026-09-22 · Kaynak: **s.157** (PDF p86 R) + **s.158 (BOŞ SAYFA)** (p87 L)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 157 | p86 R | Si **T bantları** (4) + giriş paragrafı + **"diğer alt testlerle ilişkisi:"** (9 Bakınız) + **`049 Kodu`** + **`027(8) Kodu`** | bantlar **3/4 birebir**; 2 kod gövdesi **YOK** |
+| 158 | p87 L | **BOŞ SAYFA** (koyu piksel %0.62) | **Bölüm 5 s.157'de kapanır** — plan "s.157-158"i düzeltti |
+| (159) | p87 R | **BÖLÜM 6** girişi ("…körlemesine değerlendirme yapılmamalıdır… demografik özellikler: yaş, cinsiyet, eğitim…" ) | **PHASE 10 sınırı** teyit edildi |
+
+### Bulgular
+
+- **🏁 MİLESTONE:** **Bölüm 5 (kod tipleri) taraması TAMAMLANDI (s.63-157).**
+  024 ailesine yeni sayfa gelmez → **tek tasarım kararı (DECISION-029 adayı) için
+  kanıt seti kapandı**.
+- **CONFLICT-030'a EN GÜÇLÜ İKİ VAKA:** `codeInterpretation('049')` → **`40/04`**
+  metni, `codeInterpretation('027(8)')` → **`20/02`** metni (slice(0,2) + kanonik
+  iki hane). Yani kırpma burada **alakasız bir kodun yorumunu** kullanıcıya gösteriyor;
+  `027(8)` ayrıca **parantezli notasyon** taşıdığı için iki-haneli modelde hiç
+  adreslenemiyor (**CONFLICT-031 +2**).
+- **CONFLICT-024 +2 YOK** (`049`, `027(8)` gövdeleri yok) → kapsam **148 → 103 VAR / 47 YOK**
+- **CONFLICT-025 +5 cümle:** `70+` bandı kuyruğu ("Nevrotik üçlüde yükselme
+  görülebilir" + "Ayrıca bakınız, 2, 7 ve 8…") · s.156-157 süzülen paragraf
+  (20 puanlık fark · Si+4+9 · 2/7+8)
+- **CONFLICT-027 44 → 45** ("Alt test Si'de **20 puanlık** farklılık…" sayısal koşulu)
+- **CONFLICT-033 → 9 örüntü** (+3 çok-ölçekli: nevrotik üçlü atfı · Si↑4↑9↑ · Si↑(2|7)↑8↑)
+- **✅ Çelişki üretmeyen:** 9/9 **Bakınız hedefi mevcut ve etiketler birebir** ·
+  `60-69`/`45-59`/`25-44` bandı **birebir** · kodun `25-44` bandını `min:0`'a
+  genişletmesi **BİLGİ** · "bireylerdir**..**" kaynak yazım hatası
+- **🆕 `INVENTORY-DOUBLE-COUNT`:** `inventory.py` s.157'de **20** kod başlığı saydı
+  (gerçek **11**) — regex `X/Y`yi **her iki yönde** eşleştiriyor; parantezli
+  `(8)` düşüyor → başlık sayımı daima görselden
+- **Kod değişikliği YOK** (DECISION-028: eksik içerik bekletilir)
+
+### Doğrulama
+
+`cmp-si-batch21.ts` (6 fark, hepsi yorum katmanı) · typecheck **0** ·
+`mmpiKeyIntegrity.test.ts` **56/56 PASS** (+6) · `npm test` **343/343 PASS** (30 suite) ·
+`npm run build` **PASS** (`optik-form.html` üretim farkı yok).

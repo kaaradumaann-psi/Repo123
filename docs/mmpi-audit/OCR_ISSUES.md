@@ -447,3 +447,27 @@ geçiyor; tek kadrajda bu 6 değer kısmi. Çözüm: **bindirmeli iki kadraj**
 (`b20_t17_L` 100–340 pt, `b20_t17_R` 310–560 pt, 500 dpi) → kesişimde 6 değer de
 tam okundu. **Kural:** kadraj sınırını sayfa ortasına değil, **tablodaki ilk tam
 sütunun ötesine** koy.
+
+## INVENTORY-DOUBLE-COUNT — `inventory.py` "kod başlığı" sayımı ŞİŞİRİR (s.157'de ölçüldü)
+
+**Semptom:** `inventory.py p086_R` çıktısı **"KOD BASLIKLARI (20): 01/10, 10/01,
+02/20, 20/02, … 09/90, 90/09, 049, 027"** verdi — oysa sayfada **11 gerçek başlık**
+var (9 `Bakınız` çifti + `049 Kodu` + `027(8) Kodu`).
+
+**Nedensel bağlantı:** regex `X/Y` kalıbını **her iki yönde** eşleştiriyor; kitabın
+"01/10 Kodu (Bakınız 10/01 Kodu)" satırında **iki** eşleşme doğuyor → sayı **ikiye
+katlanıyor**. 049/027 gibi kısa kodlar da yanındaki sayılarla eşleşebiliyor.
+
+**Kural:** `inventory.py` **yalnız adaya** işaret eder — **kod tipi başlığı sayısı
+her zaman görselden** (150 dpi tam sayfa) **ve parantezli varyantlarla**
+(`027(8)`) doğrulanır. KAPSAM tablosuna OCR/envanter sayımı **asla** doğrudan
+yazılmaz. **Ayrıca:** parantezli kod notasyonu (`027(8)`) envanter kalıbına
+hiç uymaz → **kaçırma (false negative) riski de var**; `027` ham haliyle yakalandı
+ama `(8)` düştü.
+
+## BLANK-PAGE — ikinci ölçüm (s.158)
+
+s.158 (PDF p87 L): OCR **1 satır** (`la <LOWCONF>`) · koyu piksel **%0.62** —
+kıyasla dolu sayfa s.157 **%4.36**, s.159 **%5.45**. Kural **teyitli**: 0-1 satır
+OCR + %1'in altında koyu piksel = **sayfa gerçekten boş**, OCR hatası değil. Bu
+ölçüm **Bölüm 5'in s.157'de bittiğini** kanıtladı (önceki plan "s.157-158" diyordu).

@@ -793,3 +793,21 @@ Sc 78 · Ma 46 · **Si 70** = 10 klinik anahtar).
 `b20_t17_L/R` (500 dpi), `b20_t17_norm2` (560 dpi), `b20_tablo30_R` (250 dpi),
 `b20_s151_top`/`b20_s151_bands`/`b20_ma_bands2`/`b20_s152_kkodu`/`b20_s153_codes`
 · OCR sayım kanıtı `OCR_ISSUES.md` (TABLO-NUMBERS 2. ölçüm, ASCII-FOLD, BLANK-PAGE).
+
+## Batch 21 — Si (0) kapanışı (kitap s.157-158) · 2026-09-22
+
+| Alan | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| Si T bandı sayısı/etiketleri | s.157: `70 T puanı ve üstü` · `60-69 T` · `45-59 T` · `25-44 T` | `SI_T_BANDS` `T ≥ 70` · `T 60-69` · `T 45-59` · `T 25-44` (min 70/60/45/0) | ✅ **4/4 + eşikler birebir** |
+| `60-69` bandı metni | "Bu kendini ortaya koymak istemeyen… Çekingen, utangaç kişilerdir." | aynı | ✅ **birebir** |
+| `45-59` bandı metni | "Sosyal ilişki kurmada başarılı olan bireylere işaret etmektedir." | aynı | ✅ **birebir** |
+| `25-44` bandı metni | 4 cümle (iyimser/manipülatif… dürtü kontrol… yalnız kalamayan… onaylanma gereksinimi) | 4/4 | ✅ **birebir** |
+| `70+` bandı metni | 4 cümle | **2/4** | ⚠️ **eksik**: "Nevrotik üçlüde yükselme görülebilir" + "(Ayrıca bakınız, 2, 7 ve 8 alt testlerinin yükselmesi.)" → 025/033 |
+| Bakınız hedefleri | `01/10`…`09/90` (9 çift) | `10/01`,`20/02`,`30/03`,`40/04`,`50/05`,`60/06`,`70/07`,`80/08`,`90/09` | ✅ **9/9 mevcut, etiket birebir** |
+| `049 Kodu` gövdesi | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" | **YOK** (`'049'` → `40/04` metni) | ❌ 024 YOK + **030 somut vaka** |
+| `027(8) Kodu` gövdesi | "Bireyde güçlü ruminatif davranışlar görülebilir." | **YOK** (`'027(8)'` → `20/02` metni) | ❌ 024 YOK + **030 somut vaka** |
+| s.157 giriş paragrafı | 3 cümle (20 puan farkı / Si+4+9 / 2-7+8) | **0/3** | ⚠️ 025 +3 · 027 +1 · 033 +2 |
+| s.158 | **BOŞ SAYFA** | — | ✅ kayıt (`BLANK-PAGE` 2. ölçüm: %0.62 vs %4.36) |
+
+**PHASE 9/10 KAYNAK SETİ: s.63-157 TAMAMI OKUNDU** (Bölüm 5 kapandı) · **Kod
+değişikliği YOK** · `mmpiKeyIntegrity` **56/56 PASS** · `npm test` **343/343 PASS**.

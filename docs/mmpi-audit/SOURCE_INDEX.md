@@ -104,7 +104,7 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **128** | **p72 L** | **Tablo 13 — Pa anahtarı (40 madde)** + norm + düşük/aşırı düşük listeleri | **DONE** · **P0 BİREBİR MATCH** (125 dpi görsel) |
 | **129** | **p72 R** | Pa listeleri devamı + **80 ve üstü T puanı** | **DONE** |
 | **130** | **p73 L** | **Pa T bantları** (70-79/60-69/45-59/27-44) | **DONE** · **5/5 MATCH** |
-| 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
+| 111-158 | p63 R – p87 L | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | ✅ **DONE** — batch 11-21 (satır batch 21'de düzeltildi: bayat `NOT_STARTED` idi; ayrıntı aşağıdaki sayfa sayfa satırlarda) |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
 | 121-129 | p68 L – p72 L | Mf (5) alt testi, **erkeklerde/kadınlarda Mf değerlendirmesi** | NOT_STARTED |
@@ -125,7 +125,9 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **154** | **p85 L** | **BOŞ SAYFA** (kaynak yerleşimi; OCR 0 satır = doğru sonuç) | **DONE** (batch 20) · sayfa eşleme teyidi: s.154 boş, Si bloğu s.155'te (sağ sayfa) başlıyor |
 | **155** | **p85 R** | **0. Sosyal İçedönüklük (Si) Alt Testi** girişi + Graham yüksek puan **1-20** + düşük puan 1 | **DONE** (batch 20) · listeler kodda YOK → CONFLICT-026 |
 | **156** | **p86 L** | 🎯 **Tablo 17 — Si anahtarı (Madde Sayısı: 70)** + norm dipnotu (E 26.86 / K 29.88, Savaşır 1981) + Si düşük puan 2-14 + yorum paragrafları | **DONE** (batch 20) · **P0 BİREBİR MATCH** (34+36) · 500 dpi bindirmeli kadraj (`b20_t17_L/R`) · **PHASE 5 kaynak tarafı KAPANDI** |
-| 157-158 | p86 R – p87 L | **Si T bantları** + `01/10`…`09/90` `Bakınız` listesi + **`049 Kodu`** ve Si kodları + Bölüm 5 kapanışı | NOT_STARTED — **sıradaki batch 21** |
+| **157** | **p86 R** | **Si T bantları** (`70+` · `60-69` · `45-59` · `25-44`) + s.156'dan süzülen giriş paragrafı + **"Si alt testinin diğer alt testlerle ilişkisi:" 9 Bakınız çifti** + **`049 Kodu`** + **`027(8) Kodu`** | **DONE** (batch 21) · bantlar **3/4 birebir**; `70+` bandında **2 cümle eksik** (nevrotik üçlü + 2/7/8 atfı) · **`049`/`027(8)` gövdeleri YOK** → CONFLICT-024 +2, **030 somut vaka** (`'049'`→`40/04`, `'027(8)'`→`20/02`), **031 +2**, 025 +5, 027 → 45, 033 → 9 · **9/9 Bakınız hedefi VAR ve etiket birebir** (uyumlu) · `INVENTORY-DOUBLE-COUNT` (envanter 20 saydı, gerçek 11) |
+| **158** | **p87 L** | — | **DONE** (batch 21) · **BOŞ SAYFA** (OCR 1 satır, koyu piksel **%0.62** vs dolu sayfa %4.36) → **BÖLÜM 5 s.157'DE BİTER** (`BLANK-PAGE` 2. ölçüm) |
+| **—** | — | **BÖLÜM 5 (kitap s.63-157) KAYNAK TARAMASI** | ✅ **TAMAMLANDI** (batch 21) → kapsam **148 başlık / 103 VAR / 47 YOK**; DECISION-029 adayı için kanıt seti kapandı |
 | 159-170 | p87 R – p93 L | Bölüm 6: Yorumlama (kod tipi belirleme, konversiyon V, paranoid V, kuş kanadı …) | NOT_STARTED |
 | 171-177 | p93 R – p96 R | Bölüm 7: Kişilik bozuklukları, intihar davranışı, alkol ölçekleri | NOT_STARTED |
 | 178-179 | p97 L – p97 R | **Wiggins içerik skalaları** — tanımlar + **Tablo 20 (normlar)** | **DONE** (deskew görsel; normlar 26/26) |

@@ -752,3 +752,41 @@ içerik bekletilmez* → kaynak terimi aynen yazılır (+ düşen "açıları" s
   koddaki `SINGLE_*` setinde Sc bulunmaması **doğru** (yeni CONFLICT yazılmadı).
 - **s.146 beş çapraz referansı** "Bakınız" biçiminde olduğu için kodun
   tek-kayıt tasarımı burada yeterlidir → CONFLICT-024/031 **genişletilmedi**.
+
+---
+
+## DECISION-029 — **ADAY · KULLANICI ONAYI BEKLİYOR**: kod tipi modelinin tek çatı kararı
+**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
+** tetikleyen:** PHASE 9/10 batch 21 — **Bölüm 5 kaynak taraması bitti (s.63-157)**,
+kanıt seti tamam; erteleme gerekçesi ("önce tüm bloklar çıkarılsın") **kalktı**.
+
+**Karar verilmesi gereken şey — 4 ayrı düzeltme DEĞİL, tek model değişikliği:**
+
+| # | Bulgu | Birikmiş kanıt |
+|---|---|---|
+| 1 | Kod **kimliği** yetersiz: aynı rakam çifti **blok-bazlı** farklı metin taşıyor | CONFLICT-031 + **036 (2 vaka: `64/46`, `91/19`)** + Si kapanışı |
+| 2 | `codeInterpretation()` **`slice(0,2)` kırpıyor** → 3+ haneli kodlar **alakasız metne** düşüyor | CONFLICT-030 (**37 örnek**; en somutu `'049'` → `40/04`, `'027(8)'` → `20/02`) |
+| 3 | Kaynağın **koşullu cümleleri** (T/yaş/puan-farkı) modelde alan yok | CONFLICT-027 (**45**) + CONFLICT-025 (koşullu ek cümleler) |
+| 4 | **Çok-ölçekli örüntüler** (nevrotik üçlü, vadiler, Si↑+4↑+9↑, K-örüntüleri) tespit edilmiyor | CONFLICT-033 (**9 örüntü**) + CONFLICT-039 (3 "ilişki" bölümü: Sc s.146 · Ma s.152 · Si s.157) |
+
+**Önerilen (A) seçeneği — minimum tutarlı çatı:**
+- `CODES` anahtarı → `(blok, kanonik sıralı kod, varyant)`; `varyant` `K`/parantez
+  alt-test (`027(8)`) ve üç-dördüncü ölçek (`123`, `8726`) bilgilerini taşır
+- `CodeInterpretation.conditions?: { rule: string; test: (t) => boolean; text: string }[]`
+- `CodeInterpretation.patterns?: { scales: ScaleId[]; op: 'all-above'|'vally'|…; text: string }[]`
+- `codeInterpretation()` kırpması **kaldırılır** → eşleşme yoksa `undefined`
+  (UI "bu kod için kaynak yorumu yok" der; **yanlış metin göstermekten iyidir**)
+- 47 eksik gövde (CONFLICT-024) ayrı bir **içerik işi** olarak ayrıca planlanır;
+  karar (A) kabul edilirse bile **toplu doldurulması zorunlu değil**
+
+**Alternatif (B):** model değişmez; yalnızca **(2)** düzeltilir (kırpma → `undefined`)
+ve **(1)** için `seeAlso` metinlerine "bkz. blok" notu eklenir → 033/039 **bilinen
+kayıt** olarak kalır. **Maliyeti:** kaynağın çok-ölçekli yorum katmanı kullanıcıya
+hiç ulaşmaz.
+
+**Onaylanırsa sıralama:** (i) `src/scoring/mmpiSourceCodes.ts` tip + çözümleyici +
+testler (CHANGE-014) → (ii) UI "yorum yok" durumu → (iii) `CONFLICT-024` kapsam
+dosyasından gövde göçü, **batch batch**. **Reddedilirse:** 030 P1 olarak açık kalır,
+hiçbir şey değişmez.
+
+**Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 21 = docs + test + araç).

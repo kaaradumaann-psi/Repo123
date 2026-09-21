@@ -663,3 +663,29 @@ kaynak listesi **script içine gömülü** (OCR'dan alınmadı, `TABLO-NUMBERS`)
 > tutarsız görünüyor; **yetkili sayı `# tests` / `# pass`** değerleridir
 > (batch 18: 324 · batch 19: 330 · batch 20: **337**, hepsi fail 0). Yeni
 > kayıtlarda suite sayısı yerine test sayısı yazılacak.
+
+## Batch 21 — Si (0) KAPANIŞI (kitap s.157-158) · 2026-09-22
+
+**Yeni denetim aracı:** `scripts/mmpi-audit/cmp-si-batch21.ts` (6 bölüm: bant
+kapsamı+eşikler · bant metinleri cümle cümle · 70+ kuyruğu · 9 Bakınız hedefi ·
+`049`/`027(8)` gövde ve kırpma çözümü · s.157 giriş paragrafı · boş sayfa kaydı).
+Çıktı: **6 FARK** — hepsi **yorum katmanı** kaydı (eksik içerik), **P0 bulgu yok**.
+
+**Kalıcı testler (6) — `tests/mmpiKeyIntegrity.test.ts` +1→56:**
+1. Si bant kapsamı/eşikleri `[70,∞) (60,69) (45,59) (0,44)` + `rangeLabel` dizisi
+2. `60-69` · `45-59` · `25-44` bandı metinleri **kaynak cümleleriyle** regex kilidi
+3. **BİLİNEN EKSİK** (025/033): `70+` bandında "Nevrotik üçlüde yükselme" ve
+   "Ayrıca bakınız, 2, 7 ve 8" **yoktur** → bir gün eklenirse test bilinçli kırılacak
+4. s.157 Bakınız listesi: `01/10`…`09/90` → `10/01`…`90/09` **kayıt + etiket birebir**
+5. **CONFLICT-030 kilidi:** `KNOWN_CODES` **tamamı iki haneli**; `codeInterpretation('049')`
+   → `40/04`, `codeInterpretation('027(8)')` → `20/02`; iki kaynak cümlesi **yok**
+6. s.157 giriş paragrafının 3 cümlesi kodda **yok** (20 puan · eyleme vurukluk · ruminatif)
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0 hata** · `npx tsx --test
+tests/mmpiKeyIntegrity.test.ts` → **56/56 PASS** · `npm test` → **343/343 PASS**
+(30 suite) · `npm run build` → **PASS** (`src/` değişmediği için `optik-form.html`
+üretim farkı **YOK**) · `git diff --check` temiz.
+
+**Kural uygulaması:** coverage kontrolleri `toLowerCase()` + noktalama kırpan `norm()`
+ile (cmp'de parantezler de soyuldu: "(Ayrıca bakınız…)" fragmenti böyle bulundu);
+bant/kod başlıkları **görselden** sayıldı (`BAND-HEAD-DROP` + `INVENTORY-DOUBLE-COUNT`).

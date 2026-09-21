@@ -2983,3 +2983,75 @@ geçiyor → altı değer bindirme bölgesinde ikinci kez okundu ✅.
 25 tablo-dışı token → `TABLO-NUMBERS` kuralı tekrar doğrulandı (OCR'a dayansaydık
 "99 fazlalık" diye **yanlış P0 çelişkisi** üretilecekti).
 Status: **VERIFIED** · **PHASE 5 KAYNAK TARAFI KAPANDI: Tablo 8-17'nin tamamı birebir.**
+
+---
+
+## SOURCE-SI-002 · Si (0) **bantları + "ilişki" bölümü + `049` / `027(8)`** — kitap s.157 (PDF p86 R)
+
+Kanıt: `.audit/pages/p086_R.png` (150 dpi tam sayfa — **görselden okundu**) ·
+`.audit/ocr/p086_R.txt` (34 satır; yalnız sayfa yapısı için) ·
+araç: `scripts/mmpi-audit/cmp-si-batch21.ts`
+
+**Si T bantları (4) — kelimesi kelimesine:**
+
+| Kaynak bant etiketi | Kaynak metni | Kod `SI_T_BANDS` |
+|---|---|---|
+| **`70 T puanı ve üstü`** | "Sosyal açıdan beceriksiz olan kişilerdir. Sosyal ilişkilerde anksiyete yaşar ve ilişki kurmaktan kaçınırlar. **Nevrotik üçlüde yükselme görülebilir. (Ayrıca bakınız, 2, 7 ve 8 alt testlerinin yükselmesi.)**" | **2/4 cümle** — son **iki cümle YOK** → CONFLICT-025 +2 · CONFLICT-033 +1 |
+| `60-69 T puanı` | "Bu kendini ortaya koymak istemeyen, yakın aile çevresinde rahat olan bireylerin profilidir. Çekingen, utangaç kişilerdir." | **BİREBİR** ✅ |
+| `45-59 T puanı` | "Sosyal ilişki kurmada başarılı olan bireylere işaret etmektedir." | **BİREBİR** ✅ |
+| `25-44 T puanı` | "İyimser, manipülatif, yüzeysel ve hatta biraz uçuk bireylerdir. Dürtü kontrol sorunları vardır. Diğerleri ile olmak isteyen, yalnız kalamayan bireyleri gösterir. Çoğu kolay ilişki kurar, arkadaş canlısı ve meraklıdırlar, sosyal açıdan kabul görme, onaylanma konusunda gereksinimleri çok fazla olan bireylerdir." | **BİREBİR** ✅ (kod `;` ve tek `.`; kaynakta "bireylerdir**..**" → kaynak yazım hatası, kayıt) |
+
+Kod `25-44` bandının **alt sınırını 0'a** genişletmiş (`min: 0`, etiket `T 25-44`
+korunmuş) → BİLGİ notu; kaynak alt bant sınırlarını hiç "0" vermez.
+
+**s.157 üstü — s.156'dan süzülen Si yorum paragrafı:** "…**maya yararlıdır.** Alt test
+Si'de **20 puanlık bir farklılık olan çiftlerin**, sosyal ilişkiler açısından **evlilik
+çatışmalarına** düşmeleri olasıdır. Alt test Si'deki yükselmeye, **alt test 4 ve
+9'daki yükselmeler** de eşlik ediyorsa, **eyleme vurukluğun bastırıldığı**
+düşünülmelidir. **Alt test 2 ya da 7** özellikle **alt test 8'in** eşlik ettiği
+durumlarda, **ruminatif davranışların kuvvetlendiği** görülür." → kodda **0/3 cümle**
+→ CONFLICT-025 +3 · **CONFLICT-027 +1** ("20 puanlık farklılık" sayısal koşulu) ·
+CONFLICT-033 +2 (Si+4+9 · Si+2/7+8 çok-ölçekli örüntüleri)
+
+**"Si alt testinin diğer alt testlerle ilişkisi:"** (CONFLICT-039'un **üçüncü**
+örneği — Sc s.146 · Ma s.152 · **Si s.157**): 9 Bakınız çifti — `01/10 (Bakınız
+10/01)` · `02/20 (20/02)` · `03/30 (30/03)` · `04/40 (40/04)` · `05/50 (50/05)` ·
+`06/60 (60/06)` · `07/70 (70/07)` · `08/80 (80/08)` · `09/90 (90/09)`.
+→ Si bölümünde **K-örüntüsü YOK** (Ma/Sc'nin aksine); **9/9 hedef kayıt `CODES`'ta
+mevcut ve etiketler BİREBİR** → çapraz referanslar **UYUMLU** (çelişki üretmez;
+yalnızca bölümün kendisi modelde karşılıksız).
+
+**Kod tipi başlıkları (2) — İKİSİ DE KODDA YOK:**
+- **`049 Kodu`** → "Psikiyatrik olgularda eyleme vurukluğun bastırılması" —
+  `CODES`'ta hiç yok. **`codeInterpretation('049')` → `canonicalCode('04')` → `40/04`
+  kaydının metni** ("Koddaki bireyler hem kızgındırlar hem de kişilerarası
+  ilişkilerde geri çekilmişlerdir…") → **CONFLICT-030 somut vaka** (kırpma, İLGİSİZ
+  metin üretiyor)
+- **`027(8) Kodu`** → "Bireyde güçlü ruminatif davranışlar görülebilir." — yok; en
+  yakın kayıt `27/72`'de "ruminatif" hiç geçmiyor. **`codeInterpretation('027(8)')` →
+  slice `'02'` → `20/02` metni** → **CONFLICT-030 somut vaka** ve kaynakta **parantezli
+  alt-test notasyonu taşıyan ilk kod** (model böyle bir başlığı adresleyemez → 031)
+
+Status: **VERIFIED** · **Kod değişikliği YOK** (eksik içerik sınıfı → DECISION-028).
+
+---
+
+## SOURCE-SI-003 · **s.158 = BOŞ SAYFA** → Bölüm 5 s.157'de biter; s.159 = Bölüm 6 girişi
+
+- **s.158 (PDF p87 L):** OCR **1 satır** (`la <LOWCONF>`) · koyu piksel oranı
+  **%0.62** — kıyas: dolu sayfa p086_R **%4.36**, p087_R **%5.45** → `BLANK-PAGE`
+  kuralının **ikinci ölçümü** (ilki s.154)
+- **s.159 (PDF p87 R):** OCR ilk satırları "**BOLUM 6** / **MINNESOTA ÇOK YÖNLÜ
+  KİŞİLİK** / **ENVANTERINI YORUMLAMA** / **YAKLASIMI**" + "MMPI profilini
+  yorumlamadan önce testi veren kişi, değerlendirme için gönderilen bireyin bazı
+  özelliklerini dikkate almalıdır. **Hiçbir zaman körlemesine bir değerlendirme
+  yapılmamalıdır.** İlk aşamada test verilecek bireyin **demografik özellikleri
+  belirlenmelidir: yaş, cinsiyet, eğitim, medeni durum, meslek**…" + "Genel olarak
+  MMPI yorumları, **zeka düzeyleri 80'in üzerinde olan yetişkinlere** yöneliktir.
+  **Eğitim düzeyi olarak ortaokul kabul edilmektedir.** Bu değişkenlerin bazıları
+  **belli kodları yorumlamada önemli** olmaktadır…"
+
+→ **BÖLÜM 5 (kod tipleri) KAYNAK TARAMASI TAMAMLANDI: s.63-157** (Bölüm 6 ile
+karıştırılmamalı; s.159'dan sonrası **PHASE 10**). s.159'daki "demografik
+değişkenler belli kodları yorumlamada önemlidir" cümlesi **CONFLICT-034'ün genel
+çerçevesi** olarak kayda geçti (kodda yaş/eğitim/cinsiyet bağlamı yok).

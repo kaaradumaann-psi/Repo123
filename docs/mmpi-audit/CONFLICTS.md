@@ -1790,3 +1790,33 @@ değerlendirildi.
 4. **`90/09`** gövdesi 5/5 sadık; **7 `Bakınız` çapraz referansı** hedef
    kayıtlarda mevcut → UYUMLU (CONFLICT-024 dışı).
 5. **`K_CORRECTION`'da `Si` yok** ↔ Tablo 17'de "(K Eklemeli)" yok ✅.
+
+---
+
+## CONFLICT-024/025/027/030/031/033/039 · genişletme (batch 21 — Si (0) KAPANIŞI, s.157-158)
+
+**🏁 MİLESTONE: Bölüm 5 (kod tipleri) kaynak taraması BİTTİ — s.63-157** (s.158 boş
+sayfa, `SOURCE-SI-003`). Bundan sonra 024 ailesine **yeni sayfa gelmez**; birikmiş
+bulguların **tek tasarım kararı** artık kanıt eksikliği olmadan verilebilir.
+
+| Conflict | Bu turdaki fark | Kanıt |
+|---|---|---|
+| **024** | **+2 YOK başlık** → `049 Kodu`, `027(8) Kodu` (ikisinin de gövdesi CODES'ta yok) | `cmp-si-batch21.ts (3)(4)` |
+| **025** | **+5 cümle**: Si `70+` bandı kuyruğu 2 ("Nevrotik üçlüde yükselme görülebilir" + "Ayrıca bakınız, 2, 7 ve 8…") · s.156-157 süzülen giriş paragrafı 3 (20 puan farkı · Si+4+9 → eyleme vurukluk · 2/7+8 → ruminatif) | `cmp-si-batch21.ts (1c)(5)` |
+| **027** | **+1 sayısal koşul → 45**: "Alt test Si'de **20 puanlık bir farklılık** olan çiftlerin… evlilik çatışmalarına düşmeleri olasıdır" — kod hiçbir sayısal fark testi yapmıyor | `SOURCE-SI-002` |
+| **030** | **+2 SOMUT VAKA (en güçlüsü)**: `codeInterpretation('049')` → **`40/04` metni** · `codeInterpretation('027(8)')` → **`20/02` metni** — kırpma burada **alakasız bir bloğun** yorumunu döndürüyor; üstelik `027(8)` **parantezli notasyon** taşıdığı için iki-haneli modelde **hiç adreslenemiyor** | `cmp-si-batch21.ts (3)(4)` + `mmpiSourceCodes.ts:305` |
+| **031** | **+2**: Si bloğunun blok-yerel kodları (`049`, `027(8)`) — aynı `04`/`02` rakam çifti başka blokta **başka** anlama geliyor | `SOURCE-SI-002` |
+| **033** | **+3 örüntü → 9**: Si 70+ bandındaki **"Nevrotik üçlüde yükselme"** atfı · **Si↑ + 4↑ + 9↑** · **Si↑ + (2 veya 7)↑ + 8↑** — üçü de çok-ölçekli, kodda tek-ölçek bant var | `cmp-si-batch21.ts (1c)(5)` |
+| **039** | **+0 (yapı teyidi)**: "Si alt testinin diğer alt testlerle ilişkisi:" bölümünün **üçüncü örneği** (Sc s.146 · Ma s.152 · **Si s.157**) — Si'de **K-örüntüsü yok**, yalnız 9 Bakınız çifti | `SOURCE-SI-002` |
+
+**✅ Bu turda ÇELİŞKİ ÜRETMEYEN bulgular:**
+- **9/9 Bakınız hedefi mevcut ve etiketler birebir** (`10/01`, `20/02`, `30/03`,
+  `40/04`, `50/05`, `60/06`, `70/07`, `80/08`, `90/09`) → çapraz referanslar **UYUMLU**
+- Si `60-69`, `45-59`, `25-44` bandı **birebir** (kod, `;`/`.` yazım farkları hariç)
+- Kodun `25-44` bandını `min: 0`'a genişletmesi → **BİLGİ** (etiket korunuyor)
+- Kaynak yazım hatası "bireylerdir**..**" → kod tek noktaya indirmiş → **kusur değil**
+
+**Karar kapısı (yeni):** Bölüm 5 seti kapandı → `DECISION-029` adayı: **kod kimliği =
+blok + sıralı kod + K/parantez varyantı** (024/030/031/039 tek çatı), `conditions[]`
+(027/025: 45 sayısal koşul) ve `patterns[]` (033: 9 örüntü) eklenmesi. **Kullanıcı
+onayı olmadan `src/` değişmez** (DECISION-027/028); bu turda da **kod değişikliği YOK**.

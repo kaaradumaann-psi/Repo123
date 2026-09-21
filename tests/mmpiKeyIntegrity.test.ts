@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test';
-import { codeInterpretation } from '../src/scoring/mmpiSourceCodes';
+import { codeInterpretation, KNOWN_CODES } from '../src/scoring/mmpiSourceCodes';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, K_CORRECTION, TURKISH_NORMS, type ScaleRule, type ScoringRule } from '../src/scoring/mmpiKeys';
-import { SC_T_BANDS, MA_T_BANDS } from '../src/scoring/mmpiSource';
+import { SC_T_BANDS, MA_T_BANDS, SI_T_BANDS } from '../src/scoring/mmpiSource';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
 import { detectValidityConfig } from '../src/scoring/mmpiValidityConfigs';
 import { CRITICAL_ITEMS } from '../src/scoring/mmpiCritical';
@@ -776,5 +776,69 @@ describe('PHASE 9/10 batch 20 — Ma (9) T bantları ve kod bloğu (s.151-153)',
     assert.equal(e91.code, '19/91');
     assert.doesNotMatch(e91.text, /Ender görülmektedir/);
     assert.doesNotMatch(e91.text, /hipomanik durumdadırlar/);
+  });
+});
+
+describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/027(8) (s.157-158)', () => {
+  // Kaynak: Ceyhun & Oral (2003) s.157 (PDF p86 R) — 150 dpi tam sayfa görselinden okundu.
+  // s.158 (p87 L) BOŞ SAYFA (koyu piksel %0.62 vs dolu sayfa %4.36) → Bölüm 5 s.157de biter.
+  // Kanıt aracı: scripts/mmpi-audit/cmp-si-batch21.ts
+
+  it('Si bant kapsamı kaynakla birebir: 70+ / 60-69 / 45-59 / 25-44 (4 bant, 4 eşik)', () => {
+    assert.deepEqual(SI_T_BANDS.map((b) => [b.min, b.max === Infinity ? null : b.max]), [
+      [70, null],
+      [60, 69],
+      [45, 59],
+      [0, 44],
+    ], 'kaynak 4 bant veriyor: "70 T puanı ve üstü" · "60-69 T puanı" · "45-59 T puanı" · "25-44 T puanı" (kod en alt bandı 0a genişletir, etiket korunur)');
+    assert.deepEqual(SI_T_BANDS.map((b) => b.rangeLabel), ['T ≥ 70', 'T 60-69', 'T 45-59', 'T 25-44']);
+  });
+
+  it('Si bant metinleri sadık: 60-69, 45-59 ve 25-44 kaynak cümlelerinin tamamını taşıyor', () => {
+    const band = (label: string) => SI_T_BANDS.find((b) => b.rangeLabel.includes(label))!;
+    assert.match(band('60-69').text, /kendini ortaya koymak istemeyen, yakın aile çevresinde rahat olan bireylerin profilidir/);
+    assert.match(band('60-69').text, /Çekingen, utangaç kişilerdir/);
+    assert.match(band('45-59').text, /Sosyal ilişki kurmada başarılı olan bireylere işaret etmektedir/);
+    assert.match(band('25-44').text, /İyimser, manipülatif, yüzeysel ve hatta biraz uçuk bireylerdir/);
+    assert.match(band('25-44').text, /Dürtü kontrol sorunları vardır/);
+    assert.match(band('25-44').text, /yalnız kalamayan bireyleri gösterir/);
+    assert.match(band('25-44').text, /onaylanma konusunda gereksinimleri çok fazla olan bireylerdir/);
+  });
+
+  it('BİLİNEN EKSİK (CONFLICT-025/033): 70+ bandındaki nevrotik üçlü + 2/7/8 atfı kodda yoktur', () => {
+    const hi = SI_T_BANDS[0];
+    assert.match(hi.text, /Sosyal açıdan beceriksiz olan kişilerdir/);
+    assert.match(hi.text, /Sosyal ilişkilerde anksiyete yaşar ve ilişki kurmaktan kaçınırlar/);
+    // kaynak: "…kaçınırlar. Nevrotik üçlüde yükselme görülebilir. (Ayrıca bakınız, 2, 7 ve 8
+    // alt testlerinin yükselmesi.)" → iki cümle bandın METNİNDE yok (örüntü altyapısı yok → 033)
+    assert.doesNotMatch(hi.text, /Nevrotik üçlüde yükselme/);
+    assert.doesNotMatch(JSON.stringify(SI_T_BANDS), /Ayrıca bakınız, 2, 7 ve 8/);
+  });
+
+  it('s.157 Bakınız listesi uyumlu: 01/10…09/90 kanonik kayıtları VAR ve etiketler birebir', () => {
+    for (const [pair, label] of [['01/10', '10/01'], ['02/20', '20/02'], ['03/30', '30/03'], ['04/40', '40/04'], ['05/50', '50/05'], ['06/60', '60/06'], ['07/70', '70/07'], ['08/80', '80/08'], ['09/90', '90/09']] as const) {
+      const rec = codeInterpretation(pair)!;
+      assert.equal(rec.code, label, `${pair} hedefi eksik/yanlış etiketli`);
+    }
+  });
+
+  it('CONFLICT-030 somut vakası: 049 ve 027(8) sorguları BAŞKA kodun metnine düşüyor (gövde YOK)', () => {
+    // kitap s.157: "049 Kodu — Psikiyatrik olgularda eyleme vurukluğun bastırılması" ve
+    // "027(8) Kodu — Bireyde güçlü ruminatif davranışlar görülebilir."
+    // CODES kanonik İKİ haneli anahtar taşır → slice(0,2) + canonicalCode bu kodları
+    // başka bir bloğun koduna çözüyor (kullanıcıya İLGİSİZ metin gösterilir).
+    assert.ok(KNOWN_CODES.every((k) => /^\d{2}$/.test(k)), 'CODES anahtarları iki haneli — üç haneli kod adreslenemiyor');
+    assert.ok(!KNOWN_CODES.includes('049') && !KNOWN_CODES.includes('027'));
+    assert.equal(codeInterpretation('049')!.code, '40/04', '049 → 40/04 (kırpma kurbanı)');
+    assert.equal(codeInterpretation('027(8)')!.code, '20/02', '027(8) → 20/02 (kırpma kurbanı)');
+    assert.doesNotMatch(codeInterpretation('04')!.text, /eyleme vurukluğun bastırılması/);
+    assert.doesNotMatch(codeInterpretation('02')!.text, /güçlü ruminatif davranışlar/);
+  });
+
+  it('s.157 giriş paragrafı (Si 20 puan fark / eyleme vurukluk / ruminatif) kodda yok → CONFLICT-025/026 kilidi', () => {
+    const src = [SI_T_BANDS.map((b) => b.text).join(' '), codeInterpretation('09')!.text, codeInterpretation('04')!.text].join(' ');
+    assert.doesNotMatch(src, /20 puanlık bir farklılık/);
+    assert.doesNotMatch(src, /eyleme vurukluğun bastırıldığı düşünülmelidir/);
+    assert.doesNotMatch(src, /ruminatif davranışların kuvvetlendiği/);
   });
 });

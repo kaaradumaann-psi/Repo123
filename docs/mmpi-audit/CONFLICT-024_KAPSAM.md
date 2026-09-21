@@ -476,3 +476,29 @@ değişmez.
 > satırının 31|31|0 kaydı ile anlatının '9 VAR / 22 YOK' demesi). Batch deltaları
 > kesindir; **kesin toplam FINAL'da `SOURCE_INDEX` üzerinden yeniden sayılacak**
 > (sessizce 'düzeltme' yapılmıyor).
+
+## Si (0) bloğu kapanışı (s.157-158) — **0 VAR / 2 YOK** · **BÖLÜM 5 TARAMASI BİTTİ**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | **`049 Kodu`** | s.157 | **YOK** ❌ | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" — CODES'ta gövde yok; `codeInterpretation('049')` → **`40/04`** metni (CONFLICT-030 somut vaka) |
+| 2 | **`027(8) Kodu`** | s.157 | **YOK** ❌ | "Bireyde güçlü ruminatif davranışlar görülebilir." — yok; `codeInterpretation('027(8)')` → **`20/02`** metni; parantezli notasyon modelde adreslenemiyor |
+| — | 9 Bakınız çifti (`01/10`…`09/90`) | s.157 | **UYUMLU** ✅ | gövde beklenmez; hedef kayıtlar 9/9 mevcut, etiketler birebir |
+| — | Si T bantları (4) + giriş paragrafı | s.157 | kodda **VAR** | `SI_T_BANDS` 4/4 bant; 70+ bandında 2 kuyruk cümlesi eksik → 025/033 |
+| — | **s.158** | p87 L | — | **BOŞ SAYFA** (koyu piksel %0.62) → bölüm s.157'de kapanır |
+
+| Blok | Başlık | VAR | YOK |
+|---|---|---|---|
+| **Si KAPANIŞI (s.157-158)** | **2** | **0** | **2** |
+| **TOPLAM (Bölüm 5 · s.63-157)** | **148** | **103** | **47** |
+
+> ⚠️ **Sütunlar birbirini tutmuyor** (148 ≠ 103+47=150): tarihsel satırlardaki kayma
+> batch 11-20 boyunca birikti (ör. Hs satırı 31|31|0 ↔ anlatıda 9 VAR/22 YOK).
+> Başlık sayısı **kendi batch farkıyla**, VAR/YOK kümülatif **önceki satırdan** taşınır.
+> **FINAL'da tek seferde yeniden sayılacak** — eski satırlar sessizce düzeltilmiyor.
+
+> **Not:** batch 20 satırında "kümülatif 146 → 103 VAR / 45 YOK" yazıyordu; bu tur
+> **yalnız +2 YOK** eklendi (049, 027(8)) → **148 → 103/45+2 = 47**. TOPLAM
+> satırlarındaki **tarihsel tutarsızlık** (Hs satırı "31/31/0" ↔ anlatıda "9 VAR /
+> 22 YOK") **FINAL'da yeniden sayılarak** çözülecek; eski satırlar sessizce
+> düzeltilmiyor (denetim ilkesi).
