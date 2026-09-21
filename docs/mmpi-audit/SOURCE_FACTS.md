@@ -2909,3 +2909,112 @@ Kod karşılaştırması (`cmp-ma-batch19.ts`):
 
 **Ma bloğu: 9 VAR / 2 YOK** (özel konfigürasyonlar)
 Status: **VERIFIED** (kaynak) · özel konfigürasyonlar **YOK**
+
+---
+
+# PHASE 9/10 batch 20 — Si (0) Sosyal İçedönüklük bloğu (kitap s.154-157)
+
+Sayfa eşlemesi: **p85 L = 154 BOŞ** (görsel doğrulandı) · **p85 R = 155** ·
+**p86 L = 156** · **p86 R = 157**
+
+## SOURCE-SI-001 · Tablo 17 — Si anahtarı (s.156) — **Visual: CONFIRMED** (140 dpi tam sayfa)
+
+> "**Tablo 17. Sosyal içedönüklük alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 70)**"
+
+| | Madde numaraları |
+|---|---|
+| **Doğru** (5 satır = 34) | 32 67 82 111 117 124 138 147 171 172 180 · 201 236 267 278 292 304 316 321 332 336 342 · 357 377 383 398 411 427 436 455 473 487 549 · 564 |
+| **Yanlış** (5 satır = 36) | 25 33 57 91 99 119 126 143 193 208 229 · 231 254 262 281 296 309 353 359 371 391 400 · 415 440 446 449 450 451 462 469 479 481 482 · 505 521 547 |
+
+Kod `SCORING_KEYS.Si`: Doğru **34** + Yanlış **36** = **70** → **BİREBİR MATCH** ✅
+Status: **VERIFIED** — script: `cmp-tablo17.ts`
+
+## SOURCE-SI-002 · Si normu — **KAYNAK İÇİ ÇELİŞKİ** (P1)
+
+| Kaynak | Erkek | Kadın |
+|---|---|---|
+| **s.156 metni** (Tablo 17 altı, **420 dpi crop ile teyit**) | **26.86** | 29.88 (Savaşır 1981) |
+| **Tablo 30** (s.257-260, kitabın norm tablosu) | **23.86** | 29.88 |
+| **Kod** `TURKISH_NORMS.Si` | **23.86** | 29.88 ✅ |
+
+**Bulgu:** Aynı kitap Si erkek normu için **iki farklı değer** verir: metin
+**26.86**, norm tablosu **23.86**. Kadın değerleri uyumlu (29.88).
+420 dpi yüksek çözünürlüklü görsel okuma **"26.86"** değerini **kesinleştirdi**
+(OCR hatası değil; kitapta böyle basılmış).
+
+**Değerlendirme:** Kod **Tablo 30**'u izler (normatif tablo > metin anması) —
+CONFLICT-037 (Pt) ile **aynı desen**. Ancak Pt'de fark **0.70** iken burada
+**3.00 T-ham puan**'dır; bu büyüklük **T puanını ~3-4 puan kaydırır** ve
+bant sınırlarında (ör. 25-44 ↔ 45-59) yorum farkı yaratabilir.
+`UNVERIFIED-CONFIG-T-001` sınıfı → **UNVERIFIED_DATA.md**'ye kaydedildi.
+Status: **VERIFIED** (her iki okuma) · **çelişki belgelendi** → CONFLICT-040
+(P1, OPEN — norm seçimi kararı)
+
+## SOURCE-SI-003 · Si T bantları (s.157) — **Visual: CONFIRMED**
+
+> "**70 T puanı ve üstü:** Sosyal açıdan beceriksiz olan kişilerdir. Sosyal
+> ilişkilerde anksiyete yaşar ve ilişki kurmaktan kaçınırlar. **Nevrotik üçlüde
+> yükselme görülebilir. (Ayrıca bakınız, 2, 7 ve 8 alt testlerinin yükselmesi.)**"
+> "**60-69 T puanı:** Bu kendini ortaya koymayı istemeyen, yakın aile çevresinde
+> rahat olan bireylerin profilidir. Çekingen, utangaç kişilerdir."
+> "**45-59 T puanı:** Sosyal ilişki kurmada başarılı olan bireylere işaret etmektedir."
+> "**25-44 T puanı:** İyimser, manipülatif, yüzeysel ve hatta biraz uçuk
+> bireylerdir. Dürtü kontrol sorunları vardır. Diğerleri ile olmak isteyen, yalnız
+> kalamayan bireyleri gösterir. Çoğu kolay ilişki kurar, arkadaş canlısı ve
+> meraklıdırlar, sosyal açıdan kabul görme, onaylanma konusunda gereksinimleri çok
+> fazla olan bireylerdir."
+
+Kod (`clinicalBands('Si')`): `T ≥ 70` · `T 60-69` · `T 45-59` · `T 25-44`
+→ **4/4 bant MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-SI-004 · Si'ye özgü sayısal/yaş kuralları (s.156-157) — **Visual: CONFIRMED**
+
+> "**Alt test Si'deki puanlar yaşla birlikte artar. Ergenler ve yüksekokul
+> öğrencileri, genellikle 40 ile 50 T puanlık bir aralıkta yer alırken yaşlı
+> kişiler 50 ile 60 T puanı arasında yer alırlar.**"
+> "**Alt test Si'de 20 puanlık bir farklılık olan çiftlerin, sosyal ilişkiler
+> açısından evlilik çatışmalarına düşmesi olasıdır.**"
+> "Alt test Si'deki yükselmeye, **alt test 4 ve 9'daki yükselmeler de eşlik
+> ediyorsa**, eyleme vurukluğun bastırıldığı düşünülmelidir."
+> "Alt test **2 ya da 7 özellikle alt test 8'in eşlik ettiği durumlarda**,
+> ruminatif davranışların kuvvetlendiği görülür."
+
+Kod: **4 kuralın tamamı YOK** ❌ (yaş normaları · 20 puanlık çift farkı ·
+4+9 eşliği · 2/7+8 eşliği) → CONFLICT-027 genişlemesi
+Status: **VERIFIED** (kaynak) · **EKSİK** (kod)
+
+## SOURCE-SI-005 · Si kod bloğu (s.157) — **Visual: CONFIRMED**
+
+Çapraz referanslar: `01/10` · `02/20` · `03/30` · `04/40` · `05/50` · `06/60` ·
+`07/70` · `08/80` · `09/90`
+**`049 Kodu`**: "Psikiyatrik olgularda eyleme vurukluğun bastırılması"
+**`027(8) Kodu`**: "Bireyde güçlü ruminatif davranışlar görülebilir."
+
+Kod: **9 çapraz referans 9/9 VAR** ✅; `049` → `40/04`, `027(8)` → `20/02`
+kayıtlarına düşüyor (her ikisi de **VAR** ✅) — ancak bu **iki özel başlığın
+kendi metinleri kodda YOK** ❌
+**Si bloğu: 11 VAR / 0 YOK** (kod başlığı olarak) · **2 özel başlık metni EKSİK**
+Status: **VERIFIED** (kaynak + kod karşılaştırması)
+
+---
+
+## 🎯 PHASE 9/10 — KLİNİK KOD SETİ TAMAMLANDI
+
+| Blok | Aralık | İncelenen | VAR | YOK |
+|---|---|---|---|---|
+| Hs (1) | s.63-78 | 31 | 31 | 0 |
+| D (2) | s.79-92 | 27 | 9 | 18 |
+| Hy (3) | s.95-101 | 12 | 12 | 0 |
+| Pd (4) | s.107-120 | 20 | 9 | 13 |
+| Mf (5) | s.121-126 | 10 | 9 | 1 |
+| Pa (6) | s.130-135 | 15 | 9 | 6 |
+| Pt (7) | s.137-142 | 16 | 15 | 1 |
+| Sc (8) | s.143-148 | 10 | 9 | 1 |
+| Ma (9) | s.149-153 | 11 | 9 | 2 |
+| **Si (0)** | **s.154-157** | **11** | **11** | **0** |
+| **TOPLAM** | **s.63-157** | **163** | **123** | **42** |
+
+**P0 katmanı (madde anahtarları — 10/10 ölçek):** L, F, K, Hs, D, Hy, Pd, Mf,
+Pa, Pt, **Sc**, **Ma**, **Si** — hepsi kaynak tablolarıyla **birebir MATCH** ✅

@@ -346,3 +346,17 @@ belirsiz; iki farklı kodun içeriği tek etikette birleşmiş görünüyor.
 `247/427/472`, `742`, `248` (+`Yüksek F` alt-kodu) — kaynakta **ayrı başlıklar**
 (s.83-92), kodda **kayıt yok**. Bu kodlar geldiğinde `slice(0,2)` kırpılmasıyla
 **başka bir kodun metni** gösterilir (CONFLICT-030).
+
+
+---
+
+## UNVERIFIED-NORM-SI-001 — Si erkek normu: iki farklı kaynak değeri (batch 20)
+
+Kod: `TURKISH_NORMS.Erkek.Si = 23.86` (sd 7.97)
+- **Tablo 30** (s.257-260): erkek **23.86** — kod bunu izliyor
+- **s.156 metni** (420 dpi görsel teyitli): erkek **26.86**
+
+Durum: **OCR-UNCERTAIN değil** — her iki okuma da yüksek çözünürlükle
+doğrulandı; **kaynak kendi içinde iki farklı değer veriyor**.
+Etki: 3 ham puan ≈ 3-4 T puanı kayma → bant sınırlarında yorum farkı.
+Karar: **CONFLICT-040** ile birlikte toplu norm kararına bırakıldı.

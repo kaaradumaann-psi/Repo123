@@ -1632,3 +1632,60 @@ kararı** altında ele alınacak. CONFLICT-033 kapsamı **7. konfig**.
 | 3 | `Yüksek 9/Yüksek K`: "kadınlar teşhircidir (**5 alt testinde T: 40'ın altında ise**)" | s.152 | YOK |
 | 4 | Ma düşük puan: "**45 yaşın altında düşük olması beklenen bir durum değildir**" (yaş kuralı) | s.152 | YOK |
 | 5 | `90/09`: "**Si alt testinin yükselmesi bırakılarak** yorum yükselen diğer iki alt test ile yapılmalıdır" | s.153 | YOK (kod `Si` için böyle bir kısıt taşımıyor) |
+
+---
+
+## CONFLICT-040 — Si erkek normu: s.156 metni (26.86) ↔ Tablo 30 (23.86) — **P1, OPEN**
+
+Area: `TURKISH_NORMS.Si` (erkek)
+
+| Kaynak | Erkek | Kadın |
+|---|---|---|
+| **s.156 metni** (Tablo 17 altı) | **26.86** | 29.88 (Savaşır 1981) |
+| **Tablo 30** (s.257-260) | **23.86** | 29.88 |
+| Kod | 23.86 | 29.88 ✅ |
+
+**Kanıt:** s.156'daki norm satırı **420 dpi yüksek çözünürlüklü crop** ile
+okundu → **"Erkeklerde ortalama: 26.86"** kesin (OCR hatası değil; kitapta böyle
+basılmış). Kadın değeri iki kaynakta da aynı.
+
+**CONFLICT-037 ile farkı:** Pt'de sapma **0.70** ham puan iken Si'de **3.00** ham
+puandır. 3 ham puan ≈ **3-4 T puanı** kayma demektir; bu, Si'nin bant sınırlarında
+(özellikle `25-44` ↔ `45-59` geçişi) **yorum farkı** yaratabilir.
+
+**Seçenekler:**
+- (a) Kod Tablo 30'u izlemeye devam eder (mevcut durum — CONFLICT-037 deseni)
+- (b) s.156 metni esas alınır ve kod değişir (P0 sınıfı: norm değeri)
+- (c) İkisi de belgelenir, kullanıcıya norm kaynağı gösterilir
+
+**Karar gerektiren gerekçe:** Kural "hiçbir norm değeri tahmin edilmez; kaynakta
+yoksa UNVERIFIED" der, ancak burada **kaynakta İKİ farklı değer var**. Hangi
+kaynağın normatif olduğu (metin mi, tablo mu) **karar** gerektirir → tüm norm
+katmanı için **tek tasarım kararı** ile ele alınmalı.
+
+Status: **OPEN** — CONFLICT-024/027/030/031/033/036/038/039 ile birlikte
+**toplu karar** altında. Kod değişikliği YOK.
+
+---
+
+## CONFLICT-027 genişlemesi — Si bloğu (batch 20)
+
+| # | Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|---|
+| 1 | **Yaş normaları:** "Ergenler ve yüksekokul öğrencileri **40-50 T**; yaşlı kişiler **50-60 T**; puanlar yaşla artar" | s.156 | YOK |
+| 2 | "**20 puanlık bir farklılık olan çiftlerin**, evlilik çatışmalarına düşmesi olasıdır" (çift farkı kuralı) | s.156 | YOK |
+| 3 | "Si'deki yükselmeye **4 ve 9'daki yükselmeler eşlik ediyorsa** → eyleme vurukluğun bastırıldığı düşünülmelidir" | s.157 | YOK |
+| 4 | "**2 ya da 7, özellikle 8'in eşlik ettiği** durumlarda ruminatif davranışlar kuvvetlenir" | s.157 | YOK |
+| 5 | `049` özel başlığı metni ("eyleme vurukluğun bastırılması") | s.157 | YOK |
+| 6 | `027(8)` özel başlığı metni ("güçlü ruminatif davranışlar") | s.157 | YOK |
+
+**CONFLICT-027 toplam örnek sayısı: 47.**
+
+---
+
+## 🎯 KİLOMETRE TAŞI — Klinik kod seti tamamlandı (batch 20)
+
+Hs, D, Hy, Pd, Mf, Pa, Pt, Sc, Ma, **Si** bloklarının tamamı okundu:
+**163 kod başlığı → 123 VAR / 42 YOK**; **P0 madde anahtarlarının 10/10'u
+birebir MATCH**. Karar bekleyen **9 açık çelişki** (024, 027, 030, 031, 033,
+036, 038, 039, 040) **tek tasarım kararı** ile çözülecek.

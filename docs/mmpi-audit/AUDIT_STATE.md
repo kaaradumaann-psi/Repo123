@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs + D + Hy + Pd + Mf + Pa + Pt + Sc + Ma TAMAMI (s.63-153)**; sıradaki **Si (0)** — son klinik ölçek; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
+| 9 | Code types (Bölüm 5-6) | ✅ **KAYNAK TARAFI TAMAMLANDI** — **Hs + D + Hy + Pd + Mf + Pa + Pt + Sc + Ma + Si TAMAMI (s.63-157)**; **163 başlık → 123 VAR / 42 YOK**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D + Hy + Pd + Mf + Pa yorum katmanı DONE; **CONFLICT-036 (Pa `64/46` gövdesi eksik + yanlış blok metni)**; CONFLICT-024/025/026/027/030/031 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,12 +47,28 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**153** (`90/09` — Ma bloğu kapandı) — PDF p84 R
-Sonraki hedef: **s.154+ = Si (0) Alt Testi** (PDF p85 L+) → Tablo 17 (Si anahtarı) →
-bantlar → Si kod bloğu → **kod seti tamamlanır** → **CONFLICT-024 / 027 / 030 /
-031 / 033 / 036 / 038 / 039 KARARI**
+**157** (`027(8)` — Si bloğu kapandı; **klinik kod seti TAMAM**) — PDF p86 R
+Sonraki hedef: **Bölüm 5-6 kapanışı** — kaynak s.158+ (kod tipi genel kurallar /
+profil yükseltme rehberi) → sonra **TOPLU TASARIM KARARI**
+(CONFLICT-024 / 027 / 030 / 031 / 033 / 036 / 038 / 039 / **040**)
 
 Last completed:
+**PHASE 9/10 batch 20 — Si (0) bloğu TAMAMI (s.154-157) DONE — 🎯 KLİNİK KOD SETİ TAMAMLANDI:**
+**🎯 P0 — Tablo 17 (Si anahtarı) BİREBİR MATCH:** Doğru **34** + Yanlış **36** =
+**70** (kitabın "Madde Sayısı: 70" başlığıyla uyumlu) ✅ (140 dpi tam sayfa
+görsel). **Si T bantları 4/4 MATCH** ✅ (`70+ / 60-69 / 45-59 / 25-44`).
+**Si kod bloğu: 11 VAR / 0 YOK** — `01/10`…`09/90` 9/9 ✅; `049`→`40/04` ve
+`027(8)`→`20/02` **dolaylı VAR** (ancak iki özel başlığın **kendi metinleri YOK**).
+**🔴 YENİ CONFLICT-040 (P1):** **Si erkek normu çelişkili** — s.156 metni
+**26.86** (420 dpi crop ile teyit, OCR hatası değil) ↔ Tablo 30 **23.86** ↔ kod
+**23.86**. Kadın 29.88 iki kaynakta da aynı. Pt'deki 0.70'lik sapmadan farklı
+olarak **3.00 ham puan** (≈3-4 T) → bant sınırlarında yorum farkı yaratabilir.
+**CONFLICT-027 +6 kural** (yaş normaları 40-50/50-60 T · 20 puanlık çift farkı ·
+4+9 eşliği · 2/7+8 eşliği · `049` metni · `027(8)` metni) → **toplam 47 örnek**.
+**s.154 BOŞ** (görsel doğrulandı). **Kümülatif FİNAL: 163 başlık → 123 VAR /
+42 YOK.** Kod değişikliği YOK.
+
+Önceki:
 **PHASE 9/10 batch 19 — Ma (9) Hipomani bloğu TAMAMI (s.149-153) DONE:**
 **🎯 İKİ P0 KATMANI BİREBİR MATCH:** **Tablo 16 (Ma anahtarı)** → Doğru **35** +
 Yanlış **11** = **46** (kitabın "Madde Sayısı: 46" başlığıyla uyumlu) ✅ ve
@@ -375,10 +391,14 @@ Sıradaki batch'ler (öncelik sırası):
    Sc bloğu 9 VAR / 1 YOK
 9j. ~~**Ma (9) — s.149-153 (PDF p82 R – p84 R)**~~ ✅ **TAMAMLANDI** (batch 19) —
    Tablo 16 birebir MATCH, bantlar 5/5, 9 VAR / 2 YOK
-9k. **Si (0) — s.154+ (PDF p85 L+)** — **SON klinik ölçek**: Si anahtarı (Tablo 17),
-   bantlar, Si kod bloğu → sonra **kod seti tamamlanır** →
-   **CONFLICT-024 / 027 / 030 / 031 / 033 / 036 / 038 / 039 KARARI** (tek tasarım
-   kararı: blok-farkında `CODES` yapısı + sayısal koşul katmanı)
+9k. ~~**Si (0) — s.154-157 (PDF p85 L – p86 R)**~~ ✅ **TAMAMLANDI** (batch 20) —
+   Tablo 17 birebir MATCH, bantlar 4/4, 11 VAR / 0 YOK; **klinik kod seti TAMAM**
+9l. **Bölüm 5-6 kapanışı — s.158+ (PDF p87 L+)**: kod tipi genel kurallar /
+   yükseltme rehberi okunmalı (kaynak yapısı gereği)
+9m. **TOPLU TASARIM KARARI** — CONFLICT-024 / 027 / 030 / 031 / 033 / 036 / 038 /
+   **039** / **040** için **tek karar**: (a) blok-farkında `CODES` yapısı,
+   (b) sayısal koşul katmanı, (c) norm kaynağı seçimi (Tablo 30 ↔ metin).
+   **Kod değişikliği yalnız bu karardan sonra.**
    → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
    sonra, tek tasarım kararı olarak)
 
@@ -489,12 +509,15 @@ Bilinen kısıtlar:
 | CONFLICT-037 | P2 | Pt normu: s.138 metni 29.90 (Savaşır 1981 atfı) ↔ Tablo 30 29.20 | ✅ **REJECTED** (kod Tablo 30'u izler) |
 | CONFLICT-038 | P2 | **"Paranoid vadi" iki farklı sayıyla tanımlı** (s.132: 70 T/10 T ↔ s.146: 80 üstü/70 T) | OPEN |
 | CONFLICT-039 | P1 | **"Yüksek 9" özel konfigürasyonları** (`Yüksek 9/Yüksek K`, `Yüksek 9/Düşük K`) kodda yok (s.152-153) | OPEN |
+| CONFLICT-040 | P1 | **Si erkek normu çelişkili**: s.156 metni 26.86 ↔ Tablo 30 23.86 ↔ kod 23.86 (420 dpi teyitli) | OPEN |
 
-Kalan açık: **18 çelişki** → 0 P0 · 10 P1 (003, 004, 005, 024, 027, 030, 031, 033, 036, 039) · 6 P2 (006, 007, 022, 025, 034, 038) · 2 P3 (026, 032).
+Kalan açık: **19 çelişki** → 0 P0 · 11 P1 (003, 004, 005, 024, 027, 030, 031, 033, 036, 039, 040) · 6 P2 (006, 007, 022, 025, 034, 038) · 2 P3 (026, 032).
+**Klinik kod seti (s.63-157) kaynak tarafı TAMAMLANDI** → karar aşamasına geçilebilir.
 **CONFLICT-027 örnek sayısı: 36** (+3: paranoid vadi · `698/968` 5 T kuralı · 456 örüntüsü).
 **CONFLICT-033 kapsamı: 5 konfig** (+1: Scarlett O'Hara vadisi, Şekil 21).
-**CONFLICT-024 kümülatif kapsam: 112 VAR / 42 YOK** (Ma bloğu 9/2).
-**CONFLICT-033 kapsamı: 7 konfig** (+`Yüksek 9/Yüksek K` ve `Yüksek 9/Düşük K`).
+**CONFLICT-024 FİNAL KAPSAM: 123 VAR / 42 YOK** (163 başlık; klinik set tamam).
+**CONFLICT-033 kapsamı: 7 konfig.** **CONFLICT-027 örnek sayısı: 47.**
+**P0 katmanı: 10/10 madde anahtarı birebir MATCH** (L,F,K,Hs,D,Hy,Pd,Mf,Pa,Pt,Sc,Ma,Si).
 **FIXED: 11** · **REJECTED: 8** (001, 002, 013, 014, 016, 018, 021, 037).
 FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 **Güncel kapsam (CONFLICT-024):** kod seti **36 VAR / 71 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd 13+Mf 1).

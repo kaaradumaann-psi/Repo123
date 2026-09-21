@@ -1339,3 +1339,44 @@ Tarih: 2026-09-22 · Kaynak: **s.149-153** (PDF p82 R – p84 R)
 
 `cmp-tablo16.ts` (anahtar + norm birebir) · `cmp-ma-batch19.ts` (kod kapsamı) ·
 typecheck **0** · **kod değişikliği YOK**.
+
+---
+
+## 🎯 PHASE 9/10 — batch 20: Si (0) bloğu TAMAMI — **KLİNİK KOD SETİ KAPANDI**
+
+Tarih: 2026-09-22 · Kaynak: **s.154-157** (PDF p85 L – p86 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 154 | p85 L | **BOŞ SAYFA** (görsel doğrulandı) | — |
+| 155 | p85 R | **Si (0) Alt Testi** başlığı + Graham 1987 yüksek/düşük listeleri | — |
+| 156 | p86 L | **Tablo 17 (Si anahtarı — 70 madde)** + norm + yaş kuralları | 🎯 **BİREBİR MATCH** · norm çelişkisi → CONFLICT-040 |
+| 157 | p86 R | **Si T bantları** + `01/10`…`09/90` + `049` + `027(8)` | bantlar 4/4 MATCH · 11 VAR / 0 YOK |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 17 birebir MATCH:** Doğru 34 + Yanlış 36 = **70** (kitap başlığı 70)
+- **Si T bantları 4/4 MATCH** (`70+ / 60-69 / 45-59 / 25-44`)
+- **Si kod bloğu 11 VAR / 0 YOK** — `049` ve `027(8)` dolaylı var ama özel metinleri yok
+- **🔴 CONFLICT-040 (P1, yeni) — Si erkek normu çelişkili:** s.156 metni **26.86**
+  (420 dpi crop ile kesinleştirildi) ↔ Tablo 30 **23.86** ↔ kod **23.86**.
+  Pt'deki 0.70'lik farktan farklı olarak **3.00 ham puan** (≈3-4 T)
+- **CONFLICT-027 +6 kural** — yaş normaları (40-50 T ergen / 50-60 T yaşlı) ·
+  20 puanlık çift farkı · 4+9 eşliği · 2/7+8 eşliği · `049` metni · `027(8)` metni
+  → **toplam 47 örnek**
+- **s.154 BOŞ SAYFA** (görsel doğrulandı — OCR 0 satır doğruydu)
+
+### 🎯 KİLOMETRE TAŞI — klinik kod seti tamamlandı
+
+| Blok | Aralık | İncelenen | VAR | YOK |
+|---|---|---|---|---|
+| Hs + D + Hy + Pd + Mf + Pa + Pt + Sc + Ma + **Si** | s.63-157 | **163** | **123** | **42** |
+
+**P0 madde anahtarlarının 10/10'u birebir MATCH** (Tablo 8-17).
+Karar bekleyen **9 açık çelişki** (024/027/030/031/033/036/038/039/**040**) tek
+tasarım kararıyla çözülecek.
+
+### Doğrulama
+
+`cmp-tablo17.ts` (anahtar birebir + norm karşılaştırması) ·
+`cmp-si-batch20.ts` (kod kapsamı) · typecheck **0** · **kod değişikliği YOK**.
