@@ -524,3 +524,43 @@ ve senkron.
 Bu turda **sandbox bağımlılıkları yeniden kuruldu** (`npm install`, `tsx` +
 `typescript`): `tsc: not found` hatası alındı → bağımlılıklar kuruldu →
 typecheck/build yeniden koşuldu ve geçti.
+
+---
+
+# PHASE 9/10 batch 18 — Pt kapanışı + Sc (8) (kitap s.142-146)
+
+Tarih: 2026-09-22 · Kapsam: kitap s.142-146 (PDF p79 L – p81 L)
+
+## Kod değişikliği
+
+`CHANGE-013` (P2) — `SC_T_BANDS` `T 21-44`: "bakışları konservatiftir" →
+"**bakış açıları konformaldir**" (kaynak s.146, 400 dpi kadraj · DECISION-028).
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `python3 scripts/mmpi-audit/extract.py render --pages 79-81 --dpi 150` | tam sayfa görseller (`p079_L…p081_L`) |
+| 400 dpi bindirmeli kırpma (`tbl15_L` / `tbl15_R`) | Tablo 15 sütun kaybı olmadan okundu |
+| `npx tsx scripts/mmpi-audit/cmp-sc-batch18.ts` | **Tablo 15: Doğru 59 + Yanlış 19 = 78 → BİREBİR MATCH** · norm 29.82/31.06 MATCH · bantlar 5/5 · kod kapsamı 7 VAR / 3 YOK |
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **37/37 PASS** (+8) |
+| `npm test` (tam suite) | **324/324 PASS** · 26 suite · ~119 s |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+## Yeni testler (8 test)
+
+1. Sc madde sayısı kitap başlığıyla uyumlu (59 + 19 = 78)
+2. Sc **Doğru** listesi Tablo 15 ile birebir (fazla/eksik yok)
+3. Sc **Yanlış** listesi Tablo 15 ile birebir (fazla/eksik yok)
+4. Sc `K Eklemeli` → `K_CORRECTION.Sc = 1` + norm çifti (29.82 / 31.06)
+5. `21-44` bandı "konformaldir" terimini taşır
+6. `21-44` bandı "konservatif" terimini **taşımaz**
+7. `21-44` bandının kalanı kaynakla uyumlu (regresyon)
+8. Sc bant sınırları `[100,∞) · [75,99] · [60,74] · [45,59] · [0,44]` + 100+ bandında "95" notu
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.** 324/324 geçti; `optik-form.html` build ile yeniden üretildi.
+Değişiklik yorum **metni** katmanındadır; ham puan/T-skoru hesabı, bant sınırları
+ve geçerlik kapıları aynı kaldı (puanlama testleri dahil tüm suite yeşil).

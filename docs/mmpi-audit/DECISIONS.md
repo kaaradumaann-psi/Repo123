@@ -716,3 +716,39 @@ depresyon belirtileri yerine…"
 
 **Sonuç:** CONFLICT-035 → **FIXED**. Regresyon testi: `mmpiKeyIntegrity.test.ts`
 → kaynak teriminin kodda bulunduğu ve yanlış terimin **bulunmadığı** doğrulanır.
+
+---
+
+## DECISION-028 — Kaynak terimi doğrudan uygulanır: Sc 21-44 bandı "konformaldir"
+
+Tarih: 2026-09-22 · PHASE 9/10 batch 18
+
+**Durum:** `SC_T_BANDS` içindeki `T 21-44` bandı "davranışları ve yaşama
+bakışları **konservatiftir**" diyordu; kaynak (s.146, 400 dpi kadraj)
+"davranışları ve yaşama bakış **açıları konformaldir**" der.
+
+**Karar:** **DECISION-027 kuralı uygulanır** — *eksik içerik bekletilir, yanlış
+içerik bekletilmez* → kaynak terimi aynen yazılır (+ düşen "açıları" sözcüğü).
+
+**Gerekçe:**
+1. Kaynak **görsel doğrulamalı** (kadraj `b18_lowband.png`); sapma tek cümle.
+2. **Bekletme gerekçesi bu vakada işlemez:** bu bir "henüz çıkarılmamış kod
+   bloğu" değil, **doğrulanmış bir bandın yanlış aktarımıdır**. "Konformal"
+   (grup normuna uyma) ile "konservatif" (gelenekçi değer) farklı yapılandır;
+   üstelik cümlenin devamı "temkinli, **tutucu**" diyerek muhafazakârlığı zaten
+   ayrıca sayıyor → kod, kaynağın iki ayrı özelliğini tek kelimeye indirgiyor.
+3. **Sayısal bir davranış değişmez** (bant sınırları 100+/75+/60-74/45-59/21-44
+   olduğu gibi kalır, 5/5 MATCH) → CONFLICT-024/030/031 tasarım kararını
+   bekleyen hiçbir yapıya dokunulmaz.
+4. Değişiklik **tek metin dizesi**, geri alınabilir, tek skalayı etkiler.
+
+**Sonuç:** CONFLICT-038 → **FIXED** (CHANGE-013). Regresyon: `mmpiKeyIntegrity.test.ts`
+→ batch 18 bloğu, üç test (terim var / "konservatif" yok / gövde uyumu).
+
+**Ayrıca bu batch'te karar gerektirmeyen olumlu doğrulamalar:**
+- **Tablo 15 (Sc anahtarı) BİREBİR MATCH** → PHASE 5 "klinik ölçek anahtarları"
+  satırı Sc için kapatıldı; `cmp-sc-batch18.ts` + test kilidi kanıt olarak bırakıldı.
+- **Sc T bantları 5/5 MATCH** ve kaynakta "Sadece Sc yükselmesi" paragrafı yok →
+  koddaki `SINGLE_*` setinde Sc bulunmaması **doğru** (yeni CONFLICT yazılmadı).
+- **s.146 beş çapraz referansı** "Bakınız" biçiminde olduğu için kodun
+  tek-kayıt tasarımı burada yeterlidir → CONFLICT-024/031 **genişletilmedi**.

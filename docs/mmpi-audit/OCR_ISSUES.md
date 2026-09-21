@@ -339,3 +339,36 @@ doğrulanamazdı** (bandın etiketi yok sayılır ya da yanlış okunurdu).
 numarası, eşik) yoğunlaşıyor — çünkü OCR kalın/kısa satırları (etiket + uzun
 paragraf) daha kolay düşürüyor. Bu yüzden **band/eşik etiketleri her zaman
 görselden** okunur (FIGUR-CURVE kuralının sayısal tablo uzantısı).
+
+## BAND-HEAD-DROP · bant başlığı satırı OCR'da tümüyle düşüyor (2026-09-22, batch 18)
+
+Kitap **s.145** (`p080_R`, 200 dpi OCR): Sc'un **ilk** T bandının başlığı ve
+paragrafının ilk dört satırı OCR çıktısında **yok**; yalnız paragrafın kuyruğu,
+kelimeler yapıştırılarak gelmiş:
+
+```
+9.Rekabet gerektiren durumlara girmekte gonulsuzdur.
+lerdedebu araligarastlanir.T>95'inuzerindeolandegerler akutdurumsal
+stres ve ciddi ozdesimkrizlerini gosterir.
+75 T puani ve ustu: Yabancilasma yasayan ve dogru dusunemeyen bireyler
+```
+
+Beklenen (150 dpi tam sayfa görsel ile okundu):
+"**100 T puanı ve üstü:** Akut bozukluğun eşlik ettiği uzun süreli ciddi bir
+stresin sonucunda ortaya çıkar. Bu kişiler tipik olarak şizofren değillerdir.
+Daha çok akut psikotik reaksiyon içine giren hastalardır. Ayrıca kimlik
+krizindeki ergenlerde de bu aralığa rastlanır."
+
+**Kural:**
+1. **Bant/kod başlığı sayısı OCR ile doğrulanmaz.** `inventory.py` bu sayfada
+   yalnız `75 T` ve `60-74 T` buldu → **5 bantlık** bir set eksik okunmuş olurdu.
+2. Başlık satırı, **üzerinde bulunduğu paragrafın ilk satırıyla birlikte**
+   düşebiliyor → satır sayısındaki kayma (iki satırın tek satıra yapışması,
+   boşlukların kaybolması) **düşme işaretidir** (`lerdedebu araligarastlanir`).
+3. Bant seti **her zaman tam sayfa görselle** (≥150 dpi okunabilir; sayısal
+   eşikler için 300-400 dpi kadraj) **sayılır**; sayımla bulunan eksik bant,
+   CONFLICT yazılmadan önce görselde aranır.
+
+**Etki:** Bu kural olmasaydı Sc bant seti **4/5 MATCH** diye yanlış
+kaydedilecek ve `T ≥ 100` bandının `T>95` notunun kaynak karşılığı
+doğrulanmamış olacaktı.

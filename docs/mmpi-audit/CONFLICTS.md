@@ -1554,3 +1554,79 @@ atıf farkı**.
 
 Resolution: **REJECTED (kod doğru).** Kod Tablo 30'u izlemeye devam eder. Fark,
 gelecekteki bir değişiklikte yanlışlıkla "düzeltme" yapılmaması için belgelendi.
+
+---
+
+## CONFLICT-038 — Sc 21-44 bandında "konformaldir" ↔ kod "konservatiftir" — **FIXED**
+
+Area: `src/scoring/mmpiSource.ts` — `SC_T_BANDS` (T 21-44)
+
+**Source (Visual: CONFIRMED, s.146, 400 dpi kadraj `b18_lowband.png`):**
+> "21-44 T puanı: Pratik ve gelenekseldirler, davranışları ve yaşama bakış
+> **açıları konformaldir.** Genellikle bireyler uyumlu, sorumlu, bağımlı ve
+> temkinlidir, ancak hayal güçleri yoktur ve oldukça katıdırlar. İlişkilerinde
+> çekingen, derin duygusal ilişkilerden kaçınan, temkinli, tutucu, rekabet etmek
+> istemeyen kişilerdir."
+
+**Current implementation (denetim öncesi):** "…davranışları ve yaşama
+bakışları **konservatiftir**." — hem "açıları" düşmüş hem terim değiştirilmiş.
+
+**Neden çelişki:** "konformal" (grup normalarına uyma) ile "konservatif"
+(gelenekçi değer yönü) ayrı kavramlardır; cümlenin devamı zaten "temkinli,
+**tutucu**" diyerek muhafazakârlığı ayrıca sayıyor → kod, kaynağın iki ayrı
+özelliğini tek kelimeye indirgiyor ve ikincisini iki kez yazıyor. DECISION-027
+kuralı: **yanlış bilgi bekletilmez**, eksik içerik bekletilir.
+
+Resolution: **FIXED** — DECISION-028 → **CHANGE-013** (tek cümle, kaynak terimi
++ "açıları"). Regresyon kilidi: `tests/mmpiKeyIntegrity.test.ts` → batch 18
+describe bloğu (terim var / "konservatif" yok / gövde uyumu).
+Etki alanı: yalnız Sc düşük-puan bandı metni; sayısal eşik ve bant sınırları
+değişmedi (100+ / 75+ / 60-74 / 45-59 / 21-44 → 5/5 MATCH).
+
+---
+
+## Batch 18 genişlemeleri — mevcut CONFLICT kayıtlarına işlenen yeni örnekler
+
+### CONFLICT-024 (P1, OPEN) — Sc/Pt başlıkları
+Üç yeni kaynak gövdesi kodda yok: **`794`** (s.142), **`87/78`** Sc-blok gövdesi
+(s.146), **`8726/Yüksek 9`** (s.146). Kümülatif kapsam: **140 başlık → 100 VAR / 42 YOK**
+(batch 18: 10 başlık → 7 VAR / 3 YOK).
+
+### CONFLICT-025 (P2, OPEN) — koşullu/ek cümle eksikliği
+`70/07` kaydında **üç kesim** yok: (1) "2 ve 8 alt testleri, en sık görülen üçüncü
+yüksekliktir." (2) "bu sözelleştirmeyi de engeller" (3) kadınlara ilişkin kapanış
+cümleleri ("Bunlar yoksa … farkındadırlar. Fiziksel görünüm olarak çekici
+olmadıklarını … sorunları vardır.").
+
+### CONFLICT-026 (P3, OPEN) — kaynak listeleri kodda yok
+Sc **Graham 1987 yüksek-puan listesi 38 satır** (s.143-144) ve **düşük-puan listesi
+9 satır** (s.144-145) kodda hiçbir yapıda temsil edilmiyor. Listelerin başlığındaki
+"(T: 80-100)" bandın değil listenin etiketidir → kod bant setiyle çelişmez.
+
+### CONFLICT-027 (P1, OPEN) — T-eşiklerinin tespit edilmemesi (+2 örnek → 38)
+| Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|
+| `70/07`: "Kadınlarda eğer **5 alt testi 40 T puanının altında** ise aynı örüntü vardır" | s.142 | metin VAR · koşul YOK |
+| `86/68`: "6 ve 8'in T puanı 80'in üstünde, **7 de 70 T puanındadır**" | s.146 | eşik "7 daha düşük"e indirgenmiş |
+
+### CONFLICT-030 (P1, OPEN) — çok ölçekli kod kırpması (+2 örnek)
+`'794'` → `canonical('79')` → **`79/97`** (Pt bloğu) metnini döndürüyor;
+`'8726'` → `slice(0,2)='87'` → `78` → **`78/87`** (Pt bloğu) metnini döndürüyor.
+Her iki çağrıda da kullanıcının gördüğü metin, kaynağın o kod için yazdığı gövde
+değildir.
+
+### CONFLICT-031 (P1, OPEN) — blok-bazlı yorum ayrımı (+1 örnek)
+`87/78` Sc bloğunda "Endişeli, kendi kendini tetkik edebilen…" der; Pt bloğunda
+`78/87` "Psikolojik yardım arayan kişilerde oldukça sık görülür…" der. Kod tek
+kayıt tuttuğu için Sc bloğunun `87/78` çağrısı **Pt metnini** döndürür.
+(Batch 16'daki `64/46` örneğinin ikinci tekrarı; tasarım kararı CONFLICT-024/030
+ile birlikte verilecek.)
+
+### CONFLICT-033 (P1) — kapsam değişmedi
+Sc bloğunda (s.143-146) üç-ölçekli konfigürasyon tanımı yok; `8726/Yüksek 9`
+dörtlü bir kod tipidir (konfigürasyon değil) → CONFLICT-024/030 altında sayıldı.
+
+**Not (olumlu bulgu):** s.146'daki `81/18`, `82/28`, `83/38`, `84/48`, `85/58`
+**beş çapraz referansın tamamı** kaynakta "Bakınız …" biçiminde yazıldığı için
+kodun tek-kayıt tasarımı bu beşinde **doğru davranıyor** — bu başlıklar için
+CONFLICT-024/031 **iddia edilmez** (kayıt: SOURCE-SC-005).

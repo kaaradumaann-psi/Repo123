@@ -1270,3 +1270,53 @@ Tarih: 2026-09-22 · Kaynak: **s.137-141** (PDF p76 R – p78 R)
 
 `cmp-tablo14.ts` (anahtar birebir) · `cmp-pt-batch17.ts` (kod kapsamı) ·
 typecheck **0** · testler **316/316 PASS** · **kod değişikliği YOK**.
+
+---
+
+## PHASE 9/10 — batch 18: Pt bloğu KAPANIŞI + Sc (8) girişi/anahtarı/bantları (kitap s.142-146)
+
+Tarih: 2026-09-22 · Kaynak: **s.142-146** (PDF p79 L – p81 L)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 142 | p79 L | `79/97` kapanışı + **`794 Kodu`** + **`70/07 Kodu`** → **Pt bloğu BİTER** | `70/07` VAR (3 kesim eksik) · `794` **YOK** |
+| 143 | p79 R | **8. Şizofreni (Sc) Alt Testi** girişi + Graham 1987 yüksek puan **1-22** (T: 80-100) | listeler kodda YOK → CONFLICT-026 |
+| 144 | p80 L | 🎯 **Tablo 15 (Sc anahtarı, 78 madde)** + "K Eklemeli" + norm 29.82/31.06 + Graham 23-38 + düşük puan 1 | **BİREBİR MATCH** (59+19=78) |
+| 145 | p80 R | Sc düşük puan 2-9 + **Sc T bantları** 100+ ("T>95") · 75+ · 60-74 (3 madde) | bantlar MATCH · OCR **BAND-HEAD-DROP** |
+| 146 | p81 L | bant kapanışı (T 45 · 45-59 · 21-44) + **5 çapraz ref** + `86/68` · `87/78` · `8726/Yüksek 9` | **5/5 MATCH** · ref **5/5 UYUMLU** · 2 gövde YOK |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 15 birebir MATCH:** Doğru **59** + Yanlış **19** = **78** (kitabın
+  "Madde Sayısı: 78" başlığıyla uyumlu) ✅ — **400 dpi bindirmeli iki kırpma**
+  (`tbl15_L`/`tbl15_R`); dikiş `156·251·320·354` sütunundan geçiyor (DECISION-003).
+- **Norm 29.82 / 31.06 MATCH** ✅ (Tablo 15 dipnotu = Savaşır 1981; sd Tablo 30) ·
+  **"K Eklemeli"** ↔ `K_CORRECTION.Sc = 1.0` ✅
+- **Sc T bantları 5/5 MATCH** ✅ (`100+ / 75+ / 60-74 / 45-59 / 21-44`) — 100+
+  bandının `T>95` notu ve 60-74 bandının 3 maddesi kodda mevcut.
+- **Kaynakta "Sadece Sc yükselmesi" paragrafı YOK** → koddaki `SINGLE_*` setinde
+  Sc'nin bulunmaması **uyumlu**; çelişki yazılmadı ✅
+- **Terim hatası bulundu ve düzeltildi:** `21-44` bandında kod "bakışları
+  **konservatiftir**" diyordu; kaynak "bakış **açıları konformaldir**" →
+  **CONFLICT-038 FIXED** (DECISION-028 / **CHANGE-013**)
+- **Pt bloğu KAPANDI** (s.137-142): `789` ve `794` gövdeleri yok; `70/07`
+  gövdesinde 3 kesim eksik → CONFLICT-024/025/030
+- **Sc kod bloğu (s.146): 8 başlık → 6 VAR / 2 YOK** — `87/78` Sc gövdesi yok
+  (`'87'` → Pt `78/87` metni) → **CONFLICT-031 +1**; `8726` → `78/87` kırpma →
+  **CONFLICT-030 +1**
+- **CONFLICT-027 +2 örnek (→ 38):** `70/07` "5 alt testi **40 T** altı" koşulu ve
+  `86/68` "**7 de 70 T puanındadır**" eşiği (koddaki karşılığı "7 daha düşük")
+- **Beş çapraz referans UYUMLU:** `81/18 · 82/28 · 83/38 · 84/48 · 85/58`
+  kaynakta "Bakınız" → tek-kayıt tasarımı burada doğru davranır (CONFLICT-024
+  iddia edilmez) — **olumlu bulgu**
+- **Kümülatif kapsam: 140 başlık → 100 VAR / 42 YOK**
+- **Yeni OCR kuralı:** `OCR_ISSUES.md` → **BAND-HEAD-DROP** (bant başlığı, kendi
+  paragrafının ilk satırlarıyla birlikte OCR'dan düşebiliyor; bant sayımı OCR ile
+  yapılmaz)
+
+### Doğrulama
+
+`cmp-sc-batch18.ts` (Tablo 15 + bantlar + kod kapsamı) · typecheck **0** ·
+`mmpiKeyIntegrity.test.ts` **37/37** (+8) · testler **324/324 PASS** (26 suite) ·
+`npm run build` **PASS** (`optik-form.html` senkron) · **CHANGE-013 tek metin
+dizesi**, puanlama matematiği değişmedi.

@@ -109,8 +109,13 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
 | 121-129 | p68 L – p72 L | Mf (5) alt testi, **erkeklerde/kadınlarda Mf değerlendirmesi** | NOT_STARTED |
 | 130-136 | p72 R – p75 R | Pa (6) alt testi + kod tipleri (64/46, 678, 68/86, 60/06) | NOT_STARTED |
-| 137-145 | p76 L – p80 L | **456 alt testlerinin örüntüsü**, Pt (7) alt testi + kod tipleri | NOT_STARTED |
-| 146-151 | p80 R – p83 L | Sc (8) alt testi + kod tipleri (86/68, 8726, 80/08) | NOT_STARTED |
+| **137-141** | **p76 R – p78 R** | **Pt (7) girişi + Tablo 14 + T bantları + kod bloğu** | **DONE** (batch 17) · Tablo 14 **birebir MATCH** (39+9=48) · bantlar 5/5 · 14 VAR / 1 YOK (`789`) |
+| **142** | **p79 L** | **Pt bloğu KAPANIŞI**: `79/97` kapanışı + **`794 Kodu`** + **`70/07 Kodu`** | **DONE** (batch 18) · `70/07` VAR (3 kesim eksik → CONFLICT-025) · `794` **YOK** → CONFLICT-024/030 · **Pt bloğu burada biter** |
+| **143** | **p79 R** | **8. Şizofreni (Sc) Alt Testi girişi** + Graham 1987 yüksek-puan listesi 1-22 (T: 80-100) | **DONE** (batch 18) · listeler kodda YOK → CONFLICT-026 |
+| **144** | **p80 L** | 🎯 **Tablo 15 — Sc anahtarı (Madde Sayısı: 78)** + "K Eklemeli" + norm 29.82/31.06 + Graham 23-38 + düşük puan 1 | **DONE** (batch 18) · **P0 BİREBİR MATCH** (Doğru **59** + Yanlış **19**) — 400 dpi **bindirmeli iki kırpma** (`tbl15_L/R`, dikiş 156/251/320/354 sütununda) |
+| **145** | **p80 R** | Sc düşük puan listesi 2-9 + **Sc T bantları**: 100+ ("T>95" notu) · 75+ · 60-74 (3 madde) | **DONE** (batch 18) · bantlar MATCH · **OCR uyarısı:** `100 T puanı ve üstü` başlığı 200 dpi OCR'da düştü → `OCR_ISSUES.md` **BAND-HEAD-DROP** |
+| **146** | **p81 L** | Sc bantları kapanışı (Düşük Puanlar T 45 · 45-59 · 21-44) + **5 çapraz ref** + `86/68` + `87/78` + `8726/Yüksek 9` | **DONE** (batch 18) · bant **5/5 MATCH** ("konformaldir" terimi → **CONFLICT-038 FIXED**) · çapraz ref **5/5 UYUMLU** · `87/78`+`8726` **YOK** → CONFLICT-031/030 |
+| 147-151 | p81 R – p83 L | Sc kod bloğu devamı (`89/98` …) + Ma (9) girişi | NOT_STARTED — **sıradaki batch 19** |
 | 152-156 | p83 R – p85 R | Ma (9) alt testi + kod tipleri (91/19, 90/09) | NOT_STARTED |
 | 155-158 | p85 L – p86 R | Si (0) alt testi, 049 / 027(8) kodları | NOT_STARTED |
 | 159-170 | p87 R – p93 L | Bölüm 6: Yorumlama (kod tipi belirleme, konversiyon V, paranoid V, kuş kanadı …) | NOT_STARTED |

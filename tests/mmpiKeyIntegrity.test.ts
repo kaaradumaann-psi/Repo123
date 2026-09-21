@@ -1,7 +1,8 @@
 import { describe, it } from 'node:test';
 import { codeInterpretation } from '../src/scoring/mmpiSourceCodes';
 import assert from 'node:assert/strict';
-import { SCORING_KEYS, isGendered, type ScaleRule } from '../src/scoring/mmpiKeys';
+import { SCORING_KEYS, isGendered, K_CORRECTION, TURKISH_NORMS, type ScaleRule, type ScoringRule } from '../src/scoring/mmpiKeys';
+import { SC_T_BANDS } from '../src/scoring/mmpiSource';
 import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
 import { detectValidityConfig } from '../src/scoring/mmpiValidityConfigs';
 import { CRITICAL_ITEMS } from '../src/scoring/mmpiCritical';
@@ -541,5 +542,85 @@ describe('PHASE 9/10 batch 13 — 40/04 kodu kaynak terimine uyar', () => {
     assert.match(e.text, /geri çekilmiş/);
     assert.match(e.text, /pasif olarak direnme/);
     assert.match(e.text, /psikomotor retardasyon/);
+  });
+});
+
+/**
+ * PHASE 9/10 batch 18 — Sc (8) anahtarı (Tablo 15) + T bandı kaynak terimi.
+ *
+ * Kaynak (kitap s.144, 400 dpi iki bindirmeli kırpma `tbl15_L`/`tbl15_R`):
+ * "Tablo 15. Şizofreni alt testi: Madde numaraları ve puanlama yönü
+ * (Madde Sayısı: 78)" → Doğru 59 + Yanlış 19 = 78; dipnotta norm
+ * "Erkeklerde ortalama: 29.82, kadınlarda ortalama: 31.06 (Savaşır 1981)".
+ * s.146 (300 dpi görsel): "21-44 T puanı: Pratik ve gelenekseldirler,
+ * davranışları ve yaşama bakış açıları **konformaldir**."
+ */
+const SC_KAYNAK_DORU = [
+  15, 16, 21, 22, 24, 32, 33, 35, 38, 40, 41, 47, 52, 76, 97, 104, 121, 156, 157, 159, 168, 179, 182, 194,
+  202, 210, 212, 238, 241, 251, 259, 266, 273, 282, 291, 297, 301, 303, 305, 307, 312, 320, 324, 325, 332,
+  334, 335, 339, 341, 345, 349, 350, 352, 354, 355, 356, 360, 363, 364,
+];
+const SC_KAYNAK_YANLIS = [
+  8, 17, 20, 37, 65, 103, 119, 177, 178, 187, 192, 196, 220, 276, 281, 306, 309, 322, 330,
+];
+
+describe('PHASE 9/10 batch 18 — Sc (8) Tablo 15 anahtarı kaynağa birebir bağlıdır', () => {
+  it('Sc madde sayısı kitabın başlığıyla uyumlu: 59 + 19 = 78', () => {
+    const sc = SCORING_KEYS.Sc as ScoringRule;
+    assert.equal(sc.trueItems.length, 59);
+    assert.equal(sc.falseItems.length, 19);
+  });
+
+  it('Sc Doğru listesi Tablo 15 ile birebir aynıdır (fazla/eksik yok)', () => {
+    const sc = SCORING_KEYS.Sc as ScoringRule;
+    const k = new Set(SC_KAYNAK_DORU);
+    const c = new Set(sc.trueItems);
+    assert.deepEqual(sc.trueItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(SC_KAYNAK_DORU.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+  });
+
+  it('Sc Yanlış listesi Tablo 15 ile birebir aynıdır (fazla/eksik yok)', () => {
+    const sc = SCORING_KEYS.Sc as ScoringRule;
+    const k = new Set(SC_KAYNAK_YANLIS);
+    const c = new Set(sc.falseItems);
+    assert.deepEqual(sc.falseItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(SC_KAYNAK_YANLIS.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+  });
+
+  it('Sc K düzeltmesi alır (Tablo 15 "K Eklemeli") ve norm çifti dipnotla eşittir', () => {
+    assert.equal(K_CORRECTION.Sc, 1);
+    assert.equal(TURKISH_NORMS.Erkek.Sc.mean, 29.82);
+    assert.equal(TURKISH_NORMS.Kadın.Sc.mean, 31.06);
+  });
+});
+
+describe('PHASE 9/10 batch 18 — Sc 21-44 bandı kaynak terimine uyar', () => {
+  const band = SC_T_BANDS.find((b) => b.rangeLabel === 'T 21-44')!;
+
+  it('bant metni kaynağın "konformaldir" terimini taşır', () => {
+    assert.ok(band, 'T 21-44 bandı bulunmalı');
+    assert.match(band.text, /bakış açıları konformaldir/i);
+  });
+
+  it('bant metni kaynakta olmayan "konservatiftir" terimini taşımaz', () => {
+    assert.ok(!/konservatif/i.test(band.text), 'kaynak s.146 "konformaldir" der');
+  });
+
+  it('bandın kalanı kaynakla uyumlu kalır (regresyon)', () => {
+    assert.match(band.text, /Pratik ve gelenekseldirler/);
+    assert.match(band.text, /hayal güçleri yoktur/);
+    assert.match(band.text, /oldukça katıdırlar/);
+    assert.match(band.text, /rekabet etmek istemeyen/);
+  });
+
+  it('Sc bant sınırı kaynakla birebir: 100+ / 75+ / 60-74 / 45-59 / 21-44', () => {
+    assert.deepEqual(SC_T_BANDS.map((b) => [b.min, b.max === Infinity ? null : b.max]), [
+      [100, null],
+      [75, 99],
+      [60, 74],
+      [45, 59],
+      [0, 44],
+    ]);
+    assert.match(SC_T_BANDS[0].text, /95/);
   });
 });

@@ -400,6 +400,22 @@ eksik + yanlış metin dönüyor).
 gövde değil); kod bunları `78/87` kaydının `diagnosis` alanında taşıyor → bu
 tasarım **kaynağa uygun** kabul edildi.
 
+## Batch 18 — Pt kapanışı + Sc bloğu (s.142, s.146)
+
+| Kod | Kaynak sayfa | Kaynak | Kodda |
+|---|---|---|---|
+| **794** | s.142 | ✅ ("Hastalar kronik olarak kaygılı ve gergindirler…") | ❌ (`'794'` → `79/97` kırpma) |
+| **8726/Yüksek 9** | s.146 | ✅ ("Ajite şizofren bir hastayı göstermektedir.") | ❌ (`'8726'` → `78/87` kırpma) |
+
+İki-ölçekli ama **gövdesi eksik** olan başlık (bu dosyanın değil, CONFLICT-031'in
+konusu): `87/78` — Sc bloğunun metni kodda yok, `87` çağrısı Pt bloğunun `78/87`
+metnini döndürüyor.
+
+`86/68` Sc bloğunda **VAR** sayıldı: gövde, Pa bloğu kaydının (`68/86`) son
+cümlesinde mevcut; yalnız "7 de 70 T puanındadır" eşiği kayıp (CONFLICT-027).
+`81/18 · 82/28 · 83/38 · 84/48 · 85/58` beş başlık kaynakta **"Bakınız"**
+çapraz referansıdır → ayrı gövde beklenmez, **UYUMLU** (CONFLICT-024 dışı).
+
 ### Kümülatif kapsam (PHASE 9/10)
 
 | Blok | İncelenen | VAR | YOK |
@@ -410,5 +426,16 @@ tasarım **kaynağa uygun** kabul edildi.
 | Pd (s.107-120) | 20 | 9 | 13 |
 | Mf (s.121-126) | 10 | 9 | 1 |
 | Pa (s.130-135) | 15 | 9 | 6 |
-| **Pt (s.137-141)** | **15** | **14** | **1** |
-| **TOPLAM** | **130** | **93** | **39** |
+| Pt (s.137-141) | 15 | 14 | 1 |
+| **Pt KAPANIŞI (s.142)** | **2** | **1** | **1** |
+| **Sc (s.146)** | **8** | **6** | **2** |
+| **TOPLAM** | **140** | **100** | **42** |
+
+
+> **FINAL sayım notu (batch 18):** yukarıdaki tablo satır satır toplanarak
+> **140 / 100 / 42** bulundu. Tablodaki **Hs satırı** ("31 | 31 | 0") ile
+> CONFLICT-024'ün Hs kapsamı (**9 VAR / 22 YOK**) hâlâ uzlaştırılmadı — bu satır
+> batch 1-2 kayıtlarından geldiği gibi bırakıldı; **tüm blok seti çıkarıldıktan
+> sonraki FINAL sayımında** düzeltilecek (VAR+YOK ≠ İncelenen olan tek satır odur).
+> **Pt satırı** batch 18 ile 15 → **17 başlığa** çıktı (s.142 kapanışı: `794` YOK,
+> `70/07` VAR); **Sc satırı** yeni eklendi (s.146: 8 başlık → 6 VAR / 2 YOK).

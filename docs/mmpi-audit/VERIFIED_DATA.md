@@ -707,3 +707,33 @@ yeniden koşulabilir).
 **40** ✓ (kaynak içi tutarlılık).
 
 **Kanıt script'i:** `scripts/mmpi-audit/cmp-tablo13.ts`.
+
+---
+
+# PHASE 9/10 batch 18 — Pt kapanışı + Sc (8) girişi/anahtarı/bantları (kitap s.142-146)
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Tablo 15 anahtarı (P0)** | s.144 — Doğru **59** + Yanlış **19** = **78** | `SCORING_KEYS.Sc` 59 + 19 = 78 | ✅ **BİREBİR MATCH** |
+| Tablo 15 başlık sayımı | "(Madde Sayısı: **78**)" | 78 | ✅ kaynak içi tutarlılık |
+| **K ekleme** | "K Eklemeli" | `K_CORRECTION.Sc = 1.0` | ✅ MATCH |
+| Norm — erkek | 29.82 (Savaşır 1981, Tablo 15 dipnotu) | 29.82 (sd 9.05 ← Tablo 30) | ✅ MATCH |
+| Norm — kadın | 31.06 | 31.06 (sd 8.2) | ✅ MATCH |
+| **Sc T bantları (5 bant)** | 100+ / 75+ / 60-74 / 45-59 / 21-44 | `SC_T_BANDS` aynı sınırlar | ✅ **5/5 MATCH** |
+| 100+ bandı "T>95" notu | s.145 | bant metninde mevcut | ✅ MATCH |
+| 60-74 bandının 3 maddesi | s.145-146 | bant metninde (1)(2)(3) | ✅ MATCH |
+| "Sadece Sc yükselmesi" | s.143-146 **YOK** | `SINGLE_*` setinde Sc yok | ✅ **uyumlu** (çelişki yok) |
+| `794 Kodu` gövdesi | s.142 | — | ❌ YOK → CONFLICT-024/030 |
+| `70/07` gövdesi | s.142 | `CODES['07']` | ✅ gövde VAR · 3 kesim eksik → CONFLICT-025 |
+| Sc Graham listeleri (38 + 9) | s.143-145 | — | ❌ YOK → CONFLICT-026 |
+| `86/68` gövdesi | s.146 | `68/86` içinde | ✅ VAR · "7 = 70 T" eşiği kayıp → CONFLICT-027 |
+| `87/78` gövdesi | s.146 | — (Pt `78/87` metni dönüyor) | ❌ YOK → CONFLICT-031 |
+| `8726/Yüksek 9` gövdesi | s.146 | — (`78/87`'ye kırpılıyor) | ❌ YOK → CONFLICT-030 |
+| 5 çapraz ref (`81/18`…`85/58`) | s.146 | 5/5 çözülüyor | ✅ **uyumlu** ("Bakınız" — ayrı gövde yok) |
+
+**Kitabın kendi başlığı doğrulandı:** Tablo 15 "(Madde Sayısı: 78)" → 59 + 19 =
+**78** ✓ (kaynak içi tutarlılık; dikiş sütunları `156/251/320/354` bindirmeli iki
+kırpımla teyit edildi — DECISION-003).
+
+**Kanıt script'leri:** `scripts/mmpi-audit/cmp-sc-batch18.ts` · regresyon kilidi
+`tests/mmpiKeyIntegrity.test.ts` (batch 18 blokları).

@@ -2699,3 +2699,131 @@ Kod karşılaştırması (`cmp-pt-batch17.ts`):
 
 **Pt bloğu kapsamı: 14 VAR / 1 YOK.**
 Status: **VERIFIED** (kaynak + kod karşılaştırması)
+
+---
+
+# PHASE 9/10 batch 18 — Pt bloğu KAPANIŞI + Sc (8) girişi (kitap s.142-146)
+
+## SOURCE-PT-007 · Pt (7) bloğu s.142'de KAPANIYOR — `794` + `70/07` — **Visual: CONFIRMED**
+
+s.142 (PDF p79 L) üç bölüm taşır (300 dpi kadraj `b18_7007.png` / `b18_7007_f.png`):
+
+1. `79/97 Kodu` kapanışı — "…Bazı bireylerde manik örüntü vardır ve bu farmakolojik
+   müdahale gerektirir." + "Bu kodu alan ergenlerin yoğun ilgi gereksinimleri
+   vardır, ancak kontrolü kaybedeceklerini düşünerek böyle bir şey yapmaktan
+   kaçınırlar. Ayrıca ergenlerde bağımlılık, bağımsızlık çatışması çok fazladır."
+   → kod `79/97` gövdesi bu kapanışı **taşıyor** ✅ (batch 17 VAR sayımı geçerli).
+2. **`794 Kodu`** — "Hastalar kronik olarak kaygılı ve gergindirler. Yüksek enerji
+   düzeyleri obsesif ruminasyonlarına katkıda bulunur. Konuşmalarının genellikle
+   izlenmesi zordur, bağlantısız fikirler görülür. İmpulsif dışa vurma dönemleri,
+   suçluluk ve kendini aşağılama dönemleri birbiri ardına sıralanır. Diğer manik
+   özelliklerin de birlikte görülüp görülmediği araştırılmalıdır."
+   → kodda **YOK** ❌ (üç haneli → CONFLICT-024; `'794'` çağrısı `79/97`'ye kırpılıyor → CONFLICT-030).
+3. **`70/07 Kodu`** — tam gövde okundu (aşağıda).
+
+**Pt (7) bloğu burada biter;** s.143'te **8. Şizofreni (Sc) Alt Testi** başlar.
+(Batch 17'nin "Pt bloğu s.142+ devam edebilir" varsayımı **kapanmıştır**.)
+Status: **VERIFIED**
+
+## SOURCE-SC-001 · `70/07 Kodu` gövdesi (s.142) — **Visual: CONFIRMED**
+
+> "Bu profili veren kişiler utangaç, içedönük, sosyal becerilerden yoksun, gergin
+> ve endişelidirler, uykusuzluktan yakınırlar. Oldukça nadir görülür. **2 ve 8 alt
+> testleri, en sık görülen üçüncü yüksekliktir.**"
+>
+> "Bu koddaki erkekler sosyal yetenekler ve/veya fiziksel görünümleri konusunda
+> endişeli ve gergindirler, kendilerini yetersiz görürler. Çoğunluğu
+> içedönüktür, **bu sözelleştirmeyi de engeller.** Güvensizlikleri ve karar verme
+> güçlükleri onları konfüzyonda bırakır, aşırı kontrollüdürler ve kendilerini
+> suçlarlar. Ruminasyonları uykusuzluk ile sonlanır. Anneleri ve kardeşleri ile
+> yoğun çatışmaları vardır. Sosyal alandaki yetersizlikleri, karşı cinsle olan
+> ilişkilerini de etkilemektedir."
+>
+> "Kadınlarda eğer 5 alt testi, **40 T puanının altında** ise aynı örüntü vardır.
+> **Bunlar yoksa sorunların ciddilik oranı daha azdır, kendilerinin ne olduğunun
+> farkındadırlar. Fiziksel görünüm olarak çekici olmadıklarını düşünürler ve
+> sosyal açıdan güvensizlik ve karşı cinsle rahat ilişki kuramama gibi sorunları
+> vardır.**"
+
+**Kod karşılaştırması** (`CODES['07']`): kayıt VAR ✅ ve ana gövde sadık; ancak
+**kalın** üç kesim kodda yok → CONFLICT-025 (koşullu/ek cümle sistematik eksikliği).
+"40 T puanının altında" eşiği metinde var, **koşul olarak tespit edilmiyor** →
+CONFLICT-027 (+1 örnek).
+Status: **VERIFIED**
+
+## SOURCE-SC-002 · Sc (8) girişi + Graham 1987 yüksek-puan listesi (s.143-144) — **Visual: CONFIRMED**
+
+- s.143 (PDF p79 R) başlık: "**8. Şizofreni (Sc) Alt Testi**" + "Şizofreni alt
+  testini oluşturan maddeler ve puanlama yönü **Tablo 15**'de gösterilmiştir."
+- s.143: "**Sc alt testinde yüksek puan alan bir birey (T: 80-100): (Graham 1987)**"
+  → maddeler **1-22**; s.144 tablo altında **23-38** devam eder (toplam **38 satır**).
+- s.144 altı / s.145 üstü: "**Sc alt testinde düşük puan alan bir birey:**" →
+  maddeler **1-9** ("Arkadaşça, neşeli, duyarlı, güvenilirdir." … "Rekabet
+  gerektiren durumlara girmekte gönülsüzdür.").
+
+**Kod:** iki liste de **YOK** ❌ → CONFLICT-026 (kaynak listeleri kodda yapısal
+olarak temsil edilmiyor). T bandı etiketi "(T: 80-100)" yalnız listenin başlığıdır;
+kodun Sc bantlarında 80-100 diye bir bant **yoktur ve kaynakta da yoktur** (bantlar
+SOURCE-SC-004'te).
+Status: **VERIFIED** (kaynak) · **EKSİK** (kod)
+
+## SOURCE-SC-003 · 🎯 **P0 — Tablo 15 (Sc anahtarı) BİREBİR MATCH** (s.144) — **Visual: CONFIRMED (400 dpi ×2 bindirmeli kırpma)**
+
+Başlık: "Tablo 15. Şizofreni alt testi: Madde numaraları ve puanlama yönü
+**(Madde Sayısı: 78)**" · dipnot satırları: "**K Eklemeli**" ve
+"Erkeklerde ortalama: **29.82**, kadınlarda ortalama: **31.06** (Savaşır 1981)".
+
+| Katman | Kaynak (Tablo 15) | Kod (`SCORING_KEYS.Sc`) | Sonuç |
+|---|---|---|---|
+| Doğru | 12+12+12+12+11 = **59** | 59 | ✅ birebir |
+| Yanlış | 11+8 = **19** | 19 | ✅ birebir |
+| Toplam | **78** (kitabın başlığı) | 78 | ✅ tutarlı |
+| K ekleme | "K Eklemeli" | `K_CORRECTION.Sc = 1.0` | ✅ |
+| Norm | 29.82 / 31.06 | `TURKISH_NORMS` 29.82 / 31.06 | ✅ (sd Tablo 30, PHASE 6) |
+
+**Dikiş uyarısı (DECISION-003):** tarama bindirme çizgisi `156 · 251 · 320 · 354`
+sütununun **üzerinden** geçiyor. Tek kırpma bu sütunu biçimlendirilmiş gösteriyor →
+**bindirmeli iki kırpma** (`tbl15_L`, `tbl15_R`) okundu; iki kırpmanın kesişiminde
+dört değer de eksiksiz görüldü.
+
+Kaynak listesi birebir: `scripts/mmpi-audit/cmp-sc-batch18.ts` + regresyon kilidi
+`tests/mmpiKeyIntegrity.test.ts` → "Sc Doğru listesi Tablo 15 ile birebir aynıdır".
+Status: **VERIFIED**
+
+## SOURCE-SC-004 · Sc T-puanı bantları (s.145-146) — **Visual: CONFIRMED**
+
+| # | Kaynak bant başlığı | Kod bandı | Sonuç |
+|---|---|---|---|
+| 1 | **100 T puanı ve üstü** (+ "T>95'in üzerinde olan değerler akut durumsal stres ve ciddi özdeşim krizlerini gösterir") | `T ≥ 100` (metinde "T 95'ten büyük…" ✅) | ✅ MATCH |
+| 2 | **75 T puanı ve üstü** | `T ≥ 75` (75-99) | ✅ MATCH |
+| 3 | **60-74 T puanı** + 3 madde (1 alt sınır+Si · 2 65-74 örtük psikoz/F-Pa · 3 psikotik belirtiler/şizoid sosyal uyum) | `T 60-74` — 3 madde metin içinde ✅ | ✅ MATCH |
+| 4 | "Düşük Puanlar: **T 45**" + **45-59 T puanı** | `T 45-59` | ✅ MATCH |
+| 5 | **21-44 T puanı** | `T 21-44` (min 0) | ✅ sınır MATCH · terim farkı → CONFLICT-038 |
+
+**Terim denetimi (300/400 dpi kadraj `b18_lowband.png`):** kaynak —
+"Pratik ve gelenekseldirler, davranışları ve yaşama bakış **açıları konformaldir**."
+kod (denetim öncesi) — "…bakışları **konservatiftir**." → **yanlış içerik**
+(eksik değil) → **CONFLICT-038 → FIXED (CHANGE-013, DECISION-028)**.
+
+Kaynakta **"Sadece Sc alt testinin yükselmesi"** paragrafı YOK (s.143-146
+tam sayfa okundu) → koddaki `SINGLE_*` setinde Sc'nin bulunmaması **uyumlu** ✅.
+Status: **VERIFIED**
+
+## SOURCE-SC-005 · Sc ↔ diğer alt testler + Sc kod bloğu (s.146) — **Visual: CONFIRMED**
+
+"Sc alt testinin diğer alt testlerle ilişkisi:" — **beşi de "Bakınız" çapraz
+referansıdır** (ayrı gövde yok): `81/18`→18/81 · `82/28`→28/82 · `83/38`→38/83 ·
+`84/48`→48/84 · `85/58`→58/85. Kodda **5/5 çözülüyor** ✅ → bu beşi için
+CONFLICT-024/031 **doğmaz** (kaynak zaten önceki bloğa yönlendiriyor).
+
+| Kaynak başlığı | Kaynak gövdesi | Kodda |
+|---|---|---|
+| `86/68 Kodu` | "6 ve 8'in T puanı **80'in üstünde**, 7 de **70 T puanındadır**. Bu profil psikiyatri hastalarında sıklıkla görülür. "Paranoid vadi" ya da "Psikotik V" olarak adlandırılır." | `68/86` kaydında **VAR** ✅ — ancak eşik "7 daha düşükse" olarak yazılmış; **"7 de 70 T" özelliği kayıp** → CONFLICT-027 |
+| `87/78 Kodu` | "Endişeli, kendi kendini tetkik edebilen, derin düşünceye dalan kişilerdir, kişilik güçlükleri kroniktir. Bağımsız, kendine güvenen kimseler değildirler, daha çok pasif bağımlıdır. Cinsel sorunları vardır. Olgun ve yakın ilişkiler kuramazlar, öğrendikleri şeyleri bağdaştıramazlar." | **YOK** ❌ — `'87'` çağrısı Pt bloğunun `78/87` metnini döndürür → CONFLICT-031 (+1) |
+| `8726/Yüksek 9 Kodu` | "Ajite şizofren bir hastayı göstermektedir." | **YOK** ❌ — `'8726'` → `slice(0,2)` → `78/87` → CONFLICT-030 (+1) |
+
+**OCR uyarısı:** s.145'teki "100 T puanı ve üstü" satırı 200 dpi OCR'da **tamamen
+kaybolmuş**, izleyen satırlar kelime yapıştırarak gelmiştir
+(`.audit/ocr/p080_R.txt` 13-15. satırlar) → kural: **bant başlıkları OCR ile
+sayılmaz** (`OCR_ISSUES.md` BAND-HEAD-DROP).
+Status: **VERIFIED**

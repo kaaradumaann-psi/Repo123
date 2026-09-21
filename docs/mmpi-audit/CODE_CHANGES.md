@@ -400,3 +400,37 @@ yanlış bilgi bekletilmez.
 - `npm test` (tam suite) → **316/316 PASS** · 24 suite (önceki 313/313, 23 suite)
 - `npm run build` → **PASS** — `optik-form.html` senkron
 - **REGRESSION YOK**
+
+---
+
+## CHANGE-013 — Sc `21-44` bandı kaynak terimine çekildi
+
+Date: 2026-09-22
+Type: **İçerik düzeltmesi** (yanlış terim → kaynak terimi + düşen sözcük)
+Priority: **P2**
+Source: `SOURCE-SC-004` · CONFLICT-038 · DECISION-028
+
+File: `src/scoring/mmpiSource.ts` — `SC_T_BANDS` (band `T 21-44`)
+
+| Before | After |
+|---|---|
+| "…davranışları ve yaşama **bakışları konservatiftir**." | "…davranışları ve yaşama **bakış açıları konformaldir**." |
+
+**Kaynak kanıtı:** kitap s.146 (PDF p81 L), **400 dpi kadraj** `.audit/pages/b18_lowband.png`:
+"21-44 T puanı: Pratik ve gelenekseldirler, davranışları ve yaşama bakış açıları
+konformaldir." (OCR bu bandı 200 dpi'de doğru okumuş; **sayısal** bant sınırları
+görselle doğrulandı — `OCR_ISSUES.md` BAND-HEAD-DROP yalnız 100+ başlığını ilgilendirir.)
+
+**Kapsam:** tek dize. Bant sınırları, `tone`, `rangeLabel`, sayısal eşikler ve
+diğer 4 Sc bandı **değişmedi**. Puanlama/ölçek matematiğine etkisi **yoktur**.
+
+### Doğrulama
+
+- `npm run typecheck` → **0 hata**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **37/37 PASS** (29 → +8 yeni test:
+  Tablo 15 Doğru/Yanlış birebirlik, 59+19=78 sayım, `K Eklemeli` + norm çifti,
+  Sc bant sınırı 5/5, terim var / "konservatif" yok / gövde regresyonu)
+- `npm test` (tam suite) → **324/324 PASS** · 26 suite (önceki 316/316 · 24 suite)
+- `npm run build` → **PASS** — `optik-form.html` yeniden üretildi ve senkron (CI
+  `git diff --exit-code -- optik-form.html` kapısı)
+- **REGRESSION YOK**
