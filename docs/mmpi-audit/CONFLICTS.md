@@ -1131,3 +1131,69 @@ Mevcut tabloya ek **T-eşiği / ölçek-koşulu** örnekleri:
 
 → CONFLICT-027 kapsamı **13 örneğe** çıktı; hiçbiri kodda koşul olarak yok
 (`CodeInterpretation` tipinde koşul alanı bulunmuyor).
+
+---
+
+## CONFLICT-031 — Kod yorumları **blok-bazlı**, kod modeli **tek-anahtarlı** (P1, OPEN)
+
+Area: `src/scoring/mmpiSourceCodes.ts` — `CODES` (tek `Record`)
+
+**Kaynak yapısı (görsel doğrulandı):** Kaynak, iki-ölçekli kod yorumlarını
+**o ölçeğin blok başlığı altında** verir. Aynı iki rakam çifti, **farklı bloklarda
+farklı başlık ve farklı metin** taşıyabilir:
+
+| Blok | Kaynak başlığı | Kodda dönen kayıt | Sonuç |
+|---|---|---|---|
+| **D (2) bloğu** (s.82-83) | `23 Kodu` — "Bireyler kendilerini sıklıkla (özellikle düşük 9) zayıf, yorgun ya da tükenmiş hissederler…" | `23` | ✅ kendi metni |
+| **Hy (3) bloğu** (s.96) | `32 Kodu` — "**23 kod tiplerinin aksine**, bu bireyler sağlıkları ve belirgin olmayan depresyonları ile fazlaca ilgilenirler… **menapoz güçlükleri**…" | **`23`** | ❌ **D bloğunun metni gösterilir** |
+| **D (2) bloğu** (s.83) | `32` (D bloğu anlamı) | `23` | ⚠️ D bloğu bağlamı ayrı çözülmeli |
+
+**Ayrıca:** `31 Kodu` (Hy bloğu, s.96) kaynakta **açıkça** "(Bakınız 13/31 Kodu)"
+diyerek komşu bloğa atıfta bulunur → yani **bloklar arası atıf kaynağın kendi
+yapısıdır**; kodun tek `Record` modeli bu katmanı temsil edemez.
+
+**Amprik kanıt (`cmp-hy-batch8.ts`):**
+```
+31      -> 13/31
+32      -> 23        ← Hy bloğunun 32'si D bloğunun 23 metnini alıyor
+321     -> 23
+345/435 -> 34/43     ← başlıktaki üçüncü varyant (534) hiç erişilemiyor
+346/436 -> 36/63
+34      -> 34/43
+35/53   -> 35/53
+```
+
+Impact: Kullanıcı `32/23` kodunu aldığında **hangi blok bağlamında** olduğunu
+belirleyen bir seçim yapılmıyor; kod, Hy bağlamında **yanlış ölçeğin metnini**
+gösterir. P1.
+
+Status: **OPEN** — çözüm, kod kimliğine **bağlam (birincil blok / T-puan sırası)**
+eklemeyi gerektirir; CONFLICT-024 ve CONFLICT-030 ile **aynı tasarım kararına**
+bağlıdır. Karar tüm klinik ölçek blokları çıkarıldıktan sonra verilecek.
+
+**Kod değişikliği YAPILMADI.**
+
+---
+
+## CONFLICT-027 (GENİŞLETME 2 — Hy bloğu, s.95-99)
+
+| Kod | Kaynak koşulu | Kaynak |
+|---|---|---|
+| `Hy 60-69 T` | "Eğer Hs'nin yükselmesi Hy ile aynı düzeyde ise ve **D alt testi, 1 ve 3 alt testlerinden 10 T puanı düşükse**…" / "Eğer **Hy alt testi Hs alt testinden 10 T puanı yüksekse**…" | s.95 (**görsel**) |
+| `345/435/534` | "**Alt test 3, 4'ten yüksekse ve K alt testi 50 T puanının üstündeyse**, duyguların ve isteklerin eyleme dökülme olasılığı düşüktür." | s.99 (**görsel**) |
+| `32` | "**2 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise** 23 koduna da bakınız" | s.96 |
+| `346/436` | "**6 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise** 36/63 kodlarına da bakınız" | s.99 |
+| `34/43` | "**3 ve 4'ün göreceli yükseklikleri**… **eğer 3 yüksekse**… **eğer 4 yüksekse**…" · "**4'ün 3'ten önemli ölçüde yüksek olduğu durumlarda**…" | s.97-98 |
+| `35/53`, `32`, `34/43`, `29/92`, `20/02` | "**üçüncü en yüksek test**" koşulları (Hy: `1,8,9` / `1,4,8` / `4 ya da 6`; D: `3 ya da 4` / `7 ya da 4`) | s.97-98, s.92 |
+
+→ CONFLICT-027 kapsamı **19 koşula** çıktı. `CodeInterpretation` tipinde
+**koşul alanı yok**; metinler koşulu anlatır ama **tespit edilmez**.
+
+---
+
+## CONFLICT-032 — Hy bloğunda erişilemeyen başlık varyantı (P3, kayıt)
+
+`s.99` başlığı **300 dpi görselle** `345/435/534` olarak doğrulandı (3 varyant).
+Kod yalnızca `34/43` anahtarını taşıdığı için **`534` sıralaması hiçbir zaman
+`345/435` metnine erişemez** (kırpma `34`e düşürür → `34/43` döner; içerik
+kaybolur). CONFLICT-030/031 ile aynı kök neden.

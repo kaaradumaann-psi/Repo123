@@ -189,3 +189,34 @@ Ayrıntı ve tam tablo: `CONFLICTS.md` → **CONFLICT-030**.
 | Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
 | D (s.79-92) | 9 | 18 |
 | **Toplam** | **18** | **40** |
+
+
+---
+
+## Hy (3) alt testi kod bloğu (s.95-100) — batch 8
+
+| Kod | Kaynak | Kodda | Not |
+|---|---|---|---|
+| `Yüksek 3 / Yüksek K` | s.96 | ❌ YOK | F ve Sc düşük koşulu |
+| `31` | s.96 | ✅ `13/31` | kaynak "(Bakınız 13/31 Kodu)" der → **atıf doğru** |
+| `32` | s.96-97 | ❌ YOK | ⚠️ `23`e düşüyor → **CONFLICT-031** (D bloğunun metni) |
+| `321` | s.97 | ❌ YOK | → `23`e düşüyor |
+| `34/43` | s.97-98 | ✅ VAR | 3 varyant + göreceli yükseklik koşulu eksik |
+| `Yüksek 3 / Düşük 4` | s.98 | ❌ YOK | |
+| `34` (4 dominant) | s.98 | ❌ YOK | → `34/43`e düşüyor |
+| `345/435/534` | s.99 | ❌ YOK | → `34/43`e düşüyor; **534 varyantı hiç erişilemez** |
+| `346/436` | s.99 | ❌ YOK | → `36/63`e düşüyor |
+| `35/53` | s.99 | ✅ VAR | |
+| `36/63` | s.99-100 | ✅ VAR | |
+| `54/45` notu | s.99 | ❌ YOK | "5'teki yükselmeyi dikkate almamak…" yorum kuralı |
+
+### Blok toplamı
+
+| Blok | Kodda VAR | Kodda YOK |
+|---|---|---|
+| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
+| D (s.79-92) | 9 | 18 |
+| **Hy (s.95-100, devam ediyor)** | **3** (`13/31`, `34/43`, `35/53`, `36/63` → sayım: 4) | **8** |
+| **Genel toplam** | **22** | **48** |
+
+Not: Hy bloğu **s.100+**'da devam ediyor (`36/63` metni s.100'e taşıyor).

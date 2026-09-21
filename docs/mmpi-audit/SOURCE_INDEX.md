@@ -77,7 +77,9 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **88-89** | **p52 L – p52 R** | **D kod bloğu IV-V**: 273/723, 274/724, 275/725, **278/728** + T-eşiği koşulları (5 T fark; K/Hs<50 T) | **DONE** (300 dpi görsel doğrulandı) · 4 kod kodda YOK · **CONFLICT-030** · CONFLICT-027 genişletildi |
 | **90-92** | **p53 L – p54 L** | **D kod bloğu VI + kapanış**: 270, 28/82, 281/821, 284/824, 482/842, 287/827, 29/92, **20/02**, **207** | **DONE** · 29/92 ve 20/02 içeriği ✓ MATCH · 6 kod YOK · **D kod bloğu KAPANDI** |
 | **93-94** | **p54 R – p55 L** | **Hy (3) alt testi girişi + Tablo 10 (Hy anahtarı)** | **DONE** (birebir MATCH — `SOURCE-CL-014/015`) |
-| 95-110 | p55 L – p62 R | Hy (3) alt testi + kod tipleri (32, 321, 34/43, 346, 39/93, 30/03) | NOT_STARTED |
+| **95** | **p55 R** | **Hy (3) T-puan bantları** (85+/76-85/70-75/60-69/45-59/24-44) + "Sadece Hy yükselmesi" kuralı | **DONE** (300 dpi görsel ×4) · **6/6 bant + tek-yükselme MATCH** |
+| **96-99** | **p56 L – p57 R** | **Hy kod bloğu I**: Yüksek3/YüksekK, `31`, **`32`**, `321`, `34/43`, Yüksek3/Düşük4, `34`, **`345/435/534`**, `346/436`, `35/53`, `36/63`, `54/45` notu | **DONE** (300 dpi görsel doğrulandı) · **CONFLICT-031** (blok-bazlı kod) · CONFLICT-027 genişletildi |
+| 100-110 | p58 L – p62 R | Hy kod bloğu devamı | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
 | 121-129 | p68 L – p72 L | Mf (5) alt testi, **erkeklerde/kadınlarda Mf değerlendirmesi** | NOT_STARTED |

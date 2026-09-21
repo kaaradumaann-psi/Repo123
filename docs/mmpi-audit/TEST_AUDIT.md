@@ -428,3 +428,23 @@ kararı tüm kod seti çıkarıldıktan sonra verilecek).
 Yeni araç: `scripts/mmpi-audit/cmp-d-batch7.ts` — `codeInterpretation()` çağrısının
 **kırpma davranışını** (CONFLICT-030) kanıtlayan karşılaştırma scripti
 (`273/723` → `27/72` vb. eşlemesi + `seeAlso` döngü testi).
+
+---
+
+# Oturum 5 — PHASE 9/10 batch 8: Hy T bantları + Hy kod bloğu I (s.95-99)
+
+Kod değişikliği **YOK** (salt okuma + karşılaştırma; CONFLICT-024/030/031 kararı
+tüm klinik ölçek blokları çıkarıldıktan sonra verilecek).
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** |
+| `npm test` (tam suite) | **313/313 PASS** · 23 suite |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+**REGRESSION YOK.**
+
+Yeni araç: `scripts/mmpi-audit/cmp-hy-batch8.ts` — Hy bloğu kod kimliği
+çakışmasını kanıtlar (`32` → `23`, `321` → `23`, `345/435` → `34/43`,
+`346/436` → `36/63`); CONFLICT-031'in ampirik dayanağı.

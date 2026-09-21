@@ -1672,3 +1672,49 @@ destekleyici terapi tercih edilmelidir.**"
 | **29/92 (devamı)** | **Yüksek enerji düzeyi** ancak bu **"bir kontrol kaybını telafi etme girişimini"** temsil eder. **Üç tip birey bu kodu elde eder:** (1) **Ajite depresyon** — ağlama, feryat etme, depresif ruminasyonlar; **çocuklar gibi ilgi çekmek için çok fazla duygusal** olabilirler. (2) **Alttaki depresyonla manik savunmalar kullanarak başa çıkmaya çalışanlar** — büyüklük düşünceleri ve inkâr depresyonu maskelemede yeterli olabilir, **ancak çoğunlukla uzun süre etkili değildir**; sonrasında **çok fazla içki içme davranışı** ortaya çıkar. (3) **Organik beyin sendromu olanlar** — işlevsellik ve yeteneklerindeki azalmanın farkında ama **inkâr etmeye ve saklamaya çalışan** bireyler; **daha önce kolaylıkla yaptıkları şeyleri yapamamanın eksikliğine bağlı ajitasyon** gösterirler. "**Sıklıkla test 3 ya da 4, üçüncü en yüksek testtir.**" |
 | **20/02 Kodu** | **Sinirlilik, zayıflık, yorgunluk, benlik değerinde düşme** belirgin özelliklerdir; kod **"sosyal olarak geri çekilmiş hafif, ancak kronik depresyonu"** gösterir; **depresyon sıklıkla kişiler arası ve sosyal becerilerin kötü olmasıyla bağlantılıdır** ve **aşağılık ve utangaçlık duyguları** ile birliktedir; **hem yetişkinler hem ergenler özellikle sosyal ilişkilerde sinirlidirler**, **engellenmiş hissederler**, **çok az arkadaşları vardır**; "**Çoğu (özellikle test 1 düşük ise) fiziksel olarak çekici olmadığını da düşünür.**" **Uykusuzluk, suçluluk duyguları ve endişe** sıklıkla vardır; "**Bu kod tipinde çoğunlukla test 7 ya da 4, üçüncü en yüksek testtir.**" **Olası tanı: Pasif-agresif kişilik** |
 | **207 Kodu** | **Gergin, kaygılı, ürkek** kişilerdir; **kendilik değerinde düşme**; **şizoid içe çekilme**; **sosyal ortamlarda yetersizlik duygusu ve gerçek sosyal beceri eksikliği** ile **içe dönük tutum**; **insanlarla etkileşimlerinde güvensiz**; **karşı cinsle ilişkilerinde mutsuz**; **depresyonları ile yaşamayı öğrenmişlerdir**; "**Bu bireylerin saldırganlık ve öfke patlamaları göstermesi beklenmez.**" |
+
+## SOURCE-CL-016 · Hy (3) T-puan bantları (s.95, p55 R) — **Visual: CONFIRMED**
+
+Fact — aynen (**300 dpi görsel, 4 ayrı kadraj**):
+
+| Bant | Kaynak metni (özet) | Kod (`HY_T_BANDS`) |
+|---|---|---|
+| **85 T ve üstü** | "Aşırı immatür, benmerkezci ve bağımlı kişilerdir. Bastırma savunma mekanizmasını kullanmaları şaşırtıcıdır. **Bu içgörü eksikliği olduğunun göstergesidir.** Semptomlar gerçek organik patolojiye uymamaktadır. Genellikle kroniktir ve ciddi rijidite vardır." | ✅ MATCH (cümle sırası farkı: kodda "içgörü" cümlesi sonda) |
+| **76-85 T** | "70-75 T puanında bildirilen özelliklere ek olarak… uzun süredir devam eden gerginliğe bağlı konversif semptomlar… başağrısı, sırt ağrısı, göğüs ağrısı, güçsüzlük, baş dönmesi ve baygınlık… organize olmuş bedensel yakınmaları vardır." | ✅ MATCH |
+| **70-75 T** | "bastırma ve inkârı çok fazla kullanan, çok fazla itaat eden (uyan), saf ve çocuksu biçimde benmerkezci… ikincil kazanç… teşhirci ve seksüel ya da saldırganlık düzeyinde dışa vuran davranışlar…" | ✅ MATCH |
+| **60-69 T** | "**Burada iki farklı örüntü vardır:** 1. Eğer **Hs'nin yükselmesi Hy ile aynı düzeyde ise ve D alt testi, 1 ve 3 alt testlerinden 10 T puanı düşükse** histerik kişiye işaret etmektedir… 2. Eğer **Hy alt testi Hs alt testinden 10 T puanı yüksekse** histerik özellikler belirgindir…" | ✅ MATCH (+ **T-eşiği** → CONFLICT-027) |
+| **45-59 T** | "Bu alana özgü bir tanımlama yoktur." | ✅ MATCH |
+| **24-44 T** | "Kendilerini sürekli eleştirirler. Olumlu kişilerarası ilişkileri inkâr etme eğilimi vardır. **Si alt testinde yükselme**, bireyin diğer insanlardan kaçma eğiliminde olduğunu göstermektedir." | ✅ MATCH metin · ⚠️ etiket kodda "T 22-44" (kaynak 24) |
+
+**"Sadece Hy alt testinin yükselmesi":** kaynak aynen → "Sadece **3'ün yüksek
+olduğu** ve **diğer hiçbir alt testin 70 T puanının üstünde olmadığı** durumda"
+↔ kod `SINGLE_HY.rule` = **birebir MATCH** ✅ · kaynak metni (kabul edilme/sevgi
+gereksinimi, reddedilme endişesi, tartışmalarda iyimserlik vurgusu) kodda **MATCH** ✅
+
+**6/6 bant + tek-yükselme kuralı VERIFIED.**
+
+## SOURCE-CL-017 · Hy bloğu: diğer alt testlerle ilişki (s.96, p56 L)
+
+**"Yüksek 3 / Yüksek K Kodu":** "Alt testler **3 ve K ikisi birden yüksek**
+olduğunda ve **F ve Sc alt testleri düşük** olduğunda, sevilme, kabul edilme ve
+kendisini yaşamı üzerinde kontrol sağlıyor gibi gösterme gereksinimi çok
+abartılıdır… çok katı bir optimizm gösterirler… **kızgınlık, bozulma ya da
+zedeleyici duyguların olduğu ya da bağımsız karar vermeleri ya da güç
+kullanmaları gereken durumlardan kaçınırlar** (ya da çok rahatsız olurlar)."
+→ **Kodda YOK** (CONFLICT-024)
+
+## SOURCE-CODE-017 · Hy kod bloğu I (s.96-99) — **Visual: CONFIRMED**
+
+| Kod | Kaynak başlığı | Kritik içerik / koşul |
+|---|---|---|
+| **31 Kodu** | s.96 | "(**Bakınız 13/31 Kodu**)" → **D bloğunun 13/31 metnine atıf** |
+| **32 Kodu** | s.96-97 | "ⓘ Eğer **2 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise** 23 koduna da bakınız." — "**23 kod tiplerinin aksine**, bu bireyler sağlıkları ve bir ölçüde de belirgin olmayan depresyonları ile fazlaca ilgilenirler. Yorgunluk, gastrik yakınmalar, baş ağrıları ve baş dönmesi geneldir… Erkekler… **test 1, 8 ve 9 sıklıkla üçüncü en yüksek testtir.** … **Kadınlar için çoğunlukla 1, 4 ve 8, üçüncü en yüksek testtir.**" — "Bazen bu profil **menapoz güçlükleri** ile bağlantılıdır." |
+| **321 Kodu** | s.97 | "**32 kodlu bireylerin özelliklerine ek olarak**… çok çeşitli hipokondriyak yakınmalar… **kadınlar sıklıkla tekrarlayan jinekolojik yakınmalar getirir ve/veya histerektomi olurlar**… **Erkekler sıklıkla gastrik rahatsızlık ya da ülser gösterirler.**" + "**kronik nevrotik bir durumu** ortaya koyan bu hastalarda… **Tedavi motivasyonları düşüktür.**" |
+| **34/43 Kodu** | s.97-98 | "Her iki kod tipi de **kızgın, immatür ve bencildir**. Evlilik uyumsuzluğu, rastgele cinsel ve yüzeysel ilişkiler, boşanma, alkolizm… **En belirgin özellikleri kronik ve şiddetli öfkedir.**" + "**3 ve 4'ün göreceli yükseklikleri** bu bireylerin kızgınlıklarını ve diğer impulslarını **ne ölçüde ketlediğinin (eğer 3 yüksekse)**, ya da **öfkelerinin daha fazla ifade edildiğinin (eğer 4 yüksekse)** bir göstergesidir." + **Olası tanı: Pasif agresif kişilik bozukluğu, agresif tip** |
+| **Yüksek 3 / Düşük 4 Kodu** | s.98 | "**Alt test 3'ün önemli ölçüde yüksek** olduğu durumda, birey kızgınlık duygularını **dolaylı olarak** gösterir… **bağımlılık–bağımsızlık çatışması**… **bastırma, inkâr ve kızgınlığın aşırı kontrol edilmesinden** dolayı öfke patlamaları…" |
+| **34 Kodu (4 dominant)** | s.98 | "**34 kodlarında, 4'ün 3'ten önemli ölçüde yüksek olduğu durumlarda**, kızgınlık baskındır, ancak **uzun süre baskı altında tutulmuştur** ve sonra **öfke patlamaları ile ifade edilir**, hatta bazen **ciddi saldırı ya da cinayetlerle sonlanır**… **3'te bastırma, 4'te saldırganlık fazladır, 3 yüksek, 4 oldukça yüksek ise pasif-agresif kişiliktir.**" |
+| **345/435/534 Kodları** | s.99 (**görsel doğrulandı — başlıkta 3 varyant**) | "**immatur ve genellikle cinsel yönden yetersizdirler**… teşhircilik görülebilir, **homoseksüel olma korkuları** vardır. **⚠️ KOŞUL: Alt test 3, 4'ten yüksekse VE K alt testi 50 T puanının üstündeyse**, duyguların ve isteklerin eyleme dökülme olasılığı düşüktür." (**300 dpi görsel doğrulandı**) |
+| **346/436 Kodları** | s.99 | "**Eğer 6 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise, 36/63 kodlarına da bakınız.**" — dönemsel eyleme vuruk davranış öyküleri; eleştiriye aşırı duyarlılık; **kızgınlık aile üyelerine yöneliktir**; **psikolojik tedaviyi reddederler** |
+| **35/53 Kodu** | s.99 | "Bu koddaki **erkekler pasif ve hatta geri çekilme eğilimindedirler**… ancak **çok güçlü ilgi gereksinimleri** vardır… **4 ya da 6 genellikle üçüncü yüksek testtir.**" |
+| **36/63 Kodu** | s.99-100 | "Yüzeyde, bu bireyler **eleştiriye aşırı duyarlı, kuşkulu, gergin ve hatta şüpheci**…" |
+| **54/45 notu** | s.99 | "**Yorumlama 5'teki yükselmeyi dikkate almamak gibi almakla daha iyi yapılabilir. Sonra, 5 alt testi yükselmesinin yorumu buna eklenebilir.**" |

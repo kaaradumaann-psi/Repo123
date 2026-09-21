@@ -829,3 +829,73 @@ Kod değişikliği **YOK** (karar tüm kod seti çıkarıldıktan sonra verilece
 
 Açık **11** → 0 P0 · **6 P1** (003, 004, 005, 024, 027, **030**) · 4 P2 (006,
 007, 022, 025) · 1 P3 (026). FIXED 10 · REJECTED 7.
+
+---
+
+## PHASE 9/10 — batch 8: Hy (3) T bantları + Hy kod bloğu I (kitap s.95-99)
+
+Tarih: 2026-09-21 · Kaynak: **s.95 (p55 R)** + **s.96-99 (p56 L – p57 R)**
+
+### P0 katmanı — Hy T bantları **6/6 MATCH** ✅
+
+| Bant | Kod | Sonuç |
+|---|---|---|
+| 85 T ve üstü | `85–∞` | ✅ |
+| 76-85 T | `76–84` | ✅ metin birebir |
+| 70-75 T | `70–75` | ✅ |
+| 60-69 T | `60–69` (iki örüntü) | ✅ |
+| 45-59 T | `45–59` ("özgü tanımlama yok") | ✅ |
+| 24-44 T | `0–44` | ✅ metin · etiket kodda `T 22-44` |
+
+**"Sadece Hy alt testinin yükselmesi"** kuralı — kaynak: "Sadece **3'ün yüksek**
+olduğu ve **diğer hiçbir alt testin 70 T puanının üstünde olmadığı** durumda" ↔
+kod `SINGLE_HY.rule` → **birebir MATCH** ✅ (metin de MATCH).
+
+Doğrulama: **300 dpi görsel, 4 ayrı kadraj** (`v_s95_a..d.png`).
+
+### Yorum katmanı — Hy kod bloğu I
+
+Okunan kod tipleri: **Yüksek3/YüksekK**, `31`, **`32`**, `321`, `34/43`,
+**Yüksek3/Düşük4**, `34`, **`345/435/534`**, `346/436`, `35/53`, `36/63`,
+`54/45` notu → `SOURCE-CODE-017`.
+
+### ⚠️ Yeni çelişki — CONFLICT-031 (P1, OPEN): kod yorumları **blok-bazlı**
+
+Kaynak, iki-ölçekli kod yorumlarını **o ölçeğin blok başlığı altında** verir ve
+**aynı rakam çifti farklı bloklarda farklı metin** taşır:
+
+| Blok | Kaynak başlığı | Kodda dönen |
+|---|---|---|
+| D (s.82) | `23 Kodu` | `23` ✅ |
+| **Hy (s.96)** | **`32 Kodu`** — "**23 kod tiplerinin aksine**… **menapoz güçlükleri**…" | **`23`** ❌ D bloğunun metni |
+
+→ `codeInterpretation('32')` **yanlış ölçeğin metnini** döndürür. Kaynağın kendisi
+`31 Kodu` için "(Bakınız 13/31 Kodu)" diyerek **bloklar arası atıf** yaptığından,
+bu katman kaynağın yapısal bir özelliğidir; kodun tek `Record` modeli temsil edemez.
+
+Ayrıca **CONFLICT-032 (P3, kayıt):** s.99 başlığı görselle **`345/435/534`**
+(3 varyant) doğrulandı; kod `34/43`e düştüğü için `534` varyantı **erişilemez**.
+
+### CONFLICT-027 genişletmesi (19 koşul)
+
+Yeni: Hy 60-69 T (D 10 T düşük · Hy, Hs'ten 10 T yüksek) · `345/435/534`
+(**3>4 ∧ K>50 T**) · `32` (2, 3'ün 5 T sınırında) · `346/436` (6, 3'ün 5 T
+sınırında) · `34/43` (göreceli yükseklik) · "üçüncü en yüksek test" koşulları.
+
+### Kapsam (CONFLICT-024)
+
+| Blok | Kodda VAR | Kodda YOK |
+|---|---|---|
+| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
+| D (s.79-92) | 9 | 18 |
+| Hy (s.95-100) | 4 | 8 |
+| **Toplam** | **22** | **48** |
+
+### Doğrulama
+
+Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT.md`.
+
+### Çelişki tablosu
+
+Açık **13** → 0 P0 · **7 P1** (003, 004, 005, 024, 027, 030, **031**) · 4 P2
+(006, 007, 022, 025) · 2 P3 (026, **032**). FIXED 10 · REJECTED 7.

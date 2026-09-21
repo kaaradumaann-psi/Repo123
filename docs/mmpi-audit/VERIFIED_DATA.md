@@ -588,3 +588,30 @@ FAZLA 0, EKSİK 0.
 `codeInterpretation('274/724')` çağrısı `27/72` kaydını döndürür; **o kaydın 6
 cümlesinin tamamı kaynağın s.88'deki `273/723` metniyle birebir aynıdır** →
 kaynağın `27/72` **ana kod** metni (s.87) kodda yoktur → **CONFLICT-030**.
+
+
+---
+
+# PHASE 9/10 batch 8 — Hy (3) T bantları (kitap s.95) — **6/6 MATCH**
+
+| Bant | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| 85 T ve üstü | "Aşırı immatür, benmerkezci ve bağımlı… bastırma savunması… içgörü eksikliği… ciddi rijidite" | `85–∞` | ✅ MATCH |
+| 76-85 T | "konversif semptomlar; başağrısı, sırt ağrısı, göğüs ağrısı, güçsüzlük, baş dönmesi ve baygınlık" | `76–84` | ✅ MATCH (metin birebir) |
+| 70-75 T | "bastırma ve inkâr… itaat eden (uyan)… ikincil kazanç… teşhirci ve seksüel" | `70–75` | ✅ MATCH |
+| 60-69 T | "iki farklı örüntü" (Hs≈Hy ∧ D 10 T düşük · Hy, Hs'ten 10 T yüksek) | `60–69` | ✅ MATCH |
+| 45-59 T | "Bu alana özgü bir tanımlama yoktur." | `45–59` | ✅ MATCH |
+| 24-44 T | "sürekli eleştiri… olumlu ilişkileri inkâr… Si yükselme" | `0–44` | ✅ MATCH metin · etiket kodda "T 22-44" |
+
+**"Sadece Hy alt testinin yükselmesi"** → kaynak kuralı ("Sadece 3'ün yüksek
+olduğu ve diğer hiçbir alt testin **70 T puanının üstünde olmadığı** durumda")
+↔ `SINGLE_HY.rule` → **birebir MATCH** ✅ · metin de MATCH ✅
+
+## Hy bloğunda kodda VAR olan ve içeriği doğrulanan kod tipleri
+
+| Kod | Kaynak | İçerik |
+|---|---|---|
+| `13/31` | s.96 (`31 Kodu`) | kaynak **"(Bakınız 13/31 Kodu)"** der → atıf doğru, kod D bloğundan hizmet ediyor ✅ |
+| `34/43` | s.97-98 | "Her iki kod tipi de kızgın, immatür ve bencildir… kronik ve şiddetli öfke" → ✅ içerik MATCH |
+| `36/63` | s.99-100 | "eleştiriye aşırı duyarlı, kuşkulu, gergin ve hatta şüpheci" → ✅ MATCH |
+| `35/53` | s.99 | "erkekler pasif ve hatta geri çekilme eğiliminde… güçlü ilgi gereksinimleri" → ✅ MATCH |

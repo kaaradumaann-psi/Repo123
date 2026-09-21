@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) blokları DONE** (D blok KAPANDI); **CONFLICT-024** (40 kod tipi yok) + **CONFLICT-027** (13 T-eşiği koşulu) + **CONFLICT-030** (yanlış kod eşlemesi) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy I (s.95-99)**; **CONFLICT-024** (48 kod tipi yok) + **CONFLICT-027** (19 T-eşiği) + **CONFLICT-030** (kırpma) + **CONFLICT-031** (blok-bazlı kod) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,11 +47,23 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**92** (207 Kodu — D kod bloğu KAPANIŞI) — PDF p54 L
-Sonraki hedef: **s.95** (Hy (3) kod bloğu, PDF p55 L) — s.93-94 (Hy girişi + Tablo 10)
-batch 6'da tamamlanmıştı
+**99** (36/63 Kodu) — PDF p57 R
+Sonraki hedef: **s.100-110** (Hy kod bloğu devamı, PDF p58 L – p62 R)
 
 Last completed:
+**PHASE 9/10 batch 8 — Hy (3) T bantları + kod bloğu I (kitap s.95-99) DONE:**
+**P0 katmanı:** Hy T bantları **6/6 MATCH** (300 dpi görsel ×4 kadraj) +
+"Sadece Hy yükselmesi" kuralı ("3 yüksek ∧ diğer hiçbiri 70 T üstünde değil")
+**birebir MATCH** ✅ (küçük fark: normal band etiketi kodda `T 22-44` ↔ kaynak
+`24-44`). **Yorum katmanı:** Hy kod bloğu I okundu (Yüksek3/YüksekK, `31`, `32`,
+`321`, `34/43`, Yüksek3/Düşük4, `34`, `345/435/534`, `346/436`, `35/53`, `36/63`,
+`54/45` notu) · **YENİ ÇELİŞKİ — CONFLICT-031 (P1):** kaynak yorumları
+**blok-bazlı** (D bloğunun `23`ü ↔ Hy bloğunun `32`si **farklı metin**), ancak kod
+tek `Record` tutuyor → `32` çağrısı **D bloğunun `23` metnini** döndürüyor.
+`345/435/534` başlığı **300 dpi görselle** doğrulandı (3 varyant) → CONFLICT-032
+(kayıt). CONFLICT-027 **19 koşula** genişletildi. **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 7 — D kod bloğu KAPANIŞI (kitap s.88-92) DONE:**
 `273/723`, `274/724`, `275/725` (s.88) + **`278/728`** (s.89) + **`29/92` kapanışı,
 `20/02`, `207`** (s.92) okundu; 300 dpi görsel doğrulamayla **T-eşiği koşulları**
@@ -154,8 +166,9 @@ batch 6'da yapıldı).
 
 Status:
 **PHASE 9/10 IN_PROGRESS** — Bölüm 5 kod tipleri. **CONFLICT-024 (P1) açık:**
-40 kod tipi (Hs 22 + D 18) kodda yok. **CONFLICT-030 (P1) açık:** kırpma nedeniyle
-bu kodlar **yanlış metne** düşüyor. Tüm klinik ölçek blokları çıkarılmadan karar verme.
+48 kod tipi (Hs 22 + D 18 + Hy 8) kodda yok. **CONFLICT-030/031 (P1) açık:**
+kırpma nedeniyle bu kodlar **yanlış metne** düşüyor ve kod yorumları **blok-bazlı**
+(bkz. `32` ↔ `23`). Tüm klinik ölçek blokları çıkarılmadan karar verme.
 
 ## Next action
 
@@ -183,7 +196,7 @@ Sıradaki batch'ler (öncelik sırası):
 8b. ~~s.79-87 — D anahtarı + T bantları + D kod bloğu~~ ✅ **TAMAMLANDI**
 8c. ~~**s.88-94 — D kod bloğu devamı + Hy (3) alt testi**~~ ✅ **TAMAMLANDI**
    (batch 6: s.93-94 Hy girişi + Tablo 10; batch 7: s.88-92 D bloğu KAPANIŞI)
-9. **Hy (3) kod bloğu — s.95-110 (PDF p55 L – p62 R)** → sonra Pd (4), Mf (5),
+9. **Hy (3) kod bloğu devamı — s.100-110 (PDF p58 L – p62 R)** → sonra Pd (4), Mf (5),
    Pa (6), Pt (7), Sc (8), Ma (9), Si (0) → **CONFLICT-024 / 030 kararı**
    (tüm kod seti çıkarıldıktan sonra, tek tasarım kararı olarak)
 
@@ -284,13 +297,15 @@ Bilinen kısıtlar:
 | CONFLICT-027 | P1 | **Kod yorumlarındaki T-puan eşikleri tespit edilmiyor** (26/62: Pa&4&8>70; 27/72: 85+; 13/31; 138; 19/91; 136/316; 12/21) | OPEN |
 
 | CONFLICT-030 | P1 | **3+ ölçekli kodlar yanlış yoruma eşleniyor** (`slice(0,2)` kırpması; kapalı döngü) | OPEN |
+| CONFLICT-031 | P1 | **Kod yorumları blok-bazlı**, kod tek-anahtarlı → `32` ≠ `23` metni | OPEN |
+| CONFLICT-032 | P3 | `345/435/534` başlık varyantı erişilemez (kayıt) | OPEN |
 
-Kalan açık: **11 çelişki** → 0 P0 · 6 P1 (003, 004, 005, 024, 027, 030) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
+Kalan açık: **13 çelişki** → 0 P0 · 7 P1 (003, 004, 005, 024, 027, 030, 031) · 4 P2 (006, 007, 022, 025) · 2 P3 (026, 032).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 5: **PHASE 9/10 batch 7 — D kod bloğu KAPANDI** (s.88-92); CONFLICT-030 açıldı
+2026-09-21 — Oturum 5: **PHASE 9/10 batch 8 — Hy T bantları 6/6 MATCH + Hy kod bloğu I** (s.95-99); CONFLICT-031/032 açıldı
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
 ## CHECKPOINT
@@ -310,29 +325,31 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p39    (kitap s.62-63: dikkatsizlik kapanışı + Bölüm 5 girişi),
                 p48-p51 (kitap s.80-87: D anahtarı Tablo 9 + D kod bloğu I-III),
                 p52-p54 (kitap s.88-92: D kod bloğu IV-V + KAPANIŞ),
-                p55    (kitap s.93-94: Hy girişi + Tablo 10),
+                p55    (kitap s.93-99: Hy girişi + Tablo 10 + Hy T bantları + Hy kod I),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
                 p115-p124 (kitap s.215-233: EK 1 madde metinleri — yapı + 39 kritik madde),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K , Hs , D , Hy  (anahtarlar + normlar + bantlar)
                 Tablo 8/9/10 → BİREBİR MATCH (Hs 33, D 60, Hy 60 madde)
+                Hy T bantları → 6/6 MATCH (s.95 görsel)
                 46 madde anahtarı → 46/46 MATCH
                 26 norm hücresi  → 26/26 MATCH (Tablo 30)
                 Tablo 6 → 16/16 · Tablo 7 → 12/12 çift MATCH
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
                 Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
-Open conflicts: 11 (6 P1 · 4 P2 · 1 P3) — P0 AÇIK ÇELİŞKİ KALMADI
-                (003, 004, 005, 024, 027, 030 · 006, 007, 022, 025 · 026)
+Open conflicts: 13 (7 P1 · 4 P2 · 2 P3) — P0 AÇIK ÇELİŞKİ KALMADI
+                (003, 004, 005, 024, 027, 030, 031 · 006, 007, 022, 025 · 026, 032)
 Fixed:          10 (008..012, 015, 017, 019, 020-kısmi, 023) + 0 regression
 Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
 Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
 Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
-Next:           PHASE 9/10 — **Hy (3) kod bloğu s.95-110** (PDF p55 L – p62 R),
+Next:           PHASE 9/10 — **Hy kod bloğu devamı s.100-110** (PDF p58 L – p62 R),
                 aynı yöntem (`inventory.py` → görsel doğrulama → `cmp-*.ts`);
-                sonra Pd (4)…Si (0) → **CONFLICT-024/030 tek tasarım kararı**;
+                sonra Pd (4)…Si (0) → **CONFLICT-024/030/031 tek tasarım kararı**
+                (blok-bazlı kod kimliği + üçlü kod seti; acele etme);
                 ardından PHASE 11-13 + FINAL (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```
