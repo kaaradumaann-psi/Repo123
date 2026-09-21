@@ -97,7 +97,21 @@ Kodda bu koşul katmanı **yok** (yalnızca `seeAlso` metinleri).
 | `213/231` | s.83 | "Ayrıca 123 koduna da bakınız" |
 | `231/321`, `234/324`, `237/327` | s.83 | "**En sık üçlü kodlar**" |
 | `237`, `239` | s.83 | atıf |
-| `24/42`, `28/82` … | s.84+ | okunacak |
+| `243/432` | s.85 | "24/42'ye ek olarak" |
+| `247/427/472`, `742` | s.85 | "Ayrıca 274'e bakınız" |
+| `248` | s.86 | |
+| `248 / Yüksek F` | s.86 | alt-kod ("Temel şizofrenik konfigürasyon") |
+| `26/62` | s.87 | **Pa ve/veya 4,8 > 70 T → psikoz erken dönem** |
+| `27/72` | s.87 | **85 T üstü → ilaç gerekli** |
+| `275/725`, `278/728`, `273/723`, `271/721`, `270/720` | s.87 | "en sık üçlü kodlar" |
+| `24/42` + atıflar `3, 7 ya da 8` | s.84 | üçüncü yükselen test |
+
+### D (2) alt testi kod bloğu — KAPANIŞ (s.82-87)
+
+**Kodda VAR (4):** `21/12`, `23`, `24/42`, `25/52`, `26/62`, `27/72`
+**Kodda YOK (12+):** `213/231`, `231/321`, `234/324`, `237/327`, `239`, `243/432`,
+`247/427/472`, `742`, `274`, `248`, `248+YüksekF`, `275/725`, `278/728`,
+`273/723`, `271/721`, `270/720`, `Nat`
 
 ### Kritik kaynak cümlesi (s.83, D bloğu)
 > "**En sık üçlü kodlar 231/321, 234/324 ve 237/327'dir.**"

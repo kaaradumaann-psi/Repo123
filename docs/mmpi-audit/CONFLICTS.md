@@ -959,3 +959,40 @@ Source (**Visual: CONFIRMED**, s.66-67):
 
 Impact: Bilgi eksikliği; tespit kuralı (4) uygulanmıyor ama yanlış sonuç
 üretilmiyor. Status: **OPEN**
+
+
+---
+
+## CONFLICT-027 — Kod yorumlarındaki **T-puan eşikleri** tespit edilmiyor (P1, OPEN)
+
+Area: kod tipi yorum katmanı (`mmpiSourceCodes.ts` + `mmpiInterpretation.ts`)
+
+Source (**Visual: CONFIRMED**): Kaynak, kod yorumlarını yalnızca **ilk iki ölçeğe**
+bağlamıyor; **ek ölçeklerin T değerlerine** bağlı koşullar koyuyor:
+
+| Kod | Kaynak koşulu | Kaynak |
+|---|---|---|
+| `26/62` | "**Pa alt testi belirgin bir biçimde yükseldiğinde ve/veya 4 ve 8 alt testi 70 T puanının üzerinde ise**, bireyin psikozun erken dönemlerinde olma olasılığı artar." | s.87 |
+| `27/72` | "**Çok fazla yükselmeler (örneğin, 85 T puanının üstünde)** sıklıkla bireyin sözel psikoterapide yeterli derecede odaklanamayacak kadar ajite ve endişeli olduğu anlamına gelir ve **daha etkili müdahale formları (ilaç gibi) gerekli olabilir.**" | s.87 |
+| `13/31` Yüksek K | "özellikle **2, 7 ve 8 testlerinin T puanı 70'in ve F alt testi T puanı 50'nin altında** olduğu durumda" | s.72 |
+| `138` | "**4 alt testinde yükselme varsa ve K alt testi düşmüşse** mücadeleci ve yıkıcı kişilik özellikleri" | s.74 |
+| `19/91` | "**2 ve 3 alt testlerinin değerleri 5 T puanından aşağıda ise** 129 ve 139 koduna bakınız" | s.77 |
+| `136/316` | "**Pa alt testi, Hy alt testinden 10 T puanından daha yüksekse** şüphecilik ve kızgınlık oldukça belirgindir"; "**Hy alt testi, Pa alt testinden 10 ya da daha fazla T puanı yüksekse** paranoid özellikler daha az belirgin olmak üzere fiziksel yakınmalar ön plana çıkabilir." | s.73 |
+| `12/21` | "**1 ve 2 alt testleri arasında 5 T puanı kadar fark varsa** 21'e bakılır" | s.68 |
+
+Current implementation: `CodeInterpretation = { code, text, diagnosis?, seeAlso? }`
+— **koşul alanı yok**. `codePointInterpretation()` yalnızca kod dizesine bakar;
+T değerleri **hiç okunmuyor**. Koşullu cümlelerin bir kısmı `text` içinde
+gömülü (13/31 Yüksek K), çoğu **hiç yok**.
+
+Impact: Klinik olarak anlamlı ayrımlar kayboluyor. Örnek: `27/72` profilinde
+**85 T üstü** bir yükselme olduğunda kaynak **"ilaç gerekli olabilir"** diyor;
+kod bunu hiçbir koşulda söylemiyor. `26/62` + `Pa`/`4`/`8` **> 70 T** durumunda
+kaynak **"psikozun erken dönemi"** diyor; kod demiyor.
+
+Status: **OPEN** — CONFLICT-024 ile **aynı kök neden** (kod modeli tek boyutlu:
+yalnızca kod dizesi). Çözüm önerisi: `CodeInterpretation`'a
+`conditions?: Array<{ rule: string; test: (t: Record<ScaleId, number>) => boolean; text: string }>`
+ekleyip `codePointInterpretation(code, tScores)` imzasını genişletmek.
+Bu, **kaynağın tüm kod seti** çıkarıldıktan sonra 024 ile **birlikte**
+kararlaştırılmalı.
