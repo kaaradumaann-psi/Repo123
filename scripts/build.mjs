@@ -112,6 +112,32 @@ const html = shell
 await mkdir(new URL('../dist/', import.meta.url), { recursive: true });
 await writeFile(new URL('../dist/index.html', import.meta.url), html);
 await writeFile(new URL('../optik-form.html', import.meta.url), html);
+// HTTP yanıt başlıkları: <meta> CSP'nin aksine `frame-ancestors` yalnız HTTP
+// başlığıyla uygulanır (tarayıcılar meta etiketindeki bu yönergeyi yok sayar);
+// nosniff/referrer/permissions/HSTS sertleştirmeleri de yalnız başlıkla gelir.
+// Cloudflare Workers statik varlıkları `_headers` dosyasını yerel olarak
+// destekler; Cloudflare Pages ve Netlify da aynı dosya biçimini anlar. Dosya
+// her derlemede yeniden yazılır ve kendisi statik varlık olarak servis edilmez.
+//  - frame-ancestors 'none' + X-Frame-Options DENY: tıklama kaçırma (clickjacking).
+//  - nosniff: MIME koklamayı kapatır.
+//  - Referrer-Policy: /kayitlar/<uuid> gibi pathname'ler dışarıya sızmasın.
+//  - Permissions-Policy: kamera yalnız uygulamanın kendi origin'inde (tarama
+//    özelliği için gerekli); mikrofon/konum/ödeme/USB hiçbir bağlamda değil.
+//  - HSTS: oturum sessionStorage'da taşındığı için SSL-strip'e karşı ek katman.
+//  - COOP/CORP: çapraz köken gömme ve pencere ilişkisi izolasyonu.
+const securityHeaders = [
+  '/*',
+  '  Strict-Transport-Security: max-age=15552000',
+  '  X-Content-Type-Options: nosniff',
+  '  X-Frame-Options: DENY',
+  "  Content-Security-Policy: frame-ancestors 'none'",
+  '  Referrer-Policy: strict-origin-when-cross-origin',
+  '  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=()',
+  '  Cross-Origin-Opener-Policy: same-origin',
+  '  Cross-Origin-Resource-Policy: same-origin',
+  '',
+].join('\n');
+await writeFile(new URL('../dist/_headers', import.meta.url), securityHeaders);
 // SPA fallback iki barındırmada iki farklı yolla sağlanır:
 //   - Cloudflare Workers: `wrangler.jsonc` → assets.not_found_handling
 //     ("single-page-application") eşleşmeyen pathname'lerde index.html döndürür.

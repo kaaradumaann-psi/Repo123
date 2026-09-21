@@ -410,7 +410,7 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 | `npm run typecheck` | `tsc --noEmit`, strict/noUnused | **DOĞRULANDI** |
 | `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print ve router | **239/239 DOĞRULANDI** |
 | `npm run verify:pdf` | hazır/üretilmiş form PDF byte/geometri/QR doğrulaması | **DOĞRULANDI** — 4 A4, 566 madde, 1.132 bubble |
-| `npm run build` | typecheck + standalone `dist/index.html`, tracked `optik-form.html` üretimi (`dist/_redirects` yalnızca `PAGES_REDIRECTS=1` ile) | **DOĞRULANDI** |
+| `npm run build` | typecheck + standalone `dist/index.html`, tracked `optik-form.html` üretimi (`dist/_redirects` yalnızca `PAGES_REDIRECTS=1` ile; `dist/_headers` HTTP güvenlik başlıkları her derlemede) | **DOĞRULANDI** |
 | `git diff --check` | whitespace/diff hygiene | **DOĞRULANDI** |
 | `npm audit --audit-level=high` | advisory scan | **DOĞRULANDI** — 0 vulnerability |
 
@@ -437,7 +437,10 @@ Aşağıdakiler otomatik testler sayesinde PASS sayılamaz ve bu ortamda **DOĞR
 - gerçek iOS/Android kamera, HTTPS permission, Safari/Firefox/Chrome PDF viewer, gerçek yazıcı/kâğıt/kalem/fotokopi;
 - gerçek fotoğraf kalibrasyonu ve klinik kabul doğruluğu;
 - responsive cihaz matrisi, keyboard-only manual corners, ekran okuyucu ve reduced-motion;
-- production hosting SPA fallback, CSP header/proxy, `ALLOWED_ORIGINS`, Supabase region/backup/retention.
+- production hosting SPA fallback, `ALLOWED_ORIGINS`, Supabase region/backup/retention.
+  (HTTP güvenlik başlıkları — HSTS, nosniff, frame-ancestors/X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, COOP/CORP — artık `dist/_headers` ile derlemeden çıkıyor; canlı yayında
+  başlıkların uygulandığı `curl -I` ile bir kez doğrulanmalıdır.)
 
 CI (`.github/workflows/ci.yml`) `npm ci`, typecheck, test, PDF verify, build ve tracked `optik-form.html` diff kontrolü yapar. Lint/E2E/manual Supabase step'i yoktur.
 
@@ -586,3 +589,4 @@ Doğrulama kanıtları (yerel):
 - **Güvenlik:** `npm audit --audit-level=high` 0; `git diff --check` temiz.
 
 Canlı dağıtım için `supabase db push` ve `supabase functions deploy admin-users` zorunludur.
+ons deploy admin-users` zorunludur.
