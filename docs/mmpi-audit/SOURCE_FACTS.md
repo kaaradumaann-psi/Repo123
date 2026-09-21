@@ -2816,3 +2816,96 @@ Status: **VERIFIED** (kaynak) · **YOK** (kod)
 | 🎯 P0 anahtar | **BİREBİR MATCH** (59+19 = 78) |
 | 🎯 Norm | **BİREBİR MATCH** (29.82 / 31.06) |
 | T bantları | **5/5 MATCH** |
+
+---
+
+# PHASE 9/10 batch 19 — Ma (9) Hipomani bloğu (kitap s.149-153)
+
+Sayfa eşlemesi (OCR başlıklarıyla doğrulandı): **p82 R = 149 · p83 L = 150 ·
+p83 R = 151 · p84 L = 152 · p84 R = 153**
+
+## SOURCE-MA-001 · Tablo 16 — Ma anahtarı (s.150) — **Visual: CONFIRMED** (140 dpi tam sayfa)
+
+> "**Tablo 16. Hipomani alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 46)**"
+
+| | Madde numaraları |
+|---|---|
+| **Doğru** (4 satır = 35) | 11 13 21 22 59 64 73 97 100 109 127 · 134 143 156 157 167 181 194 212 222 226 228 · 232 233 238 240 250 251 263 266 268 271 277 · 279 298 |
+| **Yanlış** (2 satır = 11) | 101 105 111 119 120 148 · 166 171 180 267 289 |
+| **(K Ekleme)** | ✓ |
+| **Norm** | "Erkeklerde ortalama: **19.96**, kadınlarda ortalama: **19.72** (Savaşır, 1981)" |
+
+Kod `SCORING_KEYS.Ma`: Doğru **35** + Yanlış **11** = **46** → **BİREBİR MATCH** ✅
+Norm `TURKISH_NORMS.Ma`: erkek **19.96** / kadın **19.72** → **BİREBİR MATCH** ✅
+Status: **VERIFIED** — script: `cmp-tablo16.ts`
+
+## SOURCE-MA-002 · Ma T bantları (s.151-152) — **Visual: CONFIRMED**
+
+> "**85 T puanı ve üstü:** Ajitasyon ya da manik dönem olabilir. Birey hiperaktiftir,
+> davranışları yordanamaz, fikir uçuşmaları vardır. Kendilik değerlerini abartır."
+> "**70-84 T puanı:** Enerjik, konuşkan, eylemi düşünceye tercih eden kişilerdir. …
+> Gerçek manik özellikler gösterebilirler; fikir uçuşması, duygudurumda kaymalar ve
+> değişmeler, büyüklük sanrıları ve hiperaktivite gibi. **Ergenlerde** bu yükselme,
+> artmış hareketliliği gösterir. İmpulsif ve kontrolsüzdürler. **Grandiozite ve
+> çağrışımlarında artmalar vardır. İletişim güçlükleri ve suça eğilim görülebilir.**"
+> "**60-75 T puanı** aralığındaki puanlar enerjik, dışadönük ve aktif bireyleri
+> gösterir. …"
+> "**60-69 T puanı:** Hoş, enerjik, meraklı, sosyal, kolay ilişki kuran, ilgi
+> alanları geniş kişilerdir. …"
+> "**45-59 T puanı:** Normal aralığıdır. Puan normal aralıktan yükseldikçe mani
+> düzeyinin arttığı düşünülür. Bu şekilde, puanlardaki artış man iye, giderek
+> hiperman iye işaret eder. …"
+> "**21-44 T puanı:** Düşük enerji düzeyi, güdü azlığı ve hatta apatiyi gösterir.
+> … **Özellikle 2 alt testinin yükselmedi ği durumlarda depresyon düşünülmelidir.
+> Yaşlı insanlarda 9'un düşüklüğü beklenen bir durumdur, normal yaşlanma sürecini
+> gösterir, 45 yaşın altında düşük olması beklenen bir durum değildir ve dikkat
+> edilmesi gerekir.**"
+
+Kod (`clinicalBands('Ma')`): `T ≥ 85` · `T 70-84` · `T 60-69` · `T 45-59` ·
+`T 21-44` → **5/5 bant MATCH** ✅
+**Not:** Kaynakta "60-75 T" ile "60-69 T" başlıkları **yan yana** geçer (60-75
+muhtemelen 60-74 kastı; metin bütünlüğü bozuk). Kod `60-69` bandını izler —
+kaynağın ikinci (daha dar ve tutarlı) ifadesiyle uyumlu.
+Status: **VERIFIED** · "60-75" etiketi **OCR-UNCERTAIN** (kaynak içi tutarsızlık)
+
+## SOURCE-MA-003 · Ma kod bloğu (s.152-153) — **Visual: CONFIRMED**
+
+**İki özel yükseklik başlığı** (⚠️ OCR ilkini "Düşük K" diye yanlış okudu →
+`OCR_ISSUES.md` SEMANTIC-SWAP):
+
+**`Yüksek 9/Yüksek K Kodu`** (s.152):
+> "**Eğer 9 ve K alt testlerinde puanlar 70 T puanında (2 alt testi T: 50'nin
+> altında ise) ise** bu kişiler enerjik, organize, diğerlerinin kendileri üzerinde
+> otorite kurmasını istemeyen kişilerdir. Genellikle çok iyi yöneticidirler. Güç
+> yönelimli bireylerdir. … **K alt testi 70 T puanının üzerine çıkarsa**, kendi
+> yaşamlarını ve çevrelerindeki diğer kişilerin yaşamlarını organize etme çabaları
+> vardır. … **Kadınlar fiziksel çekicilik konusunda teşhircidirler (eğer 5 alt
+> testinde T: 40'ın altında ise)**…"
+
+**`Yüksek 9/Düşük K Kodu`** (s.153): "Narsisistik kişilerdir. Kadınlar,
+eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine
+çekerler."
+
+**Çapraz referanslar (s.153):** `91/19` (Ayrıca 19/91) · `92/29` · `93/39` ·
+`94/49` ("Eyleme vuruk davranış ile ilgilidir") · `95/59` · `96/69` · `97/79` ·
+`98/89` · `90/09`
+
+**`90/09 Kodu`** (s.153): "Kod oldukça nadirdir, özellikle erkeklerde çok az
+görülür. … **Si alt testinin yükselmesi bırakılarak yorum, yükselen diğer iki alt
+test ile yapılmalıdır. Daha sonra eğer gerekliyse Si alt testi yorumlanmalıdır.**"
+
+**Diğer kritik kurallar (s.152):**
+> "Yalnızca alt test 9'u kullanarak bir yoruma gitmek güçtür. … **Hipomani alt
+> testiyle birlikte alt test 4'ü yükselen bir hastanın yorumu, alt test 8 ile 9'u
+> birlikte yükseltmiş hastadan farklıdır.**"
+
+Kod karşılaştırması (`cmp-ma-batch19.ts`):
+- **9 iki-ölçek kod → 9/9 VAR** ✅
+- **`Yüksek 9/Yüksek K` ve `Yüksek 9/Düşük K` konfigürasyonları → YOK** ❌
+- **Sayısal kurallar kodda YOK:** "9 ve K 70 T puanında (2 alt testi T: 50'nin
+  altında)" · "K 70 T üzerine çıkarsa" · "5 alt testinde T: 40'ın altında"
+  · "45 yaşın altında düşüklük beklenmez"
+
+**Ma bloğu: 9 VAR / 2 YOK** (özel konfigürasyonlar)
+Status: **VERIFIED** (kaynak) · özel konfigürasyonlar **YOK**

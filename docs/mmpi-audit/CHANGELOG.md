@@ -1305,3 +1305,37 @@ Tarih: 2026-09-22 · Kaynak: **s.142-148** (PDF p79 L – p82 L)
 `cmp-tablo15.ts` (anahtar + norm birebir) · `cmp-sc-batch18.ts` (kod kapsamı) ·
 `cmp-pt-batch18.ts` (Pt kapanışı) · typecheck **0** · testler **316/316 PASS** ·
 **kod değişikliği YOK**.
+
+---
+
+## PHASE 9/10 — batch 19: Ma (9) Hipomani bloğu TAMAMI (kitap s.149-153)
+
+Tarih: 2026-09-22 · Kaynak: **s.149-153** (PDF p82 R – p84 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 149 | p82 R | **Ma (9) Alt Testi** başlığı + Graham 1987 listesi + Tablo 16 atfı | — |
+| 150 | p83 L | **Tablo 16 (Ma anahtarı — 46 madde)** + norm | 🎯 **BİREBİR MATCH** |
+| 151 | p83 R | **Ma T bantları** (85+ / 70-84 / 60-75 / 60-69 / 45-59) | bantlar 5/5 MATCH |
+| 152 | p84 L | Ma bantları devamı (21-44) + **`Yüksek 9/Yüksek K Kodu`** + Ma ilişkileri | konfig **YOK** |
+| 153 | p84 R | **`Yüksek 9/Düşük K Kodu`** + `91/19`…`90/09` | 9 VAR / 2 YOK |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 16 birebir MATCH:** Doğru 35 + Yanlış 11 = **46** (kitap başlığı 46)
+- **🎯 Ma normları birebir MATCH:** erkek **19.96** / kadın **19.72**
+- **Ma T bantları 5/5 MATCH** (`85+ / 70-84 / 60-69 / 45-59 / 21-44`)
+- **Ma kod bloğu 9 VAR / 2 YOK** — çapraz referansların tamamı var; iki **özel
+  "Yüksek 9" konfigürasyonu** yok
+- **🆕 CONFLICT-039 (P1):** `Yüksek 9/Yüksek K` (güç yönelimli, iyi yönetici) ve
+  `Yüksek 9/Düşük K` (narsisistik/eksibisyonist) profilleri üretilemiyor
+- **⚠️ Yeni OCR kuralı — SEMANTIC-SWAP:** OCR `Yüksek 9/**Yüksek** K`'yı
+  "**Düşük** K" okudu; 140 dpi görsel düzeltti → karşıt anlamlı çiftler
+  (Yüksek/Düşük, artar/azalır, üstünde/altında) OCR'dan kabul edilmez
+- **CONFLICT-027 +5 kural** · **CONFLICT-033 → 7. konfig**
+- **Kümülatif: 152 başlık → 112 VAR / 42 YOK**
+
+### Doğrulama
+
+`cmp-tablo16.ts` (anahtar + norm birebir) · `cmp-ma-batch19.ts` (kod kapsamı) ·
+typecheck **0** · **kod değişikliği YOK**.

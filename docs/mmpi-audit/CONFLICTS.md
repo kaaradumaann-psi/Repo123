@@ -1594,3 +1594,41 @@ kararında** ele alınacak. Kod değişikliği YOK.
 
 **CONFLICT-033 kapsamı (2. vadi):** **Şekil 22 — Pa · Pt · Sc paranoid vadi**
 ("hepsini doğru yanıtlaması şeklinde de ortaya çıkar") kodda yok. Kapsam: 6 konfig.
+
+
+---
+
+## CONFLICT-039 — "Yüksek 9" özel konfigürasyonları kodda yok (P1, OPEN)
+
+Area: Ma (9) yorum katmanı
+
+**Source (Visual: CONFIRMED, s.152-153):** Kitap Ma bloğunda **iki ayrı özel
+yükseklik konfigürasyonu** tanımlar:
+
+| # | Başlık | Kaynak koşulu ve içerik |
+|---|---|---|
+| 1 | **`Yüksek 9/Yüksek K`** (s.152) | "Eğer 9 ve K alt testlerinde puanlar **70 T puanında** (2 alt testi **T: 50'nin altında** ise)…" → enerjik, organize, güç yönelimli, iyi yönetici; **K > 70 T** olursa organize etme çabası; **kadınlar teşhircidir (5 alt testi T: 40'ın altında ise)** |
+| 2 | **`Yüksek 9/Düşük K`** (s.153) | Narsisistik kişiler; kadınlar eksibisyonist biçimde kendilerini sergiler |
+
+**Current implementation:** Kodda **iki başlık da yok**; `mmpiSource.ts` içinde
+Ma'ya özel bir `SingleElevation`/konfigürasyon kaydı bulunmuyor. Kod tabanında
+"narsisistik" + "eksibisyon" birlikte yalnızca `38` ve `49` kayıtlarında
+(diğer ölçekler) geçiyor.
+
+Impact: **P1** — Ma yükselmesi yorumlanırken kaynağın ayırt ettiği iki farklı
+kişilik profili (yüksek K'lı güç yönelimli ↔ düşük K'lı narsisistik) üretilemiyor.
+
+Status: **OPEN** — CONFLICT-033 (eksik konfigürasyonlar) ile **tek tasarım
+kararı** altında ele alınacak. CONFLICT-033 kapsamı **7. konfig**.
+
+---
+
+## CONFLICT-027 genişlemesi — Ma bloğu (batch 19)
+
+| # | Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|---|
+| 1 | `Yüksek 9/Yüksek K`: "9 ve K **70 T** puanında (2 alt testi **T: 50'nin altında** ise)" | s.152 | YOK |
+| 2 | `Yüksek 9/Yüksek K`: "**K 70 T puanının üzerine çıkarsa**" ek koşulu | s.152 | YOK |
+| 3 | `Yüksek 9/Yüksek K`: "kadınlar teşhircidir (**5 alt testinde T: 40'ın altında ise**)" | s.152 | YOK |
+| 4 | Ma düşük puan: "**45 yaşın altında düşük olması beklenen bir durum değildir**" (yaş kuralı) | s.152 | YOK |
+| 5 | `90/09`: "**Si alt testinin yükselmesi bırakılarak** yorum yükselen diğer iki alt test ile yapılmalıdır" | s.153 | YOK (kod `Si` için böyle bir kısıt taşımıyor) |

@@ -339,3 +339,33 @@ doğrulanamazdı** (bandın etiketi yok sayılır ya da yanlış okunurdu).
 numarası, eşik) yoğunlaşıyor — çünkü OCR kalın/kısa satırları (etiket + uzun
 paragraf) daha kolay düşürüyor. Bu yüzden **band/eşik etiketleri her zaman
 görselden** okunur (FIGUR-CURVE kuralının sayısal tablo uzantısı).
+
+---
+
+## SEMANTIC-SWAP — OCR "Yüksek" ↔ "Düşük" karıştırması (yeni kural, batch 19)
+
+**Bulgu (s.152, p84 L):** OCR başlığı **"Yuksek9/DusukKKodu"** olarak döndürdü.
+140 dpi **tam sayfa görsel** okuma gerçek başlığın **"Yüksek 9/Yüksek K Kodu"**
+olduğunu gösterdi. Kitap **iki ayrı** özel başlık taşıyor:
+- **`Yüksek 9/Yüksek K Kodu`** (s.152)
+- **`Yüksek 9/Düşük K Kodu`** (s.153)
+
+**Neden tehlikeli:** Bu bir **karakter** hatası değil, **anlam** hatasıdır. OCR
+"Yüksek" yerine "Düşük" yazdığında ortaya çıkan metin dilbilgisel olarak
+geçerlidir ve sessizce yanlış bir denetim sonucuna yol açabilir (burada: iki
+başlıktan birinin hiç var olmadığı sanısı).
+
+**Kural:** "Yüksek/Düşük", "artar/azalır", "üstünde/altında" gibi **karşıt anlamlı
+çiftler** içeren başlık ve eşik ifadeleri OCR metninden **kabul edilmez**;
+≥125 dpi tam sayfa görsel okumayla doğrulanır.
+
+**İlişkili kayıtlar:** SOURCE-MA-002/003 · CONFLICT-039
+
+---
+
+## FIGURE-CURVE (hatırlatma, batch 18)
+
+"Paranoid vadi" tanımı **iki farklı yerde iki farklı sayıyla** geçiyor
+(s.132: 6,8 ≈ 70 T / 7 ondan 10 T aşağıda ↔ s.146: 6,8 > 80 T / 7 = 70 T).
+Her iki okuma da **tam sayfa görselle** doğrulandı; fark OCR kaynaklı değil,
+**kaynağın kendisinden** → CONFLICT-038.
