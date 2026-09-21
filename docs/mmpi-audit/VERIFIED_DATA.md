@@ -665,3 +665,26 @@ kadrajı** (spine tablonun 5. sütunundan geçiyor) · **Ek 9 ile çapraz kontro
 | 60-69 T | `60–69` | ✅ |
 | 45-59 T | `45–59` | ✅ |
 | 20-44 T | `0–44` | ✅ |
+
+
+---
+
+# PHASE 9/10 batch 14 — Mf (5) bloğu doğrulaması (kitap s.122-125)
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Tablo 12 anahtarı (P0)** | Doğru **28** + Yanlış **32** = **60** | 28 + 32 = 60 | ✅ **BİREBİR MATCH** |
+| (*) kadınlarda ters (5 madde: 69, 179, 231, 297, 133) | 5 madde | `female` listelerinde **5/5 ters** | ✅ **birebir** |
+| Norm — erkek | 29.21 (Savaşır 1981) | 29.21 | ✅ MATCH |
+| Norm — kadın | 32.98 (Savaşır 1981) | 32.98 | ✅ MATCH |
+| **Mf T bantları — Erkek (5 bant)** | 80+/70-79/60-69/41-59/26-40 | `MF_MALE_T_BANDS` | ✅ **5/5 MATCH** |
+| **Mf T bantları — Kadın (4 bant)** | >65/56-65/41-55/26-40 | `MF_FEMALE_T_BANDS` | ✅ **4/4 MATCH** |
+| "Erkeklerde sadece Mf yükselmesi" metni | s.125 | `SINGLE_MF_MALE` | ✅ metin MATCH |
+| **"sadece Mf" tespit eşiği** | **75 T ve üstü** | **≥ 70** | ❌ **FARK** → CONFLICT-027 (P1) |
+| Mf kodları (7) | 51/15, 52/25, 53/35, 54/45, 56/65, **564/654**, 57/75 | 6 VAR / 1 YOK | ⚠️ `564/654` eksik |
+
+**Kitabın kendi başlığı doğrulandı:** Tablo 12 "(Madde Sayısı: 60)" →
+28 + 32 = **60** ✓ (kaynak içi tutarlılık, çapraz kontrol başarılı).
+
+**Kanıt script'i:** `scripts/mmpi-audit/cmp-tablo12.ts` (kaynak listeleri gömülü,
+yeniden koşulabilir).

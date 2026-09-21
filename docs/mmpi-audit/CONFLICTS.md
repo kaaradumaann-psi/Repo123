@@ -1417,3 +1417,39 @@ kodda bunların **hiçbiri yok**:
 | `'498'` | `49/94` | 498/948 |
 
 → CONFLICT-030 örnekleri **28 → 34**'e çıktı.
+
+---
+
+## CONFLICT-027 · genişletme (Mf bloğu — s.125, **P1 örneği**)
+
+**Kaynak:** "Erkeklerde **5 testinde 75 T puanı ve üstü**, eğitim düzeyleri orta ya
+da lise 1 ise ve oldukça katı kültürel baskı varsa…" (s.125, p70 R)
+
+**Kod:** `mmpiInterpretation.ts:231` → `if (profile.gender === 'Erkek' &&
+single('Mf'))` burada `single(id)` = **`t(id) >= 70 && others(id) < 70`**
+
+→ Kaynak eşiği **75 T**, kod eşiği **70 T** → kod, kaynağın **"sadece Mf
+yükselmesi"** örüntüsünü **5 puan erken** tetikliyor. Aynı örüntü `SINGLE_MF_MALE`
+metninde kaynağın **75** sayısı **doğru aktarılmış**, ama **tespit kuralı**
+metinle uyuşmuyor (metin 75 der, kod 70 uygular).
+
+Not: `single()` Hs/D/Hy/Pa/Pt için de kullanılıyor (hepsi 70) — bu bloklarda
+kaynak eşiği henüz doğrulanmadı; **Mf'de doğrulandı ve sapma kanıtlandı**.
+
+→ CONFLICT-027 örnekleri **32 → 33**.
+
+## CONFLICT-024 · genişletme (Mf bloğu — s.125-126)
+
+| # | Kaynak başlığı | Sayfa | Durum |
+|---|---|---|---|
+| 1 | **`564/654`** | s.125-126 | **YOK** ❌ (`'564'` → `56/65` döndürüyor) |
+
+→ Kod seti toplamı: **36 VAR / 71 YOK.**
+
+## CONFLICT-030 · genişletme (Mf bloğu)
+
+| Çağrı | Dönen | Beklenen |
+|---|---|---|
+| `'564'` | `56/65` | 564/654 |
+
+→ CONFLICT-030 örnekleri **34 → 35**.

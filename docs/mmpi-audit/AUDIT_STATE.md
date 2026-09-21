@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd TAMAMI (s.107-120)**; Mf (5) sırada; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 34 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd TAMAMI (s.107-120) + Mf anahtar/bantlar (s.122-125)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 35 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) + **CONFLICT-035** (FIXED) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,25 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**121** (Mf (5) girişi) — PDF p68 R
-Sonraki hedef: **s.122+** — **Mf (5) bloğu**: Tablo 12 (anahtar) + T bantları, PDF p69+
+**125** (Mf kodları) — PDF p70 R
+Sonraki hedef: **s.126+** — Mf kod bloğu devamı (`57/75`), PDF p71+
 
 Last completed:
+**PHASE 9/10 batch 14 — Mf (5) bloğu: Tablo 12 + T bantları + kodlar (s.122-125) DONE:**
+**🎯 P0 — Tablo 12 (Mf anahtarı) BİREBİR MATCH:** Doğru **28** + Yanlış **32** =
+**60** (kitabın "(Madde Sayısı: 60)" başlığıyla uyumlu) ✅ · (*) kadınlarda ters
+**5 madde** (69, 179, 231, 297, 133) → kodda `female` listelerinde **5/5 ters** ✅
+· norm **29.21 / 32.98** MATCH ✅. **Okuma:** 450 dpi **satır satır kadraj**.
+**T bantları:** Erkek **5/5** ✅ · Kadın **4/4** ✅. **🔴 CONFLICT-027 genişledi
+(P1):** kaynak "Erkeklerde 5 testinde **75 T puanı ve üstü**" ↔ kod
+`single('Mf')` = **≥ 70** → 5 puan erken tetikleme (metin 75'i doğru taşıyor,
+tespit 70). **Mf kodları:** 6/7 VAR ✅ (`51/15`, `52/25`, `53/35`, `54/45`,
+`56/65`, `57/75`); **`564/654` YOK** ❌ → CONFLICT-024 (**36 VAR / 71 YOK**) ve
+CONFLICT-030 (**35 örnek**). **OCR kuralı `LOWCONF-GAP` 2. kez doğrulandı**
+(s.123 "80 ve üstü T" + s.124 "26-40 T puanı" etiketleri kaybolmuştu → 360 dpi
+kurtarma). **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 13 — Pd (4) kod bloğu III + Pd BLOĞU KAPANIŞI (s.118-121) DONE:**
 `482/842/824` **YOK** ❌ · `489/849` **YOK** ❌ · `49/94` **VAR** ✅ (gövde+diagnosis
 MATCH) · `493/943` **YOK** ❌ · `495/945` **YOK** ❌ · `496/946` **YOK** ❌ ·
@@ -270,8 +285,10 @@ Sıradaki batch'ler (öncelik sırası):
 9c. ~~**Pd kod bloğu II — s.114-117**~~ ✅ **TAMAMLANDI** (batch 12)
 9d. ~~**Pd kod bloğu III — s.118-121**~~ ✅ **TAMAMLANDI** (batch 13) —
    **Pd bloğu kapandı**; Mf (5) başladı
-9e. **Mf (5) bloğu — s.122+ (PDF p69 L+)** → **Tablo 12 (Mf anahtarı)** +
-   T bantları + kod bloğu → sonra Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
+9e. ~~**Mf (5) bloğu — s.122-125**~~ ✅ **TAMAMLANDI** (batch 14) —
+   **Tablo 12 birebir MATCH**, bantlar 9/9 MATCH; `564/654` eksik
+9f. **Mf kod bloğu devamı — s.126+ (PDF p71 L+)** → `57/75` + Pa (6) bloğuna
+   geçiş → sonra Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
    → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
    sonra, tek tasarım kararı olarak)
 
@@ -381,12 +398,14 @@ Bilinen kısıtlar:
 
 Kalan açık: **15 çelişki** → 0 P0 · 8 P1 (003, 004, 005, 024, 027, 030, 031, 033) · 5 P2 (006, 007, 022, 025, 034) · 2 P3 (026, 032).
 FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
-**Güncel kapsam (CONFLICT-024):** kod seti **36 VAR / 70 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd 13).
+**Güncel kapsam (CONFLICT-024):** kod seti **36 VAR / 71 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd 13+Mf 1).
+**CONFLICT-027 örnek sayısı: 33** — en yeni: Mf "sadece yükselme" eşiği (kaynak **75 T** ↔ kod **70 T**).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 6: **PHASE 9/10 batch 13 — Pd bloğu KAPANDI** (s.118-121); CHANGE-012 (terim düzeltmesi), CONFLICT-035 FIXED, Mf (5) başladı
+2026-09-21 — Oturum 6: **PHASE 9/10 batch 14 — Mf bloğu: Tablo 12 BİREBİR MATCH** (s.122-125); bantlar 9/9, CONFLICT-027 P1 eşik farkı
+Önceki: **PHASE 9/10 batch 13 — Pd bloğu KAPANDI** (s.118-121); CHANGE-012, CONFLICT-035 FIXED
 Önceki: **PHASE 9/10 batch 11 — Pd kod bloğu I** (s.111-113)
 Önceki: Oturum 5: **PHASE 9/10 batch 10 — Pd anahtarı + T bantları** (s.107-110)
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
@@ -415,6 +434,8 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p67-p68 (kitap s.118-121: Pd kod bloğu III + KAPANIŞ →
                          482/842/824, 489/849, 493/943, 495/945, 496/946,
                          498/948, 40/04 + Mf (5) girişi),
+                p69-p70 (kitap s.122-125: Tablo 12 Mf anahtarı BİREBİR MATCH +
+                         Mf T bantları 9/9 MATCH + Mf kodları),
                 p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
                 p61-p63 (kitap s.107-110: TABLO 11 Pd anahtarı + Pd T bantları),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),

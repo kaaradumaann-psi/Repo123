@@ -294,8 +294,21 @@ nedeniyle başka bir metne** düşüyor.
 | Nevrotik üçlü profilleri (s.103-106) | 0 | 4 |
 | Pd (s.111-113) — batch 11 | 5 | 4 |
 | Pd (s.114-117) — batch 12 | 2 | 8 |
-| **Pd (s.118-121) — batch 13** | **2** | **6** |
-| **Toplam** | **36** | **70** |
+| Pd (s.118-121) — batch 13 | 2 | 6 |
+| **Mf (s.122-125) — batch 14** | **6** | **1** |
+| **Toplam** | **36** | **71** |
+
+## Mf (5) kod bloğu (s.125-126) — **6 VAR / 1 YOK**
+
+| # | Kaynak başlığı | Kodda | Not |
+|---|---|---|---|
+| 1 | `51/15` | **VAR** ✅ | kayıt `15/51` |
+| 2 | `52/25` | **VAR** ✅ | kayıt `25/52` |
+| 3 | `53/35` | **VAR** ✅ | kayıt `35/53` |
+| 4 | `54/45` | **VAR** ✅ | kayıt `45/54` |
+| 5 | `56/65` | **VAR** ✅ | gövde MATCH |
+| 6 | **`564/654`** | **YOK** ❌ | `'564'` → `56/65` (kırpma) |
+| 7 | `57/75` | **VAR** ✅ | |
 
 ## Pd (4) kod bloğu III (s.118-121) — **2 VAR / 6 YOK** — **Pd BLOĞU KAPANDI**
 

@@ -1116,3 +1116,54 @@ CONFLICT-035 (terim sapması).
 
 `typecheck` 0 · `npm test` **316/316 PASS** (24 suite) · `build` PASS ·
 **REGRESSION YOK**.
+
+---
+
+## PHASE 9/10 — batch 14: Mf (5) bloğu — Tablo 12 + T bantları + kodlar (kitap s.122-125)
+
+Tarih: 2026-09-21 · Kaynak: **s.122-125** (PDF p69 L – p70 R)
+
+### 🎯 P0 katmanı — **Tablo 12 (Mf anahtarı) BİREBİR MATCH**
+
+| | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| Doğru (erkek) | 28 madde | 28 | ✅ |
+| Yanlış (erkek) | 32 madde | 32 | ✅ |
+| **Toplam** | **60** | **60** | kitabın "(Madde Sayısı: 60)" başlığıyla uyumlu |
+| (*) kadınlarda ters (69, 179, 231, 297, 133) | 5 | `female` listelerinde **5/5 ters** | ✅ |
+| Norm erkek / kadın | 29.21 / 32.98 | 29.21 / 32.98 | ✅ |
+
+**Okuma yöntemi:** Tablo 12 **450 dpi, satır satır kadraj** (`v_mf_r12.png`,
+`v_mf_r23.png`) — dönük/sıkışık tablo kuralı uygulandı.
+
+### T bantları — tam MATCH
+
+| Cinsiyet | Bant sayısı | Sonuç |
+|---|---|---|
+| Erkek | 5 (80+, 70-79, 60-69, 41-59, 26-40) | ✅ **5/5 MATCH** |
+| Kadın | 4 (>65, 56-65, 41-55, 26-40) | ✅ **4/4 MATCH** |
+
+### Yeni çelişki girdisi — **CONFLICT-027 genişletildi (P1)**
+
+Kaynak (s.125): "Erkeklerde **5 testinde 75 T puanı ve üstü**…"
+Kod (`mmpiInterpretation.ts:231`): `single('Mf')` = **`t >= 70`**
+→ **5 puan erken tetikleme.** `SINGLE_MF_MALE` **metni** kaynağın 75'ini doğru
+taşıyor, ama **tespit kuralı** 70 kullanıyor → metin ile kod çelişiyor.
+CONFLICT-027: **32 → 33 örnek**.
+
+### Mf kod bloğu
+
+6/7 VAR ✅ (`51/15`, `52/25`, `53/35`, `54/45`, `56/65`, `57/75`) ·
+**`564/654` YOK** ❌ → CONFLICT-024 (**36 VAR / 71 YOK**) · CONFLICT-030
+(**34 → 35 örnek**, `'564'` → `56/65`).
+
+### OCR kuralı — `LOWCONF-GAP` **2. kez doğrulandı**
+
+İki Mf T bandı **etiketi** OCR'da `<LOWCONF>` ile kaybolmuştu:
+"**26-40 T puanı:**" (s.124) ve "**80 ve üstü T puanı:**" (s.123).
+360 dpi kadrajlarla kurtarıldı → kural, iki bant sınırının doğrulanmasını sağladı.
+
+### Kod değişikliği
+
+**YOK** (salt okuma + doğrulama; eşik farkı CONFLICT-027'de kayıtlı, karar
+tüm kod seti çıkarıldıktan sonra verilecek).

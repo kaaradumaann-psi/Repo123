@@ -322,3 +322,20 @@ yalnızca son kelimenin kuyruğu (`malidir.`) kalmış.
 
 **Etki:** Bu kural olmasa CONFLICT-034 (yaş/eğitim/cinsiyet direktifi) hiç
 bulunamazdı — OCR o cümleyi tamamen düşürmüştü.
+
+## LOWCONF-GAP · ikinci doğrulama (2026-09-21, batch 14)
+
+Kural **aynı oturumda ikinci kez** işe yaradı:
+
+| Sayfa | OCR | Kaybolan metin | Görsel kurtarma |
+|---|---|---|---|
+| **s.124** (`p070_L`) | `n  n  <LOWCONF>` + "vardir vebu abartilmis…" | **"26-40 T puanı:** Erkeklerde maskülen görünmek için kompülsif bir uğraş" | 360 dpi `v_p124_lowconf2.png` |
+| **s.123** (`p069_R`) | (satır kesik) | "80 ve üstü T puanı: Lise eğitimi olan erkeklerde…" | 360 dpi `v_p124_lowconf.png` |
+
+→ Her ikisi de **Mf T bandı etiketi**ydi. Kural olmasaydı **iki bant sınırı da
+doğrulanamazdı** (bandın etiketi yok sayılır ya da yanlış okunurdu).
+
+**Genel ders:** `<LOWCONF>` işaretleri **sayısal etiketlerde** (T bandı, madde
+numarası, eşik) yoğunlaşıyor — çünkü OCR kalın/kısa satırları (etiket + uzun
+paragraf) daha kolay düşürüyor. Bu yüzden **band/eşik etiketleri her zaman
+görselden** okunur (FIGUR-CURVE kuralının sayısal tablo uzantısı).

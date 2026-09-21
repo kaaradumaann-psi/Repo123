@@ -2150,3 +2150,115 @@ Fact — aynen:
 **Pd (4) BLOĞU KAPANDI** (s.107-120: anahtar + T bantları + 20 kod).
 Sıradaki: **Mf (5) bloğu** — Tablo 12 (anahtar) + T bantları + kodlar.
 Status: **VERIFIED** (giriş metni) · Tablo 12 → sıradaki batch
+
+---
+
+# PHASE 9/10 batch 14 — Mf (5) bloğu: Tablo 12 + T bantları + kodlar (kitap s.122-125)
+
+## SOURCE-CL-011 · **Tablo 12 — Mf anahtarı (P0)** (s.122, p69 L)
+
+Fact — 450 dpi GÖRSEL okuma (satır satır kadraj; `v_mf_r12.png`, `v_mf_r23.png`):
+
+> **Tablo 12. Kadınlık-Erkeklik alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 60)**
+> **Doğru** (28 madde): 4, 25, 69*, 70, 74, 77, 78, 87, 92, 126, 132, 134, 140,
+> 149, 179*, 187, 203, 204, 217, 226, 231*, 239, 261, 278, 282, 295, 297*, 299
+> **Yanlış** (32 madde): 1, 19, 26, 28, 79, 80, 81, 89, 99, 112, 115, 116, 117,
+> 120, 133*, 144, 176, 198, 213, 214, 219, 221, 223, 229, 249, 254, 260, 262,
+> 264, 280, 283, 300
+> **Not: (*) işaretli sorular kadınlarda ters yönde puan almaktadır. Erkeklerde
+> ortalama: 29.21, kadınlarda ortalama: 32.98 (Savaşır 1981)**
+
+**Kod karşılaştırması** (`cmp-tablo12.ts`):
+| | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| Doğru (erkek) | 28 | 28 | **birebir** ✅ |
+| Yanlış (erkek) | 32 | 32 | **birebir** ✅ |
+| Toplam | **60** | **60** | kitabın "Madde Sayısı: 60" başlığıyla **uyumlu** ✅ |
+| (*) ters maddeler (kadın) | 5 (69, 179, 231, 297, 133) | `female` listelerinde **5/5 ters** ✅ | **birebir** ✅ |
+| Norm (erkek) | 29.21 | 29.21 | ✅ |
+| Norm (kadın) | 32.98 | 32.98 | ✅ |
+
+Status: **VERIFIED** — P0 katmanı **TAM MATCH** (anahtar + ters çevirme + norm)
+
+## SOURCE-CL-012 · Mf T bantları — Erkek (s.124, p70 L)
+
+Fact — aynen:
+> "**80 ve üstü T puanı:** Lise eğitimi olan erkeklerde ya da kültürel baskı
+> altındakilerde kültürün verdiği erkeksi rolle özdeşim olmadığını göstermektedir.
+> Yüksek puanlar göreceli olarak pasif erkeklere (eğer 4 alt testi de düşükse)
+> hatta bazı durumlarda kadınsı özelliklere sahip olanlara işaret etmektedir."
+> "**70-79 T puanı:** Bu erkekler hayal kurmayı seven, içedönük, eğitim yönelimli,
+> spora özel ilgi duyan kişilerdir. […]"
+> "**60-69 T puanı:** 65 T puanının üstündeki yükselmeler demografik ve klinik veri
+> dikkate alınarak değerlendirilmelidir. […]"
+> "**41-59 T puanı:** Erkeksi ilgiler ve davranışlar olduğunu göstermektedir ve
+> bütün ilgileri bu alanda daralmıştır. […]"
+> "**26-40 T puanı:** Erkeklerde maskülen görünmek için kompülsif bir uğraş vardır
+> ve bu abartılmış bir boyuttadır. […]"
+
+Kod: `MF_MALE_T_BANDS` → 5/5 sınır **birebir MATCH** ✅ (`T ≥ 80`, `T 70-79`,
+`T 60-69`, `T 41-59`, `T 26-40`)
+**Not:** "26-40 T puanı" etiketi OCR'da `<LOWCONF>` ile **kaybolmuştu**; 360 dpi
+kadraj ile kurtarıldı (LOWCONF-GAP kuralı 2. kez işe yaradı).
+Status: **VERIFIED**
+
+## SOURCE-CL-013 · Mf T bantları — Kadın (s.124-125, p70 L/R)
+
+Fact — aynen:
+> "**Kadınlarda Mf değerlendirilmesi:**
+> **65 T puanının üstü:** Bu kadınlar güçlü, kuvvetli, saldırgan, yönlendirici ve
+> yarışmacıdır. […] Ergen kızlarda 5'in yükselmesi ev, okul ve yasalarla ilgili
+> sorunlar olduğunu gösterir; **14-19 yaşları arasındaki kızlarda 5 yüksekliği
+> normal olabilir** […]"
+> "**56-65 T puanı:** Kadınlarda 60 ve üstündeki T puanı onların aktif, atılgan ve
+> yarışmacı olduklarını göstermektedir."
+> "**41-55 T puanı:** Bu kadınların ilgi alanları orta sınıf kadınların
+> ilgilendikleri konular ile sınırlıdır. […]"
+> "**26-40 T puanı:** Kadınların pasif, çekingen olduğunu göstermektedir. Mf
+> düşüklüğü nevrotik üçlüde yükselme ile ilişkilidir. **Eğer Pd yükselmesi, Mf
+> [düşüklüğüne eşlik ediyorsa seksüel impulsların olası eyleme vurukluğuna] dikkat
+> edilmelidir.** […]"
+
+Kod: `MF_FEMALE_T_BANDS` → 4/4 sınır **birebir MATCH** ✅ (`T > 65`, `T 56-65`,
+`T 41-55`, `T 26-40`)
+Status: **VERIFIED**
+
+## SOURCE-CL-014 · "Erkeklerde sadece Mf alt testinin yükselmesi" (s.125, p70 R)
+
+Fact — aynen:
+> "**Erkeklerde sadece Mf alt testinin yükselmesi:** Sadece test 5'in yükselmesi
+> açık ya da örtük homoseksüaliteyi gösterme açısından yeterli değildir. Kendi
+> homoseksüalitesini göstermek isteyen bireyler bu testte yavaş bir yükselme
+> gösterirler. **Erkeklerde 5 testinde 75 T puanı ve üstü**, eğitim düzeyleri orta
+> ya da lise 1 ise ve oldukça katı kültürel baskı varsa, bu erkeklerde geleneksel
+> erkeksi yaşam biçimi yoktur; yüksek puanlar pasif erkekleri gösterir (**eğer alt
+> test 4 düşük ise**) ve çoğunluğunda kadınsı özellikler vardır."
+
+Kod: `SINGLE_MF_MALE` **metni birebir MATCH** ✅
+**Ancak eşik uyuşmuyor:** kaynak **75 T ve üstü** ↔ kod tespiti
+`single('Mf')` = `t('Mf') >= 70 && others('Mf') < 70` → **CONFLICT-027**
+Status: metin **VERIFIED** · eşik **FARK (P1)**
+
+## SOURCE-CL-015 · Mf kod bloğu (s.125-126, p70 R)
+
+Fact — aynen:
+> "**Mf alt testinin diğer alt testlerle ilişkisi:**
+> **51/15 Kodu** (Bakınız 15/51 kodu) · **52/25 Kodu** (Bakınız 25/52 kodu) ·
+> **53/35 Kodu** (Bakınız 35/53 kodu) · **54/45 Kodu** (Bakınız 45/54 kodu) ·
+> **56/65 Kodu** · **564/654** (üçüncü yükselen ölçek: '*T puanının
+> [değerlendirilir] (örneğin, **564/654** kodu. 46/64 değerlendirilmeli ve test
+> 5'te yükselme olduğu söylenmelidir)*') · **57/75 Kodu**"
+
+Kod durumu:
+| Kod | Kodda | Not |
+|---|---|---|
+| `51/15` | **VAR** ✅ | kayıt `15/51` |
+| `52/25` | **VAR** ✅ | kayıt `25/52` |
+| `53/35` | **VAR** ✅ | kayıt `35/53` |
+| `54/45` | **VAR** ✅ | kayıt `45/54` |
+| `56/65` | **VAR** ✅ | gövde MATCH |
+| **`564/654`** | **YOK** ❌ | kırpma: `'564'` → `56/65` → CONFLICT-030 |
+| `57/75` | **VAR** ✅ | |
+
+Status: 6/7 VAR · `564/654` **MISSING** → CONFLICT-024
