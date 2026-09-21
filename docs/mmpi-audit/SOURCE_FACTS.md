@@ -1792,3 +1792,129 @@ dikkat eder · ilgi alanları daralmıştır · yaratıcı ve spontan değildir 
 
 **Ek not (s.110):** "Yüksek 4 profilleri (**yetişkin normları kullanıldığında**)"
 → norm seçiminin yaşla ilişkisi (CONFLICT-027 notu).
+
+---
+
+# PHASE 9/10 batch 11 — Pd (4) kod bloğu I (kitap s.111-113)
+
+## SOURCE-CODE-PD-001 · "Sadece Pd alt testinin yükselmesi" (s.111, p63 R)
+
+Fact — aynen (**Visual: CONFIRMED**, 340 dpi kadraj `v_pd111_rule.png`):
+> "Sadece Pd alt testinin yükselmesi: Pd alt testinin **diğer testlerden en az 10
+> ya da daha fazla T puanı yukarıda olmasıdır**. Bunlar, impulsif, küskün, isyankar
+> ve genelde kurallar, düzenlemeler ve otoriteyi kabullenmekte güçlükleri olan
+> bireylerdir. Sıklıkla yasal sorunları olabilir. İnsan canlısı olabilirler (eğer
+> test 0 düşükse), ancak diğerleriyle ilişkileri yüzeysel, yapay ve kısadır. […]
+> Alt test Si **30 T puanına** yaklaşırsa, bu sorunlar daha kalıcı ve şiddetlidir,
+> ancak birey hoş ve rahat görüntüsü verebilir."
+
+Kod: `SINGLE_PD` (`mmpiSource.ts:506`) → `rule: 'Pd alt testi diğer testlerden en az
+10 T puanı yukarıda olduğunda'`; metin **birebir MATCH** ✅ (Si 30 T notu dahil).
+Tespit (`mmpiInterpretation.ts:229`): `t('Pd') >= 70 && t('Pd') - others('Pd') >= 10`
+→ "en az 10" **MATCH**; `Pd >= 70` koşulu bu cümlede **yok** → CONFLICT-027
+kapsamına eklendi.
+Status: **VERIFIED** (metin + kural) · `Pd >= 70` **UNVERIFIED**
+
+## SOURCE-CODE-PD-002 · Pd alt testinin diğer alt testlerle ilişkisi (s.111)
+
+Fact — aynen:
+> "Pd alt testinin diğer alt testlerle ilişkisi:
+> **41/14 Kodu (Bakınız 14/41 Kodu)**
+> **42/24 Kodu (Bakınız 24/42 Kodu)**
+> **43/34 Kodu (Bakınız 34/43 Kodu)**
+> **Yüksek 4/Düşük 5 Kodu** (Ayrıca Mf alt testinin düşüklüğüne de bakınız)"
+
+Kod: `41/14` → `CODES['14']` = **VAR** ✅ · `42/24` → `CODES['24']` **VAR** ✅ ·
+`43/34` → `CODES['34']` **VAR** ✅ (kaynak da metni 14/41, 24/42, 34/43'e yolluyor)
+· **`Yüksek 4/Düşük 5` → kodda YOK** ❌
+Status: 3/4 VERIFIED · `Yüksek 4/Düşük 5` → CONFLICT-024 kapsamı
+
+## SOURCE-CODE-PD-003 · "Yüksek 4 / Düşük 5" örüntüsü (s.111-112, p63 R–p64 L)
+
+Fact — aynen (≈1 tam sayfa metin):
+> "**Erkeklerde düşük 5**, bireyin kendini erkeksi, hatta aşırı erkeksi gösterme
+> çabasını yansıtır. […] Orta ya da üst sınıftan ve yüksekokul eğitimi olan
+> erkeklerde bu örüntü, yetersizlik duygularını, özellikle kadınlara karşı
+> […] kadınları aşağılarlar. **Ergenlerde bu örüntü, açık suçluluk ile
+> bağlantılıdır.** Bu örüntüdeki **kadınlar kızgındırlar**, ancak bu duygularını
+> doğrudan ifade edemezler. Bunların kızgınlığı özel olarak erkeklere yöneliktir
+> ve heteroseksüel sorunlar beklenir. […] aşırı talepkar ve bağımlıdırlar.
+> Erkeklere karşı olan kızgınlıklarını **pasif-agresif biçimde cinsel yolları
+> kullanarak** ifade ederler. Kadınlar sıklıkla bu tür davranışlarla (**özellikle
+> eğer test 6 da yüksekse**) başkalarını da kızdırmaya çalışırlar […] Hatta bir
+> melodram krizi başlatmış oldukları için hoşlanmış görünürler. **Alt test 3 de
+> yükselmişse**, bu kadınlar kendilerinin başkaları üzerindeki etkisinin farkında
+> değildirler ve düşmanlık duygularını inkâr ederler. Evlilik ve aile sorunları ve
+> cinsel fonksiyon bozuklukları ve cinsel hoşlanma eksikliğinin olması şaşırtıcı
+> değildir. **Baş ve sırt ağrıları** da sık görülür." (s.112'ye taşar)
+
+Kod: `grep "Yüksek 4/Düşük 5|Düşük 5"` → **kodda hiç yok** ❌
+Status: **MISSING** → CONFLICT-024 kapsamı
+
+## SOURCE-CODE-PD-004 · 45/54 Kodu + yaş/eğitim/cinsiyet zorunluluğu (s.112)
+
+Fact — aynen (**Visual: ZORUNLU — OCR bu paragrafı KAYBETTİ**):
+> "**Bu kod tipi hastanın yaşı, eğitimi ve cinsiyeti dikkate alınarak
+> yorumlanmalıdır.**"
+
+**Kritik:** `p064_L` OCR çıktısında bu cümlenin yerinde yalnızca `<LOWCONF>`
+belirteci vardı (OCR cümleyi tamamen atladı). 340 dpi kadraj
+(`v_pd112_lowconf.png`) ile **okundu** → yeni OCR kuralı kaydı:
+`OCR_ISSUES.md` → **LOWCONF-GAP**.
+
+Kod: `codeInterpretation('45')` metninde bu **yorumlama kuralı yok** ❌
+(metinde "Ergenler için…" ve "liseden daha az eğitimi olan…" geçer, ancak
+**"yaşı, eğitimi ve cinsiyeti dikkate alınarak yorumlanmalıdır" direktifi yok**.)
+Status: **MISSING** → CONFLICT-034
+
+Fact — 45/54 gövdesi (aynı sayfa, OCR + görsel):
+> "Ergenler için, bu kod öfke patlamalarının olduğunu gösterir. […] ilaç
+> kullanımı, hırsızlık ya da anti-sosyal davranışlar da olabilir. Ancak bu
+> ergenler girişken (insan canlısı), dışa dönük ve genellikle akranları
+> tarafından sevilen kişilerdir […] **prognoz iyidir**. Bu koddaki yetişkinler,
+> **liseden daha az eğitimi** olan kişilerdir […] **Lise ya da daha yüksek
+> eğitimi olan yetişkin erkekler** […] sosyal protestolar ya da hareketler
+> içine girerler […] **45 ve 54 kodlu kadınlarda sıklıkla test 8 ve 9, üçüncü
+> en yüksek testtir.** […] **Olası tanı: Pasif agresif kişilik bozukluğu,
+> pasif tip. Erkeklerde 5 yüksektir. Kadınlarda 5 düşüktür.**" (s.112-113)
+
+Kod: `CODES['45']` metni + `diagnosis: ['Pasif-agresif kişilik bozukluğu, pasif
+tip — erkeklerde 5 yüksektir, kadınlarda 5 düşüktür']` → **içerik birebir MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-CODE-PD-005 · 456 Kodu (s.113, p64 R)
+
+Fact — aynen (**Visual: CONFIRMED**, 340 dpi `v_pd113_456.png`):
+> "**456 Kodu**
+> Talep edici, bağımlı ve duygusal kişilerdir, ancak diğer kişileri tedirgin
+> ederek ve onlara karşı çıkarak ilişki kurarlar. Davranış örüntüleri yakın aile
+> çevrelerine yabancılaşmalarına yol açar. Bu durum talep edici, bağımlı ve
+> duygusal ilişki gereksinimlerini karşılamalarını zorlaştırır
+> **(Bakınız Scarlett O'Hara Vadisi)**."
+
+Kod: **`456` kaydı YOK**; `codeInterpretation('456')` → kurpma nedeniyle
+**`45/54` metnini döndürüyor** ❌ → CONFLICT-030 kapsamı
+Status: **MISSING** → CONFLICT-024
+
+## SOURCE-CODE-PD-006 · 46/64 Kodu (s.113, p64 R)
+
+Fact — aynen (**Visual: CONFIRMED**, 340 dpi `v_pd113_4664.png`):
+> "Temel özellikler kızgınlık, küskünlük, güvensizlik, somurtkanlık, sinirlilik,
+> eleştiriye ve başkalarının isteklerine karşı aşırı duyarlılık ve suçun
+> başkaları üzerine yansıtılmasıdır. Bu bireyler kendilerini çok çabuk
+> reddedilmiş ya da eleştirilmiş hissederler, **yetersiz veri ve çok az öngörü
+> ile sonuçlara varırlar**. Düşünceleri, tipik olarak nasıl ihmal edildikleri,
+> başkalarının nasıl hatalı olduğu ve kendilerini nasıl koruyabilecekleri
+> üzerinde odaklanır. […] Bu kod, yetişkin normaller arasında nadirdir, ancak
+> ergenlik dönemine özgüdür. […] Yetişkin erkeklerde, **46/64 kodu sıklıkla
+> psikotik ya da pre-psikotik durumlar ile (bakınız 468/648 kodları) ya da
+> borderline kişiliklerle (bakınız 462/642 ve 463/643 kodları)** bağlantılıdır.
+> […] **Genellikle psikiyatri polikliniklerine başvuran kadın hastalar, erkek
+> hastalara oranla üç kat daha fazladır** ve kadınlarda bu profil olduğunda
+> patolojik durum daha azdır."
+
+Kod: `CODES['46']` → metin **birebir MATCH** ✅ (paragraf paragraf), `diagnosis`
+2 kayıt MATCH ✅; `seeAlso` → `468/648, 486/846, 489/849` (kaynak **462/642 ve
+463/643**'e de yolluyor → `486/846`, `489/849` hangi sayfadan? sıradaki batch'te
+kontrol edilecek) → `UNVERIFIED` notu (batch 12)
+Status: **VERIFIED** (46/64 gövdesi)

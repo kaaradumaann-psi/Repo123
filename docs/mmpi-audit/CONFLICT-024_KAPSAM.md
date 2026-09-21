@@ -250,6 +250,20 @@ Kod yalnızca **tek ölçek** ve **iki noktalı kod** katmanına sahiptir →
 **CONFLICT-033 (P1)**. Üçlü kod altyapısı yokluğunun **ikinci ve daha ağır**
 sonucu: bu örüntüler klinik yorum üretmez.
 
+## Pd (4) kod bloğu I (s.111-113) — **5 VAR / 4 YOK**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | `41/14` | s.111 | **VAR** ✅ | kayıt `14/41` |
+| 2 | `42/24` | s.111 | **VAR** ✅ | kayıt `24/42` |
+| 3 | `43/34` | s.111 | **VAR** ✅ | kayıt `34/43` |
+| 4 | **`Yüksek 4/Düşük 5`** | s.111-112 | **YOK** ❌ | tam sayfa metin (kadın/erkek/ergen ayrı) |
+| 5 | `45/54` | s.112-113 | **VAR** ✅ | gövde MATCH; yaş/eğitim/cinsiyet direktifi eksik → CONFLICT-034 |
+| 6 | **`456`** | s.113 | **YOK** ❌ | `codeInterpretation('456')` → `45/54` döndürüyor |
+| 7 | `46/64` | s.113 | **VAR** ✅ | gövde + diagnosis MATCH |
+| 8 | `468/648` | s.113 | **YOK** ❌ | 46/64 içinde atıf; `seeAlso`'da adı var, kaydı yok |
+| 9 | `463/643` | s.113 | **YOK** ❌ | 46/64 içinde atıf; `seeAlso`'da adı var, kaydı yok |
+
 ### Güncel genel toplam
 
 | Blok | Kodda VAR | Kodda YOK |
@@ -257,5 +271,6 @@ sonucu: bu örüntüler klinik yorum üretmez.
 | Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
 | D (s.79-92) | 9 | 18 |
 | Hy (s.95-101) | 8 | 8 |
-| **Nevrotik üçlü profilleri** | **0** | **4** |
-| **Toplam** | **26** | **52** |
+| Nevrotik üçlü profilleri (s.103-106) | 0 | 4 |
+| **Pd (s.111-113) — batch 11** | **5** | **4** |
+| **Toplam** | **31** | **56** |

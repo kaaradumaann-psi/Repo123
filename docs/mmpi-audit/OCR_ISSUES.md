@@ -294,3 +294,31 @@ komşu sayfa incelendiğinde (p059 R → s.103) **tamamen yeni bir bölüm**
 ("Nevrotik Üçlü Profilleri") bulundu; benzer bir durumda bölüm tamamen
 atlanabilirdi. Bu kontrol **bölüm başlığı kaçırma riskini** ortadan kaldırır
 (SPINE-CLIP ve PAGE-NUMBER-AS-ITEM ile aynı sınıf).
+
+## LOWCONF-GAP — `<LOWCONF>` belirteci gizli cümle/paragraf demektir (2026-09-21, batch 11)
+
+**Bulgu:** `p064_L` (kitap **s.112**) OCR çıktısında `45/54 Kodu` başlığından sonra:
+
+```
+45/54Kodu
+o        o n  <LOWCONF>
+malidir.
+```
+
+**Şüphe üzerine 340 dpi kadraj** (`v_pd112_lowconf.png`) alındı; eksik metin:
+
+> "**Bu kod tipi hastanın yaşı, eğitimi ve cinsiyeti dikkate alınarak
+> yorumlanmalıdır.**"
+
+→ OCR **tam bir cümleyi** (12 kelime) `<LOWCONF>` olarak işaretleyip düşürmüş;
+yalnızca son kelimenin kuyruğu (`malidir.`) kalmış.
+
+**Kural:** OCR çıktısında `<LOWCONF>` görüldüğünde:
+1. Belirteç **asla yok sayılmaz** — çevresi **≥300 dpi görselle** okunur.
+2. Belirtecin bulunduğu yer **paragraf başı/başlık altıysa** (yeni bir kod bloğu
+   ya da bölüm girişi), sayfa **"tamam" sayılmaz**.
+3. Kod metniyle karşılaştırmada `<LOWCONF>` bölgesi **kaynak kanıtı sayılmaz**;
+   görsel okuma şart (SENTENCE-SKIP'in ikinci biçimi).
+
+**Etki:** Bu kural olmasa CONFLICT-034 (yaş/eğitim/cinsiyet direktifi) hiç
+bulunamazdı — OCR o cümleyi tamamen düşürmüştü.

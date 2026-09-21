@@ -992,3 +992,41 @@ Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT
 
 Değişmedi: açık **14** (0 P0 · 8 P1 · 4 P2 · 2 P3). Bu batch **yeni çelişki
 üretmedi** — aksine bir P0 katmanını (Pd anahtarı) **doğrulayarak kapattı**.
+
+---
+
+## PHASE 9/10 — batch 11: Pd (4) kod bloğu I (kitap s.111-113)
+
+Tarih: 2026-09-21 · Kaynak: **s.111-113** (PDF p63 R – p64 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 111 | p63 R | Sadece Pd yükselmesi (en az 10 T) + Pd ilişkileri | ✅ metin MATCH · `Pd>=70` **UNVERIFIED** |
+| 111-112 | p63 R–p64 L | **Yüksek 4/Düşük 5 Kodu** | ❌ **kodda YOK** |
+| 112 | p64 L | **45/54 Kodu** + yaş/eğitim/cinsiyet zorunluluğu | ✅ gövde MATCH · ❌ direktif **YOK** |
+| 113 | p64 R | **456 Kodu** | ❌ **kodda YOK** (üstelik `45/54` metnini döndürüyor) |
+| 113 | p64 R | **46/64 Kodu** | ✅ gövde + diagnosis MATCH |
+
+### Yeni bulgular
+
+- **CONFLICT-034 (P2, OPEN):** "Bu kod tipi hastanın **yaşı, eğitimi ve
+  cinsiyeti dikkate alınarak** yorumlanmalıdır." direktifi kod kayıtlarında yok.
+  **Kaynak:** s.112.
+- **CONFLICT-024 · genişletme:** Pd bloğunda **4 YOK** (Yüksek 4/Düşük 5, 456,
+  468/648, 463/643) → kod seti toplamı **31 VAR / 56 YOK**.
+- **CONFLICT-030 · genişletme:** kurpma ampirik kanıtı — `'456'`→`45/54`,
+  `'468'`→`46/64`, `'463748'`→`46/64`, `'943'`→`49/94`. Örnek **13 → 17**.
+- **CONFLICT-027 · genişletme:** `SINGLE_PD` kodda `Pd >= 70` koşulu ekliyor;
+  kaynak cümlesinde yalnızca "en az 10 T yukarıda" var.
+- **🆕 OCR kuralı `LOWCONF-GAP`:** OCR `<LOWCONF>` belirteci **tam bir cümleyi
+  düşürmüş**; 340 dpi kadraj cümleyi kurtardı. Bu kural olmadan CONFLICT-034
+  hiç bulunamazdı.
+
+### Kod değişikliği
+
+**YOK** (salt okuma + doğrulama turu).
+
+### Testler
+
+Değişiklik olmadığı için tam suite koşulmadı; karşılaştırma script'i
+`scripts/mmpi-audit/cmp-pd-batch11.ts` eklendi (yeniden koşulabilir kanıt).

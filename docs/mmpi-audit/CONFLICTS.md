@@ -1250,3 +1250,53 @@ kararına** bağlıdır (üçlü kod altyapısı). Karar tüm klinik ölçek blo
 | `36/63`, `37/73`, `30/03` | "**üçüncü en yüksek test**" koşulları (`Si ya da Sc` · `1, 2 ve 4` · `1 ve 2`) | s.100-101 |
 
 → CONFLICT-027 kapsamı **23 koşula** çıktı.
+
+---
+
+## CONFLICT-034 — Kod yorumlarında "yaş/eğitim/cinsiyet" zorunluluğu yok (P2)
+
+Area: `mmpiSourceCodes.ts` — tüm kod kayıtları
+
+Source (**Visual: CONFIRMED**, s.112, `v_pd112_lowconf.png`):
+> "**Bu kod tipi hastanın yaşı, eğitimi ve cinsiyeti dikkate alınarak
+> yorumlanmalıdır.**" — 45/54 Kodu girişi
+
+Current implementation: `codeInterpretation()` gövde metnini döndürür; kod
+kayıtlarında **yorumlamanın yaş/eğitim/cinsiyete göre koşullanması gerektiğini
+söyleyen bir alan/direktif yoktur**. Arayüz bu uyarıyı gösteremez.
+
+Impact: Kaynak, bu kod bloğunun **koşullu** yorumlanmasını zorunlu kılıyor;
+uygulama gövde metnini bağlamsız sunuyor → yanlış genelleme riski (P2).
+
+Ek kanıt: Aynı blokta kaynak **koşullu cümleler** kuruyor ("**özellikle eğer test
+6 da yüksekse**", "**Alt test 3 de yükselmişse**", "**Eğer test 0 düşükse**") →
+CONFLICT-025 ve CONFLICT-027 ile aynı kökten (koşul modellemesi yok).
+
+Status: **OPEN**
+
+---
+
+## CONFLICT-024 · genişletme (Pd bloğu I — s.111-113)
+
+Pd (4) bloğunda kodda **YOK** olanlar:
+
+| # | Kaynak başlığı | Sayfa | Not |
+|---|---|---|---|
+| 1 | **Yüksek 4/Düşük 5 Kodu** | s.111-112 | tam sayfa metin; Mf düşüklüğüne atıf; kadın/erkek/ergen ayrımı |
+| 2 | **456 Kodu** | s.113 | kendi metni var; **`codeInterpretation('456')` şu an `45/54` döndürüyor** |
+| 3 | `468/648` | s.113 | 46/64 içinde atıf; kod `seeAlso`'da var, **kaydı yok** |
+| 4 | `463/643` | s.113 | 46/64 içinde atıf; kod `seeAlso`'da var, **kaydı yok** |
+
+## CONFLICT-030 · genişletme (Pd bloğu — ampirik kanıt)
+
+`codeInterpretation()` kurpma testi (bu oturumda koşuldu):
+
+| Çağrı | Dönen kayıt | Beklenen |
+|---|---|---|
+| `'456'` | **`45/54`** | 456 Kodu |
+| `'468'` | **`46/64`** | 468/648 Kodu |
+| `'463748'` | **`46/64`** | 463/643 Kodu |
+| `'943'` | **`49/94`** | 943 (Sc bloğu) |
+
+→ `slice(0,2)` kırpması **Pd bloğunda da** yanlış metne düşürüyor. CONFLICT-030
+örnekleri **13 → 17**'ye çıktı.

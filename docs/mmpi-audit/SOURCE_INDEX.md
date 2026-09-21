@@ -84,6 +84,9 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **103-106** | **p59 R – p61 L** | 🆕 **NEVROTİK ÜÇLÜ PROFİLLERİ** — 4 konfigürasyon: konversiyon vadisi (Şek.17), basamak orantısı (Şek.18), şapka (Şek.19), yükselen eğilim (Şek.20) | **DONE** (300-340 dpi görsel ×4) · **CONFLICT-033** (kodda hiç yok) |
 | **107** | **p61 R** | **Pd (4) alt testi girişi** + Tablo 11 + Graham 1987 maddeleri 1-19 | **DONE** (Pd bloğuna geçiş) |
 | **107-110** | **p61 R – p63 L** | **Pd (4)** girişi + **Tablo 11 (Pd anahtarı, 50 madde)** + Graham maddeleri + **Pd T bantları** | **DONE** · anahtar **BİREBİR MATCH** (24+26=50, 600 dpi dikiş kontrolü) · bantlar **5/5 MATCH** |
+| **111** | **p63 R** | **Sadece Pd yükselmesi** (en az 10 T) + **Pd diğer alt testlerle ilişkisi** (41/14, 42/24, 43/34, **Yüksek 4/Düşük 5**) | **DONE** (340 dpi görsel) |
+| **112** | **p64 L** | **Yüksek 4/Düşük 5** devamı + **45/54 Kodu** (+ **yaş/eğitim/cinsiyet zorunluluğu**) | **DONE** (OCR `<LOWCONF>` → görsel kurtarma) |
+| **113** | **p64 R** | **456 Kodu** + **46/64 Kodu** | **DONE** (340 dpi görsel) |
 | 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
