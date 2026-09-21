@@ -5,6 +5,20 @@ export const SCAN_LIMITS = {
   sourcePixels: 40_000_000, sourceDimension: 16_000, longSide: 2800, pdfWidth: 1680, pdfPages: 12, batchPages: 24,
 } as const;
 
+/**
+ * OMR motorunun kabul ettiği giriş bütçesi (omr/analyzePage ile aynı).
+ * Telefon kamerasıyla çekilen yüksek çözünürlüklü fotoğraflar bu bütçeyi
+ * aştığında kullanıcıya hata döndürmek yerine görüntü otomatik
+ * küçültülüp optimize edilir (bkz. optimizeOmrInput).
+ */
+export const OMR_INPUT_BUDGET = { pixels: 12_000_000, dimension: 8_000 } as const;
+
+/** Görüntünün OMR giriş bütçesini (piksel veya kenar uzunluğu) aşıp aşmadığını belirtir. */
+export function exceedsOmrInputBudget(width: number, height: number): boolean {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) return false;
+  return width * height > OMR_INPUT_BUDGET.pixels || width > OMR_INPUT_BUDGET.dimension || height > OMR_INPUT_BUDGET.dimension;
+}
+
 export type ImageCodec = 'jpeg' | 'png' | 'webp' | 'heic' | 'avif' | 'gif';
 export type SniffResult =
   | { kind: 'image'; codec: ImageCodec }
@@ -40,9 +54,103 @@ export function capturePixels(source: CanvasImageSource, width: number, height: 
     context.fillRect(0, 0, size.width, size.height);
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
-    context.drawImage(source, 0, 0, size.width, size.height);
+    // Yüksek çözünürlüklü telefon fotoğraflarında (ör. 48 MP → 2.800 px kenar)
+    // tek seferde büyük oranda küçültmek ayrıntı kaybettirir; 2x'ten büyük
+    // oranlarda adım adım yarılayarak iner (kalite korunur).
+    const scale = size.width / width;
+    if (Number.isFinite(scale) && scale > 0 && 1 / scale > 2) {
+      let stage = document.createElement('canvas');
+      stage.width = width;
+      stage.height = height;
+      const stageContext = stage.getContext('2d');
+      if (!stageContext) {
+        context.drawImage(source, 0, 0, size.width, size.height);
+      } else {
+        stageContext.imageSmoothingEnabled = true;
+        stageContext.imageSmoothingQuality = 'high';
+        stageContext.drawImage(source, 0, 0);
+        while (stage.width > size.width * 1.5) {
+          const next = document.createElement('canvas');
+          next.width = Math.max(size.width, Math.floor(stage.width / 2));
+          next.height = Math.max(size.height, Math.floor(stage.height / 2));
+          const nextContext = next.getContext('2d');
+          if (!nextContext) break;
+          nextContext.imageSmoothingEnabled = true;
+          nextContext.imageSmoothingQuality = 'high';
+          nextContext.drawImage(stage, 0, 0, next.width, next.height);
+          stage.width = 0;
+          stage.height = 0;
+          stage = next;
+        }
+        context.drawImage(stage, 0, 0, size.width, size.height);
+        if (stage.width) { stage.width = 0; stage.height = 0; }
+      }
+    } else {
+      context.drawImage(source, 0, 0, size.width, size.height);
+    }
     return { ...size, data: context.getImageData(0, 0, size.width, size.height).data };
   } finally { canvas.width = canvas.height = 0; }
+}
+
+export type OmrOptimizationResult = {
+  image: PixelImage;
+  /** false = görüntü bütçe içindeydi ve olduğu gibi kullanıldı. */
+  downscaled: boolean;
+  fromPixels: number;
+  toPixels: number;
+};
+
+/**
+ * Çok yüksek çözünürlüklü kaynakları (ör. 48 MP ve üzeri telefon kamerası fotoğrafları)
+ * OMR giriş bütçesine otomatik düşürür. Tek seferde büyük oranda küçültmek yerine
+ * adım adım yarılamayla (yüksek kalite çift çizgilerle) iner: bu, OMR'ın ihtiyacı olan
+ * baloncuk/QR detayını korurken `analyzePage`'in 12 MP / 8.000 px sınırına takılmayı
+ * ortadan kaldırır. Bütçe içindeki görüntüler aynen döner (boşa yeniden örneklenmez,
+ * yani gereksiz kalite kaybı yaratılmaz).
+ */
+type RgbaStage = { width: number; height: number; data: Uint8ClampedArray };
+
+export function optimizeOmrInput(image: PixelImage, signal?: AbortSignal): OmrOptimizationResult {
+  const fromPixels = image.width * image.height;
+  if (!exceedsOmrInputBudget(image.width, image.height)) {
+    return { image, downscaled: false, fromPixels, toPixels: fromPixels };
+  }
+  if (signal) checkAborted(signal);
+  const canvas = document.createElement('canvas');
+  let current: RgbaStage = { width: image.width, height: image.height, data: new Uint8ClampedArray(image.data) };
+  try {
+    while (exceedsOmrInputBudget(current.width, current.height)) {
+      if (signal) checkAborted(signal);
+      const width = Math.max(1, Math.floor(current.width / 2));
+      const height = Math.max(1, Math.floor(current.height / 2));
+      const off = document.createElement('canvas');
+      off.width = current.width;
+      off.height = current.height;
+      const offContext = off.getContext('2d');
+      if (!offContext) throw new Error('Görüntü optimize edilemedi; tarayıcı görüntü işleme alanını açamadı.');
+      const toPut = offContext.createImageData(current.width, current.height);
+      toPut.data.set(current.data);
+      offContext.putImageData(toPut, 0, 0);
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      if (!context) throw new Error('Görüntü optimize edilemedi; tarayıcı görüntü işleme alanını açamadı.');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(off, 0, 0, width, height);
+      const next = context.getImageData(0, 0, width, height);
+      current = { width: next.width, height: next.height, data: next.data };
+      off.width = off.height = 0;
+    }
+    return {
+      image: { width: current.width, height: current.height, data: current.data },
+      downscaled: true,
+      fromPixels,
+      toPixels: current.width * current.height,
+    };
+  } finally {
+    canvas.width = canvas.height = 0;
+  }
 }
 
 /**

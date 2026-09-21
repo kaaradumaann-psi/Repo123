@@ -148,6 +148,14 @@ const SECTIONS: PolicySection[] = [
           ]}
         />
         <p>
+          <b>Yapay zekâ yorumu (isteğe bağlı):</b> Sonuç ekranındaki “Yapay Zekâ Yorumu” bölümü
+          etkinleştirildiğinde, yorum üretilmesi için yalnızca <b>isimsiz</b> sayısal profil
+          (ölçek ham/T puanları, geçerlik değerleri, cinsiyet ve yaş) harici bir dil
+          modeline iletilir; danışanın adı/soyadı ve form görselleri gönderilmez. Yorum
+          metni cihazınızda kısa süreli önbelleğe alınır. Bu hizmet kullanılmadığında hiçbir
+          veri dış modele iletilmez.
+        </p>
+        <p>
           Barındırma altyapısının yurt dışında konumlanması hâlinde, KVKK m.9 koşullarının
           sağlanması veri sorumlusu uzmanın/kurumun değerlendirmesine tabidir; kurumsal
           kurulumlarda veritabanının Türkiye içinde barındırılması önerilir.

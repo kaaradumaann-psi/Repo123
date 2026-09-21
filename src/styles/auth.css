@@ -773,4 +773,31 @@
     text-align: center;
   }
   .auth-setup-preview { text-decoration: none; }
+
+  /* Ana siteye dönüş bağlantısı (sistem alt alan adı üzerinde çalışır;
+     ana site http://halilkaraduman.com.tr üzerinedir). */
+  .auth-site-return {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--accent-ink, var(--soft));
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+  }
+  .auth-site-return:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--white));
+  }
+  .auth-site-return:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 }

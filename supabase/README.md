@@ -1,7 +1,10 @@
 # Supabase kurulumu
 
 Bu klasör, uygulamanın şemasını, RLS politikalarını ve Admin'in psikolog hesabı
-oluşturmak için kullandığı Edge Function'ı içerir.
+oluşturmak için kullandığı Edge Function'ları içerir:
+
+- `admin-users` — Admin'in psikolog hesabı oluşturması ve aktiflik yönetimi.
+- `ai-interpretation` — MMPI sonuçlarının yapay zekâ destekli yorumu (karar desteği).
 
 ## 1. Proje değişkenleri
 
@@ -84,3 +87,26 @@ ilişkileri ilişkili uygulama verisini birlikte kaldırır.
 Function, çağıranın access token'ını doğrular; aktif Admin değilse psikolog
 oluşturma veya aktiflik değiştirme isteğini reddeder. Password Auth kullanıcısı
 Supabase Auth'ta oluşturulur; uygulamanın tablolarına parola yazılmaz.
+
+## 5. AI karar desteği (ai-interpretation)
+
+Sonuç ekranlarındaki "Yapay Zekâ Yorumu" bölümü, OpenAI uyumlu bir LLM uç
+noktasına istek atar. Anahtar **yalnız Edge Function çalışma zamanında**
+yaşar; frontend'e, `.env`'e veya Git'e asla yazılmaz:
+
+```sh
+supabase functions deploy ai-interpretation
+supabase secrets set AI_API_KEY=sk-... AI_MODEL=gpt-4o-mini \
+  ALLOWED_ORIGINS=https://your-app.example.com
+```
+
+- `AI_API_BASE` (opsiyonel, varsayılan `https://api.openai.com/v1`) — herhangi
+  bir OpenAI uyumlu `/chat/completions` uç noktası.
+- `AI_API_KEY` tanımlı değilken fonksiyon 503 döner; arayüz "henüz
+  yapılandırılmamış" gösterir ve AI bölümü sessizce kapanır.
+- İstemci yalnız **sayısal profil özetini** gönderir (ham metin/prompt yok);
+  fonksiyon bu özetin her alanını bağımsız doğrular. `mode=record` ise kayıt,
+  service role ile okunur ve çağrının o kayda RLS ile erişme hakkı taşıdığı
+  (sahip veya Admin) doğrulanmadan yorum üretilmez (IDOR koruması).
+- `ALLOWED_ORIGINS` `admin-users` ile **aynı değeri** taşır; boş bırakılırsa
+  yalnız localhost dev origin'leri izinli olur.

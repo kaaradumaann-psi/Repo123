@@ -4,7 +4,8 @@ import type { FormDefinition } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import type { ScanSet } from '../scanner/pageSequence';
 import { sortedPages } from '../scanner/pageSequence';
-import { canCreateRecord, createDataRecord, createRecord } from '../records/supabaseRecords';
+import { canCreateRecord, createDataRecord, createRecord, getRecordDetail } from '../records/supabaseRecords';
+import { buildEditStateFromRecord } from '../records/recordEdit';
 import type { MMPIRecord } from '../records/supabaseRecords';
 import { summarizeResults } from '../results/resultNormalizer';
 import { ScannerWorkspace } from './ScannerWorkspace';
@@ -15,6 +16,7 @@ import { Icon } from './Icon';
 import { useOnlineStatus } from '../workspace/useOnlineStatus';
 import { buildProfileFromAnswers, buildProfileFromRawScoresObject } from '../scoring/mmpiScoring';
 import { scanToAnswers } from '../scoring/omrAnswers';
+import { AiInterpretationPanel } from './results/AiInterpretationPanel';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import {
   clearDraft,
@@ -183,6 +185,13 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
   );
   const [conditionsAccepted, setConditionsAccepted] = useState(false);
   const submissionKey = useRef(boot?.submissionKey ?? crypto.randomUUID());
+  /* "Kaydı Düzenle" durumu: orijinal kayıt değişmez, yeni revizyon yazılır. */
+  const [revisionOf, setRevisionOf] = useState<string | null>(() =>
+    typeof boot?.revisionOf === 'string' ? boot.revisionOf : null);
+  const [revisionReason, setRevisionReason] = useState<string | null>(() =>
+    typeof boot?.revisionReason === 'string' ? boot.revisionReason : null);
+  const [revisionNote, setRevisionNote] = useState<string | null>(null);
+  const [editLoadError, setEditLoadError] = useState('');
   const [restoredAt, setRestoredAt] = useState<string | null>(() => (boot && isDraftNonEmpty(boot) ? boot.updatedAt : null));
   const [restoreDismissed, setRestoreDismissed] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(() => boot?.updatedAt ?? null);
@@ -266,6 +275,8 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         submissionKey: submissionKey.current,
         savedId: saved?.id ?? null,
         savedAt: saved?.createdAt ?? null,
+        revisionOf,
+        revisionReason,
       });
       if (result.ok) {
         setLastSavedAt(new Date().toISOString());
@@ -275,11 +286,11 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, landing, hasAnyData]);
+  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, landing, hasAnyData, revisionOf, revisionReason]);
 
   /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
-  const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved });
-  liveRef.current = { step, client, method, answers, currentItem, raw, scan, saved };
+  const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved, revisionOf, revisionReason });
+  liveRef.current = { step, client, method, answers, currentItem, raw, scan, saved, revisionOf, revisionReason };
   useEffect(() => () => {
     // ScannerSession deliberately retains blob URLs while the method tab is hidden so the
     // parent can restore the same pages. Once the case workspace itself disappears, no owner
@@ -323,6 +334,8 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
             submissionKey: submissionKey.current,
             savedId: live.saved?.id ?? null,
             savedAt: live.saved?.createdAt ?? null,
+            revisionOf: live.revisionOf,
+            revisionReason: live.revisionReason,
           });
         } catch {
           /* kapanış anında sessiz */
@@ -340,7 +353,10 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     for (const entry of entries) {
       try {
         const input = recordInputFromIntake(entry.client);
-        const meta = buildCaseMeta(entry.method, entry.client);
+        const meta = buildCaseMeta(entry.method, entry.client, {
+          revisionOf: typeof entry.revisionOf === 'string' ? entry.revisionOf : undefined,
+          revisionReason: typeof entry.revisionReason === 'string' ? entry.revisionReason : undefined,
+        });
         let record: MMPIRecord;
         if (entry.method === 'quick') {
           const decoded = decodeAnswers(entry.answersEncoded);
@@ -413,6 +429,71 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actor.id]);
 
+  /* ---------------- "Kaydı Düzenle" (?duzenle=<recordId>) ----------------
+   * Kayıt sayfasından gelindiğinde: orijinal kayıt RLS ile okunur, düzenleme
+   * durumu (danışan + cevaplar/ham puan + revisionOf) state'e yüklenir ve
+   * URL parametresi temizlenir. Yarım bir çalışma varsa önce onay istenir;
+   * F5'te parametre zaten temizlendiği için aynı işlem iki kez tetiklenmez
+   * (devam eden düzenleme taslaktan revisionOf ile geri gelir). */
+  /**
+   * İşlenen `duzenle` parametresi (değer olarak). CaseWorkspace sekme
+   * değişiminde bile MOUNT'TA KALIR (gizli), bu yüzden efekt yalnızca mount
+   * anında değil, URL arama kısmı her değiştiğinde tetiklenir; aynı parametre
+   * iki kez işlenmez (StrictMode çift koşumu / sekme dönüşü de kapsanır).
+   */
+  const editHandled = useRef<string | null>(null);
+  const [pendingEditId, setPendingEditId] = useState<string | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+
+  function applyRecordEdit(recordId: string) {
+    setEditLoadError('');
+    setEditLoading(true);
+    window.history.replaceState(null, '', window.location.pathname);
+    void getRecordDetail(recordId)
+      .then(record => {
+        const edit = buildEditStateFromRecord(record);
+        if (!edit) throw new Error('Bu kayıt düzenleme için uygun değil; cevaplarda ya da künyede eksik var.');
+        releaseScanPreviewUrls(scan);
+        submissionKey.current = crypto.randomUUID();
+        setClient(edit.client);
+        setMethod(edit.method);
+        setAnswers(edit.answers);
+        setCurrentItem(0);
+        setRaw(edit.raw);
+        setScan(null);
+        setScanKey(key => key + 1);
+        setSaved(null);
+        setConditionsAccepted(false);
+        setRevisionOf(edit.revisionOf);
+        setRevisionReason('Düzenleme');
+        setRevisionNote(edit.note);
+        setRestoreDismissed(true);
+        setStep('entry');
+      })
+      .catch(cause => {
+        setEditLoadError(cause instanceof Error ? cause.message : 'Kayıt düzenleme için yüklenemedi.');
+      })
+      .finally(() => setEditLoading(false));
+  }
+
+  const locationSearch = window.location.search;
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('duzenle');
+    if (!editId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(editId)) return;
+    if (editHandled.current === editId) return;
+    editHandled.current = editId;
+    const clean = step === 'home' && !hasAnyData && !saved;
+    if (clean) applyRecordEdit(editId);
+    else setPendingEditId(editId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationSearch]);
+  // Parametre işlenip URL'den silindikten sonra koruma sıfırlanır: aynı kayıt
+  // için daha sonra tekrar "Kaydı Düzenle" tıklanırsa akış yeniden tetiklenir.
+  useEffect(() => {
+    if (!locationSearch.includes('duzenle')) editHandled.current = null;
+  }, [locationSearch]);
+
   function enqueueCurrent(lastError: string) {
     if (!method) return;
     const entry: OutboxEntry = {
@@ -422,6 +503,8 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
       answersEncoded: method === 'quick' ? encodeAnswers(answers) : null,
       raw: method === 'raw' ? { ...raw } : null,
       scan: method === 'omr' && scan ? serializeScan(scan) : null,
+      revisionOf,
+      revisionReason,
       createdAt: new Date().toISOString(),
       attempts: 0,
       lastError,
@@ -459,6 +542,10 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     setConditionsAccepted(false);
     setRestoredAt(null);
     setRestoreDismissed(true);
+    setRevisionOf(null);
+    setRevisionReason(null);
+    setRevisionNote(null);
+    setEditLoadError('');
     submissionKey.current = crypto.randomUUID();
     setStep('intake');
   }
@@ -496,6 +583,8 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     setCurrentItem(draftSnapshot.currentItem);
     setRaw(draftSnapshot.raw);
     setScan(draftSnapshot.scan ? deserializeScan(draftSnapshot.scan) : null);
+    setRevisionOf(typeof draftSnapshot.revisionOf === 'string' ? draftSnapshot.revisionOf : null);
+    setRevisionReason(typeof draftSnapshot.revisionReason === 'string' ? draftSnapshot.revisionReason : null);
     // Kayıt sonrası başarı durumu da korunur: resume edilen iş zaten kaydedilmişse
     // "saved" aynen geri gelsin, "Analizi başlat" tekrar gerekmeyecektir.
     if (draftSnapshot.savedId && draftSnapshot.savedAt && draftSnapshot.step === 'review') {
@@ -602,7 +691,10 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     setBusy(true);
     try {
       const input = recordInputFromIntake(client);
-      const meta = buildCaseMeta(method, client);
+      const meta = buildCaseMeta(method, client, {
+        revisionOf: revisionOf ?? undefined,
+        revisionReason: revisionReason ?? undefined,
+      });
       let record: MMPIRecord;
       if (method === 'omr') {
         if (!scan || !omrReady) throw new Error('Dört sayfa onaylanmadan kayıt tamamlanamaz.');
@@ -780,6 +872,30 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
             onCancel={() => setConfirmNew(false)}
           />
         )}
+
+        {pendingEditId && (
+          <ConfirmDialog
+            title="Yarım kalan çalışma yerine düzenleme açılsın mı?"
+            description="Bu hesapta yarım kalan bir çalışma var. Düzenlemeyi açmak yarım çalışmayı siler; kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+            confirmLabel="Evet, düzenlemeyi aç"
+            busy={editLoading}
+            onConfirm={() => {
+              const target = pendingEditId;
+              setPendingEditId(null);
+              applyRecordEdit(target);
+            }}
+            onCancel={() => {
+              setPendingEditId(null);
+              window.history.replaceState(null, '', window.location.pathname);
+            }}
+          />
+        )}
+        {editLoadError && (
+          <div className="status-banner error-banner" role="alert">
+            <Icon name="alert" size={16} />
+            <span>{editLoadError}</span>
+          </div>
+        )}
       </section>
     );
   }
@@ -841,6 +957,68 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         {dirty && <span className="ws-chip">Kaydedilmedi</span>}
         {storageWarning && <span className="ws-hint is-error">{storageWarning}</span>}
       </div>
+
+      {/* "Kaydı Düzenle" çalışması: revizyon bağlamı her adımda görünür ve
+          kapatılamaz — sonuç orijinale bağlanmamış bir kayıt olmasın diye.
+          Metin: tam not (applyRecordEdit) yoksa orijinal id'den türetilen kısa
+          metin — taslak üzerinden geri dönüşte bile bağlam kaybolmaz. */}
+      {revisionOf && !saved && (
+        <div className="status-banner info-banner ws-revision-banner" role="status">
+          <Icon name="refresh" size={16} />
+          <span style={{ flex: 1 }}>
+            {revisionNote ?? `Bu çalışma ${revisionOf.slice(0, 8)}… kaydının düzenlemesidir; orijinal kayıt değişmez.`}{' '}
+            <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+              Orijinal kaydı görüntüle
+            </a>
+          </span>
+        </div>
+      )}
+
+      {/* Revizyon kaydedildiyse: orijinalin değişmediğinin açık onayı + bağlantı. */}
+      {revisionOf && saved && saved.id !== 'local' && (
+        <div className="status-banner success-banner" role="status">
+          <Icon name="checkCircle" size={16} />
+          <span style={{ flex: 1 }}>
+            Revizyon <strong>{saved.id}</strong> olarak yazıldı; orijinal kayıt{' '}
+            <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+              {revisionOf.slice(0, 8)}…
+            </a>{' '}
+            değişmeden korundu.
+          </span>
+        </div>
+      )}
+
+      {editLoadError && (
+        <div className="status-banner error-banner" role="alert">
+          <Icon name="alert" size={16} />
+          <span>{editLoadError}</span>
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() => setEditLoadError('')}
+          >
+            Kapat
+          </button>
+        </div>
+      )}
+
+      {pendingEditId && (
+        <ConfirmDialog
+          title="Yarım kalan çalışma yerine düzenleme açılsın mı?"
+          description="Bu hesapta yarım kalan bir çalışma var. Düzenlemeyi açmak yarım çalışmayı siler; kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+          confirmLabel="Evet, düzenlemeyi aç"
+          busy={editLoading}
+          onConfirm={() => {
+            const target = pendingEditId;
+            setPendingEditId(null);
+            applyRecordEdit(target);
+          }}
+          onCancel={() => {
+            setPendingEditId(null);
+            window.history.replaceState(null, '', window.location.pathname);
+          }}
+        />
+      )}
 
       {showRestoreBanner && (
         <div className="ws-restore-inline" role="status">
@@ -1440,17 +1618,25 @@ function ReviewPanel({
 
       {/* Hesaplama ve Grafik */}
       {profile ? (
-        <MMPIResultsPanel
-          profile={profile}
-          clientName={`${client.firstName} ${client.lastName}`}
-          answers={
-            method === 'quick'
-              ? answers
-              : method === 'omr' && scan
-                ? scanToAnswers(definition, scan)
-                : undefined
-          }
-        />
+        <>
+          <MMPIResultsPanel
+            profile={profile}
+            clientName={`${client.firstName} ${client.lastName}`}
+            answers={
+              method === 'quick'
+                ? answers
+                : method === 'omr' && scan
+                  ? scanToAnswers(definition, scan)
+                  : undefined
+            }
+          />
+          {/* Kayıt öncesi önizleme: taslak modunda yorum üretilir (recordId yok). */}
+          <AiInterpretationPanel
+            profile={profile}
+            method={method}
+            client={{ age: client.age }}
+          />
+        </>
       ) : (
         <div className="mmpi-results-placeholder">
           <Icon name="sheet" size={20} />

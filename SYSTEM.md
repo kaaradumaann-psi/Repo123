@@ -127,7 +127,8 @@ Admin'in kayıt ayrıntısında klinik cevap ve profil görmesi mevcut bilinçli
 - Taslak TTL'i 30 gündür. JSON parse öncesi 8 MiB sınırı, en fazla dört sayfa, canonical page key, batch/page tutarlılığı, UUID, review timestamp ve metin sınırları doğrulanır.
 - `serializeScan()` cevap/ölçüm/review verisini tutar; normalize piksel buffer'ı, preview blob URL'i ve original blob URL'i yazmaz. Taslaktan geri gelen sayfa veriyle kullanılabilir, görsel inceleme için yeniden okutma gerekir.
 - Hızlı cevap dizisi `D`, `Y`, `B` (bilinçli boş) ve `-` (henüz girilmedi) alfabesiyle 566 karakter saklanır; `null` ile `undefined` karışmaz.
-- Ağ hatası sonrası outbox en fazla 10 kayıt tutar. Aynı UUID v4 idempotency anahtarıyla yeniden gönderir; `mmpi_records.idempotency_key` unique/upsert sınırı çift kayıt riskini azaltır.
+- "Kaydı Düzenle" çalışmaları taslağa `revisionOf` (UUID) ve `revisionReason` (≤200 karakter) alanlarıyla yazılır; F5 ve yeniden açılışta revizyon bağlamı korunur, `?duzenle` parametresi uygulama anında temizlendiği için iki kez tetiklenmez.
+- Ağ hatası sonrası outbox en fazla 10 kayıt tutar. Aynı UUID v4 idempotency anahtarıyla yeniden gönderir; `mmpi_records.idempotency_key` unique/upsert sınırı çift kayıt riskini azaltır. Outbox girdileri de `revisionOf/revisionReason` taşır; kuyruktan yazılan revizyon bağlantısı kaybolmaz.
 - Validation/auth/sunucu hatası ağ hatası değildir; outbox'tan çıkarılır ve kullanıcıya gösterilir. Sadece bağlantı belirtileri kuyruğa alınır.
 - “Yeni işlem” açık onayla draft'ı ve aktif case state'ini siler; kuyruktaki başka kayıtları silmez. Sayfa/stream/blob temizliği reset, page remove, manual editor kapanışı ve workspace unmount noktalarında yapılır.
 
@@ -138,6 +139,22 @@ Admin'in kayıt ayrıntısında klinik cevap ve profil görmesi mevcut bilinçli
 - **OMR:** dört farklı page number, tek 24 haneli batch ID, doğru fingerprint ve her maddenin ölçülmüş reliable/blank veya açık manual review kararı gerekir.
 - Danışan formunda yaş 16–120, yerel takvim tarihi bugün/öncesi, cinsiyet ve zorunlu metinler doğrulanır; klinik bağlam 2.000, başvuru nedeni 500, meslek/eğitim 120 karakter sınırındadır.
 - Kaydetme öncesi boş madde eşiği `MMPI_MAX_BLANK=30` aşılırsa durur. `clinicalTransferAllowed` her zaman `false` olan teknik sonuç özeti klinik kararı otomatik yetkilendirmez.
+
+**Kaydı Düzenle (revizyon modeli):** Orijinal kayıt immutable olduğundan (bkz. 4.6),
+cevaplar düzenlemek `src/records/recordEdit.ts` ile **yeni bir kayıt** üretir:
+kayıt sayfasındaki "Kaydı Düzenle" (yalnız aktif psikolog + yalnız kendi kaydı)
+`/islem?duzenle=<id>` açar; `CaseWorkspace` bu parametreyi RLS ile okur
+(`getRecordDetail`), `buildEditStateFromRecord` danışan + cevap/ham puan durumunu
+yükseltir ve `revisionOf=<orijinal id>` ile işaretlenmiş revizyon taslağına geçer.
+OMR kaynaklı kayıtlar revizyonda optik payload kopyası DEĞİL, son optik durumun
+(manuel düzeltmeler dahil) 566 cevabı quick yükü olarak taşınır (kayıt başına
+~2-4 KB; MB'larca revizyon zinciri oluşmaz). Optik formun son hali, manuel
+düzeltmeler ve denetim izi her zaman orijinal kayıtta kalır ve "Testi İncele"
+ekranından görünür. Revizyon bağlantısı `CaseMeta.revisionOf/revisionReason`
+(DB trigger'ı `case-meta` içeriğini method dışında sınırlamadığından mevcut
+şemayla uyumlu) ile yazılır; kayıt detayında ve akışta "orijinali görüntüle"
+bağlantılı revizyon bandı gösterilir. Yarım bir çalışma varsa düzenleme önce
+açık onay ister; F5 güvenli (taslak `revisionOf` taşır).
 
 ---
 
@@ -207,7 +224,9 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
 | `audit_logs` SELECT | Engelli | Engelli | Tüm loglar (`is_admin()`) |
 | `audit_logs` YAZMA | Engelli | Yalnız trigger (`security definer`) | Yalnız trigger (`security definer`) |
 
-### 4.4 Admin Edge Function (`admin-users`)
+### 4.4 Edge Function'lar (`admin-users`, `ai-interpretation`)
+
+#### 4.4a Admin Edge Function (`admin-users`)
 
 - **Konum:** `supabase/functions/admin-users/index.ts`
 - **Yetki:** `SUPABASE_SERVICE_ROLE_KEY` yalnızca bu sunucu tarafı çalışma zamanında kullanılır.
@@ -219,6 +238,18 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
   * `set_active`: Psikolog hesabını aktif veya pasif yapar (Auth `ban_duration` ve profil `active` senkronizasyonu).
   * `delete`: Psikolog hesabını siler. Veri bütünlüğü için **önce Auth kullanıcısı silinir** (`adminClient.auth.admin.deleteUser(userId)`). `profiles` ve `mmpi_records` üzerindeki `ON DELETE CASCADE` ilişkisi sayesinde ilişkili tüm profil ve test kayıtları veritabanı tarafından temizlenir.
 - **Hata Yönetimi:** Tüm reddedilmeler yapılandırılmış `{ error: string }` JSON yanıtı döner; istemciye hassas yığın izi sızdırılmaz.
+
+#### 4.4b AI karar desteği Edge Function (`ai-interpretation`)
+
+- **Konum:** `supabase/functions/ai-interpretation/index.ts`; istemci `src/ai/aiInterpretation.ts`, arayüz `src/components/results/AiInterpretationPanel.tsx` (kayıt detayı + İşlem kontrol adımı).
+- **Amaç:** Hesaplanan MMPI profilinin (T skorları, geçerlik bulguları) Türkçe, yapılandırılmış, ≤650 kelimelik **karar destek** yorumu. Tanı koymaz, tedavi önermez; model sistem prompt'u bu kurallarla kilitlenir ve her çıktının altında kalıcı sınır bildirimi vardır.
+- **Doğrulama katmanları (admin-users ile aynı sözleşme +):**
+  1. CORS yalnız `ALLOWED_ORIGINS` (boşsa localhost-only); JWT kapıda (`config.toml` `verify_jwt = true`) ve fonksiyonda (`auth.getUser`) doğrulanır; profil aktif + ADMIN/PSYCHOLOG olmalı.
+  2. `mode=record` ise kayıt service role ile okunur ve çağrının o kayda erişim hakkı (sahip veya Admin) doğrulanmadan yorum üretilmez — IDOR koruması.
+  3. LLM'e giden içerik yalnız istemcinin gönderdiği profil özetinin **alan alan doğrulanmış** halidir (`safeSummary`: sayı aralıkları, ölçek kümesi, metin uzunlukları); serbest metin prompt'u istemcide yaşamaz. Görüntü/piksel verisi asla gönderilmez. Özet **isimsizdir**: danışan ad/soyadı hiçbir istem alanına katılmaz (yalnız yaş + cinsiyet); istemci yine de ad gönderse bile sunucu onu özete almaz (`tests/aiSummaryPrivacy.test.ts` regresyonla kanıtlar).
+  4. `AI_API_KEY` yalnız fonksiyon çalışma zamanında; 503 "yapılandırılmamış"ken arayüzü sessizce kapatır. En iyi çaba hız limiti: kullanıcı başına 1 istek/10 sn + 20 istek/saat.
+  5. İstemci tarafı 24 saatlik cihaz önbelleği `mmpi566:ai:record:<id>` / `mmpi566:ai:draft` anahtarlarında; özet hash'i değişince geçersiz sayılır, "Yeniden Oluştur" önbelleği atlar.
+- **Secrets:** `AI_API_KEY` (zorunlu), `AI_MODEL` (varsayılan `gpt-4o-mini`), `AI_API_BASE` (varsayılan OpenAI), `ALLOWED_ORIGINS` (admin-users ile aynı). `supabase/README.md` §5 dağıtım komutlarını içerir.
 
 ### 4.5 Secrets, CORS ve `ALLOWED_ORIGINS` güvenlik sözleşmesi
 
@@ -234,6 +265,7 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
 2. **Değişmezlik (Immutability):** `protect_mmpi_record_fields()` trigger'ı sayesinde klinik alanlar (`client_*`, `gender`, `age`, `raw_omr_answers`, `created_by`, `created_at` vb.) oluşturulduktan sonra asla güncellenemez.
 3. **Uzman Değerlendirme Notu:** Kayıt sonrasında `updateExpertNotes()` ile güncellenir. Yalnızca `expert_notes` ve `notes_updated_at` kolonları mutasyona uğrar. Metin istemcide ve veritabanı check constraint'i ile **en fazla 4000 karakter** olarak sınırlandırılır. Bu not yazdırma raporunda (`MMPIPrintReport`) "Uzman Değerlendirme Notu" başlığı altında rapora aktarılır.
 4. **Silme (Delete):** Admin her kaydı, psikolog ise kendi kaydını kalıcı olarak silebilir. `count: 'exact'` doğrulaması kullanılır. Silme işlemi sonrasında `audit_logs` tablosuna `record_delete` kaydı işlenir. Soft-delete yoktur.
+5. **Revizyon:** Cevaplar "Kaydı Düzenle" ile orijinali değiştirilmeden yeni kayda yazılır (bkz. 3.4): yeni `case-meta` `revisionOf` (orijinal UUID) + `revisionReason` taşır; `validate_mmpi_record_intake` payload şemasını method üzerinden doğruladığı için revizyon meta alanları mevcut şemaya migration gerektirmeden uyumludur. OMR revizyonları optik payload taşımaz — optik formun son hali orijinalde kalır.
 
 ---
 
@@ -314,6 +346,8 @@ Manual corner editor pointer/touch sürükleme, focusable corner handle'ları, d
 
 Rapor ve ekrandaki kaynak tabanlı “olası tanı”/izlenim ifadeleri tanı değildir; footer, FAQ, kullanım koşulları ve uzman notu yardım metni klinik kararı uzmana bırakır. Uzman notu `maxLength=4000` ve DB check ile korunur; not rapora aktarılır.
 
+**Yapay Zekâ Yorumu:** Sonuç ekranlarında (kayıt detayı + İşlem akışının kontrol adımı) `AiInterpretationPanel`, hesaplanan profilin yapay zekâ destekli karar destek yorumunu `ai-interpretation` Edge Function'ı üzerinden üretir (güvenlik sözleşmesi bkz. 4.4b). Yorum; kalıcı sınır bildirimiyle birlikte gösterilir, kopyalanabilir ve (yetkiliyse) uzman notu taslağına eklenebilir. Yazdırma raporuna dahil DEĞİLDİR — karar destek çıktısı yalnız ekran katmanındadır.
+
 Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İndir/Yeni sekmede aç** eylemleri doğrulanmış optik form PDF'sini kullanır; klinik rapor düğmesi tarayıcının print pipeline'ını kullanır.
 
 ---
@@ -324,6 +358,7 @@ Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İ
 - DM Sans gövde, Newsreader başlık font stack'i remote font yüklemeden kullanılır. Standalone CSP `font-src 'none'` olduğu için fallback font normaldir.
 - Workspace header, scanner source tablist, status/alert, confirm dialogs, form labels, image alt text, results disclosure ve focus-visible stilleri mevcuttur. Ana workspace, Admin ve scanner source tab listelerinde `role=tab`, `aria-selected`, `aria-controls` ve Home/End/Arrow klavye dolaşımı uygulanmıştır. Gerçek browser/AT davranışı bu auditte **DOĞRULANMADI**.
 - Responsive kırılımlar `screen.css`/`theme.css`/`workspace.css`/`scanner*.css` içinde 900, 800, 760, 720 ve 560 px civarındadır; scanner grid ve sonuç tabloları mobilde taşma/stack düzenlerine iner.
+- `src/styles/mobile.css` yalnızca ≤720/480 px medya sorguları içerir ve `main.tsx`'te diğer katmanlardan **sonra** yüklendiği için masaüstü görünümü değişmez. Hedefleri: sıfır yatay kaydırma (küresel taşma koruması + `min-width:0` + `overflow-wrap`), başlık/kullanıcı alanı sarmalama, yükleme kutusu ve hata kartlarının ekrana sığması, 2x2 sayfa kartı, 2 sütunlu metrik şeridi, tam genişlik eylem düğmeleri.
 - `ManualCornerEditor` pointer/touch yanında dört köşe handle'ı focusable `role=button` olarak sunar; ok tuşlarıyla küçük/büyük (Shift) adımlı taşıma ve Türkçe aria label'ları vardır. Gerçek ekran okuyucu ve browser keyboard testi **DOĞRULANMADI**.
 - Reduced-motion, mobil browser, iOS camera izinleri, gerçek Safari/Firefox/Chrome PDF viewer ve ekran okuyucu kombinasyonları **DOĞRULANMADI**. Bu, automated test PASS'i değildir; release öncesi cihaz matrisi gerekir.
 
@@ -339,6 +374,7 @@ Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İ
 - PDF worker CDN'e gitmez; worker patch sürümü `pdfjs-dist 6.3.289` ile pinlidir.
 - Draft localStorage'dadır ve aynı origin'deki browser JavaScript erişim modeline tabidir; ortak cihazda taslak bırakılmamalıdır. Taslakta görüntü byte'ı tutulmaz, ancak danışan ve cevap verisi tutulur.
 - Supabase anon/publishable key gizli kabul edilmez; gerçek güvenlik Auth/RLS/Edge Function'dadır. Service-role secret yalnız server-side Function'da olmalıdır.
+- 2026-09-21 ek denetimi (revizyon + AI + mobil): `src` yeniden tarandı — `dangerouslySetInnerHTML`/`eval`/`innerHTML` hâlâ yok; link interceptor yalnız aynı-origin `<a>`'yı yakalar (`javascript:` asla). `ai-interpretation` fonksiyonu statik olarak denetlendi: CORS allowlist, JWT (kapı + fonksiyon), rol/aktiflik, IDOR (kayıt sahipliği), sayısal özet doğrulama, hız limiti, 64 KB gövde sınırı, secret yalnız runtime. `recordEdit` yalnız RLS'li `getRecordDetail` üzerinden çalışır; `revisionOf` istemciden UUID olarak DB'ye gitmeden önce `buildCaseMeta` içinde doğrulanır. Depoda service-role/anon secret veya API key commit'i bulunamadı (yalnız `.env.example` şablonu).
 
 ### 8.2 Backend ve operasyon güvenliği
 
@@ -356,8 +392,11 @@ Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İ
 | Raw camera/PDF pixels | client memory/blob/canvas | Akış, page removal/reset/unmount; server'a gönderilmez |
 | Onaylı intake/raw/OMR payload | Supabase `mmpi_records` | Kurumun retention/silme politikasına bağlı; delete kalıcıdır |
 | Action metadata | Supabase `audit_logs` | DB retention politikasına bağlı; yalnız Admin select |
+| AI yorum isteği (yalnız isteğe bağlı bölüm) | dış dil modeli sağlayıcısına | **isimsiz**: yalnız sayısal profil + cinsiyet/yaş; ad/soyad ve görsel gönderilmez (KVKK m.4/3-d); sonuç 24 saat cihaz önbelleğinde |
 
-Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölgesi, veri işleme hukuki sebebi, saklama/imha süresi ve danışan aydınlatması kurum/uzman tarafından belirlenmelidir.
+Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölgesi, veri işleme hukuki
+sebebi, saklama/imha süresi, danışan aydınlatması ve (AI etkinse) dil modeli sağlayıcısıyla
+veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 
 ---
 
@@ -384,6 +423,8 @@ Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölg
 - Lifecycle: user-key draft isolation, TTL/corrupt JSON, no image persistence, outbox shape/size/attempts, exact local date, landing/resume decisions at code level.
 - Result boundary: unresolved OMR remains pending, measured blank is distinct, manual review/history/undo and record gate do not grant unearned clinical transfer.
 - Scoring/report: Turkish norms/K correction/validity/config/derived/critical/source labels, report rendering, print path separation.
+- **Raw-score round trip** (`tests/rawScoreRoundTrip.test.ts`): ham puan yönteminin uçtan uca regresyon testi. Elle hesaplanmış referans T puanları (yayınlanan Türk normları + K=3 düzeltme tablosu) üzerinden K düzeltmesi, T dönüşümü, Kadın Mf ters işareti, 20–120 sıkışması, profil kodu ve `RAW_SCORE_MAX`/`buildRawPayload` sınır doğrulaması kanıtlanır.
+- **AI privacy** (`tests/aiSummaryPrivacy.test.ts`): yapay zekâ istemine giden özetin isimsiz olduğunu (ad/soyad hiçbir alana sızmaz, yalnız sayısal profil + yaş/cinsiyet) ve yaş sınırı dışındaysa kimlik bağlamının hiç gönderilmediğini kanıtlar.
 - Standalone build: no source imports, one inline script, CSP hash, embedded PDF bytes and footer/print separation.
 
 ### 9.3 Manuel veya canlı doğrulama gerektirenler
@@ -392,6 +433,7 @@ Aşağıdakiler otomatik testler sayesinde PASS sayılamaz ve bu ortamda **DOĞR
 
 - gerçek Supabase project üzerinde migration `db push`, login/logout/expired session;
 - iki farklı kullanıcıyla cross-user RLS/IDOR, Admin/psychologist note/delete, audit log ve Edge Function rollback;
+- `ai-interpretation` fonksiyonunun `AI_API_KEY` ile canlı LLM çağrısı, hız limitine düşme ve `ALLOWED_ORIGINS` dışı origin'in CORS ile reddi (secret canlı ortamda ayarlanmalı);
 - gerçek iOS/Android kamera, HTTPS permission, Safari/Firefox/Chrome PDF viewer, gerçek yazıcı/kâğıt/kalem/fotokopi;
 - gerçek fotoğraf kalibrasyonu ve klinik kabul doğruluğu;
 - responsive cihaz matrisi, keyboard-only manual corners, ekran okuyucu ve reduced-motion;

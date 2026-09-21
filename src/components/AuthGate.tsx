@@ -4,6 +4,7 @@ import type { AuthenticatedUser } from '../auth/authTypes';
 import { getSession, onAuthChange, signIn, signOut, userFromSession } from '../auth/supabaseAuth';
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
 import { navigate } from '../router';
+import { SITE_LABEL, SITE_URL } from '../form/attribution';
 import { Icon } from './Icon';
 import { SiteFooter } from './SiteFooter';
 
@@ -191,6 +192,16 @@ function SystemSetupScreen() {
             <Icon name="scan" size={15} />
             <span>Tasarım önizlemesini aç</span>
           </a>
+          <a
+            className="auth-site-return"
+            href={SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ana siteye dön"
+          >
+            <Icon name="external" size={14} />
+            <span>Ana siteye dön: {SITE_LABEL}</span>
+          </a>
         </div>
       </section>
     </main>
@@ -296,6 +307,17 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
               Hesabınız yoksa veya şifrenizi unuttuysanız lütfen kurum yöneticiniz (Admin) ile iletişime geçiniz.
             </p>
           </div>
+
+          <a
+            className="auth-site-return"
+            href={SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ana siteye dön"
+          >
+            <Icon name="external" size={14} />
+            <span>Ana siteye dön: {SITE_LABEL}</span>
+          </a>
         </section>
       </div>
     </main>

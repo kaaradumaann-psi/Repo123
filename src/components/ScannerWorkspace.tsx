@@ -3,12 +3,13 @@ import type { FormDefinition, PixelImage, Point } from '../omr/omrTypes';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { autoScanAndAnalyze } from '../scanner/scanAndAnalyze';
 import { summarizeResults } from '../results/resultNormalizer';
-import { acceptPage, createScanSet, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
+import { acceptPage, autoResolveUnresolvedItems, createScanSet, listUnresolvedItems, missingPageNumbers, removePage, setManualReview, sortedPages } from '../scanner/pageSequence';
 import type { ScanSet } from '../scanner/pageSequence';
 import { checkAborted, identifyFile, normalizedThumbnail, pixelImageToBlobUrl, readImageFile, SCAN_LIMITS, yieldToScreen } from '../scanner/imageIO';
 import { readPdfPages } from '../scanner/pdfIO';
 import type { SourcePage } from '../scanner/pdfIO';
 import { CameraCapture } from './CameraCapture';
+import { ConfirmDialog } from './ConfirmDialog';
 import { ScanResultPreview } from './ScanResultPreview';
 import { RecordCapture } from './RecordCapture';
 import { MyRecordsPanel } from './MyRecordsPanel';
@@ -74,6 +75,7 @@ function ScannerSession({
     return numbers[0] ?? null;
   });
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmAutoResolve, setConfirmAutoResolve] = useState(false);
   const [recordsRefresh, setRecordsRefresh] = useState(0);
   const [manualCorners, setManualCorners] = useState<{
     image: PixelImage; corners: [Point, Point, Point, Point]; previewUrl: string; sourceName: string;
@@ -680,6 +682,56 @@ function ScannerSession({
             <strong className="stat-val text-primary">{summary.manuallyReviewed}</strong>
           </div>
         </div>
+      )}
+
+      {/* İnceleme bekleyen cevap kuyruğu: kullanıcı tek tek uğraşmak istemezse tek
+          adımda güvenli varsayılanlarla çözülür (bkz. pageSequence.autoResolveUnresolvedItems).
+          Sorunlu maddeler artık kaydı fiilen kilitleyen bir ölü uç değildir. */}
+      {pages.length > 0 && (() => {
+        const unresolved = listUnresolvedItems(scan, definition);
+        if (unresolved.length === 0) return null;
+        return (
+          <div className="status-banner warning-banner auto-resolve-banner" role="region" aria-label="İnceleme bekleyen cevaplar">
+            <Icon name="alert" size={18} />
+            <div className="auto-resolve-body" style={{ flex: 1 }}>
+              <strong>{unresolved.length} cevap inceleme bekliyor.</strong>
+              <span>
+                {' '}Herbirini tek tek inceleyebilir ya da otomatik çözebilirsiniz: tek işaret görülen maddeler
+                algılanan cevabını, çoklu/belirsiz/okunamayanlar <strong>Boş (?)</strong> olarak işaretleme
+                alınır; her çözüm denetim izine yazılır.
+              </span>
+            </div>
+            <button
+              type="button"
+              className="btn-primary btn-sm"
+              onClick={() => setConfirmAutoResolve(true)}
+            >
+              <Icon name="checkCircle" size={14} />
+              <span>Otomatik Çöz</span>
+            </button>
+          </div>
+        );
+      })()}
+
+      {confirmAutoResolve && (
+        <ConfirmDialog
+          title="İnceleme bekleyen cevaplar otomatik çözülsün mü?"
+          description="Tek işaret görülen maddeler OMR'ın algıladığı cevabını; çoklu işaretli, belirsiz, okunamayan ve geçersiz maddeler Boş (?) olarak işaretlenir. İşlem geri alınamaz ama denetim izinde kalır ve her madde daha sonra elden yeniden incelenebilir."
+          confirmLabel="Evet, otomatik çöz"
+          tone="neutral"
+          onConfirm={() => {
+            const report = autoResolveUnresolvedItems(current.current, definition);
+            setConfirmAutoResolve(false);
+            if (report.resolved === 0) return;
+            commit(report.state);
+            setStatus(
+              `${report.resolved} cevap otomatik çözüldü: ${report.asDetectedAnswer} algılanan işaret olarak, ` +
+              `${report.asBlank} Boş (?) olarak. Kayıt için artık inceleme kuyruğu yok.`,
+            );
+            notify(`Otomatik çözüm tamamlandı (${report.resolved} madde). Kontrol adımına dönebilirsiniz.`);
+          }}
+          onCancel={() => setConfirmAutoResolve(false)}
+        />
       )}
 
       {/* Sayfa İnceleme ve Düzeltme Alanı */}

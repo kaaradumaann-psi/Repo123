@@ -1,7 +1,8 @@
-import type { FormDefinition } from '../omr/omrTypes';
+import type { FormDefinition, ItemDefinition } from '../omr/omrTypes';
 import type { ManualReview, ManualReviewEvent, StoredScanPage } from '../results/scanResultTypes';
 import { validatePageResult } from '../results/resultValidator';
 import { isValidReviewTimestamp } from '../validation/dateGuards';
+import { resolveItem } from '../results/resultNormalizer';
 
 export type ScanSet = {
   batchId: string | null;
@@ -65,4 +66,96 @@ export function setManualReview(state: ScanSet, definition: FormDefinition, page
     previous: previous ? { ...previous } : null, next: review ? { ...review } : null };
   return { ...state, clinicalTransferAllowed: false, pages: { ...state.pages,
     [pageNumber]: { ...page, reviews, reviewHistory: [...page.reviewHistory, event] } } };
+}
+
+export type UnresolvedItem = {
+  pageNumber: number;
+  item: ItemDefinition;
+  /** OMR motorunun ürettiği orijinal durum (single/multiple/ambiguous/unread/invalid). */
+  status: string | undefined;
+  /** OMR motorunun gördüğü işaret (single için D/Y; diğerlerinde null). */
+  choiceId: string | null;
+};
+
+/**
+ * Kayıt kapısına takılan (inceleme bekleyen) maddelerin listesi: ölçülmüş güvenilir
+ * cevap, ölçülmüş gerçek boş veya açık manuel inceleme taşımayan her madde.
+ */
+export function listUnresolvedItems(state: ScanSet, definition: FormDefinition): UnresolvedItem[] {
+  const out: UnresolvedItem[] = [];
+  for (const expected of definition.pages) {
+    const page = state.pages[expected.pageNumber];
+    if (!page) continue;
+    for (const item of expected.items) {
+      const resolved = resolveItem(item, page);
+      if (!resolved.unresolved) continue;
+      out.push({
+        pageNumber: page.pageNumber,
+        item,
+        status: resolved.original?.status,
+        choiceId: resolved.original?.choiceId ?? null,
+      });
+    }
+  }
+  return out.sort((a, b) => a.pageNumber - b.pageNumber || a.item.itemNumber - b.item.itemNumber);
+}
+
+export type AutoResolveReport = {
+  state: ScanSet;
+  /** Toplam çözülen madde. */
+  resolved: number;
+  /** Algılanan tek işaret kabul edilerek çözülenler. */
+  asDetectedAnswer: number;
+  /** Boş (?) olarak çözülenler (çoklu/belirsiz/okunamadı/geçersiz). */
+  asBlank: number;
+};
+
+/**
+ * Kullanıcı tek tek uğraşamayacağı inceleme kuyruğunu tek adımda çözer:
+ *
+ *  - `single` (tek işaret görüldü, güvenilirlik eşiğinin altında): OMR'ın gördüğü
+ *    işaret kabul edilir — formda zaten o baloncuk işaretli demektir.
+ *  - `multiple` / `ambiguous` / `unread` / `invalid`: Boş (?) olarak onaylanır.
+ *    İki işaretten klinik cevap çıkarılamaz; boş, dürüst ve denetlenebilir seçenektir.
+ *
+ * Her çözüm bir manuel inceleme olayı olarak denetim izine (reviewHistory) yazılır;
+ * kim/otomatik kim, önceki ve sonraki değer, zaman damgasıyla kalıcıdır. Otomatik
+ * çözümler `auto:` ön ekli oturum kimliğiyle işaretlenir. Boş sayısı 30'u aşarsa
+ * mevcut MMPI_MAX_BLANK kapısı kayıt anında yine uyarır/engeller.
+ */
+export function autoResolveUnresolvedItems(state: ScanSet, definition: FormDefinition): AutoResolveReport {
+  const unresolved = listUnresolvedItems(state, definition);
+  if (unresolved.length === 0) return { state, resolved: 0, asDetectedAnswer: 0, asBlank: 0 };
+  const autoReviewerId = `auto:${state.reviewerId}`.slice(0, 160);
+  let next: ScanSet = state;
+  let asDetectedAnswer = 0;
+  let asBlank = 0;
+  const reviewedAt = new Date().toISOString();
+  for (const entry of unresolved) {
+    const original = next.pages[entry.pageNumber]?.items.find(item => item.itemId === entry.item.itemId);
+    const validChoice = original?.choiceId !== null && original?.choiceId !== undefined &&
+      entry.item.responseAreas.some(area => area.choiceId === original.choiceId);
+    // Yalnız `single` maddelerde görülen işaret güvenilir bir varsayılandır;
+    // multiple/ambiguous'da choiceId bir işaretin kendisi değildir (null olmalıdır).
+    const useDetected = original?.status === 'single' && validChoice;
+    const choiceId = useDetected ? original.choiceId : null;
+    const page = next.pages[entry.pageNumber]!;
+    const previous = Object.hasOwn(page.reviews, entry.item.itemId) ? page.reviews[entry.item.itemId] : undefined;
+    const review: ManualReview = { choiceId, reviewedAt };
+    const event: ManualReviewEvent = {
+      itemId: entry.item.itemId, action: 'review', reviewerId: autoReviewerId, recordedAt: reviewedAt,
+      previous: previous ? { ...previous } : null, next: { ...review },
+    };
+    next = {
+      ...next, clinicalTransferAllowed: false,
+      pages: { ...next.pages, [entry.pageNumber]: {
+        ...page,
+        reviews: { ...page.reviews, [entry.item.itemId]: review },
+        reviewHistory: [...page.reviewHistory, event],
+      } },
+    };
+    if (useDetected) asDetectedAnswer++;
+    else asBlank++;
+  }
+  return { state: next, resolved: unresolved.length, asDetectedAnswer, asBlank };
 }

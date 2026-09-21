@@ -26,7 +26,8 @@ export type IconName =
   | 'info'
   | 'list'
   | 'trend'
-  | 'layers';
+  | 'layers'
+  | 'edit';
 
 const paths: Record<IconName, string> = {
   print: 'M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01',
@@ -51,6 +52,7 @@ const paths: Record<IconName, string> = {
   checkCircle: 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3',
   arrowRight: 'M5 12h14M12 5l7 7-7 7',
   sparkles: 'm12 3 1.91 5.89L20 10.8l-4.59 3.96L16.82 21 12 17.27 7.18 21l1.41-6.24L4 10.8l6.09-1.91L12 3z',
+  edit: 'M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z',
   external: 'M7 17 17 7M9 7h8v8',
   pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
