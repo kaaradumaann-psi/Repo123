@@ -428,8 +428,9 @@ cümlesinde mevcut; yalnız "7 de 70 T puanındadır" eşiği kayıp (CONFLICT-0
 | Pa (s.130-135) | 15 | 9 | 6 |
 | Pt (s.137-141) | 15 | 14 | 1 |
 | **Pt KAPANIŞI (s.142)** | **2** | **1** | **1** |
-| **Sc (s.146)** | **8** | **6** | **2** |
-| **TOPLAM** | **140** | **100** | **42** |
+| Sc (s.146) | 8 | 6 | 2 |
+| **Sc KAPANIŞI (s.147-148)** | **2** | **2** | **0** |
+| **TOPLAM** | **142** | **102** | **42** |
 
 
 > **FINAL sayım notu (batch 18):** yukarıdaki tablo satır satır toplanarak
@@ -439,3 +440,15 @@ cümlesinde mevcut; yalnız "7 de 70 T puanındadır" eşiği kayıp (CONFLICT-0
 > sonraki FINAL sayımında** düzeltilecek (VAR+YOK ≠ İncelenen olan tek satır odur).
 > **Pt satırı** batch 18 ile 15 → **17 başlığa** çıktı (s.142 kapanışı: `794` YOK,
 > `70/07` VAR); **Sc satırı** yeni eklendi (s.146: 8 başlık → 6 VAR / 2 YOK).
+
+## Sc bloğu kapanış sayımı (s.147-148) — **2 VAR / 0 YOK**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | `89/98` | s.147-148 | **VAR** ✅ | gövde sadık (8/10 parça) · `diagnosis` = "Şizofreni / Madde kullanımına bağlı psikoz" ✅ · **eksik cümle:** "Yaşı 27'den küçük olanlarda görülür, üçüncü yükselen alt test 4, 7 ya da 6'dır." → CONFLICT-025/027/034 |
+| 2 | `80/08` | s.148 | **VAR** ✅ | gövde sadık (7/8 parça) · `diagnosis` = "Şizoid Kişilik" ✅ · **eksik cümle:** "Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir." → CONFLICT-025/027 |
+| — | **Şekil 22 Paranoid Vadi** (Pa↑ Pt↓ Sc↑) | s.147 | **YOK** ❌ | kod tipi değil, **üç-ölçekli konfigürasyon** → CONFLICT-033 (kapsamı 5 → 6) |
+
+**Blok toplamı (Sc, s.143-148): 10 başlık → 8 VAR / 2 YOK.** s.149-150'de (Ma
+girişi + Tablo 16 + Graham listeleri) kod tipi başlığı yok → kapsam sayımı
+değişmez.

@@ -564,3 +564,59 @@ Tarih: 2026-09-22 · Kapsam: kitap s.142-146 (PDF p79 L – p81 L)
 **REGRESSION YOK.** 324/324 geçti; `optik-form.html` build ile yeniden üretildi.
 Değişiklik yorum **metni** katmanındadır; ham puan/T-skoru hesabı, bant sınırları
 ve geçerlik kapıları aynı kaldı (puanlama testleri dahil tüm suite yeşil).
+
+---
+
+# PHASE 9/10 batch 19 — Sc kapanışı + Ma Tablo 16 (kitap s.147-150)
+
+Tarih: 2026-09-22 · Kapsam: kitap s.147-150 (PDF p81 R – p83 L)
+
+## Kod değişikliği
+
+**YOK.** Denetim turu; P0 katmanı (Tablo 16) temiz çıktı, bulunanlar "eksik
+içerik" sınıfında → CONFLICT-024/025/026/027/033/034'e işlendi (DECISION-027).
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `extract.py render --pages 81-84 --dpi 150` + 430 dpi bindirmeli kadraj | Tablo 16 ve kapanış cümleleri görselden okundu |
+| `extract.py ocr --pages 82-84 --dpi 200` + `inventory.py` | başlık envanteri: s.147 `89/98` · s.148 `80/08` · s.150-151 bant etiketleri |
+| `npx tsx scripts/mmpi-audit/cmp-ma-batch19.ts` | **Tablo 16: 35 + 11 = 46 → BİREBİR MATCH** · norm 19.96/19.72 MATCH · `K_CORRECTION.Ma = 0.2` · Sc kapanışı 8/10 ve 7/8 parça |
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **43/43 PASS** (37 → **+6**) |
+| `npm test` (tam suite) | **330/330 PASS** · 26 suite |
+| `npm run build` | **PASS** — `optik-form.html` senkron (kod değişmedi, build idempotent) |
+
+## Yeni testler (6 test)
+
+1. Ma madde sayısı kitap başlığıyla uyumlu (35 + 11 = 46)
+2. Ma **Doğru** listesi Tablo 16 ile birebir (fazla/eksik yok)
+3. Ma **Yanlış** listesi Tablo 16 ile birebir — **dikiş hattındaki `148` dahil**
+4. Ma `(K Eklemeli)` → `K_CORRECTION.Ma = 0.2` + norm çifti (19.96 / 19.72)
+5. `89/98` gövdesi + `diagnosis` regresyonu (şizofreni / madde psikozu)
+6. `80/08` gövdesi + `diagnosis` regresyonu (Şizoid Kişilik; küçük harfli
+   "danışmanlık görüşmelerinde" biçimi dahil)
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.** 330/330 geçti; puanlama matematiğine dokunulmadı.
+Not: **büyük/küçük harf duyarsız** karşılaştırma kuralı ilk kez bir bulguyu
+yanlış positivesizlemeden kurtardı (`cmp-ma-batch19.ts`).
+
+**Denetim aracı (batch 19 — `scripts/mmpi-audit/cmp-ma-batch19.ts`):** Tablo 16'yı
+**birebir** (`toSorted` dizi karşılaştırması; kadraj `64·181·251·148` sütunundan
+kestiği için `148` ayrıca doğrulanır) ve Ma norm + K eklemesini doğruluyor; Sc
+kapanışında `89/98` ve `80/08` gövdelerini **10 ve 8 parçalı** cümle kontrolünden
+geçiriyor.
+**İlk koşutta bulunan eksik (test edilmeden önce yakalandı):** cümle eşleştirmesi
+**büyük/küçük harfe duyarlı** yazılmıştı; kaynak cümlesi kodda `"; "` ile
+birleştirildiği için ortadaki cümleler küçük harfle başlıyor → "Danışmanlık
+görüşmelerinde…" ve "Bu kod tipindeki 7 ve 2…" **olmadığı halde YOK** göründü.
+İki taraf da `toLowerCase()` ile düzeltildi → `89/98` 8/10, `80/08` 7/8.
+**Kural:** `cmp-*.ts` coverage kontrolleri **her zaman case-insensitive** yapılır.
+**Kalıcı testlere alınanlar:** Tablo 16 Doğru/Yanlış **birebirlik**, 46 toplam,
+Ma norm + `K_CORRECTION.Ma`, `89/98` (yaş/üçüncü yükselen **hariç** tam metin) ve
+`80/08` gövde + Olası Tanı kilitleri. **Kod değişikliği yok** → `npm test`
+**330/330 PASS** (26 suite), `mmpiKeyIntegrity` **43/43 PASS**, `npm run build`
+**PASS** (`optik-form.html` senkron).

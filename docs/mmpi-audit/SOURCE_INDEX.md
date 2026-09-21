@@ -115,7 +115,11 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **144** | **p80 L** | 🎯 **Tablo 15 — Sc anahtarı (Madde Sayısı: 78)** + "K Eklemeli" + norm 29.82/31.06 + Graham 23-38 + düşük puan 1 | **DONE** (batch 18) · **P0 BİREBİR MATCH** (Doğru **59** + Yanlış **19**) — 400 dpi **bindirmeli iki kırpma** (`tbl15_L/R`, dikiş 156/251/320/354 sütununda) |
 | **145** | **p80 R** | Sc düşük puan listesi 2-9 + **Sc T bantları**: 100+ ("T>95" notu) · 75+ · 60-74 (3 madde) | **DONE** (batch 18) · bantlar MATCH · **OCR uyarısı:** `100 T puanı ve üstü` başlığı 200 dpi OCR'da düştü → `OCR_ISSUES.md` **BAND-HEAD-DROP** |
 | **146** | **p81 L** | Sc bantları kapanışı (Düşük Puanlar T 45 · 45-59 · 21-44) + **5 çapraz ref** + `86/68` + `87/78` + `8726/Yüksek 9` | **DONE** (batch 18) · bant **5/5 MATCH** ("konformaldir" terimi → **CONFLICT-038 FIXED**) · çapraz ref **5/5 UYUMLU** · `87/78`+`8726` **YOK** → CONFLICT-031/030 |
-| 147-151 | p81 R – p83 L | Sc kod bloğu devamı (`89/98` …) + Ma (9) girişi | NOT_STARTED — **sıradaki batch 19** |
+| **147** | **p81 R** | **Şekil 22 — Paranoid Vadi** (Pa↑ Pt↓ Sc↑, ızgara 30/50/70/90) + **`89/98 Kodu`** başlangıcı | **DONE** (batch 19) · örüntü kodda YOK → CONFLICT-033 (+1) · gövde sadık |
+| **148** | **p82 L** | `89/98` kapanışı (Olası Tanı: Şizofreni · Madde kullanımına bağlı psikoz; "Yaşı 27'den küçük…" notu) + **`80/08 Kodu`** (+ Şizoid Kişilik) → **Sc bloğu BİTER** | **DONE** (batch 19) · 2/2 başlık **VAR** · 2 eksik cümle → CONFLICT-025/027/034 |
+| **149** | **p82 R** | **9. Hipomani (Ma) Alt Testi girişi** + Graham 1987 yüksek puan **1-25** | **DONE** (batch 19) · liste kodda YOK → CONFLICT-026 |
+| **150** | **p83 L** | 🎯 **Tablo 16 — Ma anahtarı (Madde Sayısı: 46)** + "(K Eklemeli)" + norm 19.96/19.72 + Graham 26-42 + Ma düşük puan 1-2 | **DONE** (batch 19) · **P0 BİREBİR MATCH** (35+11) · 430 dpi bindirmeli kadraj; OCR `180/267`yi kaçırdı → `OCR_ISSUES.md` TABLO-NUMBERS |
+| 151-156 | p83 R – p86 L | Ma bantları (85+ / 70-84 / 60-69 / 45-59 / 21-44) + **Ma kod bloğu** (`91/19` … `90/09`) + Si (0) girişi | NOT_STARTED — **sıradaki batch 20** |
 | 152-156 | p83 R – p85 R | Ma (9) alt testi + kod tipleri (91/19, 90/09) | NOT_STARTED |
 | 155-158 | p85 L – p86 R | Si (0) alt testi, 049 / 027(8) kodları | NOT_STARTED |
 | 159-170 | p87 R – p93 L | Bölüm 6: Yorumlama (kod tipi belirleme, konversiyon V, paranoid V, kuş kanadı …) | NOT_STARTED |

@@ -372,3 +372,30 @@ krizindeki ergenlerde de bu aralığa rastlanır."
 **Etki:** Bu kural olmasaydı Sc bant seti **4/5 MATCH** diye yanlış
 kaydedilecek ve `T ≥ 100` bandının `T>95` notunun kaynak karşılığı
 doğrulanmamış olacaktı.
+
+
+## TABLO-NUMBERS · madde anahtarı tablolarında OCR **yanılır**, sayım yapmaz (2026-09-22, batch 19)
+
+Tablo 16 (Ma anahtarı, kitap s.150) **200 dpi OCR**'da 46 madde numarasının
+yalnız **44'ü** doğru okundu; **`180` ve `267` kayboldu/bozuldu** (ikisi de
+"Yanlış" satırının sağ yarısında, dikişe yakın). OCR ayrıca 22 adet **sahte
+token** üretti (Graham listesinin 26-42 madde numaraları + sayfa numaraları
+tablo verisiyle karıştı).
+
+| Ölçüm | Değer |
+|---|---|
+| Kaynak madde sayısı | 46 |
+| OCR'ın doğru okuduğu | **44 / 46** |
+| OCR'ın kaçırdığı | `180`, `267` |
+| OCR'ın eklediği gürültü token | 22 |
+| 430 dpi bindirmeli kadraj | **46/46** ✅ |
+
+**Kural:**
+1. **P0 anahtar/norm karşılaştırmasında OCR kaynak listesi olarak kullanılmaz.**
+   Kaynak liste **daima yüksek DPI görselden** okunur ve denetim script'ine
+   (`cmp-*.ts`) **elle gömülür** — OCR yalnız sayfa *yapısını* bulmak için kullanılır.
+2. Kayıp iki sayı OCR'a bırakılsaydı **iki yanlış P0 CONFLICT** ("koddaki 180/267
+   fazlalık") üretilecekti. PHASE 5'teki tüm Tablo 8-16 doğrulamaları bu yüzden
+   görsel kadrajla yapıldı.
+3. Bindirme paylı **iki** kadraj şart: tek kadrajda dikiş sütunu (`64/181/251/148`)
+   yarım görünüyor.

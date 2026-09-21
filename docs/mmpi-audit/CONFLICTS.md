@@ -1630,3 +1630,54 @@ dörtlü bir kod tipidir (konfigürasyon değil) → CONFLICT-024/030 altında s
 **beş çapraz referansın tamamı** kaynakta "Bakınız …" biçiminde yazıldığı için
 kodun tek-kayıt tasarımı bu beşinde **doğru davranıyor** — bu başlıklar için
 CONFLICT-024/031 **iddia edilmez** (kayıt: SOURCE-SC-005).
+
+---
+
+## Batch 19 genişlemeleri — Sc bloğu kapanışı + Ma girişi (s.147-150)
+
+**Kod değişikliği YOK** — bulunanların tamamı **"eksik içerik"** sınıfında;
+DECISION-027 kuralı gereği CONFLICT-024/025/026/027/030/031/033 ile birlikte
+**tek tasarım kararını** bekliyor. P0 katmanı (Tablo 16) temiz çıktı.
+
+### CONFLICT-024 (P1, OPEN) — kümülatif kapsam güncellendi
+**142 başlık → 102 VAR / 42 YOK.** Sc bloğu **kapandı** (10 başlık → 8 VAR / 2 YOK):
+eksik gövdeler `789`·`794` (Pt) + `87/78`·`8726` (Sc). Ma girişi yeni başlık
+içermiyor (s.149-150 yalnız giriş + Tablo 16 + listeler).
+
+### CONFLICT-025 (P2, OPEN) — +2 kesim
+- `89/98`: "**Yaşı 27'den küçük olanlarda görülür, üçüncü yükselen alt test 4, 7 ya da 6'dır.**"
+- `80/08`: "Bu kod tipindeki **7 ve 2 alt testleri en yüksek üçüncü testtir.**"
+
+### CONFLICT-026 (P3, OPEN) — +2 liste (Ma)
+Ma **Graham 1987 yüksek puan 42 satır** (s.149-150) ve **düşük puan listesi**
+(s.150-151) kodda hiçbir yapıda yok. Sc için de aynı durum batch 18'de
+kaydedilmişti (38 + 9 satır).
+
+### CONFLICT-027 (P1, OPEN) — sayısal koşul sayısı **38 → 40**
+| Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|
+| `89/98`: "**üçüncü yükselen alt test 4, 7 ya da 6**" + **yaş < 27** | s.148 | cümle yok → koşul yok |
+| `80/08`: "**7 ve 2 alt testleri en yüksek üçüncü testtir**" | s.148 | cümle yok → koşul yok |
+
+### CONFLICT-033 (P1, OPEN) — kapsam **5 → 6 konfigürasyon**
+**Şekil 22 "Paranoid Vadi"** (Pa↑ · **Pt↓ vadi dibi** · Sc↑; ızgara 30/50/70/90)
+kaynakta tanımlı **üç-ölçekli bir örüntü**; kodda hiç yok. Kaynak ayrıca örüntünün
+**"hepsini doğru yanıtlama" (all-true) biçiminde de çıkabileceğini** söylüyor →
+uygulansa bile **konfigürasyon 7 ile ayrıştırma** gerekir (CONFLICT-019'un
+`F>120`/kırpma hikâyesinin yorum tarafı).
+
+### CONFLICT-034 (P2, OPEN) — +1 yaş direktifi
+`89/98` kaydında "Yaşı 27'den küçük olanlarda görülür" **yaş koşulu** var; kodun
+`CodeInterpretation` modelinde yaş/eğitim/cinsiyet alanı yok (s.112'deki genel
+direktifle aynı kök).
+
+### Not · doğrulanan iki olumlu bulgu (çelişki DEĞİL)
+1. **`89/98` ve `80/08` gövdeleri sadık**: 8/10 ve 7/8 kaynak parçası kodda
+   bulunuyor; kalan farklar yalnız yukarıdaki eksik cümleler. `Olası Tanı`
+   satırları `diagnosis` alanında doğru taşınıyor ("Şizofreni · Madde
+   kullanımına bağlı psikoz" / "Şizoid Kişilik").
+2. **`60-69` vb. büyük/küçük harf tuzağı**: kod cümleleri noktalı virgülle
+   birleştirdiği için kaynak cümlesinin büyük harfle başlayan biçimi
+   (`"Danışmanlık görüşmelerinde…"`) aranamaz — **karşılaştırma duyarsız
+   yapılmalı** (`cmp-ma-batch19.ts` `toLowerCase()`; aksi halde sahte FINDING
+   üretiliyordu, batch sırasında düzeltildi).

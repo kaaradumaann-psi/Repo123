@@ -1320,3 +1320,48 @@ Tarih: 2026-09-22 · Kaynak: **s.142-146** (PDF p79 L – p81 L)
 `mmpiKeyIntegrity.test.ts` **37/37** (+8) · testler **324/324 PASS** (26 suite) ·
 `npm run build` **PASS** (`optik-form.html` senkron) · **CHANGE-013 tek metin
 dizesi**, puanlama matematiği değişmedi.
+
+---
+
+## PHASE 9/10 — batch 19: Sc (8) bloğu KAPANIŞI + Ma (9) girişi ve Tablo 16 (kitap s.147-150)
+
+Tarih: 2026-09-22 · Kaynak: **s.147-150** (PDF p81 R – p83 L)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 147 | p81 R | **Şekil 22 Paranoid Vadi** (Pa↑ Pt↓ Sc↑) + `89/98 Kodu` girişi | gövde sadık · örüntü kodda YOK → CONFLICT-033 |
+| 148 | p82 L | `89/98` kapanışı + Olası Tanılar + **`80/08 Kodu`** → **Sc bloğu BİTER** | 2/2 VAR · **2 eksik cümle** (yaş 27 · üçüncü yükselen) |
+| 149 | p82 R | **9. Hipomani (Ma) Alt Testi** girişi + Graham yüksek puan 1-25 | liste kodda YOK → CONFLICT-026 |
+| 150 | p83 L | 🎯 **Tablo 16 (Ma anahtarı, 46 madde)** + "(K Eklemeli)" + norm + Graham 26-42 | **BİREBİR MATCH** (35+11) |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 16 birebir MATCH:** Doğru **35** + Yanlış **11** = **46**
+  (kitabın "Madde Sayısı: 46" başlığıyla uyumlu) ✅ — **430 dpi bindirmeli iki kadraj**
+  (`tbl16_L`/`tbl16_R`); dikiş `64·181·251·148` sütunundan geçiyor.
+- **Norm 19.96 / 19.72 MATCH** ✅ · **"(K Eklemeli)" ↔ `K_CORRECTION.Ma = 0.2`** ✅
+  → PHASE 5'te **kalan tek klinik anahtar: Tablo 17 (Si)**
+- **Sc (8) bloğu KAPANDI (s.143-148): 10 başlık → 8 VAR / 2 YOK** — eksik gövdeler
+  `87/78` (Sc metni yok, `87` çağrısı Pt `78/87`'yi döndürüyor) ve `8726/Yüksek 9`
+- **CONFLICT-025 +2:** `89/98` "Yaşı 27'den küçük olanlarda görülür, üçüncü yükselen
+  alt test 4, 7 ya da 6'dır" · `80/08` "7 ve 2 alt testleri en yüksek üçüncü testtir"
+- **CONFLICT-027 → 40 örnek** (yukarıdaki iki üçüncü-yükselen/yaş koşulu sayısal
+  olarak tespit edilmiyor) · **CONFLICT-034 +1** (yaş direktifi) ·
+  **CONFLICT-033 → 6 konfigürasyon** (Şekil 22 + "hepsini doğru yanıtlama" ayrımı)
+- **CONFLICT-026 +2:** Ma Graham yüksek puan **42 satır** + düşük puan listesi kodda yok
+- **Yeni OCR kuralı (`TABLO-NUMBERS`) — ölçüldü:** Tablo 16'nın 46 numarasını 200 dpi
+  OCR **44/46** okudu; **`180` ve `267` kayboldu**, 22 sahte token eklendi → OCR'a
+  dayansaydı **iki yanlış P0 ÇELİŞKİ** üretilecekti. Kural: P0 liste kaynakları
+  daima yüksek DPI görselden okunur ve `cmp-*.ts` içine gömülür.
+- **Araç dersi:** kod cümleleri noktalı virgülle birleştiği için kaynak cümlesinin
+  büyük harfli başlangıcı aranamıyor → `cmp-ma-batch19.ts` **küçük harfe
+  indirgeyerek** karşılaştırıyor (ilk koşuda sahte "Danışmanlık görüşmelerinde YOK"
+  bulgusu böyle elendi)
+- **Kümülatif kapsam: 142 başlık → 102 VAR / 42 YOK** · **Kod değişikliği YOK**
+
+### Doğrulama
+
+`cmp-ma-batch19.ts` (Tablo 16 + Sc kapanış gövde denetimi) · typecheck **0** ·
+`mmpiKeyIntegrity.test.ts` **43/43 PASS** (+6 kilit: Tablo 16 birebirlik, dikiş
+`148` kontrolü, K+norm, `89/98` ve `80/08` regresyonu) · testler **330/330 PASS** ·
+`npm run build` **PASS** (`optik-form.html` senkron).

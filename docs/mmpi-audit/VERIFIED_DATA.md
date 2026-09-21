@@ -737,3 +737,29 @@ kırpımla teyit edildi — DECISION-003).
 
 **Kanıt script'leri:** `scripts/mmpi-audit/cmp-sc-batch18.ts` · regresyon kilidi
 `tests/mmpiKeyIntegrity.test.ts` (batch 18 blokları).
+
+---
+
+# PHASE 9/10 batch 19 — Sc bloğu kapanışı + Ma (9) Tablo 16 (kitap s.147-150)
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Tablo 16 anahtarı (P0)** | s.150 — Doğru **35** + Yanlış **11** = **46** | `SCORING_KEYS.Ma` 35 + 11 = 46 | ✅ **BİREBİR MATCH** |
+| Tablo 16 başlık sayımı | "(Madde Sayısı: **46**)" | 46 | ✅ kaynak içi tutarlılık |
+| **K ekleme** | "(K Eklemeli)" | `K_CORRECTION.Ma = 0.2` | ✅ MATCH |
+| Norm — erkek | 19.96 (Savaşır 1981, Tablo 16 dipnotu) | 19.96 (sd 4.4 ← Tablo 30) | ✅ MATCH |
+| Norm — kadın | 19.72 | 19.72 (sd 4.36) | ✅ MATCH |
+| **Sc bloğu kapsamı (s.143-148)** | 10 başlık | `CODES` | **8 VAR / 2 YOK** → CONFLICT-024/030/031 |
+| `89/98` gövdesi + Olası Tanı | s.147-148 | `CODES['89']` + `diagnosis` | ✅ sadık (8/10 parça) · eksik: yaş 27 + üçüncü yükselen |
+| `80/08` gövdesi + Olası Tanı | s.148 | `CODES['08']` + `diagnosis` | ✅ sadık (7/8 parça) · eksik: ilk cümle |
+| **Şekil 22 Paranoid Vadi** | s.147 (Pa↑ Pt↓ Sc↑) | — | ❌ YOK → CONFLICT-033 (+1) |
+| Ma Graham listeleri | 42 satır yüksek + düşük puan listesi | — | ❌ YOK → CONFLICT-026 |
+
+**Kod değişikliği: YOK.** Batch 18'deki CHANGE-013 (Sc 21-44 "konformaldir")
+kaldığı yerden geçerli; Tablo 16 ve norm çifti zaten doğruydu.
+
+**Kanıt script'leri:** `scripts/mmpi-audit/cmp-ma-batch19.ts` ·
+görsel kadrajlar `tbl16_L`/`tbl16_R` (430 dpi bindirmeli), `b19_ma89_age.png`,
+`b19_ma8008.png` (300 dpi) · OCR sayım kanıtı `OCR_ISSUES.md` TABLO-NUMBERS.
+
+**PHASE 5'e kalan:** Tablo 17 (Si anahtarı) — batch 21 hedefi.

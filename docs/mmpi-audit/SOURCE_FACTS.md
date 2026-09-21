@@ -2827,3 +2827,84 @@ kaybolmuş**, izleyen satırlar kelime yapıştırarak gelmiştir
 (`.audit/ocr/p080_R.txt` 13-15. satırlar) → kural: **bant başlıkları OCR ile
 sayılmaz** (`OCR_ISSUES.md` BAND-HEAD-DROP).
 Status: **VERIFIED**
+
+---
+
+# PHASE 9/10 batch 19 — Sc (8) bloğu KAPANIŞI + Ma (9) girişi/anahtarı (kitap s.147-150)
+
+## SOURCE-SC-006 · Şekil 22 **Paranoid Vadi** + `89/98` + `80/08` → **Sc bloğu s.148'de biter** — **Visual: CONFIRMED**
+
+**s.147 (PDF p81 R) — Şekil 22. Paranoid Vadi** (30/50/70/90 ızgaralı profil grafiği,
+eksen etiketleri **Pa · Pt · Sc**; Pa ~82 ↑, **Pt ~72 ↓ (vadi dibi)**, Sc ~90 ↑):
+
+> "Bu örüntüyü gösteren hastalar, duygusal olarak geri çekilmişlerdir, sosyal
+> izolasyon içindedirler, şüphecı, düşmanlık duyguları taşıyan ve davranışları
+> hakkında içgörüsü olmayan kişilerdir. Ayrıca düşünce bozuklukları, hallüsinasyon
+> ve delüzyonlara rastlanabilir. Genellikle paranoid şizofreni tanısına
+> uygundurlar. **Bu örüntü, hepsini doğru yanıtlama şeklinde de ortaya çıkar.**"
+
+→ Üç-ölçekli örüntü + "hepsini doğru yanıtlama" (all-true) ayrımı kodda **YOK** →
+**CONFLICT-033 (+1)**. (Pa bloğunun `6≈8≈70 T ∧ 7 = 6/8 − 10 T` tanımıyla aynı
+yapı; bkz. CONFLICT-027.)
+
+**s.147-148 — `89/98 Kodu`:** gövde kodla uyumlu ✅ ("…ergenlerde ve yetişkinlerde
+ciddi psikopatoloji… çocuksu beklentileri… fikir uçuşmaları… Stres altında
+dağılma… psikotik bir tablo ortaya çıkar") + **"Olası tanı: Şizofreni · Madde
+kullanımına bağlı psikoz"** → kodda `diagnosis` ✅.
+**Kaynakta ayrıca:** "**Yaşı 27'den küçük olanlarda görülür, üçüncü yükselen alt
+test 4, 7 ya da 6'dır.**" → kodda **YOK** ❌ (300 dpi kadraj `b19_ma89_age.png`)
+→ CONFLICT-025 (+1 kesim) + CONFLICT-027 (+1 sayısal koşul) + CONFLICT-034 (+1 yaş direktifi).
+
+**s.148 — `80/08 Kodu`:** "Bu kod tipindeki **7 ve 2 alt testleri en yüksek üçüncü
+testtir.** Genellikle sosyal açıdan çekingen kişilerdir… Atılgan değillerdir.
+Danışmanlık görüşmelerinde genellikle konuşmazlar." + **"Olası tanı: Şizoid
+Kişilik"** → gövde + tanı kodda VAR ✅; yalnız **ilk cümle** (üçüncü yükselen
+kuralı) **YOK** ❌ → CONFLICT-025/027.
+(Kadraj notu: kod bu cümleyi noktalı virgülle sürdürdüğü için büyük/küçük harf
+duyarsız karşılaştırma gerekir — `cmp-ma-batch19.ts` bu yüzden `toLowerCase()` kullanır.)
+
+**Sc (8) bloğu KAPANDI (s.143-148): 10 kaynak başlık → 8 VAR / 2 YOK.**
+s.149'da **9. Hipomani (Ma) Alt Testi** başlar → `Ma (9)` bloğuna geçiş.
+Status: **VERIFIED**
+
+## SOURCE-MA-001 · Ma (9) girişi + Graham 1987 listeleri (s.149-151) — **Visual: CONFIRMED**
+
+> "**9. Hipomani (Ma) Alt Testi** — Hipomani olağan dışı ve sürekli, taşkın ya da
+> huzursuz bir duygu durum döneminin en az bir hafta olmasıdır. Hipomani alt
+> testini oluşturan maddeler ve puanlama yönü **Tablo 16**'da gösterilmiştir."
+
+- "**Ma alt testinde yüksek puan alan bir birey: (Graham 1987)**" → maddeler
+  **1-25** (s.149) + **26-42** (s.150 tablo altı) = **42 satır**
+  (ilki: "1. Manik dönemde olabilir."; sonuncusu: "42. Terapiste hostil ve agresif olabilir.")
+- "**Ma alt testinde düşük puan alan bir birey:**" → "1. Düşük enerji ve aktivite
+  seviyesi vardır. 2. Uyuşuk, apatik, kayıtsızdır." (s.150) + devamı s.151+
+
+**Kod:** iki liste de YOK ❌ → **CONFLICT-026 (+2)**. Bu listeler yorum
+*girdisi* değil, kaynak otoritesinin tanımlayıcı parçası; kodda karşılık
+ararken **`Ma` T bantlarıyla karıştırılmamalı** (bantlar batch 20'nin konusu).
+Status: **VERIFIED** (kaynak) · **EKSİK** (kod)
+
+## SOURCE-MA-002 · 🎯 **P0 — Tablo 16 (Ma anahtarı) BİREBİR MATCH** (s.150) — **Visual: CONFIRMED (430 dpi ×2 bindirmeli kırpma)**
+
+Başlık: "Tablo 16. Hipomani alt testi: Madde numaraları ve puanlama yönü
+**(Madde Sayısı: 46)**" · satır etiketleri "**Doğru**" / "**Yanlış**" /
+"**(K Eklemeli)**" · dipnot: "Erkeklerde ortalama: **19.96**, kadınlarda
+ortalama: **19.72** (Savaşır,1981)"
+
+| Katman | Kaynak (Tablo 16) | Kod | Sonuç |
+|---|---|---|---|
+| Doğru | 11+11+11+2 = **35** | 35 | ✅ birebir |
+| Yanlış | **11** | 11 | ✅ birebir |
+| Toplam | **46** (kitabın başlığı) | 46 | ✅ tutarlı |
+| K ekleme | "(K Eklemeli)" | `K_CORRECTION.Ma = 0.2` | ✅ (oran PHASE 4 K tablosundan) |
+| Norm | 19.96 / 19.72 | `TURKISH_NORMS` 19.96 / 19.72 | ✅ (sd 4.4 / 4.36 ← Tablo 30) |
+
+**Dikiş kontrolü (DECISION-003):** tarama bindirmesi `64 · 181 · 251 · 148`
+sütununun üzerinden geçiyor → `tbl16_L` + `tbl16_R` kırpımlarının kesişiminde
+dört değer de eksiksiz okundu. **Yanlış satırının `180` ve `267` değerleri**
+200 dpi OCR'da **kaybolmuştu** (`OCR_ISSUES.md` → TABLO-NUMBERS); görselde net.
+
+Kanıt: `scripts/mmpi-audit/cmp-ma-batch19.ts` + regresyon kilidi
+`tests/mmpiKeyIntegrity.test.ts` ("Ma Doğru/Yanlış listesi Tablo 16 ile birebir").
+**PHASE 5 kapanışına kalan tek klinik anahtar: Tablo 17 (Si).**
+Status: **VERIFIED**

@@ -624,3 +624,66 @@ describe('PHASE 9/10 batch 18 — Sc 21-44 bandı kaynak terimine uyar', () => {
     assert.match(SC_T_BANDS[0].text, /95/);
   });
 });
+
+/**
+ * PHASE 9/10 batch 19 — Ma (9) anahtarı (Tablo 16) + Sc (8) bloğu kapanışı.
+ *
+ * Kaynak (kitap s.150, 430 dpi bindirmeli iki kırpma `tbl16_L`/`tbl16_R`):
+ * "Tablo 16. Hipomani alt testi: Madde numaraları ve puanlama yönü
+ * (Madde Sayısı: 46)" → Doğru 35 + Yanlış 11; "(K Eklemeli)";
+ * "Erkeklerde ortalama: 19.96, kadınlarda ortalama: 19.72 (Savaşır,1981)".
+ * Dikiş çizgisi 64·181·251·148 sütunundan geçiyor (DECISION-003 kontrolü).
+ */
+const MA_KAYNAK_DORU = [
+  11, 13, 21, 22, 59, 64, 73, 97, 100, 109, 127, 134, 143, 156, 157, 167, 181, 194, 212, 222, 226, 228,
+  232, 233, 238, 240, 250, 251, 263, 266, 268, 271, 277, 279, 298,
+];
+const MA_KAYNAK_YANLIS = [101, 105, 111, 119, 120, 148, 166, 171, 180, 267, 289];
+
+describe('PHASE 9/10 batch 19 — Ma (9) Tablo 16 anahtarı kaynağa birebir bağlıdır', () => {
+  it('Ma madde sayısı kitabın başlığıyla uyumlu: 35 + 11 = 46', () => {
+    const ma = SCORING_KEYS.Ma as ScoringRule;
+    assert.equal(ma.trueItems.length, 35);
+    assert.equal(ma.falseItems.length, 11);
+  });
+
+  it('Ma Doğru listesi Tablo 16 ile birebir aynıdır (fazla/eksik yok)', () => {
+    const ma = SCORING_KEYS.Ma as ScoringRule;
+    const k = new Set(MA_KAYNAK_DORU);
+    const c = new Set(ma.trueItems);
+    assert.deepEqual(ma.trueItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(MA_KAYNAK_DORU.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+  });
+
+  it('Ma Yanlış listesi Tablo 16 ile birebir aynıdır (dikiş sütunu 148 dahil)', () => {
+    const ma = SCORING_KEYS.Ma as ScoringRule;
+    const k = new Set(MA_KAYNAK_YANLIS);
+    const c = new Set(ma.falseItems);
+    assert.deepEqual(ma.falseItems.filter((x) => !k.has(x)), [], 'kodda fazladan madde var');
+    assert.deepEqual(MA_KAYNAK_YANLIS.filter((x) => !c.has(x)), [], 'koddan eksik madde var');
+    assert.ok(ma.falseItems.includes(148), 'dikiş hattındaki 148 eksik okunmuş olamaz');
+  });
+
+  it('Ma K eklemeli ve norm çifti Tablo 16 dipnotuyla eşittir', () => {
+    assert.equal(K_CORRECTION.Ma, 0.2);
+    assert.equal(TURKISH_NORMS.Erkek.Ma.mean, 19.96);
+    assert.equal(TURKISH_NORMS.Kadın.Ma.mean, 19.72);
+  });
+});
+
+describe('PHASE 9/10 batch 19 — Sc (8) bloğu kapanışı (s.147-148) regresyonu', () => {
+  it('89/98 gövdesi kaynakla uyumlu kaldığı kadarıyla durur (Olası Tanılar dahil)', () => {
+    const e = codeInterpretation('89')!;
+    assert.match(e.text, /ergenlerde ve yetişkinlerde ciddi psikopatoloji/);
+    assert.match(e.text, /fikir uçuşmaları/);
+    assert.match(e.text, /Stres altında dağılma/);
+    assert.deepEqual(e.diagnosis, ['Şizofreni', 'Madde kullanımına bağlı psikoz']);
+  });
+
+  it('80/08 gövdesi kaynakla uyumlu ve Şizoid Kişilik tanısını taşır', () => {
+    const e = codeInterpretation('80')!;
+    assert.match(e.text, /kendi ailelerinden bile uzaklaşırlar/);
+    assert.match(e.text, /danışmanlık görüşmelerinde genellikle konuşmazlar/);
+    assert.deepEqual(e.diagnosis, ['Şizoid Kişilik']);
+  });
+});
