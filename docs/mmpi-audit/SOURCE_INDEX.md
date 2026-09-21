@@ -39,7 +39,8 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 37 | p26 R | **F T bantları** (≥80 / 70-79 / 55-69 / 44-54 / <45) + K alt testi girişi | **DONE** |
 | 38 | p27 L | **Tablo 5 — K maddeleri (30 madde)** + K normu + K yüksek/ortalama | **DONE** |
 | 39 | p27 R | K düşük puan profili; K ekleme tartışması | DONE |
-| 40-42 | p28 L – p29 L | **K T bantları** (≥72 / 61-72 / 46-60 / 27-45), K–klinik ilişkisi | NEEDS_REVIEW |
+| 40 | p28 L | **K T bantları** (≥72 / 61-72 / 46-60 / 27-45) + K'nin tek gecersiz-yapmayan alt test olmasi | **DONE** (gorsel dogrulandi) |
+| 41-42 | p28 R – p29 L | K–klinik ilişkisi, K düzeyi–SED etkileşimi | IN_PROGRESS |
 | 43-56 | p29 R – p36 L | Bölüm 4: Geçerlik konfigürasyonları (V, tersine V, tümü doğru/yanlış, rastgele) | NOT_STARTED |
 | 57-58 | p36 R – p37 L | **K+ profilleri**, **F-K endeksi** | NOT_STARTED |
 | 59-62 | p37 R – p39 L | Test-tekrar test endeksi, **dikkatsizlik (TR) alt testi** | NOT_STARTED |
@@ -68,10 +69,10 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 234-235 | p124 R – p125 R | Ek 2-3: Kitap / bilgisayar formu cevap kağıdı | NOT_STARTED |
 | 236-239 | p125 R – p127 L | Ek 4-6: Kart formu işaretleme, profil örnekleri (E/K) | NOT_STARTED |
 | 240-243 | p127 R – p129 L | Ek 7-8: Madde değişim tabloları (kart↔kitap formu) | NOT_STARTED |
-| 244-247 | p130 L – p131 R | **Ek 9a: MMPI madde numaraları ve puanlama yönü** ← PHASE 2 | NOT_STARTED |
-| 248-250 | p132 L – p133 L | Ek 9b: Kişilik bozuklukları testi maddeleri | NOT_STARTED |
-| 251-256 | p133 R – p136 L | Ek 9c: Alkol, Wiggins, OH, Es, A, R, Do, Dy maddeleri | NOT_STARTED |
-| 257-260 | p136 R – p138 L | **Ek 10: Ayrıntılı tanılara göre ortalama ve SD (Tablo 35-38)** ← PHASE 6 | NOT_STARTED |
+| 244-247 | p130 L – p131 R | **Ek 9a: MMPI madde numaraları ve puanlama yönü** ← PHASE 2 | **DONE** (görsel doğrulandı) |
+| 248-250 | p132 L – p133 L | Ek 9b: Kişilik bozuklukları testi maddeleri | **DONE** (11 ölçek; 2'si görsel) |
+| 251-256 | p133 R – p136 L | Ek 9c: Alkol, Wiggins, OH, Es, A, R, Do, Dy maddeleri | **DONE** (21 ölçek; 4'ü görsel) |
+| 257-260 | p136 R – p138 L | **Ek 10: Ayrıntılı tanılara göre ortalama ve SD (Tablo 35-38)** ← PHASE 6 | **NEEDS_REVIEW** (OCR alındı, tablo yapısı çözülemedi) |
 | — | p138 R, p139 | Kapak / arka sayfa | DONE |
 
 ## Durum kodları

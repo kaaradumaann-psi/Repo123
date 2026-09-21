@@ -236,3 +236,148 @@ Status: OPEN (kayıt amaçlı; kod değişikliği önermez, kod zaten Tablo 2'yi
 Page: PDF p3 R – p6 R (İçindekiler)
 Fact: Bölüm haritası ve sayfa numaraları çıkarıldı → `SOURCE_INDEX.md`.
 Status: **VERIFIED**
+
+---
+
+# Ek 9 — Madde Numaraları ve Puanlama Yönü (kitap s.244-256)
+
+Karşılaştırma: `scripts/mmpi-audit/compare-keys.py` · Sonuç **41 MATCH / 5 DIFF**
+Doğrulama kodu: `V` = görsel doğrulandı · `O` = OCR doğrulandı (görsel bekliyor)
+
+## SOURCE-KEY-L-001 · L alt testi (Madde sayısı: 15)
+
+Page: PDF p130 L = kitap s.244
+Doğru: YOK · Yanlış: `15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 195, 225, 255, 285`
+Kod: **MATCH** · Doğrulama: **V**
+Status: **VERIFIED**
+
+## SOURCE-KEY-F-001 · F alt testi (Madde sayısı: 64)
+
+Page: kitap s.244
+Doğru (44): `14, 23, 27, 31, 34, 35, 40, 42, 48, 49, 50, 53, 56, 66, 85, 121, 123, 139, 146, 151, 156, 168, 184, 197, 200, 202, 205, 206, 209, 210, 211, 215, 218, 227, 245, 246, 247, 252, 256, 269, 275, 286, 291, 293`
+Yanlış (20): `17, 20, 54, 65, 75, 83, 112, 113, 115, 164, 169, 177, 185, 196, 199, 220, 257, 258, 272, 276`
+Kod: **DIFF** (69↔169) → `CONFLICT-008` · Doğrulama: **V**
+Status: **VERIFIED**
+
+## SOURCE-KEY-K-001 · K alt testi (Madde sayısı: 30)
+
+Page: kitap s.244
+Doğru (1): `96` · Yanlış (29): `30, 39, 71, 89, 124, 129, 134, 138, 142, 148, 160, 170, 171, 180, 183, 217, 234, 267, 272, 296, 316, 322, 374, 383, 397, 398, 406, 461, 502`
+Kod: **MATCH** · Doğrulama: **V**
+Status: **VERIFIED**
+
+## SOURCE-KEY-HS-001 · Hs alt testi (Madde sayısı: 33)
+
+Page: kitap s.244 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED (görsel bekliyor)
+
+## SOURCE-KEY-D-001 · D alt testi (Madde sayısı: 60)
+
+Page: kitap s.245 · Kod: **MATCH** · Doğrulama: **O**
+Not: Başlıkta "Madde sayısı: 60" yazar; kod anahtarı 20+40=60 ✔
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-HY-001 · Hy alt testi (Madde sayısı: 60)
+
+Page: kitap s.245 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-PD-001 · Pd alt testi (Madde sayısı: 50)
+
+Page: kitap s.245 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-MF-001 · Mf alt testi (Madde sayısı: 60) — CİNSİYETE ÖZEL
+
+Page: kitap s.245
+Doğru (erkek anahtarı): `4, 25, 69, 70, 74, 77, 78, 87, 92, 126, 132, 134, 140, 149, 179, 187, 203, 204, 217, 226, 231, 239, 261, 278, 282, 295, 297, 299`
+Yanlış (erkek anahtarı): `1, 19, 26, 28, 79, 80, 81, 89, 99, 112, 115, 116, 117, 120, 133, 144, 176, 198, 213, 214, 219, 221, 223, 229, 249, 254, 260, 262, 264, 280, 283, 300`
+**Kaynak dipnotu:** `(*) işareti sorular kadınlarda ters yönde puan almaktadır.`
+Glifli maddeler (kaynakta `*` ile işaretli): **69, 179, 231, 297, 133**
+→ Kadın anahtarı = erkek anahtarının bu 5 maddede ters çevrilmiş hâli.
+Kod (`SCORING_KEYS.Mf.male/female`): **MATCH** (5 maddenin tamamı doğru çevrilmiş)
+Doğrulama: **V**
+Status: **VERIFIED**
+
+## SOURCE-KEY-PA-001 · Pa alt testi (Madde sayısı: 40)
+
+Page: kitap s.246 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-PT-001 · Pt alt testi (Madde sayısı: 48)
+
+Page: kitap s.246 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-SC-001 · Sc alt testi (Madde sayısı: 78)
+
+Page: kitap s.246 · Kod: **MATCH** · Doğrulama: **O**
+Not: Kaynak DOĞRU sütunu yalnızca **59** madde listeler, ancak başlık "78" der.
+Kod anahtarı da 59 Doğru + 19 Yanlış = 78. Kaynak metnindeki "78" başlığı ile
+sütun toplamı arasında **kaynak içi tutarsızlık** olabilir → kayıt amaçlı not:
+scoring sonucu etkilenmez (iki taraf da 59+19).
+Status: OCR-CONFIRMED + kaynak içi not
+
+## SOURCE-KEY-MA-001 · Ma alt testi (Madde sayısı: 46)
+
+Page: kitap s.247 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-SI-001 · Si alt testi (Madde sayısı: 70)
+
+Page: kitap s.247 · Kod: **MATCH** · Doğrulama: **O**
+Status: OCR-CONFIRMED
+
+## SOURCE-KEY-PD-SCALES · Kişilik Bozuklukları Testi (kitap s.248-250)
+
+| Ölçek | Kaynak madde sayısı | Kod | Sonuç |
+|---|---|---|---|
+| PAR Paranoid | 22 | 22 | MATCH (O) |
+| SZD Şizoid | 22 | 22 | MATCH (O) |
+| STY Şizotipal | 36 | 36 | MATCH (O) |
+| ANT Antisosyal | 25 | 25 | MATCH (O) |
+| BDL Borderline | 22 | 22 | MATCH (V) |
+| **HST Histrionik** | **20** | **13** | **DIFF** → CONFLICT-012 |
+| NAR Narsisistik | 31 | 31 | MATCH (V) |
+| **AVD Çekingen** | **38** | **25** | **DIFF** → CONFLICT-011 |
+| DEP Bağımlı | 20 | 20 | MATCH (V) |
+| CPS Obsesif-Kompulsif | 15 (Doğru; Yanlış=YOK) | 15 | MATCH (O) |
+| PAG Pasif-Agresif | 14 (Doğru; Yanlış=YOK) | 14 | MATCH (O) |
+
+## SOURCE-KEY-ADDICTION · Alkol ölçekleri (kitap s.251)
+
+- **MAC MacAndrew** — tablo 51 madde listeler. **Kaynak dipnotu:** "iki madde
+  doğrudan alkolle ilişkili olduğundan (#215 ve #460) çıkarılmıştır, madde
+  sayısı **49** olarak kullanılmaktadır."
+  Kod (49 madde, 215 ve 460 hariç): **MATCH** — kitabın kendi kuralına uygun ✔
+  Doğrulama: **V** · Status: **VERIFIED**
+- **ICAS Kronik alkolizm** (Madde sayısı: 8) — Kod: **MATCH** · Doğrulama: **O**
+
+## SOURCE-KEY-WIGGINS · Wiggins içerik skalaları (kitap s.252-255)
+
+| Ölçek | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| SOC Sosyal Uyumsuzluk | 27 | 27 | MATCH (O) |
+| DEP_W Depresyon | 33 | 33 | MATCH (O) |
+| **FEM Kadınsı İlgiler** | **30** | **30** | **DIFF** (126, 463 yön) → CONFLICT-010 |
+| MOR Moral Bozukluğu | 23 | 23 | MATCH (O) |
+| REL Dinsel Tutuculuk | 12 | 12 | MATCH (O) |
+| AUT Otorite Çatışması | 20 | 20 | MATCH (O) |
+| PSY Psikotizm | 48 | 48 | MATCH (O) |
+| ORG Organik Semptomlar | 36 | 36 | MATCH (O) |
+| FAM Aile Sorunları | 16 | 16 | MATCH (O) |
+| HOS Dışa Vuran Düşmanlık | 27 (Yanlış=YOK) | 27 | MATCH (O) |
+| PHO Fobiler | 27 | 27 | MATCH (O) |
+| HYP Hipomani | 25 (Yanlış=YOK) | 25 | MATCH (O) |
+| HEA Sağlıksızlık | 28 | 28 | MATCH (O) |
+
+## SOURCE-KEY-SPECIAL · Özel ölçekler (kitap s.255-256)
+
+| Ölçek | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| OH Aşırı Kontrol-Hostilite | 33 | 33 | MATCH (V) |
+| **Es Ego Gücü** | **68** | **68** | **DIFF** (13 madde yön) → CONFLICT-009 |
+| A Welsh Anksiyete | 39 | 39 | MATCH (O) |
+| R Welsh Represyon | 40 (Yanlış=YOK) | 40 | MATCH (O) |
+| Do Üstünlük | 28 | 28 | MATCH (O) |
+| Dy Bağımlılık | 57 | 57 | MATCH (O) |

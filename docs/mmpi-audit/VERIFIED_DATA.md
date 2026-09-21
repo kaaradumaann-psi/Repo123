@@ -121,3 +121,88 @@ Kod (`SCORING_KEYS.K`): **birebir aynı** ✅ MATCH
 "K alt testi, profili geçersiz yapacak belirgin değerlerin olmadığı tek alt testtir."
 → K hiçbir zaman tek başına profili geçersiz kılmaz; kod bu davranışı
 `VALIDITY_CUTOFFS` içinde yalnızca (?) ve F ile uygular ✅ davranış MATCH
+
+---
+
+# Ek 9 — Madde anahtarları (kitap s.244-256)
+
+**Karşılaştırma sonucu: 41 MATCH / 5 DIFF / 0 MISSING (46 anahtarın tamamı)**
+
+Araç: `scripts/mmpi-audit/compare-keys.py`
+Sütun `Doğrulama`: `V` = görsel doğrulandı · `O` = yalnızca OCR
+
+## Geçerlik ve klinik ölçekler
+
+| Ölçek | Madde | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|---|
+| L | 15 | 15 | 15 | ✅ MATCH | V |
+| **F** | 64 | 64 | 64 | ❌ **DIFF** (69↔169) | V |
+| K | 30 | 30 | 30 | ✅ MATCH | V |
+| Hs | 33 | 33 | 33 | ✅ MATCH | O |
+| D | 60 | 60 | 60 | ✅ MATCH | O |
+| Hy | 60 | 60 | 60 | ✅ MATCH | O |
+| Pd | 50 | 50 | 50 | ✅ MATCH | O |
+| Mf (E) | 60 | 60 | 60 | ✅ MATCH | V |
+| Mf (K) | 60 | 60 | 60 | ✅ MATCH | V |
+| Pa | 40 | 40 | 40 | ✅ MATCH | O |
+| Pt | 48 | 48 | 48 | ✅ MATCH | O |
+| Sc | 78 | 78 | 78 | ✅ MATCH | O |
+| Ma | 46 | 46 | 46 | ✅ MATCH | O |
+| Si | 70 | 70 | 70 | ✅ MATCH | O |
+
+**Kritik doğrulama (Mf cinsiyet kuralı):** Kitap s.245 dipnotu
+"(*) işareti sorular kadınlarda ters yönde puan almaktadır" der ve
+**69, 179, 231, 297, 133** maddelerini işaretler. Kodun kadın anahtarı bu beş
+maddenin tamamını doğru şekilde ters çevirmiştir ✅
+
+## Kişilik bozuklukları testi (kitap s.248-250)
+
+| Ölçek | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| PAR | 22 | 22 | ✅ MATCH | O |
+| SZD | 22 | 22 | ✅ MATCH | O |
+| STY | 36 | 36 | ✅ MATCH | O |
+| ANT | 25 | 25 | ✅ MATCH | O |
+| BDL | 22 | 22 | ✅ MATCH | V |
+| **HST** | **20** | **13** | ❌ **DIFF** (−7 madde) | V |
+| NAR | 31 | 31 | ✅ MATCH | V |
+| **AVD** | **38** | **25** | ❌ **DIFF** (−13 madde) | V |
+| DEP | 20 | 20 | ✅ MATCH | V |
+| CPS | 15 | 15 | ✅ MATCH | O |
+| PAG | 14 | 14 | ✅ MATCH | O |
+
+## Alkol ölçekleri (kitap s.251)
+
+| Ölçek | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| MAC | 49 (dipnot: #215 ve #460 çıkarıldı) | 49 | ✅ MATCH | V |
+| ICAS | 8 | 8 | ✅ MATCH | O |
+
+## Wiggins içerik skalaları (kitap s.252-255)
+
+| Ölçek | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| SOC | 27 | 27 | ✅ MATCH | O |
+| DEP_W | 33 | 33 | ✅ MATCH | O |
+| **FEM** | 30 | 30 | ❌ **DIFF** (126, 463 yön) | V |
+| MOR | 23 | 23 | ✅ MATCH | O |
+| REL | 12 | 12 | ✅ MATCH | O |
+| AUT | 20 | 20 | ✅ MATCH | O |
+| PSY | 48 | 48 | ✅ MATCH | O |
+| ORG | 36 | 36 | ✅ MATCH | O |
+| FAM | 16 | 16 | ✅ MATCH | O |
+| HOS | 27 | 27 | ✅ MATCH | O |
+| PHO | 27 | 27 | ✅ MATCH | O |
+| HYP | 25 | 25 | ✅ MATCH | O |
+| HEA | 28 | 28 | ✅ MATCH | O |
+
+## Özel ölçekler (kitap s.255-256)
+
+| Ölçek | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| OH | 33 | 33 | ✅ MATCH | V |
+| **Es** | **68** | **68** | ❌ **DIFF** (13 madde yön) | V |
+| A | 39 | 39 | ✅ MATCH | O |
+| R | 40 | 40 | ✅ MATCH | O |
+| Do | 28 | 28 | ✅ MATCH | O |
+| Dy | 57 | 57 | ✅ MATCH | O |

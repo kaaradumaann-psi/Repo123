@@ -135,3 +135,42 @@ Reason:
 `src/`, `supabase/`, `functions/`, `worker/`, `public/` üzerinde MMPI-2/RF
 kaynaklı madde/norm/yorum araması henüz yapılmadı.
 Sonraki adım: PHASE 5 sonrası toplu tarama (DECISION-006'ya bağlı).
+
+---
+
+## GÜNCELLEME (2026-09-21, Oturum 2) — Ek 9 işlendi
+
+Ek 9 (kitap s.244-256) **tamamı işlendi** ve 46 anahtarın tamamı kodla
+karşılaştırıldı → 41 MATCH / 5 DIFF. Ayrıntı: `VERIFIED_DATA.md` (Ek 9 bölümü),
+`CONFLICTS.md` (CONFLICT-008..012).
+
+Kalan açık nokta: 41 MATCH'in 33'ü yalnızca **OCR** ile doğrulandı.
+Bunlar için görsel doğrulama yapılana kadar `OCR-CONFIRMED` statüsündedir;
+`VERIFIED` sayılmazlar. Yüksek riskli oldukları için **değil** (hepsi MATCH),
+ancak dürüstlük kaydı olarak açık tutulur.
+
+---
+
+## Ek 10 — tanılara göre ortalama ve SD (kitap s.257-260) — KISMEN OKUNDU
+
+Status:
+**NEEDS_REVIEW** (OCR alındı, yapı çözülemedi)
+
+Page: PDF p136 R = kitap s.257
+Bulgu: **Tablo 35. Genel tanılara göre ortalama ve standart sapmalar**
+Sayfada çok sütunlu, satır etiketleri sayfa altında/sağında kalan bir tablo var.
+OCR çıktısı sütun-satır ilişkisini bozuyor (ör. `Ma+.2K`, `Pd+.4K`, `Hs+.5K`,
+`Sc+1K`, `Pt+1K`, `D`, `K` etiketleri sayfa sonunda toplanmış).
+
+Görülen tanı grupları: **Borderline, Psikotik, Nevrotik, Kişilik Bozukluğu**
+ve cinsiyet/örneklem kırılımları (N=20, N=19, N=56, N=105, N=290, N=361).
+
+Do not modify code until verified.
+
+Sonraki adım:
+Bu tablo **hücre hücre görsel okunmalıdır** (1-3 sayfa/batch kuralı). Tek OCR
+ile asla `VERIFIED` sayılmayacak. Tablo 36-38 de (s.258-260) aynı şekilde.
+
+Not: `TURKISH_NORMS` içindeki 24 hücre (L/F/K dışındaki 12 ölçek × 2 cinsiyet)
+için **hâlâ hiçbir kaynak kanıtı yoktur**. Bölüm 8 (s.191-195) ve Ek 10
+birlikte okunmalıdır.

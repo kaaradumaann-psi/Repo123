@@ -46,3 +46,62 @@ Denetim günlüğü. Her oturum buraya bir kayıt ekler.
   → `SOURCE-VALIDITY-CONFIG-001`, `INTERPRETATION_AUDIT.md`
 - Kaynak: "**(?)** alt testi standart profil kağıdına işaret edilmez" → kodda da
   ? ölçeği konfigürasyona girmez ✅
+
+---
+
+## 2026-09-21 — Oturum 2 (devam)
+
+- **PHASE 3 kapanışı:** K T bantları (kitap s.40) görsel olarak doğrulandı →
+  `72 T ve üstü` · `61-72` · `46-60` · `27-45`. Yapısal kural da teyit edildi:
+  "K alt testi, profili geçersiz yapacak belirgin değerlerin olmadığı tek alt testtir."
+- L tablosu (s.31) + normlar (6.45 / 6.00) görsel doğrulandı
+- F tablosu (s.34) sütunlar arası boşluk kuralıyla yeniden okundu; normlar
+  (8.30 / **10.11**) teyit edildi
+- K tablosu (s.38) tam sayfa görüntüsüyle doğrulandı; **160 ve 322 maddelerinin
+  dikişte kaybolmadığı** kanıtlandı; normlar (13.90 / 13.54) teyit edildi
+- **PHASE 2 (madde anahtarları) işlendi:** Ek 9, kitap s.244-256 = PDF p130 L – p136 L
+  - Yeni araç: `scripts/mmpi-audit/dump-keys.ts` (kod anahtarlarını JSON'a döker)
+  - Yeni araç: `scripts/mmpi-audit/compare-keys.py` (46 anahtarı karşılaştırır)
+  - **Sonuç: 41 MATCH / 5 DIFF / 0 MISSING**
+- **5 yeni P0 çelişki bulundu ve görsel olarak doğrulandı:**
+  - CONFLICT-008 — F anahtarında **69 ↔ 169** basamak hatası
+  - CONFLICT-009 — Es (Ego Gücü) **13 madde yanlış yönde** (483, 488, 489, 494,
+    510, 525, 541, 544, 548, 554, 555, 559, 561)
+  - CONFLICT-010 — W_FEM **2 madde yanlış yönde** (126, 463)
+  - CONFLICT-011 — AVD **13 madde eksik** (38 yerine 25)
+  - CONFLICT-012 — HST **7 madde eksik** (20 yerine 13)
+- Mf cinsiyet kuralı doğrulandı: kaynak dipnotundaki 5 glifli madde
+  (69, 179, 231, 297, 133) kodda doğru şekilde ters çevrilmiş ✅
+- MAC dipnotu doğrulandı: kitap #215 ve #460'ı çıkarıp 49 madde kullanır;
+  kod aynısını yapar ✅ (DECISION-009)
+- Ek 10 (s.257-260) OCR alındı ancak tablo yapısı çözülemedi → `NEEDS_REVIEW`
+- **Kod değişikliği yine YOK** — 5 düzeltme `DECISION-008` ile PHASE 3
+  kapanışından sonraya planlandı
+
+### PHASE 2 sayısal özet
+
+| Sonuç | Adet |
+|---|---|
+| MATCH | 41 |
+| DIFF (hepsi P0) | 5 |
+| MISSING | 0 |
+| Toplam karşılaştırılan anahtar | 46 |
+| Görsel doğrulanmış MATCH | 8 |
+| OCR doğrulanmış MATCH (görsel bekliyor) | 33 |
+
+### Güncel çelişki tablosu
+
+| ID | Öncelik | Konu | Durum |
+|---|---|---|---|
+| CONFLICT-001 | P0 | F kadın normu (10.11 ↔ 9.38) | OPEN |
+| CONFLICT-002 | P0 | K normları (13.90/13.54 ↔ 13.98/11.82) | OPEN |
+| CONFLICT-003 | P1 | L T bandı alt sınırı (59 ↔ 56) | OPEN |
+| CONFLICT-004 | P1 | F ham bant sınırları (3-9/16-25/26+ ↔ 3-7/16-22/23+) | OPEN |
+| CONFLICT-005 | P1 | L/K ham bant tabloları kaynakta yok | INVESTIGATING |
+| CONFLICT-006 | P2 | F/K T bant sınır yazımı | CONFIRMED (kabul) |
+| CONFLICT-007 | P2 | `docs/kaynak-denetimi.md` depoda yok | CONFIRMED |
+| **CONFLICT-008** | **P0** | **F anahtarı 69 ↔ 169** | **CONFIRMED** |
+| **CONFLICT-009** | **P0** | **Es 13 madde yanlış yönde** | **CONFIRMED** |
+| **CONFLICT-010** | **P0** | **W_FEM 2 madde yanlış yönde** | **CONFIRMED** |
+| **CONFLICT-011** | **P0** | **AVD 13 madde eksik** | **CONFIRMED** |
+| **CONFLICT-012** | **P0** | **HST 7 madde eksik** | **CONFIRMED** |

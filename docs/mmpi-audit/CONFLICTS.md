@@ -212,3 +212,165 @@ Status:
 **CONFIRMED** — bu denetim klasörü (`docs/mmpi-audit/`) doğru içeriği
 üretiyor; PHASE 12/13 (UI/report) sonunda ya dosya oluşturulacak ya da
 UI metni düzeltilecek. **Karar bekliyor → DECISIONS.md DECISION-005.**
+
+---
+
+# PHASE 2 — Ek 9 (kitap s.244-256) madde anahtarı denetimi
+
+Karşılaştırma betiği: `scripts/mmpi-audit/compare-keys.py` (kaynak değerler
+OCR + görsel doğrulama ile girildi). Sonuç: **41 MATCH / 5 DIFF / 0 MISSING**
+(46 anahtarın tamamı karşılaştırıldı).
+
+Aşağıdaki 5 farkın **hepsi görsel olarak doğrulanmıştır** ve hepsi **P0**'dır.
+
+---
+
+## CONFLICT-008 — F alt testi: 69 ↔ 169 basamak hatası (P0)
+
+Area: F geçerlik alt testi madde anahtarı
+
+Source: PDF p130 L = **kitap s.244**, Ek 9, "F alt testi: F (Madde sayısı: 64)"
+Source value (Yanlış sütunu, 20 madde):
+```
+17, 20, 54, 65, 75, 83, 112, 113, 115, 164, 169, 177, 185, 196, 199, 220, 257, 258, 272, 276
+```
+Visual: **CONFIRMED** (tam sayfa görüntüsü, yüksek çözünürlük; "164, 169, 177" dizisi net okundu)
+
+Current implementation:
+`src/scoring/mmpiKeys.ts` → `SCORING_KEYS.F.falseItems`
+son üçlü: `... 164, **177**, 185 ...` ve listede **69** var, **169** yok.
+
+Comparison: **CONFLICT** — `69` (kod) ↔ `169` (kaynak)
+
+Impact (yüksek):
+- Madde 169 F'de sayılmaz, madde 69 yanlışlıkla F'ye sayılır → F ham puanı
+  hatalı hesaplanır.
+- F ham puanı geçerlilik eşiklerini (`fInvalid=23`, `fSuspect=16`) belirlediği
+  için **profil geçerlilik kararı** yanlış çıkabilir.
+- Madde 69 aynı zamanda `Mf` (erkek: Doğru) ve `Mf` (kadın: Yanlış) anahtarında
+  da vardır → çift etki.
+
+Problem: Tek karakterlik basamak hatası; kaynak tablo net.
+
+Status: **CONFIRMED** — düzeltme bekliyor (PHASE 3/6 teyidi gerekmez: tablo doğrudan).
+
+---
+
+## CONFLICT-009 — S_Es (Barron Ego Gücü): 13 madde yanlış yönde (P0)
+
+Area: Özel ölçek `Es` madde anahtarı
+
+Source: PDF p135 R = **kitap s.255**, Ek 9, "Ego Gücü Testi (Es) (Madde sayısı: 68)"
+Source value:
+- Doğru (25): `2, 36, 51, 95, 109, 153, 174, 181, 187, 192, 208, 221, 231, 234, 253, 270, 355, 367, 380, 410, 421, 430, 458, 513, 515`
+- Yanlış (43): `14, 22, 32, 33, 34, 43, 48, 58, 62, 82, 94, 100, 132, 140, 189, 209, 217, 236, 241, 244, 251, 261, 341, 344, 349, 359, 378, 384, 389, 420, 483, 488, 489, 494, 510, 525, 541, 544, 548, 554, 555, 559, 561`
+
+Visual: **CONFIRMED** (tam sayfa s.255; her iki sütun dikişten bağımsız okundu)
+
+Current implementation:
+`src/scoring/mmpiDerived.ts` → `SPECIAL_KEYS.Es.dogru` (38 madde) içinde
+`483, 488, 489, 494, 510, 525, 541, 544, 548, 554, 555, 559, 561` **Doğru** tarafında;
+`yanlis` yalnızca 30 madde.
+
+Comparison: **CONFLICT** — yön farkı, 13 madde
+- Doğru 25 ↔ 38 · Yanlış 43 ↔ 30 (toplamlar eşit: 68 ✓)
+
+Impact (yüksek):
+Es puanı **sistematik olarak yukarı sapar**: bu 13 maddeye "doğru" diyen birey
+kaynakta puan almamalıyken kodda +13 alır. Tersine "yanlış" diyen birey
+kaynakta +13 almalıyken kodda 0 alır → Ego gücü yorumu tamamen ters
+yönde hatalı olabilir.
+
+Status: **CONFIRMED** — düzeltme bekliyor.
+
+---
+
+## CONFLICT-010 — W_FEM (Wiggins Kadınsı İlgiler): 2 madde yanlış yönde (P0)
+
+Area: Wiggins içerik skalası `FEM`
+
+Source: PDF p134 L = **kitap s.252**, "Kadınsı İlgiler Skalası FEM (Madde sayısı: 30)"
+Source value:
+- Doğru (18): `70, 74, 77, 78, 87, 92, **126**, 132, 140, 149, 203, 261, 295, **463**, 538, 554, 557, 562`
+- Yanlış (12): `1, 81, 219, 221, 223, 283, 300, 423, 434, 537, 552, 563`
+
+Visual: **CONFIRMED** (tam sayfa s.252; "126" ve "463" Doğru sütununda net)
+
+Current implementation:
+`src/scoring/mmpiDerived.ts` → `WIGGINS_KEYS.FEM`
+`dogru` = 16 madde (126 ve 463 **yok**); `yanlis` = 14 madde (**126 ve 463 var**)
+
+Comparison: **CONFLICT** — yön farkı, 2 madde
+
+Impact (orta-yüksek):
+W_FEM toplamı değişmez (30), ancak bu iki maddeye verilen yanıt ters
+yorumlanır → `WIGGINS_NORMS.FEM` (M=14.77, SD=3.87) ile hesaplanan T puanı
+2 maddeye kadar sapar.
+
+Status: **CONFIRMED** — düzeltme bekliyor.
+
+---
+
+## CONFLICT-011 — P_AVD (Çekingen Kişilik Bozukluğu): 13 madde eksik (P0)
+
+Area: Kişilik bozuklukları testi `AVD`
+
+Source: PDF p132 R = **kitap s.249**, "Çekingen Kişilik Bozukluğu AVD (Madde sayısı: 38)"
+Source value:
+- Doğru (21): `52, 86, 138, 142, 171, 180, 201, 267, 278, 292, 304, 305, 317, 321, 344, 357, 368, 377, 418, 473, 509`
+- Yanlış (17): `54, 57, 79, 91, 99, 122, 170, 309, 353, 371, 391, 449, 450, 479, 482, 521, 547`
+
+Visual: **CONFIRMED** (tam sayfa s.249; AVD tablosu net)
+
+Current implementation:
+`PERSONALITY_KEYS.AVD` = Doğru **8** madde + Yanlış 17 madde = **25**
+
+Comparison: **CONFLICT** — kodda 13 madde eksik:
+`52, 142, 171, 180, 267, 278, 292, 304, 317, 357, 377, 418, 473`
+(başlıktaki "Madde sayısı: 38" ile kodun 25'i zaten tutarsız)
+
+Impact (yüksek):
+AVD ham puanı 38 üzerinden değil 25 üzerinden hesaplanır →
+`PERSONALITY_CUTOFFS.AVD = { marked: 9, mild: 7 }` eşikleri yanlış ölçekte
+uygulanır; ölçek **sistematik olarak düşük** çıkar. Çekingen kişilik özellikleri
+olduğu gibi kaçırılabilir.
+
+Status: **CONFIRMED** — düzeltme bekliyor.
+
+---
+
+## CONFLICT-012 — P_HST (Histrionik Kişilik Bozukluğu): 7 madde eksik (P0)
+
+Area: Kişilik bozuklukları testi `HST`
+
+Source: PDF p132 R = **kitap s.249**, "Histrionik Kişilik Bozukluğu HST (Madde sayısı: 20)"
+Source value:
+- Doğru (13): `99, 126, 181, 353, 381, 391, 445, 449, 450, 451, 482, 521, 547`
+- Yanlış (7): `111, 171, 180, 240, 286, 304, 312`
+
+Visual: **CONFIRMED** (tam sayfa s.249; HST tablosu net)
+
+Current implementation:
+`PERSONALITY_KEYS.HST` = Doğru **8** madde + Yanlış 5 madde = **13**
+
+Comparison: **CONFLICT** — kodda 7 madde eksik:
+`171, 286, 353, 391, 449, 450, 547`
+(başlıktaki "Madde sayısı: 20" ile kodun 13'ü tutarsız)
+
+Impact (yüksek):
+`PERSONALITY_CUTOFFS.HST = { marked: 10, mild: 7 }` eşiği 20 madde için
+belirlenmiştir; 13 maddelik anahtarla bu eşiklere ulaşmak çok zor →
+histrionik özellikler **sistematik olarak kaçırılır**.
+
+Status: **CONFIRMED** — düzeltme bekliyor.
+
+---
+
+## PHASE 2 kapanış notu — doğrulama durumu
+
+41 MATCH'in **33'ü yalnızca OCR** ile doğrulanmıştır (görsel doğrulama
+bekliyor). Bunlar `SOURCE_FACTS.md` içinde `OCR-CONFIRMED` olarak işaretlenir;
+`VERIFIED` sayılmaları için görsel doğrulama gerekir. Maddeler:
+`Hs, D, Hy, Pd, Pa, Pt, Sc, Ma, Si, P_PAR, P_SZD, P_STY, P_ANT, P_CPS, P_PAG,
+A_ICAS, W_SOC, W_DEP_W, W_MOR, W_REL, W_AUT, W_PSY, W_ORG, W_FAM, W_HOS,
+W_PHO, W_HYP, W_HEA, S_A, S_R, S_Do, S_Dy`.

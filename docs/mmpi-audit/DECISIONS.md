@@ -152,3 +152,100 @@ Action:
 Kod değişikliği yok. Çelişki kayıt altında.
 
 Status: **APPROVED**
+
+---
+
+## DECISION-008
+
+Date: 2026-09-21
+Issue: Ek 9 madde anahtarları — 5 P0 fark bulundu
+
+Decision:
+CONFLICT-008 (F: 69↔169), 009 (Es: 13 madde yön), 010 (FEM: 2 madde yön),
+011 (AVD: 13 madde eksik), 012 (HST: 7 madde eksik) **CONFIRMED** statüsüne
+alınır ve **düzeltilmeye hazırdır**. Ancak düzeltme PHASE 3 kapanışından
+*(yani PHASE 2-3 checkpoint'inden)* sonra tek bir toplu değişiklikle yapılır.
+
+Reason:
+- Beş farkın tamamı **görsel olarak doğrulandı** (Ek 9 tabloları yüksek
+  çözünürlükte, dikişten bağımsız okundu).
+- F'deki 69↔169 basamak hatası ve Es/FEM yön hataları **klasik MMPI
+  anahtarlarıyla da** uyuşmaz; kaynak tablo nettir.
+- HST ve AVD başlıkları kendi içinde tutarlıdır (20 ve 38 madde başlığı,
+  aynı sayıda liste) → kodun 13 ve 25 maddesi eksiktir.
+- Toplu düzeltme, tek bir test/regresyon turunda doğrulanmayı sağlar
+  (her değişiklikte 287 testi tekrar çalıştırmak yerine).
+
+Action:
+PHASE 3 DONE olduğunda: `mmpiKeys.ts` (F), `mmpiDerived.ts` (Es, FEM, AVD, HST)
+güncellenecek; ardından `npm run typecheck && npm test && npm run build`.
+Kayıtlar `CODE_CHANGES.md` CHANGE-001..005 olarak açılacak.
+
+Status: **APPROVED**
+
+---
+
+## DECISION-009
+
+Date: 2026-09-21
+Issue: MacAndrew (MAC) maddesi — kaynak tablo 51 madde, kod 49 madde
+
+Decision:
+Kod **doğru kabul edilir**; MAC için CONFLICT açılmaz.
+
+Reason:
+Kitap s.251 dipnotu açıkça şöyle der: "iki madde doğrudan alkolle ilişkili
+olduğundan (#215 ve #460) çıkarılmıştır, madde sayısı 49 olarak
+kullanılmaktadır." Kod bu kuralı birebir uygular.
+
+Action:
+`compare-keys.py` içinde kaynak değeri 49 madde olarak modellendi ve
+dipnot `NOT` alanına yazıldı. Kod değişikliği yok.
+
+Status: **APPROVED**
+
+---
+
+## DECISION-010
+
+Date: 2026-09-21
+Issue: Sc alt testinde kaynak içi tutarsızlık (başlık 78, Doğru sütunu 59)
+
+Decision:
+Kayıt amaçlı not; **kod değişikliği yok.**
+
+Reason:
+Kitap s.246 "Şizofreni alt testi: Sc (Madde sayısı: 78)" der; Doğru sütunu 59
+madde listeler, Yanlış sütunu 19 madde. Kod da 59+19=78 kullanır → scoring
+sonucu etkilenmez. Olası açıklama: 78 maddelik ölçeğin bir kısmı başka bir
+sütun düzeninde gösterilmiştir. Aynı durum D (başlık 60 ✔), Hs (33 ✔) için
+geçerli değil — yalnızca Sc'de görüldü.
+
+Action:
+`SOURCE_FACTS.md` SOURCE-KEY-SC-001 içine "kaynak içi not" olarak yazıldı.
+
+Status: **APPROVED**
+
+---
+
+## DECISION-011
+
+Date: 2026-09-21
+Issue: OCR-only doğrulanmış 33 MATCH anahtarının statüsü
+
+Decision:
+OCR ile eşleşen ama görsel doğrulanmayan anahtarlar **`OCR-CONFIRMED`**
+statüsünde kalır; `VERIFIED` sayılmaz ve FINAL raporunda "görsel doğrulama
+bekliyor" notuyla listelenir.
+
+Reason:
+Görev talimatı §7 ve §21: sayısal veride çift doğrulama zorunlu. 33 anahtarın
+tamamını şimdi görsel doğrulamak oturum bütçesini tüketir; ancak bunları
+"sessizce doğrulanmış" saymak denetimin dürüstlüğünü bozar.
+
+Action:
+`VERIFIED_DATA.md` ve `SOURCE_FACTS.md` tablolarında `Doğrulama: O` sütunu
+korunur. FINAL raporunda:
+`SOURCE-ALIGNED-WITH-UNVERIFIED` (bkz. §47).
+
+Status: **APPROVED**
