@@ -1197,3 +1197,56 @@ bağlıdır. Karar tüm klinik ölçek blokları çıkarıldıktan sonra verilec
 Kod yalnızca `34/43` anahtarını taşıdığı için **`534` sıralaması hiçbir zaman
 `345/435` metnine erişemez** (kırpma `34`e düşürür → `34/43` döner; içerik
 kaybolur). CONFLICT-030/031 ile aynı kök neden.
+
+---
+
+## CONFLICT-033 — **Nevrotik üçlü profil konfigürasyonları** kodda yok (P1, OPEN)
+
+Area: yorum katmanı (`mmpiSource.ts` / `mmpiInterpretation.ts`)
+
+**Kaynak (s.103-106, 4/4 konfigürasyon 300-340 dpi GÖRSEL doğrulandı):**
+"**Nevrotik üçlü içindeki üç alt testin ilişkileri çerçevesinde en sık
+karşılaşılan dört konfigürasyon vardır.**"
+
+| # | Konfigürasyon | Kaynak koşulu | Şekil |
+|---|---|---|---|
+| 1 | **Konversiyon vadisi** | Hs ↑, Hy ↑, **D ↓** | 17 |
+| 2 | **Basamak orantısı** | **üçü de > 70 T**, Hs > D > Hy | 18 |
+| 3 | **Şapka** | **Hs < 70 T** ∧ **D > 70 T** ∧ **Hy > 70 T** (+ D, Hs ve Hy'den yüksek) | 19 |
+| 4 | **Yükselen eğilim** | **üçü de > 70 T**, Hs < D < Hy | 20 |
+
+**Kod tarafı (kanıt):**
+
+- `src/scoring/mmpiSource.ts` → yalnızca **tek ölçek** bantları (`HS_T_BANDS`,
+  `D_T_BANDS`, `HY_T_BANDS`), **tek yükselme** kuralları (`SINGLE_HS/D/HY/…`) ve
+  `"Sadece Hy yüksek ve diğer hiçbir alt test 70 T puanının üstünde değilse"`
+  kuralı vardır.
+- `src/scoring/mmpiInterpretation.ts:192` → **yalnızca iki noktalı** kod:
+  `codePointInterpretation(code)` → `codeInterpretation(code)`
+  (`mmpiSourceCodes.ts`, **45 iki-ölçekli anahtar**).
+- **Üç ölçekli (nevrotik üçlü) bir konfigürasyon tespiti hiçbir dosyada yok**
+  (`grep -i "nevrotik\|konversiyon\|triad"` → yalnızca Goldberg/Taulbee/Peterson
+  gibi **türetilmiş endeksler** ve L-nevrotik ölçek ilişkisi).
+
+Impact: Kaynağın **en sık karşılaşılan** dört nevrotik profil örüntüsü — her biri
+**kendi yorumunu, prognozunu ve hatta yaş/cinsiyet notunu taşıyan** dört ayrı
+klinik tablo — kullanıcıya **hiç gösterilmiyor**. P1.
+
+Status: **OPEN** — düzeltme, CONFLICT-024/030/031 ile **aynı kod-modeli
+kararına** bağlıdır (üçlü kod altyapısı). Karar tüm klinik ölçek blokları
+çıkarıldıktan sonra verilecek.
+
+**Kod değişikliği YAPILMADI.**
+
+---
+
+## CONFLICT-027 (GENİŞLETME 3 — s.100-101)
+
+| Kod | Kaynak koşulu | Kaynak |
+|---|---|---|
+| `36/63` | "**Alt test 6, 3'ten 5 ya da daha fazla T puanı yüksek olduğunda**… güç ve prestij kazanmak ister… **Alt test 3, 6'dan yüksekse**… kızgınlıklarının farkında değildirler" | s.100 |
+| `39/93` | "**özellikle eğer alt test Si 40 T puanının altında ise**" (yüzeysellik) | s.101 |
+| `394/934` | "**En sık görülen üçlü kod tipi 394/934'tür.**" (üçlü kod → CONFLICT-024) | s.101 |
+| `36/63`, `37/73`, `30/03` | "**üçüncü en yüksek test**" koşulları (`Si ya da Sc` · `1, 2 ve 4` · `1 ve 2`) | s.100-101 |
+
+→ CONFLICT-027 kapsamı **23 koşula** çıktı.

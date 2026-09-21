@@ -280,3 +280,17 @@ görünür. Bu yüzden içerik farkları **≥300 dpi görsel** ile doğrulanır
 Ek doğrulama kuralı: `274/724` gibi **koşul parantezleri** (ör. "Eğer test 4 ve 7
 birbirlerinin 5 T puanı alanı içindeyse…") OCR'da başlıkla birleşip kaybolabilir →
 başlık çevresi her zaman görselden okunur.
+
+## BLANK-PAGE-OCR — OCR boş sayfada tek karakter döndürür (2026-09-21, batch 9)
+
+**Bulgu:** `p059_L` (kitap **s.102**) OCR çıktısı **tek satır** ve içeriği yalnızca
+`5` (2 bayt). Şüphe üzerine 140 dpi tam sayfa görseli alındı: sayfa
+**gerçekten boş** (kitabın bölüm arası boş sayfası; yalnızca tarama kusurları var).
+
+**Kural:** Bir sayfa için `inventory.py` **0 kod başlığı** döndürüyor **ve** OCR
+çıktısı **< 5 satır / < 200 bayt** ise, sayfa **"boş/işlenemez" varsayılmaz** —
+**tam sayfa görseli (dpi 110-150) alınır.** Gerekçe: aynı turda `p059_L` yerine
+komşu sayfa incelendiğinde (p059 R → s.103) **tamamen yeni bir bölüm**
+("Nevrotik Üçlü Profilleri") bulundu; benzer bir durumda bölüm tamamen
+atlanabilirdi. Bu kontrol **bölüm başlığı kaçırma riskini** ortadan kaldırır
+(SPINE-CLIP ve PAGE-NUMBER-AS-ITEM ile aynı sınıf).

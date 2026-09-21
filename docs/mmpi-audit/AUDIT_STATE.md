@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy I (s.95-99)**; **CONFLICT-024** (48 kod tipi yok) + **CONFLICT-027** (19 T-eşiği) + **CONFLICT-030** (kırpma) + **CONFLICT-031** (blok-bazlı kod) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) blokları DONE**; s.107 Pd girişi okundu → **CONFLICT-024** (52 kod/konfig yok) + **CONFLICT-027** (23 T-eşiği) + **CONFLICT-030** (kırpma) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,26 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**99** (36/63 Kodu) — PDF p57 R
-Sonraki hedef: **s.100-110** (Hy kod bloğu devamı, PDF p58 L – p62 R)
+**107** (Pd (4) alt testi girişi) — PDF p61 R
+Sonraki hedef: **s.108+** — Pd kod bloğu + Tablo 11 (Pd anahtarı), PDF p62 L+
 
 Last completed:
+**PHASE 9/10 batch 9 — Hy kod bloğu II + NEVROTİK ÜÇLÜ PROFİLLERİ (kitap s.100-106) DONE:**
+**Yorum katmanı:** Hy kod bloğu **kapandı** — `36/63` devamı, `37/73`, `38/83`
+(Olası Tanı: Şizofreni), `39/93`, `30/03` (s.100-101) → **5/5 kod kodda VAR ve
+içerikleri MATCH** ✅. **🆕 YENİ BÖLÜM: "Nevrotik Üçlü Profilleri" (s.103-106)** —
+kaynağın "en sık karşılaşılan **dört konfigürasyon**" dediği yapı: (1) konversiyon
+vadisi (Şekil 17: Hs↑ Hy↑ D↓), (2) **basamak orantısı** (Şekil 18: üçü de > 70 T,
+Hs>D>Hy), (3) **şapka** (Şekil 19: **Hs < 70 T ∧ D > 70 T ∧ Hy > 70 T**),
+(4) **yükselen eğilim** (Şekil 20: üçü de > 70 T, Hs<D<Hy) — **4/4 koşul 300-340
+dpi görselle doğrulandı** ve **kodda HİÇBİRİ YOK** → **CONFLICT-033 (P1)**.
+Görsel denetimde kritik eşik **340 dpi** ile teyit edildi ("Alt test Hs 70 T
+puanının altındayken alt test 2 ve 3, 70 T puanının üzerindeyse…").
+**s.102 boş sayfa** (OCR 1 satır → görselle doğrulandı). **s.107:** Pd (4) alt
+testi girişi + Graham 1987 maddeleri okundu → Pd bloğuna geçiş.
+CONFLICT-027 **23 koşula** genişletildi. **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 8 — Hy (3) T bantları + kod bloğu I (kitap s.95-99) DONE:**
 **P0 katmanı:** Hy T bantları **6/6 MATCH** (300 dpi görsel ×4 kadraj) +
 "Sadece Hy yükselmesi" kuralı ("3 yüksek ∧ diğer hiçbiri 70 T üstünde değil")
@@ -166,9 +182,11 @@ batch 6'da yapıldı).
 
 Status:
 **PHASE 9/10 IN_PROGRESS** — Bölüm 5 kod tipleri. **CONFLICT-024 (P1) açık:**
-48 kod tipi (Hs 22 + D 18 + Hy 8) kodda yok. **CONFLICT-030/031 (P1) açık:**
-kırpma nedeniyle bu kodlar **yanlış metne** düşüyor ve kod yorumları **blok-bazlı**
-(bkz. `32` ↔ `23`). Tüm klinik ölçek blokları çıkarılmadan karar verme.
+52 kod/konfig (Hs 22 + D 18 + Hy 8 + nevrotik üçlü 4) kodda yok.
+**CONFLICT-030/031/033 (P1) açık:** kırpma nedeniyle kodlar **yanlış metne**
+düşüyor, kod yorumları **blok-bazlı** (`32` ↔ `23`) ve **üç ölçekli nevrotik
+profil örüntüleri hiç tespit edilmiyor**. Tüm klinik ölçek blokları çıkarılmadan
+karar verme.
 
 ## Next action
 
@@ -196,7 +214,9 @@ Sıradaki batch'ler (öncelik sırası):
 8b. ~~s.79-87 — D anahtarı + T bantları + D kod bloğu~~ ✅ **TAMAMLANDI**
 8c. ~~**s.88-94 — D kod bloğu devamı + Hy (3) alt testi**~~ ✅ **TAMAMLANDI**
    (batch 6: s.93-94 Hy girişi + Tablo 10; batch 7: s.88-92 D bloğu KAPANIŞI)
-9. **Hy (3) kod bloğu devamı — s.100-110 (PDF p58 L – p62 R)** → sonra Pd (4), Mf (5),
+9. ~~**Hy (3) kod bloğu — s.95-101**~~ ✅ **TAMAMLANDI** (batch 8-9);
+   **nevrotik üçlü profilleri** (s.103-106) da çıkarıldı → CONFLICT-033.
+   **Sıradaki: Pd (4) bloğu — s.108+ (PDF p62 L+)** → sonra Mf (5),
    Pa (6), Pt (7), Sc (8), Ma (9), Si (0) → **CONFLICT-024 / 030 kararı**
    (tüm kod seti çıkarıldıktan sonra, tek tasarım kararı olarak)
 
@@ -299,13 +319,14 @@ Bilinen kısıtlar:
 | CONFLICT-030 | P1 | **3+ ölçekli kodlar yanlış yoruma eşleniyor** (`slice(0,2)` kırpması; kapalı döngü) | OPEN |
 | CONFLICT-031 | P1 | **Kod yorumları blok-bazlı**, kod tek-anahtarlı → `32` ≠ `23` metni | OPEN |
 | CONFLICT-032 | P3 | `345/435/534` başlık varyantı erişilemez (kayıt) | OPEN |
+| CONFLICT-033 | P1 | **Nevrotik üçlü profil konfigürasyonları** (4 konfig, s.103-106) kodda yok | OPEN |
 
-Kalan açık: **13 çelişki** → 0 P0 · 7 P1 (003, 004, 005, 024, 027, 030, 031) · 4 P2 (006, 007, 022, 025) · 2 P3 (026, 032).
+Kalan açık: **14 çelişki** → 0 P0 · 8 P1 (003, 004, 005, 024, 027, 030, 031, 033) · 4 P2 (006, 007, 022, 025) · 2 P3 (026, 032).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 5: **PHASE 9/10 batch 8 — Hy T bantları 6/6 MATCH + Hy kod bloğu I** (s.95-99); CONFLICT-031/032 açıldı
+2026-09-21 — Oturum 5: **PHASE 9/10 batch 9 — Hy bloğu KAPANDI + NEVROTİK ÜÇLÜ PROFİLLERİ** (s.100-106); CONFLICT-033 açıldı
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
 ## CHECKPOINT
@@ -326,6 +347,7 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p48-p51 (kitap s.80-87: D anahtarı Tablo 9 + D kod bloğu I-III),
                 p52-p54 (kitap s.88-92: D kod bloğu IV-V + KAPANIŞ),
                 p55    (kitap s.93-99: Hy girişi + Tablo 10 + Hy T bantları + Hy kod I),
+                p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
                 p115-p124 (kitap s.215-233: EK 1 madde metinleri — yapı + 39 kritik madde),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
@@ -338,18 +360,19 @@ Verified:       ? , L , F , K , Hs , D , Hy  (anahtarlar + normlar + bantlar)
                 Tablo 6 → 16/16 · Tablo 7 → 12/12 çift MATCH
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
                 Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
-Open conflicts: 13 (7 P1 · 4 P2 · 2 P3) — P0 AÇIK ÇELİŞKİ KALMADI
-                (003, 004, 005, 024, 027, 030, 031 · 006, 007, 022, 025 · 026, 032)
+Open conflicts: 14 (8 P1 · 4 P2 · 2 P3) — P0 AÇIK ÇELİŞKİ KALMADI
+                (003, 004, 005, 024, 027, 030, 031, 033 · 006, 007, 022, 025 · 026, 032)
 Fixed:          10 (008..012, 015, 017, 019, 020-kısmi, 023) + 0 regression
 Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
 Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
 Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
-Next:           PHASE 9/10 — **Hy kod bloğu devamı s.100-110** (PDF p58 L – p62 R),
-                aynı yöntem (`inventory.py` → görsel doğrulama → `cmp-*.ts`);
-                sonra Pd (4)…Si (0) → **CONFLICT-024/030/031 tek tasarım kararı**
-                (blok-bazlı kod kimliği + üçlü kod seti; acele etme);
+Next:           PHASE 9/10 — **Pd (4) bloğu s.108+** (PDF p62 L+): Tablo 11
+                (Pd anahtarı, P0 katmanı) + Pd T bantları + Pd kod bloğu, aynı
+                yöntem; sonra Mf (5)…Si (0) → **CONFLICT-024/030/031/033 tek
+                tasarım kararı** (blok-bazlı kod kimliği + üçlü/nevrotik üçlü
+                kod altyapısı; acele etme);
                 ardından PHASE 11-13 + FINAL (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```

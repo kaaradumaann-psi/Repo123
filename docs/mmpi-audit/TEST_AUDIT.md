@@ -448,3 +448,23 @@ tüm klinik ölçek blokları çıkarıldıktan sonra verilecek).
 Yeni araç: `scripts/mmpi-audit/cmp-hy-batch8.ts` — Hy bloğu kod kimliği
 çakışmasını kanıtlar (`32` → `23`, `321` → `23`, `345/435` → `34/43`,
 `346/436` → `36/63`); CONFLICT-031'in ampirik dayanağı.
+
+---
+
+# Oturum 5 — PHASE 9/10 batch 9: Hy bloğu kapanışı + nevrotik üçlü (s.100-107)
+
+Kod değişikliği **YOK** (salt okuma + karşılaştırma; CONFLICT-024/030/031/033
+kararı tüm klinik ölçek blokları çıkarıldıktan sonra verilecek).
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** |
+| `npm test` (tam suite) | **313/313 PASS** · 23 suite |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+**REGRESSION YOK.**
+
+Yeni araç: `scripts/mmpi-audit/cmp-hy-batch9.ts` — Hy bloğu II kod
+karşılaştırması (`37/73`, `38/83`, `39/93`, `30/03` → hepsi kendi kaydına
+eşleşiyor; `394/934` → `39/93`e kırpılıyor).

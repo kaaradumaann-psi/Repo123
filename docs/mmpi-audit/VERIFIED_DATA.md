@@ -615,3 +615,28 @@ olduğu ve diğer hiçbir alt testin **70 T puanının üstünde olmadığı** d
 | `34/43` | s.97-98 | "Her iki kod tipi de kızgın, immatür ve bencildir… kronik ve şiddetli öfke" → ✅ içerik MATCH |
 | `36/63` | s.99-100 | "eleştiriye aşırı duyarlı, kuşkulu, gergin ve hatta şüpheci" → ✅ MATCH |
 | `35/53` | s.99 | "erkekler pasif ve hatta geri çekilme eğiliminde… güçlü ilgi gereksinimleri" → ✅ MATCH |
+
+
+---
+
+# PHASE 9/10 batch 9 — Hy kod bloğu devamı (kitap s.100-101)
+
+Kodun mevcut 5 kod tipinin içeriği kaynakla karşılaştırıldı (`cmp-hy-batch9.ts`):
+
+| Kod | Kaynak | İçerik | Sonuç |
+|---|---|---|---|
+| `37/73` | s.100 | 8 cümle = gerginlik/anksiyete/uykusuzluk + düşük akademik başarı + çözümlenmemiş bağımlılık + tuhaf ve gariplik + yabancılaşma + psikotik epizodlar | ✅ **MATCH** (1, 2 ve 4 "üçüncü en yüksek test" cümlesi yok → CONFLICT-025/027) |
+| `38/83` | s.101 | 8 cümle = ruhsal karmaşa + konsantrasyon + psikotik olabilir + düşünce bozukluğu değerlendirilmeli + enkoheran konuşma + **tanı: Şizofreni / histerik nevroz** | ✅ **MATCH** |
+| `39/93` | s.101 | 5 cümle = girişken/dışadönük + **Si 40 T altı** yüzeysellik + sözel saldırganlık + baskıcı anne + çarpıntı/taşikardi/Gİ + semptomatik tedaviye yanıt | ✅ **MATCH** ("en sık üçlü kod tipi 394/934" cümlesi yok → CONFLICT-033/024) |
+| `30/03` | s.101 | 3 cümle = nadir + pasif/bağımlı/geri çekilme + göreceli rahat + sosyal kaçınma | ✅ **MATCH** ("üçüncü en yüksek test 1 ve 2" yok) |
+
+## NEVROTİK ÜÇLÜ PROFİLLERİ — kaynak koşulları (görsel doğrulandı)
+
+| # | Konfigürasyon | Koşul | Doğrulama |
+|---|---|---|---|
+| 1 | Konversiyon vadisi | Hs ↑ ∧ Hy ↑ ∧ D ↓ | 140 dpi (s.103) |
+| 2 | Basamak orantısı | üçü de **> 70 T** ∧ Hs > D > Hy | 300 dpi (s.104) |
+| 3 | Şapka | **Hs < 70 T** ∧ D > 70 T ∧ Hy > 70 T (D en yüksek) | **340 dpi** (s.105) |
+| 4 | Yükselen eğilim | üçü de **> 70 T** ∧ Hs < D < Hy | 300 dpi (s.106) |
+
+→ Bu dört koşul **kodda yok** → CONFLICT-033 (P1).

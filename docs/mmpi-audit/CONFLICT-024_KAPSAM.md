@@ -220,3 +220,42 @@ Ayrıntı ve tam tablo: `CONFLICTS.md` → **CONFLICT-030**.
 | **Genel toplam** | **22** | **48** |
 
 Not: Hy bloğu **s.100+**'da devam ediyor (`36/63` metni s.100'e taşıyor).
+
+
+---
+
+## Hy (3) alt testi kod bloğu — DEVAM (s.100-101) · batch 9
+
+| Kod | Kaynak | Kodda | Not |
+|---|---|---|---|
+| `36/63` devamı | s.100 | ✅ VAR | 5 T fark koşulu eksik |
+| `37/73` | s.100 | ✅ VAR | içerik MATCH |
+| `38/83` | s.101 | ✅ VAR | Olası Tanı: Şizofreni ✓ |
+| `39/93` | s.101 | ✅ VAR | Si<40 T koşulu eksik |
+| `30/03` | s.101 | ✅ VAR | |
+| `394/934` | s.101 | ❌ YOK | **"en sık görülen üçlü kod tipi"** → `39/93`e düşüyor |
+
+→ **Hy kod bloğu (s.95-101) kodda 8 VAR / 8 YOK.**
+
+## 🆕 NEVROTİK ÜÇLÜ PROFİLLERİ (s.103-106) — **tamamı kodda YOK**
+
+| # | Konfigürasyon | Kaynak koşulu | Şekil |
+|---|---|---|---|
+| 1 | **Konversiyon vadisi** | Hs ↑, Hy ↑, D ↓ | 17 |
+| 2 | **Basamak orantısı** | üçü de >70 T, Hs>D>Hy | 18 |
+| 3 | **Şapka** | Hs<70 T ∧ D>70 T ∧ Hy>70 T | 19 |
+| 4 | **Yükselen eğilim** | üçü de >70 T, Hs<D<Hy | 20 |
+
+Kod yalnızca **tek ölçek** ve **iki noktalı kod** katmanına sahiptir →
+**CONFLICT-033 (P1)**. Üçlü kod altyapısı yokluğunun **ikinci ve daha ağır**
+sonucu: bu örüntüler klinik yorum üretmez.
+
+### Güncel genel toplam
+
+| Blok | Kodda VAR | Kodda YOK |
+|---|---|---|
+| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
+| D (s.79-92) | 9 | 18 |
+| Hy (s.95-101) | 8 | 8 |
+| **Nevrotik üçlü profilleri** | **0** | **4** |
+| **Toplam** | **26** | **52** |

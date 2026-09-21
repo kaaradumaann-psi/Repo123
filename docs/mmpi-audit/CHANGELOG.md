@@ -899,3 +899,53 @@ Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT
 
 Açık **13** → 0 P0 · **7 P1** (003, 004, 005, 024, 027, 030, **031**) · 4 P2
 (006, 007, 022, 025) · 2 P3 (026, **032**). FIXED 10 · REJECTED 7.
+
+---
+
+## PHASE 9/10 — batch 9: Hy bloğu KAPANDI + **NEVROTİK ÜÇLÜ PROFİLLERİ** (kitap s.100-107)
+
+Tarih: 2026-09-21 · Kaynak: **s.100-101 (p58)** + **s.102-106 (p59-p61 L)** + **s.107 (p61 R)**
+
+### Hy kod bloğu kapandı (s.100-101) — **5/5 kod kodda VAR ve MATCH**
+
+| Kod | İçerik | Sonuç |
+|---|---|---|
+| `36/63` devamı | baş ağrıları/Gİ yakınmaları, aile üyelerine kızgınlık | ✅ MATCH |
+| `37/73` | gerginlik/anksiyete/düşük akademik başarı + otistik geri çekilme + psikotik epizodlar | ✅ MATCH |
+| `38/83` | ruhsal karmaşa + **Olası Tanı: Şizofreni** | ✅ MATCH |
+| `39/93` | girişken/dışadönük + **Si 40 T altı** koşulu | ✅ MATCH |
+| `30/03` | nadir + pasif/bağımlı | ✅ MATCH |
+
+### 🆕 YENİ BÖLÜM — **NEVROTİK ÜÇLÜ PROFİLLERİ** (s.103-106)
+
+Kaynak: "**Nevrotik üçlü içindeki üç alt testin ilişkileri çerçevesinde en sık
+karşılaşılan DÖRT KONFİGÜRASYON vardır.**"
+
+| # | Konfigürasyon | Koşul (**300-340 dpi görsel doğrulandı**) | Şekil |
+|---|---|---|---|
+| 1 | **Konversiyon vadisi** | Hs ↑ ∧ Hy ↑ ∧ **D ↓** | 17 |
+| 2 | **Basamak orantısı** | **üçü de > 70 T** ∧ Hs > D > Hy | 18 |
+| 3 | **Şapka** | **Hs < 70 T** ∧ **D > 70 T** ∧ **Hy > 70 T** (D en yüksek) | 19 |
+| 4 | **Yükselen eğilim** | **üçü de > 70 T** ∧ Hs < D < Hy | 20 |
+
+→ **CONFLICT-033 (P1, OPEN):** kodda üç ölçekli konfigürasyon tespiti **yok**
+(yalnızca tek-ölçek bantları + iki noktalı kodlar). 4 konfigürasyon da
+kullanıcıya gösterilmiyor.
+
+### Diğer bulgular
+
+- **s.102 boş sayfa** — `p059_L` OCR 1 satır döndürdü; görselle doğrulandı →
+  yeni OCR kuralı **BLANK-PAGE-OCR** (boş sayfa iddiası görselle teyit edilir).
+- **s.107:** Pd (4) alt testi girişi + Graham 1987 maddeleri (1-19) okundu → Pd
+  bloğuna geçiş.
+- CONFLICT-027 **23 koşula** genişletildi (s.100-101 örnekleri).
+- CONFLICT-024 kapsamı: **26 VAR / 52 YOK** (nevrotik üçlü dahil).
+
+### Doğrulama
+
+Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT.md`.
+
+### Çelişki tablosu
+
+Açık **14** → 0 P0 · **8 P1** (003, 004, 005, 024, 027, 030, 031, **033**) ·
+4 P2 (006, 007, 022, 025) · 2 P3 (026, 032). FIXED 10 · REJECTED 7.

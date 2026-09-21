@@ -79,7 +79,11 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **93-94** | **p54 R – p55 L** | **Hy (3) alt testi girişi + Tablo 10 (Hy anahtarı)** | **DONE** (birebir MATCH — `SOURCE-CL-014/015`) |
 | **95** | **p55 R** | **Hy (3) T-puan bantları** (85+/76-85/70-75/60-69/45-59/24-44) + "Sadece Hy yükselmesi" kuralı | **DONE** (300 dpi görsel ×4) · **6/6 bant + tek-yükselme MATCH** |
 | **96-99** | **p56 L – p57 R** | **Hy kod bloğu I**: Yüksek3/YüksekK, `31`, **`32`**, `321`, `34/43`, Yüksek3/Düşük4, `34`, **`345/435/534`**, `346/436`, `35/53`, `36/63`, `54/45` notu | **DONE** (300 dpi görsel doğrulandı) · **CONFLICT-031** (blok-bazlı kod) · CONFLICT-027 genişletildi |
-| 100-110 | p58 L – p62 R | Hy kod bloğu devamı | NOT_STARTED |
+| **100-101** | **p58 L – p58 R** | **Hy kod bloğu II** — `36/63` devamı, `37/73`, `38/83` (tanı Şizofreni), `39/93`, `30/03` | **DONE** · **5/5 kod kodda VAR, içerik MATCH** · `394/934` YOK |
+| **102** | **p59 L** | *(boş sayfa — OCR 1 satır döndü, görselle doğrulandı)* | **DONE (boş)** |
+| **103-106** | **p59 R – p61 L** | 🆕 **NEVROTİK ÜÇLÜ PROFİLLERİ** — 4 konfigürasyon: konversiyon vadisi (Şek.17), basamak orantısı (Şek.18), şapka (Şek.19), yükselen eğilim (Şek.20) | **DONE** (300-340 dpi görsel ×4) · **CONFLICT-033** (kodda hiç yok) |
+| **107** | **p61 R** | **Pd (4) alt testi girişi** + Tablo 11 + Graham 1987 maddeleri 1-19 | **DONE** (Pd bloğuna geçiş) |
+| 108-158 | p62 L – … | Pd (4), Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) blokları | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
 | 121-129 | p68 L – p72 L | Mf (5) alt testi, **erkeklerde/kadınlarda Mf değerlendirmesi** | NOT_STARTED |
