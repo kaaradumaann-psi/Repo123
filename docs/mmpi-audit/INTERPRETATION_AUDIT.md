@@ -10,10 +10,10 @@ Yorum katmanı denetimi. **Scoring düzeltilmeden yorum katmanı düzeltilmez**
 | Modül | İşlev | Durum |
 |---|---|---|
 | `src/scoring/mmpiInterpretation.ts` | Klinik ölçek yorumu | NOT_STARTED |
-| `src/scoring/mmpiSource.ts` | Kaynak tabanlı bant metinleri | IN_PROGRESS |
-| `src/scoring/mmpiValidityConfigs.ts` | L/F/K konfigürasyon örüntüleri | NOT_STARTED |
-| `src/scoring/mmpiCritical.ts` | Kritik maddeler + klinik izlenimler | NOT_STARTED |
-| `src/scoring/mmpiConsistency.ts` | TR endeksi, dikkatsizlik, F-K | NOT_STARTED |
+| `src/scoring/mmpiSource.ts` | Kaynak tabanlı bant metinleri | **IN_PROGRESS** — `? L F K` + `Hs · D · Hy · Pd · Mf · Pa · Pt · Sc` bantları görsel doğrulamalı karşılaştırıldı (PHASE 3/4/5 + batch 1-18; Sc 5/5, **CHANGE-013** ile `21-44` terimi kaynağa çekildi). Kalan: `Ma`, `Si` |
+| `src/scoring/mmpiValidityConfigs.ts` | L/F/K konfigürasyon örüntüleri | **DONE (kaynak karşılaştırması)** — 15/15 konfigürasyon metin + şekil olarak okundu (PHASE 4); **CHANGE-008/009/010** ile 5 eşik kaynağa çekildi; CONFLICT-016/018/019/020 karara bağlandı |
+| `src/scoring/mmpiCritical.ts` | Kritik maddeler + klinik izlenimler | **DONE (etiket denetimi)** — Ek 1 (s.215-233) 39 kritik madde kaydı görsel okundu; 14 etiket uyuşmazlığı **CONFLICT-023 → FIXED (CHANGE-011)**; kaynakta kritik madde **listesi yok** (SOURCE-ITEM-002) |
+| `src/scoring/mmpiConsistency.ts` | TR endeksi, dikkatsizlik, F-K | **DONE (kaynak karşılaştırması)** — Tablo 6 (16/16) · Tablo 7 (12/12) · TR kesme puanı **CHANGE-007** · dikkatsizlik kesmesi 4 (Greene 1980) doğrulandı · F-K bantları MATCH; `UNVERIFIED-FK-001` (−8) ve `MISSING-KPLUS-001` açık |
 
 ---
 
@@ -52,14 +52,12 @@ Kodun `VALIDITY_CONFIGS[0]` (id `reverse-v`) kuralı birebir aynıdır:
 Ayrıca kaynak şunu söyler: "**(?)** alt testi standart profil kağıdına işaret
 edilmez." → kodda `?` ölçeğinin geçerlik konfigürasyonuna girmemesi doğrudur ✅
 
-Kalan iş (PHASE 4/9):
-`VALIDITY_CONFIGS` içindeki diğer 12 örüntünün (V, yükselen/azalan eğilim,
-rastgele, tümü doğru/yanlış, yardım isteği, geleneksel olmayan, açık, güvenilir,
-akut/süreğen, erdemli, katı) adı, sırası ve T eşikleri kitap Bölüm 4'te
-**birebir** bulunmalıdır. Bulunamayan her örüntü `EXTRA`, eşiği farklı olan
-her örüntü P1 `CONFLICT` olur.
+Kalan iş: **YOK — PHASE 4 kapandı (kitap s.43-62).** 15/15 konfigürasyonun adı,
+sırası ve T eşikleri Bölüm 4'te karşılaştırıldı; bulunamayan örüntü çıkmadı
+(`all-true` F>120 kırpma sorunu **CONFLICT-019 → CHANGE-009** ile çözüldü;
+`credible` K≤65 sınırı kaynakta olmadığı için **CHANGE-010** ile kaldırıldı).
 
-Status: IN_PROGRESS → PHASE 4/9
+Status: **DONE** (PHASE 4, DECISION-018/020/022/023)
 
 ### FINDING-I-003 — K düzeltmesinin kullanımı kaynakta eleştirel
 
@@ -80,7 +78,12 @@ Status: OPEN → PHASE 4/13
 
 ## Sonraki eylem
 
-1. PHASE 4 (K düzeltmesi + konfigürasyonlar) tamamlanınca bu dosya
-   `mmpiValidityConfigs.ts` için madde-madde karşılaştırmayla doldurulur.
-2. PHASE 10'da klinik ölçek bant metinleri (s.67-158) doğrulanır.
-3. Kaynak izi (source trace) alanları FINAL raporuna taşınır.
+1. ~~PHASE 4 madde-madde karşılaştırması~~ ✅ **tamamlandı** (bkz. yukarıda FINDING-I-002).
+2. PHASE 10: klinik ölçek bant metinleri `Ma (9)` (s.152-156) ve `Si (0)`
+   (s.155-158) ile tamamlanır; ardından **Bölüm 6 yorumlama** (s.159-170) —
+   batch 18 sonrası sıradaki iş PHASE 9'un Sc kod bloğu kapanışıdır (s.147-151).
+3. Kaynak izi (source trace) alanları FINAL raporuna taşınır; FINDING-I-001
+   (`klinik yorum rehberi` künye uyuşmazlığı) FINAL'da kapanır — kod künyeleri
+   artık bu kitaba (Ceyhun & Oral 2003) sayfa numarasıyla atıf verebilir,
+   çünkü bantlar bu kitapta görsel doğrulandı. `docs/kaynak-denetimi.md`
+   atıf sorununa ek olarak `docs/mmpi-audit/` bu izi taşır (CONFLICT-007 OPEN).

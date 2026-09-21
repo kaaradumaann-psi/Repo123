@@ -52,15 +52,20 @@ bir veriyi yorumlayan istemi düzeltmek hatayı gizler.
 Bu nedenle PHASE 11 için ön koşul:
 
 ```
-PHASE 2  (madde anahtarları — Ek 9)
-PHASE 3  (validity)
-PHASE 4  (K correction)
-PHASE 5  (clinical)
-PHASE 6  (norms — Ek 10 + Bölüm 8)
-PHASE 7  (subscales)
-PHASE 8  (derived — Ek 9c)
-PHASE 9  (code types — Bölüm 5)
-PHASE 10 (interpretation — Bölüm 6)
+PHASE 2  (madde anahtarları — Ek 9)          ✅ DONE (46/46 MATCH, 5 P0 FIXED)
+PHASE 3  (validity)                          ✅ DONE (kitap s.29-42)
+PHASE 4  (K correction + 15 konfig)          ✅ DONE (CHANGE-007..010)
+PHASE 5  (clinical — Tablo 8..17)            🟡 kaynak tarafı DONE s.63-146 (Tablo 8-15 birebir; Ma/Si tabloları sırada)
+PHASE 6  (norms — Tablo 30)                  ✅ DONE (26/26 MATCH)
+PHASE 7  (subscales)                         ⬜ NOT_STARTED
+PHASE 8  (derived — Ek 9c + Wiggins)          ✅ DONE (26/26 + anahtarlar)
+PHASE 9  (code types — Bölüm 5)              🟡 IN_PROGRESS (Hs..Pt kapandı + Sc girişi; s.147+ sırada)
+PHASE 10 (interpretation — Bölüm 6)          🟡 IN_PROGRESS (bant metinleri Hs..Sc doğrulandı)
    ↓
 PHASE 11 (AI)
 ```
+
+**Güncel AI engeli:** PHASE 9/10 bittiğinde CONFLICT-024/025/027/030/031 kapanır;
+AI isteminin dayandığı **kod tipi yorumları** o zamana kadar eksik/yanlış bloğa
+eşlenebilir (ör. `'8726'` → `78/87`). FINDING-AI-001/002 bu nedenle PHASE 11'e
+bırakıldı — skor kaynağı sabitlenmeden istem değiştirmek hatayı gizler.
