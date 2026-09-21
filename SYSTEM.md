@@ -258,10 +258,19 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
   4. `AI_API_KEY` yalnız fonksiyon çalışma zamanında; tanımlı değilken **503 "henüz yapılandırılmamış"** döner ve arayüz bunu
      gösterir. Durum kodlu hatalar `FunctionError` (Error alt sınıfı) ile taşınır: düz nesne fırlatmak `instanceof Error`
      kontrolünü bozar ve 503/502 mesajlarını genel "tekrar deneyin"e düşürürdü (`tests/edgeFunctions.test.ts` bunu kilitler).
-     LLM'e ulaşılamaması/zaman aşımı `502`, beklenmeyen istisnalar `500` (istek kimliğiyle günlükte) döner.
+     LLM sağlayıcı hatası **ayırt edilebilir mesajlarla** `502` döner: 401/403 → anahtar doğrulaması (Gemini'de Generative
+     Language API/kısıt ipucu), 404 → `AI_MODEL` bulunamadı, 429 → kota/hız sınırı, safety bloklaması → filtre mesajı;
+     beklenmeyen istisnalar `500` döner. Ham sağlayıcı mesajı istemciye taşınmaz; durum kodu + kısa özet yalnız sunucu
+     günlüğüne yazılır (`logUpstreamFailure`). Ağ/zaman aşımı da `502`.
      En iyi çaba hız limiti: kullanıcı başına 1 istek/10 sn + 20 istek/saat.
-  5. İstemci tarafı 24 saatlik cihaz önbelleği `mmpi566:ai:record:<id>` / `mmpi566:ai:draft` anahtarlarında; özet hash'i değişince geçersiz sayılır, "Yeniden Oluştur" önbelleği atlar.
-- **Secrets:** `AI_API_KEY` (zorunlu), `AI_MODEL` (varsayılan `gpt-4o-mini`), `AI_API_BASE` (varsayılan OpenAI), `ALLOWED_ORIGINS` (admin-users ile aynı). `supabase/README.md` §5 dağıtım komutlarını içerir.
+  5. **LLM sağlayıcı yolu:** `callModel` → `resolveAiProvider()` (gemini|openai); seçim sırası `AI_PROVIDER` > `AI_API_BASE`
+     hostu > `AI_MODEL` adı (`gemini*`) > anahtar biçimi ipucu (`AIza.*`/`AQ.*`) > OpenAI uyumlu varsayılan. Gemini **yerel**
+     `generateContent` ucuna `x-goog-api-key` başlığıyla gider (OpenAI uyumlu `/chat/completions` yolu Google'ın 2026 `AQ.*`
+     "Auth key"lerini 401/403 ile reddettiği için kullanılmaz); OpenAI yolu `Bearer` + `/chat/completions` kullanır.
+     Anahtar biçimi yalnız sağlayıcı seçimi ipucudur — anahtar doğrulaması Google tarafında yapılır, hiçbir zaman anahtarın
+     biçimsel doğrulaması yapılmaz (`tests/edgeFunctions.test.ts` Gemini yolunu ve mesaj ayrımını kilitler).
+  6. İstemci tarafı 24 saatlik cihaz önbelleği `mmpi566:ai:record:<id>` / `mmpi566:ai:draft` anahtarlarında; özet hash'i değişince geçersiz sayılır, "Yeniden Oluştur" önbelleği atlar.
+- **Secrets:** `AI_API_KEY` (zorunlu), `AI_MODEL` (Gemini için `gemini-2.5-flash`, OpenAI için `gpt-4o-mini`; `gemini*` ile başlıyorsa sağlayıcı otomatik Gemini), `AI_PROVIDER` (opsiyonel `gemini`/`openai`), `AI_API_BASE` (opsiyonel; Gemini yerel uç noktası `https://generativelanguage.googleapis.com/v1beta`, OpenAI uyumlu `https://api.openai.com/v1`), `ALLOWED_ORIGINS` (admin-users ile aynı). `supabase/README.md` §5 dağıtım komutlarını içerir.
 
 ### 4.5 Secrets, CORS ve `ALLOWED_ORIGINS` güvenlik sözleşmesi
 
@@ -360,11 +369,11 @@ Manual corner editor pointer/touch sürükleme, focusable corner handle'ları, d
 
 ### Ekran raporu ve yazdırma
 
-`RecordDetailPage` sonuçları sekmeli progressive-disclosure düzeninde gösterir: Genel Bakış, Geçerlik, Klinik Ölçekler, Kod, Türetilmiş, Desenler/Sözlük, Kritik ve Soru Yanıtları. Ekran yazdırılmaz. `MMPIPrintReport` yalnızca kayıt özeti, profil/tablolar, validity, derived/critical bulgular ve varsa uzman notunu profesyonel print-only DOM'a koyar; `window.print()` bu raporu `@media print` ile yazdırır. `document.title`, `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>` dosya adı önerisine ayarlanır.
+`RecordDetailPage` sonuçları sekmeli progressive-disclosure düzeninde gösterir: Genel Bakış, Geçerlik, Klinik Ölçekler, Kod, Türetilmiş, Desenler/Sözlük, Kritik, Soru Yanıtları ve **en sonda Yapay Zekâ Yorumu**. Ekran yazdırılmaz. `MMPIPrintReport` yalnızca kayıt özeti, profil/tablolar, validity, derived/critical bulgular ve varsa uzman notunu profesyonel print-only DOM'a koyar; `window.print()` bu raporu `@media print` ile yazdırır. `document.title`, `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>` dosya adı önerisine ayarlanır.
 
 Rapor ve ekrandaki kaynak tabanlı “olası tanı”/izlenim ifadeleri tanı değildir; footer, FAQ, kullanım koşulları ve uzman notu yardım metni klinik kararı uzmana bırakır. Uzman notu `maxLength=4000` ve DB check ile korunur; not rapora aktarılır.
 
-**Yapay Zekâ Yorumu:** Sonuç ekranlarında (kayıt detayı + İşlem akışının kontrol adımı) `AiInterpretationPanel`, hesaplanan profilin yapay zekâ destekli karar destek yorumunu `ai-interpretation` Edge Function'ı üzerinden üretir (güvenlik sözleşmesi bkz. 4.4b). Yorum; kalıcı sınır bildirimiyle birlikte gösterilir, kopyalanabilir ve (yetkiliyse) uzman notu taslağına eklenebilir. Yazdırma raporuna dahil DEĞİLDİR — karar destek çıktısı yalnız ekran katmanındadır.
+**Yapay Zekâ Yorumu:** Sonuç panelinin **son sekmesi** (`MmpiResultsTab='ai'`, etiket "Yapay Zekâ Yorumu") — kayıt detayı + İşlem akışının kontrol adımı aynı `MMPIResultsPanel` içinde görür; ayrı bir sayfa bölümü ya da yüzen baloncuk DEĞİLDİR. `AiInterpretationPanel` sekmeye özel hero kartı, iskeletli yoğun durumu, sonuç kartı ve kalıcı sınır bildirimiyle hesaplanan profilin yapay zekâ destekli karar destek yorumunu `ai-interpretation` Edge Function'ı üzerinden üretir (güvenlik sözleşmesi bkz. 4.4b). Yorum kopyalanabilir ve (yetkiliyse) uzman notu taslağına eklenebilir. Yazdırma raporuna dahil DEĞİLDİR — karar destek çıktısı yalnız ekran katmanındadır.
 
 Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İndir/Yeni sekmede aç** eylemleri doğrulanmış optik form PDF'sini kullanır; klinik rapor düğmesi tarayıcının print pipeline'ını kullanır.
 
@@ -451,6 +460,10 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
   sarıldığı, ham `error.message`'ın istemciye taşınmadığı, `console.log` ile gövde verisinin loglanmadığı, CORS allowlist'i ve
   Bearer doğrulamasının korunduğu, `ai-interpretation`'da durum kodlarının `FunctionError` ile taşındığı ve `admin-users`'ta
   doğrulama/veritabanı hatası ayrımının (`ValidationError` → 400, `isDatabaseSideError` → 500 + `db push`) sürdüğü kanıtlanır.
+  `ai-interpretation` için ayrıca **Gemini yerel yolu** (`generateContent` + `x-goog-api-key`, `callGemini` gövdesinde
+  `Authorization` başlığı olmaması), sağlayıcı otomatik seçimi (`AI_PROVIDER` / model adı / `AIza.*`-`AQ.*` anahtar ipucu) ve
+  sağlayıcı hata mesajlarının ayrımı (401/403-anahtar, 404-`AI_MODEL`, 429-kota, safety filtresi) kilitlenir — Google'ın 2026'da
+  `AIza.*` yerine vermeye başladığı `AQ.*` anahtarlarının OpenAI uyumlu yolda 401 ile kırılması regresyonu.
 - **Teşhis sözleşmesi** (`tests/diagnostics.test.ts`): `scripts/diagnose-supabase.mjs` sözdizimi, beklenen migration listesinin `supabase/migrations/` ile birebir aynı kalması, yazma testinin yalnız açık bayrakla çalışması ve `TROUBLESHOOTING.md` çözüm sırasının belgelenmesi.
 
 ### 9.3 Manuel veya canlı doğrulama gerektirenler
@@ -515,9 +528,14 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    npx supabase secrets set ALLOWED_ORIGINS="https://app.example.com,http://localhost:5173"
    ```
    `SUPABASE_URL` ve `SUPABASE_SERVICE_ROLE_KEY` Supabase çalışma zamanı tarafından otomatik sağlanır.
-   Yapay zekâ karar desteği kullanılacaksa anahtar yalnızca fonksiyon çalışma zamanında tutulur:
+   Yapay zekâ karar desteği kullanılacaksa anahtar yalnızca fonksiyon çalışma zamanında tutulur.
+   Google Gemini anahtarları (`AIza.*` / 2026'dan itibaren `AQ.*`) için (yerel `generateContent` yolu otomatik seçilir):
    ```bash
-   npx supabase secrets set AI_API_KEY=sk-... AI_MODEL=gpt-4o-mini
+   npx supabase secrets set AI_API_KEY=AQ.Ab... AI_MODEL=gemini-2.5-flash
+   ```
+   OpenAI uyumlu uç nokta için:
+   ```bash
+   npx supabase secrets set AI_API_KEY=sk-... AI_PROVIDER=openai AI_MODEL=gpt-4o-mini
    ```
    Aynı adımda canlı projeyi otomatik doğrulayın (salt-okunur):
    ```bash

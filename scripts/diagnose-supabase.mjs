@@ -485,7 +485,7 @@ async function checkAiFunction() {
     record('ok', 'ai-interpretation deploy', 'deploy edilmiş ve JWT kapısı (verify_jwt) isteği reddetti');
   } else if (probe.status === 503) {
     record('warn', 'AI_API_KEY', 'AI_API_KEY secret’ı tanımlı değil; bölüm arayüzde sessizce kapanır',
-      'supabase secrets set AI_API_KEY=... AI_MODEL=gpt-4o-mini');
+      'supabase secrets set AI_API_KEY=... AI_MODEL=gemini-2.5-flash (Gemini) veya AI_API_KEY=... AI_PROVIDER=openai AI_MODEL=gpt-4o-mini');
   } else if (probe.status === 403 && /origin not allowed/i.test(probeText)) {
     record('warn', 'ai-interpretation CORS', 'Origin başlığı olmayan istek reddedildi (403 Origin not allowed)',
       `supabase secrets set ALLOWED_ORIGINS=${SITE_ORIGIN || 'https://UYGULAMA-ADRESINIZ'} (admin-users ile aynı değer)`);

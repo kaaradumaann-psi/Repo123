@@ -313,6 +313,12 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     assert.match(panel, /Türetilmiş Ölçekler/);
     assert.match(panel, /Kritik Bulgular/);
     assert.match(panel, /Soru Yanıtları/);
+    // Sözleşme: "Yapay Zekâ Yorumu" sekme şeridinin EN SON sekmesidir.
+    assert.match(panel, /Yapay Zekâ Yorumu/);
+    assert.ok(
+      panel.indexOf('Soru Yanıtları') < panel.indexOf('Yapay Zekâ Yorumu'),
+      'Yapay Zekâ Yorumu sekmesi Soru Yanıtları sekmesinden sonra (en sonda) görünmeli',
+    );
     // Profil özeti şeridi
     assert.match(panel, /Geçerli Profil|Şüpheli Profil|Geçersiz Profil/);
     // Dosya adı sayfalarda asla görünmez

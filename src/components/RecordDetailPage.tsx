@@ -4,7 +4,6 @@ import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
 import { validityStatusDisplay } from '../scoring/mmpiInterpretation';
-import { AiInterpretationPanel } from './results/AiInterpretationPanel';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import { MMPIPrintReport } from './results/MMPIPrintReport';
 import type { AuthenticatedUser } from '../auth/authTypes';
@@ -439,7 +438,25 @@ export function RecordDetailPage({
         </section>
 
         {profile ? (
-          <MMPIResultsPanel embedded profile={profile} answers={answers ?? undefined} />
+          <MMPIResultsPanel
+            embedded
+            profile={profile}
+            answers={answers ?? undefined}
+            /* "Yapay Zekâ Yorumu" (son sekme): kayıt modunda kayıt sahipliği
+               sunucuda yeniden doğrulanır; yalnız yaş taşınır (KVKK). */
+            aiContext={{
+              method: parsed.method ?? 'quick',
+              client: client && typeof client.age === 'number' ? { age: client.age } : null,
+              recordId: record.id,
+              onInsertIntoNotes: canWriteNotes
+                ? text => setNotesDraft(previous => {
+                    const separator = previous.trim() ? '\n\n' : '';
+                    const next = `${previous}${separator}${text}`;
+                    return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
+                  })
+                : undefined,
+            }}
+          />
         ) : (
           <div className="mmpi-results-placeholder">
             <Icon name="info" size={20} />
@@ -451,26 +468,6 @@ export function RecordDetailPage({
               </p>
             </div>
           </div>
-        )}
-
-        {/* Yapay zekâ destekli yorum (karar desteği): yalnız profil hesaplanabildiyse;
-            kayıt modunda Edge Function kayıt sahipliğini yeniden doğrular. */}
-        {profile && (
-          <AiInterpretationPanel
-            profile={profile}
-            method={parsed.method ?? 'quick'}
-            client={client && typeof client.age === 'number' ? { age: client.age } : null}
-            recordId={record.id}
-            onInsertIntoNotes={
-              canWriteNotes
-                ? text => setNotesDraft(previous => {
-                    const separator = previous.trim() ? '\n\n' : '';
-                    const next = `${previous}${separator}${text}`;
-                    return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
-                  })
-                : undefined
-            }
-          />
         )}
 
         {/* Ham veri bölümü: profil varken optik cevaplar “Soru Yanıtları”

@@ -12,6 +12,7 @@ import { MMPIExtraTab } from './MMPIExtraTab';
 import { MMPIDerivedSection } from './MMPIDerivedSection';
 import { MMPICriticalSection } from './MMPICriticalSection';
 import { MMPIAnswersTab } from './MMPIAnswersTab';
+import { AiInterpretationPanel } from './AiInterpretationPanel';
 
 export type MmpiResultsTab =
   | 'overview'
@@ -21,7 +22,8 @@ export type MmpiResultsTab =
   | 'derived'
   | 'extra'
   | 'critical'
-  | 'answers';
+  | 'answers'
+  | 'ai';
 
 const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
   { id: 'overview', label: 'Genel Bakış', icon: 'pulse' },
@@ -32,7 +34,20 @@ const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
   { id: 'extra', label: 'Desenler & Sözlük', icon: 'file' },
   { id: 'critical', label: 'Kritik Bulgular', icon: 'alert' },
   { id: 'answers', label: 'Soru Yanıtları', icon: 'sheet' },
+  // Sözleşme: "Yapay Zekâ Yorumu" her zaman EN SON sekmedir.
+  { id: 'ai', label: 'Yapay Zekâ Yorumu', icon: 'sparkles' },
 ];
+
+/** "Yapay Zekâ Yorumu" sekmesinin bağlamı — yalnız profil + yaş/cinsiyet taşınır (KVKK). */
+export type MmpiAiContext = {
+  method: 'quick' | 'raw' | 'omr';
+  /** Yalnız yaş taşınır; ad/soyad LLM istemine katılmaz (KVKK). */
+  client: { age: number } | null;
+  /** Kayıt detayında verilir: kayıt sahipliği sunucuda yeniden doğrulanır. */
+  recordId?: string;
+  /** Verildiğinde sonuç, uzman notu taslağına eklenebilir. */
+  onInsertIntoNotes?: (text: string) => void;
+};
 
 type Props = {
   profile: MMPIProfile;
@@ -44,6 +59,11 @@ type Props = {
    * (örn. kayıt detay sayfası) özet şeridi kendisi sunar ve tekrar önlenir.
    */
   embedded?: boolean;
+  /**
+   * "Yapay Zekâ Yorumu" sekmesi (son sekme) için bağlam. Verilmezse sekme yine
+   * görünür ama içerik yerine bilgi kutusu gösterilir.
+   */
+  aiContext?: MmpiAiContext;
 };
 
 function formatT(t: number): string {
@@ -55,9 +75,9 @@ function formatT(t: number): string {
  * Genel Bakış (profil grafiği + özet tablo), Geçerlik Analizleri (TR,
  * Dikkatsizlik, F-K ve konfigürasyonlarla), Klinik Ölçekler, Kod Analizleri,
  * Türetilmiş Ölçekler & Endeksler, Desenler & Sözlük, Kritik Bulgular,
- * Soru Yanıtları.
+ * Soru Yanıtları ve en sonda Yapay Zekâ Yorumu.
  */
-export function MMPIResultsPanel({ profile, clientName, answers, embedded = false }: Props) {
+export function MMPIResultsPanel({ profile, clientName, answers, embedded = false, aiContext }: Props) {
   const [tab, setTab] = useState<MmpiResultsTab>('overview');
   const { validityAnalysis, profileCode } = profile;
   const clinical = profile.clinical;
@@ -168,6 +188,18 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
       {tab === 'extra' && <MMPIExtraTab profile={profile} />}
       {tab === 'critical' && <MMPICriticalSection profile={profile} />}
       {tab === 'answers' && <MMPIAnswersTab answers={answers} />}
+      {tab === 'ai' && (
+        aiContext ? (
+          <AiInterpretationPanel profile={profile} {...aiContext} />
+        ) : (
+          <div role="tabpanel" className="mmpi-tab-panel">
+            <div className="mmpi-box info">
+              <Icon name="info" size={14} />
+              <span>Yapay zekâ yorumu bu görünümde kullanılamıyor.</span>
+            </div>
+          </div>
+        )
+      )}
 
       <p className="mmpi-info-foot">
         * T puanları cinsiyete özgü Türk normları ve klasik K düzeltme oranları (Hs, Pd, Pt, Sc, Ma) kullanılarak
