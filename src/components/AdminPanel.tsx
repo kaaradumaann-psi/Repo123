@@ -7,6 +7,7 @@ import {
   deletePsychologist,
 } from '../auth/adminApi';
 import {
+  ALL_RECORDS_LIMIT,
   listAllRecords,
   deleteRecord,
 } from '../records/supabaseRecords';
@@ -277,7 +278,10 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           </div>
           <div>
             <span className="metric-label">Toplam Test Kaydı</span>
-            <strong className="metric-value">{records.length}</strong>
+            <strong className="metric-value">
+              {records.length}
+              {records.length >= ALL_RECORDS_LIMIT ? '+' : ''}
+            </strong>
             <small className="ws-hint">Tüm uzmanların uygulamaları</small>
           </div>
         </div>
@@ -377,6 +381,17 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
               <span>Yenile</span>
             </button>
           </div>
+
+          {!loadingRecords && !recordsFailed && records.length >= ALL_RECORDS_LIMIT && (
+            <div className="status-banner info-banner" role="status">
+              <Icon name="info" size={16} />
+              <span style={{ flex: 1 }}>
+                Liste en yeni {ALL_RECORDS_LIMIT} kaydı gösteriyor. Daha eski kayıtlar bu ekranda listelenmez ve
+                arama alanı yalnızca yüklenen {ALL_RECORDS_LIMIT} kayıt içinde çalışır; denetim gerektiren daha eski
+                bir kayda erişmek için veritabanından sorgu gerekir.
+              </span>
+            </div>
+          )}
 
           <div className="search-filter-box">
             <div className="search-input-wrapper">

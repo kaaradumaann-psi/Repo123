@@ -185,7 +185,7 @@ export async function renderFormPdf(definition: FormDefinition, batchId: string,
     regular: await embedTrueType(doc, parseTtf(faces.regular), 'LiberationSans'),
     bold: await embedTrueType(doc, parseTtf(faces.bold), 'LiberationSans-Bold'),
   };
-  const pages = await doc.allocate();
+  const pages = doc.allocate();
   const kids: number[] = [];
   const scale = PT_PER_MM;
   for (const page of definition.pages) {

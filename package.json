@@ -13,7 +13,8 @@
     "build": "tsc --noEmit && node scripts/build.mjs",
     "deploy": "npm run build && npx wrangler deploy",
     "pdf": "tsx scripts/generate-pdf.ts",
-    "verify:pdf": "tsx scripts/verify-pdf.ts"
+    "verify:pdf": "tsx scripts/verify-pdf.ts",
+    "diagnose:supabase": "node scripts/diagnose-supabase.mjs"
   },
   "dependencies": {
     "@noble/hashes": "2.4.0",

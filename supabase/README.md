@@ -28,6 +28,19 @@ supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 ```
 
+Uygulamadan sonra canlı projeyi bağımlılıksız teşhis betiğiyle doğrulayın
+(migration geçmişi, kolon/politika/grant/trigger, `audit_logs` sözleşmesi ve iki
+Edge Function'ın CORS davranışı):
+
+```sh
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co \
+SUPABASE_SERVICE_KEY=<service_role> \
+SITE_ORIGIN=https://your-app.example.com \
+npm run diagnose:supabase
+```
+
+Belirti → kök neden → komut eşlemesi için [`../TROUBLESHOOTING.md`](../TROUBLESHOOTING.md).
+
 Özellikle `20260920000000_record_actions.sql`, not kaydı ve silme akışındaki
 RLS/şema uyumunu düzeltir; bu migration uygulanmadan uygulama kodu tek başına
 canlı Supabase yetkilerini değiştiremez.
@@ -84,8 +97,9 @@ verir. Arena preview origin'i de açıkça eklenmelidir. Hesap silme işlemi Aut
 kullanıcısını siler; `profiles` ve `mmpi_records` üzerindeki `on delete cascade`
 ilişkileri ilişkili uygulama verisini birlikte kaldırır.
 
-Function, çağıranın access token'ını doğrular; aktif Admin değilse psikolog
-oluşturma veya aktiflik değiştirme isteğini reddeder. Password Auth kullanıcısı
+`admin-users` ayrıca veritabanı kaynaklı hataları (denetim izi/kısıt/RLS) **500 +
+`supabase db push`** mesajıyla, Auth/istemci kaynaklıları **400** ile ayırır; böylece
+arayüz "şema eksik" ile "geçersiz istek" durumunu karıştırmaz. Password Auth kullanıcısı
 Supabase Auth'ta oluşturulur; uygulamanın tablolarına parola yazılmaz.
 
 ## 5. AI karar desteği (ai-interpretation)
