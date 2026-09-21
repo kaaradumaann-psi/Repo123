@@ -949,3 +949,46 @@ Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT
 
 Açık **14** → 0 P0 · **8 P1** (003, 004, 005, 024, 027, 030, 031, **033**) ·
 4 P2 (006, 007, 022, 025) · 2 P3 (026, 032). FIXED 10 · REJECTED 7.
+
+---
+
+## PHASE 9/10 — batch 10: Pd (4) anahtarı + T bantları (kitap s.107-110)
+
+Tarih: 2026-09-21 · Kaynak: **s.107 (p61 R)** + **s.108-110 (p62 L – p63 L)**
+
+### P0 katmanı — **Tablo 11 Pd anahtarı BİREBİR MATCH** ✅
+
+| | Kaynak (s.108) | Kod (`SCORING_KEYS.Pd`) | Sonuç |
+|---|---|---|---|
+| Doğru | 24 madde | 24 madde | ✅ fazla/eksik yok |
+| Yanlış | 26 madde | 26 madde | ✅ fazla/eksik yok |
+| **Toplam** | **50** (kitabın "Madde Sayısı: 50") | 50 | ✅ |
+
+- Araç: `cmp-tablo11.ts`
+- Doğrulama: **400 dpi** okuma + **600 dpi dikiş kadrajı** — spine tablonun
+  **5. sütunundan** geçiyor (`35/215`, `96/231` civarı); ayrı kadrajla teyit edildi
+  (`33, 35, 38, 42` / `127, 215, 216, 224`).
+- **Ek 9 ile çapraz doğrulama** ✓ · norm **16.62 / 18.12** ✓
+
+### Pd T bantları **5/5 MATCH** ✅
+
+`80+` · `70-79` · `60-69` · `45-59` · `20-44` — sınırlar **300 dpi görselle**
+doğrulandı (`v_pd_band_a/b.png`).
+
+### Ek içerik (s.107-109)
+
+- Graham 1987 **Pd yüksek**: 43 madde (toplum kuralları, impulsivite, yalan/çalma,
+  otoriteye isyankârlık, "**psikoterapi prognozu kötüdür**" dahil).
+- **Pd düşük**: 12 madde (geleneksel/itaatkâr, pasif, samimi ve güvenilir,
+  enerji düzeyi düşük, inatçı ve kuralcı…).
+- "**Yüksek 4 profilleri (yetişkin normları kullanıldığında)**" → norm/yaş
+  ilişkisi notu (CONFLICT-027).
+
+### Doğrulama
+
+Kod değişikliği **YOK**. `typecheck` · `npm test` · `build` → `TEST_AUDIT.md`.
+
+### Çelişki tablosu
+
+Değişmedi: açık **14** (0 P0 · 8 P1 · 4 P2 · 2 P3). Bu batch **yeni çelişki
+üretmedi** — aksine bir P0 katmanını (Pd anahtarı) **doğrulayarak kapattı**.

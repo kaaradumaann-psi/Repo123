@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) blokları DONE**; s.107 Pd girişi okundu → **CONFLICT-024** (52 kod/konfig yok) + **CONFLICT-027** (23 T-eşiği) + **CONFLICT-030** (kırpma) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu sırada → **CONFLICT-024** (52 kod/konfig yok) + **CONFLICT-027** (23 T-eşiği) + **CONFLICT-030** (kırpma) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,21 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**107** (Pd (4) alt testi girişi) — PDF p61 R
-Sonraki hedef: **s.108+** — Pd kod bloğu + Tablo 11 (Pd anahtarı), PDF p62 L+
+**110** (Pd T bantları sonu) — PDF p63 L
+Sonraki hedef: **s.111+** — Pd kod bloğu, PDF p63 R+
 
 Last completed:
+**PHASE 9/10 batch 10 — Pd (4) anahtarı + T bantları (kitap s.107-110) DONE:**
+**P0 katmanı:** **Tablo 11 → Pd anahtarı BİREBİR MATCH** ✅ (Doğru **24** +
+Yanlış **26** = **50** = kitabın "Madde Sayısı: 50") — 400 dpi okuma, **600 dpi
+dikiş kadrajı** ile teyit (spine tablonun 5. sütunundan geçiyor) ve **Ek 9 ile
+çapraz doğrulama** ✓ · norm **16.62 / 18.12** ✓. **Pd T bantları 5/5 MATCH** ✅
+(80+/70-79/60-69/45-59/20-44; sınırlar 300 dpi görselle doğrulandı). Graham 1987
+Pd **yüksek** (43 madde) ve **düşük** (12 madde) listeleri okundu (s.107-109).
+Not: "**Yüksek 4 profilleri (yetişkin normları kullanıldığında)**" →
+norm/yaş ilişkisi CONFLICT-027'ye eklendi. **Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 9 — Hy kod bloğu II + NEVROTİK ÜÇLÜ PROFİLLERİ (kitap s.100-106) DONE:**
 **Yorum katmanı:** Hy kod bloğu **kapandı** — `36/63` devamı, `37/73`, `38/83`
 (Olası Tanı: Şizofreni), `39/93`, `30/03` (s.100-101) → **5/5 kod kodda VAR ve
@@ -348,12 +359,13 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p52-p54 (kitap s.88-92: D kod bloğu IV-V + KAPANIŞ),
                 p55    (kitap s.93-99: Hy girişi + Tablo 10 + Hy T bantları + Hy kod I),
                 p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
+                p61-p63 (kitap s.107-110: TABLO 11 Pd anahtarı + Pd T bantları),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
                 p115-p124 (kitap s.215-233: EK 1 madde metinleri — yapı + 39 kritik madde),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
-Verified:       ? , L , F , K , Hs , D , Hy  (anahtarlar + normlar + bantlar)
-                Tablo 8/9/10 → BİREBİR MATCH (Hs 33, D 60, Hy 60 madde)
+Verified:       ? , L , F , K , Hs , D , Hy , Pd  (anahtarlar + normlar + bantlar)
+                Tablo 8/9/10/11 → BİREBİR MATCH (Hs 33, D 60, Hy 60, Pd 50 madde)
                 Hy T bantları → 6/6 MATCH (s.95 görsel)
                 46 madde anahtarı → 46/46 MATCH
                 26 norm hücresi  → 26/26 MATCH (Tablo 30)
@@ -368,11 +380,11 @@ Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalan
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
 Code changes:   11 (5 anahtar + 1 TR kesme + 5 konfig/test + 1 kritik madde etiketi)
 Tests:          313/313 PASS (23 suite) · typecheck PASS · build PASS
-Next:           PHASE 9/10 — **Pd (4) bloğu s.108+** (PDF p62 L+): Tablo 11
-                (Pd anahtarı, P0 katmanı) + Pd T bantları + Pd kod bloğu, aynı
-                yöntem; sonra Mf (5)…Si (0) → **CONFLICT-024/030/031/033 tek
-                tasarım kararı** (blok-bazlı kod kimliği + üçlü/nevrotik üçlü
-                kod altyapısı; acele etme);
+Next:           PHASE 9/10 — **Pd kod bloğu s.111+** (PDF p63 R+): kod başlığı
+                envanteri (`inventory.py`) → görsel doğrulama → `cmp-*.ts`;
+                sonra Mf (5)…Si (0) → **CONFLICT-024/030/031/033 tek tasarım
+                kararı** (blok-bazlı kod kimliği + üçlü/nevrotik üçlü kod
+                altyapısı; acele etme);
                 ardından PHASE 11-13 + FINAL (OCR-only sayım + DECISION-011)
 Blocking:       none
 ```

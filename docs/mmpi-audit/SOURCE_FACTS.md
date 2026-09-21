@@ -1741,3 +1741,54 @@ sık karşılaşılan DÖRT KONFİGÜRASYON vardır.**"
 | **2** | **Basamak orantısı** (asamalı) | "**Üç alt test de 70 T puanın üzerindedir**" ve "temel örüntü **1 alt testi en yukarıda** olmak üzere **2 ve 3 sırasıyla daha altta** yer alacak şekildedir." Ek (s.104): "Bu bireyler **en küçük işlev bozukluklarına bile aşırı duyarlık** gösteren, somatik bilgileri belirgin kişilerdir… **Kısa süreli psikolojik tedavilerde prognoz iyi değildir.** Bu konfigürasyona **35 yaşın üzerinde ve kendilerini 'tepeyi aşmış' olarak gören erkek hastalarda** sıklıkla rastlanır." | **Şekil 18** |
 | **3** | **Şapka** | "**Alt test Hs 70 T puanının altındayken alt test 2 ve 3, 70 T puanının üzerindeyse** bu hastalar **emosyonel olarak aşırı kontrol** gösterirler ve **kendilerini sıkıştırılmış gibi** hissettiklerini söylerler. Genellikle **yorgun, gergin, kendilerine ilişkin şüphelerle dolu**durlar ve bu nedenle **iş yapmazlar**. **Bağımlı ve immatür** olarak tanımlanırlar. **Tedavi motivasyonları düşüktür.**" Özellik: "**Alt test 2'nin 1 ve 3'ten daha fazla yükselmiş olmasıdır.**" | **Şekil 19** |
 | **4** | **Yükselen eğilim** | "Her **üç alt test de 70 T puanının üzerindedir ve her bir alt test bir öncekinden daha yüksektir.**" (s.106: yaşam boyu süregelen hastalık geçmişi, frijidite, evlilik sorunları olan **kadınlarda**; **erkeklerde** kronik anksiyete + gastrit/ülser) | **Şekil 20** |
+
+## SOURCE-CL-019 · Tablo 11 — Psikopatik Sapma (Pd) alt testi anahtarı (s.108, p62 L) — **Visual: CONFIRMED**
+
+Fact — aynen (**Madde Sayısı: 50**; 400 dpi + **600 dpi dikiş kadrajı**):
+
+**Doğru (24):** `16, 21, 24, 32, 33, 35, 38, 42, 61, 67, 84, 94, 102, 106, 110,
+118, 127, 215, 216, 224, 239, 244, 245, 284`
+
+**Yanlış (26):** `8, 20, 37, 82, 91, 96, 107, 134, 137, 141, 155, 170, 171, 173,
+180, 183, 201, 231, 235, 237, 248, 267, 287, 289, 294, 296`
+
+Norm: "Erkeklerde ortalama **16.62**, kadınlarda ortalama: **18.12** (Savaşır, 1981)"
+
+**⚠️ SPINE-CLIP uyarısı:** Dikiş (spine) tablonun **Tam 5. sütunundan** geçiyor
+(`35/215`, `96/231` civarı). Değerler **600 dpi'lık ayrı kadrajla** teyit edildi:
+`33, 35, 38, 42` / `127, 215, 216, 224` — hiçbiri dikişe kurban gitmemiş.
+
+Kod karşılaştırması (`SCORING_KEYS.Pd`, `cmp-tablo11.ts`):
+- Doğru: kaynak 24 ↔ kod 24 → **BİREBİR MATCH** ✅
+- Yanlış: kaynak 26 ↔ kod 26 → **BİREBİR MATCH** ✅
+- Toplam **50 = kitabın "Madde Sayısı: 50"** ✅ → bağımsız tutarlılık kanıtı
+- **Ek 9 (`SOURCE-KEY-002`) ile çapraz doğrulama** ✓
+Status: **VERIFIED**
+
+## SOURCE-CL-020 · Pd T-puan bantları + düşük puan (s.109-110) — **Visual: CONFIRMED**
+
+Pd **yüksek** puan (Graham 1987) maddeleri 1-43 (s.107-109): 43 madde
+(ör. 1. toplum kurallarına uymada güçlük · 8. impulsif · 19. beğenilir, ilk imajı
+iyidir · 20. kişilerarası ilişkileri yüzeyeldir · 21. sıcak ve yakın ilişkiler
+kuramaz · **40. "Psikoterapi ya da danışmanlıkla değişme prognozu kötüdür."**)
+
+Pd **düşük** puanlanan birey (12 madde, s.109): geleneksel ve itaatkâr · otoriteye
+boyun eğer · pasif, itaatkâr ve çekingen · diğerlerinin nasıl tepki vereceğini
+düşünür · samimi ve güvenilirdir · enerji düzeyi düşük · mevki ve güvencede olmaya
+dikkat eder · ilgi alanları daralmıştır · yaratıcı ve spontan değildir · **inatçıdır**
+· kuralcı ve katıdır · erkekse cinsellikle çok ilgili değildir, kadınlardan korkar
+
+**T-puan bantları (300 dpi görsel doğrulandı):**
+
+| Bant | Kaynak metni | Kod (`PD_T_BANDS`) |
+|---|---|---|
+| **80 T ve üstü** | "70-79 T puanında verilen özelliklere ek olarak bu yükselme **klinik tanı olarak psikopatik bir bireyi** göstermektedir. **Antisosyal davranışlar, otorite figürleri ile çatışma** vardır. **Diğerleriyle kendi gereksinimlerini nasıl karşılayabileceklerine bakarak ilişki kurarlar.**" | `80–∞` ✅ MATCH |
+| **70-79 T** | "**Öfkeli, impulsif, duygusal açıdan yüzeysel, yordanamaz davranışları** olan kişiler… **sosyal uyumsuzluk, otoriteye ve diğerlerine karşı olma** davranışları…" + (s.110) mükemmeliyetçi/narsisistik kavramlar, kızgınlığın aile/otorite/topluma yönelmesi, **"Patolojinin var olup olmadığının belirlenmesi için, bireyin hem yaşam durumu, hem de yaşı dikkate alınmalıdır."** | `70–79` ✅ MATCH |
+| **60-69 T** | "**Risk alabilen, enerjik, sosyal, maceraperest ve atılgan**… ancak engellendiklerinde bu özellikler **huzursuzluk, saldırganlık ve sosyal olarak uyumlu olmayan davranış** biçimine dönüşebilir." | `60–69` ✅ MATCH |
+| **45-59 T** | "**Aşırı kontrol koyma ve kısıtlanma genellikle azdır. Sosyal kurallara kısmen uyum vardır.**" | `45–59` ✅ MATCH |
+| **20-44 T** | "**Durağan, pasif ve atılgan olmayan** bireylerdir. **Maceraperest değildirler** ve sıklıkla **sosyal geleneklere uyma konusunda bağımlı ve hatta katıdırlar**… **çok sevgi dolu olsalar da cinsel ilişkiye girmek konusunda girişken değildirler**." | `0–44` ✅ MATCH |
+
+**5/5 bant MATCH.**
+
+**Ek not (s.110):** "Yüksek 4 profilleri (**yetişkin normları kullanıldığında**)"
+→ norm seçiminin yaşla ilişkisi (CONFLICT-027 notu).

@@ -468,3 +468,18 @@ kararı tüm klinik ölçek blokları çıkarıldıktan sonra verilecek).
 Yeni araç: `scripts/mmpi-audit/cmp-hy-batch9.ts` — Hy bloğu II kod
 karşılaştırması (`37/73`, `38/83`, `39/93`, `30/03` → hepsi kendi kaydına
 eşleşiyor; `394/934` → `39/93`e kırpılıyor).
+
+---
+
+# Oturum 5 — PHASE 9/10 batch 10: Pd anahtarı + T bantları (s.107-110)
+
+Kod değişikliği **YOK** (salt P0 doğrulama turu).
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** |
+| `npm run build` | **PASS** — `optik-form.html` senkron |
+
+Yeni araç: `scripts/mmpi-audit/cmp-tablo11.ts` — Tablo 11 ↔ `SCORING_KEYS.Pd`
+birebir karşılaştırma (**24+26=50 MATCH**).

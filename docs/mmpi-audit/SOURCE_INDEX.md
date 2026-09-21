@@ -83,7 +83,8 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **102** | **p59 L** | *(boş sayfa — OCR 1 satır döndü, görselle doğrulandı)* | **DONE (boş)** |
 | **103-106** | **p59 R – p61 L** | 🆕 **NEVROTİK ÜÇLÜ PROFİLLERİ** — 4 konfigürasyon: konversiyon vadisi (Şek.17), basamak orantısı (Şek.18), şapka (Şek.19), yükselen eğilim (Şek.20) | **DONE** (300-340 dpi görsel ×4) · **CONFLICT-033** (kodda hiç yok) |
 | **107** | **p61 R** | **Pd (4) alt testi girişi** + Tablo 11 + Graham 1987 maddeleri 1-19 | **DONE** (Pd bloğuna geçiş) |
-| 108-158 | p62 L – … | Pd (4), Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) blokları | NOT_STARTED |
+| **107-110** | **p61 R – p63 L** | **Pd (4)** girişi + **Tablo 11 (Pd anahtarı, 50 madde)** + Graham maddeleri + **Pd T bantları** | **DONE** · anahtar **BİREBİR MATCH** (24+26=50, 600 dpi dikiş kontrolü) · bantlar **5/5 MATCH** |
+| 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |
 | 121-129 | p68 L – p72 L | Mf (5) alt testi, **erkeklerde/kadınlarda Mf değerlendirmesi** | NOT_STARTED |

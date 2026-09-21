@@ -640,3 +640,28 @@ Kodun mevcut 5 kod tipinin içeriği kaynakla karşılaştırıldı (`cmp-hy-bat
 | 4 | Yükselen eğilim | üçü de **> 70 T** ∧ Hs < D < Hy | 300 dpi (s.106) |
 
 → Bu dört koşul **kodda yok** → CONFLICT-033 (P1).
+
+---
+
+# PHASE 9/10 batch 10 — Pd (4) anahtarı + bantları (kitap s.107-110)
+
+## P0 KATMANI — Tablo 11 Pd anahtarı **BİREBİR MATCH** ✅
+
+| | Kaynak (s.108, görsel) | Kod | Sonuç |
+|---|---|---|---|
+| Doğru | 24 madde | 24 madde | ✅ **fazla/eksik YOK** |
+| Yanlış | 26 madde | 26 madde | ✅ **fazla/eksik YOK** |
+| Toplam | **50** = kitabın "Madde Sayısı: 50" | 50 | ✅ |
+
+Araç: `scripts/mmpi-audit/cmp-tablo11.ts` · Doğrulama: 400 dpi + **600 dpi dikiş
+kadrajı** (spine tablonun 5. sütunundan geçiyor) · **Ek 9 ile çapraz kontrol** ✓
+
+## Pd T-puan bantları **5/5 MATCH** ✅
+
+| Bant | Kod | Sonuç |
+|---|---|---|
+| 80 T ve üstü | `80–∞` | ✅ metin birebir |
+| 70-79 T | `70–79` | ✅ |
+| 60-69 T | `60–69` | ✅ |
+| 45-59 T | `45–59` | ✅ |
+| 20-44 T | `0–44` | ✅ |
