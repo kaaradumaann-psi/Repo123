@@ -457,11 +457,7 @@ export function RecordDetailPage({
           <AiInterpretationPanel
             profile={profile}
             method={parsed.method ?? 'quick'}
-            client={
-              client && typeof client.age === 'number'
-                ? { firstName: client.firstName, lastName: client.lastName, age: client.age }
-                : null
-            }
+            client={client && typeof client.age === 'number' ? { age: client.age } : null}
             recordId={record.id}
             onInsertIntoNotes={
               canWriteNotes

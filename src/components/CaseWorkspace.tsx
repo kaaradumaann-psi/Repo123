@@ -1631,7 +1631,7 @@ function ReviewPanel({
           <AiInterpretationPanel
             profile={profile}
             method={method}
-            client={{ firstName: client.firstName, lastName: client.lastName, age: client.age }}
+            client={{ age: client.age }}
           />
         </>
       ) : (

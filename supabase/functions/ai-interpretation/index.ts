@@ -84,10 +84,15 @@ function response(request: Request, status: number, body: unknown): Response {
 const SCALE_IDS = new Set(['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si']);
 
 type AiScale = { id: string; raw: number; k: number | null; t: number; level: string };
+/**
+ * Kimlik modeli: danışanın ad/soyadı LLM istemine KATILMAZ. İstemci yalnız
+ * yaş + (üst düzeyde) cinsiyet bağlamı gönderir; kişiyi doğrudan tanımlayan
+ * veri cihazdan ayrılmaz (KVKK m.4/3-d sahte isimlendirme).
+ */
 type AiSummary = {
   gender: 'Erkek' | 'Kadın';
   method: 'quick' | 'raw' | 'omr';
-  client: { firstName: string; lastName: string; age: number } | null;
+  client: { age: number } | null;
   scales: AiScale[];
   validity: {
     cannotSay: number; l: number; f: number; k: number; fMinusK: number;
@@ -124,9 +129,10 @@ function safeSummary(value: unknown): AiSummary | null {
     const c = v.client;
     if (typeof c !== 'object' || c === null) return null;
     const cc = c as Record<string, unknown>;
-    if (!boundedString(cc.firstName, 80) || !boundedString(cc.lastName, 80) ||
-      typeof cc.age !== 'number' || !Number.isInteger(cc.age) || cc.age < 16 || cc.age > 120) return null;
-    client = { firstName: cc.firstName.trim(), lastName: cc.lastName.trim(), age: cc.age };
+    // Sadece yaş kabul edilir; istemci ad/soyad gönderse bile özeTE ALINMAZ
+    // (LLM'e kimlik verisi gitmez).
+    if (typeof cc.age !== 'number' || !Number.isInteger(cc.age) || cc.age < 16 || cc.age > 120) return null;
+    client = { age: cc.age };
   }
 
   if (!Array.isArray(v.scales) || v.scales.length < 10 || v.scales.length > 20) return null;
@@ -209,7 +215,7 @@ function systemPrompt(): string {
 function userPrompt(summary: AiSummary): string {
   return `MMPI-566 profil özeti (Türkiye normları, ${summary.gender} normları):\n` +
     `Yöntem: ${summary.method}\n` +
-    (summary.client ? `Danışan: ${summary.client.firstName} ${summary.client.lastName}, ${summary.client.age} yaş\n` : '') +
+    (summary.client ? `Danışan yaşı: ${summary.client.age}\n` : '') +
     `Ölçekler (ham, K eklemesi, T):\n` +
     summary.scales.map(scale =>
       `${scale.id}: ham=${scale.raw}${scale.k !== null ? `, K+=${scale.k} (düzeltmeli ham=${scale.raw + scale.k})` : ''}, T=${scale.t.toFixed(1)} [${scale.level}]`).join('\n') +

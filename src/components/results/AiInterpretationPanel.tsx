@@ -11,7 +11,8 @@ import { Icon } from '../Icon';
 export type AiInterpretationPanelProps = {
   profile: MMPIProfile;
   method: 'quick' | 'raw' | 'omr';
-  client: { firstName: string; lastName: string; age: number } | null;
+  /** Yalnız yaş taşınır; ad/soyad LLM istemine katılmaz (KVKK). */
+  client: { age: number } | null;
   /** Kayıt detayında recordId verilir: Edge Function kayıt sahipliğini doğrular. */
   recordId?: string;
   /** Verildiğinde sonuç, uzman notu taslağına eklenebilir. */

@@ -4,7 +4,9 @@
  * Güvenlik notları:
  *  - İstek, oturum Bearer token'ıyla (session) imzalanır; fonksiyon tarafında JWT,
  *    profil rolü ve (kayıt modunda) kayıt sahipliği yeniden doğrulanır.
- *  - LLM'e yalnız sayısal olarak doğrulanmış profil özeti gönderilir (serbest metin yok).
+ *  - LLM'e yalnız sayısal olarak doğrulanmış, İSİMSİZ profil özeti gönderilir
+ *    (KVKK m.4/3-d sahte isimlendirme: danışan adı/soyadı cihazdan asla
+ *    ayrılmaz; yalnız yaş + cinsiyet bağlamı taşınır). Serbest metin yok.
  *  - Sonuç, 24 saat boyunca cihazda (localStorage) önbelleğe alınır; profil değişirse
  *    önbellek geçersiz sayılır (özet hash'i karşılaştırılır).
  *  - Görüntü/piksel verisi hiçbir zaman gönderilmez.
@@ -15,7 +17,8 @@ import type { MMPIProfile } from '../scoring/mmpiScoring';
 export type AiProfileSummary = {
   gender: 'Erkek' | 'Kadın';
   method: 'quick' | 'raw' | 'omr';
-  client: { firstName: string; lastName: string; age: number } | null;
+  /** Kimlik bağlamı: yalnız yaş. Ad/soyad LLM istemine KATILMAZ. */
+  client: { age: number } | null;
   scales: { id: string; raw: number; k: number | null; t: number; level: string }[];
   validity: {
     cannotSay: number;
@@ -42,19 +45,22 @@ export type AiInterpretationError = Error & { code?: number };
 const REQUEST_TIMEOUT_MS = 120_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** MMPIProfile'dan LLM'e gidecek sayısal özeti üretir (tüm alanlar doğrulanmış sayıdır). */
+/**
+ * MMPIProfile'dan LLM'e gidecek sayısal özeti üretir (tüm alanlar doğrulanmış
+ * sayıdır). Danışanın adı/soyadı özetin hiçbir alanına yazılmaz: yorum yalnız
+ * sayısal profil + yaş/cinsiyet bağlamından üretilir, dolayısıyla LLM sağlayıcısına
+ * kişiyi doğrudan tanımlayan veri gönderilmez.
+ */
 export function buildAiProfileSummary(
   profile: MMPIProfile,
   method: 'quick' | 'raw' | 'omr',
-  client: { firstName: string; lastName: string; age: number } | null,
+  client: { age: number } | null,
 ): AiProfileSummary {
   const scaleEntry = (id: string) => profile.scales.find(scale => scale.id === id);
   return {
     gender: profile.gender,
     method,
-    client: client && client.age >= 16 && client.age <= 120
-      ? { firstName: client.firstName.slice(0, 80), lastName: client.lastName.slice(0, 80), age: client.age }
-      : null,
+    client: client && client.age >= 16 && client.age <= 120 ? { age: client.age } : null,
     scales: profile.scales
       .filter(scale => scale.id !== '?')
       .map(scale => ({

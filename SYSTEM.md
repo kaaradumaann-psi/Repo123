@@ -246,7 +246,7 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
 - **Doğrulama katmanları (admin-users ile aynı sözleşme +):**
   1. CORS yalnız `ALLOWED_ORIGINS` (boşsa localhost-only); JWT kapıda (`config.toml` `verify_jwt = true`) ve fonksiyonda (`auth.getUser`) doğrulanır; profil aktif + ADMIN/PSYCHOLOG olmalı.
   2. `mode=record` ise kayıt service role ile okunur ve çağrının o kayda erişim hakkı (sahip veya Admin) doğrulanmadan yorum üretilmez — IDOR koruması.
-  3. LLM'e giden içerik yalnız istemcinin gönderdiği profil özetinin **alan alan doğrulanmış** halidir (`safeSummary`: sayı aralıkları, ölçek kümesi, metin uzunlukları); serbest metin prompt'u istemcide yaşamaz. Görüntü/piksel verisi asla gönderilmez.
+  3. LLM'e giden içerik yalnız istemcinin gönderdiği profil özetinin **alan alan doğrulanmış** halidir (`safeSummary`: sayı aralıkları, ölçek kümesi, metin uzunlukları); serbest metin prompt'u istemcide yaşamaz. Görüntü/piksel verisi asla gönderilmez. Özet **isimsizdir**: danışan ad/soyadı hiçbir istem alanına katılmaz (yalnız yaş + cinsiyet); istemci yine de ad gönderse bile sunucu onu özete almaz (`tests/aiSummaryPrivacy.test.ts` regresyonla kanıtlar).
   4. `AI_API_KEY` yalnız fonksiyon çalışma zamanında; 503 "yapılandırılmamış"ken arayüzü sessizce kapatır. En iyi çaba hız limiti: kullanıcı başına 1 istek/10 sn + 20 istek/saat.
   5. İstemci tarafı 24 saatlik cihaz önbelleği `mmpi566:ai:record:<id>` / `mmpi566:ai:draft` anahtarlarında; özet hash'i değişince geçersiz sayılır, "Yeniden Oluştur" önbelleği atlar.
 - **Secrets:** `AI_API_KEY` (zorunlu), `AI_MODEL` (varsayılan `gpt-4o-mini`), `AI_API_BASE` (varsayılan OpenAI), `ALLOWED_ORIGINS` (admin-users ile aynı). `supabase/README.md` §5 dağıtım komutlarını içerir.
@@ -392,8 +392,11 @@ Form PDF yazdırma ile klinik rapor yazdırma ayrıdır: FormKit'in **Yazdır/İ
 | Raw camera/PDF pixels | client memory/blob/canvas | Akış, page removal/reset/unmount; server'a gönderilmez |
 | Onaylı intake/raw/OMR payload | Supabase `mmpi_records` | Kurumun retention/silme politikasına bağlı; delete kalıcıdır |
 | Action metadata | Supabase `audit_logs` | DB retention politikasına bağlı; yalnız Admin select |
+| AI yorum isteği (yalnız isteğe bağlı bölüm) | dış dil modeli sağlayıcısına | **isimsiz**: yalnız sayısal profil + cinsiyet/yaş; ad/soyad ve görsel gönderilmez (KVKK m.4/3-d); sonuç 24 saat cihaz önbelleğinde |
 
-Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölgesi, veri işleme hukuki sebebi, saklama/imha süresi ve danışan aydınlatması kurum/uzman tarafından belirlenmelidir.
+Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölgesi, veri işleme hukuki
+sebebi, saklama/imha süresi, danışan aydınlatması ve (AI etkinse) dil modeli sağlayıcısıyla
+veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 
 ---
 
@@ -421,6 +424,7 @@ Bu teknik davranış KVKK hukuki danışmanlığı değildir. Barındırma bölg
 - Result boundary: unresolved OMR remains pending, measured blank is distinct, manual review/history/undo and record gate do not grant unearned clinical transfer.
 - Scoring/report: Turkish norms/K correction/validity/config/derived/critical/source labels, report rendering, print path separation.
 - **Raw-score round trip** (`tests/rawScoreRoundTrip.test.ts`): ham puan yönteminin uçtan uca regresyon testi. Elle hesaplanmış referans T puanları (yayınlanan Türk normları + K=3 düzeltme tablosu) üzerinden K düzeltmesi, T dönüşümü, Kadın Mf ters işareti, 20–120 sıkışması, profil kodu ve `RAW_SCORE_MAX`/`buildRawPayload` sınır doğrulaması kanıtlanır.
+- **AI privacy** (`tests/aiSummaryPrivacy.test.ts`): yapay zekâ istemine giden özetin isimsiz olduğunu (ad/soyad hiçbir alana sızmaz, yalnız sayısal profil + yaş/cinsiyet) ve yaş sınırı dışındaysa kimlik bağlamının hiç gönderilmediğini kanıtlar.
 - Standalone build: no source imports, one inline script, CSP hash, embedded PDF bytes and footer/print separation.
 
 ### 9.3 Manuel veya canlı doğrulama gerektirenler
