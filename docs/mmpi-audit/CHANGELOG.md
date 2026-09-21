@@ -482,3 +482,36 @@ her ikisi de artık doğru örüntüye eşleşiyor.
 
 **Güncel çelişki tablosu:** açık **5** (3 P1: 003/004/005 · 2 P2: 006/007) ·
 FIXED **9** · REJECTED **6**. **Açık P0 yok.**
+
+---
+
+## PHASE 8 — Wiggins normları doğrulandı (kitap s.178-181)
+
+Tarih: 2026-09-21 · PDF p97 L – p98 R
+
+### Bulgular
+
+| Konu | Sonuç |
+|---|---|
+| **Tablo 20** (s.179) normları ↔ `WIGGINS_NORMS` | ✅ **26/26 BİREBİR MATCH** (Normal Grup n=1000) |
+| Madde sayıları (13 skala) | ✅ 12/13 match · SOC metin "26" ↔ kitabın listesi 27 → **kaynak içi tutarsızlık** (DECISION-024) |
+| SOC yorum yönü | ⚠️ **CONFLICT-022** (P2, OPEN) — kaynak "yüksek = kendinden emin" der; kod "yüksek = ketlenmiş". PHASE 10'da karar |
+| Madde listeleri | ✅ Ek 9c karşılaştırması zaten **46/46 MATCH** |
+| Türkçe uyarlama (s.181) | Akça & Ceyhun 1994 · n=2000 (400 K + 600 E hasta; 578 K + 422 E normal) |
+
+### Yöntem (kalıcı ders)
+
+Tablo ~**2.87° dönük** taranmış → sütunlar arası ~29 px dikey kayma → OCR
+satırları 4. sütunda **bir alt satıra** yazıyordu (sessiz ±1 satır hatası).
+**Çözüm:** deskew + sütun y-merkezi doğrulaması → `OCR_ISSUES.md`
+**ROTATED-TABLE**.
+
+### Kapanan kısıt
+
+`AUDIT_STATE`: "WIGGINS_NORMS (13 ölçek) için hiç kaynak kanıtı yok" →
+**KAPANDI** (DECISION-025). PHASE 8 tamamlandı.
+
+### Güncel durum
+
+Açık çelişki **6** (3 P1: 003/004/005 · 3 P2: 006/007/022) · FIXED **9** ·
+REJECTED **7**. **Açık P0 yok.** Sonraki: **Bölüm 5 — kod tipleri (s.64+)**.

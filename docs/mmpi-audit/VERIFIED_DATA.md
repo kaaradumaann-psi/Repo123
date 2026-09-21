@@ -407,3 +407,36 @@ birebir) bu sayfadaki "12 çift / max 12 / kesim 4" ifadeleriyle birlikte
 | 62, 62, 45 | "Çok Kapalı" | değişmedi | Konf. 3 (s.45) |
 | 62, 62, 52 | "V Şekli" | değişmedi | Konf. 2 (s.44) |
 | 55, 80, 55 | Tersine V | değişmedi | Konf. 1 (s.43) |
+
+---
+
+# PHASE 8 — Wiggins içerik skalaları (kitap s.178-181) → **NORMLAR DOĞRULANDI**
+
+## WIGGINS_NORMS ↔ Tablo 20 (Normal Grup, n=1000) — **26/26 MATCH**
+
+| Skala | Kaynak M | Kod M | Kaynak SD | Kod SD | Sonuç |
+|---|---|---|---|---|---|
+| SOC | 10.52 | 10.52 | 4.36 | 4.36 | ✅ |
+| DEP_W | 11.75 | 11.75 | 5.13 | 5.13 | ✅ |
+| FEM | 14.77 | 14.77 | 3.87 | 3.87 | ✅ |
+| MOR | 8.97 | 8.97 | 4.28 | 4.28 | ✅ |
+| REL | 7.37 | 7.37 | 4.87 | 4.87 | ✅ |
+| AUT | 11.04 | 11.04 | 3.36 | 3.36 | ✅ |
+| PSY | 14.80 | 14.8 | 7.04 | 7.04 | ✅ |
+| ORG | 10.40 | 10.4 | 5.31 | 5.31 | ✅ |
+| FAM | 5.31 | 5.31 | 3.44 | 3.44 | ✅ |
+| HOS | 11.35 | 11.35 | 3.67 | 3.67 | ✅ |
+| PHO | 11.37 | 11.37 | 4.52 | 4.52 | ✅ |
+| HYP | 13.32 | 13.32 | 3.90 | 3.9 | ✅ |
+| HEA | 7.71 | 7.71 | 4.19 | 4.19 | ✅ |
+
+## Madde sayıları ↔ kaynak metni — **12/13 match**
+
+SOC hariç tüm skalalar kaynak metnindeki madde sayılarıyla birebir uyuşuyor
+(SOC → kaynak içi tutarsızlık, DECISION-024). Madde **listeleri** Ek 9c
+karşılaştırmasında **46/46 MATCH**.
+
+## Kapatılan kısıt
+
+`AUDIT_STATE` kısıtı "**`WIGGINS_NORMS` (13 ölçek) için hiç kaynak kanıtı yok**"
+→ **KAPANDI** (DECISION-025). PHASE 8'in norm katmanı tamamlandı.

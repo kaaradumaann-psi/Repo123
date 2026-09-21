@@ -1022,3 +1022,98 @@ Fact — aynen (**Visual: CONFIRMED**):
 Kullanım: PHASE 5 (klinik testler / kod tipleri / yorum) için kaynak temeli ve
 kapsam sözleşmesi (ikili kodların tamamı + üçlü/dörtlü kodların çoğunluğu).
 Status: **VERIFIED** (bilgi kaydı)
+
+---
+
+# Bölüm 8 — Wiggins İçerik Skalaları (kitap s.178-181, PDF p97 L – p98 R)
+
+## SOURCE-WIGGINS-001 · Tablo 20 — Türk örneklemi normları (s.179)
+
+Fact — aynen (**Visual: CONFIRMED** — tablo deskew edilerek okundu, 450 dpi):
+
+**Tablo 20. Türk örneklemi Wiggins içerik skalaları ortalama ve standard
+sapmaları** (Hasta Grubu n=1000 · Normal Grup n=1000)
+
+| Skala | Hasta X̄ | Hasta Sd | Normal X̄ | Normal Sd |
+|---|---|---|---|---|
+| SOC | 12.30 | 4.73 | 10.52 | 4.36 |
+| DEP | 15.83 | 6.35 | 11.75 | 5.13 |
+| FEM | 12.96 | 3.93 | 14.77 | 3.87 |
+| MOR | 11.87 | 5.36 | 8.97 | 4.28 |
+| REL | 6.52 | 3.22 | 7.37 | 4.87 |
+| AUT | 10.70 | 3.58 | 11.04 | 3.36 |
+| PSY | 17.76 | 9.22 | 14.80 | 7.04 |
+| ORG | 14.42 | 6.65 | 10.40 | 5.31 |
+| FAM | 6.04 | 3.70 | 5.31 | 3.44 |
+| HOS | 12.70 | 4.29 | 11.35 | 3.67 |
+| PHO | 12.12 | 5.47 | 11.37 | 4.52 |
+| HYP | 14.65 | 4.42 | 13.32 | 3.90 |
+| HEA | 10.48 | 4.77 | 7.71 | 4.19 |
+
+Kod: `WIGGINS_NORMS` = **Normal Grup** değerleri →
+**13/13 skala × 2 değer = 26/26 BİREBİR MATCH** ✅
+Status: **VERIFIED** — bu, PHASE 8'in doğrulanmamış son norm katmanını kapatır.
+
+**Okuma notu (yöntem):** Tarama ~2.87° dönük olduğu için sütunlar arasında
+satır başına ~29 px dikey kayma oluşuyor; düz okuma sütun 3-4'ü ±1 satır
+kaydırır. Tablo **deskew edilerek** okundu ve sütun y-merkezleri programatik
+olarak doğrulandı (13/13 satır hizası). Ayrıntı: `OCR_ISSUES.md`.
+
+## SOURCE-WIGGINS-002 · Skala başına madde sayıları (s.178-181)
+
+Fact — aynen (**Visual: CONFIRMED**):
+
+| Skala | Kaynak ifadesi | Kod (`WIGGINS_KEYS`) | Sonuç |
+|---|---|---|---|
+| SOC | "**Toplam 26 maddeden** oluşan" (s.178) | 13 + 14 = **27** | ⚠️ **KAYNAK İÇİ ÇELİŞKİ** |
+| DEP | 33 maddeden | 27 + 6 = 33 | ✅ |
+| FEM | 30 maddeden | 18 + 12 = 30 | ✅ |
+| MOR | 23 maddeden | 21 + 2 = 23 | ✅ |
+| REL | 12 maddeden | 9 + 3 = 12 | ✅ |
+| AUT | 20 maddeden | 19 + 1 = 20 | ✅ |
+| PSY | 48 maddeden | 45 + 3 = 48 | ✅ |
+| ORG | 36 maddeden | 15 + 21 = 36 | ✅ |
+| FAM | **16 maddeden** (görsel, s.180) | 11 + 5 = 16 | ✅ |
+| HOS | 27 maddeden | 27 + 0 = 27 | ✅ |
+| PHO | **27 maddeden** (görsel, s.180) | 16 + 11 = 27 | ✅ |
+| HYP | 25 maddeden | 25 + 0 = 25 | ✅ |
+| HEA | 28 maddeden | 10 + 18 = 28 | ✅ |
+
+**SOC çelişkisi:** Metin "26" der; ancak kitabın **kendi madde listesi**
+(Ek 9c, s.251-256) 27 madde verir ve bu liste `compare-keys.py` ile
+**46/46 MATCH** olarak doğrulanmıştır → kaynak içi tutarsızlık; kod madde
+listesini izler. Kayıt: **CONFLICT-021**, **DECISION-024**.
+Status: 12/13 **VERIFIED** · SOC **kaynak içi tutarsızlık (kod doğru)**
+
+## SOURCE-WIGGINS-003 · Skala tanımları (s.178-181)
+
+Fact — aynen (kod `WIGGINS_META` ile karşılaştırma):
+
+| Skala | Kaynak tanımı (kısaltılmış) | Kod açıklaması | Durum |
+|---|---|---|---|
+| SOC | "maddeleri **içedönüklük-dışadönüklük** kavramını içermektedir. **Yüksek puanlar kendinden emin, güvenli, parlak** bireyleri gösterirken, **düşük puanlar iddiacı, eğlenceyi seven**, diğer insanlarla kolay ilişkiye giren bireylere işaret etmektedir" | "Sosyal ortamlarda ketlenmişlik ve utangaçlık" (yüksek = ketlenmiş) | ⚠️ **YÖN ÇELİŞKİSİ** → CONFLICT-022 |
+| DEP | "endişe, suçluluk, mutsuzluk, yaşamın anlamının yitirildiği" | "Mutsuzluk, suçluluk ve yaşamın anlamını yitirme hissi" | ✅ |
+| FEM | "hobileri ve çeşitli spor faaliyetlerine merakı" | "Estetik konulara ve sanata karşı ilgi" | ~ kısmi |
+| MOR | "kendini başarısız, ümitsiz olarak tanımladığı" | "Kendini başarısız hissetme ve düşük kendilik değeri" | ✅ |
+| REL | "dinsel tutuculuk" | "Gelenekselci, dinsel tutucu tutumlar" | ✅ |
+| AUT | "otoriteye güvensizliği … Diğer insanlara inanmaz, onların hep kendisini kullandıklarını düşünür" | "Otoriteye güvensizlik ve kullanılma kaygısı" | ✅ |
+| PSY | "klasik psikotik semptomları gösterir … paranoid temeli ağır basmaktadır" | (kontrol edildi) | ✅ |
+| ORG | "güç azlığından yakınmasını ve duygusal çatışmalardan kaynaklanan fiziksel semptomları" | — | ✅ |
+| FAM | "ailesinden yeterince ilgi ve sevgi görmediğini, onların gereksiz yere eleştiren, sinirli, kavga etmeye eğilimli" | — | ✅ |
+| HOS | "sadistik impulsları … tartışmaya eğilimli, kavga çıkarmaya hazır" | — | ✅ |
+| PHO | "çeşitli korkuları anlatmaktadır (yükseklik, karanlık, kapalı alanlar)" | — | ✅ |
+| HYP | "huzursuzluğu, gerginliği ve telaşı gösterir" | — | ✅ |
+| HEA | "kendi sağlığı ile aşırı ilgilidir; gastrointestinal yakınmalar" | — | ✅ |
+
+## SOURCE-WIGGINS-004 · Türkçe uyarlama çalışması (s.181)
+
+Fact — aynen (**Visual: CONFIRMED**):
+- Akça & Ceyhun (1994): örneklem **2000 denek** — hasta grubu 400 kadın +
+  600 erkek; normal grup 578 kadın + 422 erkek. Hasta grubu Ankara'daki çeşitli
+  üniversite hastanelerinde yatan hastalardan, normal grup devlet dairelerinde
+  çalışanlardan ve üniversite öğrencilerinden oluşmuştur.
+- Wiggins iç tutarlılık: en düşük **FEM (.50-.65)**; en yüksek **SOC (.82-.86)**,
+  REL (.67-.89), DEP (.75-.87), MOR (.75-.86).
+- Wiggins'in orijinal çalışmasında 7 ayrı grup karşılaştırılmıştır
+  (Hava Kuvvetleri erkek personel N=261, yatan/ayaktan hastalar, öğrenciler).
+Status: **VERIFIED** (bilgi kaydı)

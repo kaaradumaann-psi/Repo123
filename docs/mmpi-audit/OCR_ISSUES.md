@@ -132,3 +132,60 @@ Ek not — düşük güven etiketi:
 Tablo 7 OCR'ında bir satır `<LOWCONF>` olarak işaretlendi (178/342 satırının
 sıra numarası "9" okundu; çift ve yön doğru). **Sıra numarası anlamsal değildir**
 (madde çifti ve Aynı/Farklı yönü belirleyicidir) → bulgu etkilenmedi.
+
+---
+
+# ROTATED-TABLE — dönük taramada tablo satırları kayar (PHASE 8 dersi)
+
+Tarih: 2026-09-21 · Kaynak: **Tablo 20** (Wiggins normları, kitap s.179,
+PDF p97 R)
+
+## Sorun
+
+Taranan sayfa **~2.87° dönük**. Bu, sütunlar arasında satır başına yaklaşık
+**+29 px dikey kayma** yaratıyor:
+
+| Sütun | Kayma (px) |
+|---|---|
+| 1 (Hasta X̄) | 0 |
+| 2 (Hasta Sd) | ~+27 |
+| 3 (Normal X̄) | ~+58 |
+| 4 (Normal Sd) | ~+87 |
+
+Sonuç: OCR, satırları **görsel konuma göre** grupladığı için 4. sütunun
+değerlerini **bir alt satıra** yazdı ve okuma ±1 satır kaydı:
+
+```
+OCR (HATALI):
+SOC  12.30  4.73  10.52
+DEP   4.36  15.83  6.35  11.75     ← 4.36 aslında SOC'un Normal Sd'si
+FEM   5.13  12.96   3.93  14.77
+...
+```
+Doğru okuma: `SOC = 12.30 | 4.73 | 10.52 | 4.36`.
+
+**Risk:** Bu kayma sessizdir; sayılar makul göründüğü için fark edilmezse
+norm değerleri **yanlış eşleştirilir** (ör. REL normal SD 3.58 sanılırken
+gerçekte 4.87). Bu, doğrudan T-puanı hatasına yol açardı.
+
+## Çözüm (kalıcı yöntem)
+
+1. **Deskew:** Sayfa eğimini ölç (sütun y-merkezlerinin x'e göre doğrusal
+   regresyonu) ve görüntüyü ters yönde döndür:
+   ```python
+   slope = (y_last - y_first) / (x_last - x_first)   # ~0.0501
+   ang = math.degrees(math.atan(slope))              # ~2.87°
+   M = cv2.getRotationMatrix2D((w/2, h/2), ang, 1.0)
+   rot = cv2.warpAffine(img, M, (w, h), borderValue=(255,255,255))
+   ```
+2. **Sütun doğrulaması:** Her sütunun y-merkezlerini programatik çıkar; 13
+   veri satırının hizalandığını **sayısal olarak** doğrula (satır sayısı +
+   eşit aralık).
+3. Ancak bundan sonra değerleri görsel oku.
+
+## Kural
+
+> **Dönük taramada yoğun sayısal tablo:** OCR satır grubu **güvenilmez**.
+> Önce deskew + sütun y-merkezi doğrulaması, sonra görsel okuma. Tablo
+> sütunlarının kayma miktarı satır aralığının yarısına yaklaşırsa (±50 px)
+> otomatik olarak ±1 satır hatası beklenir.

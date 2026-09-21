@@ -584,3 +584,42 @@ sınandı; **kararlar erişilebilirlik kanıtına dayandırıldı**.
 
 **Sonuç:** CONFLICT-016 **REJECTED** · CONFLICT-019 **FIXED** ·
 CONFLICT-020 **FIXED kısmen** (1/4; kalan 3 belgeli-gerekçeli).
+
+---
+
+## DECISION-024 — Wiggins SOC madde sayısı: kaynak içi çelişki, kod korunur
+
+Tarih: 2026-09-21 · PHASE 8 (kitap s.178-181)
+
+**Durum:** Wiggins SOC skalasının madde sayısı için iki kaynak ifadesi var:
+- Metin (s.178): "**Toplam 26 maddeden** oluşan…"
+- Kitabın kendi madde listesi (Ek 9c, s.251-256): **27 madde** — PHASE 2'de
+  `compare-keys.py` ile 46/46 MATCH olarak doğrulandı.
+
+**Karar:** Kod **değişmez** (`WIGGINS_KEYS.SOC` = 27 madde).
+
+**Gerekçe:**
+- Madde listesi, sayısal bir düzyazı ifadesinden daha güçlü kanıttır ve
+  bağımsız olarak (madde madde) doğrulanmıştır.
+- 13 skalalık toplam kontrolü: kaynak metin toplamı 351 ↔ doğrulanmış liste
+  toplamı 352 → tek fark SOC'tur; sistemik bir hata değil, tek noktalı dizgi
+  hatası.
+- Aynı sınıf: CONFLICT-018/DECISION-020 (kaynak kendi verisiyle çelişiyor).
+
+**Sonuç:** CONFLICT-021 **REJECTED**; kaynak içi tutarsızlık belgelendi.
+
+## DECISION-025 — `WIGGINS_NORMS` kaynağa bağlandı (verified)
+
+Tarih: 2026-09-21 · PHASE 8
+
+**Durum:** `WIGGINS_NORMS` (13 ölçek) bugüne dek **kaynak kanıtı olmadan**
+duruyordu (`AUDIT_STATE` kısıtı: "WIGGINS_NORMS için hiç kaynak kanıtı yok").
+
+**Kaynak:** Tablo 20 — "Türk örneklemi Wiggins içerik skalaları ortalama ve
+standard sapmaları" (s.179), Normal Grup (n=1000) sütunları.
+
+**Karar:** Kod **değişmez**; 13/13 skala × 2 değer = **26/26 birebir MATCH**.
+
+**Yöntem notu:** Tablo ~2.87° dönük tarandığı için sütunlar arası dikey kayma
+var; **deskew edilerek** ve sütun y-merkezleri programatik doğrulanarak okundu
+(`OCR_ISSUES.md` → ROTATED-TABLE). Kısıt listesindeki ilgili madde kapatıldı.

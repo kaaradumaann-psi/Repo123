@@ -36,7 +36,7 @@ Sayfa eşleme:
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
-| 8 | Derived scales (Bölüm 7, kitap s.171-188) | **IN_PROGRESS** (anahtarlar DONE, normlar YOK) |
+| 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
 | 9 | Code types (Bölüm 5-6) | NOT_STARTED |
 | 10 | Interpretation (Bölüm 6) | NOT_STARTED |
 | 11 | AI interpretation | NOT_STARTED |
@@ -47,10 +47,20 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**62** (Dikkatsizlik kapanışı) — PDF p39 L
+**181** (Wiggins — Türkçe uyarlama) — PDF p98 R
 Sonraki hedef: **s.64** (Bölüm 5 — kod tipleri, PDF p40 L)
 
 Last completed:
+**PHASE 8 — WIGGINS NORMLARI DOĞRULANDI (kitap s.178-181):**
+Tablo 20 (Normal Grup n=1000) ↔ `WIGGINS_NORMS` = **26/26 BİREBİR MATCH** ✅ ·
+13 skalalık madde sayıları 12/13 match; SOC metin "26" ↔ kitabın kendi listesi
+27 → kaynak içi tutarsızlık, kod doğru (DECISION-024) · SOC yorum yönü
+CONFLICT-022 (P2, OPEN, PHASE 10'a bırakıldı) ·
+`AUDIT_STATE` kısıtı "WIGGINS_NORMS için kaynak kanıtı yok" **KAPANDI**.
+**Okuma yöntemi:** Tablo ~2.87° dönük → **deskew** + sütun y-merkezi
+doğrulaması (OCR_ISSUES.md ROTATED-TABLE).
+
+Önceki:
 **PHASE 4 KAPANDI — kitap s.43-62 (PDF p29 R – p39 L) TAM DONE:**
 15/15 konfigürasyon ✓ · F-K endeksi ✓ · TR endeksi ✓ · Tablo 6 (16/16) ✓ ·
 Tablo 7 (12/12) ✓ · **Dikkatsizlik kapanışı: 12 çift · max puan 12 · kesim 4
@@ -98,8 +108,8 @@ Sıradaki batch'ler (öncelik sırası):
 2. ~~**CONFLICT-019 kararı**~~ ✅ **FIXED** (CHANGE-009, DECISION-023)
 3. ~~**CONFLICT-016/020 kararı**~~ ✅ **verildi** — 016 REJECTED · 020 kısmen
    FIXED (CHANGE-010); kalan 3 madde gerekçeli-belgeli
-4. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins normları** → PHASE 8
-   (doğrulanmamış son norm katmanı)
+4. ~~**PDF p97 L – p98 R** — Wiggins normları~~ ✅ **TAMAMLANDI**
+   (`WIGGINS_NORMS` 26/26 MATCH; DECISION-024/025)
 5. **PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni → PHASE 2/5
 
 ## Last completed task
@@ -123,8 +133,12 @@ Testler **301/301 PASS**.
 
 Bilinen kısıtlar:
 - 33 anahtar yalnızca OCR doğrulamalı → `OCR-CONFIRMED` (`DECISION-011`)
+- **Wiggins SOC yorum yönü** kaynakla çelişiyor → CONFLICT-022 (P2, PHASE 10)
+- **Dönük tablo kuralı:** sayısal tablolarda önce deskew + sütun doğrulaması
+  (`OCR_ISSUES.md` ROTATED-TABLE)
 - Ek 10 tablo yapısı OCR ile çözülemiyor → hücre hücre görsel okuma gerekli
-- `WIGGINS_NORMS` (13 ölçek) için **hiç kaynak kanıtı yok** → PHASE 8
+- ~~`WIGGINS_NORMS` (13 ölçek) için hiç kaynak kanıtı yok~~ → **KAPANDI**
+  (Tablo 20 s.179 ile 26/26 MATCH, DECISION-025)
 - F-K negatif eşiği (−8) kaynakta yok → UNVERIFIED · ~~dikkatsizlik kesmesi 4~~ → **VERIFIED** (DECISION-022)
 - K+ profili örüntüsü kaynakta var, kodda yok → `MISSING-KPLUS-001` (P3)
 - **Şekil okuma uyarısı:** 200 DPI OCR şekil içi eğri/ızgara değerlerini
@@ -185,9 +199,11 @@ Bilinen kısıtlar:
 | CONFLICT-018 | P2 | Konf. 8 eşiği (80) kaynak içi tutarsız | ✅ **REJECTED** (DECISION-020) |
 | CONFLICT-019 | P1 | Konf. 7 (tümüne doğru) tetiklenemez (F>120 vs kırpma) | ✅ **FIXED** (CHANGE-009) |
 | CONFLICT-020 | P2 | Konf. 2/9/12'de kaynakta olmayan sınırlar | ✅ **FIXED kısmen** (12 kaldırıldı; 2/9 gerekçeli) |
+| CONFLICT-021 | P1 | Wiggins SOC metin "26" ↔ kitabın listesi 27 | ✅ **REJECTED** (DECISION-024) |
+| CONFLICT-022 | P2 | Wiggins SOC yorum yönü | OPEN (PHASE 10) |
 
-Kalan açık: **5 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 2 P2 (006, 007).
-FIXED: 9 (008-012, 015, 017, 019, 020-kısmi) · REJECTED: 6 (001, 002, 013, 014, 016, 018).
+Kalan açık: **6 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 3 P2 (006, 007, 022).
+FIXED: 9 (008-012, 015, 017, 019, 020-kısmi) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
@@ -200,7 +216,7 @@ Phase:          PHASE 0, 1, 2, 3, 6 — DONE
                 PHASE 4 — ✅ **DONE** (s.43-62 tamamı)
                 PHASE 4+ kararlar — CONFLICT-016/019/020 → DECISION-023 (DONE)
                 PHASE 5 — NOT_STARTED (Bölüm 5 kod tipleri; s.63 girişi okundu)
-                PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
+                PHASE 8 — ✅ DONE (anahtarlar + WIGGINS_NORMS 26/26 MATCH)
                 PHASE 14 — IN_PROGRESS (20 denetim testi)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p22-p28 (kitap s.29-40 geçerlik),
@@ -208,6 +224,7 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p32-p35 (kitap s.48-55: Konf. 6-13 — BÖLÜM 4 TAMAM),
                 p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
                 p39    (kitap s.62-63: dikkatsizlik kapanışı + Bölüm 5 girişi),
+                p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
@@ -217,13 +234,13 @@ Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
                 Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
                 Konfigürasyon 1,3,10,13 → birebir MATCH (15/15 karşılaştırıldı)
 Open conflicts: 8 (5 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Open conflicts: 5 (3 P1 · 2 P2) — P0 AÇIK ÇELİŞKİ KALMADI
+Open conflicts: 6 (3 P1 · 3 P2) — P0 AÇIK ÇELİŞKİ KALMADI
 Fixed:          9 (008..012, 015, 017, 019, 020-kısmi) + 0 regression
-Rejected:       6 (001, 002, 013, 014, 016, 018 — kod doğru / kaynak içi tutarsızlık)
+Rejected:       7 (001, 002, 013, 014, 016, 018, 021 — kod doğru / kaynak içi tutarsızlık)
 Code changes:   10 (5 anahtar + 1 TR kesme + 5 konfig/test)
 Tests:          309/309 PASS (22 suite) · typecheck PASS · build PASS
-Next:           Wiggins normları (s.178-181, PDF p97 L – p98 R) → PHASE 8;
-                sonra Bölüm 5 / kod tipleri (s.64+, PDF p40 L)
+Next:           Bölüm 5 / kod tipleri (s.64+, PDF p40 L) → PHASE 5;
+                sonra Ek 1 madde metni (s.215-233) ve FINAL doğrulamalar
 Blocking:       none
 ```
 
@@ -250,6 +267,6 @@ Blocking:       none
 
 - 33 anahtar yalnızca OCR doğrulamalı (`OCR-CONFIRMED`, DECISION-011)
 - Ek 10 hücre hücre okunmadı (norm kaynağı değil, DECISION-016)
-- `WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8
+- ~~`WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8~~ → **KAPANDI** (Tablo 20, 26/26 MATCH)
 - Türkçe OCR modeli yok → tüm sayısal fact'ler görsel doğrulamalı
 - OCR-only sayım tutarsızlığı (32 O / 9 V ↔ "33"): FINAL öncesi sayılacak

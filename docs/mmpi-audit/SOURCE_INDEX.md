@@ -83,7 +83,8 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 155-158 | p85 L – p86 R | Si (0) alt testi, 049 / 027(8) kodları | NOT_STARTED |
 | 159-170 | p87 R – p93 L | Bölüm 6: Yorumlama (kod tipi belirleme, konversiyon V, paranoid V, kuş kanadı …) | NOT_STARTED |
 | 171-177 | p93 R – p96 R | Bölüm 7: Kişilik bozuklukları, intihar davranışı, alkol ölçekleri | NOT_STARTED |
-| 178-181 | p97 L – p98 R | **Wiggins içerik skalaları** | NOT_STARTED |
+| 178-179 | p97 L – p97 R | **Wiggins içerik skalaları** — tanımlar + **Tablo 20 (normlar)** | **DONE** (deskew görsel; normlar 26/26) |
+| 180-181 | p98 L – p98 R | Wiggins madde sayıları (FAM 16 · HOS 27 · PHO 27) + Türkçe uyarlama (Akça & Ceyhun 1994) | **DONE** (görsel) |
 | 182-188 | p98 R – p102 L | Aşırı Kontrol-Hostilite, Ego gücü, Welsh A/R, Üstünlük, Bağımlılık | NOT_STARTED |
 | 189-190 | p102 R – p103 L | Bölüm 8: Türkiye uyarlanması, tarihçe | NOT_STARTED |
 | 191-194 | p103 R – p105 L | Standardizasyon çalışması: örneklem, yöntem, demografi (N=1003 E / 663 K) | **DONE** |

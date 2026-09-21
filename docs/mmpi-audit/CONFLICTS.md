@@ -765,3 +765,50 @@ hiçbirini etkilemez (F/K bantları ayrık).
 `F 60-70`) ve **`credible`** (indeks 11) örüntülerini de yutar → iki örüntü
 erişilemez hale gelir. Kaynağın Şekil 9'daki yükselmiş-F eğrisi de alt sınırı
 destekler. → `UNVERIFIED-CONFIG-F-001` (belgeli, kaynak dışı ama gerekli).
+
+---
+
+## CONFLICT-021 — Wiggins SOC: metin "26 madde" ↔ kitabın kendi listesi 27 (P1) → **REJECTED (kod doğru)**
+
+Area: `WIGGINS_KEYS.SOC`
+
+Source A (metin, s.178, **görsel doğrulandı**): "Sosyal uyumsuzluk skalası
+(SOC): **Toplam 26 maddeden** oluşan bu skalanın…"
+Source B (kitabın kendi madde listesi, **Ek 9c s.251-256**): SOC = 13 Doğru +
+14 Yanlış = **27 madde** — `dump-keys.ts` + `compare-keys.py` ile
+**46/46 MATCH** olarak doğrulanmıştı (PHASE 2).
+
+Current implementation: `WIGGINS_KEYS.SOC` = **27 madde** (13 + 14).
+
+**Değerlendirme:** Kaynak **kendi kendisiyle** çelişiyor (düzyazı sayısı ↔ kendi
+madde listesi). Bu, PHASE 2'de bağımsız olarak doğrulanan **madde listesi**
+lehine çözülür; metindeki sayı muhtemelen dizgi/çeviri hatasıdır.
+
+Toplam kontrolü: kaynak metin toplamı 351, kitabın listelerinden gelen kod
+toplamı 352 → fark tam olarak SOC'taki bu 1 maddedir.
+
+Resolution: **REJECTED — kod doğru.** Karar: **DECISION-024**.
+Not: Kaynak metnin kendisi de doğrulanmış listeden farklı olduğu için
+`UNVERIFIED` **değil, kaynak içi tutarsızlık** olarak sınıflandırıldı
+(CONFLICT-018 ile aynı sınıf).
+
+---
+
+## CONFLICT-022 — Wiggins SOC yorum yönü (P2, OPEN)
+
+Area: `WIGGINS_META.SOC` + `WIGGINS_HIGH_TEXT.SOC` (yorum katmanı)
+
+Source (s.178-179, **görsel doğrulandı**): "…Yüksek puanlar **kendinden emin,
+güvenli, parlak** bireyleri gösterirken, **düşük puanlar iddiacı, eğlenceyi
+seven**, diğer insanlarla kolay ilişkiye giren bireylere işaret etmektedir."
+
+Current implementation: `WIGGINS_HIGH_TEXT.SOC` = "Sosyal ortamlarda
+ketlenmişlik, utangaçlık ve içedönüklük; insanlarla iletişim kurmakta güçlük"
+→ **yüksek puan = uyumsuzluk** (standart Wiggins SOC yönü).
+
+**Gerilim:** Kaynağın tanımı, ölçeğin adıyla ("Sosyal **uyumsuzluk**") ve
+standart Wiggins yönüyle çelişiyor; kaynak her iki ucu da olumlu niteliklerle
+tarif ediyor.
+
+Status: **OPEN** — yorum katmanı işi (PHASE 10) kapsamında karara bağlanacak;
+sayısal veri (norm/madde listesi) etkilenmez. Acele karar verilmedi.
