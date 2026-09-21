@@ -118,3 +118,19 @@ Kodda bu koşul katmanı **yok** (yalnızca `seeAlso` metinleri).
 
 → Kaynak, üçlü kodları yalnızca tanımlamıyor; **frekans sırası** bile veriyor.
 Kodda üçlü kod altyapısı **hiç yok** (CONFLICT-024).
+
+
+### D kod bloğu — devam (s.90-91)
+
+| Kod | Kaynak | Kodda |
+|---|---|---|
+| `270` | s.90 | ❌ |
+| `28/82` | s.90 | ✅ VAR |
+| `281/821` | s.90 | ❌ |
+| `284/824` | s.91 | ❌ |
+| `482/842` | s.91 (atıf) | ❌ |
+| `287/827` | s.91 | ❌ |
+| `29/92` | s.91 | ✅ VAR |
+
+**D bloğu güncel sayım:** Kodda **VAR 6** (`21/12`, `23`, `24/42`, `25/52`,
+`26/62`, `27/72`, `28/82`, `29/92`) · **YOK 16+**

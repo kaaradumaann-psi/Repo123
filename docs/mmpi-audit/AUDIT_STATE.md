@@ -37,8 +37,8 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs bloğu DONE (s.63-78)**: 9 mevcut kod MATCH, **22 kod tipi YOK** → CONFLICT-024 (P1); koşullu cümleler eksik → CONFLICT-025 (P2) |
-| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs yorum katmanı DONE (s.66-78); D alt testi s.79+ |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-87) blokları DONE**; **CONFLICT-024** (kod seti eksik) + **CONFLICT-027** (T-eşiği koşulları yok) |
+| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
@@ -47,10 +47,23 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**79** (D alt testi girişi) — PDF p47 R
-Sonraki hedef: **s.80** (D alt testi Tablo 9, PDF p48 L)
+**87** (27/72 Kodu) — PDF p51 R
+Sonraki hedef: **s.88** (D kod bloğu devamı + Hy (3) girişi, PDF p52 L)
 
 Last completed:
+**PHASE 9/10 batch 4 — D anahtarı + D kod bloğu (kitap s.79-87) DONE:**
+**P0 katmanı:** Tablo 9 → D anahtarı **60/60 BİREBİR MATCH** ✅ · norm
+**20.63/23.86 MATCH** ✅ · D T bantları **6/6 etiket MATCH** ✅ (kaynağın 79
+çakışması kodda tek anlamlı) · OCR "6↔9" hatası görsel doğrulamayla yakalandı
+→ yeni kural `OCR_ISSUES.md` DIGIT-6-9 · **Yorum katmanı:** D kod bloğu okundu
+(23, 24/42, 243/432, 247/427/472, 742, 274, 248(+YüksekF), 25/52, 26/62, 27/72)
+· kodda **4 kod VAR / 12+ YOK** → CONFLICT-024 · **KRİTİK YENİ ÇELİŞKİ:
+CONFLICT-027 (P1)** — kaynak yorumları **T-puan eşiklerine** bağlıyor
+(`26/62`: Pa ve/veya 4,8 **> 70 T** → psikoz erken dönem; `27/72`: **85 T üstü** →
+ilaç gerekli olabilir; + 5 örnek daha) ama `CodeInterpretation` modelinde
+**koşul alanı yok** → tespit edilmiyor.
+
+Önceki:
 **PHASE 9/10 batch 2 — Hs kod bloğu TAMAMI (kitap s.70-78) DONE:**
 Hs (1) alt testinin **31 kod tipi bölümü** görsel olarak okundu (s.67-78) ·
 Kodda **mevcut 9 kodun (12,13,14,15,16,17,18,19,01) gövdesi sadık MATCH** ✅ ·
@@ -128,11 +141,12 @@ Status:
 ## Next action
 
 Continue from:
-**s.78 tamamlandı, Hs bloğu kapandı.** Sıradaki: **s.80-94 (PDF p48 L – p54 R)**
-— D (2) alt testi: **Tablo 9 (D maddeleri + puanlama yönü)** → T bantları → kod
-tipleri. **Tablo 9 için tablo modu zorunlu** (görsel + OCR + satır/sütun
-doğrulama). Sonra Hy (3), Pd (4) … → **CONFLICT-024/025 kararı** (tüm kod seti
-çıkarıldıktan sonra)
+**s.87 tamamlandı.** Sıradaki: **s.88-94 (PDF p52 L – p54 R)** — D kod bloğu
+devamı (28/82 …) + **Hy (3) alt testi girişi + Tablo 10**. Aynı yöntem:
+`inventory.py` ile kod başlığı envanteri → tam sayfa görsel doğrulama →
+`cmp-*.ts` ile kod karşılaştırması. Sonra Pa (6), Pt (7), Sc (8), Ma (9),
+Si (0) blokları → **CONFLICT-024/025/027 KARARI** (tüm kod seti çıkarıldıktan
+sonra, tek tasarım kararı olarak)
 
 Sıradaki batch'ler (öncelik sırası):
 
@@ -147,7 +161,8 @@ Sıradaki batch'ler (öncelik sırası):
 6. ~~**CONFLICT-023 kararı**~~ ✅ **FIXED** (DECISION-026 + CHANGE-011)
 7. ~~PHASE 9/10 s.63-69 (Hs yorumu + ilk kod tipleri)~~ ✅ **TAMAMLANDI**
 8. ~~s.70-78 — Hs kod bloğu~~ ✅ **TAMAMLANDI** (31 kod tipi; CONFLICT-024 kapsamı)
-8b. **s.80-94 — D (2) alt testi + kod tipleri (PDF p48 L – p54 R)** → PHASE 9/10
+8b. ~~s.79-87 — D anahtarı + T bantları + D kod bloğu~~ ✅ **TAMAMLANDI**
+8c. **s.88-94 — D kod bloğu devamı + Hy (3) alt testi (PDF p52 L – p54 R)** → PHASE 9/10
 9. **D (2) alt testi (s.79-94)** → Hy (3) → Pd (4) → … → **CONFLICT-024 kararı**
    (üçlü kod seti tamamlandıktan sonra)
 
@@ -210,7 +225,7 @@ Bilinen kısıtlar:
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
 | `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **26/26 PASS** (batch 3 + Ek 1: +4 kritik madde testi) |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **313/313 PASS** · 23 suite · ~120 s (baseline 287 → 297 → 301 → 307 → 309 → 313) |
+| `npm test` | **313/313 PASS** · 23 suite (bu oturumda kod değişmedi; s.63-87 salt okuma) |
 | `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
@@ -244,9 +259,10 @@ Bilinen kısıtlar:
 | CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | ✅ **FIXED** (DECISION-026) |
 | CONFLICT-024 | P1 | **22 kod tipi kodda yok** (Hs bloğu: 123, 1234, 1236, 1237, 1270, 12378, 128, 129, 120, 132, 134, 1342, 136, 137, 138, 1382, 139, 146, 1469 + 3 alt-kod); kod üretimi `slice(0,2)` | OPEN |
 | CONFLICT-025 | P2 | **Koşullu ek cümleler sistematik eksik** (7 kodda belgelendi: 12, 13, 14, 16, 17, 18, 19) | OPEN |
-| CONFLICT-026 | P3 | Hs düşük puan 5 maddesi + 40 yaş notu + 21-49 örüntü koşulu eksik | OPEN |
+| CONFLICT-026 | P3 | Hs düşük puan 5 maddesi + 40 yaş notu + 21-49 örüntü koşulu + D düşük puan 18 maddesi eksik | OPEN |
+| CONFLICT-027 | P1 | **Kod yorumlarındaki T-puan eşikleri tespit edilmiyor** (26/62: Pa&4&8>70; 27/72: 85+; 13/31; 138; 19/91; 136/316; 12/21) | OPEN |
 
-Kalan açık: **9 çelişki** → 0 P0 · 4 P1 (003, 004, 005, 024) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
+Kalan açık: **10 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update

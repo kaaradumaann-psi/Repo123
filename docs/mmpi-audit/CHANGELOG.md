@@ -722,3 +722,44 @@ kodlar**"), `237`, `239` … → kodda **hiçbiri yok**. Kaynak üçlü kodlar i
 
 **YOK** — anahtar/norm/bant katmanı zaten MATCH; eksik olan **yorum katmanı**
 (CONFLICT-024/025) tasarım kararı bekliyor.
+
+---
+
+## PHASE 9/10 — batch 4: D kod bloğu (kitap s.84-87)
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.84-87** (PDF p50 L – p51 R)
+
+### 🔴 Yeni P1 çelişki — CONFLICT-027
+
+Kaynak, kod yorumlarını **T-puan eşiklerine** bağlıyor; kodun veri modeli
+(`CodeInterpretation = { code, text, diagnosis?, seeAlso? }`) **koşul taşımıyor**:
+
+| Kod | Kaynak koşulu |
+|---|---|
+| `26/62` | "**Pa alt testi belirgin bir biçimde yükseldiğinde ve/veya 4 ve 8 alt testi 70 T puanının üzerinde ise**, bireyin psikozun erken dönemlerinde olma olasılığı artar." |
+| `27/72` | "**Çok fazla yükselmeler (örneğin, 85 T puanının üstünde)** … **daha etkili müdahale formları (ilaç gibi) gerekli olabilir.**" |
+
+→ Ayrıca `13/31` (2,7,8 < 70 ∧ F < 50), `138` (4 yüksek ∧ K düşük),
+`19/91` (2,3 < 5 T farkı), `136/316` (Pa−Hy ≥ 10), `12/21` (1-2 farkı ≥ 5)
+koşulları da kodda tespit edilmiyor. **7 örnek belgelendi.**
+
+### Kaynak bulguları (SOURCE-CODE-011/012)
+
+D kod bloğu: `23`, `24/42`, `243/432`, `247/427/472` + `742` + `274`,
+`248` (+`Yüksek F` alt-kodu), `25/52`, `26/62`, `27/72` (+`275/725`,
+`278/728`, `273/723`, `271/721`, `270/720`).
+Kaynak ayrıca **"en sık üçlü kodlar"** listeleri veriyor (s.83, s.87).
+
+### CONFLICT-024 kapsamı
+
+Hs bloğu: 9 kod VAR / 22 YOK · **D bloğu: 4 kod VAR / 12+ YOK**
+→ Bu artık **sistemik** bir eksik: kod modeli yalnızca **2 ölçekli**.
+
+### Yeni araç
+
+`scripts/mmpi-audit/inventory.py` — OCR metinlerinden **yalnızca kod başlıklarını
+ve sayısal kuralları** çıkarır (bağlam ekonomisi: tam OCR metni okunmaz).
+
+### Kod değişikliği
+
+**YOK** — kanıt toplama aşaması sürüyor (kaynağın kalan klinik ölçek blokları).

@@ -979,11 +979,16 @@ bağlamıyor; **ek ölçeklerin T değerlerine** bağlı koşullar koyuyor:
 | `19/91` | "**2 ve 3 alt testlerinin değerleri 5 T puanından aşağıda ise** 129 ve 139 koduna bakınız" | s.77 |
 | `136/316` | "**Pa alt testi, Hy alt testinden 10 T puanından daha yüksekse** şüphecilik ve kızgınlık oldukça belirgindir"; "**Hy alt testi, Pa alt testinden 10 ya da daha fazla T puanı yüksekse** paranoid özellikler daha az belirgin olmak üzere fiziksel yakınmalar ön plana çıkabilir." | s.73 |
 | `12/21` | "**1 ve 2 alt testleri arasında 5 T puanı kadar fark varsa** 21'e bakılır" | s.68 |
+| `287/827` | "**eğer K alt testi 50 T puanının altında ise ve Ma alt testi 70 T puanının üzerinde ise** bunlar dikkate değerlendirilmelidir. **İntihar çoğunlukla garip biçimlerde gerçekleştirilir.**" | s.91 |
+| `284/824` | "**dürtü kontrolünü kaybetme korkuları çaktır (özellikle Pd alt testi 80'in üzerinde ise)**" | s.91 |
+| `281/821` | "Diğer bireylerde, **özellikle test 3 de yükselmiş ise**, bu somatik yakınmalar ve bunlarla bağlantılı davranışlar, terapisti kurtarma davranışlarında bulunmaya teşvik edebilir" | s.90 |
+| `284/824` | "test 4, test 2 ya da 8'in 5 T puanı alanı içinde ise 482/842 kodlarının yorumuna bakınız" | s.91 |
 
 Current implementation: `CodeInterpretation = { code, text, diagnosis?, seeAlso? }`
 — **koşul alanı yok**. `codePointInterpretation()` yalnızca kod dizesine bakar;
 T değerleri **hiç okunmuyor**. Koşullu cümlelerin bir kısmı `text` içinde
-gömülü (13/31 Yüksek K), çoğu **hiç yok**.
+gömülü (13/31 Yüksek K), çoğu **hiç yok**. **Toplam 11 koşul örneği belgelendi
+(s.68-91).**
 
 Impact: Klinik olarak anlamlı ayrımlar kayboluyor. Örnek: `27/72` profilinde
 **85 T üstü** bir yükselme olduğunda kaynak **"ilaç gerekli olabilir"** diyor;
