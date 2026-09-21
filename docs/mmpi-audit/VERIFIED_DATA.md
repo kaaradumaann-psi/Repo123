@@ -325,3 +325,29 @@ testinin en az 5 T puanı üstündedir." → **Kodda K+ profili tanımı yoktur*
 | Çift sayısı | **12** | 12 | ✅ MATCH | O (tablo) |
 | Çift listesi + yönü | Tablo 7 | `CARELESS_PAIRS` | ✅ **12/12 + yön birebir** | O (tablo) |
 | Kesme puanı | kaynakta **bulunamadı** (yalnızca "4 ve üzeri" kodda) | `score < 4` | ⚠️ UNVERIFIED | — |
+
+
+---
+
+# PHASE 4 — Geçerlik Konfigürasyonları batch 2 (kitap s.43-47)
+
+| # | Kaynak koşul | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| 1 | L,K 50-60 ∧ F > 70 | `reverse-v` birebir | ✅ MATCH | V (önceki oturum) |
+| 2 | L,K **≥ 60** ∧ F **≈50** | `v-shape`: L≥60 ∧ K≥60 ∧ F≤55 | L,K ✅ · F ⚠️ alt sınır yok | V |
+| 3 | L,K **> 60** ∧ F **< 50** | `closed-v` birebir | ✅ MATCH | O |
+| 4 | L **=40** ∧ F **45-55** ∧ K **=60** (L<F<K) | `ascending`: L<F<K ∧ L≤45 ∧ K≥55 | sıra+L+K ✅ · F aralığı ⚠️ yok | **V** (K=60 dikişte kesikti, görsel doğrulandı) |
+| 5 | L **=60** ∧ F **≈50** ∧ K **40-45** (L>F>K) | `descending`: L>F>K ∧ L≥55 ∧ K≤45 | sıra+L ✅ · F ve K alt sınırı ⚠️ | O |
+
+**Desen:** Kaynak çoğu konfigürasyonda **nokta değer** verir (40, 60, 50); kod
+bu noktaların çevresine **±5 tolerans** koyar ve kaynak değeri daima bandın
+içinde kalır → EXTRA (kabul edilebilir, DECISION-018 emsali).
+Ancak kaynak **açık aralık** verdiğinde (F 45-55; K 40-45) kod aralığı
+**tek yönlü** uygular → CONFLICT-016 (P1, OPEN).
+
+Bölüm girişi kuralı (s.43): "? alt testi standart profil kağıdına işaret
+edilmez" → geçerlik konfigürasyonları yalnızca L, F, K üzerinden kurulur
+(kod da yalnızca L, F, K kullanır → ✅ uyumlu).
+
+K düzeltmesi ek bilgi (s.46): klinik ölçeğe **5-10 T puanı** eklenir (Greene
+1980); K, F'ten **20 ya da daha çok** T puanı yüksekse …

@@ -550,3 +550,46 @@ ve yorum metinleri kaynak cümlesine göre yeniden yazıldı; kaynakta olmayan
 İlgili karar: **DECISION-019**
 
 ---
+
+---
+
+## CONFLICT-016 — Konfigürasyonlarda F/K aralık sınırları uygulanmıyor (P1)
+
+Area:
+Geçerlik konfigürasyonları (`VALIDITY_CONFIGS`) — örüntü eşleştirme
+
+Source:
+**kitap s.44, 46, 47** — `SOURCE-CONFIG-002`, `004`, `005`
+
+Source value (üç ayrı örüntüde açık aralık/nitelik verilir):
+
+| Konf. | Kaynak ifadesi | Kod kuralı | Fark |
+|---|---|---|---|
+| 2 (s.44) | L,K **en az 60**; F **50'ye yakın** | `v-shape`: L≥60 ∧ K≥60 ∧ **F ≤ 55** | F için **alt sınır yok** (F=0 da eşleşir) |
+| 4 (s.46) | L=40; F **45-55**; K=60 | `ascending`: L<F<K ∧ L≤45 ∧ K≥55 | F aralığı **hiç uygulanmıyor**; sıralama yeterli |
+| 5 (s.47) | L=60; F **≈50**; K **40-45** | `descending`: L>F>K ∧ L≥55 ∧ **K ≤ 45** | K için **alt sınır yok** (K=20 de eşleşir) |
+
+Comparison:
+**CONFLICT (kısmi)** — sıralama ilişkileri (L<F<K, L>F>K, V / tersine V) ve
+nokta değerleri birebir uyuşur; ancak kaynağın **aralık olarak verdiği**
+değerler kodda **tek yönlü** uygulanmıştır. Sonuç: kod, kaynağın kapsamadığı
+profilleri bu örüntülere dahil edebilir.
+
+Örnek (Konf. 4): L=40, F=62, K=65 → kaynakta F 45-55 dışında olduğu için
+Konfigürasyon 4 **değildir**; kodda sıralama sağlandığı için **eşleşir**.
+
+Impact:
+Yorum katmanı — yanlış örüntü etiketi ve yanlış yorum metni. Puanlama/T puanı
+etkilenmez (P1).
+
+Status:
+**OPEN** — bilinçli olarak **karar verilmedi**. Gerekçe: Bölüm 4'ün yalnızca ilk
+5 konfigürasyonu okundu (s.43-47); kalan örüntüler (s.48-55) aynı desende
+olabilir. **Tüm konfigürasyon seti okunmadan kural sıkılaştırılmamalıdır**
+(CONFLICT-014'ün dersi: eksik veriyle acele kayıt/karar hata üretir).
+
+Sonraki adım:
+s.48-55 batch'i tamamlandıktan sonra tek bir DECISION ile:
+(a) tüm konfigürasyonlara kaynak aralıklarını **iki yönlü** uygula, veya
+(b) "±5 tolerans" kuralını tüm sette tutarlı kabul et ve aralık verilen
+yerlerde aralığı **zorunlu** kıl.

@@ -311,7 +311,7 @@ Reason). Aynı hata sınıfı için kural eklendi: **şekil içi eğri/ızgara d
 | CONFLICT-014 | P2 | Konf. 15 L nokta ↔ bant | ✅ **REJECTED** |
 | CONFLICT-015 | P1 | TR kesme puanı | ✅ **FIXED** |
 
-**P0 açık çelişki yok.** Kalan: 5 açık (3 P1 + 2 P2) · 4 REJECTED · 6 FIXED.
+**P0 açık çelişki yok.** Kalan: 6 açık (4 P1 + 2 P2) · 4 REJECTED · 6 FIXED.
 
 ### Testler
 
@@ -324,3 +324,51 @@ Bu oturumun başında sandbox sıfırlaması nedeniyle yerel git geçmişi kaybo
 `git fetch` + `FETCH_HEAD` karşılaştırması içeriğin remote'ta **birebir aynı**
 olduğunu gösterdi (`git diff FETCH_HEAD HEAD` boş) → `git reset --hard FETCH_HEAD`
 ile geçmiş geri alındı. **Force-push gerekmedi.**
+
+---
+
+## PHASE 4 — batch 2: Bölüm 4 geçerlik konfigürasyonları 1-5
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.43-47** (PDF p29 R – p31 R)
+
+### İşlenen sayfalar
+
+| Kitap s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 43 | p29 R | Bölüm 4 girişi + **Konfigürasyon 1 — Tersine V** | ✅ birebir MATCH |
+| 44 | p30 L | **Konfigürasyon 2** (L,K ≥60; F ≈50) | L,K ✅ · F ⚠️ → CONFLICT-016 |
+| 45 | p30 R | **Konfigürasyon 3 — "V" / Çok Kapalı** | ✅ birebir MATCH |
+| 46 | p31 L | **Konfigürasyon 4 — Yükselen Eğilim** | sıra+L+K ✅ · F ⚠️ → CONFLICT-016 |
+| 47 | p31 R | **Konfigürasyon 5 — Azalan Eğilim** | sıra+L ✅ · F/K ⚠️ → CONFLICT-016 |
+
+### Yeni SOURCE_FACT'ler
+
+`SOURCE-CONFIG-001` … `SOURCE-CONFIG-005` (+ Bölüm 4 giriş kuralı:
+"? alt testi standart profil kağıdına işaret edilmez")
+
+### Sayısal görsel doğrulama (zorunlu adım)
+
+Konfigürasyon 4'ün **K değeri** ilk OCR'da dikişte kesildi ("Kalttesti6").
+Bindirmeli yüksek DPI kırpma ile netleştirildi: **K alt testi 60 T puanındadır**
+(L=40, F=45-55). Sayı OCR'dan kabul edilmedi.
+
+### Yeni çelişki
+
+**CONFLICT-016 (P1, OPEN)** — Kaynak Konf. 2/4/5'te F ve K için **aralık**
+verir (F 45-55; K 40-45; F ≈50), kod ise aralıkları **tek yönlü** uygular
+(Konf. 4'te F için hiç sınır yok; Konf. 5'te K'nın alt sınırı yok).
+→ Yorum katmanı etkisi; puanlama etkilenmez.
+**Karar bilinçli olarak ertelendi:** tüm konfigürasyon seti (s.48-55) okunmadan
+kural sıkılaştırılmamalıdır — CONFLICT-014'ün dersi.
+
+### Gözlem (ileride karar için)
+
+Kaynak çoğu konfigürasyonda **nokta değer** verir (40, 60, 50); kod bu noktaları
+**±5 tolerans bandına** çevirir ve kaynak değeri daima bandın içinde kalır
+(DECISION-018 ile tutarlı, kabul edilebilir). Sorun yalnızca kaynağın **açık
+aralık** verdiği hâllerde ortaya çıkar.
+
+### Durum
+
+Bu batch'te **kod değişikliği yok** · yeni test yok.
+Önceki doğrulama zinciri geçerli: 301/301 PASS · typecheck 0 · build 0.

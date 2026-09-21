@@ -722,3 +722,110 @@ Kod karşılığı: `mmpiConsistency.ts` → `CARELESS_PAIRS` (12 çift, `condit
 `same`/`different`)
 Comparison: **birebir MATCH** (12/12 çift + 12/12 yön) ✅
 Status: **VERIFIED**
+
+---
+
+# Bölüm 4 — Geçerlik Konfigürasyonları (kitap s.43-47) — batch 2
+
+Bölüm girişi (s.43): "Geçerlik konfigürasyonları L, F ve K alt testleri içindir,
+**? alt testi standart profil kağıdına işaret edilmez.**"
+
+## SOURCE-CONFIG-001 · Konfigürasyon 1 — Tersine V (s.43, p29 R)
+
+Fact — aynen:
+> "Konfigürasyon 1: L ve K alt testlerinin T değerinin **50-60** ve F alt
+> testinin T değerinin **70'in üzerinde** olduğu durumlar."
+> Şekil 1. Tersine V.
+
+Yorum: "Birey kişisel ve duygusal zorluklarını kabullenmekte ve yardım
+istemektedir. […] F alt testi yükseldikçe, bireyin sorunlarını abartarak kısa
+süre içinde yardım almak istediği ya da simülasyon yaptığı söylenebilir."
+
+Kod: `VALIDITY_CONFIGS[0]` id `reverse-v`
+`L 50-60 ∧ K 50-60 ∧ F > 70` → **birebir MATCH** ✅ (önceki oturumda da doğrulanmıştı)
+
+## SOURCE-CONFIG-002 · Konfigürasyon 2 — Savunuculuk örüntüsü (s.44, p30 L)
+
+Fact — aynen:
+> "Konfigürasyon 2: L ve K alt testlerinin **en az 60 T düzeyinde** (70 T puanına
+> bile yaklaşabilir), F alt testinin **50 T puanına yakın** olduğu durumlar."
+
+Yorum: "Bu birey kabul edilmez duygularından, impulslarından […] kaçınmaya ya da
+bunları inkâr etmeye çalışmaktadır. Birey kendini en iyi biçimde sunar. Dünyayı
+uçlarda, iyi ve kötü olarak görür. […] savunuculuk, psikopatolojinin
+inkârından şüphelenilmelidir."
+
+Kod eşleşmesi: `v-shape` → `L ≥ 60 ∧ K ≥ 60 ∧ F ≤ 55`
+- L: kaynak "en az 60" = **≥ 60** → ✅ MATCH
+- K: aynı → ✅ MATCH
+- F: kaynak "**50'ye yakın**" (niteliksel) ↔ kod **F ≤ 55, alt sınır YOK**
+  → kod F = 0…55 aralığını kabul eder; kaynak "yakın" der → **belirsiz + alt
+  sınır eksik** → CONFLICT-016
+
+Status: L/K **VERIFIED**, F **NEEDS_REVIEW**
+
+## SOURCE-CONFIG-003 · Konfigürasyon 3 — "V" / Çok Kapalı (s.45, p30 R)
+
+Fact — aynen:
+> "Konfigürasyon 3: Geçerlik Alt Testi 'V' (Çok Kapalı): Bu örüntüde, **F alt
+> testi 50 T puanının altında, L ve K alt testi 60 T puanının üzerindedir.**"
+> Şekil 3. Çok kapalı geçerlik konfigürasyonu.
+
+Yorum: "L ve K alt testleri ne kadar çok yükselirse, bu kişi kendisini
+olduğundan daha iyi gösterme çabası içindedir. […] Özellikle kendini iyi
+göstermek isteyen, iş arayan ve diğer durumlardaki (gözaltındakiler gibi)
+kişilerin çok sık verdiği bir konfigürasyon biçimidir."
+Ek: "Bu inkâr tutumu klinik testler üzerinde azaltıcı etkiye sahiptir […]
+Klinikte 'V geçerlik konfigürasyonunun etkisini karşılamak için klinik testleri
+pratik olarak 5-[10 T puanı yükseltmek yardımcı olmaktadır.]"
+
+Kod: `closed-v` → `L > 60 ∧ K > 60 ∧ F < 50` → **birebir MATCH** ✅
+
+## SOURCE-CONFIG-004 · Konfigürasyon 4 — Yükselen Eğilim (s.46, p31 L)
+
+Fact — aynen (görsel doğrulandı; sayı dikişte kesilmişti, yüksek DPI kırpma ile
+netleştirildi → "K alt testi **60** T puanındadır"):
+> "Konfigürasyon 4: L alt testi F'den, F alt testi de K'dan düşüktür. L alt
+> testi **40 T puanında**, F alt testi **45-55 T**, K alt testi **60 T**
+> puanındadır."
+> Şekil 4. Yükselen eğilim.
+
+Yorum: "Bu konfigürasyon sorunlarıyla baş edette çekük uygun kaynakları sahip ve
+testi aldığı dönemde stres ya da gerilim yaşama […] normal kişilerin tipik
+konfigürasyonu[dur]."
+
+Kod: `ascending` → `L < F ∧ F < K ∧ L ≤ 45 ∧ K ≥ 55`
+- Sıralama `L < F < K` → ✅ MATCH
+- L = 40 (nokta) ↔ kod `L ≤ 45` → ±5 üst tolerans ✓ (kaynak değeri kapsanır)
+- K = 60 (nokta) ↔ kod `K ≥ 55` → ±5 alt tolerans ✓ (kaynak değeri kapsanır)
+- F = **45-55** (kaynak açık aralık verir) ↔ kodda **F için sınır YOK**
+  (yalnızca sıralama) → **eksik** → CONFLICT-016
+
+Status: sıralama + L + K **VERIFIED**, F aralığı **NEEDS_REVIEW**
+
+Aynı sayfada K düzeltmesi bilgisi (PHASE 4 K correction):
+> "[Klinik ölçeğe] 5-10 T puanı eklenebilir (Greene 1980). […] K alt testi, F alt
+> testinden 20 ya da daha çok T puanı […]"
+
+## SOURCE-CONFIG-005 · Konfigürasyon 5 — Azalan Eğilim (s.47, p31 R)
+
+Fact — aynen:
+> "Konfigürasyon 5: L alt testi F'den, F alt testi de K'dan büyüktür. L **60 T
+> puanına**, F **yaklaşık 50 T puanına** yükselmiş, K alt testi **40-45 T puanı**
+> arasındadır."
+> Şekil 5. Azalan eğilim.
+
+Yorum: "Bu kişiler, kendilerini iyi göstermeye çalışırlar, sorunlarını kabul
+etmekten ya da kendileri ile uğraşılmasını istemekten hoşlanmazlar. Ancak bu
+kişilerin iyi görünme çabaları etkisizdir ve nevrotik üçlü genellikle yükselir.
+Erkeklerde Mf düşük olabilir. Eğitimi ve sosyo-ekonomik düzeyleri düşük
+bireylerde daha çok görülür."
+
+Kod: `descending` → `L > F ∧ F > K ∧ L ≥ 55 ∧ K ≤ 45`
+- Sıralama `L > F > K` → ✅ MATCH
+- L = 60 (nokta) ↔ kod `L ≥ 55` → ±5 alt tolerans ✓ (kaynak değeri kapsanır)
+- F "yaklaşık 50" ↔ kodda F sınırı yok (yalnızca sıralama) → **belirsiz**
+- K = **40-45 arası** (kaynak açık aralık) ↔ kod `K ≤ 45` → üst sınır ✓ ama
+  **alt sınır yok** (K = 20 de kabul edilir) → **eksik** → CONFLICT-016
+
+Status: sıralama + L **VERIFIED**, F ve K alt sınırı **NEEDS_REVIEW**

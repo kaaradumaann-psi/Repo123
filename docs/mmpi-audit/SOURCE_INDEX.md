@@ -41,7 +41,12 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 39 | p27 R | K düşük puan profili; K ekleme tartışması | DONE |
 | 40 | p28 L | **K T bantları** (≥72 / 61-72 / 46-60 / 27-45) + K'nin tek gecersiz-yapmayan alt test olmasi | **DONE** (gorsel dogrulandi) |
 | 41-42 | p28 R – p29 L | K–klinik ilişkisi, K düzeyi–SED etkileşimi | **DONE** (s.42 boş doğrulandı) |
-| 43-55 | p29 R – p36 L | Bölüm 4: Geçerlik konfigürasyonları (V, tersine V, tümü doğru/yanlış, rastgele) | NOT_STARTED |
+| **43** | **p29 R** | **Bölüm 4 girişi + Konfigürasyon 1 — Tersine V** (L,K 50-60 ∧ F>70) | **DONE** |
+| **44** | **p30 L** | **Konfigürasyon 2** (L,K ≥60 ∧ F ≈50) + Şekil 2 | **DONE** |
+| **45** | **p30 R** | **Konfigürasyon 3 — "V" (Çok Kapalı)** (F<50 ∧ L,K>60) + Şekil 3 | **DONE** |
+| **46** | **p31 L** | **Konfigürasyon 4 — Yükselen Eğilim** (L=40, F 45-55, K=60) + Şekil 4 | **DONE** (K değeri görsel doğrulandı) |
+| **47** | **p31 R** | **Konfigürasyon 5 — Azalan Eğilim** (L=60, F≈50, K 40-45) + Şekil 5 | **DONE** |
+| 48-55 | p32 L – p36 L | Bölüm 4 konfigürasyonları (6-13: tümü doğru/yanlış, rastgele, yardım arayan …) | NOT_STARTED |
 | **56** | **p36 L** | **Konfigürasyon 14 — erdemli görünme isteği** (L>55, F<60, K 59-64) + Şekil 14 | **DONE** (görsel doğrulandı) |
 | 57 | p36 R | **Konfigürasyon 15** (L=60, F>70, K<40) + Şekil 15 + **K+ profili** tanımı (Mark & Seeman 1963) | **DONE** (şekil görsel doğrulandı) |
 | 58 | p37 L | **F-K endeksi** (kesim 11→9; 0-9 geçerli, >9 sahte-kötülük, 0 sahte-iyilik; X̄ 8.66/SD 5.94) | **DONE** (görsel doğrulandı) |
