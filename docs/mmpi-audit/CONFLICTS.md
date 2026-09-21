@@ -921,6 +921,25 @@ Ayrıca kaynak s.69'daki **Pd / Ma / Mf / L koşullu** ek yorumları
 Impact: Yorum içeriği eksik; ayrıntı düzeyi düşük (yanlış yorum üretilmiyor).
 Status: **OPEN** — içerik eklemesi; metin kaynaktan birebir alınmalı.
 
+**GENİŞLETME (s.70-78 taraması sonrası):** Bu eksik *tek kod değil, sistemik*.
+Hs bloğunda kodda **mevcut olan 9 kodun gövdesi sadık (MATCH)**, ancak
+**koşullu ek cümleler sistematik olarak düşmüş**:
+
+| Kod | Kaynakta olan, kodda olmayan koşullu/atıf cümlesi | Kaynak |
+|---|---|---|
+| 12 | lise öğrencileri + üniversite öncesi ergenler paragrafları | s.68 |
+| 13 | "L ve K da yükselirse" + "13 vs 31 kodu" ayrımı | s.71 |
+| 14 | "Çok genel olarak görülen üçlü kodlar 143/413 ve 142/412'dir." | s.75 |
+| 16 | "erkeklerde 2 ve 4'ün, kadınlarda 3 ve 8'in üçlü yükselmesi" | s.76 |
+| 17 | "Her iki cins için de 172/712 ve 173/713 kodları sık görülür." | s.76 |
+| 18 | "Genel olarak üçlü kodlar 182/812, 183/813 ve 187/817'dir." | s.77 |
+| 19 | "2 ve 3 alt testleri 5 T puanından aşağıda ise 129 ve 139 koduna bakınız." | s.77 |
+
+Kaynak, yorumu **ikinci ölçekle sınırlamıyor**; üçüncü ölçeğin kimliğine ve
+profilin geri kalanına göre **ayrı yorum** veriyor. Kodun `text + seeAlso`
+modeli bu katmanı taşımıyor. Bu, CONFLICT-024 ile **aynı kök nedeni** paylaşır
+(kod modeli 2 ölçekli) → karar birlikte verilmeli.
+
 ---
 
 ## CONFLICT-026 — Hs düşük puan özellikleri ve yaş notu eksik (P3, OPEN)

@@ -37,8 +37,8 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — s.63-69 DONE (Hs bantları MATCH; 12/21 MATCH); **üçlü kod tipleri kodda YOK** → CONFLICT-024 (P1) |
-| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — s.66-69 yorum katmanı; CONFLICT-025/026 (içerik eksikleri) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs bloğu DONE (s.63-78)**: 9 mevcut kod MATCH, **22 kod tipi YOK** → CONFLICT-024 (P1); koşullu cümleler eksik → CONFLICT-025 (P2) |
+| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs yorum katmanı DONE (s.66-78); D alt testi s.79+ |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
@@ -47,10 +47,21 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**69** (1236 Kodu) — PDF p42 R
-Sonraki hedef: **s.70** (Hs kod tipleri devamı, PDF p43 L)
+**79** (D alt testi girişi) — PDF p47 R
+Sonraki hedef: **s.80** (D alt testi Tablo 9, PDF p48 L)
 
 Last completed:
+**PHASE 9/10 batch 2 — Hs kod bloğu TAMAMI (kitap s.70-78) DONE:**
+Hs (1) alt testinin **31 kod tipi bölümü** görsel olarak okundu (s.67-78) ·
+Kodda **mevcut 9 kodun (12,13,14,15,16,17,18,19,01) gövdesi sadık MATCH** ✅ ·
+**22 kod tipi kodda YOK** (123, 1234, 1236, 1237, 1270, 12378, 128, 129, 120,
+132, 134, 1342, 136, 137, 138, 1382, 139, 146, 1469 + 3 alt-kod) →
+**CONFLICT-024 genişletildi** (kapsam dosyası: `CONFLICT-024_KAPSAM.md`) ·
+**Koşullu ek cümleler sistematik olarak eksik** (7 kodda belgelendi) →
+CONFLICT-025 genişletildi · s.79 D alt testi girişi + 21 madde listesi okundu
+(SOURCE-CL-009)
+
+Önceki:
 **PHASE 9/10 batch 1 — Hs yorumu + kod tipleri (kitap s.66-69) DONE:**
 Hs T-puan bantları **5/5 sınır birebir MATCH** (85+/75-84/60-74/50-59/21-49) ·
 Tablo 8 ikinci okuma teyidi ✓ · **12/21 gövdesi MATCH** · **Kritik bulgu:
@@ -117,9 +128,11 @@ Status:
 ## Next action
 
 Continue from:
-**s.69 tamamlandı.** Sıradaki: **s.70-78 (PDF p43 L – p46 R)** — Hs kod tipleri
-(1237, 12378, 1270, 13/31, 132/312, 138/318, 139 …) → sonra D (2) alt testi
-(s.79-94) → **CONFLICT-024 kararı** (üçlü kod seti tamamlandıktan sonra)
+**s.78 tamamlandı, Hs bloğu kapandı.** Sıradaki: **s.80-94 (PDF p48 L – p54 R)**
+— D (2) alt testi: **Tablo 9 (D maddeleri + puanlama yönü)** → T bantları → kod
+tipleri. **Tablo 9 için tablo modu zorunlu** (görsel + OCR + satır/sütun
+doğrulama). Sonra Hy (3), Pd (4) … → **CONFLICT-024/025 kararı** (tüm kod seti
+çıkarıldıktan sonra)
 
 Sıradaki batch'ler (öncelik sırası):
 
@@ -133,7 +146,8 @@ Sıradaki batch'ler (öncelik sırası):
    (madde 1-566 bütünlük + 39 kritik madde görsel doğrulaması; CONFLICT-023)
 6. ~~**CONFLICT-023 kararı**~~ ✅ **FIXED** (DECISION-026 + CHANGE-011)
 7. ~~PHASE 9/10 s.63-69 (Hs yorumu + ilk kod tipleri)~~ ✅ **TAMAMLANDI**
-8. **s.70-78 — Hs kod tipleri devamı (PDF p43 L – p46 R)** → PHASE 9/10
+8. ~~s.70-78 — Hs kod bloğu~~ ✅ **TAMAMLANDI** (31 kod tipi; CONFLICT-024 kapsamı)
+8b. **s.80-94 — D (2) alt testi + kod tipleri (PDF p48 L – p54 R)** → PHASE 9/10
 9. **D (2) alt testi (s.79-94)** → Hy (3) → Pd (4) → … → **CONFLICT-024 kararı**
    (üçlü kod seti tamamlandıktan sonra)
 
@@ -228,8 +242,8 @@ Bilinen kısıtlar:
 | CONFLICT-021 | P1 | Wiggins SOC metin "26" ↔ kitabın listesi 27 | ✅ **REJECTED** (DECISION-024) |
 | CONFLICT-022 | P2 | Wiggins SOC yorum yönü | OPEN (PHASE 10) |
 | CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | ✅ **FIXED** (DECISION-026) |
-| CONFLICT-024 | P1 | **Üçlü/dörtlü kod tipleri (123/213, 1234, 1236…) kodda yok**; kod üretimi 2 ölçekle sınırlı | OPEN |
-| CONFLICT-025 | P2 | 12/21 yorumunda ergen/lise paragrafları + koşullu Pd/Ma/Mf/L yorumları eksik | OPEN |
+| CONFLICT-024 | P1 | **22 kod tipi kodda yok** (Hs bloğu: 123, 1234, 1236, 1237, 1270, 12378, 128, 129, 120, 132, 134, 1342, 136, 137, 138, 1382, 139, 146, 1469 + 3 alt-kod); kod üretimi `slice(0,2)` | OPEN |
+| CONFLICT-025 | P2 | **Koşullu ek cümleler sistematik eksik** (7 kodda belgelendi: 12, 13, 14, 16, 17, 18, 19) | OPEN |
 | CONFLICT-026 | P3 | Hs düşük puan 5 maddesi + 40 yaş notu + 21-49 örüntü koşulu eksik | OPEN |
 
 Kalan açık: **9 çelişki** → 0 P0 · 4 P1 (003, 004, 005, 024) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).

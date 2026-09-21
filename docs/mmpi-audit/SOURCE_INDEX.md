@@ -71,8 +71,9 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 62 | p39 L | TR/dikkatsizlik kapanışı (dikkatsizlik kesmesi 4 — DECISION-022) | **DONE** |
 | 63-66 | p39 R – p41 L | Bölüm 5 girişi + **Tablo 8 (Hs: 11 Doğru / 22 Yanlış, madde 33; X̄ 13.19/15.89)** | **DONE** (Tablo 8 görsel doğrulandı) |
 | **67-69** | **p41 R – p42 R** | **Hs T-puan bantları** (85+/75-84/60-74/50-59/21-49) + Hs yorumu + **12/21**, **123/213**, **1234**, **1236** kodları | **DONE** (görsel doğrulandı) |
-| 70-78 | p43 L – p46 R | Hs kod tipleri (1237, 12378, 1270, 13/31, 132/312, 138/318, 139 …) | **NOT_STARTED** |
-| 79-94 | p47 L – p54 R | D (2) alt testi + kod tipleri (21/12, 23, 213/231, 24/42, 28/82 …) | NOT_STARTED |
+| **70-78** | **p43 L – p47 L** | **Hs kod bloğu TAMAMI** — 1237, 1270, 12378, 128/218, 129/219, 120/210, 13/31 (+Yüksek K, Düşük 2), 132/312, 134/314, 1342, 136/316, 137, 138/318, 1382, 139, 14/41, Yüksek1/Düşük4, 146, 1469, 15/51, 16/61, 17/71, 18/81, 19/91, 10/01 | **DONE** (görsel doğrulandı) · 22 kod tipi kodda YOK → CONFLICT-024 |
+| **79** | **p47 R** | **D (2) alt testi girişi** + yüksek puan 21 maddesi (Graham 1987) | **DONE** (görsel doğrulandı) |
+| 80-94 | p48 L – p54 R | D alt testi Tablo 9 + T bantları + kod tipleri | NOT_STARTED |
 | 95-110 | p55 L – p62 R | Hy (3) alt testi + kod tipleri (32, 321, 34/43, 346, 39/93, 30/03) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |

@@ -1371,3 +1371,105 @@ Fact — aynen:
 
 Kod: **`CODES['1236']` TANIMLI DEĞİL** ❌ → CONFLICT-024 (P1)
 Status: **MISSING** (kod metninin devamı s.70+'ta okunacak)
+
+## SOURCE-CODE-005 · Hs kod tipi bloğu I (s.70, p43 L) — **Visual: CONFIRMED**
+
+Fact — kaynakta **sırayla** tanımlı kod tipleri (her biri ayrı başlık):
+| Kod | Özet (kaynak) |
+|---|---|
+| **1237 Kodu** | "123'teki kod tipinin özelliklerine ek olarak" anksiyete, gerilim, korku, atılgan olamama, yetersizlik duyguları, kişilerarası ilişkilerde bağımlılıkta artma; sırt/göğüs ağrıları + epigastrik yakınmalar. **"Özellikle K 50 T puanından düşükse"** günlük stres ve sorumluluklarla başa çıkamazlar. Erkekler kendilerinden daha güçlü kadınlarla evlenir; kronik işsizlik ve alkol bağımlılığı görülebilir. Olası tanı: Pasif bağımlı kişilik yapısında anksiyete ve psikofizyolojik reaksiyon |
+| **1270 Kodu** | Sinirlilik, anksiyete, depresyon, zayıflık, yorgunluk, ilgi kaybı; benlik değerlerinde düşme; sosyal ilişkilerde geri çekilme ve içe dönük tutum; uykusuzluk, kardiyak semptomlar, anoreksiya |
+| **12378 Kodu** | "Nevrotik bozuklukların **daha şiddetli** şeklidir. **7 ve 8'deki yükselmeler**, nevrotik bozukluğun daha abartılı olduğunun göstergesidir." |
+| **128/218 Kodları** | Bedenin **üst kısmına** ilişkin yakınmalar; yorgunluk, gerilim, düşüncelerde bozulmalar; ruhsal bozukluk ve diğerlerinden yabancılaşma; "akut prepsikotik ya da psikotik ve **somatik delüzyonlar**" |
+| **129/219 Kodları** | Beden işlevleriyle aşırı ilgi; hastalıklarının **gerçekten acil** olduğunu düşünürler; akut klinik rahatsızlık, gerginlik, ajitasyon, huzursuzluk; baş ağrısı, uykusuzluk, spastik bağırsak ağrıları; **nörolojik etiyoloji** dikkate alınmalı (organik beyin sendromları); çok az düzeyde de olsa depresyonu/çatışmayı/hipomanik pasif-bağımlı tavrı maskelemeyi ya da inkâr etmeyi isterler |
+
+Kod: **hiçbiri tanımlı değil** ❌ → CONFLICT-024 (P1)
+Status: **MISSING** (6 kod tipi)
+
+## SOURCE-CODE-006 · Hs kod tipi bloğu II (s.71, p43 R) — **Visual: CONFIRMED**
+
+Fact — aynen:
+| Kod | Özet (kaynak) |
+|---|---|
+| **120/210 Kodları** | Depresyon, içe çekilme, kararsızlık, kişilerarası ilişkilerden kaçınma, yetersizlik ve suçluluk duygularına **değişik somatik yakınmalar eşlik eder**. "**8 ve 6 birlikte yükselmişse** uzak duruş, pasif ve insanlardan kaçan **şizoid** bir biçim gösterirler." |
+| **13/31 Kodu** | (Kodda mevcut — gövde MATCH) **Ek koşullu paragraflar:** (i) "13/31 kodu ile birlikte **2, 7, 8 ve 9 alt testleri yükselmiş ve K alt testi düşmüşse** hastada gerginlik, anksiyete, karar vermede güçlük ve depresyon olabilir… Kendilerini normal ve sorumluluk sahibi tanımlama eğilimi vardır." (ii) "13/31 kodu ile birlikte **L ve K alt testleri de yükselirse**, kendileri ile uğraşılmasına karşı öfkelendikleri anlaşılmaktadır." (iii) "**13 kodunu veren** kişilerde hipokondriyak özellikler belirgindir. **31 kodunu veren** kişilerde ise stres durumları ile karşılaşıldığında bedensel yakınmalar ortaya çıkar, immatür ve bağımlı özellik gösterirler." |
+
+Kod: `120`/`210` **tanımlı değil** → CONFLICT-024 · `13` mevcut; (ii) ve (iii)
+paragrafları kodda **YOK** → CONFLICT-025 sınıfı
+Status: **MISSING**
+
+**Genel bulgu (kritik):** Kaynak, Hs kod tipi bölümünde **her üçlü/dörtlü kod için
+ayrı yorum** veriyor ve bunları **koşullu cümlelerle** birbirine bağlıyor
+("K 50'den düşükse", "8 ve 6 birlikte yükselmişse", "L ve K da yükselirse").
+Kodda bu katman **tamamen yok**.
+
+## SOURCE-CODE-007 · Hs kod bloğu III (s.72-73, p44) — **Visual: CONFIRMED**
+
+| Kod | Özet (kaynak) |
+|---|---|
+| **13/31 Kodu, Yüksek K** | "Özellikle **2, 7 ve 8 testlerinin T puanı 70'in ve F alt testi T puanı 50'nin altında** ise bireyler kendini normal, sorumluluk sahibi, yardımsever ve sempatik olarak sunmaya çalışır. Var olan herhangi bir bedensel semptomun ortaya çıkma biçimi **yetersizlik, değersizlik** şeklindedir. Geleneksel psikoterapötik müdahalelerden yararlanmazlar, profesyonellere güven duydukları zaman, tedaviyle iyileşebilirler." |
+| **13/31 Kodu / Düşük 2 Kodu** | "Bu tür profil veren bireylerin **histerik kişilik özellikleri vardır ve klasik psikosomatik semptomlar** gösterirler." |
+| **132/312 Kodları** | "13/31 kod tipindeki özelliklere ek olarak birey, **zayıflık ve yorgunluktan yakınır** (Eğer 9 alt testi daha düşükse). Kendilerinde **depresif duygudurum olduğunu inkâr etseler** de davranışlarında sıklıkla depresif özellikler vardır. Bu kişiler **uyumlu ve pasiftirler** (Özellikle 4 alt testi düşükse.) Diğerlerinin ilgisi karşısında **endişe yaşarlar** (Si alt testinde düşüklük olduğunda bile)." |
+| **134/314 Kodları** | "Bireylerde belirgin olan özellikler; **inatçılık, züppellik** hatta **kendini beğenmişliktir.** Tanımlanan özellikleri nedeniyle **somatizasyon yakınmaları ikinci planda kalmaktadır.** 13/31 kodundaki özellikler bu bireylere de uygundur. **Bağımlılık, bağımsızlık çatışmaları** vardır; ancak diğerlerine yabancılaşma konusunda çok endişe yaşamazlar. Eğer profil **konversiyon** vadisine uygunsa **somatik yakınmalar dönemsel patlamalar** ya da **pasif agresif** bir tarzda ifade edilir." |
+| **1342 Kodu** | "Birey **bağımlı ve immatürdür. Otistik dönemleri** olabilir. Psikiyatrik olarak **depresyon, anksiyete, sinirlilik, başağrısı, uykusuzluk** gibi somatik yakınmalar görülebilir." |
+| **136/316 Kodları** | "Bedensel semptomların (özellikle **mide ve baş ağrısı**) stres durumlarında ortaya çıkmasına karşın bu kişiler, diğerlerinden gelen **istekler karşısında gergin ve aşırı duyarlıdırlar.** Bireyler **benmerkezci ve narsisisttir.** Ayrıca **katı ve inatçı** olma eğilimi içindedir. Sıklıkla bu profil veren erkek **hastalara rekabetçi, şüpheci, çabuk kızan ve diğerlerini kontrol etmeyi isteyen** bireylerdir. Davranışlarını benmerkezci biçimde rasyonalize etme eğilimindedir, diğer insanlarla ilişkilerinde **içgörüleri azdır** ve onlardan beklentileri çok fazladır." |
+
+**Kritik sayısal koşul (13/31 Yüksek K):** 2, 7, 8 testleri **70'in altında** ∧
+F alt testi **50'nin altında** → kodda yalnızca `13` `text` içinde "Yüksek K ile
+(özellikle 2, 7 ve 8'in T puanı 70'in ve F'nin 50'nin altında olduğu durumda)"
+biçiminde **gömülü**; ayrı bir alt-kod olarak **tespit edilmiyor**.
+
+## SOURCE-CODE-008 · Hs kod bloğu IV (s.74-75, p45) — **Visual: CONFIRMED**
+
+| Kod | Özet (kaynak) |
+|---|---|
+| **1382 Kodu** | "138'deki yoruma ek olarak **dikkate değer depresyon, konfüzyonel düşünce, alkol alımı ve intihar etme düşünceleri** vardır. Birey, **sıklıkla yalnız**dır, evli ise **evlilik uyumu bozuktur.** Sürekli olarak **bir işten, başka bir işe geçer.**" |
+| **139 Kodu** | "Bireyde; **başağrısı, görme ve işitme yakınmaları, titreme ve koordinasyon bozuklukları** ve çok sayıda somatik yakınma görülür. **Engellenme eşiği oldukça düşüktür**, sinirlidir ve **öfke patlamaları** vardır. Eğer **4 alt testinde yükselme varsa ve K alt testi düşmüşse mücadeleci ve yıkıcı kişilik** özellikleri vardır. Kişilerarası ilişkilerinde **öfke ön plandadır** ve **boşanmalar oldukça sık** görülür. Kişilerin genellikle **mükemmelliği isteyen öyküleri** vardır ve ailelerine ilgileri azdır. **Alkol alımından sonra düşmanlık duyguları** ön plana çıkar. Bu kod, çok sık olarak **kişilik bozuklukları** ya da **travmaya eşlik eden kronik beyin sendromu** olan olgularda görülür. Seyrek olarak **anksiyete bozuklukları** ile birliktedir. **Olası Tanı: Somatoform bozukluk / Organik beyin sendromu**" |
+| **14/41 Kodu** | (kodda mevcut) **Ek:** "**Çok genel olarak görülen üçlü kodlar 143/413 ve 142/412'dir.**" |
+| **Yüksek 1 / Düşük 4 Kodu** | "Bu örüntü **karşılaşılan sorunlarla başa çıkamama ve ev yaşantısındaki güçlüklerle** bağlantılıdır. **Öfkelerini kolaylıkla dile getirmelerine** karşın yine de **psikofizyolojik tepkiler** verirler. Genel özellikleri **sürekli yakınma ve karamsarlık**tır." |
+| **146 Kodu** | "**Antisosyal** ya da **impuls kontrolünde güçlüğü** olan kişilerdir. **Kötümser, katı, kolay ilişki kuramayan**, başkalarından gelen eleştirilere **aşırı duyarlık gösteren** bireylerdir. Çevrelerini **şaşırtacak derecede düşmanlık** gösterirler." |
+| **1469 Kodu** | "**Kızgın, tepkisel** insanlardır. Aşırı biçimde **karşılarındaki kişiyi suçlarlar. Hostil, huzursuz, alıcı, şüpheci, narsisistik, benmerkezci** kişilerdir. **Duygusal labilite, anksiyete, gerginlik, manipülatif, impulsif** özellikler, **eyleme vuruk davranışlar** görülmektedir. **İş başarısızlığı** ve **aile içi ilişki güçlükleri** belirgindir." |
+| **15/51 Kodu** | (kodda mevcut) **Ek:** "15/51 kodunu yorumlarken **5 alt testini bırakarak yükselen üçüncü alt teste bakmak gereklidir.**" |
+
+## SOURCE-CODE-009 · Hs kod bloğu V (s.76-77, p46) — **Visual: CONFIRMED**
+
+| Kod | Özet (kaynak) |
+|---|---|
+| **16/61 Kodu** | (kodda mevcut) **Ek:** "**16/61 profilleri her iki cins için de oldukça nadirdir.** Eğer bu tip bir profil elde edilmişse **erkeklerde 2 ve 4'ün, kadınlarda ise 3 ve 8'in** olduğu **üçlü bir yükselme** vardır." |
+| **17/71 Kodu** | (kodda mevcut) **Ek:** "**Her iki cins için de 172/712 ve 173/713 kodları sık görülür.**" |
+| **18/81 Kodu** | "Hastalarda **düşmanlık ve saldırganlık duyguları** vardır, ancak bu duygularını **uygun bir biçimde ifade edemezler.** Beden işlevleri ve bedensel hastalıklara ilişkin **delüzyonel düşüncelerini açıkça gösterirler.** […] **Somatik hezeyanları** olabilir. […] Bu kişilerde **karşı cinsin üyelerine ilişkin hostilite** vardır. […] **Özellikle stres altında** kişilerde **şaşkınlık ve düşüncede konfüzyon** olabilir. **Somatik uğraşları gerçek ile bağlantılarını koparabilir.** **Genel olarak üçlü kodlar 182/812, 183/813 ve 187/817'dir.** Bu kod tipini veren **ergenlerin okul başarısı düşüktür**, utangaçlık oldukça fazladır. […] **Madde bağımlılığı ya da intihar girişimleri** olabilir. Bu örüntüyü gösteren **ergenlerin 2/3'ü boşanmış ailelerden gelmektedir.** **Olası Tanı: Eğer F alt testi de yükselmişse şizofreni. Pre-psikotik bozukluk tanısı da düşünülmelidir.**" |
+| **19/91 Kodu** | "Hastalar **gergin ve kaygılı** olarak tanımlanır. Çok yoğun **duygusal karmaşa** yaşarlar. **Sindirim sorunları, baş ağrıları ve bitkinlik** gibi bedensel yakınmalar yaygındır ve bu kişiler **semptomlarına yönelik psikolojik açıklamayı kabul etmezler.** […] **Pasif-bağımlı** bireylerdir, **yetersizliklerini kompanse etmek** isterler. Bu kod tipi aynı zamanda **beyin hasarı olan** bireylerde görülmektedir […] Eğer bu profilde **2 ve 3 alt testlerinin değerleri 5 T puanından aşağıda ise 129 ve 139 koduna bakınız.** […] **Olası Tanı: Organik beyin bozukluğuna bağlı güçlükler / Pasif-bağımlı kişilik bozukluğu**" |
+
+## SOURCE-CODE-010 · Hs kod bloğu VI (s.78, p47 L) — **Visual: CONFIRMED**
+
+| Kod | Özet (kaynak) |
+|---|---|
+| **10/01 Kodu** | "Bu kod **oldukça nadirdir**, **sosyal açıdan rahatsız, içe çekilmiş, soğuk, pasif** kişilerde ortaya çıkar. Genel olarak bunlara genellikle **çok sayıda somatik yakınmalar** eşlik eder. **Üçüncü yükselen alt test 8 olduğu zaman** genellikle **şizoid çekilme ve sosyal yetersizliğin** olduğu söylenebilir. Sıklıkla **2 ve 3 yükselen testlerdir** ve eğer **T değeri 70'in üstünde ise destek sistemleri zayıflamıştır ve maskeli depresyon** vardır." |
+
+**Hs kod bloğu burada bitiyor** (s.78 sonu). **s.79'da Bölüm "2. Depresyon (D)
+Alt Testi" başlıyor** → SOURCE-CL-009 (aşağıda).
+
+## SOURCE-CL-009 · D (2) alt testi girişi + yüksek puan listesi (s.79, p47 R) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> "**2. Depresyon (D) Alt Testi** — Bu alt test, depresyon belirtilerinin
+> derecesini ölçmek amacıyla geliştirilmiştir. Depresyonda olan kişilerin ana
+> belirtileri, karamsarlık, gelecekten ümitsizlik; kendini değersiz, işe yaramaz
+> görme, suçluluk duyguları, hareketlerde ve düşüncede yavaşlama ve çeşitli
+> bedensel yakınmalardır. Sıklıkla ölüm ve intiharla ilgili düşüncelerin
+> yoğunluğu da dikkati çeker. […] Depresyon alt testindeki maddeler ve puanlama
+> yönü **Tablo 9'da** gösterilmiştir."
+> "**D alt testinde yüksek puan alan bir birey (Graham 1987):**
+> 1. Depresif, mutsuz, kederli ve sıkıntılıdır. 2. Gelecekten umutsuzdur.
+> 3. Kendini aşağılamaktadır. 4. Suçluluk duyguları vardır. 5. Konuşmak istemez.
+> 6. Ağlar. 7. Yavaş hareket eder. 8. Depresif tanısı konulabilir.
+> 9. Somatik yakınmaları vardır. 10. Güçsüzlük, yorgunluk, enerji kaybından
+> yakınır. 11. Ajite ve gergindir. 12. Kolay kızar. 13. Üzüntüye eğilimlidir.
+> 14. Kendine güveni azalmıştır. 15. Okulda ya da işte başarısız olduğunu
+> düşünür. 16. Kendini işe yaramaz ve iş görmez gibi görür. 17. İçe çekilmiş,
+> utangaç, ürkek, yalnız kalmaya eğilimli ve ketumdur. 18. Soğuktur.
+> 19. Kişilerarası ilişkilerden kaçınır, insanlarla fazla konuşmaz.
+> 20. Temkinli ve geleneksekdir. 21. Karar vermede güçlük çeker."
+
+Kod karşılaştırması: `D_T_BANDS` ve D yorumu → **sonraki batch'te** (s.80-94).
+Şimdilik: **D alt testi 21 maddelik liste `MISSING`** adayı.

@@ -618,3 +618,61 @@ sayısal iddialar OCR'a bırakılmadı (OCR_ISSUES.md FIGURE-CURVE kuralı).
 
 Açık **9** (4 P1: 003/004/005/024 · 4 P2: 006/007/022/025 · 1 P3: 026) ·
 FIXED 10 · REJECTED 7. **P0 açık çelişki yok.**
+
+---
+
+## PHASE 9/10 — batch 2: Hs kod bloğu TAMAMI (kitap s.70-78) + D girişi (s.79)
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.70-79** (PDF p43 L – p47 R)
+
+### Hs (1) alt testi kod bloğu — KAPANDI (s.67-78)
+
+**31 kod tipi bölümü** görsel olarak okundu. Kaynak bulguları
+`SOURCE-CODE-005..010`, kapsam analizi `CONFLICT-024_KAPSAM.md`.
+
+| Grup | Kodlar |
+|---|---|
+| **Kodda VAR (9)** | `12`, `13`, `14`, `15`, `16`, `17`, `18`, `19`, `01` — **gövdeler sadık MATCH** ✅ |
+| **Kodda YOK (22)** | `123`, `1234`, `1236`, `1237`, `1270`, `12378`, `128`, `129`, `120`, `132`, `134`, `1342`, `136`, `137`, `138`, `1382`, `139`, `146`, `1469` + 3 alt-kod (`13/31 Yüksek K`, `13/31 Düşük 2`, `Yüksek 1/Düşük 4`) |
+| **Yalnız atıf (kodda yok)** | `2134`, `213/231`, `182/812`, `183/813`, `187/817`, `143/413`, `142/412`, `172/712`, `173/713` |
+
+### İki kök neden
+
+1. **CONFLICT-024 (P1) — kod modeli 2 ölçekli.** `mmpiScoring.ts:258`
+   `slice(0, 2)` yalnızca en yüksek 2 ölçeği alıyor; `CODES` sözlüğünde
+   0 üçlü kod var. Kaynağın yorum katmanının büyük bölümü üretilmiyor.
+2. **CONFLICT-025 (P2) — koşullu cümleler düşmüş.** Mevcut 9 kodun gövdesi
+   sadık, ancak kaynak yorumu **üçüncü ölçeğe ve profilin geri kalanına** göre
+   ayrıştırıyor ("8 ve 6 birlikte yükselmişse", "L ve K da yükselirse",
+   "erkeklerde 2 ve 4'ün, kadınlarda 3 ve 8'in olduğu üçlü yükselme",
+   "143/413 ve 142/412", "172/712 ve 173/713", "182/812, 183/813, 187/817").
+   7 kodda belgelendi.
+
+### Kritik sayısal koşullar (kaynaktan, görsel doğrulanmış)
+
+- **13/31 Yüksek K:** 2, 7, 8 testleri **70'in altında** ∧ F **50'nin altında**
+- **13/31:** "L ve K alt testleri de yükselirse" → ayrı yorum
+- **136/316:** "Pa, Hy'den **10 T puanından** daha yüksekse şüphecilik ve
+  kızgınlık"; "**Hy, Pa'dan 10 ya da daha fazla T puanı** yüksekse paranoid
+  özellikler daha az belirgin olmak üzere fiziksel yakınmalar ön plana çıkar"
+- **1382:** 138'e ek depresyon/konfüzyon/alkol/intihar
+- **19/91:** "2 ve 3 alt testlerinin değerleri **5 T puanından aşağıda ise**
+  129 ve 139 koduna bakınız"
+- **12/21:** "1 ve 2 arasında **5 T puanı** fark varsa 21'e bakılır"
+- **10/01:** "**T değeri 70'in üstünde ise** destek sistemleri zayıflamıştır"
+
+### D (2) alt testi başlangıcı (s.79)
+
+`SOURCE-CL-009`: D alt testi girişi + **"D alt testinde yüksek puan alan bir
+birey (Graham 1987)" 21 maddelik listesi** kayda geçti. Kod karşılaştırması
+sonraki batch'te (s.80-94, Tablo 9).
+
+### Kod değişikliği
+
+**YOK** — CONFLICT-024/025 tasarım kararı gerektiriyor; kaynağın **tüm** kod
+seti (10 klinik ölçek × kod bloğu) çıkarılmadan karar verilmeyecek.
+
+### Çelişki tablosu
+
+Açık **9** (4 P1: 003/004/005/024 · 4 P2: 006/007/022/025 · 1 P3: 026) ·
+FIXED 10 · REJECTED 7. **P0 açık çelişki yok.**
