@@ -79,3 +79,28 @@ Kaynak yorumları yalnızca koda değil, **ek koşullara** da bağlıyor:
 - 14/41: "**Çok genel olarak görülen üçlü kodlar 143/413 ve 142/412'dir.**"
 
 Kodda bu koşul katmanı **yok** (yalnızca `seeAlso` metinleri).
+
+
+---
+
+## D (2) alt testi kod bloğu (s.82-94) — devam ediyor
+
+### Kodda VAR (2)
+| Kod | Kaynak | Durum |
+|---|---|---|
+| `21/12` | s.82 | ✅ tanımlı |
+| `23` | s.82-83 | ✅ tanımlı |
+
+### Kodda YOK (D bloğunda şu ana kadar)
+| Kod | Kaynak | Not |
+|---|---|---|
+| `213/231` | s.83 | "Ayrıca 123 koduna da bakınız" |
+| `231/321`, `234/324`, `237/327` | s.83 | "**En sık üçlü kodlar**" |
+| `237`, `239` | s.83 | atıf |
+| `24/42`, `28/82` … | s.84+ | okunacak |
+
+### Kritik kaynak cümlesi (s.83, D bloğu)
+> "**En sık üçlü kodlar 231/321, 234/324 ve 237/327'dir.**"
+
+→ Kaynak, üçlü kodları yalnızca tanımlamıyor; **frekans sırası** bile veriyor.
+Kodda üçlü kod altyapısı **hiç yok** (CONFLICT-024).

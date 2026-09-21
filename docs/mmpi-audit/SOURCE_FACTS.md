@@ -1473,3 +1473,84 @@ Fact — aynen:
 
 Kod karşılaştırması: `D_T_BANDS` ve D yorumu → **sonraki batch'te** (s.80-94).
 Şimdilik: **D alt testi 21 maddelik liste `MISSING`** adayı.
+
+## SOURCE-CL-010 · Tablo 9 — Depresyon (D) alt testi anahtarı (s.80, p48 L) — **Visual: CONFIRMED**
+
+Fact — aynen (**Madde Sayısı: 60**):
+**Doğru (20):** `5, 13, 23, 32, 41, 43, 52, 67, 86, 104, 130, 138, 142, 158,
+159, 182, 189, 193, 236, 259`
+**Yanlış (40):** `2, 8, 9, 18, 30, 36, 39, 46, 51, 57, 58, 64, 80, 88, 89, 95,
+98, 107, 122, 131, 145, 152, 153, 154, 155, 160, 178, 191, 207, 208, 233, 241,
+242, 248, 263, 270, 271, 272, 285, 296`
+Norm: "Erkeklerde ortalama: **20.63**, kadınlarda: **23.86** (Savaşır, 1981)"
+
+**⚠️ OCR UYARISI (yeni kayıt — `OCR_ISSUES.md`):** Ham OCR, Yanlış listesinin ilk
+maddesini **"6"** okudu; **görsel doğrulama "9" olduğunu gösterdi** (420 dpi
+crop). "6" ile "9" karışması → madde numaralarında **her zaman** görsel teyit.
+
+Kod karşılaştırması (`SCORING_KEYS.D`):
+- Doğru: kaynak 20 ↔ kod 20 → **BİREBİR MATCH** ✅
+- Yanlış: kaynak 40 ↔ kod 40 → **BİREBİR MATCH** ✅
+- Toplam 60 = kitabın "Madde Sayısı: 60" ✅
+- Norm: kod Erkek **20.63** ✅ · Kadın **23.86** ✅ → MATCH
+Status: **VERIFIED** (P0 katmanı — anahtar ve norm)
+
+## SOURCE-CL-011 · D alt testi düşük puan listesi (s.80-81) — **Visual: CONFIRMED**
+
+Fact — aynen ("D alt testinde düşük puan alan bir birey"):
+> "1. Gerginlik, anksiyete, suçluluk ve depresyondan arınmıştır. 2. Rahat ve
+> huzurludur. 3. Kendine güvenlidir. 4. Duygusal açıdan dengeli ve tutarlıdır.
+> 5. Pek çok durumda etkili davranır. 6. Neşeli ve iyimserdir.
+> 7. Sözelleştirmede güçlüğü çok azdır. 8. Aktif, enerjik, uyanıktır.
+> 9. Yarışmacıdır. 10. Sorumluluk alabilir. 11. Sosyal ortamlarda rahattır.
+> 12. Liderlik rolünü üstlenir. 13. Zeki, espirili ve renklidir.
+> 14. İlk bakışta olumlu bir izlenim yaratır. 15. İmpulsif değildir,
+> kontrollüdür. 16. Ketlenmemiştir, kendini kolaylıkla ortaya koyabilir.
+> 17. Diğer insanlarda kızgınlık ve düşmanlık uyandırır.
+> 18. Otoriter rolünde olan kişilerle çatışması vardır."
+
+Kod: `D_T_BANDS` / `SINGLE_D` içinde bu liste **YOK** (yalnızca 28-44 bandı
+özeti var) → `MISSING` (CONFLICT-026 sınıfı, içerik eksiği)
+
+## SOURCE-CL-012 · D alt testi genel kural (s.81) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> "Alt test 2'nin yorumlanması, birlikte yükselen diğer alt testlere göre
+> değişmektedir. **Depresyon çok farklı nedenlerden kaynaklanabilir ve bunlar
+> ancak diğer alt testlerdeki yükselmelere bakılarak yorumlanabilir.** **Alt test 2
+> ile ilişkin açık davranışsal belirtiler yoksa, intihar riskine karşı dikkatli
+> olmak gerekir.**"
+
+Kod karşılaştırması: **sonraki batch** (yorum katmanı kuralı)
+
+## SOURCE-CL-013 · D T-puan bantları (s.81-82) — **Visual: CONFIRMED**
+
+Fact — aynen (kaynak sırası):
+| Kaynak | İçerik (kısa) |
+|---|---|
+| **85 ve üstü T** | "Bir şeye odaklanamayacak ya da açık bir biçimde düşünemeyecek kadar kederli olan bireyleri gösterir." |
+| **79 ve üstü T** | Depresif ve kaygılı, benlik saygısı düşük, karamsar, ilgi alanları daralmış, kendini işe yaramaz görür… "**Alt test 2'de yükselme, kişinin o sıradaki işlev düzeyiyle ilgili rahatsızlığı ya da hoşnutsuzluğu hakkında bilgi verebilir**… (Yüksek puanlar her zaman depresyon olarak tanımlanamaz, kişinin o anda çevresinden gelen rahatsızlıklarını da yansıtabilir)." |
+| **70-79 T** | "Ciddi ve kendine güveni olmayan bireyleri gösterir… **Hastada depresyonun göstergeleri yoksa ve diğer alt testler yükselmemişse hastanın intihar eğilimi açısından değerlendirilmesi gerekmektedir.**" |
+| **60-69 T** | "Bu bireylerde orta düzeyde depresyon, endişe ve karamsarlık göstergesi vardır. Bu duygu durum hali durumsal bir krize bağlı olabileceği gibi kalıcı ve geri dönüşü olmayan bir durum da olabilir." |
+| **45-59 T** | "Bu, bireyin yaşamında **iyimserlik ve karamsarlık dengesini** kurduğunun göstergesidir." |
+| **28-44 T** | "Olasılıkla neşeli, meraklı, iyimser, aktif ve dışa dönüktürler (Bakınız **Si alt testinin düşüklüğü**). Bu durum bazen bu bireylerin **kayıtsız** gibi algılanmalarına neden olur, bu da diğerlerinde **hostilite** ortaya çıkarır." |
+
+**Kritik gözlem (kaynak içi çakışma):** Kaynak **"79 ve üstü"** ile **"70-79"**
+bantlarını **çakışacak biçimde** yazar (79 iki bantta da geçer). Kod bunu
+**ilk-eşleşen-kazanır** sırasıyla (79-84 → 70-78) tek anlamlı hâle getirmiştir.
+
+Kod karşılaştırması (bant sınırları):
+| Kaynak | Kod | Sonuç |
+|---|---|---|
+| 85 ve üstü | `85+` | ✅ |
+| 79 ve üstü | `79-84` (önce) + `70-78` | ✅ (çakışma tek anlamlı çözülmüş) |
+| 70-79 | `70-78` | ✅ (sınır yorumu) |
+| 60-69 | `60-69` | ✅ MATCH |
+| 45-59 | `45-59` | ✅ MATCH |
+| 28-44 | `28-44` (min 0) | ✅ MATCH (etiket) |
+
+**Not:** `clinicalBands('D', gender)` **cinsiyete göre ayrım YAPMIYOR**; ancak
+D için kadın normu da (23.86) farklı. Kaynak T-bandı tablolarında cinsiyet
+ayrımı bu bölümde görünmüyor (bantlar metin olarak veriliyor) → bu bir tutarsızlık
+değil, kaynak da tek bant seti veriyor.
+Status: **VERIFIED**

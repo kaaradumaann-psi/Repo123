@@ -506,3 +506,39 @@ Diğer klinik ölçeklerin madde anahtarları **Ek 9** (s.244-256) ile doğrulan
   kaynağın sayısal kuralı ("5 T puanı fark") korunmuş ✓.
 - Kapsamlı karşılaştırma (tüm kodlar + üçlü/dörtlü kodlar) **PHASE 9/10**
   kapsamında sürüyor.
+
+
+---
+
+# PHASE 5/9 — D (2) alt testi anahtarı ve normu (kitap s.80)
+
+## Tablo 9 — Depresyon (D) alt testi: **BİREBİR MATCH** ✅
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Madde sayısı** | 60 (başlık) | 20 + 40 = **60** | ✅ |
+| **Doğru maddeler** | 20 madde | 20 madde, aynı liste | ✅ **BİREBİR** |
+| **Yanlış maddeler** | 40 madde | 40 madde, aynı liste | ✅ **BİREBİR** |
+| **Norm (Erkek)** | 20.63 (Savaşır, 1981) | `20.63` | ✅ MATCH |
+| **Norm (Kadın)** | 23.86 (Savaşır, 1981) | `23.86` | ✅ MATCH |
+
+Doğru: `5, 13, 23, 32, 41, 43, 52, 67, 86, 104, 130, 138, 142, 158, 159, 182,
+189, 193, 236, 259`
+Yanlış: `2, 8, 9, 18, 30, 36, 39, 46, 51, 57, 58, 64, 80, 88, 89, 95, 98, 107,
+122, 131, 145, 152, 153, 154, 155, 160, 178, 191, 207, 208, 233, 241, 242, 248,
+263, 270, 271, 272, 285, 296`
+
+**Doğrulama yöntemi:** OCR + 420 dpi görsel teyit + kod karşılaştırması
+(`scripts/mmpi-audit/cmp-tablo9.ts`). OCR'ın "6" hatası görsel doğrulamayla
+yakalandı (bkz. `OCR_ISSUES.md` DIGIT-6-9).
+
+## D T-puan bantları (s.81-82)
+
+| Kaynak bandı | Kod karşılığı | Sonuç |
+|---|---|---|
+| 85 ve üstü | `T ≥ 85` | ✅ |
+| 79 ve üstü | `79-84` + `70-78` (sıralı çözüm) | ✅ |
+| 70-79 | `70-78` | ✅ (kaynakta 79 iki bantta — kod tek anlamlı) |
+| 60-69 | `60-69` | ✅ MATCH |
+| 45-59 | `45-59` | ✅ MATCH |
+| 28-44 | `28-44` (min 0) | ✅ MATCH (etiket) |

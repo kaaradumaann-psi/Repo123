@@ -676,3 +676,49 @@ seti (10 klinik ölçek × kod bloğu) çıkarılmadan karar verilmeyecek.
 
 Açık **9** (4 P1: 003/004/005/024 · 4 P2: 006/007/022/025 · 1 P3: 026) ·
 FIXED 10 · REJECTED 7. **P0 açık çelişki yok.**
+
+---
+
+## PHASE 5/9 — batch 3: D (2) alt testi anahtarı + normu (kitap s.79-83)
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.79-83** (PDF p47 R – p49 R)
+
+### P0 katmanı doğrulandı — Tablo 9 BİREBİR MATCH ✅
+
+| Katman | Sonuç |
+|---|---|
+| Madde sayısı 60 | ✅ |
+| Doğru 20 madde | ✅ **BİREBİR MATCH** |
+| Yanlış 40 madde | ✅ **BİREBİR MATCH** |
+| Norm Erkek 20.63 | ✅ MATCH |
+| Norm Kadın 23.86 | ✅ MATCH |
+
+**OCR hatası yakalandı:** Ham OCR Yanlış listesinin ilk maddesini "6" okudu;
+420 dpi görsel doğrulama **"9"** olduğunu gösterdi. Yeni kural kaydı:
+`OCR_ISSUES.md` → **DIGIT-6-9** (6/9, 0/8, 1/7, 5/6 görsel teyit zorunlu).
+
+### D T-puan bantları — MATCH
+
+Kaynak: 85+ / 79+ / 70-79 / 60-69 / 45-59 / 28-44 ·
+Kod: 85+ / 79-84 / 70-78 / 60-69 / 45-59 / 28-44(min 0)
+→ Bant **etiketleri birebir**; kaynağın **79 çakışması** (79 hem "79 ve üstü" hem
+"70-79" içinde) kodda **ilk-eşleşen-kazanır** sırasıyla tek anlamlı hâle gelmiş.
+
+### Kaynak bulguları
+
+- `SOURCE-CL-010`: Tablo 9 (anahtar + norm)
+- `SOURCE-CL-011`: D düşük puan 18 maddelik liste → kodda **yok**
+- `SOURCE-CL-012`: "Alt test 2 ile ilişkin **açık davranışsal belirtiler yoksa,
+  intihar riskine karşı dikkatli olmak gerekir**" → yorum katmanı kuralı
+- `SOURCE-CL-013`: D T-bantları
+
+### CONFLICT-024 kapsamı genişledi (D bloğu)
+
+Kaynakta: `213/231`, **`231/321`, `234/324`, `237/327`** ("**en sık üçlü
+kodlar**"), `237`, `239` … → kodda **hiçbiri yok**. Kaynak üçlü kodlar için
+**frekans sıralaması** bile veriyor.
+
+### Kod değişikliği
+
+**YOK** — anahtar/norm/bant katmanı zaten MATCH; eksik olan **yorum katmanı**
+(CONFLICT-024/025) tasarım kararı bekliyor.

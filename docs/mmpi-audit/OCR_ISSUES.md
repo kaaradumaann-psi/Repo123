@@ -222,3 +222,20 @@ Sayfa numaraları **hariç** tutulur; ayrıca sayfa üst/alt %6'lık bant taranm
 Ek 1 sayfalarında dikiş tarafındaki maddeler kırpılır (ör. `#20`, `#37`
 bandında yalnız üst yarı okunabildi). Görsel doğrulamada **bindirmeli kadraj**
 (orta çizgiyi %2-3 aşan) kullanılmalıdır.
+
+
+---
+
+## DIGIT-6-9 — "6" ↔ "9" karışması (2026-09-21, PHASE 9/10)
+
+**Gözlem:** Tablo 9 (D alt testi, s.80) ham OCR çıktısında Yanlış listesinin ilk
+maddesi **"6"** olarak okundu; 420 dpi görsel crop **"9"** olduğunu gösterdi.
+Kod anahtarıyla karşılaştırma da 9 olduğunu doğruladı.
+
+**Etki:** Madde numaralarında tek karakterlik hata, anahtar karşılaştırmasını
+**tamamen yanlış** yapar (bir madde eksik + olmayan bir madde fazla).
+
+**Kural:** Madde numarası içeren tablolarda **6/9, 0/8, 1/7, 5/6** gibi karışması
+olası çiftler için **görsel teyit zorunludur**. OCR metni tek başına yeterli
+değildir — bu, tablolar için zaten geçerli olan "sayısal veri çift doğrulama"
+kuralının somut bir örneğidir.
