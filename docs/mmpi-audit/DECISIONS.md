@@ -517,3 +517,28 @@ yapılmadı (ör. `credible` için K üst sınırını kaldırmak) — bunlar ay
 kararın konusudur.
 
 **Sonuç:** CHANGE-008 uygulandı; CONFLICT-017 **FIXED**; +6 regresyon testi.
+
+---
+
+## DECISION-022 — Dikkatsizlik kesmesi 4 doğrulandı; `UNVERIFIED-TR-001` kapatıldı
+
+Tarih: 2026-09-21 · PHASE 4 kapanışı (kitap s.62)
+
+**Durum:** Dikkatsizlik (carelessness) endeksi kesme puanı kodda `score < 4`
+(normal) / `≥ 4` (uyarı) olarak uygulanıyordu; kaynak atfı eksikti
+(`UNVERIFIED-TR-001`).
+
+**Kaynak kanıtı (s.62, p39 L, görsel doğrulandı):**
+- "Dikkatsizlik alt testi … **12 çift** görgül yolla seçilmiş maddeden
+  oluşmaktadır."
+- "Hastanın dikkatsizlik alt testinden alacağı **en yüksek puan 12'dir**."
+- "**Greene (1980)** geçersiz profilleri belirlemede **4'ün kesim puanı**
+  olarak alınabileceğini belirtmiştir."
+
+**Karar:** Kod **değişmez**. 12 çift · max 12 · kesim 4 üçlüsü birebir
+uyuşuyor → `UNVERIFIED-TR-001` **VERIFIED** olarak kapatılır.
+
+**Gerekçe:** Sayılar kaynakta açık; kod zaten bu değerleri uyguluyor. Kaynak
+atfı (Greene 1980) artık belgeli. Değişiklik gereksiz.
+
+**Sonuç:** Kayıt `VERIFIED_DATA.md`'ye taşındı; SOURCE-CL-002 eklendi.

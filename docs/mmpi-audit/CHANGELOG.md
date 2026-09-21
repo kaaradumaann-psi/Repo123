@@ -423,3 +423,34 @@ Tarih: 2026-09-21 · Kaynak: kitap **s.48-55** (PDF p32 L – p35 R)
 Açık **8** (5 P1: 003/004/005/016-kısmi/019 · 3 P2: 006/007/020) ·
 FIXED **7** (008-012, 015, 017) · REJECTED **5** (001, 002, 013, 014, 018).
 **P0 açık çelişki yok.**
+
+---
+
+## PHASE 4 KAPANIŞI — kitap s.62-63
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.62** (p39 L) + **s.63** (p39 R)
+
+### s.62 — Dikkatsizlik endeksi kesin sayıları (GÖRSEL DOĞRULANDI)
+
+| Kaynak | Kod | Sonuç |
+|---|---|---|
+| "**12 çift** görgül yolla seçilmiş madde" | `CARELESS_PAIRS` = 12 çift | ✅ MATCH |
+| "en yüksek puan **12**'dir" | 12 çift × 1 puan = 12 | ✅ MATCH |
+| "**Greene (1980)** … **4'ün kesim puanı**" | `normal = score < 4` (≥4 uyarı) | ✅ MATCH |
+
+→ **`UNVERIFIED-TR-001` KAPANDI** (DECISION-022). Kayıt: SOURCE-CL-002.
+
+### s.63 — BÖLÜM 5 başlangıcı
+
+"Minnesota Çok Yönlü Kişilik Envanteri **Klinik Testlerin Değerlendirilmesi**";
+kod yorumlarının temel kaynak listesi (Archer, Butcher, Ceyhun, Dahlstrom,
+Erol, Friedman & Graham, Greene, Lachar, Levitt, Savaşır, Webb); kapsam
+sözleşmesi: "ikili kodların **hepsi**, üçlü ve dörtlü kodların **çoğunluğu**";
+"kodların yorumlanması alt testlerin **sayısal sıralamasına** göre".
+Kayıt: SOURCE-CL-003.
+
+### Durum
+
+**PHASE 4 (K düzeltmesi + geçerlik konfigürasyonları) ✅ DONE** — s.43-62
+tamamen işlendi. Açık çelişki **8** (5 P1 · 3 P2), **açık P0 yok**.
+Testler: **307/307 PASS** (22 suite) · typecheck 0 · build PASS · REGRESSION YOK.

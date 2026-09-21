@@ -379,3 +379,17 @@ K düzeltmesi ek bilgi (s.46): klinik ölçeğe **5-10 T puanı** eklenir (Green
 
 Not: T puanları **[20, 120]** aralığına kırpılır (`mmpiScoring.ts`), bu yüzden
 kaynağın "F > 120" koşulu matematiksel olarak sağlanamaz.
+
+---
+
+# PHASE 4 kapanışı — Dikkatsizlik endeksi (s.62, p39 L) → **KAPANDI**
+
+| Kaynak (s.62, görsel doğrulandı) | Kod | Sonuç |
+|---|---|---|
+| **12 çift** görgül yolla seçilmiş, zıt içerikli madde | `CARELESS_PAIRS` = 12 çift (7 same + 5 different) | ✅ **MATCH** |
+| En yüksek puan **12** | 12 çift × 1 puan | ✅ **MATCH** |
+| Kesim puanı **4** (Greene 1980) | `normal = score < 4` (≥ 4 → uyarı) | ✅ **MATCH** |
+
+→ Önceki `UNVERIFIED-TR-001` **kapandı**. Tablo 7 karşılaştırması (12/12 çift
+birebir) bu sayfadaki "12 çift / max 12 / kesim 4" ifadeleriyle birlikte
+**tam doğrulandı**.

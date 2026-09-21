@@ -54,7 +54,14 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **53** | **p34 R** | **Konfigürasyon 11 — Açık ve tavizsiz** (L<55; F≈64; K<45) | **DONE** (görsel doğrulandı) |
 | **54** | **p35 L** | **Konfigürasyon 12 — Güvenilir cevaplayıcı** (L≈50; F<70; K>50) | **DONE** |
 | **55** | **p35 R** | **Konfigürasyon 13 — Akut/süreğen** (L>50; F≈K>55) | **DONE** |
-| 56 | p36 L | **Konfigürasyon 14** + **Konfigürasyon 15** | **DONE** |
+| 56 | p36 L | **Konfigürasyon 14** | **DONE** (görsel) |
+| 57 | p36 R | **Konfigürasyon 15** + **K+ profili** (Mark & Seeman 1963) | **DONE** (görsel) |
+| 58 | p37 L | **F-K Endeksi** (kesim 9; 0-9 geçerli / >9 sahte-kötülük / 0 sahte-iyilik) | **DONE** (görsel ×2) |
+| 59 | p37 R | F-K bantları (8-11 abartma / >16) + **TR endeksi** (≥3 risk, Dahlstrom 1972) | **DONE** (görsel) |
+| 60 | p38 L | **Tablo 6** — TR endeksi 16 çifti | **DONE** (16/16 MATCH) |
+| 61 | p38 R | **Tablo 7** — Dikkatsizlik 12 çifti | **DONE** (12/12 MATCH) |
+| **62** | **p39 L** | **Dikkatsizlik kapanışı** (12 çift · max 12 · kesim 4, Greene 1980) | **DONE** (görsel) |
+| 63 | p39 R | **BÖLÜM 5 başlangıcı** — klinik testler/kod tipleri; kaynak listesi; kapsam sözleşmesi | **DONE** (görsel) |
 | **56** | **p36 L** | **Konfigürasyon 14 — erdemli görünme isteği** (L>55, F<60, K 59-64) + Şekil 14 | **DONE** (görsel doğrulandı) |
 | 57 | p36 R | **Konfigürasyon 15** (L=60, F>70, K<40) + Şekil 15 + **K+ profili** tanımı (Mark & Seeman 1963) | **DONE** (şekil görsel doğrulandı) |
 | 58 | p37 L | **F-K endeksi** (kesim 11→9; 0-9 geçerli, >9 sahte-kötülük, 0 sahte-iyilik; X̄ 8.66/SD 5.94) | **DONE** (görsel doğrulandı) |

@@ -32,7 +32,7 @@ Sayfa eşleme:
 | 1 | Kaynak yapısı / indeks | **DONE** |
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi |
 | 3 | Validity (kitap s.29-42) | **DONE** |
-| 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-61) | **IN_PROGRESS** — **Konf. 1-15 TAMAM** ✓ · F-K ✓ · TR ✓ · K+ ✓; yalnız s.62 kapanışı açık |
+| 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-62) | ✅ **DONE** — 15/15 konfig · F-K ✓ · TR ✓ · K+ ✓ · dikkatsizlik 12 çift/max 12/kesim 4 ✓ |
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
@@ -47,9 +47,17 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**55** (Konfigürasyon 13 — Akut/süreğen) — PDF p35 R
+**62** (Dikkatsizlik kapanışı) — PDF p39 L
+Sonraki hedef: **s.64** (Bölüm 5 — kod tipleri, PDF p40 L)
 
 Last completed:
+**PHASE 4 KAPANDI — kitap s.43-62 (PDF p29 R – p39 L) TAM DONE:**
+15/15 konfigürasyon ✓ · F-K endeksi ✓ · TR endeksi ✓ · Tablo 6 (16/16) ✓ ·
+Tablo 7 (12/12) ✓ · **Dikkatsizlik kapanışı: 12 çift · max puan 12 · kesim 4
+(Greene 1980) → `UNVERIFIED-TR-001` KAPANDI (DECISION-022)** · Bölüm 5 girişi
+(s.63) okundu → PHASE 5 kaynak temeli (SOURCE-CL-003)
+
+Önceki:
 **PHASE 4 batch 3 — kitap s.48-55 (PDF p32 L – p35 R) DONE — BÖLÜM 4 TAMAM:**
 Konf. 6 (rastgele) ✓ · Konf. 7 (tümüne doğru) ✓/❌ ulaşılamaz → CONFLICT-019 ·
 Konf. 8 (tümüne yanlış) → kaynak içi tutarsızlık, REJECTED (DECISION-020) ·
@@ -71,21 +79,22 @@ K+ profili tanımı ✓ · **F-K endeksi ✓** · **TR endeksi ✓ (kesme puanı
 düzeltildi)** · **Tablo 6 (16 çift) ✓ birebir** · **Tablo 7 (12 çift) ✓ birebir**
 
 Current section:
-**PHASE 4 devam ediyor.** K düzeltmesi + konfigürasyonlar işleniyor.
+**PHASE 4 tamamlandı (s.43-62).** Bölüm 5 — klinik testler/kod tipleri sırada.
 
 Status:
-**IN_PROGRESS** — sıradaki iş Bölüm 4'ün kalan konfigürasyonları (s.43-55)
+**PHASE 4 DONE** — sıradaki iş: CONFLICT-019 kararı → CONFLICT-016/020 →
+Wiggins normları (s.178-181) → Bölüm 5 (s.64+)
 
 ## Next action
 
 Continue from:
-**Bölüm 4 kapandı (s.43-55).** Sıradaki: **s.62 (p39 L)** kapanışı →
-**CONFLICT-019/020 kararları** → sonra Wiggins normları
+**PHASE 4 kapandı (s.43-62).** Sıradaki: **CONFLICT-019 kararı (P1)** →
+**CONFLICT-016/020 kararı** → **Wiggins normları s.178-181** → **Bölüm 5 / kod
+tipleri (s.64+)**
 
 Sıradaki batch'ler (öncelik sırası):
 
-1. **PDF p39 L** — kitap s.62, TR/dikkatsizlik tartışmasının devamı
-   → **PHASE 4 kapanışı** (SOURCE_INDEX + CHECKPOINT + doküman senkronu)
+1. ~~**PDF p39 L** — kitap s.62~~ ✅ **TAMAMLANDI** (PHASE 4 kapandı)
 2. **CONFLICT-019 kararı (P1)** — "tümüne doğru" örüntüsü uygulanamaz durumda:
    T kırpması mı yükseltilecek, ham cevap örüntüsünden mi tespit edilecek?
    **Tasarım kararı** — acele etme.
@@ -119,7 +128,7 @@ Bilinen kısıtlar:
 - 33 anahtar yalnızca OCR doğrulamalı → `OCR-CONFIRMED` (`DECISION-011`)
 - Ek 10 tablo yapısı OCR ile çözülemiyor → hücre hücre görsel okuma gerekli
 - `WIGGINS_NORMS` (13 ölçek) için **hiç kaynak kanıtı yok** → PHASE 8
-- Dikkatsizlik kesme puanı (4) ve F-K negatif eşiği (−8) kaynakta yok → UNVERIFIED
+- F-K negatif eşiği (−8) kaynakta yok → UNVERIFIED · ~~dikkatsizlik kesmesi 4~~ → **VERIFIED** (DECISION-022)
 - K+ profili örüntüsü kaynakta var, kodda yok → `MISSING-KPLUS-001` (P3)
 - **Şekil okuma uyarısı:** 200 DPI OCR şekil içi eğri/ızgara değerlerini
   güvenilir okumaz → sayısal CONFLICT yazmadan önce yüksek DPI görsel doğrulama
@@ -127,7 +136,7 @@ Bilinen kısıtlar:
 
 ## Code changes so far
 
-**7 değişiklik — 2026-09-21:**
+**8 değişiklik — 2026-09-21:**
 
 | ID | Dosya | Ne |
 |---|---|---|
@@ -138,14 +147,17 @@ Bilinen kısıtlar:
 | CHANGE-005 | `src/scoring/mmpiDerived.ts` | HST: +7 madde (13→20) |
 | CHANGE-006 | `tests/mmpiKeyIntegrity.test.ts` | **YENİ** 7 test (PHASE 2) |
 | CHANGE-007 | `src/scoring/mmpiConsistency.ts` + test | **TR kesme puanı `<=3` → `<=2`** (P1) |
+| CHANGE-008 | `src/scoring/mmpiValidityConfigs.ts` + test | **4 konfig eşiği kaynağa çekildi** (P1): `ascending` +F45-55, `descending` +K≥40, `all-true` 40→35, `help-seeking` 105→100 |
+| — | `tests/mmpiExtended.test.ts` | all-false testi DECISION-020 gerekçesiyle güncellendi |
 
 ## Tests
 
 | Komut | Sonuç |
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **20/20 PASS** (batch 3: +6 konfig eşiği testi) |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **301/301 PASS** · 21 suite · 113 383 ms (baseline 287 → 297 → 301) |
+| `npm test` | **307/307 PASS** · 22 suite · ~120 s (baseline 287 → 297 → 301 → 307) |
 | `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
@@ -180,13 +192,14 @@ FIXED: 007 (008-012, 015, 017) · REJECTED: 5 (001, 002, 013, 014, 018).
 
 ## Last update
 
-2026-09-21 — Oturum 3 devam (PHASE 4 batch 1: konfigürasyonlar, F-K, TR endeksi + CHANGE-007)
+2026-09-21 — Oturum 3 devam: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
 ## CHECKPOINT
 
 ```
 Phase:          PHASE 0, 1, 2, 3, 6 — DONE
-                PHASE 4 — IN_PROGRESS (s.43-47 + s.56-61 DONE; s.48-55 + s.62 açık)
+                PHASE 4 — ✅ **DONE** (s.43-62 tamamı)
+                PHASE 5 — NOT_STARTED (Bölüm 5 kod tipleri; s.63 girişi okundu)
                 PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
                 PHASE 14 — IN_PROGRESS (20 denetim testi)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
@@ -194,6 +207,7 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p29-p31 (kitap s.43-47: Konf. 1-5),
                 p32-p35 (kitap s.48-55: Konf. 6-13 — BÖLÜM 4 TAMAM),
                 p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
+                p39    (kitap s.62-63: dikkatsizlik kapanışı + Bölüm 5 girişi),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
@@ -207,20 +221,24 @@ Fixed:          7 (CONFLICT-008..012, 015, 017) + 0 regression
 Rejected:       5 (001, 002, 013, 014, 018 — kod doğru / kaynak içi tutarsızlık)
 Code changes:   8 (5 anahtar + 1 TR kesme + 1 konfig eşiği + 1 test dosyası)
 Tests:          307/307 PASS (22 suite) · typecheck PASS · build PASS
-Next:           PDF p39 L (s.62) → PHASE 4 kapanışı; sonra CONFLICT-019/020
-                kararları ve Wiggins normları (s.178-181)
+Next:           CONFLICT-019 kararı (T kırpma [20,120] ↔ kaynak F>120);
+                sonra CONFLICT-016/020; sonra Wiggins normları (s.178-181)
 Blocking:       none
 ```
 
 ## Bir sonraki oturum için 3 satırlık özet
 
-1. **Nerede kaldık:** PHASE 4 batch 1 (kitap s.56-61) **DONE**. Konfigürasyon 14
+1. **Nerede kaldık:** **PHASE 4 TAMAMEN DONE (kitap s.43-62).** 15/15
+   konfigürasyon karşılaştırıldı; CHANGE-008 ile 4 eşik kaynağa çekildi;
+   dikkatsizlik kesmesi (4, Greene 1980) doğrulandı. **Açık P0 yok.**
+   (Ayrıntı için aşağıdaki eski özet geçerli:) PHASE 4 batch 1 (s.56-61) DONE. Konfigürasyon 14
    birebir MATCH; F-K endeksi bantları MATCH; Tablo 6 (16 çift) ve Tablo 7
    (12 çift + yön) **birebir MATCH**; **TR kesme puanı kaynağa çekildi**
    (3 → uyarı, CHANGE-007). 4 çelişki REJECTED (001/002 normlar, 013 F-K=0,
    014 Konf.15 — ikisi "kod doğru"), 1 FIXED. **Açık P0 yok.**
-2. **Sıradaki iş:** kitap s.43-48 (PDF p29 R – p31 L) → Bölüm 4'ün kalan
-   konfigürasyonları. **Kural:** her konfigürasyonda metin **ve** şekil yüksek
+2. **Sıradaki iş:** **CONFLICT-019 kararı (P1)** — "tümüne doğru" örüntüsü
+   uygulanamıyor (T puanı [20,120] kırpılıyor, kaynak F>120 istiyor).
+   (Eski not:) kitap s.43-48 → Bölüm 4'ün kalan konfigürasyonları. **Kural:** her konfigürasyonda metin **ve** şekil yüksek
    DPI ile okunmalı; şekil okumasını OCR'a bırakma (CONFLICT-014 dersi).
 2b. **Açık karar:** CONFLICT-016 (Konf. 2/4/5'te F/K aralıkları tek yönlü) →
    **tüm konfigürasyon seti okunmadan karar verme.**

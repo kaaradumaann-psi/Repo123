@@ -968,3 +968,57 @@ Kod: `acute-chronic` → `L > 50 ∧ F > 55 ∧ K > 55 ∧ |F−K| ≤ 6`
 - L > 50 ✅ · F,K > 55 ✅ · "hemen hemen eşit" ↔ |F−K| ≤ 6 (niceleme yok, makul
   eşitleme) ✓
 Status: **VERIFIED (birebir)**
+
+---
+
+# Bölüm 4 kapanışı — Dikkatsizlik endeksi kesin sayıları (s.62, p39 L)
+
+## SOURCE-CL-002 · Dikkatsizlik alt testi: 12 çift · max 12 · kesim 4
+
+Fact — aynen (**Visual: CONFIRMED** — s.62 tam sayfa okundu):
+> "Dikkatsizlik alt testi psikolojik olarak zıt içerikli olduğuna karar verilen,
+> **12 çift görgül yolla seçilmiş maddeden oluşmaktadır**."
+> "Test tekrar test göstergesinden daha duyarlı bir ayrım yapan bu alt test,
+> saptırılmış test davranışının ortaya çıkarılmasını mümkün kılar. MMPI'yı
+> düzgün bir şekilde cevaplandırmak istemeyen hastaları olduğu kadar,
+> konfüzyonda-ki hastaları da ayırt etmektedir. […] Hastanın dikkatsizlik alt
+> testinden alacağı **en yüksek puan 12'dir**. **Greene (1980) geçersiz
+> profilleri belirlemede 4'ün kesim puanı olarak alınabileceğini
+> belirtmiştir.**"
+
+Kod karşılaştırması:
+| Kaynak | Kod | Sonuç |
+|---|---|---|
+| 12 çift, zıt içerikli, görgül seçilmiş | `CARELESS_PAIRS` = **12 çift** (7 `same` + 5 `different`) | ✅ MATCH |
+| En yüksek puan **12** | 12 çift × 1 puan = **12** | ✅ MATCH |
+| Kesim puanı **4** (Greene 1980) | `const normal = score < 4;` → **≥4 uyarı** | ✅ MATCH |
+
+Status: **VERIFIED** — `UNVERIFIED-TR-001` **KAPANDI** (kesim puanı 4 doğrulandı,
+kaynak atfı Greene 1980).
+
+## SOURCE-CL-003 · Bölüm 5 girişi — yorum katmanının kaynak temeli (s.63, p39 R)
+
+Fact — aynen (**Visual: CONFIRMED**):
+> "**BÖLÜM 5 — MİNNESOTA ÇOK YÖNLÜ KİŞİLİK ENVANTERİ KLİNİK TESTLERİN
+> DEĞERLENDİRİLMESİ**"
+> "Bu bölümde verilecek olan kod tipleri ve profil yorumlamaları klinik
+> bilgilere dayanmaktadır. […] Kod yorumlamaları MMPI'da kullanılan **ikili
+> kodların hepsini, üçlü ve dörtlü kodların çoğunluğunu** içermektedir."
+> "**Kodların yorumlanması alt testlerin sayısal sıralamasına göre
+> yapılmıştır.**"
+> Temel kaynaklar: Archer 1987 · Butcher 1969, 1984, 1987 · Butcher & Graham
+> 1990 · Ceyhun 1986 · Dahlstrom ve ark. 1972 · Erol 1982 · Friedman & Graham
+> 1987 · Greene 1979 · Lachar 1974 · Levitt 1989 · Savaşır 1978, 1981 · Webb
+> 1978
+> "MMPI yorumları, ilkokul mezunu ortaokul düzeyinde eğitimi olan, zeka düzeyi
+> normale yakın ve **genellikle yetişkinler için** yapılmıştır."
+> "Bundan sonraki bölümde verilen kodlar aşağıdaki özellikler göz önünde
+> tutularak değerlendirilmiştir. Bunlar; psikiyatrik grupta ortalama ve yüksek
+> puanların yorumlanması ve **cinsiyet, yaş, eğitim, sosyo-ekonomik düzey** gibi
+> değişkenlerin puanlara etkisidir."
+> "MMPI değerlendirmesinde **düşük puanlar psikopatolojiyi değil, uyumu** …"
+> (s.64'e taşar)
+
+Kullanım: PHASE 5 (klinik testler / kod tipleri / yorum) için kaynak temeli ve
+kapsam sözleşmesi (ikili kodların tamamı + üçlü/dörtlü kodların çoğunluğu).
+Status: **VERIFIED** (bilgi kaydı)

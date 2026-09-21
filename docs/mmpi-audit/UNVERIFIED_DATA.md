@@ -277,3 +277,14 @@ varsayar.
 Durum: **UNVERIFIED/CONFLICT-019** — kırpma değeri (20/120) kaynakta
 belgelenmemiştir; kaynağın kendi kuralını uygulanamaz kılar. Düzeltme tasarım
 kararı gerektirir (T kırpması mı, ham örüntü tespiti mi).
+
+
+---
+
+## ~~UNVERIFIED-TR-001 — dikkatsizlik kesmesi 4~~ → **KAPANDI / VERIFIED**
+
+s.62 (p39 L) **görsel doğrulandı**: "Hastanın dikkatsizlik alt testinden alacağı
+en yüksek puan 12'dir. **Greene (1980) geçersiz profilleri belirlemede 4'ün
+kesim puanı olarak alınabileceğini belirtmiştir.**" → kodun `score < 4`
+(normal) eşiği ve 12 çiftlik set **birebir MATCH**. Kayıt: SOURCE-CL-002.
+Kapatan karar: DECISION-022.
