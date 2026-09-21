@@ -205,3 +205,43 @@ ile asla `VERIFIED` sayılmayacak. Tablo 36-38 de (s.258-260) aynı şekilde.
 Not: `TURKISH_NORMS` içindeki 24 hücre (L/F/K dışındaki 12 ölçek × 2 cinsiyet)
 için **hâlâ hiçbir kaynak kanıtı yoktur**. Bölüm 8 (s.191-195) ve Ek 10
 birlikte okunmalıdır.
+
+---
+
+# PHASE 4 — Tutarlılık endekslerinde kaynağı doğrulanamayan değerler
+
+Bu değerler **kaynak kitapta bulunamadı**. Kaynak bulunana kadar kod
+**değiştirilmez** (UNVERIFIED), ancak kaynakla çeliştiği de iddia edilemez.
+
+## UNVERIFIED-TR-001 — Dikkatsizlik alt testi kesme puanı (4)
+
+Kod: `src/scoring/mmpiConsistency.ts` → `carelessnessIndex`
+```ts
+const normal = score < 4;   // 4 ve üzeri → kuşku
+```
+Kod atfı: "(Greene 1980)" — **ikincil kaynak**.
+Kaynak kitap taraması: s.61'de Tablo 7 (12 çift + yön) verilir; **kesme puanı
+için sayısal bir değer yoktur**. s.61 tartışması yalnızca TR endeksi üzerindedir.
+Durum: **UNVERIFIED** — kaynakta bulunana kadar kod korunur.
+Not: Kitap dikkatsizlik alt testinin **ne anlama geldiğini** ve 12 çifti verir,
+ancak "kaç puan kuşku doğurur" bilgisini vermez.
+
+## UNVERIFIED-FK-001 — F-K negatif bölge eşiği (−8)
+
+Kod: `fkIndexAnalysis` → `if (value >= -8) { 'Hafif Negatif (Geçerli)' }`
+Kaynak (s.58): yalnızca "0-9 geçerli / >9 sahte-kötülük / 0 sahte-iyilik"
+verilir; **negatif değerler için sayısal eşik yoktur**.
+Durum: **UNVERIFIED** — `−8` eşiği kaynakta doğrulanamadı.
+Not: Kaynağın sahte-iyilik tartışması nitelikseldir (yüksek K + düşük F bileşimi);
+sayısal eşik verilmez. CONFLICT-013 REJECTED gerekçelerinden biri budur.
+
+## MISSING-KPLUS-001 — K+ profili örüntüsü kodda yok
+
+Kaynak (s.57, Mark & Seeman 1963): K+ profilinin **dört** ölçülebilir ölçütü
+verilir → `VERIFIED_DATA.md` (K+ profili tablosu).
+Kod: `VALIDITY_CONFIGS` içinde K+ profili **tanımı yoktur**; `fkIndexAnalysis`
+yalnızca F−K farkını değerlendirir.
+Durum: **MISSING (P3 — kapsam eksiği, hatalı değer değil)**.
+Kaynak elverişli olduğu hâlde kod bu örüntüyü tanımıyor. Ölçütler doğrulanmış
+olduğundan ileride `VALIDITY_CONFIGS`'e eklenebilir; ancak bu bir **yeni özellik**
+olduğu için ayrı bir karar gerektirir (DECISION gerekir; bu batch'te eklenmedi).

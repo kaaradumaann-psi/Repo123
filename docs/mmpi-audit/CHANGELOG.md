@@ -246,3 +246,81 @@ Kaynak kitap da 31-50 yaş aralığının **yetersiz temsil edildiğini** söyle
 | CONFLICT-008..012 | P0 | 5 anahtar hatası | ✅ FIXED |
 
 **P0 açık çelişki kalmadı.** Kalan: 3 P1 + 2 P2.
+
+---
+
+## PHASE 4 — batch 1: Geçerlik konfigürasyonları, K+, F-K, TR endeksi
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.56-61** (PDF p36 L – p38 R)
+Sayfa doğrulaması: her sayfanın numarası görsel olarak okundu
+(p036_L=56, p036_R=57, p037_L=58, p037_R=59, p038_L=60, p038_R=61) —
+eşleme formülüyle (`leaf = sayfa + 15`) tutarlı.
+
+### İşlenen sayfalar
+
+| Kitap s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 56 | p36 L | Konfigürasyon 14 (L>55, F<60, K 59-64) + Şekil 14 | ✅ birebir MATCH |
+| 57 | p36 R | Konfigürasyon 15 (L=60, F>70, K<40) + Şekil 15 + **K+ profili** | ⚠️ CONFLICT-014 → **REJECTED** |
+| 58 | p37 L | **F-K endeksi** (kesim 11→9, 0-9 geçerli, >9 sahte-kötülük, 0 sahte-iyilik) | ✅ MATCH (bir gerilim: CONFLICT-013) |
+| 59 | p37 R | **TR kesme puanı ≥3** + F-K 8-11 / >16 bantları + Greene 1979 | ❌ CONFLICT-015 → **FIXED** |
+| 60 | p38 L | **Tablo 6 — 16 tekrarlanmış madde çifti** | ✅ 16/16 birebir |
+| 61 | p38 R | **Tablo 7 — Dikkatsizlik alt testi 12 çift + yön** | ✅ 12/12 birebir |
+
+### Yeni SOURCE_FACT'ler
+
+`SOURCE-FK-001..004` · `SOURCE-CONFIG-014` · `SOURCE-CONFIG-015` ·
+`SOURCE-TR-001..003` · `SOURCE-CL-001` (9 yeni fact)
+
+### Çelişkiler
+
+| ID | Konu | Öncelik | Sonuç |
+|---|---|---|---|
+| CONFLICT-013 | F-K = 0: sahte-iyilik etiketi ↔ geçerlilik sınırı | P2 | **REJECTED** (kaynak içi gerilim, kod doğru) |
+| CONFLICT-014 | Konf. 15: kaynak L=60 noktası ↔ kod 55-65 bandı | P2 | **REJECTED** (ilk P1 bulgum **hatalıydı**, düzeltildi) |
+| CONFLICT-015 | TR kesme puanı 1 puan kaymış (3 tutarlı sayılıyordu) | P1 | **FIXED** (CHANGE-007) |
+
+### Kod değişikliği
+
+**CHANGE-007** — `src/scoring/mmpiConsistency.ts`:
+`consistent = score <= 3` → `score <= 2`; kaynakta olmayan "üç-dört"
+iddiası ve Gravitz & Gerton atfı kaldırıldı; +4 regresyon testi.
+
+### Önemli süreç olayı
+
+CONFLICT-014 ilk kaydedildiğinde **hatalıydı**: "kaynak başlığı 60 der, şekil 55
+gösterir" iddiası, şeklin yüksek DPI okumasıyla **çürütüldü** (şekilde L noktası
+tam 60'ta; kaynakta "55" diye bir değer yok). Kayıt silinmedi; **düzeltme geçmişi
+korunarak** REJECTED'a çevrildi (Previous finding / New evidence / Resolution /
+Reason). Aynı hata sınıfı için kural eklendi: **şekil içi eğri/ızgara değerleri
+200 DPI OCR ile okunamaz, yüksek DPI görsel doğrulama zorunludur.**
+
+### Güncel çelişki tablosu
+
+| ID | Öncelik | Konu | Durum |
+|---|---|---|---|
+| CONFLICT-001 | P0 | F kadın normu | ✅ **REJECTED** (kod doğru) |
+| CONFLICT-002 | P0 | K normları | ✅ **REJECTED** (kod doğru) |
+| CONFLICT-003 | P1 | L T bandı alt sınırı (59 ↔ 56) | OPEN |
+| CONFLICT-004 | P1 | F ham bant sınırları | OPEN |
+| CONFLICT-005 | P1 | L/K ham bant tabloları kaynakta yok | INVESTIGATING |
+| CONFLICT-006 | P2 | F/K T bant sınır yazımı | CONFIRMED (kabul) |
+| CONFLICT-007 | P2 | `docs/kaynak-denetimi.md` depoda yok | CONFIRMED |
+| CONFLICT-008..012 | P0 | 5 anahtar hatası | ✅ FIXED |
+| CONFLICT-013 | P2 | F-K = 0 etiketi | ✅ **REJECTED** |
+| CONFLICT-014 | P2 | Konf. 15 L nokta ↔ bant | ✅ **REJECTED** |
+| CONFLICT-015 | P1 | TR kesme puanı | ✅ **FIXED** |
+
+**P0 açık çelişki yok.** Kalan: 5 açık (3 P1 + 2 P2) · 4 REJECTED · 6 FIXED.
+
+### Testler
+
+`typecheck` 0 · `npm test` **301/301 PASS** (21 suite, 113 383 ms) ·
+`build` 0 · **REGRESSION YOK**.
+
+### Git kurtarma notu
+
+Bu oturumun başında sandbox sıfırlaması nedeniyle yerel git geçmişi kaybolmuştu;
+`git fetch` + `FETCH_HEAD` karşılaştırması içeriğin remote'ta **birebir aynı**
+olduğunu gösterdi (`git diff FETCH_HEAD HEAD` boş) → `git reset --hard FETCH_HEAD`
+ile geçmiş geri alındı. **Force-push gerekmedi.**

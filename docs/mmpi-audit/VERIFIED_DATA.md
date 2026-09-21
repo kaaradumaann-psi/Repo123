@@ -246,3 +246,82 @@ maddenin tamamını doğru şekilde ters çevirmiştir ✅
 | R | 40 | 40 | ✅ MATCH | O |
 | Do | 28 | 28 | ✅ MATCH | O |
 | Dy | 57 | 57 | ✅ MATCH | O |
+
+---
+
+# PHASE 4 — Tutarlılık endeksleri ve F-K (kitap s.56-61)
+
+Doğrulama anahtarı: **V** = yüksek DPI görsel doğrulama · **O** = OCR (görsel
+doğrulama yok) — sayısal tablolar için **V zorunludur**.
+
+## Konfigürasyon 14 — erdemli görünme isteği (kitap s.56, p36 L)
+
+| Ölçek | Kaynak koşulu | Kod koşulu | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| L | > 55 | `v.L > 55` | ✅ MATCH | V |
+| F | < 60 | `v.F < 60` | ✅ MATCH | V |
+| K | 59-64 arası | `v.K >= 59 && v.K <= 64` | ✅ MATCH | V |
+
+Kaynak aynen: "Konfigürasyon 14: L alt testi 55 T puanının üstünde, F alt testi
+60 T puanının altında, K alt testi 59-64 T puanı arasındadır." (Şekil 14)
+Ek uyarı (kaynak): "Eğer F ve K alt testleri 70 T puanının üstündeyse, bireyde
+hastalığa içgörü yoktur ve prognoz kötüdür."
+
+## Konfigürasyon 15 — katı / karmaşıklık örüntüsü (kitap s.57, p36 R)
+
+| Ölçek | Kaynak koşulu | Kod koşulu | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| L | **= 60** (nokta; şekilde de 60) | `55 ≤ v.L ≤ 65` | ⚠️ EXTRA (kaynak noktasının ±5 toleransı) | V |
+| F | > 70 | `v.F > 70` | ✅ MATCH | V |
+| K | < 40 | `v.K < 40` | ✅ MATCH | V |
+
+Kaynak aynen: "Konfigürasyon 15: L alt testi **60 T puanında**, F alt testi 70 T
+puanının üstünde ve K alt testi 40 T puanının altındadır." (Şekil 15)
+Şekil 15 görsel doğrulaması: L noktası **60** seviyesinde, F noktası 70'in hemen
+üstünde, K noktası 40'ın altında → metni doğrular.
+→ DECISION-018 (bant kabul edildi), CONFLICT-014 REJECTED.
+
+## K+ profili (Mark & Seeman 1963) — kitap s.57, p36 R
+
+| Ölçüt | Kaynak | Kodda karşılığı | Sonuç |
+|---|---|---|---|
+| Klinik ölçekler | Hiçbiri T ≥ 70 | örüntü tanımı yok | ⚠️ kodda yok → UNVERIFIED |
+| Klinik ölçekler | ≥ 6 ölçek T ≤ 60 | örüntü tanımı yok | ⚠️ kodda yok → UNVERIFIED |
+| K ve L | K > F **ve** L > F | — | ⚠️ kodda yok |
+| K − F | **≥ 5 T puanı** | — | ⚠️ kodda yok |
+| Kişilik | sizoid, utangaç, kaygılı, ketlenmiş, pasif direnç | — | (yorum) |
+
+Kaynak: "K+ profilinde K ve L alt testleri F'den yüksektir ve K alt testi, F alt
+testinin en az 5 T puanı üstündedir." → **Kodda K+ profili tanımı yoktur**
+(s.58'de Şekil 16 ile gösterilir). Bu bir **MISSING** kalemidir;
+`P3` (rapor/yorum kapsamı) olarak kaydedilir.
+
+## F-K endeksi (Gough) — kitap s.58-59
+
+| Kural | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| 0 ≤ F-K ≤ 9 | profil **geçerlidir** | `0 < value ≤ 9` → "Normal/Geçerli" | ✅ MATCH | V |
+| F-K > 9 | **sahte-kötülük** | `value > 9` → "Sahte-Kötülük" | ✅ MATCH | V |
+| F-K = 0 | **sahte-iyilik** | "Hafif Savunuculuk (Geçerli)" | ⚠️ kaynak içi gerilim → CONFLICT-013 REJECTED (DECISION-017) | V |
+| 8 ≤ F-K ≤ 11 | sorunlar var **ama abartılıyor**; yardıma açık | her iki dalda da 8-11 notu | ✅ MATCH | V |
+| F-K > 16 | kritik; psikoz **veya** simülasyon | `value > 16` → "Kritik Derecede Yüksek Abartma" | ✅ MATCH | V |
+| Negatif bölge eşiği | **kaynakta sayısal eşik yok** | `value < -8` → sahte-iyilik | ⚠️ UNVERIFIED (kaynak yok) | V |
+| Kesim puanı tarihçesi | 11 → **9** (Gough 1947, 1951) | — | bilgi | V |
+| Klinik grup | X̄ = **8.66**, SD = **5.94** | — | bilgi | V |
+
+## TR (test-tekrar test) endeksi — kitap s.59-60
+
+| Kalem | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| Madde çifti sayısı | **16** | 16 | ✅ MATCH | O |
+| Çift listesi | Tablo 6 (s.60) | `TR_PAIRS` | ✅ **16/16 birebir** | O (tablo) |
+| Bulunduğu ölçekler | 6, 7, 8 ve 0 alt testleri | — | bilgi | V |
+| Kesme puanı | **≥ 3 → geçersizlik riski** | **düzeltildi** → `score <= 2` tutarlı | ✅ FIXED (CHANGE-007) | V |
+
+## Dikkatsizlik alt testi — kitap s.61
+
+| Kalem | Kaynak | Kod | Sonuç | Doğrulama |
+|---|---|---|---|---|
+| Çift sayısı | **12** | 12 | ✅ MATCH | O (tablo) |
+| Çift listesi + yönü | Tablo 7 | `CARELESS_PAIRS` | ✅ **12/12 + yön birebir** | O (tablo) |
+| Kesme puanı | kaynakta **bulunamadı** (yalnızca "4 ve üzeri" kodda) | `score < 4` | ⚠️ UNVERIFIED | — |

@@ -415,3 +415,138 @@ bekliyor). Bunlar `SOURCE_FACTS.md` içinde `OCR-CONFIRMED` olarak işaretlenir;
 `Hs, D, Hy, Pd, Pa, Pt, Sc, Ma, Si, P_PAR, P_SZD, P_STY, P_ANT, P_CPS, P_PAG,
 A_ICAS, W_SOC, W_DEP_W, W_MOR, W_REL, W_AUT, W_PSY, W_ORG, W_FAM, W_HOS,
 W_PHO, W_HYP, W_HEA, S_A, S_R, S_Do, S_Dy`.
+
+---
+
+# PHASE 4 — Geçerlik Konfigürasyonları ve F-K Endeksi
+
+## CONFLICT-013 — F-K = 0: sahte-iyilik etiketi ve geçerlilik sınırı çakışması (P2)
+
+Area:
+F-K endeksi yorumu / sahte-iyilik (faking good)
+
+Source:
+**kitap s.59** ("F-K Endeksi" bölümü) — `SOURCE-FK-002`
+Source value:
+> "F-K puanı **0-9 arasında ise profil geçerlidir**, 9'dan büyükse
+> sahte-kötülük, **0 ise sahte-iyiliktir**."
+
+Current implementation:
+`src/scoring/mmpiConsistency.ts` → `fkIndexAnalysis`
+`value === 0` → `level: 'Hafif Savunuculuk (Geçerli)'`, `isWarning: false`, `tone: 'ok'`
+`-8 ≤ value < 0` → `'Hafif Negatif (Geçerli)'`, uyarı yok
+`value < -8` → `'Sahte-İyilik (Faking Good) Eğilimi'`, `isWarning: true`
+
+Comparison:
+**CONFLICT** — kaynak F-K = 0'ı **sahte-iyilik** olarak tanımlar ve uyarı
+gerektirir; kod 0'ı "geçerli, uyarı yok" sayar.
+Ayrıca kaynak negatif bölge için **sayısal eşik vermez**; kodun `-8` eşiği
+kaynakta doğrulanamadı.
+
+Problem:
+F-K = 0 olan profillerde sahte-iyilik sinyali kullanıcıya gösterilmez.
+
+Impact (düşük-orta):
+Yalnızca tam 0 değerinde uyarı kaybolur; negatif bölge uyarısı -9'da başlar
+(kaynak -8 eşiğini desteklemiyor). Yorum katmanı etkisi sınırlı ama
+"sahte-iyilik" hipotezi kaynağın açık kuralıdır.
+
+Status: **REJECTED** (kod doğru kabul edildi) — ilgili karar: **DECISION-017**
+
+**Resolution:** Kaynağın kesme kuralı cümlesi "0-9 arasında ise profil
+geçerlidir" olduğu için 0 geçerli aralığın **içindedir**; "0 ise sahte-iyiliktir"
+ifadesi ise tek bir noktaya ilişkin **etiketlemedir**. Kaynak içi tutarsızlıkta
+DECISION-015 kuralı uygulanır → birincil kesme kuralı esastır, kod değişmez.
+Kodun negatif bölgedeki `-8` eşiği kaynakta **yok** → `UNVERIFIED_DATA.md`'ye
+kaydedildi (kaynak bulunana kadar değiştirilmez).
+
+**Reason:** Kod hatası değil, kaynak üslup gerilimidir; 0 hem sınır hem etiket
+olduğu için iki cümle birlikte doğru kabul edilebilir.
+
+---
+
+## CONFLICT-014 — Konfigürasyon 15: L değeri nokta mu bant mı? (P2)
+
+> **DÜZELTME KAYDI** — Bu kaydın ilk sürümü hatalıydı; tarihsel olarak korunur.
+
+**Previous finding (hatalı, ilk okuma):**
+"Kaynak başlığı s.58'de `L > 60` der, Şekil 15'te 55 çizgisi vardır; kod 55-65
+kullanır (üst sınır 65 kaynakta yok)" → P1 olarak kaydedilmişti.
+
+**New source evidence (yüksek DPI görsel okuma, düzeltir):**
+- **Metin (kitap s.57, Şekil 15 kutusu):** "Konfigürasyon 15: L alt testi
+  **60 T puanında**, F alt testi 70 T puanının üstünde ve K alt testi 40 T
+  puanının altındadır."
+  → "puanının üstünde" DEĞİL, "**puanında**" yazıyor; yani **nokta değeri**.
+- **Şekil 15 grafiği (görsel doğrulandı):** x ekseni L, F, K; y ekseni 30-90.
+  Çizilen profil: **L noktası tam 60** seviyesinde (L/F sütun sınırında), F
+  noktası 70 çizgisinin hemen üstünde (~72), K noktası 40'ın altında (~37).
+  → Şekil metni **doğrular**; "şekilde 55 vardır" iddiası **yanlıştı**.
+
+**Resolution:**
+Kaynakta Konfigürasyon 15 için **L = 60 noktası** verilir (aralık değil).
+Kod: `v.L >= 55 && v.L <= 65` → kaynak noktasının çevresine **±5 tolerans
+bandı** koyar. Bant kaynakta **yoktur** ama kaynak değeri (60) bandın tam
+merkezindedir → **CONFLICT değil, EXTRA (tolerans yorumu)**.
+
+Karşılaştırma ölçütü: Kitap, aralık vermek istediğinde açıkça verir
+(Konfigürasyon 14'te "K alt testi **59-64 T puanı arasındadır**", s.56 —
+kodla birebir MATCH). Konfigürasyon 15'te L için aralık değil **nokta** vermesi
+bilinçli bir üslup farkıdır.
+
+**Reason:** Düz nokta eşitliği (`L === 60`) pratikte neredeyse hiçbir profili
+yakalamaz; ±5 bandı kaynak değerini merkez alır ve kaynak değerini dışlamaz.
+Ek olarak hiçbir profil bu örüntüden **dışlanmaz** (bant genişletici, daraltıcı
+değil — L=70 olan bir profil zaten F>70 ve K<40 koşullarını taşıyorsa başka
+örüntülere de girebilir).
+
+**Status: REJECTED** (ilk hatalı bulgu geçersiz; kod değişikliği YOK)
+İlgili karar: **DECISION-018**
+
+**Ders:** Şekil içindeki eğri, ızgara çizgileri ve nokta konumları 200 DPI
+OCR ile güvenilir okunamaz; bu tür bulgular **yüksek DPI kırpma ile görsel
+doğrulanmadan** CONFLICT olarak kaydedilmemelidir. (Bu kayıt, o hatanın
+örneğidir ve silinmez.)
+
+---
+
+## CONFLICT-015 — TR endeksi kesme puanı 1 puan kaymış (P1)
+
+Area:
+Yanıt tutarlılığı / TR endeksi geçerlilik değerlendirmesi
+
+Source:
+**kitap s.59** — `SOURCE-TR-002` — **Visual: CONFIRMED** (yüksek DPI kırpma)
+Source value:
+> "TR endeksi üzerinde **3 puan ya da daha fazla** bir puanın, geçersiz profil
+> olasılığını arttırdığı ileri sürülmüştür (Dahlstrom 1972)."
+
+Current implementation (önce):
+`src/scoring/mmpiConsistency.ts` → `trIndex`
+```ts
+const consistent = score <= 3;   // 3 DAHİL tutarlı
+```
++ dosya başı yorumu: "3 ve altı tutarlı kabul edilir (Gravitz & Gerton 1976…)"
+
+Comparison:
+**CONFLICT** — kaynak 3'te geçersizlik riskini başlatır (≥ 3); kod 3'ü tutarlı
+sayar. **1 puan kayma.** Kodun kendi atfı (Dahlstrom 1972) kaynağın atfıyla
+aynıdır → kayma, uygulama hatasıdır (yorum değil).
+
+Problem:
+TR = 3 olan profiller kaynakta "geçersizlik olasılığı arttı" bölgesindeyken
+kodda **uyarısız/tutarlı** görünüyordu. Ayrıca kod metnindeki "normal bireyler
+üç-dördüne değişik yanıt verir" ifadesi **kaynakta yok** (kaldırıldı).
+
+Impact:
+Geçerlilik değerlendirmesi ve rapordaki "Tutarlı/Tutarsız Yanıt Örüntüsü"
+bandı; TR = 3 olan tüm profiller.
+
+Resolution:
+**FIXED** — CHANGE-007 (2026-09-21): `consistent = score <= 2`; doküman yorumu
+ve yorum metinleri kaynak cümlesine göre yeniden yazıldı; kaynakta olmayan
+"üç-dört" ifadesi kaldırıldı. Regresyon testi eklendi
+(`tests/mmpiKeyIntegrity.test.ts` → PHASE 4, 3 puan uyarı / 2 puan tutarlı).
+İlgili karar: **DECISION-019**
+
+---

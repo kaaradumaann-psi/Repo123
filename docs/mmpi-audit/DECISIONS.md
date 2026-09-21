@@ -383,3 +383,80 @@ Ek 10 hücre hücre okunmadan `VERIFIED` sayılmaz; kodda karşılığı olmadı
 şu an düzeltme gerektirmez.
 
 Status: **APPROVED**
+
+---
+
+## DECISION-017 — F-K = 0: kod değişikliği YOK (CONFLICT-016 REJECTED)
+
+Tarih: 2026-09-21 · PHASE 4
+
+**Durum:** Kitap s.58 aynı paragrafta iki ifade kullanıyor:
+1. "F-K puanı **0-9 arasında ise profil geçerlidir**"
+2. "**0 ise sahte-iyiliktir**"
+
+**Karar:** Kod mevcut hâliyle (0 → "Hafif Savunuculuk (Geçerli)", uyarı yok)
+**korunur**.
+
+**Gerekçe:**
+- Kaynağın kesme kuralı cümlesi 0'ı geçerli aralığa **dahil eder**; kod bunu izler.
+- "0 ise sahte-iyilik" ifadesi tek bir noktaya (0) ilişkin etiketlemedir; kaynak
+  negatif değerler için **hiçbir sayısal eşik vermez**.
+- Kaynak içi tutarsızlıkta DECISION-015'in kuralı uygulanır: kaynağın **birincil
+  kesme kuralı** esas alınır; kod değiştirilmez, gerilim kayda geçirilir.
+- Kodun sahte-iyilik uyarısı negatif bölgede zaten vardır (`value < -8`); `-8`
+  eşiği kaynakta doğrulanamadı → `UNVERIFIED_DATA.md`.
+
+**Sonuç:** CONFLICT-016 **REJECTED**. Kod değişikliği yok.
+
+---
+
+## DECISION-018 — Konfigürasyon 15: ±5 tolerans bandı kabul edilir
+
+Tarih: 2026-09-21 · PHASE 4
+
+**Durum:** Kaynak (s.57) Konfigürasyon 15 için "L alt testi **60 T puanında**"
+(nokta) der; Şekil 15 grafiği de L noktasını tam 60'ta çizer (görsel doğrulandı).
+Kod `55 ≤ L ≤ 65` bandı kullanır.
+
+**Karar:** Kod **korunur** (bant = kaynak noktasının ±5 toleransı).
+
+**Gerekçe:**
+- Bant, kaynak değerini (60) **dışlamaz**, tam merkezine alır.
+- Kaynak aralık vermek istediğinde açıkça verir (Konfigürasyon 14: K = 59-64,
+  s.56 → kodla birebir MATCH); 15'te nokta vermesi üslup farkıdır.
+- `L === 60` katı eşitliği pratikte hiçbir profili yakalamaz → örüntü işlevsiz
+  kalırdı; bant yakalayıcıyı **genişletir**, profil dışlamaz.
+
+**Sonuç:** CONFLICT-014 **REJECTED** (ilk P1 kaydı hatalıydı; düzeltme kaydı
+CONFLICTS.md'de tarihsel olarak korunur).
+
+**Süreç dersi (DECISION-004/015 ile aynı çizgide):** Şekil içi eğri/ızgara
+okumaları 200 DPI OCR ile güvenilmezdir. Sayısal bir CONFLICT yazmadan önce
+**yüksek DPI görsel doğrulama zorunludur**; bu olayda ilk kayıt bu kural
+çiğnendiği için hatalı çıktı ve düzeltildi.
+
+---
+
+## DECISION-019 — TR endeksi kesme puanı kaynağa çekildi (CODE CHANGE)
+
+Tarih: 2026-09-21 · PHASE 4
+
+**Durum:** Kaynak (s.59, görsel doğrulanmış): "TR endeksi üzerinde **3 puan ya
+da daha fazla** bir puanın, geçersiz profil olasılığını arttırdığı ileri
+sürülmüştür (Dahlstrom 1972)."
+Kod: `consistent = score <= 3` → 3 puanda **uyarı yok**.
+
+**Karar:** Kod **kaynağa çekilir**: `consistent = score <= 2` (yani TR ≥ 3 →
+"Tutarsız Yanıt Örüntüsü", `isWarning: true`).
+
+**Gerekçe:**
+- Kaynak cümlesi tek anlamlıdır ve kesme puanını **3** olarak verir.
+- Kodun kendi atfı (Dahlstrom 1972) kaynağın atfıyla **aynıdır** → bu bir
+  yorum farkı değil, uygulama (off-by-one) hatasıdır.
+- Kod yorumundaki "normal bireyler üç-dördüne değişik yanıt verir" ve
+  "Gravitz & Gerton 1976" **kaynakta yok** → kaldırıldı (kaynakta olmayan
+  olgusal iddia taşınamaz).
+
+**Sonuç:** CHANGE-007 uygulandı; CONFLICT-015 → **FIXED**.
+Mevcut testler (1 puan uyarı yok, 4 puan uyarı var) etkilenmedi; 3 puan için
+yeni regresyon testi eklendi.

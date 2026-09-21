@@ -1,6 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, type ScaleRule } from '../src/scoring/mmpiKeys';
+import { trIndex, fkIndexAnalysis, TR_PAIRS, CARELESS_PAIRS } from '../src/scoring/mmpiConsistency';
+import type { ResponseMap } from '../src/scoring/mmpiScoring';
 import {
   PERSONALITY_KEYS,
   ADDICTION_KEYS,
@@ -300,5 +302,86 @@ describe('Türk normları — Tablo 30 (kitap s.195)', () => {
     assert.equal(TURKISH_NORMS.Kadın.F.mean, 9.38, 'F kadın: Tablo 30 (9.38), s.34 dipnotu (10.11) değil');
     assert.equal(TURKISH_NORMS.Erkek.K.mean, 13.98, 'K erkek: Tablo 30 (13.98), s.38 dipnotu (13.90) değil');
     assert.equal(TURKISH_NORMS.Kadın.K.mean, 11.82, 'K kadın: Tablo 30 (11.82), s.38 dipnotu (13.54) değil');
+  });
+});
+
+/**
+ * PHASE 4 — Tutarlılık endeksleri (kitap s.59-61).
+ *
+ * Kaynak: "TR endeksi üzerinde 3 puan ya da daha fazla bir puanın, geçersiz
+ * profil olasılığını arttırdığı ileri sürülmüştür (Dahlstrom 1972)." (s.59)
+ * ve F-K Endeksi bantları (s.58-59) + Tablo 6/7 (s.60-61).
+ */
+function responseMap(patch: Record<number, 1 | 0 | -1> = {}): ResponseMap {
+  const map: ResponseMap = {};
+  for (let i = 1; i <= 566; i++) map[i] = 1; // hepsi D
+  Object.assign(map, patch);
+  return map;
+}
+
+describe('PHASE 4 — tutarlılık endeksleri kaynak uyumu', () => {
+  it('TR endeksi 3 puanda uyarı verir (kaynak: 3 ya da daha fazla → geçersizlik riski)', () => {
+    const patch: Record<number, 1 | 0> = {};
+    TR_PAIRS.slice(0, 3).forEach(([x, y]) => {
+      patch[x] = 1;
+      patch[y] = 0;
+    });
+    const three = trIndex(responseMap(patch));
+    assert.equal(three.score, 3, '3 tutarsız çift');
+    assert.equal(
+      three.isWarning,
+      true,
+      'kaynak s.59: "3 puan ya da daha fazla" → 3 uyarı olmalı (eski kod 3\'ü tutarlı sayıyordu)',
+    );
+    assert.match(three.interpretation, /3 puan ya da daha fazla/);
+
+    // 2 puan hâlâ tutarlı olmalı (sınırın altı)
+    const patch2: Record<number, 1 | 0> = {};
+    TR_PAIRS.slice(0, 2).forEach(([x, y]) => {
+      patch2[x] = 1;
+      patch2[y] = 0;
+    });
+    const two = trIndex(responseMap(patch2));
+    assert.equal(two.score, 2);
+    assert.equal(two.isWarning, false, '2 puan tutarlı kabul edilmeli');
+  });
+
+  it('Tablo 6 tekrarlanmış madde çiftleri koda birebir geçmiştir', () => {
+    const tableSix = [
+      [8, 318], [13, 290], [15, 314], [16, 315], [20, 310], [21, 308],
+      [22, 326], [23, 288], [24, 333], [32, 328], [33, 323], [35, 331],
+      [37, 302], [38, 311], [305, 366], [317, 362],
+    ];
+    assert.equal(TR_PAIRS.length, 16, 'Tablo 6: toplam 16 madde');
+    tableSix.forEach(([a, b], i) => {
+      assert.deepEqual([...TR_PAIRS[i]!], [a, b], `Tablo 6 ${i + 1}. çift`);
+    });
+  });
+
+  it('Tablo 7 dikkatsizlik çiftleri ve yönleri koda birebir geçmiştir', () => {
+    const tableSeven: Array<[number, number, 'same' | 'different']> = [
+      [10, 405, 'same'], [17, 65, 'different'], [18, 63, 'different'],
+      [49, 113, 'same'], [76, 107, 'same'], [88, 526, 'same'],
+      [137, 216, 'same'], [177, 220, 'different'], [178, 342, 'same'],
+      [286, 312, 'different'], [329, 425, 'same'], [388, 480, 'different'],
+    ];
+    assert.equal(CARELESS_PAIRS.length, 12, 'Tablo 7: 12 madde çifti');
+    tableSeven.forEach(([a, b, cond], i) => {
+      const entry = CARELESS_PAIRS[i]!;
+      assert.deepEqual([...entry.pair], [a, b], `Tablo 7 ${i + 1}. çift`);
+      assert.equal(entry.condition, cond, `Tablo 7 ${i + 1}. yön`);
+    });
+  });
+
+  it('F-K endeksi bantları kaynağa uyar (0-9 geçerli, >9 sahte-kötülük, >16 kritik)', () => {
+    assert.equal(fkIndexAnalysis(20, 11).value, 9, 'F-K = 9');
+    assert.equal(fkIndexAnalysis(20, 11).isWarning, false, '9 geçerli');
+    assert.equal(fkIndexAnalysis(21, 11).isWarning, true, '10 sahte-kötülük');
+    assert.match(fkIndexAnalysis(21, 11).level, /Sahte-Kötülük/);
+    assert.equal(fkIndexAnalysis(20, 3).isWarning, true, '17 kritik');
+    assert.match(fkIndexAnalysis(20, 3).level, /Kritik/);
+    // 8-11 aralığı her iki dalda da "abartma" notunu taşır (kaynak s.59)
+    assert.match(fkIndexAnalysis(18, 10).interpretation, /8-11 aralığı/, '8-9 dalı');
+    assert.match(fkIndexAnalysis(20, 10).interpretation, /8-11 aralığı/, '10-11 dalı');
   });
 });

@@ -481,3 +481,244 @@ Aynı kitap, F ve K normlarını **iki farklı yerde tutarsız** verir:
 
 Kod **Tablo 30'u izler** ve doğrudur → `CONFLICT-001` ve `CONFLICT-002`
 **REJECTED**.
+
+---
+
+# Bölüm 4 — Geçerlik Konfigürasyonları / F-K Endeksi (kitap s.56-59)
+
+## SOURCE-FK-001 · F-K Endeksi — kesim puanı 9 (Gough)
+
+Page: **PDF p37 L = kitap s.58** ("F-K Endeksi" bölümü) — sayfa numarası 58 doğrulandı
+**Visual: CONFIRMED** (yüksek DPI kırpma; metin dikişe kadar uzandığı için
+bindirmeli kırpma kullanıldı)
+
+Fact — aynen:
+> "F-K Endeksi diğer bir geçerlik belirleyicisidir. K puanının F puanından
+> çıkarılması ile elde edilmektedir. İlk yapılan çalışmalarda kesim puanı olarak
+> **11** alınmış, bu kesim puanı normallerin **%1'inde**, psikiyatrik grubun
+> **%2.5'unda** görülmüştür (Gough 1947, 1951). Daha sonra kesim puanı **9'a
+> düşürülmüştür**. **F-K puanı 0-9 arasında ise profil geçerlidir, 9'dan büyükse
+> sahte-kötülük, 0 ise sahte-iyiliktir.** Klinik olgularda F-K endeksinin 9'dan
+> büyük olduğu durumlarda birey psikopatolojisini inkâr etmektedir (Wetzel,
+> Marlowe 1990)."
+
+Yapısal sonuç:
+- Kesim puanı **9** (tarihsel: 11 → 9'a düşürülmüş)
+- `0 ≤ F-K ≤ 9` → geçerli
+- `F-K > 9` → **sahte-kötülük** (abartma)
+- `F-K = 0` → **sahte-iyilik** ← dikkat: kaynak 0'ı sahte-iyilik olarak tanımlar
+- Klinik olgular X̄ = **8.66 / SD = 5.94** (psikiyatrik hastalar)
+
+Kod karşılığı (`mmpiConsistency.ts` → `fkIndexAnalysis`):
+- `value > 9` → "Sahte-Kötülük (Faking Bad) Eğilimi" ✅ **MATCH**
+- `0 < value ≤ 9` → "Normal / Geçerli" ✅ **MATCH**
+- `value = 0` → kod "Hafif Savunuculuk (Geçerli)" der; kaynak "sahte-iyilik" der
+  → **kaynak içi nüans** (aşağıda SOURCE-FK-002)
+
+Status: **VERIFIED**
+
+## SOURCE-FK-002 · F-K = 0 durumu — kaynak içi gerilim
+
+Page: kitap s.58
+Fact: Kaynak "F-K puanı 0-9 arasında ise profil geçerlidir" **ve** "0 ise
+sahte-iyiliktir" ifadelerini birlikte kullanır. Yani 0 hem geçerli aralığın
+sınırı hem de sahte-iyilik göstergesidir → **kaynak içi gerilim**.
+
+Ek bağlam (aynı sayfa): Yüksek K + düşük F bileşimi ("sorunlarımla başa
+çıkabilirim" + "stresim yok") genellikle F-K endeksi tarafından **sahte-iyilik**
+olarak değerlendirilir; bu yüzden MMPI alan normal bireyler yanlış biçimde
+sahte-iyilik grubuna girebilir.
+
+Kod davranışı: `value = 0` → "Hafif Savunuculuk (Geçerli)", `tone: 'ok'`,
+`isWarning: false`. Negatif değerler ise `value >= -8` → "Hafif Negatif (Geçerli)",
+`value < -8` → "Sahte-İyilik (Faking Good) Eğilimi".
+
+Değerlendirme: Kod, 0 için geçerli aralığı koruyup **uyarı vermez**; kaynak ise
+0'ı sahte-iyilik olarak işaretler. Negatif bölgede kod eşiği **-8**'dir; kaynak
+sayısal bir negatif eşik vermez.
+
+Status: **NEEDS_REVIEW** → CONFLICT-013 (P2; yorum etkisi düşük)
+
+## SOURCE-FK-003 · K+ profili — Mark & Seeman (1963) tanımı
+
+Page: **PDF p36 R = kitap s.57** ("K+ profilleri" bölümü)
+Visual: CONFIRMED
+
+Fact — aynen:
+> "Bazen bir profilde tek anlamlı yükselme K alt testinde gözlenir. Bu profilde
+> hiçbir klinik test 70 T puanının üstünde değildir. (6 ya da daha çok klinik
+> test 60 T puanı ya da altındadır.) K+ profilinde K ve L alt testleri F'den
+> yüksektir ve K alt testi, F alt testinin **en az 5 T puanı** üstündedir.
+> Mark ve Seeman (1963) bu tür profilleri K+ profili olarak adlandırmaktadır.
+> Özellikleri: Bu kişiler utangaç, kaygılı ve ketlenmişlerdir. Ayrıca
+> sorunlarının psikolojik olabileceği konusunda dirençlidirler. Yakın kişiler
+> arası ilişkilerden kaçınırlar ve pasif direnç gösterirler. Kişilik özellikleri
+> **sizoid** yapıdadır."
+
+Ölçütler (kod karşılaştırması için):
+1. Hiçbir klinik ölçek T ≥ 70
+2. En az 6 klinik ölçek T ≤ 60
+3. K ve L > F
+4. **K − F ≥ 5 T puanı**
+5. Şekil 16 ile gösterilir
+
+Status: **VERIFIED**
+
+## SOURCE-CONFIG-014 · Konfigürasyon 14 — Erdemli Görünme İsteği
+
+Page: **PDF p36 L = kitap s.56**
+Fact: "Konfigürasyon 14: L alt testi **55 T puanının üstünde**, F alt testi
+**60 T puanının altında**, K alt testi **59-64 T puanı arasındadır**."
+"Bu profil geçerlidir. Geçerlik konfigürasyonu bireyin kendisini çok erdemli
+biri olarak gösterme isteğini ve kendisini de böyle görmek istediğini
+göstermektedir."
+Ek uyarı: "Eğer F ve K alt testleri 70 T puanının üstündeyse, bireyde hastalığa
+içgörü yoktur ve prognoz kötüdür."
+
+Kod karşılığı: `VALIDITY_CONFIGS` id `virtuous`:
+`L > 55 ∧ F < 60 ∧ 59 ≤ K ≤ 64` → **birebir MATCH** ✅
+
+Status: **VERIFIED**
+
+## SOURCE-CONFIG-015 · Konfigürasyon 15 — Katı / Karmaşıklık Örüntüsü
+
+Page: **PDF p36 R = kitap s.57**
+Fact: "Konfigürasyon 15: L alt testi **60 T puanının üstünde**, F alt testi
+**70 T puanının üstünde** ve K alt testi **40 T puanının altındadır**."
+"F'nin yüksekliği bu kişinin karmaşıklık yaşadığını gösterir. L'deki ortalama
+yüksek puan, bireyin dünyayı basit, siyah ve beyaz olarak gördüğünün
+göstergesidir. Düşük K, bireyin benlik değerinin düşüklüğüne, başa çıkma
+kaynaklarının azlığına ve duygusal alanda katı olduğuna işaret etmektedir.
+Ancak L'nin yüksekliği bireyin katı bir biçimde geleneksel değerlere
+tutunduğunu gösterir."
+
+Kod karşılığı: `VALIDITY_CONFIGS` id `rigid`:
+`55 ≤ L ≤ 65 ∧ F > 70 ∧ K < 40`
+
+Comparison: **CONFLICT** (kaynak içi çelişki):
+- Kaynakta 15. konfigürasyon için **iki farklı kural** var:
+  - **Başlık (s.58):** `L > 60 ∧ F > 70 ∧ K < 40`
+  - **Şekil 15 (s.58, p36 R/s.57 çizimi):** `L > 55 ∧ F > 70 ∧ K < 40`
+- Kod **55-65** aralığını kullanır: ne başlıkla (60) ne şekille (55) birebir
+  örtüşür; üst sınır (65) kaynakta **hiçbir yerde yoktur**.
+
+Status: **CONFIRMED** → CONFLICT-014 (P1)
+
+## SOURCE-FK-004 · F-K bant yorumları (8-11 ve 16 üstü)
+
+Page: **PDF p37 R = kitap s.59** — **Visual: CONFIRMED** (çalışma başlığı ve
+sayfa numarası 59 görsel olarak doğrulandı)
+
+Fact — aynen:
+> "Psikiyatrik grupta sahte-kötülük profilleri, sahte-iyilikten daha iyi ayırt
+> edicidir. […] Özetle F-K endeksinin yararlılığı konusunda henüz kesinleşmiş
+> bir bulgu yoktur.
+> **Eğer F-K endeksi 8-11 arasında ise** konfigürasyon, bireyin sorunları
+> olduğunu gösterse de bu kişiler sorunlarını abartmaktadırlar. Bu durum
+> hastanın psikolojik müdahaleye ve yardım almaya açık olduğunu göstermektedir.
+> **F-K endeksi 16'nın üstünde ise:** […] Yapılan standart değerlendirme hastanın
+> durumunu yansıtmayabilir. […] - Hasta akut bir psikotik bozukluk
+> göstermektedir […] - Birey bilinçli olarak durumunu abartmakta ya da bir yarar
+> sağlamak için simülasyon yapmaktadır."
+
+Bant tablosu (kaynak):
+| F-K | Kaynak yorumu |
+|---|---|
+| 0-9 | profil **geçerlidir** (9'dan büyükse sahte-kötülük) |
+| 8-11 | bireyin sorunları var **ama abartmaktadır**; yardıma açık |
+| > 9 | sahte-kötülük |
+| > 16 | kritik; standart değerlendirme yansıtmayabilir (psikoz / simülasyon) |
+| 0 | sahte-iyilik |
+
+Kod karşılığı: kod 8-9'u "Normal/Geçerli" bandında, 10-11'i "Sahte-Kötülük"
+bandında ele alır ve **her iki dalda da** 8-11 abartma notunu ekler
+(`value >= 8` / `value >= 10 && value <= 11`) → 8-11 aralığı tam kapsanır ✅
+`value > 16` → "Kritik Derecede Yüksek Abartma" ✅
+Status: **VERIFIED** — MATCH
+
+---
+
+# PHASE 4 — TR (Test-Tekrar Test) Endeksi ve Dikkatsizlik Alt Testi
+
+## SOURCE-TR-001 · TR endeksi — 16 tekrarlanmış madde çifti (Tablo 6)
+
+Page: **PDF p38 L = kitap s.60** — başlık: "Tablo 6. MMPI kitap formunda aynı
+olan maddeler" (iki sütunlu tablo: Madde No | Cümleler | Madde No | Cümleler)
+Kaynak ifadesi (p37 R = s.59):
+> "MMPI'n[in] grup kitapçığında yer alır. **Toplam sayısı 16 olan ve 6, 7, 8 ve 0
+> alt testlerinde yer alan tekrarlanmış maddeler** test tekrar test (TR)
+> endeksini oluşturmaktadır."
+
+Tablo 6'dan çıkarılan 16 çift (kaynak sırası):
+(8,318) (13,290) (15,314) (16,315) (20,310) (21,308) (22,326) (23,288)
+(24,333) (32,328) (33,323) (35,331) (37,302) (38,311) (305,366) (317,362)
+
+Kod karşılığı: `src/scoring/mmpiConsistency.ts` → `TR_PAIRS` (16 çift)
+Comparison: **birebir MATCH** (16/16 çift, hem üye hem sıra aynı) ✅
+Status: **VERIFIED**
+
+## SOURCE-TR-002 · TR endeksi kesme puanı — **3 puan ya da daha fazla**
+
+Page: **PDF p37 R = kitap s.59** — **Visual: CONFIRMED** (yüksek DPI kırpma,
+cümle okunur halde)
+Fact — aynen:
+> "TR endeksi üzerinde **3 puan ya da daha fazla bir puanın, geçersiz profil
+> olasılığını arttırdığı** ileri sürülmüştür (Dahlstrom 1972)."
+
+Yani kaynak: **TR ≥ 3 → geçersiz profil olasılığı artar** (kesme 3'te başlar).
+
+Kod karşılığı:
+```ts
+const consistent = score <= 3;   // 3 DAHİL tutarlı sayılıyor
+```
+Kod: TR ≤ 3 → "Tutarlı Yanıt Örüntüsü", uyarı yok; TR ≥ 4 → tutarsız.
+Comparison: **CONFLICT** — kaynak ≥ 3'te geçersizlik riskini başlatır, kod
+3'ü hâlâ tutarlı sayar → **1 puan kayması**.
+Status: **VERIFIED** → CONFLICT-015 (P1)
+
+## SOURCE-TR-003 · TR endeksi yorum bağlamı (Greene 1979)
+
+Page: kitap s.59 (devamı s.60-61)
+Fact: "Greene (1979) yaptığı bir araştırmada psikiyatrik hastalar, gözaltındaki
+genç suçlular ve üniversite psikoloji öğrencilerine MMPI vermiş ve **gözaltındaki
+gençlerin yanıtlarının, yüksekokul öğrencilerinden daha tutarsız** olduğunu
+saptamıştır. Gözaltındaki gençlerin genellikle işbirliği içinde olmadıklarının
+ve test almaya dirençlerinin göstergesidir."
+Ek (s.60-61): "TR endeksi bazı durumlarda daha az puanlık […] sadece
+dikkatsizlik nedeniyle ortaya çıktığını akılda tutmak gerekir. Üstelik TR
+endeksi, sadece hastaların cevaplarının tutarlılığını tayin etse de, 'bütün
+doğru' ya da 'bütün yanlış' cevap kurgularını göstermemektedir. […] F alt
+testindeki yüksek puanlara karşın hastaların maddeleri tutarlı olarak doldurmuş
+olduklarını TR endeksi gösterebilir."
+Status: **VERIFIED** (yorum bağlamı; kod yorum metinleriyle uyumlu)
+
+## SOURCE-CL-001 · Dikkatsizlik alt testi — 12 madde çifti ve puanlama yönü (Tablo 7)
+
+Page: **PDF p38 R = kitap s.61** — başlık: "Tablo 7. Dikkatsizlik alt testi
+madde sayıları ve puanlama yönü" (Madde No | Yanıt (Aynı/Farklı) | Madde Sayısı)
+
+Tablo 7'den çıkarılan 12 çift:
+| Çift | Yanıt | # |
+|---|---|---|
+| 10/405 | Aynı | 1 |
+| 17/65 | Farklı | 2 |
+| 18/63 | Farklı | 3 |
+| 49/113 | Aynı | 4 |
+| 76/107 | Aynı | 5 |
+| 88/526 | Aynı | 6* |
+| 137/216 | Aynı | 7 |
+| 177/220 | Farklı | 8 |
+| 178/342 | Aynı | 9 |
+| 286/312 | Farklı | 10 |
+| 329/425 | Aynı | 11 |
+| 388/480 | Farklı | 12 |
+
+\* sıra numarası OCR'da "9" olarak okundu; **sıra numarası anlamsal değil**
+(numaralandırma hatası kitapta/OCR'da), çift listesi ve yönü kesin.
+`OCR-UNCERTAIN`: yalnızca sıra numaraları (88/526 satırı) — madde çiftleri ve
+Aynı/Farklı yönleri net.
+
+Kod karşılığı: `mmpiConsistency.ts` → `CARELESS_PAIRS` (12 çift, `condition`
+`same`/`different`)
+Comparison: **birebir MATCH** (12/12 çift + 12/12 yön) ✅
+Status: **VERIFIED**

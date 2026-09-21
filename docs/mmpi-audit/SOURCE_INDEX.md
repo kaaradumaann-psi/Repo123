@@ -41,9 +41,14 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | 39 | p27 R | K düşük puan profili; K ekleme tartışması | DONE |
 | 40 | p28 L | **K T bantları** (≥72 / 61-72 / 46-60 / 27-45) + K'nin tek gecersiz-yapmayan alt test olmasi | **DONE** (gorsel dogrulandi) |
 | 41-42 | p28 R – p29 L | K–klinik ilişkisi, K düzeyi–SED etkileşimi | **DONE** (s.42 boş doğrulandı) |
-| 43-56 | p29 R – p36 L | Bölüm 4: Geçerlik konfigürasyonları (V, tersine V, tümü doğru/yanlış, rastgele) | NOT_STARTED |
-| 57-58 | p36 R – p37 L | **K+ profilleri**, **F-K endeksi** | NOT_STARTED |
-| 59-62 | p37 R – p39 L | Test-tekrar test endeksi, **dikkatsizlik (TR) alt testi** | NOT_STARTED |
+| 43-55 | p29 R – p36 L | Bölüm 4: Geçerlik konfigürasyonları (V, tersine V, tümü doğru/yanlış, rastgele) | NOT_STARTED |
+| **56** | **p36 L** | **Konfigürasyon 14 — erdemli görünme isteği** (L>55, F<60, K 59-64) + Şekil 14 | **DONE** (görsel doğrulandı) |
+| 57 | p36 R | **Konfigürasyon 15** (L=60, F>70, K<40) + Şekil 15 + **K+ profili** tanımı (Mark & Seeman 1963) | **DONE** (şekil görsel doğrulandı) |
+| 58 | p37 L | **F-K endeksi** (kesim 11→9; 0-9 geçerli, >9 sahte-kötülük, 0 sahte-iyilik; X̄ 8.66/SD 5.94) | **DONE** (görsel doğrulandı) |
+| 59 | p37 R | **TR endeksi kesme puanı (≥3)** + F-K 8-11 / >16 bantları + Greene 1979 | **DONE** (görsel doğrulandı) |
+| 60 | p38 L | **Tablo 6 — TR: aynı olan 16 madde çifti** | **DONE** |
+| 61 | p38 R | **Tablo 7 — Dikkatsizlik alt testi: 12 çift + puanlama yönü** | **DONE** |
+| 62 | p39 L | TR/dikkatsizlik tartışmasının devamı | NOT_STARTED |
 | 63-66 | p39 R – p41 L | Bölüm 5 girişi, klinik ölçek değerlendirmesi genel kuralları | NOT_STARTED |
 | 67-78 | p41 L – p46 R | Hs (1) alt testi + kod tipleri (12/21, 123, 1234, 13/31, 138/318 …) | NOT_STARTED |
 | 79-94 | p47 L – p54 R | D (2) alt testi + kod tipleri (21/12, 23, 213/231, 24/42, 28/82 …) | NOT_STARTED |

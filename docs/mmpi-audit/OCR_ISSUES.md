@@ -99,3 +99,36 @@ Sayfa: kitap s.40-41 (PDF p28 L/R) — K T bantları
 Sorun: Bant sınırları OCR'dan alındı (`72`, `61-72`, `46-60`, `27-45`);
 görsel doğrulama bu oturumda **yapılmadı** (p28 R henüz okunmadı).
 İşlem: PHASE 4'te görsel teyit zorunlu.
+
+---
+
+## ISSUE — FIGURE-CURVE: OCR şekil içi eğri/ızgara değerlerini okuyamaz
+
+Tarih: 2026-09-21 · PHASE 4
+
+Belirti:
+Bölüm 4'teki profil şekilleri (Şekil 14, 15, 16 …) bir ızgara + çizgi grafiğidir.
+RapidOCR bu sayfalarda **yalnızca eksen etiketlerini** (90 / 70 / 50 / 30 ve
+L F K) metne döker; **çizilen eğrinin hangi T değerinde olduğunu okumaz**.
+Önceki bir CONFLICT kaydı bu yüzden **yanlış** çıktı: şekilde 55 çizgisi olduğu
+sanıldı; yüksek DPI görsel okuma şeklin L noktasını **tam 60** seviyesinde
+çizdiğini gösterdi (kaynakta 55 değeri **hiç yok**).
+
+Kural (bundan sonra bağlayıcı):
+1. Şekil/grafik sayfalarında sayısal bir iddia **OCR ile kurulmaz**.
+2. Eğrinin T değeri **yüksek DPI (≥300) kırpma ile görsel** okunur; ızgara
+   aralığı (bu kitapta 20 birim; 30-90 arası) referans alınarak konum tahmin
+   edilir ve **tahmin olduğu açıkça yazılır** (ör. "F ≈ 72").
+3. Metin ("L alt testi 60 T puanında") ile şekil **birlikte** raporlanır;
+   ikisi çelişirse **CONFLICT yazılmadan önce** kaynak içi çelişki olarak
+   işaretlenir (CONFLICT-014 örneği).
+
+Ek not — dikiş (SPINE-CLIP) ile birleşen sorun:
+Sayfa metni cilt payına kadar uzandığında merkez kırpma satırları keser.
+Bu batch'te F-K endeksi paragrafı ve TR kesme puanı cümlesi bu nedenle
+**bindirmeli kırpma** ile okundu (sol yarı 0.00-0.60, sağ yarı 0.50-1.00 W).
+
+Ek not — düşük güven etiketi:
+Tablo 7 OCR'ında bir satır `<LOWCONF>` olarak işaretlendi (178/342 satırının
+sıra numarası "9" okundu; çift ve yön doğru). **Sıra numarası anlamsal değildir**
+(madde çifti ve Aynı/Farklı yönü belirleyicidir) → bulgu etkilenmedi.

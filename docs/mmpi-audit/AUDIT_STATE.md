@@ -32,7 +32,7 @@ Sayfa eşleme:
 | 1 | Kaynak yapısı / indeks | **DONE** |
 | 2 | Madde anahtarları (Ek 9, kitap s.244-256) | **DONE** — 46/46 MATCH, 5 P0 düzeltildi |
 | 3 | Validity (kitap s.29-42) | **DONE** |
-| 4 | K correction (kitap s.40-42, 57-58) | NOT_STARTED |
+| 4 | K correction + geçerlik konfigürasyonları (kitap s.40-42, 43-61) | **IN_PROGRESS** — F-K ✓, TR ✓, Konf.14/15 ✓, K+ ✓; konfigürasyonlar s.43-55 açık |
 | 5 | Clinical scales (kitap s.63-158) | NOT_STARTED |
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
@@ -42,33 +42,40 @@ Sayfa eşleme:
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** (10 yeni test eklendi) |
+| 14 | Tests | **IN_PROGRESS** (14 denetim testi) |
 
 ## Current position
 
 Current book page:
-**195** (Tablo 30 — Türk normaları) — PDF p105 R
+**61** (Dikkatsizlik alt testi / Tablo 7) — PDF p38 R
 
 Last completed:
-Bölüm 3 (s.29-42) **DONE** · Bölüm 8 + Tablo 30 (s.189-195) **DONE** (normlar)
+**PHASE 4 batch 1 — kitap s.56-61 (PDF p36 L – p38 R) DONE:**
+Konfigürasyon 14 ✓ · Konfigürasyon 15 ✓ (şekil görsel doğrulandı) ·
+K+ profili tanımı ✓ · **F-K endeksi ✓** · **TR endeksi ✓ (kesme puanı
+düzeltildi)** · **Tablo 6 (16 çift) ✓ birebir** · **Tablo 7 (12 çift) ✓ birebir**
 
 Current section:
-**PHASE 3 ve PHASE 6 tamamlandı.** Kod doğrulandı, 2 P0 çelişki REJECTED.
+**PHASE 4 devam ediyor.** K düzeltmesi + konfigürasyonlar işleniyor.
 
 Status:
-**IN_PROGRESS** — sıradaki iş Bölüm 4 (geçerlik konfigürasyonları)
+**IN_PROGRESS** — sıradaki iş Bölüm 4'ün kalan konfigürasyonları (s.43-55)
 
 ## Next action
 
 Continue from:
-**Bölüm 4 — Geçerlik konfigürasyonları, kitap s.43-56** → **PDF p29 R – p36 L**
+**Bölüm 4 — Geçerlik konfigürasyonları, kitap s.43-55** → **PDF p29 R – p36 L**
+(s.56-61 batch'i tamamlandı; aynı bölümün başı kaldı)
 
 Sıradaki batch'ler (öncelik sırası):
 
-1. **PDF p36 R – p38 R** — kitap s.57-61, **K+ profilleri + F-K endeksi +
-   TR endeksi** → **PHASE 4** (K düzeltmesi + tutarlılık endeksleri)
-2. **PDF p29 R – p31 L** — kitap s.43-48, Bölüm 4 konfigürasyonları
-   (Konfigürasyon 1 = Tersine V zaten doğrulandı; kalan 12 örüntü) → PHASE 4/9
+1. **PDF p29 R – p31 L** — kitap s.43-48, Bölüm 4 konfigürasyonları
+   (Konfigürasyon 1 = Tersine V zaten doğrulandı; Konf. 14/15 doğrulandı;
+   kalan ~10 örüntü) → PHASE 4
+   **DİKKAT:** Şekiller metinle çelişebilir → her konfigürasyonda hem **metin
+   hem şekil** yüksek DPI ile okunmalı (CONFLICT-014 dersi).
+2. **PDF p37 R – p39 L** — kitap s.59-62'nin kalanı: s.62 (p39 L) TR/dikkatsizlik
+   tartışmasının devamı → PHASE 4 kapanışı
 3. **PDF p97 L – p98 R** — kitap s.178-181, **Wiggins içerik skalaları metni**
    → `WIGGINS_NORMS` için tek kalan doğrulanmamış norm katmanı → PHASE 8
 4. **PDF p115 L – p124 L** — kitap s.215-233, **Ek 1: MMPI test kitabı**
@@ -83,8 +90,11 @@ Topic:
 Madde anahtarları: F, Es, W_FEM, AVD, HST
 
 Result:
-**PHASE 2 DONE.** 5 P0 hata düzeltildi; doğrulama sonrası **46/46 MATCH**.
-Kalıcı regresyon testi eklendi (7 test). Testler **294/294 PASS**.
+**PHASE 4 batch 1 DONE (kitap s.56-61).** Konfigürasyon 14 birebir MATCH;
+Konfigürasyon 15 → kaynak nokta (60) vs kod bandı (55-65) → **REJECTED**
+yanlış bulgu düzeltildi (DECISION-018); F-K endeksi bantları MATCH; Tablo 6 ve
+Tablo 7 **birebir MATCH**; **TR kesme puanı 3 → düzeltildi (CHANGE-007)**.
+Testler **301/301 PASS**.
 
 ## Current blocking issue
 
@@ -93,11 +103,16 @@ Kalıcı regresyon testi eklendi (7 test). Testler **294/294 PASS**.
 Bilinen kısıtlar:
 - 33 anahtar yalnızca OCR doğrulamalı → `OCR-CONFIRMED` (`DECISION-011`)
 - Ek 10 tablo yapısı OCR ile çözülemiyor → hücre hücre görsel okuma gerekli
-- `TURKISH_NORMS` içindeki 24 hücre (L/F/K dışı) için **hiç kaynak kanıtı yok**
+- `WIGGINS_NORMS` (13 ölçek) için **hiç kaynak kanıtı yok** → PHASE 8
+- Dikkatsizlik kesme puanı (4) ve F-K negatif eşiği (−8) kaynakta yok → UNVERIFIED
+- K+ profili örüntüsü kaynakta var, kodda yok → `MISSING-KPLUS-001` (P3)
+- **Şekil okuma uyarısı:** 200 DPI OCR şekil içi eğri/ızgara değerlerini
+  güvenilir okumaz → sayısal CONFLICT yazmadan önce yüksek DPI görsel doğrulama
+  (CONFLICT-014'ün düzeltilme nedeni)
 
 ## Code changes so far
 
-**6 değişiklik — hepsi 2026-09-21 (Oturum 3):**
+**7 değişiklik — 2026-09-21:**
 
 | ID | Dosya | Ne |
 |---|---|---|
@@ -106,7 +121,8 @@ Bilinen kısıtlar:
 | CHANGE-003 | `src/scoring/mmpiDerived.ts` | W_FEM: `126, 463` Yanlış→Doğru |
 | CHANGE-004 | `src/scoring/mmpiDerived.ts` | AVD: +13 madde (25→38) |
 | CHANGE-005 | `src/scoring/mmpiDerived.ts` | HST: +7 madde (13→20) |
-| CHANGE-006 | `tests/mmpiKeyIntegrity.test.ts` | **YENİ** 7 test |
+| CHANGE-006 | `tests/mmpiKeyIntegrity.test.ts` | **YENİ** 7 test (PHASE 2) |
+| CHANGE-007 | `src/scoring/mmpiConsistency.ts` + test | **TR kesme puanı `<=3` → `<=2`** (P1) |
 
 ## Tests
 
@@ -114,8 +130,8 @@ Bilinen kısıtlar:
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **294/294 PASS** (baseline 287 + 7 yeni) |
-| `npm run build` | **PASS** |
+| `npm test` | **301/301 PASS** · 21 suite · 113 383 ms (baseline 287 → 297 → 301) |
+| `npm run build` | **PASS** (0) — `optik-form.html` senkron |
 
 **REGRESSION: YOK.**
 
@@ -123,8 +139,8 @@ Bilinen kısıtlar:
 
 | ID | Öncelik | Konu | Durum |
 |---|---|---|---|
-| CONFLICT-001 | P0 | F kadın normu (10.11 ↔ 9.38) | **OPEN** |
-| CONFLICT-002 | P0 | K normları (13.90/13.54 ↔ 13.98/11.82) | **OPEN** |
+| CONFLICT-001 | P0 | F kadın normu (10.11 ↔ 9.38) | ✅ **REJECTED** (kod doğru) |
+| CONFLICT-002 | P0 | K normları (13.90/13.54 ↔ 13.98/11.82) | ✅ **REJECTED** (kod doğru) |
 | CONFLICT-003 | P1 | L T bandı alt sınırı (59 ↔ 56) | OPEN |
 | CONFLICT-004 | P1 | F ham bant sınırları (3-9/16-25/26+ ↔ 3-7/16-22/23+) | OPEN |
 | CONFLICT-005 | P1 | L/K ham bant tabloları kaynakta yok | INVESTIGATING |
@@ -135,43 +151,53 @@ Bilinen kısıtlar:
 | CONFLICT-010 | P0 | W_FEM 2 madde yanlış yönde | ✅ **FIXED** |
 | CONFLICT-011 | P0 | AVD 13 madde eksik | ✅ **FIXED** |
 | CONFLICT-012 | P0 | HST 7 madde eksik | ✅ **FIXED** |
+| CONFLICT-013 | P2 | F-K = 0 sahte-iyilik etiketi | ✅ **REJECTED** (kaynak içi gerilim) |
+| CONFLICT-014 | P2 | Konf. 15 L: kaynak nokta (60) ↔ kod bant (55-65) | ✅ **REJECTED** (ilk bulgu hatalıydı) |
+| CONFLICT-015 | P1 | TR kesme puanı 1 puan kaymış | ✅ **FIXED** (CHANGE-007) |
 
-Kalan açık: **7 çelişki** → 2 P0 (norm), 3 P1, 2 P2.
+Kalan açık: **5 çelişki** → 0 P0, 3 P1 (003/004/005), 2 P2 (006/007).
 
 ## Last update
 
-2026-09-21 — Oturum 3 (PHASE 2 DONE + düzeltme paketi + regresyon testi)
+2026-09-21 — Oturum 3 devam (PHASE 4 batch 1: konfigürasyonlar, F-K, TR endeksi + CHANGE-007)
 
 ## CHECKPOINT
 
 ```
 Phase:          PHASE 0, 1, 2, 3, 6 — DONE
+                PHASE 4 — IN_PROGRESS (s.56-61 DONE; s.43-55 + s.62 açık)
                 PHASE 8 — IN_PROGRESS (anahtarlar DONE, WIGGINS_NORMS açık)
-                PHASE 14 — IN_PROGRESS (10 yeni test)
+                PHASE 14 — IN_PROGRESS (14 denetim testi)
 Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p22-p28 (kitap s.29-40 geçerlik),
+                p36-p38 (kitap s.56-61: Konf.14/15, K+, F-K, TR, Tablo 6/7),
                 p103-p105 (kitap s.189-195 Bölüm 8 + TABLO 30),
                 p130-p136 (kitap s.244-256 EK 9 TAMAMI)
 Verified:       ? , L , F , K  (anahtarlar + normlar + bantlar)
                 46 madde anahtarı → 46/46 MATCH
                 26 norm hücresi  → 26/26 MATCH (Tablo 30)
+                Tablo 6 → 16/16 · Tablo 7 → 12/12 çift MATCH
+                Konfigürasyon 14 → birebir MATCH · F-K bantları → MATCH
 Open conflicts: 5 (3 P1 · 2 P2) — P0 AÇIK ÇELİŞKİ KALMADI
-Fixed:          5 (CONFLICT-008..012) + 0 regression
-Rejected:       2 (CONFLICT-001/002 — kod doğruydu; kitap kendi içinde tutarsız)
-Code changes:   6 (5 düzeltme + 1 yeni test dosyası)
-Tests:          297/297 PASS · typecheck PASS · build PASS
-Next:           PDF p36 R – p38 R → PHASE 4 (K+ profilleri, F-K endeksi)
+Fixed:          6 (CONFLICT-008..012, 015) + 0 regression
+Rejected:       4 (001, 002, 013, 014 — kod doğru / kaynak içi tutarsızlık)
+Code changes:   7 (5 anahtar düzeltmesi + 1 TR kesme puanı + 1 test dosyası)
+Tests:          301/301 PASS · typecheck PASS · build PASS
+Next:           PDF p29 R – p31 L → Bölüm 4 kalan konfigürasyonlar (s.43-48)
 Blocking:       none
 ```
 
 ## Bir sonraki oturum için 3 satırlık özet
 
-1. **Nerede kaldık:** PHASE 3 (geçerlik s.29-42) ve PHASE 6 (normlar) **DONE**.
-   Ek 9'un tamamı + Tablo 30 normları doğrulandı. 5 P0 anahtar hatası düzeltildi,
-   2 P0 norm "hatası" ise **kod doğru** çıktı (REJECTED). **Açık P0 yok.**
-2. **Sıradaki iş:** kitap s.57-61 (PDF p36 R – p38 R) → **PHASE 4**:
-   K+ profilleri, F-K endeksi, test-tekrar test ve dikkatsizlik (TR) endeksi.
-3. **Sonra:** Bölüm 4 konfigürasyonları (kalan 12 örüntü) ve Wiggins normları
+1. **Nerede kaldık:** PHASE 4 batch 1 (kitap s.56-61) **DONE**. Konfigürasyon 14
+   birebir MATCH; F-K endeksi bantları MATCH; Tablo 6 (16 çift) ve Tablo 7
+   (12 çift + yön) **birebir MATCH**; **TR kesme puanı kaynağa çekildi**
+   (3 → uyarı, CHANGE-007). 4 çelişki REJECTED (001/002 normlar, 013 F-K=0,
+   014 Konf.15 — ikisi "kod doğru"), 1 FIXED. **Açık P0 yok.**
+2. **Sıradaki iş:** kitap s.43-48 (PDF p29 R – p31 L) → Bölüm 4'ün kalan
+   konfigürasyonları. **Kural:** her konfigürasyonda metin **ve** şekil yüksek
+   DPI ile okunmalı; şekil okumasını OCR'a bırakma (CONFLICT-014 dersi).
+3. **Sonra:** s.62 kapanışı → sonra s.178-181 **Wiggins normları**
    (`WIGGINS_NORMS` — doğrulanmamış son norm katmanı).
 
 ### Bilinen kısıtlar (engelleyici değil)
@@ -180,3 +206,4 @@ Blocking:       none
 - Ek 10 hücre hücre okunmadı (norm kaynağı değil, DECISION-016)
 - `WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8
 - Türkçe OCR modeli yok → tüm sayısal fact'ler görsel doğrulamalı
+- OCR-only sayım tutarsızlığı (32 O / 9 V ↔ "33"): FINAL öncesi sayılacak

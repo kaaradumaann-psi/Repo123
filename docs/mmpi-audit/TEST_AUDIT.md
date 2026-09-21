@@ -226,3 +226,60 @@ Artık 26 hücrenin tamamı kaynaklı ve testle korunuyor.
 Kalan açık: **`WIGGINS_NORMS`** (13 ölçek) için hâlâ kaynak kanıtı yok.
 Wiggins normları kitapta Ek 9'da verilmez; Bölüm 7 (s.178-181) metni
 okunmalıdır → PHASE 8.
+
+---
+
+# Oturum 3 (devam) — PHASE 4: konfigürasyonlar, F-K, TR endeksi
+
+Tarih: 2026-09-21 · Kapsam: kitap s.56-61 (PDF p36 L – p38 R)
+
+## Yapılan kod değişikliği
+
+`CHANGE-007` — TR endeksi kesme puanı kaynağa çekildi (P1):
+`consistent = score <= 3` → `score <= 2`; kaynakta olmayan yorum iddiaları
+kaldırıldı. Ayrıntı: `CODE_CHANGES.md`.
+
+## Komutlar ve sonuçlar
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **0 hata** |
+| `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **14/14 PASS** (10 mevcut + 4 yeni) |
+| `npm test` (tam suite) | **301/301 PASS** · 21 suite · 113 383 ms |
+| `npm run build` | **0** — `dist/index.html` + `optik-form.html` üretildi |
+
+Önceki tur: 297/297 (20 suite). Şimdi 301/301 (21 suite) → **+4 test, +1 suite**.
+
+## Yeni testler (PHASE 4 suite — `tests/mmpiKeyIntegrity.test.ts`)
+
+1. **TR = 3 → uyarı var / TR = 2 → uyarı yok.** Kaynak s.59'daki "3 puan ya da
+   daha fazla" kuralını sabitler. Eski kodda 3 puan uyarısızdı → bu test o
+   kaymayı bir daha geri getirmez.
+2. **Tablo 6 → `TR_PAIRS` birebir** (16 çift, sıra dahil). Kaynak tablosundaki
+   çift değişirse kırmızıya döner.
+3. **Tablo 7 → `CARELESS_PAIRS` birebir** (12 çift + 12 yön: Aynı/Farklı).
+4. **F-K bantları**: 9 geçerli · 10 sahte-kötülük · 17 kritik · 8-11 notu her iki
+   dalda. Kaynağın 8-11 ve >16 bantlarını sabitler.
+
+## Neden bu testler gerekliydi
+
+- TR kesme puanı kayma sınıfı **görünmezdi**: kod kendi yorumunda Dahlstrom 1972'ye
+  atıf yapıyordu ama sayıyı 1 puan kaydırmıştı; bunu kontrol eden test yoktu.
+- Tablo 6/7 çiftleri **madde numarası** verisidir; tek basamak hatası (ör. 24↔42)
+  sessizce yanlış tutarlılık puanı üretir. Artık kaynak tabloya bağlıdır.
+
+## REGRESSION kaydı
+
+**REGRESSION YOK.**
+- Mevcut TR testleri (1 puan uyarısız, 4 puan uyarılı) yeni kesme puanında da
+  doğrudur → değişmedi.
+- Başka hiçbir suite etkilenmedi (301/301).
+- `optik-form.html` build ile yeniden üretildi ve **senkron** durumda
+  (`build.test.ts` bu senkronu zorunlu kılar).
+
+## Kapsam boşlukları (açık)
+
+- **`WIGGINS_NORMS`** (13 ölçek): hâlâ kaynak kanıtı yok → PHASE 8 (s.178-181).
+- **Dikkatsizlik kesme puanı (4)** ve **F-K negatif eşiği (−8)**: kaynakta
+  bulunamadı → `UNVERIFIED_DATA.md`.
+- **K+ profili örüntüsü**: kaynakta tanımlı, kodda yok → `MISSING-KPLUS-001` (P3).

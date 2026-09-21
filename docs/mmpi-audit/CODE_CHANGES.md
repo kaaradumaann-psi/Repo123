@@ -192,3 +192,64 @@ kod tabloyu doğru izlediği için `EXPECTED_SPECIAL.OH = 31` olarak yazıldı
 (bkz. `SOURCE-INTERNAL-OH-001`).
 
 Tests: **PASS** (7/7) — toplam suite 287 → **294**
+
+---
+
+## CHANGE-007 — TR endeksi kesme puanı kaynağa çekildi (P1)
+
+Date: 2026-09-21
+Type: **Davranış değişikliği** (geçerlilik değerlendirmesi)
+Priority: **P1**
+Source: `SOURCE-TR-002` (kitap s.59, görsel doğrulanmış) · CONFLICT-015 · DECISION-019
+
+Files:
+- `src/scoring/mmpiConsistency.ts`
+- `tests/mmpiKeyIntegrity.test.ts`
+
+### Değişiklik 1 — kesme puanı
+
+Before:
+```ts
+const consistent = score <= 3;   // 3 DAHİL tutarlı
+```
+After:
+```ts
+// Kaynak kitap s.59: "3 puan ya da daha fazla bir puanın, geçersiz profil
+// olasılığını arttırdığı ileri sürülmüştür (Dahlstrom 1972)."
+// → 3 puan DAHİL geçersizlik riski; tutarlılık yalnızca 0-2 için geçerlidir.
+const consistent = score <= 2;
+```
+
+Etki: TR = 3 olan profiller artık "Tutarsız Yanıt Örüntüsü" + `isWarning: true`.
+
+### Değişiklik 2 — kaynakta olmayan olgusal iddiaların kaldırılması
+
+Before (yorum metni):
+> "Normal bireyler tekrarlanan maddelerin **yalnızca üç-dördüne** değişik yanıt
+> verir."
+
+After:
+> "TR endeksi 3 puanın altındadır; yanıtlar tutarlı kabul edilir. Bu seviyedeki
+> düşük tutarsızlıklar genellikle dikkatsizlik kaynaklıdır."
+
+Ayrıca dosya başı yorumundaki "3 ve altı tutarlı kabul edilir (Gravitz & Gerton
+1976)" ifadesi kaynak cümlesiyle değiştirildi. **Gerekçe:** "üç-dört" ifadesi ve
+Gravitz & Gerton atfı yüklü kaynak kitapta **yoktur**; kaynakta bulunmayan
+olgusal iddia taşınamaz (SECONDARY-SOURCE kuralı).
+
+### Değişiklik 3 — regresyon testleri (+4 test)
+
+`tests/mmpiKeyIntegrity.test.ts` → yeni suite "PHASE 4 — tutarlılık endeksleri
+kaynak uyumu":
+1. TR = 3 → uyarı **var**; TR = 2 → uyarı **yok** (kesme kayması koruması)
+2. Tablo 6 → `TR_PAIRS` birebir (16 çift, sıra dahil)
+3. Tablo 7 → `CARELESS_PAIRS` birebir (12 çift + 12 yön)
+4. F-K bantları (9 geçerli / 10 sahte-kötülük / 17 kritik / 8-11 notu iki dalda)
+
+### Doğrulama
+
+- `npm run typecheck` → **0 hata**
+- `tests/mmpiKeyIntegrity.test.ts` → **14/14 PASS**
+- Mevcut TR testleri etkilenmedi (1 puan uyarı yok, 4 puan uyarı var → ikisi de
+  yeni kuralda da doğru)
+- Tam suite sonucu: `TEST_AUDIT.md`
