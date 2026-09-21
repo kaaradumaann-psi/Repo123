@@ -105,3 +105,64 @@ Denetim günlüğü. Her oturum buraya bir kayıt ekler.
 | **CONFLICT-010** | **P0** | **W_FEM 2 madde yanlış yönde** | **CONFIRMED** |
 | **CONFLICT-011** | **P0** | **AVD 13 madde eksik** | **CONFIRMED** |
 | **CONFLICT-012** | **P0** | **HST 7 madde eksik** | **CONFIRMED** |
+
+---
+
+## 2026-09-21 — Oturum 3: DÜZELTME PAKETİ
+
+**İlk kod değişiklikleri yapıldı.** `DECISION-008` uyarınca 5 P0 anahtar
+hatası tek pakette düzeltildi ve kalıcı regresyon testi eklendi.
+
+### Değişiklikler
+
+| ID | Dosya | Ne |
+|---|---|---|
+| CHANGE-001 | `mmpiKeys.ts` | F: `69` → `169` (CONFLICT-008) |
+| CHANGE-002 | `mmpiDerived.ts` | Es: 13 madde Doğru→Yanlış (CONFLICT-009) |
+| CHANGE-003 | `mmpiDerived.ts` | W_FEM: `126, 463` Yanlış→Doğru (CONFLICT-010) |
+| CHANGE-004 | `mmpiDerived.ts` | AVD: +13 madde, 25→38 (CONFLICT-011) |
+| CHANGE-005 | `mmpiDerived.ts` | HST: +7 madde, 13→20 (CONFLICT-012) |
+| CHANGE-006 | `tests/mmpiKeyIntegrity.test.ts` | **YENİ**: 7 test, anahtar bütünlüğü |
+
+### Doğrulama
+
+| Komut | Sonuç |
+|---|---|
+| `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
+| `npm run typecheck` | **PASS** |
+| `npm test` | **294/294 PASS** (287 baseline + 7 yeni) |
+| `npm run build` | **PASS** |
+
+**REGRESSION: YOK.**
+
+### Düzeltmelerin bilimsel etkisi
+
+| Değişiklik | Önce | Sonra |
+|---|---|---|
+| F geçerlilik | Yanlış ölçek: madde 69 sayılıyor, 169 sayılmıyor → profil geçerlilik kararı hataya açık | Kaynakla birebir |
+| Es ego gücü | 13 madde ters yönde → puan sistematik sapıyordu | Kaynakla birebir |
+| W_FEM | 2 madde ters yönde | Kaynakla birebir |
+| AVD çekingen kişilik | 25 madde → eşikler anlamsız, özellikler kaçırılıyordu | 38 madde, kaynakla birebir |
+| HST histrionik | 13 madde → eşikler erişilemez | 20 madde, kaynakla birebir |
+
+### Yeni keşif
+
+Yeni `mmpiKeyIntegrity` testi ilk çalıştırmasında **OH ölçeğinde kaynak içi
+tutarsızlık** buldu: başlık "Madde sayısı: 33", tablo 31 madde listeler.
+Yüksek DPI görsel doğrulamayla teyit edildi → `SOURCE-INTERNAL-OH-001`,
+`DECISION-012`. Kod tabloyu doğru izliyor, **değişiklik yok**.
+
+### Güncel çelişki tablosu
+
+| ID | Öncelik | Konu | Durum |
+|---|---|---|---|
+| CONFLICT-001 | P0 | F kadın normu (10.11 ↔ 9.38) | OPEN |
+| CONFLICT-002 | P0 | K normları (13.90/13.54 ↔ 13.98/11.82) | OPEN |
+| CONFLICT-003 | P1 | L T bandı alt sınırı (59 ↔ 56) | OPEN |
+| CONFLICT-004 | P1 | F ham bant sınırları | OPEN |
+| CONFLICT-005 | P1 | L/K ham bant tabloları kaynakta yok | INVESTIGATING |
+| CONFLICT-006 | P2 | F/K T bant sınır yazımı | CONFIRMED (kabul) |
+| CONFLICT-007 | P2 | `docs/kaynak-denetimi.md` depoda yok | CONFIRMED (ertelendi) |
+| **CONFLICT-008..012** | **P0** | **5 anahtar hatası** | **✅ FIXED** |
+
+Kalan açık: **7 çelişki** (2 P0 norm, 3 P1, 2 P2).

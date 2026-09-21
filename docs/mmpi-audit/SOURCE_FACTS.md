@@ -381,3 +381,24 @@ Status: OCR-CONFIRMED
 | R Welsh Represyon | 40 (Yanlış=YOK) | 40 | MATCH (O) |
 | Do Üstünlük | 28 | 28 | MATCH (O) |
 | Dy Bağımlılık | 57 | 57 | MATCH (O) |
+
+---
+
+## SOURCE-INTERNAL-OH-001 · OH ölçeğinde kaynak içi tutarsızlık
+
+Page: PDF p135 R = **kitap s.255**, "Aşırı Kontrol-Hostilite Testi (O-H) (Madde sayısı: 33)"
+OCR + Visual: **CONFIRMED** (yüksek DPI kırpma, dikiş dahil)
+
+Fact — tablonun gerçek içeriği:
+- **Doğru (10):** 78, 91, 229, 319, 338, 373, 394, 425, 488, 559
+- **Yanlış (21):** 1, 30, 81, 90, 102, 109, 129, 130, 141, 165, 181, 183,
+  290, 329, 382, 396, 439, 446, 475, 501, 534
+- **Toplam: 31 madde**
+
+Sorun: **Başlık "33" der, tablo 31 madde listeler.** Kaynağın kendi içi tutarsızlığı.
+
+Karar (`DECISION-012`): **Kod tabloyu izler (31 madde) ve doğrudur.**
+Kod değişikliği **yoktur**. `tests/mmpiKeyIntegrity.test.ts` içinde
+`EXPECTED_SPECIAL.OH = 31` olarak, kaynak çelişkisi yorumla birlikte kaydedilmiştir.
+
+Status: **VERIFIED** (kaynak çelişkisi kayıt altında; kod tarafı MATCH)

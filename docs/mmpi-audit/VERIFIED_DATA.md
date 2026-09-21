@@ -126,7 +126,9 @@ Kod (`SCORING_KEYS.K`): **birebir aynı** ✅ MATCH
 
 # Ek 9 — Madde anahtarları (kitap s.244-256)
 
-**Karşılaştırma sonucu: 41 MATCH / 5 DIFF / 0 MISSING (46 anahtarın tamamı)**
+**Karşılaştırma sonucu (düzeltme sonrası): 46 MATCH / 0 DIFF / 0 MISSING**
+
+Önceki durum: 41 MATCH / 5 DIFF → `CODE_CHANGES.md` CHANGE-001..005
 
 Araç: `scripts/mmpi-audit/compare-keys.py`
 Sütun `Doğrulama`: `V` = görsel doğrulandı · `O` = yalnızca OCR
@@ -136,7 +138,7 @@ Sütun `Doğrulama`: `V` = görsel doğrulandı · `O` = yalnızca OCR
 | Ölçek | Madde | Kaynak | Kod | Sonuç | Doğrulama |
 |---|---|---|---|---|---|
 | L | 15 | 15 | 15 | ✅ MATCH | V |
-| **F** | 64 | 64 | 64 | ❌ **DIFF** (69↔169) | V |
+| F | 64 | 64 | 64 | ✅ MATCH (düzeltildi) | V |
 | K | 30 | 30 | 30 | ✅ MATCH | V |
 | Hs | 33 | 33 | 33 | ✅ MATCH | O |
 | D | 60 | 60 | 60 | ✅ MATCH | O |
@@ -164,9 +166,9 @@ maddenin tamamını doğru şekilde ters çevirmiştir ✅
 | STY | 36 | 36 | ✅ MATCH | O |
 | ANT | 25 | 25 | ✅ MATCH | O |
 | BDL | 22 | 22 | ✅ MATCH | V |
-| **HST** | **20** | **13** | ❌ **DIFF** (−7 madde) | V |
+| HST | 20 | 20 | ✅ MATCH (düzeltildi) | V |
 | NAR | 31 | 31 | ✅ MATCH | V |
-| **AVD** | **38** | **25** | ❌ **DIFF** (−13 madde) | V |
+| AVD | 38 | 38 | ✅ MATCH (düzeltildi) | V |
 | DEP | 20 | 20 | ✅ MATCH | V |
 | CPS | 15 | 15 | ✅ MATCH | O |
 | PAG | 14 | 14 | ✅ MATCH | O |
@@ -184,7 +186,7 @@ maddenin tamamını doğru şekilde ters çevirmiştir ✅
 |---|---|---|---|---|
 | SOC | 27 | 27 | ✅ MATCH | O |
 | DEP_W | 33 | 33 | ✅ MATCH | O |
-| **FEM** | 30 | 30 | ❌ **DIFF** (126, 463 yön) | V |
+| FEM | 30 | 30 | ✅ MATCH (düzeltildi) | V |
 | MOR | 23 | 23 | ✅ MATCH | O |
 | REL | 12 | 12 | ✅ MATCH | O |
 | AUT | 20 | 20 | ✅ MATCH | O |
@@ -200,8 +202,8 @@ maddenin tamamını doğru şekilde ters çevirmiştir ✅
 
 | Ölçek | Kaynak | Kod | Sonuç | Doğrulama |
 |---|---|---|---|---|
-| OH | 33 | 33 | ✅ MATCH | V |
-| **Es** | **68** | **68** | ❌ **DIFF** (13 madde yön) | V |
+| OH | 33 (başlık) / **31** (tablo) | 31 | ✅ MATCH (tablo izlenir) | V |
+| Es | 68 | 68 | ✅ MATCH (düzeltildi) | V |
 | A | 39 | 39 | ✅ MATCH | O |
 | R | 40 | 40 | ✅ MATCH | O |
 | Do | 28 | 28 | ✅ MATCH | O |

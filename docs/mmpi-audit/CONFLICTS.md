@@ -252,7 +252,7 @@ Impact (yüksek):
 
 Problem: Tek karakterlik basamak hatası; kaynak tablo net.
 
-Status: **CONFIRMED** — düzeltme bekliyor (PHASE 3/6 teyidi gerekmez: tablo doğrudan).
+Status: **FIXED** (CHANGE-001, 2026-09-21)
 
 ---
 
@@ -281,7 +281,7 @@ kaynakta puan almamalıyken kodda +13 alır. Tersine "yanlış" diyen birey
 kaynakta +13 almalıyken kodda 0 alır → Ego gücü yorumu tamamen ters
 yönde hatalı olabilir.
 
-Status: **CONFIRMED** — düzeltme bekliyor.
+Status: **FIXED** (CHANGE-002..005, 2026-09-21)
 
 ---
 
@@ -307,7 +307,7 @@ W_FEM toplamı değişmez (30), ancak bu iki maddeye verilen yanıt ters
 yorumlanır → `WIGGINS_NORMS.FEM` (M=14.77, SD=3.87) ile hesaplanan T puanı
 2 maddeye kadar sapar.
 
-Status: **CONFIRMED** — düzeltme bekliyor.
+Status: **FIXED** (CHANGE-002..005, 2026-09-21)
 
 ---
 
@@ -335,7 +335,7 @@ AVD ham puanı 38 üzerinden değil 25 üzerinden hesaplanır →
 uygulanır; ölçek **sistematik olarak düşük** çıkar. Çekingen kişilik özellikleri
 olduğu gibi kaçırılabilir.
 
-Status: **CONFIRMED** — düzeltme bekliyor.
+Status: **FIXED** (CHANGE-002..005, 2026-09-21)
 
 ---
 
@@ -362,7 +362,7 @@ Impact (yüksek):
 belirlenmiştir; 13 maddelik anahtarla bu eşiklere ulaşmak çok zor →
 histrionik özellikler **sistematik olarak kaçırılır**.
 
-Status: **CONFIRMED** — düzeltme bekliyor.
+Status: **FIXED** (CHANGE-002..005, 2026-09-21)
 
 ---
 

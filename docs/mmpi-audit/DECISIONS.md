@@ -249,3 +249,67 @@ korunur. FINAL raporunda:
 `SOURCE-ALIGNED-WITH-UNVERIFIED` (bkz. §47).
 
 Status: **APPROVED**
+
+---
+
+## DECISION-012
+
+Date: 2026-09-21
+Issue: OH ölçeğinde kaynak başlığı (33) ile tablo (31) çelişiyor
+
+Decision:
+**Kod doğru kabul edilir; değişiklik yapılmaz.** Kaynak çelişkisi
+`SOURCE-INTERNAL-OH-001` olarak kaydedilir. Yeni testte beklenen değer
+**31** olarak yazılır (tablo, yapılandırılmış veri kabul edilir).
+
+Reason:
+Aynı yöntem (?) alt testi çelişkisinde de uygulandı (`DECISION-007`):
+yapılandırılmış tablo, düz metin/başlıktan üstündür. Kod tabloyu birebir
+yansıtır. Başlığa uymak için koda 2 uydurma madde eklemek kaynağa aykırı olur.
+
+Action:
+`tests/mmpiKeyIntegrity.test.ts` → `EXPECTED_SPECIAL.OH = 31` + açıklama yorumu.
+`SOURCE_FACTS.md` → `SOURCE-INTERNAL-OH-001`.
+Kod değişikliği yok.
+
+Status: **APPROVED**
+
+---
+
+## DECISION-013
+
+Date: 2026-09-21
+Issue: Düzeltme paketinin kapsamı ve sırası
+
+Decision:
+CONFLICT-008..012 tek pakette düzeltildi (CHANGE-001..005) ve aynı pakette
+kalıcı regresyon testi eklendi (CHANGE-006).
+
+Reason:
+Beş hata da aynı sınıftandır (madde anahtarı hataları) ve aynı doğrulama
+turunda test edilebilir. Test eklemesi aynı pakette olursa, hatanın geri
+gelme olasılığı paket kapanışında kapatılmış olur.
+
+Action:
+`npm run typecheck && npm test && npm run build` → üçü de PASS.
+Test sayısı 287 → **294**.
+
+Status: **APPROVED**
+
+---
+
+## DECISION-014
+
+Date: 2026-09-21
+Issue: `optik-form.html` derleme çıktısı değişti
+
+Decision:
+`optik-form.html` (yeniden üretilen tek dosya teslim) commit'e dahil edilir.
+
+Reason:
+Depoda izlenen ve `npm run build` tarafından üretilen bir çıktıdır;
+`tests/build.test.ts` bu dosyanın gömülü PDF ile tutarlılığını doğrular.
+Değişiklik yalnızca CSP `script-src` sha256 hash'idir (kaynak kod değiştiği
+için beklenen ve zorunlu).
+
+Status: **APPROVED**

@@ -111,3 +111,75 @@ Bu test, başlıktaki madde sayısı ile `dogru.length + yanlis.length` uyuşmaz
 AVD (25 vs 38) hataları bu testle otomatik yakalanırdı.
 
 Mevcut durumda böyle bir test **yoktur** → bu, test kapsamındaki en büyük boşluktur.
+
+---
+
+## Düzeltme paketi sonrası — 2026-09-21 (Oturum 3)
+
+### Komut sonuçları
+
+| Komut | Sonuç |
+|---|---|
+| `npm run typecheck` | **PASS** (tsc --noEmit, hata yok) |
+| `npm test` | **294 / 294 PASS** (18 → **19 suite**) |
+| `npm run build` | **PASS** (`dist/index.html` + `optik-form.html` üretildi) |
+
+Baseline 287 testti; **+7 yeni test** (`tests/mmpiKeyIntegrity.test.ts`).
+
+### REGRESSION kaydı
+
+**REGRESSION YOK.** Düzeltme paketinden sonra hiçbir mevcut test kırılmadı.
+
+Neden beklenen kırılma olmadı:
+- `tests/mmpiScoring.test.ts` F için yalnızca **uzunluk** doğrular
+  (`trueItems.length === 44`, `falseItems.length === 20`) → 69→169 değişimi
+  uzunluğu değiştirmez.
+- Doğrudan `69` / `169` madde numarasına bağlı hiçbir assertion yok
+  (`grep -rn "\b69\b\|\b169\b" tests/*.ts` → yalnızca sayısal değer olarak
+  kullanılanlar).
+- Türetilmiş ölçekler (`Es`, `FEM`, `AVD`, `HST`) için **madde düzeyi doğrulama
+  yapan test yoktu**; yalnızca `derivedScales.length === 33` sayısı kontrol
+  ediliyordu, o da değişmedi.
+
+> **Test kapsamı bulgusu:** Yukarıdaki üç madde, 5 P0 hatasının neden
+> yıllarca görünmez kaldığını açıklar. Düzeltmeden önceki `TEST_AUDIT.md`
+> analizi bunu doğru öngörmüştü ("hangi testler kırılacak" listesi boş çıktı —
+> çünkü kapsam yoktu).
+
+### `optik-form.html` değişikliği
+
+`npm run build` çıktısı olarak yeniden üretildi. Diff **yalnızca** CSP
+`script-src` sha256 hash'idir:
+
+```
+- script-src 'sha256-pdI1uXrCpu0+Y5Uqz9b2zYlM/Wde1Trr0lYHPlc1U/g='
++ script-src 'sha256-tEjXQus+swxg+7Kj/G4kPRq2vXry2YGHh/5SHiLSPvg='
+```
+
+Kaynak kod değiştiği için beklenen ve zorunludur (`DECISION-014`).
+`tests/build.test.ts` bu dosyanın gömülü PDF ile tutarlılığını doğrular → PASS.
+
+### Yeni test — `tests/mmpiKeyIntegrity.test.ts` (7 test)
+
+Testin **denetim değeri** kanıtlandı: ilk çalıştırmada daha önce bilinmeyen
+bir kaynak içi tutarsızlığı ortaya çıkardı (`OH`: başlık 33, tablo 31).
+
+| Test | Ne doğrular |
+|---|---|
+| geçerlik + klinik ölçekler | 12 ölçeğin madde sayısı = kaynak Ek 9 başlığı |
+| Mf cinsiyet çifti | İki anahtar 60 madde + **aynı madde kümesi** (yalnızca yön farkı) |
+| kişilik bozuklukları | 11 ölçek (PAR…PAG) madde sayısı |
+| alkol ölçekleri | MAC 49 (dipnot kuralı), ICAS 8 |
+| Wiggins | 13 içerik skalası |
+| özel ölçekler | OH 31, Es 68, A 39, R 40, Do 28, Dy 57 |
+| regresyon koruması | CONFLICT-008..012 düzeltmeleri kalıcı mı |
+
+Ek yapısal kontroller (tüm ölçekler): tekrarlanan madde yok, Doğru/Yanlış
+kümeleri ayrık, tüm maddeler 1-566 aralığında.
+
+### Sıradaki test işleri (PHASE 14)
+
+1. `tests/mmpiScoring.test.ts` içine **madde düzeyi** doğrulama eklenmeli
+   (şu an yalnızca uzunluk). Öneri: `compare-keys.py` çıktısından üretilen
+   golden fixture ile F/Es/FEM/AVD/HST için tam liste karşılaştırması.
+2. `TURKISH_NORMS` 24 hücresi için kaynak kanıtı (Ek 10 + Bölüm 8) → PHASE 6.
