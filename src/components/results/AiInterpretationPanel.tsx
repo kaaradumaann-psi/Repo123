@@ -21,16 +21,15 @@ export type AiInterpretationPanelProps = {
 
 /**
  * "Yapay Zekâ Yorumu" sekmesi — sonuç panelinin son sekmesi, karar destek katmanı.
- * Yorum; tanı koyar, tedavi önerir ya da klinik karar verir gibi sunulmaz: her
- * çıktının altında kalıcı bir sınır bildirimi vardır ve metin yalnızca bu
- * analizde üretilen sayısal profil özetinden türetilir.
- *
- * Düzen sekmeye uygun, kendi dilinde: hero kartı (başlık + eylem), durum
- * kartları (yoğun / hata / sonuç) ve disaclaimer şeridi.
+ * Yorum yalnızca bu analizde üretilen sayısal profil özetinden türetilir.
+ * Tasarım dili sitenin kendisiyle aynı: kâğıt-beyaz yüzeyler, hairline
+ * kenarlıklar, tek vurgu rengi; davranış ise dayanıklı: zaman aşımı /
+ * yoğunluk durumunda net geri bildirim ve tek tıkla yeniden deneme.
  */
 export function AiInterpretationPanel({ profile, method, client, recordId, onInsertIntoNotes }: AiInterpretationPanelProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [errorCode, setErrorCode] = useState<number | null>(null);
   const [result, setResult] = useState<AiInterpretationResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [inserted, setInserted] = useState(false);
@@ -45,7 +44,7 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
           <Icon name="info" size={14} />
           <span>
             Bu kurulumda yapay zekâ yorumu etkin değil (Supabase bağlantısı yapılandırılmamış).
-            Yorum yalnızca bu analizin sayısal profil özetinden üretilir; tanı koymaz.
+            Yorum yalnızca sayısal profil özetinden üretilir.
           </span>
         </div>
       </div>
@@ -57,6 +56,7 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
     const force = forceRef.current;
     setBusy(true);
     setError('');
+    setErrorCode(null);
     setCopied(false);
     setInserted(false);
     if (force) setResult(null);
@@ -65,6 +65,8 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
       const next = await requestAiInterpretation({ summary, recordId, ignoreCache: force });
       setResult(next);
     } catch (cause) {
+      const code = cause instanceof Error ? (cause as unknown as { code?: number }).code ?? null : null;
+      setErrorCode(typeof code === 'number' ? code : null);
       setError(cause instanceof Error ? cause.message : 'Yapay zekâ yorumu üretilemedi.');
     } finally {
       forceRef.current = false;
@@ -73,6 +75,13 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
   }
 
   function requestRegenerate() {
+    forceRef.current = true;
+    void generate();
+  }
+
+  function requestRetry() {
+    // Zaman aşımı / geçici sağlayıcı hatasında aynı özetle yeniden dene;
+    // önbellek atlanır ki takılı bir ara durum dönmesin.
     forceRef.current = true;
     void generate();
   }
@@ -94,6 +103,20 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
     setInserted(true);
   }
 
+  // Hata koduna göre eyleme dönük kısa yardım metni
+  function errorHelp(): string | null {
+    if (errorCode === 504 || errorCode === 502) {
+      return 'Sunucu yoğunluğu veya soğuk başlatma nedeniyle gecikmiş olabilir. Tekrar dene genellikle hemen sonuç verir (ilk istek 10-30 sn sürebilir).';
+    }
+    if (errorCode === 429) return 'Çok fazla istek gönderildi. 10 saniye bekleyip tekrar deneyin.';
+    if (errorCode === 401) return 'Oturumunuz sona ermiş olabilir. Sayfayı yenileyip tekrar giriş yapın.';
+    if (errorCode === 403) return 'Bu kayıt için yetkiniz doğrulanamadı.';
+    if (errorCode === 503) return 'Yapay zekâ servisi bu ortamda yapılandırılmamış. Yöneticinize başvurun.';
+    return null;
+  }
+
+  const help = errorHelp();
+
   return (
     <div role="tabpanel" className="mmpi-tab-panel ai-tab">
       {/* Hero: sekmenin kimliği — başlık, çerçeveleyen açıklama ve üretim eylemi */}
@@ -107,11 +130,9 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
           </h4>
           <p className="ai-hero-sub">
             Hesaplanan profilin (T skorları, geçerlik bulguları) yapay zekâ destekli kısa yorumu.
-            Tanı koymaz; klinik kararın yerine geçmez.
           </p>
           <div className="ai-hero-chips">
             <span className="mmpi-chip">Yalnız sayısal profil gönderilir</span>
-            <span className="mmpi-chip">Tanı koymaz</span>
             <span className="mmpi-chip">Karar destek aracı</span>
           </div>
         </div>
@@ -120,10 +141,11 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
           className="btn-primary btn-sm ai-hero-btn"
           onClick={() => (result ? requestRegenerate() : void generate())}
           disabled={busy}
+          aria-busy={busy}
         >
           {busy ? (
             <>
-              <div className="spinner-inline" />
+              <span className="spinner-inline" aria-hidden="true" />
               <span>Yorumlanıyor…</span>
             </>
           ) : result ? (
@@ -141,9 +163,9 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
       </section>
 
       {busy && (
-        <section className="ai-status-card" role="status" aria-live="polite">
+        <section className="ai-status-card" role="status" aria-live="polite" aria-label="Yapay zekâ yorumu hazırlanıyor">
           <div className="ai-status-row">
-            <div className="spinner-inline" />
+            <span className="spinner-inline" aria-hidden="true" />
             <span>
               Profil özetleniyor ve yapay zekâya gönderiliyor… (ilk denemede ~10-30 sn sürebilir)
             </span>
@@ -159,8 +181,11 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
       {error && !busy && (
         <div className="status-banner error-banner" role="alert">
           <Icon name="alert" size={16} />
-          <span style={{ flex: 1 }}>{error}</span>
-          <button type="button" className="btn-secondary btn-sm" onClick={() => void generate()}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600 }}>{error}</div>
+            {help && <div style={{ marginTop: 4, fontSize: 12.5, opacity: 0.9, lineHeight: 1.5 }}>{help}</div>}
+          </div>
+          <button type="button" className="btn-secondary btn-sm" onClick={requestRetry}>
             <Icon name="refresh" size={13} />
             <span>Tekrar dene</span>
           </button>
@@ -208,8 +233,8 @@ export function AiInterpretationPanel({ profile, method, client, recordId, onIns
       <p className="ai-disclaimer" role="note">
         <Icon name="info" size={13} />
         <span>
-          Bu bölüm bir karar destek aracıdır: yalnızca bu analizin sayısal profil özetinden yola çıkar,
-          tanı koyamaz, tedavi öneremez ve uygulayıcı uzmanın klinik değerlendirmesinin yerine geçmez.
+          Karar destek çıktısıdır — tanı koymaz, tedavi önermez; yalnızca bu analizin sayısal profil özetinden
+          üretilir. Nihai değerlendirme uygulayıcı uzmana aittir.
         </span>
       </p>
     </div>
