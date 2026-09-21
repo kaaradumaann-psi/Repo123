@@ -8,7 +8,9 @@
  *    (KVKK m.4/3-d sahte isimlendirme: danışan adı/soyadı cihazdan asla
  *    ayrılmaz; yalnız yaş + cinsiyet bağlamı taşınır). Serbest metin yok.
  *  - Sonuç, 24 saat boyunca cihazda (localStorage) önbelleğe alınır; profil değişirse
- *    önbellek geçersiz sayılır (özet hash'i karşılaştırılır).
+ *    önbellek geçersiz sayılır (özet hash'i karşılaştırılır). Önbellek anahtarı
+ *    kullanıcıya özgüdür — aynı cihazı paylaşan iki hesap birbirinin yorumunu
+ *    göremez.
  *  - Görüntü/piksel verisi hiçbir zaman gönderilmez.
  */
 import { supabase, supabaseConfig } from '../auth/supabaseClient';
@@ -44,6 +46,7 @@ export type AiInterpretationError = Error & { code?: number };
 
 const REQUEST_TIMEOUT_MS = 120_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const TRANSIENT_RETRY_DELAY_MS = 1_200;
 
 /**
  * MMPIProfile'dan LLM'e gidecek sayısal özeti üretir (tüm alanlar doğrulanmış
@@ -96,12 +99,14 @@ function summarizeHash(value: string): string {
 
 type CacheEntry = { hash: string; result: AiInterpretationResult };
 
-function cacheKey(scope: { recordId?: string }): string {
-  return scope.recordId ? `mmpi566:ai:record:${scope.recordId}` : 'mmpi566:ai:draft';
+function cacheKey(scope: { recordId?: string; userId?: string | null }): string {
+  const userSuffix = scope.userId ? `:${scope.userId.slice(0, 8)}` : '';
+  return scope.recordId ? `mmpi566:ai:record:${scope.recordId}${userSuffix}` : `mmpi566:ai:draft${userSuffix}`;
 }
 
 function readCache(key: string, hash: string): AiInterpretationResult | null {
   try {
+    // localStorage bazı gizli pencerelerde erişilemez; hız kesiciye düşmeden çık.
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CacheEntry;
@@ -117,6 +122,7 @@ function readCache(key: string, hash: string): AiInterpretationResult | null {
 
 function writeCache(key: string, hash: string, result: AiInterpretationResult): void {
   try {
+    // GÜVENLİK: yalnızca anonim özet + model metni saklanır; PII yok.
     window.localStorage.setItem(key, JSON.stringify({ hash, result } satisfies CacheEntry));
   } catch {
     /* depolama dolu/erişilemez: önbellek isteğe bağlı */
@@ -131,71 +137,126 @@ export type AiInterpretationRequest = {
   ignoreCache?: boolean;
 };
 
+function isTransientCode(code: number | undefined): boolean {
+  return code === 502 || code === 504 || code === 0;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
 /**
  * AI yorumunu ister. Önbellekte taze bir sonuç varsa (ve ignoreCache verilmediyse)
  * ağa çıkmadan onu döner. Hata durumunda `AiInterpretationError` fırlatır
  * (code: 401/403/404/413/429/502/503/504).
+ *
+ * Dayanıklılık: soğuk başlatma / geçici ağ kesintisinde (502/504/0) tek seferlik
+ * kısa bir yeniden deneme yapılır; kalıcı hatalarda (401/403/404) doğrudan döner.
  */
 export async function requestAiInterpretation(request: AiInterpretationRequest): Promise<AiInterpretationResult> {
   if (!supabase || !supabaseConfig.configured) {
     throw Object.assign(new Error('Yapay zekâ yorum özelliği bu kurulumda etkin değil.'), { code: 503 } as AiInterpretationError);
   }
-  const key = cacheKey({ recordId: request.recordId });
+
+  // Oturum önce alınır: hem Bearer hem de kullanıcıya özgü önbellek anahtarı için.
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  const userId = sessionData.session?.user?.id ?? null;
+  if (!token) {
+    throw Object.assign(new Error('Oturum doğrulanamadı; lütfen yeniden giriş yapın.'), { code: 401 } as AiInterpretationError);
+  }
+
+  const key = cacheKey({ recordId: request.recordId, userId });
   const hash = summarizeHash(JSON.stringify(request.summary));
   if (!request.ignoreCache) {
     const cached = readCache(key, hash);
     if (cached) return cached;
   }
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData.session?.access_token;
-  if (!token) {
-    throw Object.assign(new Error('Oturum doğrulanamadı; lütfen yeniden giriş yapın.'), { code: 401 } as AiInterpretationError);
+  let lastTransient: AiInterpretationError | null = null;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const upstream = await fetch(`${supabaseConfig.url}/functions/v1/ai-interpretation`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          apikey: supabaseConfig.anonKey,
+        },
+        body: JSON.stringify({
+          mode: request.recordId ? 'record' : 'draft',
+          ...(request.recordId ? { recordId: request.recordId } : {}),
+          profile: request.summary,
+        }),
+      });
+      let payload: { error?: string; ok?: boolean; text?: string; model?: string; generatedAt?: string };
+      try {
+        payload = await upstream.json();
+      } catch {
+        payload = {};
+      }
+      if (!upstream.ok || !payload.ok || typeof payload.text !== 'string' || !payload.text) {
+        const message = typeof payload.error === 'string' && payload.error
+          ? payload.error
+          : 'Yapay zekâ yorumu üretilmedi; lütfen tekrar deneyin.';
+        const code = upstream.status || 0;
+        const err = Object.assign(new Error(message), { code } as AiInterpretationError);
+        if (isTransientCode(code) && attempt === 0) {
+          lastTransient = err as AiInterpretationError;
+          // Kısa bekleme ardından tek seferlik yeniden dene
+          window.clearTimeout(timer);
+          await sleep(TRANSIENT_RETRY_DELAY_MS);
+          continue;
+        }
+        throw err;
+      }
+      const result: AiInterpretationResult = {
+        text: payload.text,
+        model: typeof payload.model === 'string' ? payload.model : 'yapay zekâ',
+        generatedAt: typeof payload.generatedAt === 'string' ? payload.generatedAt : new Date().toISOString(),
+      };
+      writeCache(key, hash, result);
+      return result;
+    } catch (error) {
+      if (error instanceof Error && (error as AiInterpretationError).code !== undefined) {
+        const code = (error as AiInterpretationError).code;
+        if (isTransientCode(code) && attempt === 0) {
+          lastTransient = error as AiInterpretationError;
+          window.clearTimeout(timer);
+          await sleep(TRANSIENT_RETRY_DELAY_MS);
+          continue;
+        }
+        throw error;
+      }
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        const err = Object.assign(new Error('Yapay zekâ yanıtı zamanında gelmedi; lütfen tekrar deneyin.'), { code: 504 } as AiInterpretationError);
+        if (attempt === 0) {
+          lastTransient = err as AiInterpretationError;
+          window.clearTimeout(timer);
+          await sleep(TRANSIENT_RETRY_DELAY_MS);
+          continue;
+        }
+        throw err;
+      }
+      // Ağ hatası (fetch TypeError) → geçici say, bir kez dene
+      if (attempt === 0) {
+        lastTransient = Object.assign(new Error('Bağlantı kurulamadı; lütfen tekrar deneyin.'), { code: 0 } as AiInterpretationError);
+        window.clearTimeout(timer);
+        await sleep(TRANSIENT_RETRY_DELAY_MS);
+        continue;
+      }
+      throw Object.assign(new Error('Bağlantı kurulamadı; lütfen tekrar deneyin.'), { code: 0 } as AiInterpretationError);
+    } finally {
+      window.clearTimeout(timer);
+    }
   }
 
-  const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    const upstream = await fetch(`${supabaseConfig.url}/functions/v1/ai-interpretation`, {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        apikey: supabaseConfig.anonKey,
-      },
-      body: JSON.stringify({
-        mode: request.recordId ? 'record' : 'draft',
-        ...(request.recordId ? { recordId: request.recordId } : {}),
-        profile: request.summary,
-      }),
-    });
-    let payload: { error?: string; ok?: boolean; text?: string; model?: string; generatedAt?: string };
-    try {
-      payload = await upstream.json();
-    } catch {
-      payload = {};
-    }
-    if (!upstream.ok || !payload.ok || typeof payload.text !== 'string' || !payload.text) {
-      const message = typeof payload.error === 'string' && payload.error
-        ? payload.error
-        : 'Yapay zekâ yorumu üretilmedi; lütfen tekrar deneyin.';
-      throw Object.assign(new Error(message), { code: upstream.status } as AiInterpretationError);
-    }
-    const result: AiInterpretationResult = {
-      text: payload.text,
-      model: typeof payload.model === 'string' ? payload.model : 'yapay zekâ',
-      generatedAt: typeof payload.generatedAt === 'string' ? payload.generatedAt : new Date().toISOString(),
-    };
-    writeCache(key, hash, result);
-    return result;
-  } catch (error) {
-    if (error instanceof Error && (error as AiInterpretationError).code) throw error;
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw Object.assign(new Error('Yapay zekâ yanıtı zamanında gelmedi; lütfen tekrar deneyin.'), { code: 504 } as AiInterpretationError);
-    }
-    throw Object.assign(new Error('Bağlantı kurulamadı; lütfen tekrar deneyin.'), { code: 0 } as AiInterpretationError);
-  } finally {
-    window.clearTimeout(timer);
-  }
+  // Döngüden buraya yalnızca ilk deneme geçici hatayla bitti ve ikinci deneme de
+  // aynı sınıfta bir hata verdiyse ulaşılır; son hatayı taşı.
+  if (lastTransient) throw lastTransient;
+  throw Object.assign(new Error('Yapay zekâ yorumu üretilemedi; lütfen tekrar deneyin.'), { code: 0 } as AiInterpretationError);
 }
