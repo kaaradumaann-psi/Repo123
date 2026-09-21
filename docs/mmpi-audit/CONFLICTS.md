@@ -1001,3 +1001,55 @@ yalnızca kod dizesi). Çözüm önerisi: `CodeInterpretation`'a
 ekleyip `codePointInterpretation(code, tScores)` imzasını genişletmek.
 Bu, **kaynağın tüm kod seti** çıkarıldıktan sonra 024 ile **birlikte**
 kararlaştırılmalı.
+
+---
+
+## CONFLICT-028 — Hy **kadın** normu: kaynak kendi kendisiyle çelişiyor (P2) → **REJECTED**
+
+Area: `TURKISH_NORMS.Kadın.Hy`
+
+**Kaynak kanıtı A (metin, s.94, 400 dpi GÖRSEL doğrulandı):**
+> "Erkeklerde ortalama: **19.31**, kadınlarda ortalama: **22.33** (Savaşır, 1981)"
+
+**Kaynak kanıtı B (Tablo 30, s.195, `SOURCE-NORM-001`, 26/26 doğrulanmış):**
+> Hy kadın: X̄ **18.12** · SD 5.31
+
+**Kod:** `TURKISH_NORMS.Kadın.Hy = { mean: 18.12, sd: 5.31 }` → **Tablo 30'u izler**
+
+**Karşılaştırma:** Aynı kitap, aynı ölçek (Hy), aynı örneklem için **iki farklı
+kadın ortalaması** veriyor (22.33 ↔ 18.12). Bu, **CONFLICT-001 (F kadın normu)**
+ve **CONFLICT-002 (K normları)** ile **aynı sınıfın üçüncü örneğidir**:
+
+| Çelişki | Metin (Bölüm 3-5) | Tablo 30 (s.195) | Kod |
+|---|---|---|---|
+| 001 | F kadın 10.11 | 9.38 | Tablo 30 ✅ REJECTED |
+| 002 | K erkek 13.90 / kadın 13.54 | 13.98 / 11.82 | Tablo 30 ✅ REJECTED |
+| **028** | **Hy kadın 22.33** | **18.12** | **Tablo 30 ✅ REJECTED** |
+
+**Resolution: REJECTED (kod doğru).** Gerekçe (DECISION-015/016 emsali):
+1. **Tablo 30**, "Normal Türk Erkek ve Kadınların MMPI Alt Testlerindeki Ortalama
+   ve Standart Sapmaları" başlıklı **asıl norm tablosudur** (n=1003/663).
+2. Gövde metnindeki sayılar **ikincil atıflardır** ("Savaşır, 1981").
+3. Tablo 30'un **tamamı** (26 hücre) doğrulanmıştır; metin atıflarında ise
+   **3 farklı hata** bulunmuştur (F kadın, K × 2, Hy kadın) — metin atıflarının
+   güvenilirliği sistematik olarak düşüktür.
+4. Kod tek bir tutarlı kaynağı izlemelidir; karışık kaynak kullanımı iç
+   tutarsızlık üretir.
+
+**Karar kaydı:** `DECISION-028`.
+
+**Tarihsel kayıt (silinmedi):** İlk bulgu (bu oturum) "Hy kadın normu P0 hatalı"
+yönündeydi; Tablo 30 kanıtı ile **tam tersi** sonuca bağlandı — kod doğrudur,
+metin atfı hatalıdır.
+
+---
+
+## CONFLICT-029 — Tablo 10'da OCR satır kayması (P3, kayıt) → **OCR-UNCERTAIN (çözüldü)**
+
+Kaynak: `SOURCE-CL-014`. Ham OCR, `55`, `51`, `30` maddelerini **Doğru**
+listesine kaydırdı; görsel okuma bunların **Yanlış** listesinde olduğunu
+gösterdi. OCR ile karşılaştırma yapılsaydı **sahte 3 maddelik P0 fark**
+raporlanacaktı.
+
+Resolution: **OCR-UNCERTAIN → görsel ile ÇÖZÜLDÜ.** Kod anahtarı kaynakla
+birebir uyumlu. Kural kaydı: `OCR_ISSUES.md` → **TABLE-ROW-SHIFT**.

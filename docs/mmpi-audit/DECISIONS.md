@@ -654,3 +654,38 @@ desteklenmeyen hiçbir etiket bırakılmadı; yorum/tanı iddiası eklenmedi.
 
 **Sonuç:** CHANGE-011 · CONFLICT-023 **FIXED** · +4 regresyon testi
 (`tests/mmpiKeyIntegrity.test.ts`).
+
+---
+
+## DECISION-028 — Norm katmanında kanonik kaynak: **Tablo 30** (üçüncü teyit)
+
+Tarih: 2026-09-21 · PHASE 9/10 batch 6
+
+**Durum:** Kitap, aynı norm değerleri için **iki farklı sayı** veriyor:
+- **Gövde metni** (bölüm içi atıflar, "Savaşır, 1981")
+- **Tablo 30** (s.195) — "Normal Türk Erkek ve Kadınların MMPI Alt Testlerindeki
+  Ortalama ve Standart Sapmaları"
+
+Çelişki **üç kez** bulundu:
+
+| # | Ölçek | Metin | Tablo 30 |
+|---|---|---|---|
+| 001 | F kadın | 10.11 | **9.38** |
+| 002 | K erkek / kadın | 13.90 / 13.54 | **13.98 / 11.82** |
+| 028 | Hy kadın | 22.33 | **18.12** |
+
+**Karar:** Norm katmanının **kanonik kaynağı Tablo 30'dur.** Kod Tablo 30'u
+izler ve **değişmez**.
+
+**Gerekçe:**
+1. Tablo 30 başlığı gereği **asıl norm tablosudur** (örneklem n=1003 erkek /
+   663 kadın, Bölüm 8 standardizasyonu).
+2. Metin atıfları **ikincil**dir ve **3 farklı hata** içerirler → güvenilirlikleri
+   sistematik olarak düşük.
+3. Tablo 30'un **26/26 hücresi** doğrulanmıştır; metin atıfları ise
+   doğrulanmamış aralıklı sayılardır.
+4. Tek kanonik kaynak, iç tutarsızlığı önler.
+
+**Sonuç:** CONFLICT-001, 002 ve **028** → **REJECTED (kod doğru)**.
+Bu kural, norm katmanında ortaya çıkacak **her yeni metin/Tablo 30 çelişkisi**
+için öncelikli olarak uygulanır.

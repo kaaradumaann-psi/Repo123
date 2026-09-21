@@ -1590,3 +1590,37 @@ eşiği. Kodun `text` alanı bunları taşımıyor → **CONFLICT-025 genişletm
 | **284/824 Kodları** | **Yetişkinlerde** sıklıkla **şizoid ya da şizofrenik durumlarla** bağlantılı ve **F alt testi de yükselmiştir**. 28/82'nin özelliklerine ek olarak **kızgınlık, isyankârlık, başkalarından uzak ve soğuk olma duyguları güçlü**; **dürtü kontrolünü kaybetme korkuları çaktır** "**(özellikle Pd alt testi 80'in üzerinde ise)**" ve **eyleme vuruk davranışlar, garip ve tuhaf şekillerde olur**. **Sosyal alanda ve evlilikte uyumsuzluk** olmasıdır "**(test 4, test 2 ya da 8'in 5 T puanı alanı içinde ise 482/842 kodlarının yorumuna bakınız)**." **Ergenlerde** bu kod **yetmiyor**; **daha çok birçok ergende bulunan isyankârlığı ve sosyal gruptan uzaklaşmayı yansıtır**; **dürtü kontrolünde zayıflık vardır** ve bunun yanı sıra **doğal olmayan davranışlar ve duygularda kuşkulu görülür**, ancak **altta yatan patoloji daha az şiddetlidir**. |
 | **287/827 Kodları** | **Depresyon, kaygı ve tanjansıyel düşünce süreçleri**; **kendilerini insanlardan uzak hissederler, eleştiriye çok fazla duyarlıdırlar ve genelde insanlara güvenmezler**. **Çoğu zaman belirli bir şeye odaklanamama, baş dönmesi epizodları, mental konfüzyon, uykusuzluk, görev ve sorumlulukları yerine getirme yeteneğinin azalması** gibi önemli mental güçlükler. "**Ayrıca, değişken ya da uygunsuz duygular, hatta hallüsinasyonlar ya da açık düşünce bozuklukları vardır.**" **Bağımlılık korkularına bağlı olarak yakın kişilerarası ilişkilerden kaçınırlar ve duygusal bağlanmadan korkarlar.** **Cinsellik ve kendini ifade etme konularında çatışmaları vardır.** **İntihar düşünceleri ve tehditler çok olasıdır** ve "**eğer K alt testi 50 T puanının altında ise ve Ma alt testi 70 T puanının üzerinde ise bunlar dikkate değerlendirilmelidir. İntihar çoğunlukla garip biçimlerde gerçekleştirilir.**" |
 | **29/92 Kodu** | "Bu gruptaki kişiler **benmerkezci ve narsisistik olma eğilimindedirler. Kendi değerlerini abartırlar.**" |
+
+## SOURCE-CL-014 · Tablo 10 — Histeri (Hy) alt testi anahtarı (s.94, p55 L) — **Visual: CONFIRMED**
+
+Fact — aynen (**Madde Sayısı: 60**):
+**Doğru (13):** `10, 23, 32, 43, 44, 47, 76, 114, 179, 186, 189, 238, 253`
+**Yanlış (47):** `2, 3, 6, 7, 8, 9, 12, 26, 30, 51, 55, 71, 89, 93, 103, 107,
+109, 124, 128, 129, 136, 137, 141, 147, 153, 160, 162, 163, 170, 172, 174, 175,
+180, 188, 190, 192, 201, 213, 230, 234, 243, 265, 267, 274, 279, 289, 292`
+Norm: "Erkeklerde ortalama: **19.31**, kadınlarda ortalama: **22.33**
+(Savaşır, 1981)"
+
+**⚠️ OCR UYARISI #2 (bu batch) — `OCR_ISSUES.md` TABLE-ROW-SHIFT:**
+Ham OCR, `55`, `51` ve `30` maddelerini **Doğru** listesine kaydırdı (satır
+kayması). 400 dpi görsel okuma bunların **Yanlış** listesinde olduğunu gösterdi.
+OCR bu haliyle karşılaştırılsaydı **3 maddede sahte P0 fark** raporlanacaktı.
+
+Kod karşılaştırması (`SCORING_KEYS.Hy`):
+- Doğru: kaynak 13 ↔ kod 13 → **BİREBİR MATCH** ✅
+- Yanlış: kaynak 47 ↔ kod 47 → **BİREBİR MATCH** ✅
+- Toplam 60 = kitabın "Madde Sayısı: 60" ✅
+- Norm **Erkek 19.31** ✅ MATCH
+- Norm **Kadın: kaynak metni 22.33 ↔ kod 18.12** → **KAYNAK İÇİ ÇELİŞKİ** →
+  CONFLICT-028 (REJECTED, aşağıda)
+Status: anahtar **VERIFIED** · norm **REJECTED (kod doğru)**
+
+## SOURCE-CL-015 · Hy alt testi girişi (s.93, p54 R)
+
+Fact — aynen:
+> "**3. Histeri (Hy) Alt Testi** — Histeri, **fizik bir neden olmadan bir organın
+> işlevinin kaybedilmesidir.** Bu alt test **nevrotik bozukluklardan konversiyon
+> histerisine tanı koymada yardımcı olmak amacıyla geliştirilmiştir.** Genel bir
+> çocuksuluk, çabuk sinirlenme, neşe…"
+
+Kod karşılaştırması: `HY_T_BANDS` ve Hy yorumu → sonraki batch (s.95+)

@@ -542,3 +542,30 @@ yakalandı (bkz. `OCR_ISSUES.md` DIGIT-6-9).
 | 60-69 | `60-69` | ✅ MATCH |
 | 45-59 | `45-59` | ✅ MATCH |
 | 28-44 | `28-44` (min 0) | ✅ MATCH (etiket) |
+
+
+---
+
+# PHASE 5/9 — Hy (3) alt testi anahtarı (kitap s.94)
+
+## Tablo 10 — Histeri (Hy) alt testi: **BİREBİR MATCH** ✅
+
+| Katman | Kaynak | Kod | Sonuç |
+|---|---|---|---|
+| **Madde sayısı** | 60 (başlık) | 13 + 47 = **60** | ✅ |
+| **Doğru maddeler** | 13 madde | 13 madde, aynı liste | ✅ **BİREBİR** |
+| **Yanlış maddeler** | 47 madde | 47 madde, aynı liste | ✅ **BİREBİR** |
+| **Norm (Erkek)** | 19.31 (metin, Savaşır 1981) | `19.31` | ✅ MATCH |
+| **Norm (Kadın)** | metin **22.33** ↔ Tablo 30 **18.12** | `18.12` | ⚠️ kaynak içi çelişki → CONFLICT-028 **REJECTED** (DECISION-028) |
+
+Doğru: `10, 23, 32, 43, 44, 47, 76, 114, 179, 186, 189, 238, 253`
+Yanlış: `2, 3, 6, 7, 8, 9, 12, 26, 30, 51, 55, 71, 89, 93, 103, 107, 109, 124,
+128, 129, 136, 137, 141, 147, 153, 160, 162, 163, 170, 172, 174, 175, 180, 188,
+190, 192, 201, 213, 230, 234, 243, 265, 267, 274, 279, 289, 292`
+
+**Doğrulama yöntemi:** 400 dpi görsel okuma (OCR satır kayması nedeniyle **OCR
+kullanılmadı**) + `scripts/mmpi-audit/cmp-tablo10.ts` → kaynak 60 = kod 60,
+FAZLA 0, EKSİK 0.
+
+**Doğrulanmış anahtar tablosu (P0 katmanı):** Tablo 8 (Hs) ✅ · Tablo 9 (D) ✅ ·
+**Tablo 10 (Hy) ✅** · Ek 9 ile 46/46 ✅

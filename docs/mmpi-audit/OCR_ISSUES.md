@@ -239,3 +239,24 @@ Kod anahtarıyla karşılaştırma da 9 olduğunu doğruladı.
 olası çiftler için **görsel teyit zorunludur**. OCR metni tek başına yeterli
 değildir — bu, tablolar için zaten geçerli olan "sayısal veri çift doğrulama"
 kuralının somut bir örneğidir.
+
+
+---
+
+## TABLE-ROW-SHIFT — Tablo satırlarının yanlış listeye kayması (2026-09-21)
+
+**Gözlem:** Tablo 10 (Hy alt testi, s.94) ham OCR çıktısında `55`, `51` ve `30`
+maddeleri **Doğru** listesinde göründü; 400 dpi görsel okuma bunların **Yanlış**
+listesinde olduğunu gösterdi. OCR, "Yanlış" başlığından sonraki ilk satırın
+elemanlarını bir önceki bölüme iliştirmişti.
+
+**Etki:** OCR ile karşılaştırma yapılsaydı **3 maddede sahte P0 fark** (madde
+yönü hatası) raporlanacak ve yanlış bir kod değişikliği tetiklenebilecekti.
+Görsel doğrulama ile kodun doğru olduğu kanıtlandı (13 + 47 = 60 BİREBİR MATCH).
+
+**Kural:** Madde anahtarı tablolarında (Tablo 4, 8, 9, 10, 11, …):
+1. OCR'a **hiç güvenilmez** — yön listeleri (Doğru/Yanlış) **görsel olarak** okunur.
+2. Kritik sayılar (madde numaraları) **400 dpi** crop ile teyit edilir.
+3. Toplam madde sayısı **kitabın başlığıyla** (ör. "Madde Sayısı: 60")
+   çapraz kontrol edilir — bu, sessiz madde kaybını/eklenmesini yakalar.
+4. Karşılaştırma **her zaman** `Doğru n + Yanlış n = kitap n` kontrolünü içerir.
