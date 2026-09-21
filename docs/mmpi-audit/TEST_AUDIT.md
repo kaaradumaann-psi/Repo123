@@ -376,3 +376,35 @@ dökülerek** doğrulandı (DECISION-023). Etkilenmeyenler: `reverse-v`,
 ## REGRESSION kaydı
 
 **REGRESSION YOK.** 309/309; `optik-form.html` build ile güncel.
+
+---
+
+# Oturum 4 — PHASE 9/10 batch 1 (s.66-69): kod değişikliği YOK
+
+Tarih: 2026-09-21 · Kapsam: kitap s.66-69 (PDF p41 L – p42 R)
+
+## Kod değişikliği
+
+**Yok.** Bu batch yalnızca kaynak okuma + karşılaştırma + çelişki kaydıdır.
+CONFLICT-024 (üçlü kod tipleri) **tasarım kararı** gerektirdiği ve kaynağın
+tam üçlü kod seti henüz çıkarılmadığı için kod değiştirilmedi.
+
+## Testler
+
+Bu batch'te kod dosyaları değişmedi; regresyon riski yok. Kaynak okuma
+sırasında koşulan doğrulama:
+
+| Komut | Sonuç |
+|---|---|
+| `python3 scripts/mmpi-audit/extract.py ocr --pages 41-42 --dpi 200` | 4 dosya üretildi (p041_L/R, p042_L/R) |
+| Görsel doğrulama (pymupdf dpi 135, tam sayfa) | `v_p041_full.png` · `v_p042_full.png` |
+| `grep` kod karşılaştırması | `CODES`: 45 iki noktalı, 0 üçlü kod · `slice(0, 2)` |
+
+**REGRESSION: YOK** (kod değişmedi).
+
+## Ortam notu
+
+Sandbox sıfırlanması sonrası ortam yeniden kuruldu:
+`npm install` (58 paket) · `pip3 install --break-system-packages pymupdf
+opencv-python-headless rapidocr-onnxruntime` · `opencv-python-headless`
+**force-reinstall** (libGL.so.1 hatası → çözüldü).

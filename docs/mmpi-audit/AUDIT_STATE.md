@@ -37,8 +37,8 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — `mmpiSourceCodes.ts` ↔ s.63-158 karşılaştırması; örnek `CODES['12']` ✓ birebir |
-| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** (kod tipi yorumlarıyla birlikte yürütülüyor) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — s.63-69 DONE (Hs bantları MATCH; 12/21 MATCH); **üçlü kod tipleri kodda YOK** → CONFLICT-024 (P1) |
+| 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — s.66-69 yorum katmanı; CONFLICT-025/026 (içerik eksikleri) |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
@@ -47,10 +47,19 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**233** (Ek 1 sonu — madde 566) — PDF p124 R
-Sonraki hedef: **s.64** (Bölüm 5 — kod tipleri, PDF p40 L)
+**69** (1236 Kodu) — PDF p42 R
+Sonraki hedef: **s.70** (Hs kod tipleri devamı, PDF p43 L)
 
 Last completed:
+**PHASE 9/10 batch 1 — Hs yorumu + kod tipleri (kitap s.66-69) DONE:**
+Hs T-puan bantları **5/5 sınır birebir MATCH** (85+/75-84/60-74/50-59/21-49) ·
+Tablo 8 ikinci okuma teyidi ✓ · **12/21 gövdesi MATCH** · **Kritik bulgu:
+kaynakta 123/213, 1234, 1236, 2134, 213/231 ÜÇLÜ kod tipleri var, kodda
+hiçbiri yok** ve kod üretimi `slice(0,2)` ile 2 ölçekle sınırlı →
+**CONFLICT-024 (P1, OPEN)** · 12/21 ergen paragrafları eksik → CONFLICT-025 ·
+Hs düşük puan 5 maddesi + 40 yaş notu eksik → CONFLICT-026
+
+Önceki:
 **PHASE 2/5 — EK 1 MADDE METİNLERİ (kitap s.215-233) DONE:**
 Madde numaralandırması **1-566 kesintisiz** (boşluk/kopya yok) ✓ ·
 39 kritik madde kaydının (38 madde) metinleri **300-350 dpi görselden** okundu
@@ -98,18 +107,19 @@ K+ profili tanımı ✓ · **F-K endeksi ✓** · **TR endeksi ✓ (kesme puanı
 düzeltildi)** · **Tablo 6 (16 çift) ✓ birebir** · **Tablo 7 (12 çift) ✓ birebir**
 
 Current section:
-**PHASE 4 tamamlandı (s.43-62).** Bölüm 5 — klinik testler/kod tipleri sırada.
+**PHASE 9/10 — Bölüm 5 kod tipleri (s.63-158).** Hs (1) alt testi işleniyor;
+s.63-69 DONE, s.70+ (Hs kod tipleri devamı) sırada.
 
 Status:
-**PHASE 4 DONE** — sıradaki iş: CONFLICT-019 kararı → CONFLICT-016/020 →
-Wiggins normları (s.178-181) → Bölüm 5 (s.64+)
+**PHASE 9/10 IN_PROGRESS** — Bölüm 5 kod tipleri. **CONFLICT-024 (P1) açık:**
+üçlü kod tipleri yok. Kaynağın üçlü kod seti tamamen çıkarılmadan karar verme.
 
 ## Next action
 
 Continue from:
-**Ek 1 tamamlandı (s.215-233).** Sıradaki: **CONFLICT-023 kararı (P2)** →
-**Bölüm 5 / kod tipleri (s.64+, PDF p40 L)** → FINAL öncesi OCR-only sayım +
-DECISION-011 doğrulaması
+**s.69 tamamlandı.** Sıradaki: **s.70-78 (PDF p43 L – p46 R)** — Hs kod tipleri
+(1237, 12378, 1270, 13/31, 132/312, 138/318, 139 …) → sonra D (2) alt testi
+(s.79-94) → **CONFLICT-024 kararı** (üçlü kod seti tamamlandıktan sonra)
 
 Sıradaki batch'ler (öncelik sırası):
 
@@ -122,7 +132,10 @@ Sıradaki batch'ler (öncelik sırası):
 5. ~~**PDF p115 L – p124 L** — kitap s.215-233, Ek 1 madde metni~~ ✅ **TAMAMLANDI**
    (madde 1-566 bütünlük + 39 kritik madde görsel doğrulaması; CONFLICT-023)
 6. ~~**CONFLICT-023 kararı**~~ ✅ **FIXED** (DECISION-026 + CHANGE-011)
-7. **Bölüm 5 — kod tipleri (s.64+)** → PHASE 5 (Bölüm 5 girişi s.63 okundu)
+7. ~~PHASE 9/10 s.63-69 (Hs yorumu + ilk kod tipleri)~~ ✅ **TAMAMLANDI**
+8. **s.70-78 — Hs kod tipleri devamı (PDF p43 L – p46 R)** → PHASE 9/10
+9. **D (2) alt testi (s.79-94)** → Hy (3) → Pd (4) → … → **CONFLICT-024 kararı**
+   (üçlü kod seti tamamlandıktan sonra)
 
 ## Last completed task
 
@@ -215,8 +228,11 @@ Bilinen kısıtlar:
 | CONFLICT-021 | P1 | Wiggins SOC metin "26" ↔ kitabın listesi 27 | ✅ **REJECTED** (DECISION-024) |
 | CONFLICT-022 | P2 | Wiggins SOC yorum yönü | OPEN (PHASE 10) |
 | CONFLICT-023 | P2 | Kritik madde etiketleri kaynak metniyle uyuşmuyor (14 kayıt) + liste kaynakta yok | ✅ **FIXED** (DECISION-026) |
+| CONFLICT-024 | P1 | **Üçlü/dörtlü kod tipleri (123/213, 1234, 1236…) kodda yok**; kod üretimi 2 ölçekle sınırlı | OPEN |
+| CONFLICT-025 | P2 | 12/21 yorumunda ergen/lise paragrafları + koşullu Pd/Ma/Mf/L yorumları eksik | OPEN |
+| CONFLICT-026 | P3 | Hs düşük puan 5 maddesi + 40 yaş notu + 21-49 örüntü koşulu eksik | OPEN |
 
-Kalan açık: **6 çelişki** → 0 P0 · 3 P1 (003, 004, 005) · 3 P2 (006, 007, 022).
+Kalan açık: **9 çelişki** → 0 P0 · 4 P1 (003, 004, 005, 024) · 4 P2 (006, 007, 022, 025) · 1 P3 (026).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update

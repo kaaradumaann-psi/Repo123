@@ -1234,3 +1234,140 @@ müdahale olabildiğince kısıtlı olmalıdır"* ↔ kod metni birebir özet �
 kaynak *"12 kodunda 1 ve 2 alt testleri arasında 5 T puanı kadar fark varsa
 21'e bakılır"* ↔ kod metninde korunmuş ✓.
 Status: **VERIFIED (yapı + örnek)** · PHASE 9/10 kapsamı belirlendi
+
+---
+
+# PHASE 9/10 — Bölüm 5: Hs alt testi yorumu ve kod tipleri (kitap s.66-69)
+
+## SOURCE-CL-006 · Hs T-puan bantları (s.67, p41 R) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> **84'ün üzerinde T Puanı:** "Yakınmaları bütün organ sistemlerine yayılmış olan
+> kişilerde görülür. Ağrı, yorgunluk ve güçsüzlük sıklıkla vardır. Somatik ilgiler
+> somatik delüzyonlara dönüşmüş demektir. Bu belki de şizofrenik bir epizodun
+> başlangıcıdır."
+> **75-84 T Puanı:** [{kaynak metni birebir kod ile aynı — bkz. aşağıda}]
+> **60-74 T Puanı:** "Bu puanlar sıklıkla bu kişilerin hem şimdiki hem de geçmiş
+> yaşantıda fiziksel bozukluk gösterdiğine işaret etmektedir ve bu yükselmeye
+> **sıklıkla D alt testindeki yükselme eşlik eder**… Bedensel hastalığı olan
+> bireylerde **65 T puanının üstünde** bir yükselme, bu bireylerin yaşadıkları
+> güçlüklere aşırı tepki verdiklerini ve kabul edilmez dürtülerini somatizasyon
+> ile ifade ettiklerini göstermektedir."
+> **50-59 T Puanı:** "…Özelliği olan bir örüntüde **2, 6, 7, 8 ya da 0 alt
+> testlerinin 70'in üzerine yükselmediği zaman** günlük yaşam aktivitelerini
+> yerine getirdiği söylenebilir. Bu kişiler sıklıkla yetenekli, sorumluluk
+> sahibi, vicdanlı, dikkatli ve yargılamaları iyi olan kişilerdir."
+> **21-49 T Puanı:** "(a) Hastalığın hiç konu olmadığı ailelerde yetişen
+> bireyler (b) Şimdiye kadar hiç ağrı, acı ya da hastalık geçirmediği ile övünen
+> kişilerde. […] **Özelliği olan bir örüntüde 2,6,7,8 ya da 0 alt testlerinin
+> 70'in üzerinde yer aldığı bir durumdur**, çünkü bu konfigürasyonda düşük Hs alt
+> testi sıklıkla birisinin bedeni ile ilgisinin olmadığını gösterir."
+
+Kod: `HS_T_BANDS` → `T > 84` · `75-84` · `60-74` · `50-59` · `21-49`
+Karşılaştırma: **Bant sınırları birebir MATCH** ✅ · 75-84 / 60-74 / 50-59 /
+21-49 metinleri **MATCH** (birebir özet) ✅
+Status: **VERIFIED**
+
+## SOURCE-CL-007 · Hs düşük puan ve yaş özellikleri (s.66-67) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> "**Hs alt testinde düşük puan alan bir bireyin:** 1. Somatik uğraşları yoktur.
+> 2. İyimserdir. 3. Duyarlıdır. 4. İçgörüsü vardır. 5. Günlük yaşamda oldukça
+> etkindir."
+> "Hs alt testinin **40 yaşın üzerindekilerde daha çok yükseldiği** ancak genç
+> grupta daha düşük olduğu belirtilmektedir."
+> "Ciddi bedensel hastalığı olan bireylerde de bu alt testte yükselme vardır,
+> ancak bu psikiyatrik hastalar kadar yüksek değildir. Hipokondriyak tanısı
+> konulan hastaların semptomları uzun sürelidir, değişmeye dirençlidirler ve
+> bu, artık strese tepkiden farklı bir şeydir. **Bu bireyler önerilen tedaviyi
+> uygulamaz ve sık sık doktor doktor gezerler.**"
+
+Kod: 5 maddelik liste `HS_T_BANDS` içinde **YOK** · 40 yaş notu **YOK** ·
+"doktor doktor gezerler" **YOK** (kaynakta ayrı cümle)
+Status: **MISSING** → CONFLICT-026 (P3)
+
+## SOURCE-CL-008 · Tablo 8 teyidi (s.66, p41 L) — **Visual: CONFIRMED**
+
+Fact — aynen (Tablo 8, Madde Sayısı: 33):
+Doğru: `23 29 43 62 72 108 114 125 161 189 273` (11) ·
+Yanlış: `2 3 7 9 18 51 55 63 68 103 130 153 155 163 175 188 190 192 230 243 274
+281` (22) · K Eklemeli: (boş) · "Erkeklerde ortalama: 13.19, kadınlarda: 15.89
+(Savaşır, 1981)"
+Karşılaştırma: SOURCE-CL-004 ile aynı → **VERIFIED** (ikinci okuma teyidi)
+
+## SOURCE-CODE-001 · 12/21 Kodu (s.67 sonu – s.68, p41 R – p42 L) — **Visual: CONFIRMED**
+
+Fact — aynen (kod gövdesi):
+> "**12/21 Kodu** — Bu kodun en belirgin özelliği bedensel rahatsızlık ve ağrıdır.
+> Bireyler bedensel işlevleri ile çok fazla ilgilidirler. […] **12/21 Kodu veren
+> lise öğrencileri genel olarak utangaç, gergin, içedönük, mutsuz, endişeli,
+> güvensiz ve özellikle karşı cins ile ilişkilerinde oldukça çekingendirler.**
+> **Üniversite öncesi ergenler, sıklıkla utangaçlıklarını obsesyonlar ya da
+> sosyal izolasyon biçiminde gösterirler. Bağımlılık ve karamsarlık belirgindir
+> ve arkadaşları azdır. Aile öykülerinde sıklıkla ayrılıklar ya da boşanma
+> vardır.** 12 Kodunda 1 ve 2 alt testleri arasında **5 T puanı** kadar fark
+> varsa 21'e bakılır…"
+
+Ek (s.69, 12/21 kodunun devamı):
+> "Kod tipine ek olarak **Pd alt testi düşük** olduğunda heteroseksüel ilişki
+> azlığı ve seksüel zorlukların olduğu bir pasifliği gösterir. **Ma alt testinde
+> de düşüklük** olduğunda kişide enerji düzeyinde azalma, iş yapmama ve sürekli
+> yatma isteği vardır. **Mf alt testinin düşmesi** kadınlarda aşırı derecede
+> sorumluluk aldıklarını ve sıkıntılarının uzun süreli olduğunu gösterir. Eğer
+> aynı zamanda **L alt testi de yükselmişse** bu kadınlarda evlilik sorunları,
+> yorgunluk yakınmaları ve diğerleri tarafından anlaşılmama vardır."
+
+Kod: `CODES['12']` → gövde **MATCH** ✅ · `diagnosis: Pasif-bağımlı kişilik
+bozukluğu / Somatizasyon bozukluğu / Depresyon` ✅ · **lise öğrencileri** ve
+**üniversite öncesi ergenler** paragrafları **YOK** → CONFLICT-025 · **Pd/Ma/Mf/L
+koşullu ek yorumları YOK**
+Status: gövde **VERIFIED** · koşullu ek yorumlar **MISSING**
+
+## SOURCE-CODE-002 · 123/213 Kodu (s.68 sonu – s.69 başı) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> "**123/213 Kodları** (Ayrıca 1234 ve 1237'ye bakınız. 3 alt testi, 1'den 5 T
+> puanı yüksekse 213/231 kodlarına bakınız.)
+> Bu kişiler özellikle yorgunluk, güçsüzlük ve karın bölgesindeki organlarla
+> ilgili bedensel yakınmalar gösterirler. Öykülerinde uzun süreli kronik
+> hipokondriazis öyküsü vardır. Onların yakınmaları sıklıkla pasif bir
+> bağımlılığın kanıtı olabilir ancak bu kişilerde **konfüzyon, intihar
+> düşünceleri, obsesyonlar ve kompulsiyonlar yoktur.** İlgi alanları daralmış,
+> depresif, atılgan olmayan, risk alma konusunda tereddütlü kişilerdir."
+> **Olası tanı: Belirgin somatizasyon bozukluğu ve hipokondriyak uğraşlar.**
+
+Kod: **`CODES['123']` TANIMLI DEĞİL** ❌ → CONFLICT-024 (P1)
+Status: **MISSING**
+
+## SOURCE-CODE-003 · 1234 Kodu (s.69, p42 R) — **Visual: CONFIRMED**
+
+Fact — aynen:
+> "**1234 Kodu** (Ayrıca eğer alt test 1 ve 2 diğerlerinden 5 T puanı yüksekse
+> **2134'e bakınız**.)
+> Kişilerdeki kişilik zayıflığı korkaklık, stres yaratan durumlarla ve
+> sorumluluklar ile başa çıkmada yetersizlik vardır. Bağımlılık, bağımsızlık
+> çatışması yaşarlar. Alkolle sınırlar, ancak içtikleri zaman kavga ederler.
+> Bu profili veren erkekler kadınlara karşı düşmanlık duyguları gösterirler
+> (Sıklıkla fiziksel şiddet yani dayak vardır.). Özellikle güçlü bağımlılık
+> gereksinimleri engellenmiştir. Erkeklerde anneye bağımlılık özlemi, anneleri
+> tarafından reddedilme korkusu ile çatışma içindedirler. **Olası tanılar: pasif
+> agresif kişilik, anksiyete ya da psikofizyolojik reaksiyonlardır.**
+> Kadınlarda karakter bozukluğu, pasif-agresif kişilik, kimseye güven duymama,
+> duygularını ifade etme güçlüğü ya da nasıl ifade edeceğini bilememe görülür.
+> Psikoterapide savunucudurlar, motivasyonları düşüktür.
+> **Olası Tanı: Pasif-agresif kişilik / Anksiyete ya da psikofizyolojik
+> reaksiyon**"
+
+Kod: **`CODES['1234']` TANIMLI DEĞİL** ❌ → CONFLICT-024 (P1)
+Status: **MISSING**
+
+## SOURCE-CODE-004 · 1236 Kodu başlangıcı (s.69, p42 R — devamı s.70)
+
+Fact — aynen:
+> "**1236 Kodu** — Birey uzun süreli gerginlik, yetersizlik ve stres altında
+> semptom geliştirme eğilimi gösterir. **Semptomlar konversif niteliktedir.**
+> Bastırma ve yadsımayı kullanır. Olumsuz duygularını psikosomatik semptomlarla
+> gösterir."
+
+Kod: **`CODES['1236']` TANIMLI DEĞİL** ❌ → CONFLICT-024 (P1)
+Status: **MISSING** (kod metninin devamı s.70+'ta okunacak)

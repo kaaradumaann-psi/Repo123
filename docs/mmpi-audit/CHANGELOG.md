@@ -573,3 +573,48 @@ Tarih: 2026-09-21 · Karar: DECISION-026 · Öncelik: P2
 - Madde numaraları ve D/Y yönleri **değişmedi**; `#74` cinsiyet ayrımı korundu.
 - Doğrulama: `typecheck` 0 · `mmpiKeyIntegrity` **26/26** · `npm test`
   **313/313 PASS** (23 suite) · `build` PASS · **REGRESSION YOK**.
+
+---
+
+## PHASE 9/10 — batch 1: Hs yorumu + ilk kod tipleri (kitap s.66-69)
+
+Tarih: 2026-09-21 · Kaynak: kitap **s.66-69** (PDF p41 L – p42 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 66 | p41 L | Tablo 8 (Hs maddeleri) + Hs düşük puan 5 maddesi + madde 22/23 | ✅ Tablo 8 teyit · 5 madde **eksik** (026) |
+| 67 | p41 R | Hs T-puan bantları (85+/75-84/60-74/50-59/21-49) + Hs ilgili ölçekler | ✅ **5/5 bant sınırı birebir MATCH** |
+| 68 | p42 L | 12/21 kodu (gövde + ergen paragrafları) + 123/213 başlangıcı | ✅ gövde MATCH · ergen **eksik** (025) · 123/213 **kodda yok** |
+| 69 | p42 R | 12/21 koşullu ek yorumlar + 1234 + 1236 başlangıcı | ❌ **üçlü kodlar kodda yok** (024) |
+
+### Kritik bulgu — CONFLICT-024 (P1)
+
+Kaynak, Hs kod tipi bölümünde **üçlü ve dörtlü kodlar** tanımlıyor
+(`123/213`, `1234`, `1236`, `1237`, `2134`, `213/231`) ve bunlar iki noktalı
+kodlardan **farklı** yorumlar taşıyor. Kodda:
+- `CODES` sözlüğünde **45 iki noktalı kod** var, **hiç üçlü kod yok**
+- Kod üretimi `mmpiScoring.ts:258` → `slice(0, 2)` = yalnızca **en yüksek 2 ölçek**
+- 12/21 için kaynağın **"5 T puanı fark"** kuralı yalnızca metin olarak var,
+  **tespit edilmiyor**
+
+Bu, kaynağın yorum katmanının önemli bir bölümünün hiç üretilmediği anlamına
+gelir. Karar, kaynağın **tam üçlü kod seti** çıkarıldıktan sonra verilecek
+(s.70-158).
+
+### Diğer bulgular
+
+- **CONFLICT-025 (P2):** 12/21 yorumunda "lise öğrencileri" ve "üniversite öncesi
+  ergenler" paragrafları + koşullu Pd/Ma/Mf/L yorumları eksik.
+- **CONFLICT-026 (P3):** Hs düşük puanın 5 özelliği, 40 yaş notu, "doktor doktor
+  gezerler" cümlesi ve 21-49 bandının `2,6,7,8,0 > 70` örüntü koşulu eksik.
+
+### Doğrulama
+
+Görsel okuma (**≥300 dpi tam sayfa**, `v_p041_full.png`, `v_p042_full.png`) —
+Tablo 8, Hs bant sayıları, 12/21 ve üçlü kod başlıkları **gözle teyit edildi**;
+sayısal iddialar OCR'a bırakılmadı (OCR_ISSUES.md FIGURE-CURVE kuralı).
+
+### Çelişki tablosu
+
+Açık **9** (4 P1: 003/004/005/024 · 4 P2: 006/007/022/025 · 1 P3: 026) ·
+FIXED 10 · REJECTED 7. **P0 açık çelişki yok.**

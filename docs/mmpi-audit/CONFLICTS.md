@@ -864,3 +864,79 @@ Regresyon: +4 test; `tests/mmpiKeyIntegrity.test.ts` 26/26 · `npm test`
 Not (lehte delil): #74 cinsiyete göre yön ayrımı **doğru** (#74 kaynakta
 "Şayet kız iseniz" koşullu metni vardır) ve 24 kayıt kaynak metniyle tutarlıdır
 → liste tümüyle hatalı değil; içinde hem doğru hem hatalı kayıt var.
+
+---
+
+## CONFLICT-024 — Üçlü/dörtlü kod tipleri yorumlanmıyor (P1, OPEN)
+
+Area: `src/scoring/mmpiSourceCodes.ts` + `mmpiScoring.ts` kod üretimi
+
+Source: `SOURCE-CODE-002/003/004` (kitap s.68-69) — kaynak, Hs kod tipi
+bölümünde **123/213**, **1234**, **1236**, **1237**, **2134**, **213/231**
+kodlarını ayrı ayrı tanımlar. Ayrıca 12/21 için "1 ve 2 alt testleri arasında
+**5 T puanı** kadar fark varsa 21'e bakılır" gibi **fark kuralları** verir.
+
+Current implementation:
+```ts
+// mmpiScoring.ts:258
+const sortedClin = [...clinical].filter(s => s.id !== 'Mf' && s.id !== 'Si')
+  .sort((a, b) => b.tScore - a.tScore);
+const topTwo = sortedClin.slice(0, 2);   // ← yalnızca 2 ölçek
+```
+`CODES` sözlüğünde **45 iki noktalı kod** var; **hiç üçlü kod yok**
+(`grep "'123'\|'1234'\|'1236'"` → 0 sonuç).
+
+Impact: Kaynağın yorum katmanının önemli bir bölümü (üçüncü ölçeğin yükselmesiyle
+**değişen** yorumlar) hiç üretilmiyor. Örnek: yalnızca 1-2 yükselmiş profil ile
+1-2-**3** yükselmiş profil kodda aynı yorumu alır; kaynakta farklıdır (12/21 vs
+123/213). Ayrıca 12/21 kodu için kaynağın **5 T farkı** kuralı kodda yalnızca
+`seeAlso` metni olarak var, **tespit edilmiyor**.
+
+Status: **OPEN** — çözüm tasarım kararı gerektirir:
+(a) kod üretimini 3. ölçeğe genişlet + üçlü `CODES` girişleri ekle, **veya**
+(b) iki noktalı kod korunup üçüncü ölçek **yüksek** olduğunda "ek yorum" olarak
+göster. Karar için önce kaynağın üçlü kod seti **tamamı** çıkarılmalı
+(s.70-158). Bu yüzden **şimdi kod değiştirilmedi**; kaynak tarama devam ediyor.
+
+---
+
+## CONFLICT-025 — 12/21 yorumunda ergen/lise paragrafları eksik (P2, OPEN)
+
+Area: `CODES['12']` metni
+
+Source (**Visual: CONFIRMED**, s.68): "12/21 Kodu veren **lise öğrencileri**
+genel olarak utangaç, gergin, içedönük, mutsuz, endişeli, güvensiz ve özellikle
+karşı cins ile ilişkilerinde oldukça çekingendirler. **Üniversite öncesi
+ergenler**, sıklıkla utangaçlıklarını obsesyonlar ya da sosyal izolasyon
+biçiminde gösterirler. Bağımlılık ve karamsarlık belirgindir ve arkadaşları
+azdır. Aile öykülerinde sıklıkla ayrılıklar ya da boşanma vardır."
+
+Current implementation: `CODES['12'].text` — bu iki paragraf **yok**
+(kontrol: `lise` · `ergen` · `utangaç` · `ayrılık` · `boşanma` → hepsi 0 sonuç).
+Kod metni doğrudan "12 kodunda 5 T puanı fark varsa 21'e bakılır" bölümüne geçer.
+
+Ayrıca kaynak s.69'daki **Pd / Ma / Mf / L koşullu** ek yorumları
+(`SOURCE-CODE-001`) kodda yok.
+
+Impact: Yorum içeriği eksik; ayrıntı düzeyi düşük (yanlış yorum üretilmiyor).
+Status: **OPEN** — içerik eklemesi; metin kaynaktan birebir alınmalı.
+
+---
+
+## CONFLICT-026 — Hs düşük puan özellikleri ve yaş notu eksik (P3, OPEN)
+
+Area: `HS_T_BANDS` (21-49 bandı) ve Hs genel yorumu
+
+Source (**Visual: CONFIRMED**, s.66-67):
+1. "Hs alt testinde düşük puan alan bir bireyin: **1. Somatik uğraşları
+   yoktur. 2. İyimserdir. 3. Duyarlıdır. 4. İçgörüsü vardır. 5. Günlük yaşamda
+   oldukça etkindir.**" → kodda **yok**
+2. "Hs alt testinin **40 yaşın üzerindekilerde** daha çok yükseldiği ancak genç
+   grupta daha düşük olduğu belirtilmektedir." → kodda **yok**
+3. "Bu bireyler önerilen tedaviyi uygulamaz ve **sık sık doktor doktor
+   gezerler.**" → kodda **yok**
+4. 21-49 bandı: "Özelliği olan bir örüntüde **2,6,7,8 ya da 0 alt testlerinin
+   70'in üzerinde yer aldığı** bir durumdur" → kodda **yok**
+
+Impact: Bilgi eksikliği; tespit kuralı (4) uygulanmıyor ama yanlış sonuç
+üretilmiyor. Status: **OPEN**
