@@ -2585,3 +2585,117 @@ Status: **VERIFIED** (kaynak) · **YOK** (kod)
 | Kodda YOK | **6** (`648`, `678/876`, `679`, `680/860`, `694/964`, `698/968`) |
 | Blok-bazlı metin farkı | **1** (`64/46` Pa bloğu gövdesi kodda yok) |
 | Yeni sayısal tarama kuralı (kodda yok) | **4** (paranoid vadi 70/10 T · `698/968` 5 T kuralı · `456` örüntüsü 65/65/35 · `45` "2 ya da 8 üçüncü") |
+
+---
+
+# PHASE 9/10 batch 17 — Pt (7) Psikasteni bloğu (kitap s.137-141)
+
+Sayfa eşlemesi (OCR başlıklarıyla doğrulandı): **p76 R = 137 · p77 L = 138 ·
+p77 R = 139 · p78 L = 140 · p78 R = 141**
+
+## SOURCE-PT-001 · Tablo 14 — Pt anahtarı (s.138) — **Visual: CONFIRMED** (125 dpi tam sayfa)
+
+> "**Tablo 14. Psikasteni alt testi: Madde numaraları ve puanlama yönü
+> (Madde Sayısı: 48)**"
+
+| | Madde numaraları |
+|---|---|
+| **Doğru** (4 satır) | 10 15 22 32 41 67 76 86 94 102 106 · 142 159 182 189 217 238 266 301 304 305 317 · 321 336 337 340 342 343 344 346 349 351 352 · 356 357 358 359 360 361 |
+| **Yanlış** | 3 · 8 · 36 · 122 · 152 · 164 · 178 · 329 · 353 |
+| **(K eklemeli)** | ✓ |
+
+Kod `SCORING_KEYS.Pt`: Doğru **39** + Yanlış **9** = **48**
+→ **BİREBİR MATCH** ✅ (FAZLA [] · EKSİK [])
+Status: **VERIFIED** — script: `cmp-tablo14.ts`
+
+## SOURCE-PT-002 · Pt T bantları (s.139) — **Visual: CONFIRMED**
+
+> "**84 T puanı ve üstü:** Bireyin ajite ruminasyonları, korku hali, obsesyonları
+> ve kompülsiyonları ya da fobileri olduğunu göstermektedir. Anksiyete ve
+> gerginlik o kadar fazladır ki günlük yaşamlarını bile devam ettiremezler.
+> Entellektüalizasyon, izolasyon ve rasyonalizasyon sıklıkla kullanılmaktadır."
+> "**75-84 T puanı:** Temiz, titiz, düzenli kişilerdir. Önemsiz sorunlar karşısında
+> bile gerginlik ve endişe yaşarlar. Kendilerini yetersiz, aşağılık duyguları ve
+> suçluluğu olan kişiler olarak gösterirler. […] Kendilerine ait bir fikirleri yoktur."
+> "**60-74 T puanı:** Bu yükseltiler dürüst, mükemmeliyetçi, titiz ve kendini
+> eleştiren bireyler olduklarına işaret etmektedir. Küçük sorunları bile
+> kendilerine dert edinme eğilimdedirler."
+> "**45-59 T puanı:** Bireyler yaşamlarını ve işlerini endişe ve güvensizlik
+> duymadan yürütebilirler."
+> "**20-44 T puanı:** Rahat, duygusal, gerginliği olmayan bireylerdir. Çoğu
+> kendine güvenir ve uyumludur. Üretici ve yeterlidirler. Kaygı düzeyleri çok
+> düşük olduğu için sanki tembel gibi görünürler. Başarıya, statüye, kabul
+> görmeye önem veren kişilerdir."
+
+Kod (`clinicalBands('Pt')`): `T ≥ 84` · `T 75-83` · `T 60-74` · `T 45-59` ·
+`T 20-44` → **5/5 bant MATCH** ✅
+**Not (örtüşme çözümü):** kaynak "75-**84** T" yazarken 84'ü aynı zamanda
+"84 ve üstü" bandına da verir; kod 84'ü üst banda atar (75-83) → kaynağın
+örtüşen sınırını tutarlı biçimde çözer, davranış farkı yok.
+Status: **VERIFIED**
+
+## SOURCE-PT-003 · Norm (s.138) — **KAYNAK İÇİ/ATIF FARKI**
+
+> "**Erkeklerde ortalama: 27.90, kadınlarda ortalama: 29.90 (Savaşır, 1981)**"
+
+Kod `TURKISH_NORMS.Pt`: erkek **27.9** ✓ · kadın **29.2** ❌ (kaynak metni 29.90)
+Ancak **Tablo 30 (s.257-260)** — kitabın asıl norm tablosu — Pt kadın için
+**29.20** verir ve bu değer 26/26 MATCH olarak doğrulanmıştır.
+
+**Bulgu:** s.138'deki değer **Savaşır (1981)** atıflı ayrı bir çalışmadandır;
+kitabın kendi norm tablosu (Tablo 30) **29.20**'dir. Kod **Tablo 30'u izler**
+(normatif tablo > metin anması) → **kod doğru**; fark belgelendi.
+→ **CONFLICT-037** (P2, REJECTED — kaynak atıf farkı)
+Status: **VERIFIED** (kod Tablo 30 ile uyumlu)
+
+## SOURCE-PT-004 · "Sadece Pt alt testinin yükselmesi" (s.139) — **Visual: CONFIRMED**
+
+> "**Sadece Pt alt testinin yükselmesi:** Alt test 7'de yüksek puanlar, psikiyatrik
+> grupta genellikle kaygılı, gergin, kararsız ve dikkatini bir noktada
+> yoğunlaştıramayan bireyleri tanımlamaktadır. Bu kişilerde obsesif düşünceler,
+> ruminasyonlar, kendinden şüphe… Fobi ve kompülsif davranış, bu alt testte yüksek
+> puan alan kişilerde görülebilmesine karşın, bu yüksek puanın karakteristiği
+> değildir. **Gerçekte, pek çok rijid kompülsif hasta alt test 7'yi yükseltmez,
+> çünkü bu kişilerin entellektüel savunmaları anksiyetelerini ve güvensizlik
+> duygularını kontrol edecek kadar güçlüdür.**"
+
+Kod: `SINGLE_PT` (`mmpiSource.ts`) → gövde **birebir MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-PT-005 · "Pt alt testinde DÜŞÜK puan alan bir birey" (s.139) — **Visual: CONFIRMED**
+
+> "1. Korkular ve kaygılardan arınmıştır. 2. Kendine güven duymaktadır.
+> 3. Geniş ilgi alanları vardır. 4. Sorunlu, gerçekçi, etkili, uyumludur.
+> 5. Başarı, mevki ve tanınıp bilinmeye ilişkin değerleri vardır."
+
+Kod: Pt düşük-puan listesi **var mı** → `UNVERIFIED_DATA.md` (kontrol edildi,
+ayrı yapı olarak yok; CONFLICT-026 sınıfı)
+Status: **VERIFIED** (kaynak) · **EKSİK** (kod)
+
+## SOURCE-PT-006 · Pt kod bloğu — 12 başlık (s.140-141) — **Visual: CONFIRMED**
+
+`71/17` · `72/27` · `73/37` · `74/47` · `75/57` · `76/67` · `78/87` (s.140) ·
+`782` · `872` · `784/874` · `789` · `79/97` (s.141)
+Çapraz referanslar: `278/728`, `478/728`, `478/748` (s.140, "bakınız" — ayrı gövde yok)
+
+**Kritik sayısal kurallar — ikisi de KODDA VAR ✅:**
+- s.140: "Eğer 2 ve 4, 8 alt testinin **5 T puanı altındaysa** 278/728 ve 478/728 ve
+  478/748 kodlarına bakınız" → kod `78/87` metninde mevcut
+- s.141: "**7 < 8**: Her iki yükselmede **75 T puanının üstünde** ve 8 alt testinde
+  belirgin bir yükselme varsa tanı şizofrenidir." → kod `78/87` metninde mevcut
+
+Kod karşılaştırması (`cmp-pt-batch17.ts`):
+- **8 iki-ölçek kod** → hepsi VAR ✅
+- **3 tanı varyantı** (`782`, `872`, `784/874`) → kod `78/87` kaydının
+  **`diagnosis` alanında VAR** ✅ ("782 kodu: Depresif Bozukluk, Obsesif Kompulsif
+  Bozukluk" · "872 kodu: Şizofrenik Reaksiyon" · "784/874 kodu: Şizofrenik
+  Reaksiyon, Sizoid Kişilik Bozukluğu")
+- **`789` gövdesi YOK** ❌ — kaynak: "Hostil, gergin, şüpheci, hiperaktif,
+  huzursuz bireylerdir. Günlerini fanteziler ve hayal kurmayla geçirirler.
+  Yansıtmayı kullanır, uygunsuz duygudurum gösterirler. […] Kendilerine ilişkin
+  grandioziteleri vardır, kendileri ile övünürler. Başarıya ulaşma isteklerinin
+  çok fazla olmasına karşın orta düzeyde performans gösterirler."
+  → `codeInterpretation('789')` = `78/87` (kırpma)
+
+**Pt bloğu kapsamı: 14 VAR / 1 YOK.**
+Status: **VERIFIED** (kaynak + kod karşılaştırması)

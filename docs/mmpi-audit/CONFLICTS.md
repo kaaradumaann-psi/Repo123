@@ -1531,3 +1531,26 @@ Kaynaktan çıkan ve kodda karşılığı olmayan **3 yeni sayısal tarama kural
 
 Ayrıca Şekil 21 (**Scarlett O'Hara vadisi**: `Pd ↑ · Mf ↓ · Pa ↑`) CONFLICT-033
 kapsamına eklendi — tanımlı bir konfigürasyon, kodda hiç yok.
+
+
+---
+
+## CONFLICT-037 — Pt normu: s.138 metni (29.90) ↔ Tablo 30 (29.20) — **REJECTED**
+
+Area: `TURKISH_NORMS.Pt` (kadın)
+
+**Source A** (s.138, metin): "Erkeklerde ortalama: **27.90**, kadınlarda
+ortalama: **29.90** (Savaşır, 1981)" — *Visual: CONFIRMED*
+
+**Source B** (Tablo 30, s.257-260, kitabın norm tablosu): Pt kadın = **29.20**
+(sd 6.59) — bu değer **26/26 MATCH** olarak doğrulanmıştır (PHASE 6).
+
+**Current implementation:** `TURKISH_NORMS.Kadın.Pt = 29.2` → **Tablo 30 ile uyumlu**
+
+**Değerlendirme:** s.138'deki değer **Savaşır (1981)** atıflı ayrı bir çalışmadan
+anılmaktadır (`SECONDARY-SOURCE` atıf); kitabın kendi normatif tablosu Tablo 30'dur
+ve kod onu izler. İki değer farklı kaynaklara aittir → **kaynak içi çelişki değil,
+atıf farkı**.
+
+Resolution: **REJECTED (kod doğru).** Kod Tablo 30'u izlemeye devam eder. Fark,
+gelecekteki bir değişiklikte yanlışlıkla "düzeltme" yapılmaması için belgelendi.

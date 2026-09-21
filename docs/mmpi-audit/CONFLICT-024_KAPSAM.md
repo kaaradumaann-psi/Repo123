@@ -377,3 +377,38 @@ eksik + yanlış metin dönüyor).
 | Mf (s.121-126) | 10 | 9 | 1 |
 | **Pa (s.130-135)** | **15** | **9** | **6** |
 | **TOPLAM** | **115** | **79** | **38** |
+
+## Pt (7) kod bloğu (s.140-141) — **14 VAR / 1 YOK**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | `71/17` | s.140 | **VAR** ✅ | kayıt `17/71` |
+| 2 | `72/27` | s.140 | **VAR** ✅ | kayıt `27/72` |
+| 3 | `73/37` | s.140 | **VAR** ✅ | kayıt `37/73` |
+| 4 | `74/47` | s.140 | **VAR** ✅ | kayıt `47/74` |
+| 5 | `75/57` | s.140 | **VAR** ✅ | kayıt `57/75` |
+| 6 | `76/67` | s.140 | **VAR** ✅ | kayıt `67/76` |
+| 7 | `78/87` | s.140 | **VAR** ✅ | gövde MATCH · "5 T puanı" ve "75 T" koşulları dahil |
+| 8 | `782` | s.141 | **VAR** ✅ *(diagnosis)* | kod `78/87` `diagnosis` alanında: "78/87 + Olası tanı" |
+| 9 | `872` | s.141 | **VAR** ✅ *(diagnosis)* | `diagnosis` alanında |
+| 10 | `784/874` | s.141 | **VAR** ✅ *(diagnosis)* | `diagnosis` alanında |
+| 11 | **`789`** | s.141 | **YOK** ❌ | tam gövde: "Hostil, gergin, şüpheci, hiperaktif…" → `'789'`→`78/87` (kırpma) |
+| 12 | `79/97` | s.141 | **VAR** ✅ | |
+| — | `278/728`, `478/728`, `478/748` | s.140 | (çapraz ref) | kaynakta "bakınız"; ayrı gövde yok |
+
+**Not:** `782`/`872`/`784/874` kaynakta **kısa "Olası Tanı" satırlarıdır** (tam
+gövde değil); kod bunları `78/87` kaydının `diagnosis` alanında taşıyor → bu
+tasarım **kaynağa uygun** kabul edildi.
+
+### Kümülatif kapsam (PHASE 9/10)
+
+| Blok | İncelenen | VAR | YOK |
+|---|---|---|---|
+| Hs (s.63-78) | 31 | 31 | 0 |
+| D (s.79-92) | 27 | 9 | 18 |
+| Hy (s.95-101) | 12 | 12 | 0 |
+| Pd (s.107-120) | 20 | 9 | 13 |
+| Mf (s.121-126) | 10 | 9 | 1 |
+| Pa (s.130-135) | 15 | 9 | 6 |
+| **Pt (s.137-141)** | **15** | **14** | **1** |
+| **TOPLAM** | **130** | **93** | **39** |

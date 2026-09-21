@@ -1240,3 +1240,33 @@ Tarih: 2026-09-22 · Kaynak: **s.130-135** (PDF p73 L – p75 R)
 
 `typecheck` **0 hata** · `npm test` **316/316 PASS** (24 suite) · **REGRESSION
 YOK** · **kod değişikliği yok** (FIX aşaması tüm kod seti çıkarıldıktan sonra).
+
+---
+
+## PHASE 9/10 — batch 17: Pt (7) Psikasteni bloğu (kitap s.137-141)
+
+Tarih: 2026-09-22 · Kaynak: **s.137-141** (PDF p76 R – p78 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 137 | p76 R | **Pt (7) Alt Testi** başlığı + Graham 1987 yüksek-puan listesi (1-22) | — |
+| 138 | p77 L | **Tablo 14 (Pt anahtarı — 48 madde)** + norm + madde açıklamaları 23-38 | 🎯 **BİREBİR MATCH** · norm farkı → CONFLICT-037 |
+| 139 | p77 R | Madde 39-41 + **"Sadece Pt yükselmesi"** + **düşük puan 5 maddesi** + **Pt T bantları** | bantlar 5/5 MATCH · SINGLE_PT MATCH · düşük liste kodda YOK |
+| 140 | p78 L | Pt çapraz ilişkiler + `71/17`, `72/27`, `73/37`, `74/47`, `75/57`, `76/67`, `78/87` | 7/7 VAR |
+| 141 | p78 R | `782`, `872`, `784/874`, `789`, `79/97` + "7<8 → 75 T" kuralı | 4 VAR (biri `diagnosis`) · `789` **YOK** |
+
+### Bulgular
+
+- **🎯 P0 — Tablo 14 birebir MATCH:** Doğru 39 + Yanlış 9 = **48** (kitap başlığı 48)
+- **Pt T bantları 5/5 MATCH** (kaynağın 75-84 ⟷ 84+ örtüşmesi kodda 75-83/84+ olarak çözülür)
+- **`SINGLE_PT` birebir MATCH** ✅
+- **Kritik sayısal koşullar kodda mevcut:** "8'in 5 T altı" · "7<8 → 75 T üstü"
+- **Pt bloğu: 14 VAR / 1 YOK** → kümülatif **130 başlık: 93 VAR / 39 YOK**
+- **CONFLICT-037 (REJECTED):** s.138'deki kadın normu **29.90** Savaşır (1981)
+  atıflıdır; kitabın Tablo 30'u **29.20**'dir ve kod onu izler → atıf farkı, kod doğru
+- Pt **düşük-puan 5 maddesi** kodda yok → CONFLICT-026 sınıfı
+
+### Doğrulama
+
+`cmp-tablo14.ts` (anahtar birebir) · `cmp-pt-batch17.ts` (kod kapsamı) ·
+typecheck **0** · testler **316/316 PASS** · **kod değişikliği YOK**.
