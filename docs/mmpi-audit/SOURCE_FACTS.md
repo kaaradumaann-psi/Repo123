@@ -1918,3 +1918,91 @@ Kod: `CODES['46']` → metin **birebir MATCH** ✅ (paragraf paragraf), `diagnos
 463/643**'e de yolluyor → `486/846`, `489/849` hangi sayfadan? sıradaki batch'te
 kontrol edilecek) → `UNVERIFIED` notu (batch 12)
 Status: **VERIFIED** (46/64 gövdesi)
+
+---
+
+# PHASE 9/10 batch 12 — Pd (4) kod bloğu II (kitap s.114-117)
+
+## SOURCE-CODE-PD-007 · 46/64 kapanışı: sayısal koşullar (s.115, p65 L/R)
+
+Fact — aynen (s.114'ten taşan paragraf + s.115 kapanış):
+> "Sıklıkla benzer biçimde terapist ya da tedaviyi veren diğer bireylerden de
+> aşırı isteklerde bulunurlar, ancak aynı zamanda da aldıkları tedaviyi eleştirir
+> ve karşı çıkarlar. […] **İçgörüleri yoktur. 5 alt testinin 40 T puanının altında
+> olduğu kadınlarda pasiflik, bağımlılık ve kendine acıma görülür (bakınız Yüksek 4
+> ve Düşük 5).** Menstrüasyonda düzensizlikler, cinsel işlev bozukluğu, baş
+> ağrıları ve sırt ağrıları gibi fiziksel yakınmalar da olur."
+
+Status: **VERIFIED** — 40 T + "Yüksek 4/Düşük 5" atfı (kodu yok, CONFLICT-024)
+
+## SOURCE-CODE-PD-008 · 468/648 Kodu (s.115, p65 R)
+
+Fact — aynen (**Visual: CONFIRMED**, 340 dpi `v_pd115_469.png`):
+> "**468/648 Kodları**
+> Eğer birey psikiyatride yatan bir hasta ise şiddetli ve olasılıkla kronik,
+> duygusal bir rahatsızlığı, büyük olasılıkla **paranoid şizofreniyi düşündürür**.
+> Bu bireyler kuşkucu, kızgın, aşırı duyarlı, suçlayıcıdırlar. Eleştiriden kolayca
+> yaralanırlar ve durumlara kötü niyetli anlamlar yükleme ve düşüncelerinde aşırı
+> genelleme eğilimindedirler. […] delüzyonlar ya da referans fikirleri olabilir,
+> büyüklük (grandiozite) elemanları, en azından benmerkezci tarzda olabilir.
+> Bireyler gerçekte kızgınlıklarını (ve diğer psikolojik problemleri) inkâr
+> ederler ve kızgınlığı başkalarına yüklerler […]"
+
+**Sayısal kural — aynen (340 dpi `v_pd115_469b.png`):**
+> "**K testi 50 T puanının altında, test 5, 4 ve 6'nın 5 T puanı alanı içinde
+> ve/veya alt test 9 ve 2 de 70 T puanının üzerinde olduğu durumlarda impuls
+> kontrolünde azalma vardır.**"
+
+Kod: **`468/648` kaydı YOK** → `codeInterpretation('468')` = `46/64` (CONFLICT-030)
+Status: **MISSING** (kod yok) · koşul → CONFLICT-027 (T-eşiği modellemesi yok)
+
+## SOURCE-CODE-PD-009 · 469 Kodu (s.115, p65 R)
+
+Fact — aynen (**Visual: CONFIRMED**, 340 dpi `v_pd115_469c.png`):
+> "**469 Kodu**
+> 46 koduna ek olarak **test 9 da 70 T puanının üzerinde ise** bu ani öfke
+> patlamaları olan bireyleri göstermektedir."
+
+Kod: **`469` kaydı YOK** → `codeInterpretation('469')` = `46/64` (CONFLICT-030)
+Status: **MISSING** (kod yok; tek cümlelik kural, kolayca eklenebilir — CONFLICT-024
+koşullu cümle örneklerine eklendi)
+
+## SOURCE-CODE-PD-010 · 47/74 Kodu (s.115-116, p65 R – p66 L)
+
+Fact — aynen:
+> "**47/74 Kodu** (Ayrıca **247/427/274** kodlarına bakınız.)
+> Bu bireylerde (hem ergenler, hem de yetişkinler) kızgınlık açıkça göze çarpan
+> bir özellik ise de, kendi kendini eleştirme ve suçluluk da sık görülür.
+> Bireyin davranışı **döngüsel bir örüntü** gösterir. […] eyleme vuruk davranış
+> gösterirler. Bu sırada, sıklıkla yasal sınırlamaları çiğnerler. Eyleme vurma
+> döneminden sonra […] **çok fazla pişmanlık, utanma ve suçluluk** yaşarlar.
+> Vicdan azapları çok şiddetli olursa da, davranışlarını kontrol etme (genellikle
+> aşırı kontrol etme girişimi) geçicidir ve daha sonra da eyleme vuruk davranış
+> dönemleri beklenir. **Davranışlarının altında, bağımlılık ve bağımsızlık
+> arasında büyük çatışma vardır.** […] **En sık görülen 3'lü kodlar 478/748 ve
+> 472/742'dir.** **Psikoterapi suçluluk yaşadıkları dönemde yapılırsa etkili
+> olabilir.** Ancak uzun…"
+
+Kod: `CODES['47']` → gövde **MATCH** ✅ (döngüsel örüntü, suçluluk, aşırı kontrol);
+`seeAlso: '247/427/274 kodlarına da bakınız.'` ✅ MATCH
+**Eksikler:** (a) "**En sık görülen 3'lü kodlar 478/748 ve 472/742'dir**" cümlesi
+kodda **YOK**; (b) psikoterapi cümlesi var mı → kontrol edildi (`47` metninde
+"Psikoterapi" **var**) ; (c) `247/427`, `274`, `472/742`, `478/748` **kayıtları yok**
+Status: gövde **VERIFIED** · 4 kod **MISSING** → CONFLICT-024
+
+## SOURCE-CODE-PD-011 · 48/84 Kodu (s.116-117, p66 L/R)
+
+Fact — aynen:
+> "Bu koddaki **ergenler** kızgın ve mutsuzdurlar, garip düşünce örüntüleri
+> gösterirler […] **Akademik yönden başarısızdırlar ve suç işleyebilirler.
+> Sıklıkla anoreksiya, aşırı hareketlilik ve enürezis ve enkoprezis öyküleri de
+> vardır.** […] Bunlarla terapötik işbirliği kurmak zordur ve terapiden sıklıkla
+> kaçınırlar ve/veya sorunların varlığını inkâr ederler. Bu koddaki **yetişkinler**
+> genellikle major bir kişilik bozukluğu ya da **psikotik bir süreç** gösterirler."
+
+Kod: `CODES['48']` → `diagnosis: ['Psikiyatrik yatan hasta ise şizofreni (Paranoid
+tip)', 'Borderline kişilik bozukluğu', 'Antisosyal, paranoid, şizoid kişilik
+bozukluğu']`; `seeAlso: '482/842, 486/846, 489/849'`
+Status: gövde **VERIFIED** · `482/842`, `486/846`, `489/849` **kayıtları yok** →
+CONFLICT-024 (isimleri `seeAlso`'da var, gövdeleri yok — 46/64'teki `468/648`
+ile aynı kalıp)

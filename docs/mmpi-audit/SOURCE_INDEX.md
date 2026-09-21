@@ -87,6 +87,10 @@ kitap s.244 (Ek 9) = PDF p130 L · kitap s.257 (Ek 10) = PDF p136 R.
 | **111** | **p63 R** | **Sadece Pd yükselmesi** (en az 10 T) + **Pd diğer alt testlerle ilişkisi** (41/14, 42/24, 43/34, **Yüksek 4/Düşük 5**) | **DONE** (340 dpi görsel) |
 | **112** | **p64 L** | **Yüksek 4/Düşük 5** devamı + **45/54 Kodu** (+ **yaş/eğitim/cinsiyet zorunluluğu**) | **DONE** (OCR `<LOWCONF>` → görsel kurtarma) |
 | **113** | **p64 R** | **456 Kodu** + **46/64 Kodu** | **DONE** (340 dpi görsel) |
+| **114** | **p65 L** | 46/64 kapanışı (40 T koşulu) | **DONE** |
+| **115** | **p65 R** | **468/648 Kodu** + **469 Kodu** + **47/74 Kodu** başlangıcı | **DONE** (340 dpi görsel ×3) |
+| **116** | **p66 L** | **47/74** devamı (478/748 · 472/742 atıfları) + **48/84 Kodu** başlangıcı | **DONE** |
+| **117** | **p66 R** | **48/84** devamı (ergen + yetişkin) | **DONE** |
 | 111-158 | p63 R – … | Pd kod bloğu + Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0) | NOT_STARTED |
 | 103 | p59 L | **Nevrotik üçlü profilleri** | NOT_STARTED |
 | 111-120 | p63 L – p67 R | Pd (4) alt testi + kod tipleri (45/54, 468, 48/84, 489, 49/94 …) | NOT_STARTED |

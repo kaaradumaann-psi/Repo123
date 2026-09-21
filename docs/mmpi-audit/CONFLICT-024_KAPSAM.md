@@ -264,6 +264,26 @@ sonucu: bu örüntüler klinik yorum üretmez.
 | 8 | `468/648` | s.113 | **YOK** ❌ | 46/64 içinde atıf; `seeAlso`'da adı var, kaydı yok |
 | 9 | `463/643` | s.113 | **YOK** ❌ | 46/64 içinde atıf; `seeAlso`'da adı var, kaydı yok |
 
+## Pd (4) kod bloğu II (s.114-117) — **2 VAR / 8 YOK**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | `46/64` kapanışı (40 T koşulu + Yüksek4/Düşük5 atfı) | s.114-115 | **VAR** ✅ | gövde devamı MATCH |
+| 2 | **`468/648`** | s.115 | **YOK** ❌ | paranoid şizofreni + **K<50, 5/4/6 5T alanı, 9&2>70** koşulu |
+| 3 | **`469`** | s.115 | **YOK** ❌ | tek cümle: "46'ya ek olarak **test 9 > 70 T** → ani öfke patlamaları" |
+| 4 | `47/74` | s.115-116 | **VAR** ✅ | gövde + seeAlso MATCH |
+| 5 | **`247/427`** | s.115 | **YOK** ❌ | `seeAlso`'da adı var, gövdesi yok |
+| 6 | **`274`** | s.115 | **YOK** ❌ | `47`'nin seeAlso'sunda — **D bloğunda da vardı** (batch 7) |
+| 7 | **`478/748`** | s.116 | **YOK** ❌ | "en sık görülen 3'lü kodlardan biri" |
+| 8 | **`472/742`** | s.116 | **YOK** ❌ | "en sık görülen 3'lü kodlardan biri" |
+| 9 | `48/84` | s.116-117 | **VAR** ✅ | gövde + 3 diagnosis MATCH |
+| 10 | **`482/842`, `486/846`, `489/849`** | s.116 | **YOK** ❌ | `seeAlso`'da ad var, gövde yok |
+
+**Örüntü (kayıt):** `seeAlso` alanları **kayıtta olmayan kodlara** işaret ediyor —
+`46/64` → `468/648`, `48/84` → `482/842, 486/846, 489/849`. Bu, CONFLICT-030'un
+"kapalı döngü" bulgusunun bir başka biçimi: kullanıcı tıkladığında **kırpma
+nedeniyle başka bir metne** düşüyor.
+
 ### Güncel genel toplam
 
 | Blok | Kodda VAR | Kodda YOK |
@@ -272,5 +292,6 @@ sonucu: bu örüntüler klinik yorum üretmez.
 | D (s.79-92) | 9 | 18 |
 | Hy (s.95-101) | 8 | 8 |
 | Nevrotik üçlü profilleri (s.103-106) | 0 | 4 |
-| **Pd (s.111-113) — batch 11** | **5** | **4** |
-| **Toplam** | **31** | **56** |
+| Pd (s.111-113) — batch 11 | 5 | 4 |
+| **Pd (s.114-117) — batch 12** | **2** | **8** |
+| **Toplam** | **33** | **64** |

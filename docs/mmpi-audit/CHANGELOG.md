@@ -1030,3 +1030,41 @@ Tarih: 2026-09-21 · Kaynak: **s.111-113** (PDF p63 R – p64 R)
 
 Değişiklik olmadığı için tam suite koşulmadı; karşılaştırma script'i
 `scripts/mmpi-audit/cmp-pd-batch11.ts` eklendi (yeniden koşulabilir kanıt).
+
+---
+
+## PHASE 9/10 — batch 12: Pd (4) kod bloğu II (kitap s.114-117)
+
+Tarih: 2026-09-21 · Kaynak: **s.114-117** (PDF p65 L – p66 R)
+
+| s. | İçerik | Sonuç |
+|---|---|---|
+| 114-115 | 46/64 kapanışı (40 T koşulu) | ✅ gövde MATCH |
+| 115 | **468/648 Kodu** | ❌ **YOK** (paranoid şizofreni + 3 sayısal koşul) |
+| 115 | **469 Kodu** | ❌ **YOK** (tek cümle: test 9 > 70 T) |
+| 115-116 | `47/74` | ✅ VAR · "en sık 3'lü kodlar 478/748 ve 472/742" **eksik** |
+| 116 | **478/748**, **472/742**, **247/427**, **274** | ❌ **YOK** |
+| 116-117 | `48/84` | ✅ VAR · `482/842`, `486/846`, `489/849` **YOK** |
+
+### Yeni ampirik kanıt (CONFLICT-030 — kapalı döngü)
+
+| Çağrı | Dönen | Beklenen |
+|---|---|---|
+| `'468'`,`'469'`,`'462'`,`'463'` | `46/64` | 468/648 · 469 · 462/642 · 463/643 |
+| `'472'`,`'478'` | `47/74` | 472/742 · 478/748 |
+| `'482'`,`'486'`,`'489'` | `48/84` | 482/842 · 486/846 · 489/849 |
+| `'247'` | `24/42` | 247/427 · `'274'` → `27/72` |
+
+→ **11 kod** hiç yok; `seeAlso` alanları **var olmayan kayıtlara** işaret ediyor.
+CONFLICT-030: **17 → 28 örnek** · CONFLICT-024 toplamı: **33 VAR / 64 YOK** ·
+CONFLICT-027: **23 → 26 koşul**.
+
+### Görsel doğrulamalar
+
+- `v_pd115_469.png` — 468/648 gövdesi (340 dpi)
+- `v_pd115_469b.png` — **K<50 ∧ 5/4/6 5 T alanı ∧ 9&2>70 T** koşulu (birebir)
+- `v_pd115_469c.png` — 469 kuralı ("test 9 da 70 T puanının üzerinde")
+
+### Kod değişikliği
+
+**YOK** (salt okuma + doğrulama turu).

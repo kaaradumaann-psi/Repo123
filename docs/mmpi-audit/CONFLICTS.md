@@ -1300,3 +1300,36 @@ Pd (4) bloğunda kodda **YOK** olanlar:
 
 → `slice(0,2)` kırpması **Pd bloğunda da** yanlış metne düşürüyor. CONFLICT-030
 örnekleri **13 → 17**'ye çıktı.
+
+---
+
+## CONFLICT-027 · genişletme (Pd bloğu II — s.115-116)
+
+Yeni T-eşiği koşulları (hepsi **görsel doğrulandı**):
+
+| # | Kaynak koşulu | Sayfa | Kod |
+|---|---|---|---|
+| 1 | **468/648:** "K testi **50 T puanının altında**, test **5, 4 ve 6'nın 5 T puanı alanı içinde** ve/veya alt test **9 ve 2 de 70 T puanının üzerinde** olduğu durumlarda impuls kontrolünde azalma vardır" | s.115 | `468` kaydı yok → koşul da yok |
+| 2 | **469:** "46 koduna ek olarak **test 9 da 70 T puanının üzerinde ise**… ani öfke patlamaları" | s.115 | `469` kaydı yok |
+| 3 | **46/64:** "**5 alt testinin 40 T puanının altında** olduğu kadınlarda pasiflik, bağımlılık ve kendine acıma" | s.115 | koşul yok |
+
+→ CONFLICT-027 örnekleri **23 → 26**'ya çıktı. Ortak kök: `CodeInterpretation`
+modelinde **koşul alanı yok** (`rule`/`text`/`diagnosis`/`seeAlso` dışında).
+
+## CONFLICT-030 · genişletme (Pd bloğu II — ampirik)
+
+| Çağrı | Dönen kayıt | Beklenen |
+|---|---|---|
+| `'468'` | `46/64` | 468/648 |
+| `'469'` | `46/64` | 469 |
+| `'462'`/`'463'` | `46/64` | 462/642 · 463/643 |
+| `'472'`/`'478'` | **`47/74`** | 472/742 · 478/748 |
+| `'482'`/`'486'`/`'489'` | `48/84` | 482/842 · 486/846 · 489/849 |
+| `'247'`/`'274'` | `24/42` / `27/72` | 247/427 · 274 |
+
+**Toplam 11 kayıt** (`462, 463, 468, 469, 472, 478, 482, 486, 489, 247, 274`)
+kodda hiç yok → CONFLICT-030 örnekleri **17 → 28**'e çıktı.
+
+**Kapalı döngü kanıtı:** `47/74`'ün `seeAlso`'su kullanıcıyı `247/427/274`'e
+yolluyor; bu kodların **kaydı yok**, çağrıldıklarında **başka metin** dönüyor.
+`48/84`'ün `seeAlso`'su `482/842, 486/846, 489/849`'a yolluyor → aynı durum.

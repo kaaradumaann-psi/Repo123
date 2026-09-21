@@ -37,7 +37,7 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | NOT_STARTED |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd I (s.111-113)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 17 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) |
+| 9 | Code types (Bölüm 5-6) | **IN_PROGRESS** — **Hs (s.63-78) + D (s.79-92) + Hy (s.95-101) + Pd I-II (s.111-117)**; **Pd anahtarı + bantlar (s.107-110) P0 DONE**; Pd kod bloğu II sırada → **CONFLICT-024** (56 kod/konfig yok) + **CONFLICT-027** (T-eşikleri) + **CONFLICT-030** (kırpma, 28 örnek) + **CONFLICT-031** (blok-bazlı) + **CONFLICT-033** (nevrotik üçlü yok) + **CONFLICT-034** (yaş/eğitim/cinsiyet direktifi yok) |
 | 10 | Interpretation (Bölüm 6) | **IN_PROGRESS** — Hs + D yorum katmanı DONE (s.66-87); CONFLICT-025/026/027 |
 | 11 | AI interpretation | NOT_STARTED |
 | 12 | UI | NOT_STARTED |
@@ -47,10 +47,22 @@ Sayfa eşleme:
 ## Current position
 
 Current book page:
-**113** (46/64 Kodu sonu) — PDF p64 R
-Sonraki hedef: **s.114+** — Pd kod bloğu devamı, PDF p65+
+**117** (48/84 Kodu sonu) — PDF p66 R
+Sonraki hedef: **s.118+** — Pd kod bloğu devamı / Mf (5) bloğu, PDF p67+
 
 Last completed:
+**PHASE 9/10 batch 12 — Pd (4) kod bloğu II (kitap s.114-117) DONE:**
+`46/64` kapanışı (40 T koşulu) MATCH ✅ · **`468/648` YOK** ❌ (paranoid şizofreni +
+**K<50 ∧ 5/4/6 5 T alanı ∧ 9&2>70 T** koşulu — 340 dpi görsel) · **`469` YOK** ❌
+("test 9 da 70 T puanının üzerinde") · `47/74` VAR ✅ · **`478/748`, `472/742`,
+`247/427`, `274` YOK** ❌ · `48/84` VAR ✅ · **`482/842`, `486/846`, `489/849`
+YOK** ❌. **Kapalı döngü kanıtı:** 11 kod çağrısı başka metne düşüyor
+(`'468','469','462','463'`→`46/64`; `'472','478'`→`47/74`; `'482','486','489'`→
+`48/84`; `'247'`→`24/42`; `'274'`→`27/72`). CONFLICT-030 **17→28 örnek**,
+CONFLICT-024 **33 VAR / 64 YOK**, CONFLICT-027 **23→26 koşul**.
+**Kod değişikliği YOK.**
+
+Önceki:
 **PHASE 9/10 batch 11 — Pd (4) kod bloğu I (kitap s.111-113) DONE:**
 **P0 katmanı (yorum):** "Sadece Pd yükselmesi" kuralı **en az 10 T** →
 metin **birebir MATCH** ✅ (Si 30 T notu dahil); `Pd >= 70` ek koşulu kaynakta
@@ -244,10 +256,11 @@ Sıradaki batch'ler (öncelik sırası):
    ~~**Pd (4) anahtarı + T bantları — s.107-110**~~ ✅ **TAMAMLANDI** (batch 10)
 9b. ~~**Pd kod bloğu I — s.111-113**~~ ✅ **TAMAMLANDI** (batch 11) →
    CONFLICT-034 açıldı; `456` ve `Yüksek 4/Düşük 5` kodda yok
-9c. **Pd kod bloğu II — s.114+ (PDF p65 L+)** → `47/74`, `48/84`, `49/94`,
-   `40/04` + Mf (5) bloğuna geçiş → sonra Mf (5), Pa (6), Pt (7), Sc (8),
-   Ma (9), Si (0) → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti
-   çıkarıldıktan sonra, tek tasarım kararı olarak)
+9c. ~~**Pd kod bloğu II — s.114-117**~~ ✅ **TAMAMLANDI** (batch 12)
+9d. **Pd kod bloğu III — s.118+ (PDF p67 L+)** → kalan Pd kodları + Mf (5)
+   bloğuna geçiş → sonra Mf (5), Pa (6), Pt (7), Sc (8), Ma (9), Si (0)
+   → **CONFLICT-024 / 030 / 031 / 033 KARARI** (tüm kod seti çıkarıldıktan
+   sonra, tek tasarım kararı olarak)
 
 ## Last completed task
 
@@ -352,11 +365,13 @@ Bilinen kısıtlar:
 | CONFLICT-034 | P2 | **"Yaşı, eğitimi ve cinsiyeti dikkate alınarak yorumlanmalıdır"** direktifi kod kayıtlarında yok (s.112) | OPEN |
 
 Kalan açık: **15 çelişki** → 0 P0 · 8 P1 (003, 004, 005, 024, 027, 030, 031, 033) · 5 P2 (006, 007, 022, 025, 034) · 2 P3 (026, 032).
+**Güncel kapsam (CONFLICT-024):** kod seti **33 VAR / 64 YOK** (Hs 22+D 18+Hy 8+üçlü 4+Pd I 4+Pd II 8).
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
 
-2026-09-21 — Oturum 6: **PHASE 9/10 batch 11 — Pd kod bloğu I** (s.111-113); CONFLICT-034 açıldı, CONFLICT-024/030 genişletildi
+2026-09-21 — Oturum 6: **PHASE 9/10 batch 12 — Pd kod bloğu II** (s.114-117); kapalı döngü kanıtı 11 kod
+Önceki: **PHASE 9/10 batch 11 — Pd kod bloğu I** (s.111-113)
 Önceki: Oturum 5: **PHASE 9/10 batch 10 — Pd anahtarı + T bantları** (s.107-110)
 Önceki: **PHASE 4 KAPANDI** (batch 3 + kapanış: CHANGE-008, CONFLICT-017..020, DECISION-020..022)
 
@@ -379,6 +394,8 @@ Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p52-p54 (kitap s.88-92: D kod bloğu IV-V + KAPANIŞ),
                 p55    (kitap s.93-99: Hy girişi + Tablo 10 + Hy T bantları + Hy kod I),
                 p63-p64 (kitap s.111-113: Pd kod bloğu I — 45/54, 456, 46/64),
+                p65-p66 (kitap s.114-117: Pd kod bloğu II — 468/648, 469, 47/74,
+                         478/748, 472/742, 48/84),
                 p58-p61 (kitap s.100-107: Hy kod II + NEVROTİK ÜÇLÜ PROFİLLERİ + Pd girişi),
                 p61-p63 (kitap s.107-110: TABLO 11 Pd anahtarı + Pd T bantları),
                 p97-p98 (kitap s.178-181: WIGGINS NORMLARI — Tablo 20 26/26),
