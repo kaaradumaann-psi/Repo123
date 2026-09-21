@@ -304,6 +304,21 @@
   border-color: var(--primary-border, #b9caff);
 }
 
+/* İnceleme bekleyen cevaplar: tek adımda güvenli varsayılan çözümü (otomatik çözüm).
+   Uzun metin içeren uyarı olduğu için satır içi akış korunur; eylem sağda kalır. */
+.auto-resolve-banner {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.auto-resolve-body {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.auto-resolve-body strong {
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .scan-comparison[data-layout="side"] {
     grid-template-columns: 1fr;

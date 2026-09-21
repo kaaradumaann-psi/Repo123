@@ -1,8 +1,9 @@
 import type { FormDefinition, PixelImage, Point } from '../omr/omrTypes';
-import { analyzePage } from '../omr/analyzePage';
+import { analyzePage, MAX_INPUT_PIXELS } from '../omr/analyzePage';
 import type { PageReadResult } from '../results/scanResultTypes';
 import { autoScanDocument, expandQuadOutward, grayToPixelImage, isotropicUpscale } from './documentScan';
 import type { DocumentScanResult } from './documentScan';
+import { optimizeOmrInput } from './imageIO';
 import { toGrayscale } from '../omr/imageQuality';
 import { normalizeShadows } from './shadowNormalization';
 
@@ -74,6 +75,12 @@ export type AutoScanAnalysis = {
  */
 export async function autoScanAndAnalyze(source: PixelImage, definition: FormDefinition,
   strategies: ScanStrategy[] = SCAN_STRATEGIES): Promise<AutoScanAnalysis> {
+  // Son güvenlik ağı: her yoldan (dosya, kamera, PDF, manuel warp) gelen görüntü,
+  // OMR giriş bütçesini aşıyorsa otomatik küçültülür; kullanıcı asla "12 megapiksel
+  // sınırını aşıyor" hatasıyla karşı karşıya kalmaz. Bütçe içindeki görüntüler
+  // aynen kullanılır (gereksiz yeniden örneklenmez).
+  const prepared = optimizeOmrInput(source);
+  const workSource = prepared.image;
   const attempts: StrategyAttempt[] = [];
   let firstScan: DocumentScanResult | null = null;
   let last: AutoScanAnalysis | null = null;
@@ -87,23 +94,40 @@ export async function autoScanAndAnalyze(source: PixelImage, definition: FormDef
       // input cap is 12M), clamped to ×3. jsQR's multi-scale sampling is sensitive to sub-percent
       // raster sizes at the decode boundary, so a short derived factor set (base rounded to one
       // decimal, plus the ×2 and ×3 steps) is tried; the first factor the OMR engine accepts wins.
-      const gray = toGrayscale(source);
-      const base = Math.min(3, Math.sqrt(9_000_000 / (source.width * source.height)));
-      const factors = [...new Set([Math.round(base * 10) / 10, 2, 3].map(value => Math.min(3, value)))]
-        .filter(value => value >= 1);
+      //
+      // Her factor, `analyzePage`'in 12 MP giriş bütçesinin (MAX_INPUT_PIXELS) İÇİNDE KALACAK
+      // şekilde kelepçelenir. Önceki sürümde sabit ×2/×3 adımları, 5-6 MP'lik telefon
+      // yakalamalarında 24-53 MP üretip "12 megapiksel sınırını aşıyor" hatası döndürüyordu.
+      const gray = toGrayscale(workSource);
+      const sourcePixels = workSource.width * workSource.height;
+      const hardMaxFactor = Math.sqrt(MAX_INPUT_PIXELS / sourcePixels);
+      const base = Math.min(3, Math.sqrt(9_000_000 / sourcePixels));
+      const factors = [...new Set([Math.round(base * 10) / 10, 2, 3])]
+        .map(value => Math.min(3, hardMaxFactor, value))
+        .filter(value => Number.isFinite(value) && value >= 1)
+        .sort((a, b) => a - b);
       let result: PageReadResult | null = null;
-      for (const factor of factors) {
-        const up = isotropicUpscale(gray, factor);
-        const cleaned = strategy.clean === 'shadow'
-          ? normalizeShadows(up, { force: true, radiusFraction: 0.08 })
-          : up;
+      if (factors.length === 0) {
+        // Kaynak zaten bütçenin üstünde: upscale yerine görüntüyü olduğu gibi dene.
         scan = {
-          image: grayToPixelImage(cleaned), quad: null, warped: false, pixelsPerMm: 0,
-          stages: strategy.clean === 'shadow' ? ['shadow'] : [],
-          note: `Geometriyi koruyan izotropik upscale ×${factor.toFixed(1)} (warp yok).`,
+          image: grayToPixelImage(gray), quad: null, warped: false, pixelsPerMm: 0,
+          stages: [], note: 'Upscale bütçesi aşıldı; görüntü olduğu gibi işlendi.',
         };
         result = await analyzePage(scan.image, definition);
-        if (result.ok) break;
+      } else {
+        for (const factor of factors) {
+          const up = isotropicUpscale(gray, factor);
+          const cleaned = strategy.clean === 'shadow'
+            ? normalizeShadows(up, { force: true, radiusFraction: 0.08 })
+            : up;
+          scan = {
+            image: grayToPixelImage(cleaned), quad: null, warped: false, pixelsPerMm: 0,
+            stages: strategy.clean === 'shadow' ? ['shadow'] : [],
+            note: `Geometriyi koruyan izotropik upscale ×${factor.toFixed(1)} (warp yok).`,
+          };
+          result = await analyzePage(scan.image, definition);
+          if (result.ok) break;
+        }
       }
       attempts.push({ strategy, ok: result!.ok, code: result!.ok ? undefined : result!.code });
       last = { scan, result: result!, strategyIndex: index, attempts };
@@ -111,9 +135,9 @@ export async function autoScanAndAnalyze(source: PixelImage, definition: FormDef
       continue;
     }
     scan = index === 0 || !firstScan?.quad
-      ? autoScanDocument(source, { pixelsPerMm: strategy.pixelsPerMm, clean: strategy.clean })
+      ? autoScanDocument(workSource, { pixelsPerMm: strategy.pixelsPerMm, clean: strategy.clean })
       // Detection already ran for this capture — reuse its corners, only re-warp/re-clean.
-      : autoScanDocument(source, {
+      : autoScanDocument(workSource, {
         corners: firstScan.quad.corners as [Point, Point, Point, Point],
         pixelsPerMm: strategy.pixelsPerMm, clean: strategy.clean,
       });
@@ -124,8 +148,8 @@ export async function autoScanAndAnalyze(source: PixelImage, definition: FormDef
     // printed squares), so on PAGE_CROPPED we retry once with a slightly widened quad — but only
     // then, because a needless desk margin degrades captures whose sheet fills the frame.
     if (!result.ok && result.code === 'PAGE_CROPPED' && scan.quad) {
-      const widened = autoScanDocument(source, {
-        corners: expandQuadOutward(scan.quad.corners as [Point, Point, Point, Point], source.width, source.height, 0.03),
+      const widened = autoScanDocument(workSource, {
+        corners: expandQuadOutward(scan.quad.corners as [Point, Point, Point, Point], workSource.width, workSource.height, 0.03),
         pixelsPerMm: strategy.pixelsPerMm, clean: strategy.clean,
       });
       const retry = await analyzePage(widened.image, definition);

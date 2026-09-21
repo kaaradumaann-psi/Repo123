@@ -822,6 +822,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: var(--white);
 }
 
+.action-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: var(--white);
+  color: var(--slate-600);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action-btn-secondary:hover:not(:disabled) {
+  background: var(--slate-100);
+  color: var(--slate-800);
+  border-color: var(--slate-300);
+}
+
 .action-btn-danger {
   display: inline-flex;
   align-items: center;

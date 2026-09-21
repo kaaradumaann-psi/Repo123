@@ -196,6 +196,10 @@ export type CaseDraftV1 = {
   submissionKey: string;
   savedId: string | null;
   savedAt: string | null;
+  /** "Düzenle" ile açılan çalışmanın orijinal kayıt id'si (yoksa null/absent). */
+  revisionOf?: string | null;
+  /** Revizyonun kısa nedeni. */
+  revisionReason?: string | null;
 };
 
 export type DraftSaveResult = { ok: true } | { ok: false; reason: string };
@@ -292,6 +296,8 @@ export function saveDraft(
     submissionKey: draft.submissionKey,
     savedId: draft.savedId,
     savedAt: draft.savedAt,
+    revisionOf: draft.revisionOf ?? null,
+    revisionReason: draft.revisionReason ?? null,
   };
   try {
     target.setItem(draftKey(userId), JSON.stringify(payload));
@@ -362,6 +368,12 @@ export function loadDraft(userId: string, store?: KeyValueStore | null): CaseDra
   if (candidate.savedAt !== null && !isValidReviewTimestamp(candidate.savedAt)) {
     return null;
   }
+  // Revizyon alanları opsiyoneldir (eski taslaklarda yoktur); mevcutlarsa
+  // UUID/kenarlı metin olmalıdır.
+  if (candidate.revisionOf !== undefined && candidate.revisionOf !== null &&
+    (typeof candidate.revisionOf !== 'string' || !UUID_V4.test(candidate.revisionOf))) return null;
+  if (candidate.revisionReason !== undefined && candidate.revisionReason !== null &&
+    (typeof candidate.revisionReason !== 'string' || candidate.revisionReason.length > 200)) return null;
   return candidate as unknown as CaseDraftV1;
 }
 
@@ -387,6 +399,9 @@ export type OutboxEntry = {
   answersEncoded: string | null;
   raw: RawScores | null;
   scan: SerializedScanSet | null;
+  /** "Düzenle" çalışmaları: revizyon bağlantısı kuyrukta da korunur. */
+  revisionOf?: string | null;
+  revisionReason?: string | null;
   createdAt: string;
   attempts: number;
   lastError: string;
@@ -404,11 +419,16 @@ function isOutboxEntry(value: unknown): value is OutboxEntry {
     : method === 'raw'
       ? entry.answersEncoded === null && entry.raw !== null && entry.scan === null
       : method === 'omr' && entry.answersEncoded === null && entry.raw === null && entry.scan !== null;
+  const revisionOfValid = entry.revisionOf === undefined || entry.revisionOf === null ||
+    (typeof entry.revisionOf === 'string' && UUID_V4.test(entry.revisionOf));
+  const revisionReasonValid = entry.revisionReason === undefined || entry.revisionReason === null ||
+    (typeof entry.revisionReason === 'string' && entry.revisionReason.length <= 200);
   return (
     typeof entry.idempotencyKey === 'string' &&
     UUID_V4.test(entry.idempotencyKey) &&
     (method === 'quick' || method === 'raw' || method === 'omr') &&
     isClientIntake(entry.client) && answersValid && rawValid && scanValid && methodShapeValid &&
+    revisionOfValid && revisionReasonValid &&
     typeof entry.createdAt === 'string' && isValidReviewTimestamp(entry.createdAt) &&
     typeof entry.attempts === 'number' && Number.isInteger(entry.attempts) && entry.attempts >= 0 && entry.attempts <= 100 &&
     typeof entry.lastError === 'string' && entry.lastError.length <= 2000 && !/[\u0000-\u001f\u007f]/.test(entry.lastError)

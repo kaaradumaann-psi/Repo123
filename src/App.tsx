@@ -195,7 +195,10 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
       <header className="app-header">
         <div className="header-inner">
           <div className="header-left">
-            <a className="brand" href="#main" aria-label="MMPI-566 çalışma alanı">
+            {/* Marka bağlantısı her zaman temiz ana sayfaya (/) gider; History API
+                yönlendirmesi installLinkInterceptor ile SPA olarak yakalanır.
+                Eski `#main` demiri aynı sayfada kalıyordu ve ana sayfaya gitmiyordu. */}
+            <a className="brand" href="/" aria-label="MMPI-566 çalışma alanı — ana sayfa">
               <span className="brand-mark">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />

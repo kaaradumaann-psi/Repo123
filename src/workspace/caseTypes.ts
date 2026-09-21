@@ -77,6 +77,16 @@ export type CaseMeta = {
   scoringVersion?: string;
   /** T dönüşümünde kullanılan norm kaynağının kısa etiketi. */
   normSource?: string;
+  /**
+   * Revizyon zinciri: bu kayıt başka bir kayda "Düzenle" ile oluşturulduysa
+   * orijinal kaydın id'si. Orijinal kayıt değişmez (immutability trigger'ı)
+   * kalır; revizyonlar hafif payload taşır (OMR revizyonu optik yerine
+   * sonuç cevaplarını kullanır) böylece "tüm optik kayıtlarını tutmak"
+   * depolama sorunu oluşturmaz.
+   */
+  revisionOf?: string;
+  /** Revizyonun kısa nedeni (ör. "Cevap düzeltmesi"). */
+  revisionReason?: string;
   method: EntryMethod;
   client: {
     firstName: string;
@@ -144,7 +154,10 @@ export function isValidCaseMeta(value: unknown): value is CaseMeta {
     validEducation && validMarital && boundedNarrative(client.applicationReason, 500) &&
     boundedNarrative(client.clinicalContext, 2000) &&
     (value.scoringVersion === undefined || boundedString(value.scoringVersion, 100, true)) &&
-    (value.normSource === undefined || boundedString(value.normSource, 200, true));
+    (value.normSource === undefined || boundedString(value.normSource, 200, true)) &&
+    (value.revisionOf === undefined || (typeof value.revisionOf === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.revisionOf))) &&
+    (value.revisionReason === undefined || boundedString(value.revisionReason, 200));
 }
 
 export function isValidQuickEntryPayload(value: unknown): value is QuickEntryPayload {
@@ -504,14 +517,29 @@ export function recordInputFromIntake(client: ClientIntake): RecordInput {
   };
 }
 
-export function buildCaseMeta(method: EntryMethod, client: ClientIntake): CaseMeta {
+export type CaseMetaRevision = {
+  /** "Düzenle" ile oluşturulan revizyonun orijinal kayıt id'si. */
+  revisionOf?: string;
+  /** Revizyonun kısa nedeni. */
+  revisionReason?: string;
+};
+
+export function buildCaseMeta(method: EntryMethod, client: ClientIntake, revision: CaseMetaRevision = {}): CaseMeta {
   const error = validateIntake(client);
   if (error) throw new Error(error);
+  const revisionOf = revision.revisionOf?.trim();
+  const revisionReason = revision.revisionReason?.trim() ?? '';
+  if (revisionOf && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(revisionOf)) {
+    throw new Error('Revizyon kaynağı kimliği geçersiz.');
+  }
+  if (revisionReason.length > 200) throw new Error('Revizyon nedeni çok uzun.');
   return {
     kind: 'case-meta',
     version: 1,
     scoringVersion: SCORING_ENGINE_VERSION,
     normSource: NORM_SOURCE_LABEL,
+    ...(revisionOf ? { revisionOf } : {}),
+    ...(revisionReason ? { revisionReason } : {}),
     method,
     client: {
       firstName: client.firstName.trim(),
@@ -591,6 +619,9 @@ export function parseRecordPayload(raw: unknown[]) {
     /** Kaydı üreten motor sürümü; eski kayıtlarda bulunmaz (undefined). */
     scoringVersion: typeof meta?.scoringVersion === 'string' ? meta.scoringVersion : undefined,
     normSource: typeof meta?.normSource === 'string' ? meta.normSource : undefined,
+    /** Revizyon zinciri; eski kayıtlarda bulunmaz (undefined). */
+    revisionOf: typeof meta?.revisionOf === 'string' ? meta.revisionOf : undefined,
+    revisionReason: typeof meta?.revisionReason === 'string' ? meta.revisionReason : undefined,
     followUp: client?.followUp || legacyContext?.followUp || '',
     maritalStatus: client?.maritalStatus || legacyContext?.maritalStatus || '',
     testDuration: client?.testDuration || legacyContext?.testDuration || '',

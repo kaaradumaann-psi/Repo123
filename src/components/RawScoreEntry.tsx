@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MMPI_MAX_BLANK, RAW_SCORE_FIELDS, RAW_SCORE_MAX } from '../workspace/caseTypes';
 import type { RawScoreKey, RawScores } from '../workspace/caseTypes';
 
@@ -7,15 +8,23 @@ type RawScoreEntryProps = {
 };
 
 export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
+  /** Sınır dışı giriş sessizce yutulmaz: alan altında açık uyarı gösterilir. */
+  const [rangeError, setRangeError] = useState<Partial<Record<RawScoreKey, string>>>({});
+
   function setField(key: RawScoreKey, raw: string) {
     if (raw === '') {
+      setRangeError(previous => ({ ...previous, [key]: undefined }));
       onChange({ ...scores, [key]: '' });
       return;
     }
     if (!/^\d+$/.test(raw)) return;
     const number = Number(raw);
     const max = RAW_SCORE_MAX[key];
-    if (number > max) return;
+    if (number > max) {
+      setRangeError(previous => ({ ...previous, [key]: `En fazla ${max} girilebilir.` }));
+      return;
+    }
+    setRangeError(previous => ({ ...previous, [key]: undefined }));
     onChange({ ...scores, [key]: number });
   }
 
@@ -76,8 +85,13 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
                   value={scores[field.key]}
                   onChange={event => setField(field.key, event.target.value)}
                   aria-label={`${field.label} ham puanı, 0 ile ${field.max} arası`}
+                  aria-invalid={rangeError[field.key] ? true : undefined}
                 />
-                <small>0–{field.max}</small>
+                {rangeError[field.key] ? (
+                  <small className="ws-hint is-error">{rangeError[field.key]}</small>
+                ) : (
+                  <small>0–{field.max}</small>
+                )}
               </label>
             ))}
           </div>
@@ -101,8 +115,13 @@ export function RawScoreEntry({ scores, onChange }: RawScoreEntryProps) {
                   value={scores[field.key]}
                   onChange={event => setField(field.key, event.target.value)}
                   aria-label={`${field.label} ham puanı${field.kRaw ? ' (K düzeltmesiz)' : ''}, 0 ile ${field.max} arası`}
+                  aria-invalid={rangeError[field.key] ? true : undefined}
                 />
-                <small>0–{field.max}{field.kRaw ? ' · K’sız' : ''}</small>
+                {rangeError[field.key] ? (
+                  <small className="ws-hint is-error">{rangeError[field.key]}</small>
+                ) : (
+                  <small>0–{field.max}{field.kRaw ? ' · K’sız' : ''}</small>
+                )}
               </label>
             ))}
           </div>

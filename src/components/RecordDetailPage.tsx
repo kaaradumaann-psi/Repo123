@@ -4,9 +4,11 @@ import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
 import { validityStatusDisplay } from '../scoring/mmpiInterpretation';
+import { AiInterpretationPanel } from './results/AiInterpretationPanel';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import { MMPIPrintReport } from './results/MMPIPrintReport';
 import type { AuthenticatedUser } from '../auth/authTypes';
+import { navigate } from '../router';
 import { Icon } from './Icon';
 
 function dash(value: string | number | null | undefined): string {
@@ -184,6 +186,15 @@ export function RecordDetailPage({
     }
   }
 
+  /* "Kaydı Düzenle": yalnız aktif psikolog ve yalnız kendi kaydı (klinik kayıt
+     oluşturma yetkisi RLS'te PSYCHOLOG+active'e aittir; Admin düzenleyemez). */
+  const canEditRecord =
+    viewer != null &&
+    viewer.active === true &&
+    viewer.role === 'PSYCHOLOG' &&
+    typeof record?.createdBy === 'string' &&
+    viewer.id === record.createdBy;
+
   const notesDirty = notesDraft.trim() !== notesSaved.trim();
   // Not yetkisi RLS ile aynıdır: Admin görünür tüm kayıtlara, aktif psikolog
   // yalnızca kendi kaydına yazabilir. Klinik alanlar veritabanı trigger'ı ile
@@ -225,6 +236,17 @@ export function RecordDetailPage({
             <span className="section-badge badge-primary">Kayıt İnceleme</span>
             <span className="mono-sub">ID: {record.id}</span>
           </div>
+          {canEditRecord && (
+            <button
+              type="button"
+              className="btn-secondary btn-sm"
+              onClick={() => navigate(`/islem?duzenle=${record.id}`)}
+              title="Kaydı düzenle: cevaplar yeni bir revizyon kaydı olarak düzenlenir, orijinal kayıt değişmez"
+            >
+              <Icon name="refresh" size={15} />
+              <span>Kaydı Düzenle</span>
+            </button>
+          )}
           <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
             <Icon name="sheet" size={15} />
             <span>Yazdır / PDF</span>
@@ -255,6 +277,42 @@ export function RecordDetailPage({
             </div>
           )}
         </header>
+
+        {/* Revizyon zinciri: bu kayıt bir başka kaydın "Düzenle" sonucuysa. */}
+        {parsed.revisionOf && (
+          <div className="status-banner info-banner" role="status">
+            <Icon name="refresh" size={16} />
+            <span style={{ flex: 1 }}>
+              Bu kayıt <strong>{parsed.revisionOf.slice(0, 8)}…</strong> kaydının düzenlenmiş (revizyon) halidir.
+              {parsed.revisionReason ? ` Neden: ${parsed.revisionReason}.` : ''}{' '}
+              <a href={`/kayitlar/${parsed.revisionOf}`} className="ws-revision-link">
+                Orijinal kaydı görüntüle
+              </a>
+            </span>
+          </div>
+        )}
+
+        {/* Optik formun son hali (OMR kayıtlarında): batch, kaynak ve manuel düzeltme özeti.
+            Piksel verisi sunucuda tutulmaz; madde sonuçları + manuel düzeltmeler +
+            denetim izi bu kayıtta kalır. */}
+        {parsed.method === 'omr' && omrPages.length === 4 && (() => {
+          const batchId = omrPages[0]?.batchId;
+          const reviewedCount = omrPages.reduce(
+            (total, page) => total + Object.keys(page.manualReviews ?? {}).length,
+            0,
+          );
+          const historyCount = omrPages.reduce((total, page) => total + (page.reviewHistory?.length ?? 0), 0);
+          return (
+            <div className="status-banner info-banner no-print" role="status">
+              <Icon name="scan" size={16} />
+              <span style={{ flex: 1 }}>
+                Optik form son hali bu kayıtta korunuyor: set <code className="mono-sub">{batchId ?? '—'}</code> ·
+                4/4 sayfa · {reviewedCount} manuel düzeltme · {historyCount} denetim olayı.
+                Kaydı düzenlerseniz revizyon bu detayı kopyalamaz; optik kayıt her zaman burada kalır.
+              </span>
+            </div>
+          );
+        })()}
 
         <details className="client-info-details">
           <summary>
@@ -391,6 +449,30 @@ export function RecordDetailPage({
               </p>
             </div>
           </div>
+        )}
+
+        {/* Yapay zekâ destekli yorum (karar desteği): yalnız profil hesaplanabildiyse;
+            kayıt modunda Edge Function kayıt sahipliğini yeniden doğrular. */}
+        {profile && (
+          <AiInterpretationPanel
+            profile={profile}
+            method={parsed.method ?? 'quick'}
+            client={
+              client && typeof client.age === 'number'
+                ? { firstName: client.firstName, lastName: client.lastName, age: client.age }
+                : null
+            }
+            recordId={record.id}
+            onInsertIntoNotes={
+              canWriteNotes
+                ? text => setNotesDraft(previous => {
+                    const separator = previous.trim() ? '\n\n' : '';
+                    const next = `${previous}${separator}${text}`;
+                    return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
+                  })
+                : undefined
+            }
+          />
         )}
 
         {/* Ham veri bölümü: profil varken optik cevaplar “Soru Yanıtları”

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { listOwnRecords, deleteRecord } from '../records/supabaseRecords';
 import type { RecordSummary } from '../records/supabaseRecords';
 import { ConfirmDialog } from './ConfirmDialog';
+import { navigate } from '../router';
 import { Icon } from './Icon';
 
 export function MyRecordsPanel() {
@@ -215,6 +216,15 @@ export function MyRecordsPanel() {
                           <Icon name="eye" size={15} />
                           <span>Testi İncele</span>
                         </a>
+                        <button
+                          type="button"
+                          className="action-btn-secondary"
+                          onClick={() => navigate(`/islem?duzenle=${record.id}`)}
+                          title="Kaydı düzenle (yeni revizyon oluşturur)"
+                          aria-label={`${record.firstName} ${record.lastName} kaydını düzenle`}
+                        >
+                          <Icon name="refresh" size={15} />
+                        </button>
                         <button
                           type="button"
                           className="action-btn-danger"
