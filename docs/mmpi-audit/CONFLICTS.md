@@ -1486,3 +1486,48 @@ kullanır; kodun en düşük Pa bandı **T 27-44**'tür → kod bu alt ayrımı 
 
 → **Mf bloğu tam kapandı (s.121-126): 9 VAR / 1 YOK.** Kod seti toplamı
 değişmedi: **36 VAR / 71 YOK.**
+
+
+---
+
+## CONFLICT-036 — Pa bloğu `64/46` gövdesi kodda yok; yanlış blok metni dönüyor (P1, OPEN)
+
+Area: `src/scoring/mmpiSourceCodes.ts` — `CODES['46']`
+
+**Source (Visual: CONFIRMED, s.130-131):** Pa bloğundaki `64/46 Kodu` der ki:
+> "Bu koddaki bireyler **immatur, narsisistik, pasif-bağımlı** kişilerdir. Sosyal
+> ilişki kurulması zordur… **64/46 kodunun yanında 8 alt testi de yükselmişse
+> süreç daha kötü olur.** … Öfkeyle doludurlar ve bu da onların eleştiriye
+> duyarlılık ve kıskançlıkları ile birleştiğinde tahmin edilemeyen ve mantıksız
+> öfke patlamalarına yol açar."
+
+**Current implementation:** `codeInterpretation('64')` → `canonicalCode('64')` →
+`'46'` → Pd bloğunun `46/64` kaydı:
+> "Temel özellikler kızgınlık, küskünlük, güvensizlik, somurtkanlık…"
+
+**Kanıt:** 45 kaydın tamamı tarandı; kaynağın Pa bloğu `64/46` metnindeki
+"immatur", "narsisistik, pasif-bağımlı" ifadeleri **hiçbir kayıtta geçmiyor**.
+
+Comparison: **MISSING** (Pa bloğu gövdesi) + **CONFLICT-031** (blok-bazlı ayrım
+yok: Pd `46/64` metni Pa `64/46` çağrısına dönüyor).
+
+Impact: **P1** — yorum katmanı. `96`/`64`/`46` kodları klinik olarak farklı
+örüntülerdir (biri paranoid/pa, diğeri pasif-agresif/pd ağırlıklı).
+
+Status: **OPEN** — CONFLICT-024/031 ile birlikte tek tasarım kararı bekliyor
+(blok-farkında `CODES` yapısı).
+
+---
+
+## CONFLICT-027 genişlemesi — Pa bloğu sayısal kuralları (batch 16)
+
+Kaynaktan çıkan ve kodda karşılığı olmayan **3 yeni sayısal tarama kuralı**:
+
+| # | Kaynak kuralı | Sayfa | Kodda |
+|---|---|---|---|
+| 1 | **Paranoid vadi:** "6 ve 8 alt testleri **70 T puanı civarında**dır ve **7 alt testi 10 T puanı aşağıda**dır" | s.132 | YOK |
+| 2 | `698/968 → 68/86` geçişi: "**8 alt testi, 6'dan 5 T puanı aşağıda** ise" | s.134 | YOK |
+| 3 | **456 örüntüsü:** "4 ve 6 alt testleri T puanı olarak **65'in üzerinde**, 5 alt testi T puanı olarak **35'tedir**" | s.134 | YOK |
+
+Ayrıca Şekil 21 (**Scarlett O'Hara vadisi**: `Pd ↑ · Mf ↓ · Pa ↑`) CONFLICT-033
+kapsamına eklendi — tanımlı bir konfigürasyon, kodda hiç yok.

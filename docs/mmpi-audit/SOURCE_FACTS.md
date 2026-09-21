@@ -2381,3 +2381,207 @@ Fact — aynen (**Visual: CONFIRMED** `v_pa_tablo13_full.png` + OCR p73_L):
 Kod: `PA_T_BANDS` → **5/5 sınır + metin BİREBİR MATCH** ✅
 (`T ≥ 80`, `T 70-79`, `T 60-69`, `T 45-59`, `T 27-44`; 55-59 alt notu dahil)
 Status: **VERIFIED**
+
+---
+
+# PHASE 9/10 batch 16 — Pa (6) kod bloğu (kitap s.130-135)
+
+Sayfa eşlemesi (OCR başlıklarıyla doğrulandı): **p73 L = 130 · p73 R = 131 ·
+p74 L = 132 · p74 R = 133 · p75 L = 134 · p75 R = 135**;
+**p76 L = 136 BOŞ** (görsel doğrulandı), **p76 R = 137 → Pt (7) bloğu başlıyor**
+→ Pa bloğu kapsamı **s.130-135**.
+
+## SOURCE-CODE-PA-000 · Pa T bant metinleri (s.130) — **Visual: CONFIRMED**
+
+| T puanı | Kaynak metni (s.130, 125 dpi tam sayfa görsel) |
+|---|---|
+| ≥ 80 | "noiddir, referans fikirleri vardır, temel savunma mekanizması yansıtmadır. Gerçeği değerlendirme bozuktur, delüzyonlar, perseküsyon ve/veya grandioz biçimindedir." |
+| 70-79 | "Diğerlerini suçlama ve hostilite temel özelliklerdir. Bu bireyler katı, inatçı ve aşırı duyarlıdırlar. Kişiler arası ilişkilerde aşırı savunucu tutumları nedeniyle yanlış anlaşılabilirler. Açık paranoid özellikler vardır." |
+| 60-69 | "Duyarlı bireylerdir, kendilerinin ve diğerlerinin duygularının kolaylıkla incinebileceği türünde düşünceleri vardır. Bu sıklıkla depresyonla ilgilidir. Diğerlerinden gelen eleştiri ve önerileri çok ciddiye alırlar ve kendilerinin söyledikleri her şeyin eleştiri gibi alındığı fikri vardır. Kişilerarası ilişkilerde savunucu ve diğer insanlara güvensizdirler, diğerlerinin kendilerinden yararlanacağını düşünürler. Kırgın, küskün olmaya hazırdırlar, çünkü en ufak bir olumsuzluğu üstlerine alırlar. İşte ve evde kendilerinden beklentiler konusunda kontrollüdürler." |
+| 45-59 | "Bu kişiler diğerlerini değerlendirmede esnektirler. Onlara karşı duyarlıdırlar ve diğerlerinin kendilerinden beklentilerini doğru anlayarak olumlu yanıt verirler. **55-59 T puanı arasında olan bireyler anlayışlı, duyarlı kişilerdir.**" |
+| 27-44 | "İki tip insan bu puanı verebilir: Diğerlerine duyarlılığı olmayan kişiler ve çok fazla şüphesi ve endişesi olan kişiler: Bunlar paranoya maddelerini atlarlar. Diğerleri ise yüksek puan alan kişilerle aynıdırlar. Düşük puan alan bireyler geleneksel, güvenilir, kişilerarası ilişkilerde duyarsız, ilkel ve saftırlar. Zekâları sınırlıdır ve ilgi alanları daralmıştır." |
+
+Kod (`clinicalBands('Pa')`): `T ≥ 80` · `T 70-79` · `T 60-69` · `T 45-59` ·
+`T 27-44` → **5/5 bant aralığı MATCH** ✅ (metinler de mevcut).
+Status: **VERIFIED**
+
+## SOURCE-CODE-PA-001 · "Sadece Pa alt testinin yükselmesi" (s.130) — **Visual: CONFIRMED**
+
+> "**Sadece Pa alt testinin yükselmesi:** Bu bireyler aşırı duyarlı, katı, gergin ve
+> kaygılıdırlar. Yaşamlarında iş ve sosyal baskı olduğunu hissederler. Şüphecilik,
+> güvensizlik, düşüncelere dalma vardır. Yansıtma mekanizmasını sık kullanırlar.
+> Sorunlara aşırı tepki verirler."
+
+Kod: `SINGLE_PA` (`mmpiSource.ts:517`) → **birebir MATCH** ✅
+Status: **VERIFIED**
+
+## SOURCE-CODE-PA-002 · Pa alt testinin diğer alt testlerle ilişkisi — 4 çapraz referans (s.130-131)
+
+> "Pa alt testinin diğer alt testlerle ilişkisi:
+> **61/16 Kodu** (Bakınız 16/61 Kodu) · **62/26 Kodu** (Bakınız 26/62 Kodu) ·
+> **63/36 Kodu** (Bakınız 36/63 Kodu) ·
+> **64/46 Kodu (Ayrıca 46/64, 462/642, 463/643 kodlarına ve 468/648 kodlarına bakınız.)**"
+> "Bu koddaki bireyler **immatur, narsisistik, pasif-bağımlı** kişilerdir. Sosyal
+> ilişki kurulması zordur. Diğerlerine öfke duyarlar ancak bunu kontrol edebilirler."
+
+Kod: **4/4 çapraz referans VAR** ✅ (`codeInterpretation('61')`, `'62'`, `'63'`,
+`'64'`) — ancak **`64/46` gövdesi kaynakta Pa bloğuna aittir ve kodda YOK**;
+çağrı Pd bloğunun `46/64` kaydına düşer (gövde farklı) → **CONFLICT-031
+genişlemesi** (aşağıda SOURCE-CODE-PA-003).
+Status: **VERIFIED** (referanslar) · gövde **CONFLICT**
+
+## SOURCE-CODE-PA-003 · `64/46` gövdesinin blok farkı (s.130-131) — **Visual: CONFIRMED**
+
+Pa bloğu (s.130-131) `64/46` için: **"immatur, narsisistik, pasif-bağımlı
+kişilerdir…"** + s.131 devamı:
+> "Zaman zaman öfke patlamaları olur. Kızgınlıklarının suçunu başkalarına
+> yüklerler. Diğer insanlara kuşku ile bakarlar ve paranoid özellikler
+> yaşarlar. Uzun zamandan beri sosyal uyumsuzluk gösterirler. Sonuç olarak
+> psikolojik yardım için uygun kişiler değillerdir. **64/46 kodunun yanında
+> 8 alt testi de yükselmişse süreç daha kötü olur.** Yukarıdaki özelliklere ek
+> olarak bu hastalar psikolojik sorunlarını kabul etme yerine kaçma yolunu
+> seçmektedirler. Mantık ve yargılamalarda da güçlükleri ortaya çıkmaktadır.
+> Öfkeyle doludurlar ve bu da onların eleştiriye duyarlılık ve kıskançlıkları ile
+> birleştiğinde tahmin edilemeyen ve mantıksız öfke patlamalarına yol açar."
+
+Kod `46` kaydı (Pd bloğu, s.113): "Temel özellikler kızgınlık, küskünlük,
+güvensizlik, somurtkanlık…" → **tamamen farklı metin**.
+
+**Bulgu:** `64/46` erişimi **Pd bloğu metnini** döndürüyor; kaynağın Pa bloğu
+`64/46` metni kodda **hiçbir kayıtta yok** (tüm 45 kayıt tarandı: "immatur",
+"narsisistik, pasif-bağımlı" hiçbirinde geçmiyor).
+→ **CONFLICT-036** (yeni) · CONFLICT-024 kapsamına **+1 YOK kaydı** (gövde)
+Status: **VERIFIED** (kaynak) · **CONFLICT** (kod)
+
+## SOURCE-CODE-PA-004 · `648 Kodu` (s.131) — **Visual: CONFIRMED**
+
+> "Süregen sorunlarına karşın savunucudurlar ve sorunlarında kendi rollerini inkâr
+> ederler. Huzursuz, şüpheci, narsisistik, sürekli isteyen rolündedirler.
+> Rasyonalizasyon ve yansıtma savunma mekanizmalarını kullanırlar. Klinik olarak
+> referans fikirleri, delüzyonlar, duygusal labilite ve kaygı görülür. İmpulsif,
+> manipülatif davranışları olabilir. Otorite figürleri ile çatışma içindedirler.
+> İntihar girişimleri, ilaç kullanımı olabilir. **Profil tipi kroniktir.**"
+
+Kod: `648` anahtarı **YOK** → çağrı `46` → Pd bloğu `46/64` metni → **YANLIŞ
+EŞLEME** ❌ (CONFLICT-030 kırpma kanıtı · CONFLICT-024 kapsam)
+Status: **VERIFIED** (kaynak) · **YOK** (kod)
+
+## SOURCE-CODE-PA-005 · `67/76`, `678/876`, `679` (s.131-132) — **Visual: CONFIRMED**
+
+`67/76` (s.131):
+> "Oldukça nadir görülür **2 ya da 8 alt testleri yükselen üçüncü alt testtir**.
+> Bireyler gergin, kaygılı, aşırı duyarlı ve sıklıkla çabuk küsen kişilerdir.
+> Başkalarının kendilerine haksızlık ettiğini düşünerek ilişkilerini bozarlar.
+> Aşağılık ve/veya suçluluk duyguları vardır ve bunu diğerlerine yansıtırlar.
+> **Eğer 6 alt testi 7'den daha yüksekse ya da ikisi aynı düzeydeyse, obsesif-kompulsif
+> bozukluktan psikotik döneme bir geçiş olabileceği dikkate alınmalıdır.**
+> Her iki cinsiyette de **2 ve 8, üçüncü yüksek alt testtir**.
+> **Olası tanı: Dekompanze obsesif kompulsif bozukluk**
+> Alt test 6, 7'den daha yüksek ya da aynı düzeyde ise **obsesif kompulsif
+> bozukluktan şizofreniye geçiş olasıdır.**"
+
+`678/876` (s.131): "6 ve 8, 7'den yüksek ise bu **psikotik vadiyi** oluşturur.
+Ciddi psikopatolojileri vardır. **Şizofrenik bozukluklardan paranoid tip tanısı
+konulabilir.**"
+
+`679` (s.132): "Aşırı duyarlı ve katıdırlar. Sosyal ve iş yaşamlarında, kendilerini
+bastırılmış hissederler; şüphecidirler ve güvensizlik duyarlar, çabuk gücenirler ve
+öfke patlamaları vardır. **İmpulsif dönemlerini, dönemsel suçluluk ve kendine
+yönelme izlemektedir.**"
+
+Kod: `67` kaydı **VAR** ✅ (2 haneye iniyor) ama kaynak `67/76` metni şu cümleyi
+taşıyor: "Oldukça nadir görülür. Bireyler gergin, kaygılı, aşırı duyarlı…" →
+**kaynak PD bloğunun `67/76`'sı ile Pa bloğunun `67/76`'sı farklı bağlamlarda
+geçiyor**; kod tek kayıtta tutuyor → **CONFLICT-031 (blok-bazlı ayrım)**.
+`678/876` ve `679` anahtarları **YOK** → `67`'ye düşüyor ❌
+Status: **VERIFIED** (kaynak) · kısmi **YOK** (kod)
+
+## SOURCE-CODE-PA-006 · `68/86` — paranoid vadi + tarama ölçütü (s.132) — **Visual: CONFIRMED**
+
+> "**68/86 Kodu** (Ayrıca 468/648, 486/846, 489/849 kodlarına bakınız)
+> … **Pd ve Pt alt testleri, en yüksek üçüncü testtir.** Hem ergenlerde, hem de
+> yetişkinlerde bu kod ciddi psikopatolojiyi gösterir ve **F alt testi de
+> yükselmişse, birey kabul edilmeyen yaşantılar getirir.**
+> **"Paranoid vadi" varsa bu daha çok görülen bir durumdur. Paranoid vadide
+> 6 ve 8 alt testleri 70 T puanı civarındadır ve 7 alt testi 10 T puanı
+> aşağıdadır.** Eğer diğer alt testler 6 ve 8'den daha yüksekse paranoid vadinin
+> olduğu durumlarda paranoid şizofreni düşünülmelidir."
+
+**Kritik sayısal kural:** paranoid vadi = `6 ≈ 8 ≈ 70 T` ∧ `7 = 6/8 − 10 T`
+Kod: `68/86` kaydı **VAR** ✅ — ancak **sayısal tarama ölçütü** (70 T civarı +
+7'nin 10 T aşağıda olması) kodda **YOK** → CONFLICT-027 kapsamına eklendi.
+Status: **VERIFIED** (kaynak) · sayısal koşul **EKSİK**
+
+## SOURCE-CODE-PA-007 · `680/860`, `69/96`, `694/964`, `698/968`, `60/06` (s.133-134) — **Visual: CONFIRMED**
+
+`680/860`: "Hastalarda paranoid şizofrenide görülen paranoid özellikler ve düşünce
+bozukluğu vardır. Sistemli hezeyanlar görülebilir. …"
+
+`69/96` (Ayrıca 698/968):
+> "Hastalar gergin ve anksiyöz kişilerdir. Grandiozite ve egosantrik sezgiler
+> içindedirler; heyecanlı ve enerjiktirler. … Düşünce bozukluğunun varlığı halinde
+> bunun manik ya da şizofrenik özellikler mi olduğu gözden geçirilmelidir.
+> **Kod daha çok kadınlarda görülmektedir. 4 ve 8 alt testi, en çok yükselen
+> üçüncü alt testtir.** … **Olası tanı: Manik bozukluğun bazı tipleri · Akut
+> psikotik epizod · Alt test F ve Sc yüksekse paranoid şizofreni**"
+
+`694/964`: "Hastaların sosyal, aile ve iş yaşamları hostilitelerine,
+yargılamalarının bozukluğuna ve duygularını kontrol edememelerine bağlı olarak
+bozuktur. İçgörüleri yoktur ve **sucu diğerlerinin üstüne atma tipiktir. Saldırma,
+mücadele etme ve hatta cinayet potansiyeli değerlendirilmelidir.**"
+
+`698/968`: "69/96 kodunda tanımlanan birey tipine ek olarak bu bireylerde ruhsal
+karışıklık, konfüzyon, düşünce ve dikkat toplamada güçlük vardır. Ayrıca
+delüzyonlar, paranoid şüphe ve hallüsinasyon da vardır. **Eğer 8 alt testi, 6'dan
+5 T puanı aşağıda ise 68/86 koduna bakın.** Olası tanı: Şizofreni paranoid tip."
+
+`60/06`: "Erkeklerde çok az görülür, genç kadınlarda hemen hemen hiç görülmeyebilir.
+**Kadınlarda özellikle 30 yaşından sonra rastlanır. 2, 4 ve 3 yükselen diğer alt
+testlerdir.** …"
+
+Kod: `69` VAR ✅ · `60/06` → `06` VAR ✅ · **`680/860`, `694/964`, `698/968`
+YOK** ❌ → `68`, `69`, `69` kayıtlarına düşüyor.
+**CONFLICT-027 genişlemesi:** `698/968` için "8, 6'dan **5 T puanı aşağıda** ise
+68/86 koduna bakın" sayısal kuralı kodda **YOK**.
+Status: **VERIFIED** (kaynak) · 3 kod **YOK**
+
+## SOURCE-CODE-PA-008 · "456 Alt Testlerinin Örüntüsü" (s.134) — **Visual: CONFIRMED**
+
+> "Genellikle kadınlarda görülen bir örüntüdür. **4 ve 6 alt testleri T puanı
+> olarak 65'in üzerinde, 5 alt testi T puanı olarak 35'tedir.** 4 ve 6 alt
+> testlerinin profilde en yüksek noktalar olması gerekli değildir.
+> Bu örüntüye alt test 3'ün yükselmesi eşlik ediyorsa, bu tür kadınlarda, yüzeyel
+> bir sosyallik, diğerlerine yönelik düşmanlık duygularının inkârı söz konusu
+> olabilir, diğerlerini kontrol ve manipüle etme davranış kalıbını yansıtır.
+> Birey psikolojik yardıma dirençlidir."
+
+**Sayısal kural:** `4 > 65 T` ∧ `6 > 65 T` ∧ `5 = 35 T`
+Kod: bu örüntü için **özel bir tarama kuralı YOK** → CONFLICT-027 kapsamı
+(CONFLICT-011 `mmpiConsistency.ts`'deki TR/dikkatsizlik ile karıştırılmamalı).
+Status: **VERIFIED** (kaynak) · **EKSİK** (kod)
+
+## SOURCE-CODE-PA-009 · Şekil 21 — "Scarlett O'Hara vadisi" (s.135) — **Visual: CONFIRMED**
+
+Şekil 21 (s.135, tam sayfa görsel): **Pd ↑ (~72 T) · Mf ↓ (~32 T dip) · Pa ↑ (~75 T)**
+→ U biçimli vadi.
+> "Bu örüntü, düşmanlık ve kızgınlık duygularını doğrudan ifade edemeyen, bağımlı,
+> daima sevgi isteyen ve düzensiz duygulanım içindeki kadınlarda görülür.
+> Diğerlerini öfkelendirecek davranışları vardır. Böylece diğerlerini kendilerinden
+> uzaklaştırır ve sonra da kendilerine ne kadar kötü davranıldığını düşünürler;
+> aile, evlilik ve cinsel konularda sorunları vardır. Bu tür kadınlar terapisti
+> kızdırarak terapötik müdahaleyi güçleştirirler."
+
+Kod: "Scarlett" / bu örüntü **YOK** (`grep` → yalnız `mmpiDerived.ts:44` madde
+listesindeki 456 maddesi, ilgisiz) → **CONFLICT-033 kapsamına eklendi**
+(nevrotik üçlü profilleriyle aynı sınıf: tanımlı konfigürasyon, kodda yok).
+Status: **VERIFIED** (kaynak) · **YOK** (kod)
+
+## Pa (6) kod bloğu — birleşik özet (s.130-135)
+
+| | Sayı |
+|---|---|
+| İncelenen kod başlığı | **15** |
+| Kodda VAR (2 haneli anahtara iniyor) | **9** |
+| Kodda YOK | **6** (`648`, `678/876`, `679`, `680/860`, `694/964`, `698/968`) |
+| Blok-bazlı metin farkı | **1** (`64/46` Pa bloğu gövdesi kodda yok) |
+| Yeni sayısal tarama kuralı (kodda yok) | **4** (paranoid vadi 70/10 T · `698/968` 5 T kuralı · `456` örüntüsü 65/65/35 · `45` "2 ya da 8 üçüncü") |

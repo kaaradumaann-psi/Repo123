@@ -1205,3 +1205,38 @@ Kaynağın **Pa kontrol listeleri** kodda **yok** (4 liste):
 ### Kod değişikliği
 
 **YOK** (salt okuma + doğrulama).
+
+---
+
+## PHASE 9/10 — batch 16: Pa (6) kod bloğu (kitap s.130-135) — **Pa BLOĞU KAPANDI**
+
+Tarih: 2026-09-22 · Kaynak: **s.130-135** (PDF p73 L – p75 R)
+
+| s. | PDF | İçerik | Sonuç |
+|---|---|---|---|
+| 130 | p73 L | Pa T bantları (5 bant) + "Sadece Pa yükselmesi" + çapraz ref 61/16, 62/26, 63/36, 64/46 | ✅ bantlar 5/5 MATCH · SINGLE_PA birebir · **`64/46` gövdesi YOK** |
+| 131 | p73 R | `648`, `65/56`, `67/76`, `678/876` | 1 VAR / 3 YOK |
+| 132 | p74 L | `679`, `68/86` (+ **paranoid vadi** kuralı) | 1 VAR / 1 YOK |
+| 133 | p74 R | `680/860`, `69/96`, `694/964` | 1 VAR / 2 YOK |
+| 134 | p75 L | `698/968`, `60/06`, **456 Alt Testlerinin Örüntüsü** | 1 VAR / 1 YOK |
+| 135 | p75 R | **Şekil 21 — Scarlett O'Hara vadisi** (Pd ↑ · Mf ↓ · Pa ↑) | **YOK** → CONFLICT-033 |
+| 136 | p76 L | **BOŞ SAYFA** (görsel doğrulandı) | — |
+| 137 | p76 R | **Pt (7) Alt Testi başlıyor** | sıradaki blok |
+
+### Bulgular
+
+- **Pa T bantları 5/5 MATCH** · **"Sadece Pa" birebir MATCH** (`SINGLE_PA`) ·
+  Pa normları ve Tablo 13 (batch 15) tam uyumlu
+- **9 VAR / 6 YOK** kod başlığı → kümülatif **115 başlık: 79 VAR / 38 YOK**
+- **🔴 CONFLICT-036 (P1, yeni):** Pa bloğunun `64/46` gövdesi
+  ("immatur, narsisistik, pasif-bağımlı…") kodda **hiç yok**; `64` çağrısı
+  **Pd bloğunun `46/64`** metnini döndürüyor
+- **CONFLICT-027 genişledi** — 3 sayısal kural kodda yok: paranoid vadi
+  (`6≈8≈70 T`, `7 = 6/8 − 10 T`), `698/968 → 68/86` ("8, 6'dan 5 T aşağıda"),
+  456 örüntüsü (`4,6 > 65 T` ∧ `5 = 35 T`)
+- **CONFLICT-033 genişledi** — Scarlett O'Hara vadisi (Şekil 21) kodda yok
+
+### Doğrulama
+
+`typecheck` **0 hata** · `npm test` **316/316 PASS** (24 suite) · **REGRESSION
+YOK** · **kod değişikliği yok** (FIX aşaması tüm kod seti çıkarıldıktan sonra).

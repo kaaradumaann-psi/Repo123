@@ -333,3 +333,47 @@ nedeniyle başka bir metne** düşüyor.
 
 **Pd bloğundan açılan yeni çelişkiler:** CONFLICT-034 (yaş/eğitim/cinsiyet
 direktifi) · CONFLICT-035 (terim sapması)
+
+## Pa (6) kod bloğu (s.130-135) — **9 VAR / 6 YOK**
+
+| # | Kaynak başlığı | Sayfa | Kodda | Not |
+|---|---|---|---|---|
+| 1 | `61/16` | s.130 | **VAR** ✅ | çapraz ref `16/61` |
+| 2 | `62/26` | s.130 | **VAR** ✅ | çapraz ref `26/62` |
+| 3 | `63/36` | s.130 | **VAR** ✅ | çapraz ref `36/63` |
+| 4 | `64/46` | s.130-131 | **VAR** ✅ | ⚠️ **çağrı Pd bloğu `46/64` metnini döndürüyor** → CONFLICT-036 |
+| 5 | **`648`** | s.131 | **YOK** ❌ | `'648'` → `46/64` (kırpma) |
+| 6 | `65/56` | s.131 | **VAR** ✅ | `56/65` (Pd bloğunda) |
+| 7 | `67/76` | s.131 | **VAR** ✅ | ⚠️ kaynak Pd ve Pa bloğunda farklı bağlam → CONFLICT-031 |
+| 8 | **`678/876`** | s.131 | **YOK** ❌ | `'678'` → `67/76` (kırpma) |
+| 9 | **`679`** | s.132 | **YOK** ❌ | `'679'` → `67/76` (kırpma) |
+| 10 | `68/86` | s.132 | **VAR** ✅ | sayısal "paranoid vadi" kuralı eksik → CONFLICT-027 |
+| 11 | **`680/860`** | s.133 | **YOK** ❌ | `'680'` → `68/86` (kırpma) |
+| 12 | `69/96` | s.133 | **VAR** ✅ | |
+| 13 | **`694/964`** | s.133 | **YOK** ❌ | `'694'` → `69/96` (kırpma) |
+| 14 | **`698/968`** | s.134 | **YOK** ❌ | `'698'` → `69/96` (kırpma) |
+| 15 | `60/06` | s.134 | **VAR** ✅ | kayıt `06` |
+
+### Ek örüntüler (kod başlığı değil, sayısal tarama kuralı)
+
+| Örüntü | Kaynak kuralı | Kodda |
+|---|---|---|
+| **Paranoid vadi** (s.132) | `6 ≈ 8 ≈ 70 T` ∧ `7 = 6/8 − 10 T` | **YOK** ❌ |
+| `698/968` → `68/86` geçişi (s.134) | "8, 6'dan **5 T puanı aşağıda** ise" | **YOK** ❌ |
+| **456 Alt Testlerinin Örüntüsü** (s.134) | `4 > 65 T` ∧ `6 > 65 T` ∧ `5 = 35 T` (+ 3 yükselirse) | **YOK** ❌ |
+| **Scarlett O'Hara vadisi** (s.135, Şekil 21) | `Pd ↑ · Mf ↓ · Pa ↑` | **YOK** ❌ (CONFLICT-033 kapsamı) |
+
+**Pa bloğundan açılan yeni çelişki:** **CONFLICT-036** (`64/46` Pa bloğu gövdesi
+eksik + yanlış metin dönüyor).
+
+### Kümülatif kapsam (PHASE 9/10, blok blok)
+
+| Blok | İncelenen | VAR | YOK |
+|---|---|---|---|
+| Hs (s.70-78) | 31 | 31 | 0 |
+| D (s.79-92) | 27 | 9 | 18 |
+| Hy (s.95-101) | 12 | 12 | 0 |
+| Pd (s.107-120) | 20 | 9 | 13 |
+| Mf (s.121-126) | 10 | 9 | 1 |
+| **Pa (s.130-135)** | **15** | **9** | **6** |
+| **TOPLAM** | **115** | **79** | **38** |
