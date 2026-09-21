@@ -32,6 +32,21 @@ try {
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * İstemciye taşınacak durum kodlu hata. Düz nesne (`{ message, code }`) fırlatmak
+ * çalışmaz: `error instanceof Error` false kalır, `catch` içinde kod okunamaz ve
+ * kullanıcı "henüz yapılandırılmamış" (503) yerine genel "tekrar deneyin"
+ * mesajını görür.
+ */
+class FunctionError extends Error {
+  readonly code: number;
+  constructor(message: string, code: number) {
+    super(message);
+    this.name = 'FunctionError';
+    this.code = code;
+  }
+}
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_PER_USER_SECONDS = 10;
 const RATE_PER_USER_HOURLY = 20;
@@ -228,8 +243,7 @@ function userPrompt(summary: AiSummary): string {
 async function callModel(summary: AiSummary): Promise<{ text: string; model: string }> {
   const apiKey = Deno.env.get('AI_API_KEY') ?? '';
   if (!apiKey) {
-    const error: { message: string; code: number } = { message: 'Yapay zekâ yorum özelliği henüz yapılandırılmamış.', code: 503 };
-    throw error;
+    throw new FunctionError('Yapay zekâ yorum özelliği henüz yapılandırılmamış (AI_API_KEY secret\'ı tanımlı değil).', 503);
   }
   const base = (Deno.env.get('AI_API_BASE') ?? 'https://api.openai.com/v1').replace(/\/+$/, '');
   const model = Deno.env.get('AI_MODEL') ?? 'gpt-4o-mini';
@@ -251,21 +265,28 @@ async function callModel(summary: AiSummary): Promise<{ text: string; model: str
       }),
     });
     if (!upstream.ok) {
-      const error: { message: string; code: number } = {
-        message: upstream.status === 401 || upstream.status === 403
+      throw new FunctionError(
+        upstream.status === 401 || upstream.status === 403
           ? 'Yapay zekâ servisi anahtar doğrulaması geçmedi; yöneticiniz AI_API_KEY secret\'ını kontrol etmeli.'
           : 'Yapay zekâ servisi yanıt veremedi; lütfen sonra tekrar deneyin.',
-        code: 502,
-      };
-      throw error;
+        502,
+      );
     }
     const payload = await upstream.json() as { choices?: { message?: { content?: unknown } }[] };
     const text = payload.choices?.[0]?.message?.content;
     if (typeof text !== 'string' || !text.trim() || text.length > 20_000) {
-      const error: { message: string; code: number } = { message: 'Yapay zekâ beklendiği biçimde yanıt üretmedi; lütfen tekrar deneyin.', code: 502 };
-      throw error;
+      throw new FunctionError('Yapay zekâ beklendiği biçimde yanıt üretmedi; lütfen tekrar deneyin.', 502);
     }
     return { text: text.trim(), model };
+  } catch (error) {
+    if (error instanceof FunctionError) throw error;
+    // Ağ/zaman aşımı ya da bozuk JSON gövdesi: ham istisna metni istemciye taşınmaz.
+    throw new FunctionError(
+      controller.signal.aborted
+        ? 'Yapay zekâ servisi zamanında yanıt vermedi; lütfen tekrar deneyin.'
+        : 'Yapay zekâ servisine bağlantı kurulamadı; lütfen tekrar deneyin.',
+      502,
+    );
   } finally {
     clearTimeout(timer);
   }
@@ -276,77 +297,80 @@ async function callModel(summary: AiSummary): Promise<{ text: string; model: str
 type RequestBody = { mode: 'record' | 'draft'; recordId?: unknown; profile?: unknown };
 
 Deno.serve(async request => {
-  const origin = request.headers.get('origin');
-  if (origin && !isAllowedOrigin(origin)) return response(request, 403, { error: 'Origin not allowed' });
-  if (request.method === 'OPTIONS') return new Response('ok', { headers: headers(request) });
-  if (request.method !== 'POST') return response(request, 405, { error: 'Method not allowed' });
-  if (!supabaseUrl || !serviceRoleKey || !adminClient) return response(request, 500, { error: 'Function configuration is incomplete' });
-
-  const authorization = request.headers.get('Authorization');
-  if (!authorization?.startsWith('Bearer ')) return response(request, 401, { error: 'Authentication required' });
-  const token = authorization.slice('Bearer '.length);
-  const { data: authData, error: authError } = await adminClient.auth.getUser(token);
-  if (authError || !authData.user) return response(request, 401, { error: 'Authentication required' });
-  const userId = authData.user.id;
-
-  const { data: callerRow, error: callerError } = await adminClient.from('profiles')
-    .select('id,role,active').eq('id', userId).maybeSingle();
-  const caller = safeCaller(callerRow);
-  if (callerError || !caller || !caller.active) return response(request, 403, { error: 'Active profile required' });
-  if (caller.role !== 'ADMIN' && caller.role !== 'PSYCHOLOG') return response(request, 403, { error: 'Role not allowed' });
-
-  if (rateLimited(userId)) return response(request, 429, { error: 'Çok fazla istek; lütfen biraz sonra tekrar deneyin.' });
-
-  const declaredLength = Number(request.headers.get('content-length'));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
-    return response(request, 413, { error: 'Request too large' });
-  }
-  let body: RequestBody;
   try {
-    const rawBody = await request.text();
-    if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) return response(request, 413, { error: 'Request too large' });
-    body = JSON.parse(rawBody) as RequestBody;
-  } catch {
-    return response(request, 400, { error: 'Invalid request' });
-  }
+    const origin = request.headers.get('origin');
+    if (origin && !isAllowedOrigin(origin)) return response(request, 403, { error: 'Origin not allowed' });
+    if (request.method === 'OPTIONS') return new Response('ok', { headers: headers(request) });
+    if (request.method !== 'POST') return response(request, 405, { error: 'Method not allowed' });
+    if (!supabaseUrl || !serviceRoleKey || !adminClient) return response(request, 500, { error: 'Function configuration is incomplete' });
 
-  if (body.mode !== 'record' && body.mode !== 'draft') return response(request, 400, { error: 'Invalid request' });
-  const summary = safeSummary(body.profile);
-  if (!summary) return response(request, 400, { error: 'Invalid request' });
+    const authorization = request.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) return response(request, 401, { error: 'Authentication required' });
+    const token = authorization.slice('Bearer '.length);
+    const { data: authData, error: authError } = await adminClient.auth.getUser(token);
+    if (authError || !authData.user) return response(request, 401, { error: 'Authentication required' });
+    const userId = authData.user.id;
 
-  try {
-    if (body.mode === 'record') {
-      // Kayıt modu: istemcinin yorumlatmak istediği kaydın, bu çağrının gerçekten
-      // erişebildiği kayıt olduğu doğrulanır (IDOR koruması).
-      const recordId = body.recordId;
-      if (typeof recordId !== 'string' || !UUID_PATTERN.test(recordId)) {
-        return response(request, 400, { error: 'Invalid request' });
-      }
-      const { data: record, error: recordError } = await adminClient.from('mmpi_records')
-        .select('id,created_by').eq('id', recordId).maybeSingle();
-      if (recordError || !record) return response(request, 404, { error: 'Record not found' });
-      if (record.created_by !== userId && caller.role !== 'ADMIN') {
-        return response(request, 403, { error: 'Record access denied' });
-      }
+    const { data: callerRow, error: callerError } = await adminClient.from('profiles')
+      .select('id,role,active').eq('id', userId).maybeSingle();
+    const caller = safeCaller(callerRow);
+    if (callerError || !caller || !caller.active) return response(request, 403, { error: 'Active profile required' });
+    if (caller.role !== 'ADMIN' && caller.role !== 'PSYCHOLOG') return response(request, 403, { error: 'Role not allowed' });
+
+    if (rateLimited(userId)) return response(request, 429, { error: 'Çok fazla istek; lütfen biraz sonra tekrar deneyin.' });
+
+    const declaredLength = Number(request.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      return response(request, 413, { error: 'Request too large' });
     }
-  } catch {
-    return response(request, 500, { error: 'Record verification failed' });
-  }
+    let body: RequestBody;
+    try {
+      const rawBody = await request.text();
+      if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) return response(request, 413, { error: 'Request too large' });
+      body = JSON.parse(rawBody) as RequestBody;
+    } catch {
+      return response(request, 400, { error: 'Invalid request' });
+    }
 
-  try {
-    const { text, model } = await callModel(summary);
-    return response(request, 200, {
-      ok: true,
-      text,
-      model,
-      generatedAt: new Date().toISOString(),
-    });
+    if (body.mode !== 'record' && body.mode !== 'draft') return response(request, 400, { error: 'Invalid request' });
+    const summary = safeSummary(body.profile);
+    if (!summary) return response(request, 400, { error: 'Invalid request' });
+
+    try {
+      if (body.mode === 'record') {
+        // Kayıt modu: istemcinin yorumlatmak istediği kaydın, bu çağrının gerçekten
+        // erişebildiği kayıt olduğu doğrulanır (IDOR koruması).
+        const recordId = body.recordId;
+        if (typeof recordId !== 'string' || !UUID_PATTERN.test(recordId)) {
+          return response(request, 400, { error: 'Invalid request' });
+        }
+        const { data: record, error: recordError } = await adminClient.from('mmpi_records')
+          .select('id,created_by').eq('id', recordId).maybeSingle();
+        if (recordError || !record) return response(request, 404, { error: 'Record not found' });
+        if (record.created_by !== userId && caller.role !== 'ADMIN') {
+          return response(request, 403, { error: 'Record access denied' });
+        }
+      }
+    } catch {
+      return response(request, 500, { error: 'Record verification failed' });
+    }
+
+    try {
+      const { text, model } = await callModel(summary);
+      return response(request, 200, {
+        ok: true,
+        text,
+        model,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof FunctionError) return response(request, error.code, { error: error.message });
+      console.error('ai-interpretation failed', error);
+      return response(request, 500, { error: 'Yapay zekâ yorumu üretilemedi; yöneticiniz fonksiyon günlüklerini kontrol etmeli.' });
+    }
   } catch (error) {
-    const code = error instanceof Error && typeof (error as { code?: unknown }).code === 'number'
-      ? (error as { code: number }).code
-      : 502;
-    const message = error instanceof Error ? error.message : 'Yapay zekâ yorumu üretilmedi; lütfen tekrar deneyin.';
-    return response(request, code, { error: message });
+    console.error('ai-interpretation handler failed', error);
+    return response(request, 500, { error: 'İstek işlenemedi; yönetici supabase functions logs ai-interpretation çıktısını kontrol etmeli.' });
   }
 });
 

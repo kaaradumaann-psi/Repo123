@@ -10,7 +10,7 @@ katmanı olarak.** Araca karşı bu depoda opsiyonel (elle tetiklenen) bir CI i�
 [`.github/workflows/strix-scan.yml`](../.github/workflows/strix-scan.yml). Depoya `STRIX_LLM` ve
 `LLM_API_KEY` secret'ları girilip iş akışı elle çalıştırıldığında Strix, depoyu ve derlenen tek
 dosyalık çıktıyı tarayıp raporu CI artifact olarak bırakır. Secret'lar girilmemişse iş akışı
- **hatasız atlanır** — normal CI akışı (typecheck + 252 test + PDF doğrulama + build + bayt
+ **hatasız atlanır** — normal CI akışı (typecheck + 285 test + PDF doğrulama + build + bayt
 özdeşlik kontrolü) hiçbir şekilde etkilenmez.
 
 ## Strix nedir?

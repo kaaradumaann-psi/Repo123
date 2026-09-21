@@ -67,6 +67,14 @@ export type RecordInput = {
 
 export const RAW_PAYLOAD_MAX_BYTES = 8 * 1024 * 1024;
 
+/**
+ * Liste üst sınırları. Bilinçli olarak sabittir (sayfalama yok) ve arayüzler
+ * bu sınıra ulaşıldığında bunu görünür biçimde bildirir: sessiz kırpma, uzmanın
+ * eski bir kaydı "yok" saymasına yol açabilir.
+ */
+export const OWN_RECORDS_LIMIT = 100;
+export const ALL_RECORDS_LIMIT = 200;
+
 function text(value: string, label: string, max = 120): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
   if (!normalized || normalized.length > max || /[\u0000-\u001f\u007f]/.test(normalized)) {
@@ -194,24 +202,30 @@ async function upsertRecord(
     raw_omr_answers: answers,
     created_by: actor.id,
   };
+  const genericWriteFailure = 'Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.';
   let data: { id?: unknown; created_at?: unknown } | null = null;
+  let response: { data: unknown; error: unknown };
   try {
-    const response = await requireSupabase()
+    response = await requireSupabase()
       .from('mmpi_records')
       .upsert(payload, { onConflict: 'idempotency_key' })
       .select('id,created_at')
       .single();
-    if (response.error) {
-      // Ağ hatası ile sunucu hatasını ayırt edebilmek için orijinal mesaj `cause` ile taşınır;
-      // `isNetworkError` kuyruğa alma kararını bu zincirden verir.
-      throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.', { cause: response.error });
-    }
-    data = response.data as { id?: unknown; created_at?: unknown } | null;
   } catch (cause) {
-    if (cause instanceof Error && cause.message.startsWith('Kayıt oluşturulamadı.')) throw cause;
-    throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.', { cause });
+    // Ağ/istisna yolu: orijinal sebep `cause` ile taşınır, `isNetworkError` kuyruğa
+    // alma kararını bu zincirden verir.
+    throw new Error(genericWriteFailure, { cause });
   }
-  if (!data) throw new Error('Kayıt oluşturulamadı. Bilgileriniz korundu, lütfen tekrar deneyin.');
+  if (response.error) {
+    // Şema/RLS kaynaklı hatalar (42703, PGRST204, 42501, 42P01 …) kullanıcıya
+    // eyleme dönüştürülebilir mesaj olarak döner; ağ hatası ise kuyruğa alınabilmesi
+    // için genel mesajda kalır.
+    const detail = isNetworkError(response.error) ? genericWriteFailure : describeMutationError(response.error, genericWriteFailure);
+    // Sebep her durumda zincire bağlanır: çevrimdışı kuyruğu `isNetworkError` ile karar verir.
+    throw new Error(detail, { cause: response.error });
+  }
+  data = response.data as { id?: unknown; created_at?: unknown } | null;
+  if (!data) throw new Error(genericWriteFailure);
   const row = data as { id?: unknown; created_at?: unknown };
   if (typeof row.id !== 'string' || typeof row.created_at !== 'string') throw new Error('Kayıt yanıtı geçersiz.');
   return { id: row.id, createdAt: row.created_at };
@@ -249,8 +263,8 @@ export async function listOwnRecords(): Promise<RecordSummary[]> {
     .from('mmpi_records')
     .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by')
     .order('created_at', { ascending: false })
-    .limit(100);
-  if (error) throw new Error('Test kayıtlarınız alınamadı.');
+    .limit(OWN_RECORDS_LIMIT);
+  if (error) throw new Error(describeMutationError(error, 'Test kayıtlarınız alınamadı.'));
   return (data ?? []).map(row => {
     const value = row as {
       id?: unknown;
@@ -310,7 +324,7 @@ export async function listAllRecords(): Promise<RecordSummary[]> {
       )
     `)
     .order('created_at', { ascending: false })
-    .limit(200);
+    .limit(ALL_RECORDS_LIMIT);
 
   if (error) {
     // If join fails due to relationship naming, fallback to basic select
@@ -318,8 +332,8 @@ export async function listAllRecords(): Promise<RecordSummary[]> {
       .from('mmpi_records')
       .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by,created_by')
       .order('created_at', { ascending: false })
-      .limit(200);
-    if (fallback.error) throw new Error('Tüm test kayıtları alınamadı.');
+      .limit(ALL_RECORDS_LIMIT);
+    if (fallback.error) throw new Error(describeMutationError(fallback.error, 'Tüm test kayıtları alınamadı.'));
     return (fallback.data ?? []).map(row => {
       const v = row as Record<string, unknown>;
       return {
@@ -398,26 +412,67 @@ export const EXPERT_NOTES_MAX = 4000;
 
 /**
  * PostgREST/veritabanı hatalarını kullanıcıya dürüst ama hassas detay
- * sızdırmayan bir kategoriye çevirir. PostgRest hata `code`ları:
- *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / yetki yok
+ * sızdırmayan bir kategoriye çevirir. PostgREST hata `code`ları:
+ *   - 42501      → satır-düzeyi güvenlik (RLS) ihlali / grant eksik
  *   - 42703/PGRST204 → tanımsız kolon (şema/migration eksik — örn. expert_notes)
- *   - PGRST301       → JWT süresi dolmuş / geçersiz (PGRST300/301 serisi)
+ *   - 42P01/PGRST205 → tanımsız tablo (migration hiç uygulanmamış)
+ *   - PGRST30x       → JWT süresi dolmuş / geçersiz (PGRST300/301/302)
+ *   - PGRST116       → `.single()` tek satır bekledi ama 0/multiple satır geldi
+ *                      (kayıt yok ya da RLS görünürlüğü engelliyor)
  *   - 22P02          → geçersiz UUID gibi tip hatası (çağrı katmanı zaten korur)
+ *   - 23502          → NOT NULL ihlali (denetim izi / şema uyumsuzluğu)
  *   - 23503/23505/23514 → FK, uniqueness veya check bütünlük ihlali
+ *   - P0001          → trigger içinde `raise exception` (PostgREST bunu 400 yapar)
  * Ağ hataları tarayıcı kaynaklıdır (Failed to fetch vb.).
+ *
+ * Teşhis için hata `code`su ve kısa `message`ı konsola yazılır. Ham `details`
+ * BİLİNÇLİ olarak yazılmaz: PostgreSQL, kısıt ihlallerinde `details` alanına
+ * satırın tamamını ("Failing row contains (...)") koyabilir ve bu, danışan
+ * verisini tarayıcı konsoluna/log toplayıcısına taşır (KVKK).
  */
-function describeMutationError(cause: unknown, fallback: string): string {
+export function describeMutationError(cause: unknown, fallback: string): string {
   if (isNetworkError(cause)) {
     return 'Bağlantı kurulamadı; veriniz korundu, lütfen tekrar deneyin.';
   }
-  const code = typeof cause === 'object' && cause !== null ? String((cause as { code?: unknown }).code ?? '') : '';
-  if (code === '42501') return 'Bu işlem için yetkiniz bulunmuyor.';
+  const row = typeof cause === 'object' && cause !== null
+    ? (cause as { code?: unknown; message?: unknown })
+    : {};
+  const code = String(row.code ?? '');
+  if (code) {
+    try {
+      const message = typeof row.message === 'string' ? row.message.slice(0, 160) : '';
+      console.error('[supabase] kayıt işlemi hatası', { code, message });
+    } catch {
+      /* konsol yoksa yut */
+    }
+  }
+  if (code === '42501') {
+    return 'Bu işlem için yetkiniz bulunmuyor (veritabanı yetkisi/RLS). Yöneticiniz supabase db push ile güncel politikaları uygulamalı.';
+  }
   if (code === '42703' || code === 'PGRST204') {
     return 'Kayıt işlemleri için veritabanı güncellemesi gerekiyor; yöneticiniz supabase db push çalıştırmalı.';
   }
-  if (/^PGRST30[01]$/.test(code)) return 'Oturumunuzun süresi dolmuş olabilir; lütfen yeniden giriş yapın.';
+  if (code === '42P01' || code === 'PGRST205') {
+    return 'Veritabanı şeması eksik; yöneticiniz supabase db push çalıştırmalı.';
+  }
+  if (/^PGRST30[12]$/.test(code)) return 'Oturumunuzun süresi dolmuş olabilir; lütfen yeniden giriş yapın.';
+  if (code === 'PGRST116') {
+    // `.single()` tek satır bekler: 0 satır = kayıt yok ya da RLS görünürlüğü engelliyor.
+    // Canlı şema eskiyse kayıt politikaları da eksik olabilir; bu yüzden db push ipucu verilir.
+    return 'Kayıt bulunamadı veya bu kayda erişim yetkiniz bulunmuyor. Şema eksik olabilir; yöneticiniz supabase db push çalıştırmalı.';
+  }
   if (code === '22P02') return 'İşlem hedefi geçersiz; sayfayı yenileyip tekrar deneyin.';
+  if (code === '23502') {
+    if (/audit_logs/i.test(String(row.message ?? ''))) {
+      return 'Denetim izi (audit_logs) bu işlemi kaydedemedi. Yöneticiniz supabase db push ile şemayı güncellemeli.';
+    }
+    return 'Zorunlu bir alan eksik gönderildi; sayfayı yenileyip tekrar deneyin.';
+  }
   if (code === '23503' || code === '23505' || code === '23514') return 'Kayıt bütünlüğü korunamadı; tekrar deneyin.';
+  if (code === 'P0001') {
+    const detail = typeof row.message === 'string' ? row.message.trim() : '';
+    return detail ? `Veritabanı işlemi reddetti: ${detail.slice(0, 160)}` : fallback;
+  }
   return fallback;
 }
 

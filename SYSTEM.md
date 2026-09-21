@@ -2,7 +2,7 @@
 
 **Belgenin amacı:** Bu dosya, depo kodundan türetilmiş güncel mimari ve üretim işletim sözleşmesidir. Yeni bir özellik tasarımı değildir; uygulamanın gerçekten yaptığı şeyleri, güvenlik sınırlarını, doğrulanmış kontrolleri ve doğrulanamayan üretim bağımlılıklarını ayırır.
 
-**Denetim snapshot'ı:** 20 Eylül 2026 · teslim branch'i · yerel doğrulama: `npm ci`, `npm run typecheck`, `npm test` **239/239**, `npm run verify:pdf`, `npm run build`, `npm audit --audit-level=high` ve `git diff --check`.
+**Denetim snapshot'ı:** 21 Eylül 2026 · teslim branch'i · yerel doğrulama: `npm ci`, `npm run typecheck`, `npm test` **285/285**, `npm run verify:pdf`, `npm run build`, `npm audit --audit-level=high` ve `git diff --check`.
 
 Durum etiketleri:
 
@@ -238,6 +238,14 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
   * `set_active`: Psikolog hesabını aktif veya pasif yapar (Auth `ban_duration` ve profil `active` senkronizasyonu).
   * `delete`: Psikolog hesabını siler. Veri bütünlüğü için **önce Auth kullanıcısı silinir** (`adminClient.auth.admin.deleteUser(userId)`). `profiles` ve `mmpi_records` üzerindeki `ON DELETE CASCADE` ilişkisi sayesinde ilişkili tüm profil ve test kayıtları veritabanı tarafından temizlenir.
 - **Hata Yönetimi:** Tüm reddedilmeler yapılandırılmış `{ error: string }` JSON yanıtı döner; istemciye hassas yığın izi sızdırılmaz.
+  Veritabanı kaynaklı düşüşler (denetim izi/kısıt/RLS → `23502`, `42501`, `42703`, `42P01`, trigger) **500 + `supabase db push`** mesajıyla, Auth/istemci kaynaklılar **400** ile döner (`isDatabaseSideError`).
+  İstemci tarafında `src/auth/adminApi.ts` → `explainEdgeFunctionError()` hatayı gerçek nedene göre ayırır:
+  `FunctionsFetchError` (CORS/`ALLOWED_ORIGINS` ya da deploy yok), `FunctionsRelayError`, 401 (oturum), 403 (origin ya da rol),
+  404 (hedef yok), 413, 429, 500 (deploy/schema). Bu yüzden "Edge Function bağlantısını kontrol edin" gibi ayırt edilemez tek
+  cümle yerine eyleme dönüştürülebilir mesaj gösterilir (`tests/adminApiErrors.test.ts`).
+  Doğrulama hataları `ValidationError` ile `400` (mesaj gösterilir), beklenmeyen istisnalar günlüğe yazılıp **ham mesaj istemciye
+  taşınmadan** `500` döner; işleyicinin tamamı en dışta `try/catch` içindedir (yakalanmayan istisna CORS başlıksız yanıt üretip
+  tarayıcıda "bağlantı hatası" gibi görünürdü). Aynı sözleşme `tests/edgeFunctions.test.ts` ile kilitlidir.
 
 #### 4.4b AI karar desteği Edge Function (`ai-interpretation`)
 
@@ -247,7 +255,11 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
   1. CORS yalnız `ALLOWED_ORIGINS` (boşsa localhost-only); JWT kapıda (`config.toml` `verify_jwt = true`) ve fonksiyonda (`auth.getUser`) doğrulanır; profil aktif + ADMIN/PSYCHOLOG olmalı.
   2. `mode=record` ise kayıt service role ile okunur ve çağrının o kayda erişim hakkı (sahip veya Admin) doğrulanmadan yorum üretilmez — IDOR koruması.
   3. LLM'e giden içerik yalnız istemcinin gönderdiği profil özetinin **alan alan doğrulanmış** halidir (`safeSummary`: sayı aralıkları, ölçek kümesi, metin uzunlukları); serbest metin prompt'u istemcide yaşamaz. Görüntü/piksel verisi asla gönderilmez. Özet **isimsizdir**: danışan ad/soyadı hiçbir istem alanına katılmaz (yalnız yaş + cinsiyet); istemci yine de ad gönderse bile sunucu onu özete almaz (`tests/aiSummaryPrivacy.test.ts` regresyonla kanıtlar).
-  4. `AI_API_KEY` yalnız fonksiyon çalışma zamanında; 503 "yapılandırılmamış"ken arayüzü sessizce kapatır. En iyi çaba hız limiti: kullanıcı başına 1 istek/10 sn + 20 istek/saat.
+  4. `AI_API_KEY` yalnız fonksiyon çalışma zamanında; tanımlı değilken **503 "henüz yapılandırılmamış"** döner ve arayüz bunu
+     gösterir. Durum kodlu hatalar `FunctionError` (Error alt sınıfı) ile taşınır: düz nesne fırlatmak `instanceof Error`
+     kontrolünü bozar ve 503/502 mesajlarını genel "tekrar deneyin"e düşürürdü (`tests/edgeFunctions.test.ts` bunu kilitler).
+     LLM'e ulaşılamaması/zaman aşımı `502`, beklenmeyen istisnalar `500` (istek kimliğiyle günlükte) döner.
+     En iyi çaba hız limiti: kullanıcı başına 1 istek/10 sn + 20 istek/saat.
   5. İstemci tarafı 24 saatlik cihaz önbelleği `mmpi566:ai:record:<id>` / `mmpi566:ai:draft` anahtarlarında; özet hash'i değişince geçersiz sayılır, "Yeniden Oluştur" önbelleği atlar.
 - **Secrets:** `AI_API_KEY` (zorunlu), `AI_MODEL` (varsayılan `gpt-4o-mini`), `AI_API_BASE` (varsayılan OpenAI), `ALLOWED_ORIGINS` (admin-users ile aynı). `supabase/README.md` §5 dağıtım komutlarını içerir.
 
@@ -265,7 +277,13 @@ RLS, veritabanı seviyesinde açık (`enable row level security`) tutulur; hiçb
 2. **Değişmezlik (Immutability):** `protect_mmpi_record_fields()` trigger'ı sayesinde klinik alanlar (`client_*`, `gender`, `age`, `raw_omr_answers`, `created_by`, `created_at` vb.) oluşturulduktan sonra asla güncellenemez.
 3. **Uzman Değerlendirme Notu:** Kayıt sonrasında `updateExpertNotes()` ile güncellenir. Yalnızca `expert_notes` ve `notes_updated_at` kolonları mutasyona uğrar. Metin istemcide ve veritabanı check constraint'i ile **en fazla 4000 karakter** olarak sınırlandırılır. Bu not yazdırma raporunda (`MMPIPrintReport`) "Uzman Değerlendirme Notu" başlığı altında rapora aktarılır.
 4. **Silme (Delete):** Admin her kaydı, psikolog ise kendi kaydını kalıcı olarak silebilir. `count: 'exact'` doğrulaması kullanılır. Silme işlemi sonrasında `audit_logs` tablosuna `record_delete` kaydı işlenir. Soft-delete yoktur.
-5. **Revizyon:** Cevaplar "Kaydı Düzenle" ile orijinali değiştirilmeden yeni kayda yazılır (bkz. 3.4): yeni `case-meta` `revisionOf` (orijinal UUID) + `revisionReason` taşır; `validate_mmpi_record_intake` payload şemasını method üzerinden doğruladığı için revizyon meta alanları mevcut şemaya migration gerektirmeden uyumludur. OMR revizyonları optik payload taşımaz — optik formun son hali orijinalde kalır.
+5. **Liste üst sınırları:** Psikolog kendi kayıtlarında en yeni **100**, Admin tüm kayıtlarda en yeni **200** satırı görür
+   (`OWN_RECORDS_LIMIT` / `ALL_RECORDS_LIMIT`). Sınıra ulaşıldığında arayüz sayaçta `+` gösterir ve "daha eski kayıtlar
+   listelenmiyor" bilgisini verir; sessiz kırpma yoktur. Sayfalama henüz yoktur.
+6. **Hata çevirisi:** `describeMutationError()` PostgREST kodlarını (42703/PGRST204, 42P01/PGRST205, 42501, 23502, P0001,
+   PGRST301, 22P02, 23503/23505/23514) kullanıcı mesajına çevirir ve `code`/`message`ı konsola yazar. PostgreSQL'in
+   `details` alanı **bilinçli olarak loglanmaz**: kısıt ihlallerinde satırın tamamını içerebilir (danışan verisi).
+7. **Revizyon:** Cevaplar "Kaydı Düzenle" ile orijinali değiştirilmeden yeni kayda yazılır (bkz. 3.4): yeni `case-meta` `revisionOf` (orijinal UUID) + `revisionReason` taşır; `validate_mmpi_record_intake` payload şemasını method üzerinden doğruladığı için revizyon meta alanları mevcut şemaya migration gerektirmeden uyumludur. OMR revizyonları optik payload taşımaz — optik formun son hali orijinalde kalır.
 
 ---
 
@@ -408,7 +426,8 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 | --- | --- | --- |
 | `npm ci` | lockfile ile temiz bağımlılık kurulumu | **DOĞRULANDI** — 74 paket, 0 vulnerability |
 | `npm run typecheck` | `tsc --noEmit`, strict/noUnused | **DOĞRULANDI** |
-| `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print ve router | **239/239 DOĞRULANDI** |
+| `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print, router, kayıt/Edge Function hata çevirisi ve teşhis betiği sözleşmesi | **285/285 DOĞRULANDI** |
+| `npm run diagnose:supabase` | canlı proje teşhisi (migration/RLS/grant/trigger + iki Edge Function CORS); yazma testi yalnız `--allow-destructive` ile | **DOĞRULANMADI** — bu ortamdan canlı projeye erişim yok (betiğin kendisi ve sözleşmesi `tests/diagnostics.test.ts` ile doğrulanır) |
 | `npm run verify:pdf` | hazır/üretilmiş form PDF byte/geometri/QR doğrulaması | **DOĞRULANDI** — 4 A4, 566 madde, 1.132 bubble |
 | `npm run build` | typecheck + standalone `dist/index.html`, tracked `optik-form.html` üretimi (`dist/_redirects` yalnızca `PAGES_REDIRECTS=1` ile; `dist/_headers` HTTP güvenlik başlıkları her derlemede) | **DOĞRULANDI** |
 | `git diff --check` | whitespace/diff hygiene | **DOĞRULANDI** |
@@ -426,6 +445,13 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 - **Raw-score round trip** (`tests/rawScoreRoundTrip.test.ts`): ham puan yönteminin uçtan uca regresyon testi. Elle hesaplanmış referans T puanları (yayınlanan Türk normları + K=3 düzeltme tablosu) üzerinden K düzeltmesi, T dönüşümü, Kadın Mf ters işareti, 20–120 sıkışması, profil kodu ve `RAW_SCORE_MAX`/`buildRawPayload` sınır doğrulaması kanıtlanır.
 - **AI privacy** (`tests/aiSummaryPrivacy.test.ts`): yapay zekâ istemine giden özetin isimsiz olduğunu (ad/soyad hiçbir alana sızmaz, yalnız sayısal profil + yaş/cinsiyet) ve yaş sınırı dışındaysa kimlik bağlamının hiç gönderilmediğini kanıtlar.
 - Standalone build: no source imports, one inline script, CSP hash, embedded PDF bytes and footer/print separation.
+- **Kayıt/Edge Function hata çevirisi** (`tests/recordErrors.test.ts`, `tests/adminApiErrors.test.ts`): PostgREST kodlarının (42703/PGRST204, 42P01/PGRST205, 42501, 23502, P0001, PGRST116, PGRST301/302) eyleme dönüştürülebilir mesaja çevrildiğini; `details` alanının (satır içeriği) mesaja sızmadığını; Edge Function hata sınıflarının (Fetch/Relay/Http) ve HTTP durumlarının (401/403/404/413/429/500) ayrı mesajlara gittiğini kanıtlar.
+- **Edge Function sözleşmesi** (`tests/edgeFunctions.test.ts`): iki fonksiyonun kaynağı esbuild ile derlenir (Deno kodunun
+  tsconfig kapsamı dışında olması nedeniyle sözdizimi hatası ancak deploy'da görülürdü); işleyicinin en dışta `try/catch` ile
+  sarıldığı, ham `error.message`'ın istemciye taşınmadığı, `console.log` ile gövde verisinin loglanmadığı, CORS allowlist'i ve
+  Bearer doğrulamasının korunduğu, `ai-interpretation`'da durum kodlarının `FunctionError` ile taşındığı ve `admin-users`'ta
+  doğrulama/veritabanı hatası ayrımının (`ValidationError` → 400, `isDatabaseSideError` → 500 + `db push`) sürdüğü kanıtlanır.
+- **Teşhis sözleşmesi** (`tests/diagnostics.test.ts`): `scripts/diagnose-supabase.mjs` sözdizimi, beklenen migration listesinin `supabase/migrations/` ile birebir aynı kalması, yazma testinin yalnız açık bayrakla çalışması ve `TROUBLESHOOTING.md` çözüm sırasının belgelenmesi.
 
 ### 9.3 Manuel veya canlı doğrulama gerektirenler
 
@@ -480,6 +506,7 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    Kullanıcı oluşturma, aktiflik yönetimi ve kullanıcı silme işlemlerini yürüten güncel Edge Function'ı deploy edin:
    ```bash
    npx supabase functions deploy admin-users
+   npx supabase functions deploy ai-interpretation   # yapay zekâ yorumu kullanılacaksa
    ```
 
 5. **Verify secrets & CORS:**
@@ -488,6 +515,17 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
    npx supabase secrets set ALLOWED_ORIGINS="https://app.example.com,http://localhost:5173"
    ```
    `SUPABASE_URL` ve `SUPABASE_SERVICE_ROLE_KEY` Supabase çalışma zamanı tarafından otomatik sağlanır.
+   Yapay zekâ karar desteği kullanılacaksa anahtar yalnızca fonksiyon çalışma zamanında tutulur:
+   ```bash
+   npx supabase secrets set AI_API_KEY=sk-... AI_MODEL=gpt-4o-mini
+   ```
+   Aynı adımda canlı projeyi otomatik doğrulayın (salt-okunur):
+   ```bash
+   npm run diagnose:supabase        # migration/şema/RLS/grant/trigger + iki fonksiyonun CORS'u
+   ```
+
+   Canlıda hata görülürse (`400`, "Kayıt bulunamadı…", "Kullanıcı hesabı silinemedi")
+   kök neden tablosu ve kesin çözüm sırası `TROUBLESHOOTING.md` içindedir.
 
 6. **Build frontend:**
    ```bash
@@ -541,7 +579,7 @@ Bu liste “PASS” yerine gerçek kanıt gerektirir:
 ### Kod ve artifact
 
 - [x] `npm run typecheck`.
-- [x] `npm test` 239/239.
+- [x] `npm test` 285/285.
 - [x] `npm ci` ile lockfile kurulumu: 74 paket, 0 vulnerability.
 - [x] `npm run verify:pdf`: 4 A4, 566 madde ve 1.132 bubble doğrulandı.
 - [x] `npm run build`: `dist/index.html` ve `optik-form.html` üretildi; standalone build testleri başarılı (SPA fallback Workers'ta `wrangler.jsonc`, Pages/Netlify'da `PAGES_REDIRECTS=1` + `_redirects`).
@@ -583,10 +621,19 @@ Canlı Supabase projesinin migration geçmişi, Edge Function sürümü ve `ALLO
 Doğrulama kanıtları (yerel):
 
 - **TypeScript:** `npm run typecheck` temiz.
-- **Test:** `npm test` **239/239 PASS**.
+- **Test:** `npm test` **285/285 PASS**.
+- **Canlı ortam arızaları:** `TROUBLESHOOTING.md` belirti → kök neden → komut tablosunu, ilk Admin bootstrap'ını ve hata kodu
+  eşlemesini içerir; `npm run diagnose:supabase` aynı kontrolleri canlı projede tek komutla yapar (migration geçmişi, kolonlar,
+  RLS politikaları, grant'lar, trigger'lar, `audit_logs` sözleşmesi ve iki Edge Function'ın CORS davranışı).
 - **PDF:** `npm run verify:pdf` (4 A4, 566 madde, 1.132 bubble).
 - **Build:** `npm run build` (`dist/index.html`, `optik-form.html`; `_redirects` yalnızca `PAGES_REDIRECTS=1` ile).
 - **Güvenlik:** `npm audit --audit-level=high` 0; `git diff --check` temiz.
 
-Canlı dağıtım için `supabase db push` ve `supabase functions deploy admin-users` zorunludur.
-ons deploy admin-users` zorunludur.
+Canlı dağıtım için `supabase db push`, `supabase functions deploy admin-users` ve
+`supabase secrets set ALLOWED_ORIGINS=...` zorunludur.
+
+Canlı ortam belirtileri (400, "Kayıt bulunamadı…", "Kullanıcı hesabı silinemedi") ve
+kesin çözüm sırası `TROUBLESHOOTING.md` içinde; `npm run diagnose:supabase` aynı
+kontrolleri canlı projede otomatik yapar (migration geçmişi, kolon/politika/grant/trigger,
+`audit_logs` sözleşmesi, `admin-users` + `ai-interpretation` CORS'u ve isteğe bağlı
+uçtan uca yazma/silme testi).

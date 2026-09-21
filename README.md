@@ -256,6 +256,20 @@ npm run pdf         # optik formu üret
 npm run verify:pdf  # üretilen PDF'i doğrula
 ```
 
+Canlı kurulumun (Supabase şeması, RLS, grant'lar, trigger'lar ve iki Edge
+Function'ın CORS'u) doğrulaması için bağımlılıksız teşhis betiği:
+
+```sh
+SUPABASE_URL=https://<proje-ref>.supabase.co \
+SUPABASE_SERVICE_KEY=<service_role> \
+SITE_ORIGIN=https://uygulama-adresiniz \
+npm run diagnose:supabase          # --allow-destructive ile uçtan uca yazma/silme testi
+```
+
+Üretimde görülen `400` / “Kayıt bulunamadı…” / “Kullanıcı hesabı silinemedi”
+belirtilerinin kök nedenleri ve çözüm sırası [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+içindedir.
+
 `npm test` şunları çalıştırır: form geometrisi, kimlik alanlarının yalnızca
 1. sayfada olması, homografi/benzerlik matematiği, sentetik görüntüler üzerinde
 OMR (boş, güçlü, silik, silinmiş, çoklu, çelişen iz, eksik köşe karesi, kesik
@@ -265,8 +279,15 @@ PDF'in dosyadan geri okunup tanımla karşılaştırılması**, **depodaki PDF'i
 rasterleştirilip gerçek OMR hattından geçirilmesi** (4 sayfa kabul, 566 madde
 boş okunuyor, sayfalar tek tek kabul ediliyor), **pdf.js worker sertleştirmesinin
 pin'lenmiş sürümde başvurduğu sembollerin varlığı** ve **tek dosya derlemenin
-CSP hash doğrulaması**. Supabase Auth ve kayıt çağrıları doğal olarak backend'e
-HTTPS bağlantısı gerektirir.
+CSP hash doğrulaması**, **kayıt/Edge Function hata çevirisinin** (PostgREST kodları
+`42703/PGRST204`, `42P01/PGRST205`, `42501`, `23502`, `P0001`, `PGRST116`,
+`PGRST301/302` ve HTTP 401/403/404/413/429/500 için eyleme dönüştürülebilir mesaj;
+satır içeriği taşıyan `details` alanının loglanmadığının kanıtı), iki Edge Function'ın
+**kaynak sözleşmesinin** (esbuild ile sözdizimi, en dışta `try/catch`, ham hata
+mesajının istemciye dönmemesi, CORS/rol kapılarının korunması) ve **teşhis betiği
+sözleşmesinin** (beklenen migration listesi, salt-okunur varsayılan). Supabase Auth
+ve kayıt çağrıları doğal olarak backend'e HTTPS bağlantısı gerektirir.
+Toplam **285 test** 18 dosyada koşar.
 
 Ayrıca GitHub Actions CI (`.github/workflows/ci.yml`) her push/PR'da tip kontrolü,
 testler, PDF doğrulaması ve derlemeyi çalıştırır; commit'li `optik-form.html`'in
@@ -364,6 +385,8 @@ değiştirilebilir); uygulamanın FormKit akışı bu doğrulanmış sabit set k
 | `scripts/build.mjs` | Tek dosya production derlemesi (`optik-form.html` / `dist/index.html`). |
 | `wrangler.jsonc` | Cloudflare Workers statik varlık yayını: `dist/` + SPA fallback. Wrangler'ın Vite otomatik yapılandırmasına girmesini engeller. |
 | `scripts/generate-pdf.ts`, `printFonts.ts`, `verify-pdf.ts` | Yazdırılabilir form PDF üretimi ve bağımsız doğrulama. |
+| `scripts/diagnose-supabase.mjs` | Canlı Supabase teşhisi (`npm run diagnose:supabase`): migration geçmişi, şema, RLS politikaları, grant'lar, trigger'lar, `audit_logs` sözleşmesi, `admin-users` + `ai-interpretation` CORS'u; yazma/silme testi yalnız `--allow-destructive` ile. Harici bağımlılık yok. |
+| `TROUBLESHOOTING.md` | Canlı ortam hata kümesinin (400 / silme yetkisi / hesap silme) kök neden tablosu, `supabase db push` + `functions deploy` + `secrets set` çözüm sırası ve hata kodu → neden eşlemesi. |
 | `docs/kaynak-denetimi.md` | Puanlama/yorum bileşenlerinin kaynak denetimi: künye–bileşen eşleştirme tabloları ve doğrulanamayan kesimlerin dürüstlük kaydı. |
 
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini

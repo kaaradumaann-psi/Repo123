@@ -93,8 +93,11 @@ export function AuthGate({ children }: { children: (user: AuthenticatedUser, onL
       }
     };
     const interval = window.setInterval(() => { void validate(); }, 60_000);
-    window.addEventListener('focus', validate);
-    return () => { alive = false; window.clearInterval(interval); window.removeEventListener('focus', validate); };
+    // Dinleyiciye async fonksiyon verilmez: reddedilen bir Promise "unhandled rejection"
+    // üretir (setUser içinde bile hata olsa yakalanmaz). Sarmalayıp void'liyoruz.
+    const onFocus = () => { void validate(); };
+    window.addEventListener('focus', onFocus);
+    return () => { alive = false; window.clearInterval(interval); window.removeEventListener('focus', onFocus); };
   }, [user]);
 
   async function handleSignIn(email: string, password: string) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { listOwnRecords, deleteRecord } from '../records/supabaseRecords';
+import { OWN_RECORDS_LIMIT, listOwnRecords, deleteRecord } from '../records/supabaseRecords';
 import type { RecordSummary } from '../records/supabaseRecords';
 import { ConfirmDialog } from './ConfirmDialog';
 import { navigate } from '../router';
@@ -77,9 +77,23 @@ export function MyRecordsPanel() {
             <Icon name="refresh" size={15} />
             <span>Yenile</span>
           </button>
-          <div className="stats-pill">{records.length} Kayıt</div>
+          <div className="stats-pill">
+            {records.length}
+            {records.length >= OWN_RECORDS_LIMIT ? '+' : ''} Kayıt
+          </div>
         </div>
       </div>
+
+      {!loading && !error && records.length >= OWN_RECORDS_LIMIT && (
+        <div className="status-banner info-banner" role="status">
+          <Icon name="info" size={16} />
+          <span style={{ flex: 1 }}>
+            Liste en yeni {OWN_RECORDS_LIMIT} kaydı gösteriyor. Daha eski kayıtlar bu listede <strong>ve arama
+            sonuçlarında</strong> görünmez; arşiv {OWN_RECORDS_LIMIT} kaydı aştıysa eski bir kayda erişmek için
+            yöneticinizden veritabanı sorgusu istemeniz gerekir.
+          </span>
+        </div>
+      )}
 
       <div className="search-filter-box">
         <div className="search-input-wrapper">
