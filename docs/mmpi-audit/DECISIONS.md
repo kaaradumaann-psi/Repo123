@@ -755,8 +755,8 @@ içerik bekletilmez* → kaynak terimi aynen yazılır (+ düşen "açıları" s
 
 ---
 
-## DECISION-029 — **ADAY · KULLANICI ONAYI BEKLİYOR**: kod tipi modelinin tek çatı kararı
-**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
+## DECISION-029 — **ONAYLANDI (A)**: kod tipi modelinin tek çatı kararı
+**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **ONAYLANDI — (A) SEÇENEĞİ** (kullanıcı onayı 2026-09-22, "A'dan devam") · **Uygulama: CHANGE-014** · `src/` değişikliği bu onayla yetkilidir
 ** tetikleyen:** PHASE 9/10 batch 21 — **Bölüm 5 kaynak taraması bitti (s.63-157)**,
 kanıt seti tamam; erteleme gerekçesi ("önce tüm bloklar çıkarılsın") **kalktı**.
 
@@ -790,3 +790,54 @@ dosyasından gövde göçü, **batch batch**. **Reddedilirse:** 030 P1 olarak a�
 hiçbir şey değişmez.
 
 **Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 21 = docs + test + araç).
+
+### ONAY SONRASI UYGULAMA — CHANGE-014 (2026-09-22, aynı oturum)
+
+**(A) kabul edildi ve uygulandı.** Uygulanan çatı (öneriyle birebir; tek fark
+aşağıda "sapma" başlığında):
+
+- **Kod kimliği = `(blok, kanonik sıralı rakamlar, varyant)`**: blok, kodun
+  **İLK (en yüksek) rakamı**dır (`parseCode()` → `CODE_DIGIT_SCALE`). Kaynağın o
+  bloğa özgü başlığı olan kodlar `BLOCK_CODES` ayrık kaydında durur:
+  **4 kayıt** — `Ma:19` (`91/19`, s.153) · `Pa:46` (`64/46`, s.130-131) ·
+  `Si:049` (s.157) · `Si:027` (`027(8)`, s.157). `CODES` (45 iki-haneli ortak
+  kayıt) **elleçilmedi**; blok kaydı varsa o kazanır, yoksa ortak kayda düşülür.
+- **`conditions?: CodeCondition[]`**: `{ source, quote, test?, manual? }` —
+  `quote` **kaynak cümlesinin birebir alıntısı**, `test` profil T puanlarıyla
+  çalışan makine koşulu, `manual` = "yaş/süre gibi profilde olmayan bilgi ister,
+  elle değerlendirilmelidir". **12 koşul bağlandı**: 11 tanesi mevcut
+  iki-haneli kayıtlara (`12 13 26 27 49 07 68 89 08`) `CODE_CONDITIONS`
+  ayrık tablosunda + `withConditions()` ile birleştirilir (9 kod anahtarı,
+  11 koşul), 1 tanesi `Pa:46` bloğunda (`8` yükselmesi, s.131).
+- **`patterns`**: çok-ölçekli örüntüler `CodeInterpretation`'a değil
+  `mmpiInterpretation.ts` desen katmanına eklendi (3 yeni desen: `neurotic-step`
+  · `neurotic-hat` · `neurotic-rising`; `PatternHit`'e `source?` alanı geldi).
+- **Kırpma KALDIRILDI**: `codeInterpretation()` içindeki `slice(0, 2)` gitti →
+  eşleşme yoksa **`undefined`**; UI "bu kod için kaynak yorumu tanımlı değil"
+  diyor (yanlış metin göstermekten iyidir).
+- **UI:** `MMPICodeTab` ve `MMPIPrintReport` artık `codeInterpretationForProfile()`
+  kullanıyor → koşullu ek yorumlar yalnız **profil karşılık verdiğinde**
+  listelenir; blok etiketi alt testin tam adından gelir; yazdırma raporunda
+  koşullar tek satır `pr-context` olarak basılır.
+
+**Öneriden sapmalar (bilinçli, ikisi de muhafazakâr):**
+1. `patterns` alanı tipe **konmadı** — örüntüler profil düzeyinde nesnelerdir,
+   kod kaydına gömülürse aynı örüntü 45 kayıtta tekrarlanırdı. Desen katmanı
+   (`detectPatterns`) zaten testli ve UI'da görünüyor.
+2. `conditions` mevcut 9 kaydın **içine yazılmadı**; `CODE_CONDITIONS` ayrık
+   tabloda ve çözümlerde birleştiriliyor → `CODES` kayıtlarının 45 metni
+   olduğu gibi kaldı (diff küçük, kaynak satır numaraları bozulmadı).
+3. `CodeCondition`'da `text` değil **`quote`** var:DECISION-028 uyarınca yalnızca
+   **birebir kaynak cümlesi** taşınır; kod tarafından üretilen "yorum" üretilmedi.
+
+**Kapsam dışı bırakılanlar (bilinçli, kayıt altında):** 44 eksik gövde
+(CONFLICT-024 kapsamı) **doldurulmadı** — karar (A) kabulü bunu zorunlu kılmıyordu;
+yalnız kanıtı okunmuş 4 blok gövdesi girdi. `87` sorgusu hâlâ Pt `78/87`
+gövdesine düşüyor (kaynak `87` için ayrı başlık vermiyor; uydurma gövde
+yazılmadı) → **CONFLICT-031 FIXED-kısmı**. `Yüksek 9/Düşük K` gövdesi ve Si
+`70+` kuyruk cümleleri **hâlâ YOK** (039 / 025). Kalan ~33 koşul (027) ve
+6 örüntü (033) bağlanmadı.
+
+**Test/CI sonucu:** `npx tsc --noEmit` **0 hata** · `npm test` **359/359 PASS**
+(34 suite; +16 test) · `npm run build` **PASS** (`optik-form.html` yeniden üretildi,
+senkron) · **REGRESSION YOK**.

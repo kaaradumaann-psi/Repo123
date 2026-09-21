@@ -1,5 +1,5 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
-import { codePointInterpretation, thirdHighestClinical } from '../../scoring/mmpiInterpretation';
+import { codeInterpretationForProfile, thirdHighestClinical } from '../../scoring/mmpiInterpretation';
 import { Icon } from '../Icon';
 
 /**
@@ -9,7 +9,11 @@ import { Icon } from '../Icon';
  */
 export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
   const code = profile.profileCode;
-  const entry = codePointInterpretation(code);
+  // DECISION-029/A: blok-yerel gövde öncelikli, eşleşme yoksa yorum gösterilmez
+  // (eski davranış kodu iki haneye kırparak BAŞKA bir kodun yorumunu gösteriyordu).
+  const resolved = codeInterpretationForProfile(code, profile);
+  const entry = resolved?.entry;
+  const blockName = entry?.block ? profile.clinical.find(x => x.id === entry.block)?.fullName : undefined;
   const codeDigits = (code ?? '').split('');
   const idByDigit: Record<string, string> = {
     '1': 'Hs', '2': 'D', '3': 'Hy', '4': 'Pd', '5': 'Mf', '6': 'Pa', '7': 'Pt', '8': 'Sc', '9': 'Ma', '0': 'Si',
@@ -29,7 +33,11 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           </h4>
           <div className="mmpi-code-value">{code ?? '—'}</div>
           <div className="mmpi-code-name">
-            {entry ? `Kod ${entry.code} — yorumu aşağıdadır` : code ? 'İki noktalı kod noktası' : 'Kod hesaplanamadı'}
+            {entry
+              ? `Kod ${entry.code}${blockName ? ` — ${blockName} bloğunun gövdesi` : ' — yorumu aşağıdadır'}`
+              : code
+                ? 'Kod noktası — kaynak yorumu tanımlı değil'
+                : 'Kod hesaplanamadı'}
           </div>
           {codeScales.map((scale, index) => (
             <div className="mmpi-code-scale" key={scale.id}>
@@ -76,12 +84,32 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                 </div>
               )}
               {entry.seeAlso && <p className="mmpi-summary-note">{entry.seeAlso}</p>}
+              {resolved && resolved.activeConditions.length > 0 && (
+                <div className="mmpi-box info">
+                  <b>Koşullu ek yorum:</b>
+                  <ul>
+                    {resolved.activeConditions.map((c, i) => (
+                      <li key={i}>
+                        <Icon name="info" size={12} />
+                        {c.quote}
+                        <span className="mmpi-code-name">
+                          {' '}
+                          ({c.source}
+                          {c.manual ? ' · yaş/süre bilgisi gerekir, elle değerlendirilmelidir' : ''})
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </>
           ) : (
             <p className="clin-desc">
-              Bu iki noktalı koda ilişkin tanımlı bir kod yorumu yoktur. Klinik ölçeklerin ayrıntılı T puanı
-              yorumları için “Klinik Ölçekler” sekmesine, profil konfigürasyonları için “Ek Ölçekler &amp;
-              Kritikler” sekmesine bakınız.
+              Bu koda ilişkin tanımlı bir kaynak yorumu yoktur. Kaynak, üç ve daha çok ölçekli ya da
+              blok-yerel kodları (ör. 123, 8726, 049, 027(8)) ayrı başlıklar olarak verir; bu gövdeler
+              çıkarılmadığı sürece burada <b>bilerek başka bir kodun yorumu gösterilmez</b>. Klinik ölçeklerin
+              ayrıntılı T puanı yorumları için “Klinik Ölçekler” sekmesine, profil konfigürasyonları için
+              “Ek Ölçekler &amp; Kritikler” sekmesine bakınız.
             </p>
           )}
         </section>

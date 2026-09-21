@@ -900,7 +900,9 @@ göster. Karar için önce kaynağın üçlü kod seti **tamamı** çıkarılmal
 
 ---
 
-## CONFLICT-025 — 12/21 yorumunda ergen/lise paragrafları eksik (P2, OPEN)
+## CONFLICT-025 — 12/21 yorumunda ergen/lise paragrafları eksik (P2, OPEN — kısmi)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** **Koşul tarafı bağlandı** (`12`: "5 T puanı kadar fark varsa 21'e bakılır" artık makinede; `27` 85 T; `07` 40 T; `68` 70 T; `49` K/Si; `13` Yüksek K; `89`/`08` üçüncü yükselen + yaş `manual`). **Lise/ergen paragrafları hâlâ YOK** — kaynak cümleleri kodda yok, eksik içerik bekletilir (DECISION-028).
+
 
 Area: `CODES['12']` metni
 
@@ -963,7 +965,9 @@ Impact: Bilgi eksikliği; tespit kuralı (4) uygulanmıyor ama yanlış sonuç
 
 ---
 
-## CONFLICT-027 — Kod yorumlarındaki **T-puan eşikleri** tespit edilmiyor (P1, OPEN)
+## CONFLICT-027 — Kod yorumlarındaki **T-puan eşikleri** tespit edilmiyor (P1, OPEN → **12 koşul bağlandı**)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `CodeInterpretation.conditions` alanı açıldı: `quote` (birebir kaynak cümlesi) + `test(profil)` makine koşulu + `manual` bayrağı. Bağlanan anahtarlar: `12 13 26 27 49 07 68 89 08` + `Pa:46`. **Örnek sayısı 45'tir; 12'si bağlandı, ~33'ü kapsam dışı** (gövde/paragraf içeriği 024/025 ile birlikte ayrıca planlanır). Yaş/eğitim isteyenler `manual` — `MMPIProfile`'da `age` yok, kod "karar vermiş" gibi görünmesin diye elle değerlendirme notu basılıyor.
+
 
 Area: kod tipi yorum katmanı (`mmpiSourceCodes.ts` + `mmpiInterpretation.ts`)
 
@@ -1056,7 +1060,9 @@ birebir uyumlu. Kural kaydı: `OCR_ISSUES.md` → **TABLE-ROW-SHIFT**.
 
 ---
 
-## CONFLICT-030 — 3+ ölçekli kodlar **yanlış yoruma** eşleniyor (P1, OPEN)
+## CONFLICT-030 — 3+ ölçekli kodlar **yanlış yoruma** eşleniyor (P1, ✅ **FIXED** — CHANGE-014)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `codeInterpretation()` içindeki **`slice(0,2)` kırpması kaldırıldı** → eşleşme yoksa `undefined` (UI "kaynak yorumu tanımlı değil" der). Kanıtı okunmuş 4 üç/parantez-haneli kod **kendi gövdesini** aldı: `91/19` (Ma), `64/46` (Pa), `049`, `027(8)` (Si). **Kalan 33 örnek için gövde YOK ve üretilmedi** — bunlar artık *sessizce yanlış* değil **açıkça tanımsız** döner; gövde içeriği CONFLICT-024 kapsam işidir. Kilit testleri: `049`/`027(8)` kendi gövdesi + `794`/`8726`/`273/723`/`213/231` → `undefined`.
+
 
 Area: `src/scoring/mmpiSourceCodes.ts:305` — `codeInterpretation()`
 
@@ -1134,7 +1140,9 @@ Mevcut tabloya ek **T-eşiği / ölçek-koşulu** örnekleri:
 
 ---
 
-## CONFLICT-031 — Kod yorumları **blok-bazlı**, kod modeli **tek-anahtarlı** (P1, OPEN)
+## CONFLICT-031 — Kod yorumları **blok-bazlı**, kod modeli **tek-anahtarlı** (P1, ✅ **FIXED-kısmı** — CHANGE-014)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** **Model kararı çözüldü:** kimlik artık `(blok, sıralı kod, varyant)`; blok = kodun ilk rakamı. Kaynağın ayrı başlık verdiği **4** vaka ayrık kayda taşındı. **Kalan kısım içerik işi:** kaynakta ayrı başlığı olan diğer blok gövdeleri (ör. `32 Kodu` s.96) hâlâ ortak kayda düşüyor; `87` sorgusu Pt `78/87` gövdesine düşmeye **devam ediyor** (kaynak `87` için ayrı başlık vermiyor → uydurma gövde yazılmadı). Bu yüzden kayıt **tamamen kapatılmadı**, kapsam 024 ile birlikte izleniyor.
+
 
 Area: `src/scoring/mmpiSourceCodes.ts` — `CODES` (tek `Record`)
 
@@ -1200,7 +1208,9 @@ kaybolur). CONFLICT-030/031 ile aynı kök neden.
 
 ---
 
-## CONFLICT-033 — **Nevrotik üçlü profil konfigürasyonları** kodda yok (P1, OPEN)
+## CONFLICT-033 — **Nevrotik üçlü profil konfigürasyonları** kodda yok (P1, ✅ **FIXED-kısmı** — CHANGE-014)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** Nevrotik üçlünün **4/4 konfigürasyonu** artık kodda: `konversiyon-vadisi` önceden vardı; `neurotic-step` (Şekil 18) · `neurotic-hat` (Şekil 19) · `neurotic-rising` (Şekil 20) eklendi, eşikler kaynak cümlesinden (>70 T / Hs<70 T) ve `PatternHit.source` alanı geldi. **033'ün diğer 5 örüntüsü (Paranoid Vadi Şekil 22 · Si↑+4↑+9↑ · Si↑+(2|7)↑+8↑ · K-örüntüleri) hâlâ YOK** → kayıt bu yüzden tamamen kapatılmadı.
+
 
 Area: yorum katmanı (`mmpiSource.ts` / `mmpiInterpretation.ts`)
 
@@ -1490,7 +1500,9 @@ değişmedi: **36 VAR / 71 YOK.**
 
 ---
 
-## CONFLICT-036 — Pa bloğu `64/46` gövdesi kodda yok; yanlış blok metni dönüyor (P1, OPEN)
+## CONFLICT-036 — Pa bloğu `64/46` gövdesi kodda yok; yanlış blok metni dönüyor (P1, ✅ **FIXED** — CHANGE-014)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `Pa:46` blok-yerel kaydı açıldı; s.130-131 gövdesi **birebir** (kitabın "düşmancıdır" yazımı dâhil) + `462/642 · 463/643 · 468/648` çapraz referansları `seeAlso`da. `46` sorgusu Pd `46/64` gövdesinde kaldı (çapraz bulaşma yok).
+
 
 Area: `src/scoring/mmpiSourceCodes.ts` — `CODES['46']`
 
@@ -1686,7 +1698,9 @@ direktifle aynı kök).
 
 # BATCH 20 genişletmeleri (kitap s.151-156 · Ma kapanışı + Si girişi + Tablo 17)
 
-## CONFLICT-036 · 2. SOMUT VAKA — Ma bloğu `91/19` gövdesi kodda yok (P1, OPEN)
+## CONFLICT-036 · 2. SOMUT VAKA — Ma bloğu `91/19` gövdesi kodda yok (P1, ✅ **FIXED** — CHANGE-014)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `Ma:19` ayrık kaydı açıldı (s.153); kanonik `'19'` sorgusu **etkilenmedi** (s.77 Hs gövdesini vermeye devam ediyor) — iki gövde artık çarpışmıyor.
+
 
 Pa `64/46` vakasında görülen kusurun **ikinci ve daha saf örneği**: `91/19`
 (kitap s.153) iki-ölçekli bir koddur; `slice(0,2)`/3+ ölçek kırpmasına gerek
@@ -1706,7 +1720,9 @@ kodda da var.
 
 ---
 
-## CONFLICT-039 (YENİ · P2 · OPEN) — "X alt testinin diğer alt testlerle ilişkisi" bölümü ve **K-ilişkili örüntüler** modelde temsil edilemiyor
+## CONFLICT-039 (P2 · OPEN) — "X alt testinin diğer alt testlerle ilişkisi" bölümü ve **K-ilişkili örüntüler** modelde temsil edilemiyor
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `Si (s.157)` satırındaki `049` / `027(8)` **gövde** kısmı CHANGE-014 ile kapandı. `Yüksek 9/Yüksek K` ve `Yüksek 9/Düşük K` gövdeleri ile "ilişki" bölümlerinin örüntü katmanı **hâlâ YOK** (gövde metinleri okunmuş değil / s.153 devamı ve PHASE 10 bekliyor). `conditions.manual` bu bölüm için **taşıcı mekanizmayı** sağladı: K-eşikli notlar koşul olarak kodlanabilir (ör. `49` K > 50).
+
 
 **Kaynak yapısı (görselden + OCR'dan doğrulandı):** her klinik blok sonu
 `… alt testinin diğer alt testlerle ilişkisi:` başlıklı bir bölüm taşıyor:

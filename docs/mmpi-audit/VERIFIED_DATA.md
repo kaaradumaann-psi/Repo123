@@ -811,3 +811,6 @@ Sc 78 · Ma 46 · **Si 70** = 10 klinik anahtar).
 
 **PHASE 9/10 KAYNAK SETİ: s.63-157 TAMAMI OKUNDU** (Bölüm 5 kapandı) · **Kod
 değişikliği YOK** · `mmpiKeyIntegrity` **56/56 PASS** · `npm test` **343/343 PASS**.
+→ **GÜNCEL (CHANGE-014, 2026-09-22):** DECISION-029 (A) onayı ile `src/` değişti ·
+`mmpiKeyIntegrity` **63/63** · `npm test` **359/359 PASS** (34 suite) · tsc **0** ·
+build PASS (`optik-form.html` senkron).

@@ -13,7 +13,15 @@ import {
   type Band,
   type SingleElevation,
 } from './mmpiSource';
-import { codeInterpretation, canonicalCode } from './mmpiSourceCodes';
+import {
+  activeCodeConditions,
+  canonicalCode,
+  codeInterpretation,
+  resolveCodeInterpretation,
+  type CodeCondition,
+  type CodeInterpretation,
+  type CodeScaleKey,
+} from './mmpiSourceCodes';
 
 /**
  * Kullanıcı dostu açıklama metinleri — yorum rehberindeki alt testi tanımlarının
@@ -110,6 +118,8 @@ export type PatternHit = {
   rule: string;
   detail: string;
   hit: boolean;
+  /** Kaynak sayfası/şekil numarası (DECISION-029/A ile eklenen örüntülerde zorunlu). */
+  source?: string;
 };
 
 /**
@@ -179,6 +189,48 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     detail: 'Mf düşüklüğüyle ilişkili klasik nevrotik bölge: bedensel yakınmalar, depresif duygudurum ve histerik savunmaların birlikte yükseldiği tablo.',
     hit: Hs >= 65 && D >= 65 && Hy >= 65,
   });
+  // DECISION-029/A — kaynağın "Nevrotik üçlü içindeki üç alt testin ilişkileri
+  // çerçevesinde en sık karşılaşılan konfigürasyonlar" (s.103-106) listesi. Eşikler
+  // ve sıralama koşulları kitap metnindeki sayısal değerlerdir (300-340 dpi görsel
+  // doğrulaması: docs/mmpi-audit/SOURCE_FACTS.md, CONFLICT-033 tablosu).
+  const triadHigh = Hs > 70 && D > 70 && Hy > 70;
+  hits.push({
+    id: 'neurotic-step',
+    name: 'Basamak Orantısı (asamalı) — Şekil 18',
+    rule: 'Hs > 70 T ∧ D > 70 T ∧ Hy > 70 T ∧ Hs > D > Hy',
+    detail:
+      'Üç alt test de 70 T puanın üzerindedir ve temel örüntü 1 alt testi en yukarıda olmak üzere 2 ve 3 ' +
+      'sırasıyla daha altta yer alacak şekildedir. Bu bireyler en küçük işlev bozukluklarına bile aşırı duyarlık ' +
+      'gösteren, somatik bilgileri belirgin kişilerdir; kısa süreli psikolojik tedavilerde prognoz iyi değildir. ' +
+      'Kaynak bu konfigürasyona 35 yaşın üzerinde ve kendilerini "tepeyi aşmış" olarak gören erkek hastalarda ' +
+      'sıklıkla rastlandığını not eder (yaş koşulu profilden değerlendirilemez).',
+    source: 's.103-104 · Şekil 18',
+    hit: triadHigh && Hs > D && D > Hy,
+  });
+  hits.push({
+    id: 'neurotic-hat',
+    name: 'Şapka — Şekil 19',
+    rule: 'Hs < 70 T ∧ D > 70 T ∧ Hy > 70 T ∧ D, Hs ve Hy’den yüksek',
+    detail:
+      'Alt test Hs 70 T puanının altındayken alt test 2 ve 3, 70 T puanının üzerindeyse bu hastalar emosyonel ' +
+      'olarak aşırı kontrol gösterirler ve kendilerini sıkıştırılmış gibi hissettiklerini söylerler. Genellikle ' +
+      'yorgun, gergin, kendilerine ilişkin şüphelerle doludurlar ve bu nedenle iş yapmazlar; bağımlı ve immatür ' +
+      'olarak tanımlanırlar. Tedavi motivasyonları düşüktür. Ayırt edici özelliği alt test 2’nin 1 ve 3’ten ' +
+      'daha fazla yükselmiş olmasıdır.',
+    source: 's.105 · Şekil 19',
+    hit: Hs < 70 && D > 70 && Hy > 70 && D > Hs && D > Hy,
+  });
+  hits.push({
+    id: 'neurotic-rising',
+    name: 'Yükselen Eğilim — Şekil 20',
+    rule: 'Hs > 70 T ∧ D > 70 T ∧ Hy > 70 T ∧ Hs < D < Hy',
+    detail:
+      'Her üç alt test de 70 T puanının üzerindedir ve her bir alt test bir öncekinden daha yüksektir. Kaynak ' +
+      'bu örüntüyü yaşam boyu süregelen hastalık geçmişi, frijidite ve evlilik sorunları olan kadınlarda; ' +
+      'erkeklerde kronik anksiyete ile gastrit/ülser tablosunda sık görülen bir seyir olarak tanımlar.',
+    source: 's.106 · Şekil 20',
+    hit: triadHigh && Hs < D && D < Hy,
+  });
   hits.push({
     id: 'multi-high',
     name: 'Çoklu Yükselme',
@@ -200,6 +252,48 @@ export function codePointName(code: string | undefined): string | undefined {
   if (!entry) return undefined;
   const prefix = entry.diagnosis && entry.diagnosis.length > 0 ? `Olası tanı: ${entry.diagnosis[0]}` : 'Yorum mevcut';
   return `Kod ${entry.code} — ${prefix}`;
+}
+
+/** Profil üzerinden değerlendirilen kod yorumu (koşullu ek yorumlarla). */
+export type ProfileCodeInterpretation = {
+  entry: CodeInterpretation;
+  /** Profilin T puanlarıyla DEVREYE GİREN koşullu ek yorumlar. */
+  activeConditions: CodeCondition[];
+  /** Kaynağın sık kullandığı "üçüncü yükselen alt test" bilgisi. */
+  third?: CodeScaleKey;
+};
+
+/**
+ * Kod yorumunu profil bağlamıyla çözer: blok-yerel gövde öncelikli, eşleşme yoksa
+ * `undefined` (CONFLICT-030: kırpma kaldırıldı). Profil T puanları koşullu
+ * yorumları devreye sokar; yaş gibi profil dışı veriler `manual` olarak işaretlidir.
+ */
+export function codeInterpretationForProfile(
+  code: string | undefined,
+  profile: MMPIProfile,
+): ProfileCodeInterpretation | undefined {
+  const entry = resolveCodeInterpretation(code);
+  if (!entry) return undefined;
+
+  const scaleT = (id: string): number | undefined => profile.scales.find(s => s.id === id)?.tScore;
+  const used = (code ?? '').replace(/\D/g, '').split('');
+  const idByDigit: Record<string, CodeScaleKey> = {
+    '1': 'Hs', '2': 'D', '3': 'Hy', '4': 'Pd', '5': 'Mf', '6': 'Pa', '7': 'Pt', '8': 'Sc', '9': 'Ma', '0': 'Si',
+  };
+  const excluded = used.map(d => idByDigit[d]).filter(Boolean);
+  const third = profile.clinical
+    .filter(s => !excluded.includes(s.id as CodeScaleKey))
+    .sort((a, b) => b.tScore - a.tScore)[0];
+
+  return {
+    entry,
+    third: third?.id as CodeScaleKey | undefined,
+    activeConditions: activeCodeConditions(entry, {
+      t: scaleT,
+      gender: profile.gender,
+      third: third?.id as CodeScaleKey | undefined,
+    }),
+  };
 }
 
 /** Klinik ölçeğin T puanı için kaynak bandı. */

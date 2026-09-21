@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { buildProfileFromAnswers, buildProfileFromRawScoresObject, type ValidityFinding } from '../src/scoring/mmpiScoring';
-import { clinicalBandFor, codePointInterpretation, detectPatterns, detectSingleElevations } from '../src/scoring/mmpiInterpretation';
+import {
+  clinicalBandFor,
+  codeInterpretationForProfile,
+  codePointInterpretation,
+  detectPatterns,
+  detectSingleElevations,
+} from '../src/scoring/mmpiInterpretation';
 import { canonicalCode } from '../src/scoring/mmpiSourceCodes';
 import type { ItemAnswer, RawScores } from '../src/workspace/caseTypes';
 
@@ -244,6 +250,63 @@ describe('desen göstergeleri kaynak konfigürasyonlarını kullanır', () => {
     const hits = detectPatterns(p).filter(pt => pt.hit);
     assert.deepEqual(hits, []);
   });
+
+  // CHANGE-014 (DECISION-029/A) — kaynağın nevrotik üçlü konfigürasyonları
+  // (s.103-106, Şekil 18-20). Eşikler kitap metninden: "üç alt test de 70 T puanın
+  // üzerinde", "Hs 70 T puanının altındayken 2 ve 3 70 T'nin üzerinde" vb.
+  it('basamak orantısı: üçü de > 70 T ve Hs > D > Hy (Şekil 18)', () => {
+    const p = profile({ K: 0, Hs: 26, D: 32, Hy: 29 });
+    const hit = detectPatterns(p).find(pt => pt.id === 'neurotic-step')!;
+    assert.equal(hit.hit, true);
+    assert.equal(hit.source, 's.103-104 · Şekil 18');
+    assert.equal(detectPatterns(p).find(pt => pt.id === 'neurotic-rising')!.hit, false);
+  });
+
+  it('şapka: Hs < 70 T iken D ve Hy > 70 T ve en yüksek D (Şekil 19)', () => {
+    const p = profile({ K: 0, Hs: 18, D: 34, Hy: 30 });
+    assert.equal(detectPatterns(p).find(pt => pt.id === 'neurotic-hat')!.hit, true);
+    assert.equal(detectPatterns(p).find(pt => pt.id === 'neurotic-step')!.hit, false);
+    // Hs de 70 üzerine çıkarsa şapka bozulur:
+    const notHat = profile({ K: 0, Hs: 24, D: 34, Hy: 30 });
+    assert.equal(detectPatterns(notHat).find(pt => pt.id === 'neurotic-hat')!.hit, false);
+  });
+
+  it('yükselen eğilim: üçü de > 70 T ve Hs < D < Hy (Şekil 20)', () => {
+    const p = profile({ K: 0, Hs: 22, D: 33, Hy: 32 });
+    const hit = detectPatterns(p).find(pt => pt.id === 'neurotic-rising')!;
+    assert.equal(hit.hit, true);
+    assert.match(hit.source ?? '', /\u015eekil 20/);
+  });
+});
+
+describe('CHANGE-014 (DECISION-029/A) — profil bağlamlı kod yorumu', () => {
+  it('blok-yerel kodlar yorumu doğru gövdeyle gelir; kırpma yoktur', () => {
+    const p = profile({});
+    const si = codeInterpretationForProfile('049', p)!;
+    assert.equal(si.entry.code, '049');
+    assert.equal(si.entry.block, 'Si');
+    // kaynakta ayrı başlık olan üç haneli kod artık BAŞKA koda düşmüyor:
+    assert.equal(codeInterpretationForProfile('794', p), undefined);
+    assert.equal(codeInterpretationForProfile('8726', p), undefined);
+  });
+
+  it('koşullu ek yorumlar yalnız profil karşılık verdiğinde listelenir', () => {
+    const dusuk = profile({ K: 0 });
+    assert.deepEqual(codeInterpretationForProfile('27', dusuk)!.activeConditions, [], 'D ve Pt 85 T altında → koşul susar');
+    const yuksek = profile({ K: 0, D: 40 });
+    const hit = codeInterpretationForProfile('27', yuksek)!.activeConditions;
+    assert.equal(hit.length, 1);
+    assert.match(hit[0].quote, /85 T puanının üstünde/);
+    assert.equal(hit[0].source, 's.87');
+  });
+
+  it('64/46 kaydındaki 8-yükselmesi notu koşul olarak devreye giriyor', () => {
+    const yuksekSc = profile({ K: 0, Sc: 54 });
+    assert.equal((yuksekSc.scales.find(x => x.id === 'Sc')!.tScore) > 70, true, 'test profili Sc > 70 T üretmeli');
+    assert.equal(codeInterpretationForProfile('64', yuksekSc)!.activeConditions.length, 1);
+    const dusukSc = profile({ K: 0 });
+    assert.deepEqual(codeInterpretationForProfile('64', dusukSc)!.activeConditions, []);
+  });
 });
 
 describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
@@ -408,5 +471,49 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
     assert.match(critical, /ham puan yöntemiyle girildiği için kritik maddeler listelenemiyor/);
     const validity = renderToStaticMarkup(createElement(MMPIValidityTab, { profile: p }));
     assert.match(validity, /TR, dikkatsizlik ve konfigürasyon analizleri madde düzeyinde/);
+  });
+});
+
+describe('CHANGE-014 (DECISION-029/A) — kod sekmesi blok-yerel gövdeyi ve koşullu notu render eder', () => {
+  /** Ham puan profili: Pa en yüksek, Pd ikinci → profil kodu 64 (Pa bloğu). */
+  const codeProfile = (over: Record<string, number> = {}) =>
+    buildProfileFromRawScoresObject(
+      { blank: 0, L: 5, F: 6, K: 0, Hs: 5, D: 11, Hy: 13, Pd: 30, Mf: 29, Pa: 110, Pt: 28, Sc: 30, Ma: 20, Si: 24, ...over } as never,
+      'Erkek',
+    );
+
+  it('64/46 Pa gövdesi ve blok etiketi görünür; Sc yükselmediyse koşul kutusu gelmez', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPICodeTab } = await import('../src/components/results/MMPICodeTab');
+    const html = renderToStaticMarkup(createElement(MMPICodeTab, { profile: codeProfile() }));
+    assert.match(html, /64\/46/);
+    assert.match(html, /immat\u00fcr, narsisistik, pasif- ba\u011f\u0131ml\u0131 ki\u015filerdir/);
+    assert.match(html, /Paranoya \(6\)/, 'blok etiketi alt testin tam ad\u0131ndan gelir');
+    assert.doesNotMatch(html, /Ko\u015fullu ek yorum/);
+  });
+
+  it('Sc 70 T üzerine ç\u0131k\u0131nca "8 alt testi yükselmişse" notu koşullu kutuda görünür', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPICodeTab } = await import('../src/components/results/MMPICodeTab');
+    const html = renderToStaticMarkup(createElement(MMPICodeTab, { profile: codeProfile({ Pd: 38, Sc: 48 }) }));
+    assert.match(html, /Ko\u015fullu ek yorum/);
+    assert.match(html, /8 alt testi de yükselmişse süreç daha kötü olur/);
+    assert.match(html, /s\.131/);
+  });
+
+  it('yazdırma raporu da blok-yerel kaydı kullanır', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPIPrintReport } = await import('../src/components/results/MMPIPrintReport');
+    const html = renderToStaticMarkup(
+      createElement(MMPIPrintReport, {
+        profile: codeProfile(),
+        meta: { fullName: 'Denek A', testDate: '2026-09-22', reportDate: '2026-09-22', gender: 'Erkek', age: '24' },
+      }),
+    );
+    assert.match(html, /64\/46/);
+    assert.match(html, /immat\u00fcr, narsisistik/);
   });
 });

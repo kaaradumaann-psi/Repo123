@@ -16,7 +16,51 @@ export type CodeInterpretation = {
   diagnosis?: string[];
   /** Kaynağın yönlendirdiği diğer kodlar. */
   seeAlso?: string;
+  /**
+   * Yorumun kaynakta verildiği alt test bloğu (DECISION-029/A, CONFLICT-031).
+   * Kaynak, aynı rakam çiftini farklı bloklarda FARKLI gövdeyle verir.
+   */
+  block?: CodeScaleKey;
+  /** Kaynaktaki tam kod biçimi (ör. "049", "027(8)") — kanonik iki haneye indirgenmez. */
+  rawCode?: string;
+  /** Koşullu ek yorumlar (DECISION-029/A; CONFLICT-025/027). */
+  conditions?: CodeCondition[];
 };
+
+/** Kaynağın kullandığı ölçek anahtarları (kod rakamları + geçerlik ölçekleri). */
+export type CodeScaleKey =
+  | 'Hs' | 'D' | 'Hy' | 'Pd' | 'Mf' | 'Pa' | 'Pt' | 'Sc' | 'Ma' | 'Si'
+  | 'L' | 'F' | 'K';
+
+/** Kod rakamı → alt test eşlemesi (kaynak notasyonu: 1=Hs … 9=Ma, 0=Si). */
+export const CODE_DIGIT_SCALE: Record<string, CodeScaleKey> = {
+  '1': 'Hs', '2': 'D', '3': 'Hy', '4': 'Pd', '5': 'Mf',
+  '6': 'Pa', '7': 'Pt', '8': 'Sc', '9': 'Ma', '0': 'Si',
+};
+
+/** Koşullu yorumların değerlendirildiği bağlam. */
+export type CodeConditionContext = {
+  /** T puanı erişicisi; ölçek profile yoksa undefined döner. */
+  t: (scale: CodeScaleKey) => number | undefined;
+  gender?: 'Erkek' | 'Kadın';
+  /** Profilin üçüncü yükselen alt testi (kaynak bunu sık koşul olarak kullanır). */
+  third?: CodeScaleKey;
+};
+
+/**
+ * Kaynağın kod yorumuna bağladığı KOŞUL. `test` verilmişse profil üzerinden
+ * makinece değerlendirilir; `manual: true` olanlar (yaş gibi profil dışı veri
+ * gerektirenler) her zaman uyarı olarak gösterilir.
+ */
+export type CodeCondition = {
+  /** Kaynak sayfası/bloğu, ör. "s.68". */
+  source: string;
+  /** Kaynaktaki koşul cümlesinin birebir alıntısı. */
+  quote: string;
+  test?: (ctx: CodeConditionContext) => boolean;
+  manual?: boolean;
+};
+
 
 const CODES: Record<string, CodeInterpretation> = {
   '12': {
@@ -293,16 +337,266 @@ const CODES: Record<string, CodeInterpretation> = {
   },
 };
 
+/* ------------------------------------------------------------------ */
+/* DECISION-029 (A) — blok-yerel kod gövdeleri (CONFLICT-030/031/036) */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Kaynağın **belirli bir alt test bloğunda** verdiği, iki-haneli kanonik
+ * anahtarla çarpışan (yaşayan) kod gövdeleri. Anahtar: `Blok:kanonikRakamlar`.
+ *
+ * Bunlar `CODES`'a konmaz: aynı rakam çifti başka blokta **başka** bir gövde
+ * taşır (ör. `'19'` = Hs bloğunun 19/91'i, `'46'` = Pd bloğunun 46/64'ü).
+ * Metinler kitap sayfasından **birebir** aktarılmıştır (bkz. docs/mmpi-audit/
+ * SOURCE_FACTS.md · SOURCE-PA-00x, SOURCE-MA-00x, SOURCE-SI-00x).
+ */
+const BLOCK_CODES: Record<string, CodeInterpretation> = {
+  // Ma (9) bloğu, s.153: "91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)"
+  'Ma:19': {
+    code: '91/19',
+    block: 'Ma',
+    rawCode: '91/19',
+    text:
+      'Ender görülmektedir. Hastalar hipomanik durumdadırlar, ancak gergindirler ve yerlerinde duramazlar. ' +
+      'İhtiraslıdırlar. Başarısızlıkla engellenmişlerdir. Hipokondriak sorunlarıyla karşılaştıkları durumsal ' +
+      'güçlükler arasındaki ilişkiyi ispatlamak kolaydır.',
+    seeAlso:
+      'Ayrıca 19/91 Koduna da Bakınız. 92/29, 93/39, 94/49, 95/59, 96/69, 97/79, 98/89 kodlarına bakınız; ' +
+      'kaynak 94/49 için ayrıca "Eyleme vuruk davranış ile ilgilidir" notunu verir (s.153).',
+  },
+  // Pa (6) bloğu, s.130-131: "64/46 Kodu (Ayrıca 46/64, 462/642, 463/643 kodlarına ve 468/648 kodlarına bakınız.)"
+  'Pa:46': {
+    code: '64/46',
+    block: 'Pa',
+    rawCode: '64/46',
+    text:
+      'Bu koddaki bireyler immatür, narsisistik, pasif- bağımlı kişilerdir. Sosyal ilişki kurulması zordur. ' +
+      'Diğerlerine öfke duyarlar ancak bunu kontrol edebilirler. Zaman zaman öfke patlamaları olur. ' +
+      'Kızgınlıklarının suçunu başkalarına yüklerler. Diğer insanlara kuşku ile bakarlar ve paranoid özellikler ' +
+      'yaşarlar. Uzun zamandan beri sosyal uyumsuzluk gösterirler. Sonuç olarak psikolojik yardım için uygun ' +
+      'kişiler değillerdir. 64/46 kodunun yanında 8 alt testi de yükselmişse süreç daha kötü olur. Yukarıdaki ' +
+      'özelliklere ek olarak bu hastalar psikolojik sorunlarını kabul etme yerine kaçma yolunu seçmektedirler. ' +
+      'Mantık ve yargılamalarda da güçlükleri ortaya çıkmaktadır. Öfkeyle doludurlar ve bu da onların eleştiriye ' +
+      'duyarlılık ve kıskançlıkları ile birleştiğinde tahmin edilemeyen ve mantıksız öfke patlamalarına yol açar. ' +
+      'Açık olarak herşeye karşı çıkar ve düşmancıdır. Davranış değişikliği için getirdikleri çözüm ise, ' +
+      'karşısındakilerin kendi belirtilerine uygun bir şekilde davranış değiştirmesidir.',
+    seeAlso: 'Ayrıca 46/64, 462/642, 463/643 kodlarına ve 468/648 kodlarına bakınız.',
+    conditions: [
+      {
+        source: 's.131',
+        quote: '64/46 kodunun yanında 8 alt testi de yükselmişse süreç daha kötü olur.',
+        test: ({ t }) => (t('Sc') ?? 0) >= 70,
+      },
+    ],
+  },
+  // Si (0) bloğu, s.157 — üç haneli/blok-yerel kodlar; iki-haneli modele sığmıyorlardı.
+  'Si:049': {
+    code: '049',
+    block: 'Si',
+    rawCode: '049',
+    text: 'Psikiyatrik olgularda eyleme vurukluğun bastırılması',
+  },
+  'Si:027': {
+    code: '027(8)',
+    block: 'Si',
+    rawCode: '027(8)',
+    text: 'Bireyde güçlü ruminatif davranışlar görülebilir.',
+  },
+};
+
+/** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
+export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
+
+/**
+ * Var olan iki-haneli kayıtlara bağlanan koşullu ek yorumlar. Kaynak bu
+ * cümleleri gövdenin içine gömmüş ya da hiç taşımamıştır (CONFLICT-025/027);
+ * burada **makinece değerlendirilebilir** hâle getirilirler.
+ */
+const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
+  '12': [
+    {
+      source: 's.68',
+      quote: '12 kodunda 1 ve 2 alt testleri arasında 5 T puanı kadar fark varsa 21’e bakılır',
+      test: ({ t }) => {
+        const hs = t('Hs');
+        const d = t('D');
+        return hs !== undefined && d !== undefined && Math.abs(hs - d) <= 5;
+      },
+    },
+  ],
+  '13': [
+    {
+      source: 's.72',
+      quote:
+        'Yüksek K ile (özellikle 2, 7 ve 8’in T puanı 70’in ve F’nin 50’nin altında olduğu durumda) bireyler ' +
+        'kendini normal, sorumluluk sahibi, yardımsever ve sempatik olarak sunmaya çalışır.',
+      test: ({ t }) =>
+        (t('D') ?? 100) < 70 && (t('Pt') ?? 100) < 70 && (t('Sc') ?? 100) < 70 && (t('F') ?? 100) < 50,
+    },
+  ],
+  '26': [
+    {
+      source: 's.87',
+      quote:
+        'Pa alt testi belirgin bir biçimde yükseldiğinde ve/veya 4 ve 8 alt testi 70 T puanının üzerinde ise, ' +
+        'bireyin psikozun erken dönemlerinde olma olasılığı artar.',
+      test: ({ t }) => (t('Pd') ?? 0) > 70 && (t('Sc') ?? 0) > 70,
+    },
+  ],
+  '27': [
+    {
+      source: 's.87',
+      quote:
+        'Çok fazla yükselmeler (örneğin, 85 T puanının üstünde) sıklıkla bireyin sözel psikoterapide yeterli ' +
+        'derecede odaklanamayacak kadar ajite ve endişeli olduğu anlamına gelir ve daha etkili müdahale formları ' +
+        '(ilaç gibi) gerekli olabilir.',
+      test: ({ t }) => (t('D') ?? 0) > 85 || (t('Pt') ?? 0) > 85,
+    },
+  ],
+  '49': [
+    {
+      source: 's.118-121 (Pd bloğu)',
+      quote:
+        'Eğer K testi 50 T puanının üzerinde ise ve/veya test 2, 5, 7 ya da 0, 70 T puanı üstünde üçüncü ' +
+        'yükselen test ise hem ergenler hem de yetişkinlerde suç işleme ya da antisosyal davranış olasılığı daha azdır.',
+      test: ({ t }) => (t('K') ?? 0) > 50,
+    },
+    {
+      source: 's.118-121 (Pd bloğu)',
+      quote: 'Alt test Si 50 T puanının altında olduğunda 49/94 özelliklerine sahip olsa bile bireyin sosyal ilişkileri iyidir.',
+      test: ({ t }) => (t('Si') ?? 100) < 50,
+    },
+  ],
+  // '70/07' ve '86/68' kayıtları CODES'ta kanonik SIRALI anahtarda durur;
+  // koşul tablosu da aynı anahtarı taşımak zorundadır (çözümleyici sorted digits ile arar).
+  '07': [
+    {
+      source: 's.142 (Pt bloğu)',
+      quote: '70/07 kodunda 5 alt testi 40 T puanının altındadır.',
+      test: ({ t }) => (t('Mf') ?? 100) < 40,
+    },
+  ],
+  '68': [
+    {
+      source: 's.146 (Sc bloğu)',
+      quote: '86/68 kodunda 7 de 70 T puanındadır.',
+      test: ({ t }) => (t('Pt') ?? 0) >= 70,
+    },
+  ],
+  '89': [
+    {
+      source: 's.147-148 (Sc bloğu)',
+      quote: "Yaşı 27'den küçük olanlarda görülür.",
+      manual: true,
+    },
+    {
+      source: 's.148 (Sc bloğu)',
+      quote: 'üçüncü yükselen alt test 4, 7 ya da 6’dır',
+      test: ({ third }) => third === 'Pd' || third === 'Pt' || third === 'Pa',
+    },
+  ],
+  '08': [
+    {
+      source: 's.148 (Sc bloğu)',
+      quote: 'Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir.',
+      manual: true,
+    },
+  ],
+};
+
+/* ------------------------------------------------------------------ */
+/* Çözümleyici — KERİTME YOK (DECISION-029/A, CONFLICT-030 kapandı)   */
+/* ------------------------------------------------------------------ */
+
+export type CodeRef = {
+  /** Rakam dizisi (sıralı, kanonik), ör. "19" ya da "049". */
+  digits: string;
+  /** Parantezli alt-test niteliği, ör. "027(8)" için "8". */
+  qualifier?: string;
+  /** Kodun birinci (en yüksek) ölçeği → kaynağın bloğu. */
+  block?: CodeScaleKey;
+};
+
+/** Kod düğümünü ayrıştırır: "91/19" → 91, "027(8)" → 027 + (8). */
+export function parseCode(code: string | undefined): CodeRef | undefined {
+  if (!code) return undefined;
+  const m = code.trim().match(/^(\d{2,})(?:\s*\((\d)\))?/);
+  const raw = m?.[1];
+  if (!raw) return undefined;
+  const digits = raw.split('').sort().join('');
+  const lead = raw[0] ?? '';
+  return { digits, qualifier: m?.[2], block: CODE_DIGIT_SCALE[lead] };
+}
+
+function withConditions(entry: CodeInterpretation | undefined, key: string): CodeInterpretation | undefined {
+  if (!entry) return undefined;
+  if (entry.conditions) return entry;
+  const extra = CODE_CONDITIONS[key];
+  return extra ? { ...entry, conditions: extra } : entry;
+}
+
+/**
+ * Koda karşılık gelen kaynak yorumu.
+ *
+ * Çözümleme sırası:
+ *  1. **blok-yerel gövde** — kodun ilk rakamı bloğu verir (91 → Ma, 64 → Pa);
+ *     üç+ haneli kodlar yalnız burada adreslenir (`049`, `027(8)`).
+ *  2. **ortak iki-haneli kayıt** — `CODES`.
+ *  3. eşleşme yoksa **`undefined`**. ESKİ DAVRANIŞIN aksine kod **`slice(0, 2)` ile
+ *     kırpılmaz** → 3+ haneli bir kod artık başka bir kodun metnini dönmez
+ *     (CONFLICT-030). Çağıran taraf "bu kod için kaynak yorumu tanımlı değil"
+ *     durumunu gösterir.
+ */
+/** Çözümlenen kayıt başına tek örnek: aynı kayda giden her sorgu AYNI nesneyi döndürür. */
+const RESOLVED_CACHE = new Map<string, CodeInterpretation>();
+
+function cachedRecord(key: string, build: () => CodeInterpretation | undefined): CodeInterpretation | undefined {
+  const hit = RESOLVED_CACHE.get(key);
+  if (hit) return hit;
+  const made = build();
+  if (made) RESOLVED_CACHE.set(key, made);
+  return made;
+}
+
+export function resolveCodeInterpretation(code: string | undefined): CodeInterpretation | undefined {
+  const ref = parseCode(code);
+  if (!ref) return undefined;
+  // 1) blok-yerel gövde (kaynağın o bloğa özgü başlığı)
+  if (ref.block) {
+    const scoped = BLOCK_CODES[`${ref.block}:${ref.digits}`];
+    if (scoped) return scoped;
+  }
+  // 2) ortak iki-haneli kayıt — Kırpma YOK: 3+ haneli kod burada undefined döner
+  if (ref.digits.length !== 2) return undefined;
+  return cachedRecord(`shared:${ref.digits}`, () => withConditions(CODES[ref.digits], ref.digits));
+}
+
+/** Koşullu yorumlardan profili gerçekten karşılık olanlar (manuel olanlar her zaman). */
+export function activeCodeConditions(
+  entry: CodeInterpretation | undefined,
+  ctx: CodeConditionContext,
+): CodeCondition[] {
+  if (!entry?.conditions) return [];
+  return entry.conditions.filter((c) => c.manual || !c.test || c.test(ctx));
+}
+
 /** Kodu kanonik biçime çevirir: "21" → "12". */
 export function canonicalCode(code: string): string {
   const chars = code.split('').sort();
   return chars.join('');
 }
 
-/** İki noktalı kod için kaynak yorumu; yoksa undefined. */
+/**
+ * Kod için kaynak yorumu; tanımlı değilse `undefined`.
+ *
+ * **DECISION-029/A:** eski uygulama `code.slice(0, 2)` ile kodu kırpıyor ve bu
+ * yüzden `049`, `027(8)`, `794`, `8726`, `273/723` gibi blok-yerel/çok haneli
+ * kodlar **başka bir kodun metnine** düşüyordu (CONFLICT-030). Artık çözümleme
+ * `resolveCodeInterpretation()` ile yapılır: blok-yerel gövde öncelikli, iki
+ * haneden fazlası kırpılmaz, eşleşme yoksa `undefined` döner.
+ */
 export function codeInterpretation(code: string | undefined): CodeInterpretation | undefined {
-  if (!code || code.length < 2) return undefined;
-  return CODES[canonicalCode(code.slice(0, 2))];
+  return resolveCodeInterpretation(code);
 }
 
 /** Bilinen tüm kod anahtarları (test ve doğrulama için). */

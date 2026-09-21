@@ -1,5 +1,12 @@
 import { describe, it } from 'node:test';
-import { codeInterpretation, KNOWN_CODES } from '../src/scoring/mmpiSourceCodes';
+import {
+  codeInterpretation,
+  KNOWN_CODES,
+  KNOWN_BLOCK_CODES,
+  activeCodeConditions,
+  resolveCodeInterpretation,
+  type CodeScaleKey,
+} from '../src/scoring/mmpiSourceCodes';
 import assert from 'node:assert/strict';
 import { SCORING_KEYS, isGendered, K_CORRECTION, TURKISH_NORMS, type ScaleRule, type ScoringRule } from '../src/scoring/mmpiKeys';
 import { SC_T_BANDS, MA_T_BANDS, SI_T_BANDS } from '../src/scoring/mmpiSource';
@@ -765,17 +772,25 @@ describe('PHASE 9/10 batch 20 — Ma (9) T bantları ve kod bloğu (s.151-153)',
     assert.doesNotMatch(all, /diğer alt testlerle ilişkisi/);
   });
 
-  it('90/09 gövdesi sadık; 91/19 gövdesi kanonik anahtar çarpışmasına kurban gidiyor (CONFLICT-031 kilidi)', () => {
+  it('90/09 gövdesi sadık; 91/19 gövdesi ARTIK blok-yerel kayıtta (CHANGE-014, CONFLICT-031/036)', () => {
     const e90 = codeInterpretation('90')!;
     assert.equal(e90.code, '90/09');
     assert.match(e90.text, /Kod oldukça nadirdir, özellikle erkeklerde çok az görülür/);
     assert.match(e90.text, /Si alt testinin yükselmesi bırakılarak yorum/);
+    // kitap s.153 "91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)" AYRI bir gövdeydi;
+    // kanonikleştirme ("91" → "19") onu s.77deki Hs bloğu metniyle çarpıştırıyordu.
+    // CHANGE-014 (DECISION-029/A) kodun İLK RAKAMINI blok sayarak ayrıştırır:
     const e91 = codeInterpretation('91')!;
-    // kitap s.153 "91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)" AYRI bir gövdedir;
-    // kanonikleştirme ("91" → "19") onu s.77deki Hs bloğu metniyle çarpıştırıyor:
-    assert.equal(e91.code, '19/91');
-    assert.doesNotMatch(e91.text, /Ender görülmektedir/);
-    assert.doesNotMatch(e91.text, /hipomanik durumdadırlar/);
+    assert.equal(e91.code, '91/19');
+    assert.equal(e91.block, 'Ma');
+    assert.match(e91.text, /Ender görülmektedir/);
+    assert.match(e91.text, /hipomanik durumdadırlar, ancak gergindirler ve yerlerinde duramazlar/);
+    assert.match(e91.text, /Başarısızlıkla engellenmişlerdir/);
+    assert.match(e91.seeAlso ?? '', /19\/91/);
+    // Hs bloğunun 19/91 gövdesi bundan ETKİLENMEZ (çapraz bulaşma yok):
+    const e19 = codeInterpretation('19')!;
+    assert.equal(e19.code, '19/91');
+    assert.doesNotMatch(e19.text, /Ender görülmektedir/);
   });
 });
 
@@ -822,17 +837,31 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     }
   });
 
-  it('CONFLICT-030 somut vakası: 049 ve 027(8) sorguları BAŞKA kodun metnine düşüyor (gövde YOK)', () => {
+  it('049 ve 027(8) gövdeleri blok-yerel kayıtta; KIRPMA YOK (CONFLICT-030 → CHANGE-014)', () => {
     // kitap s.157: "049 Kodu — Psikiyatrik olgularda eyleme vurukluğun bastırılması" ve
     // "027(8) Kodu — Bireyde güçlü ruminatif davranışlar görülebilir."
-    // CODES kanonik İKİ haneli anahtar taşır → slice(0,2) + canonicalCode bu kodları
-    // başka bir bloğun koduna çözüyor (kullanıcıya İLGİSİZ metin gösterilir).
-    assert.ok(KNOWN_CODES.every((k) => /^\d{2}$/.test(k)), 'CODES anahtarları iki haneli — üç haneli kod adreslenemiyor');
-    assert.ok(!KNOWN_CODES.includes('049') && !KNOWN_CODES.includes('027'));
-    assert.equal(codeInterpretation('049')!.code, '40/04', '049 → 40/04 (kırpma kurbanı)');
-    assert.equal(codeInterpretation('027(8)')!.code, '20/02', '027(8) → 20/02 (kırpma kurbanı)');
+    // ESKİ davranış: slice(0,2) + canonicalCode → '049' → 40/04 metni, '027(8)' → 20/02 metni
+    // (kullanıcıya İLGİSİZ kod yorumu gösteriliyordu). CHANGE-014 bunu kaldırdı.
+    const e049 = codeInterpretation('049')!;
+    assert.equal(e049.code, '049');
+    assert.equal(e049.block, 'Si');
+    assert.match(e049.text, /Psikiyatrik olgularda eyleme vurukluğun bastırılması/);
+    const e027 = codeInterpretation('027(8)')!;
+    assert.equal(e027.code, '027(8)');
+    assert.equal(e027.rawCode, '027(8)');
+    assert.match(e027.text, /Bireyde güçlü ruminatif davranışlar görülebilir/);
+    // kırpmanın gittiğinin negatif kanıtı: eşleşmeyen 3+ haneli kodlar artık undefined
+    assert.equal(codeInterpretation('794'), undefined, "'794' Pt bloğunda ayrı başlıktı; 79/97 metni dönemez");
+    assert.equal(codeInterpretation('8726'), undefined);
+    assert.equal(codeInterpretation('273/723'), undefined);
+    assert.equal(codeInterpretation('213/231'), undefined);
+    // ortak iki-haneli kayıtlar ESKİSİ GİBİ çalışır (geriye dönük uyum)
+    assert.equal(codeInterpretation('04')!.code, '40/04');
     assert.doesNotMatch(codeInterpretation('04')!.text, /eyleme vurukluğun bastırılması/);
     assert.doesNotMatch(codeInterpretation('02')!.text, /güçlü ruminatif davranışlar/);
+    // blok kayıtları CODES'a karışmaz
+    assert.ok(KNOWN_CODES.every((k) => /^\d{2}$/.test(k)), 'CODES anahtarları iki haneli kalır');
+    assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), ['Ma:19', 'Pa:46', 'Si:027', 'Si:049']);
   });
 
   it('s.157 giriş paragrafı (Si 20 puan fark / eyleme vurukluk / ruminatif) kodda yok → CONFLICT-025/026 kilidi', () => {
@@ -840,5 +869,72 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     assert.doesNotMatch(src, /20 puanlık bir farklılık/);
     assert.doesNotMatch(src, /eyleme vurukluğun bastırıldığı düşünülmelidir/);
     assert.doesNotMatch(src, /ruminatif davranışların kuvvetlendiği/);
+  });
+});
+
+describe('CHANGE-014 (DECISION-029/A) — blok kimliği, kırpmasız çözümleme, koşullu yorumlar', () => {
+  /** Sahte profil bağlamı: yalnızca koşulun baktığı ölçekler verilir. */
+  const ctx = (over: Partial<Record<CodeScaleKey, number>>, third?: CodeScaleKey) => ({
+    t: (id: CodeScaleKey) => over[id],
+    third,
+  });
+
+  it('Pa bloğunun 64/46 gövdesi kaynak metni birebir taşır (s.130-131)', () => {
+    const e = resolveCodeInterpretation('64')!;
+    assert.equal(e.code, '64/46');
+    assert.equal(e.block, 'Pa');
+    assert.match(e.text, /immatür, narsisistik, pasif- bağımlı kişilerdir/);
+    assert.match(e.text, /Diğerlerine öfke duyarlar ancak bunu kontrol edebilirler/);
+    assert.match(e.text, /psikolojik yardım için uygun kişiler değillerdir/);
+    assert.match(e.text, /karşısındakilerin kendi belirtilerine uygun bir şekilde davranış değiştirmesidir/);
+    assert.match(e.seeAlso ?? '', /462\/642/);
+    // Pd bloğunun 46/64 gövdesi ayrışmış kalır:
+    assert.equal(resolveCodeInterpretation('46')!.code, '46/64');
+    assert.doesNotMatch(resolveCodeInterpretation('46')!.text, /immatür, narsisistik, pasif- bağımlı/);
+  });
+
+  it('eş kodlar aynı nesneyi döndürür (12 ↔ 21), kodun bloğu gövdeyi seçer', () => {
+    assert.equal(resolveCodeInterpretation('12'), resolveCodeInterpretation('21'));
+    assert.equal(resolveCodeInterpretation('91')!.block, 'Ma');
+    assert.equal(resolveCodeInterpretation('19')!.block, undefined, 'ortak kayıtta blok alanı yok');
+    assert.equal(resolveCodeInterpretation('049')!.block, 'Si');
+  });
+
+  it('koşullu ek yorumlar yalnız profil karşılık verdiğinde devreye girer (CONFLICT-027)', () => {
+    const kodsuz = activeCodeConditions(resolveCodeInterpretation('49'), ctx({ K: 20, Si: 60 }));
+    assert.deepEqual(kodsuz, [], 'K düşük + Si yüksek → hiçbir 49/94 koşulu aktif değil');
+    const aktif = activeCodeConditions(resolveCodeInterpretation('49'), ctx({ K: 60, Si: 40 }));
+    assert.equal(aktif.length, 2, 'K > 50 ve Si < 50 koşullarının ikisi de devrede');
+    assert.match(aktif[0].quote, /K testi 50 T puanının üzerinde/);
+    assert.match(aktif[1].quote, /Si 50 T puanının altında/);
+  });
+
+  it('yaş gibi profil dışı veri isteyen koşullar her zaman "elle değerlendirilir" olarak gelir', () => {
+    const list = activeCodeConditions(resolveCodeInterpretation('89'), ctx({ Sc: 90, Ma: 90 }, 'Pt'));
+    assert.ok(list.some(c => c.manual), "89/98 'Yaşı 27'den küçük' koşulu manuel işaretli olmalı");
+    assert.ok(list.some(c => /üçüncü yükselen alt test 4, 7 ya da 6/.test(c.quote)), 'Pt üçüncü yükselen → üçüncü-test koşulu aktif');
+    const thirdOlmayan = activeCodeConditions(resolveCodeInterpretation('89'), ctx({ Sc: 90, Ma: 90 }, 'Si'));
+    assert.equal(thirdOlmayan.length, 1, 'üçüncü yükselen Si ise sayısal koşul susar, yalnız manuel not kalır');
+  });
+
+  it('13/31 Yüksek-K ve 12/21 5-T-farkı koşulları kaynak eşiğiyle çalışır', () => {
+    assert.equal(activeCodeConditions(resolveCodeInterpretation('13'), ctx({ D: 65, Pt: 66, Sc: 60, F: 40 })).length, 1);
+    assert.deepEqual(activeCodeConditions(resolveCodeInterpretation('13'), ctx({ D: 80, Pt: 66, Sc: 60, F: 40 })), []);
+    assert.equal(activeCodeConditions(resolveCodeInterpretation('12'), ctx({ Hs: 80, D: 78 })).length, 1, 'fark ≤ 5 T → 21’e bakılır');
+    assert.deepEqual(activeCodeConditions(resolveCodeInterpretation('12'), ctx({ Hs: 95, D: 70 })), []);
+  });
+
+  it('koşul tablosunda ölü anahtar yoktur: 9 kaydın tamamı her iki sıralamadan çözülür', () => {
+    const kosullu = ['12', '13', '26', '27', '49', '07', '68', '89', '08'];
+    for (const k of kosullu) {
+      assert.ok(resolveCodeInterpretation(k)?.conditions?.length, `${k} koşullu kayıt taşımalı`);
+      const ters = [...k].reverse().join('');
+      assert.equal(resolveCodeInterpretation(ters)?.conditions, resolveCodeInterpretation(k)?.conditions, `${k} ↔ ${ters} aynı kayda inmeli`);
+    }
+  });
+
+  it('64/46 kaydındaki "8 yükselmişse süreç daha kötü olur" notu koşula bağlandı (s.131)', () => {
+    assert.equal(activeCodeConditions(resolveCodeInterpretation('64'), ctx({ Sc: 75 })).length, 1);
+    assert.deepEqual(activeCodeConditions(resolveCodeInterpretation('64'), ctx({ Sc: 60 })), []);
   });
 });

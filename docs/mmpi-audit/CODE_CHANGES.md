@@ -434,3 +434,80 @@ diğer 4 Sc bandı **değişmedi**. Puanlama/ölçek matematiğine etkisi **yokt
 - `npm run build` → **PASS** — `optik-form.html` yeniden üretildi ve senkron (CI
   `git diff --exit-code -- optik-form.html` kapısı)
 - **REGRESSION YOK**
+
+---
+
+## CHANGE-014 — kod çözümlemesi blok-yerel + koşullu yorumlar (DECISION-029 · seçenek A)
+
+Date: 2026-09-22
+Type: **Model değişikliği** (kod kimliği + kırpmasız çözümleme + koşullu yorum + örüntü katmanı)
+Priority: **P1** (CONFLICT-030 kullanıcıya alakasız metin gösteriyordu)
+Source: `SOURCE-CODE-PA-003` (s.130-131) · `SOURCE-MA-006` (s.153) · `SOURCE-SI-002` (s.157) ·
+nevrotik üçlü konfigürasyonları (s.103-106, Şekil 18-20) · DECISION-029 **(A)**
+
+**Dosyalar (4):**
+
+| Dosya | Ne |
+|---|---|
+| `src/scoring/mmpiSourceCodes.ts` | `CodeInterpretation` alanları: `block?` · `rawCode?` · `conditions?: CodeCondition[]`; yeni `CODE_DIGIT_SCALE`, `BLOCK_CODES` (4 blok-yerel gövde), `CODE_CONDITIONS` (9 anahtar / 11 koşul), `KNOWN_BLOCK_CODES`, `parseCode()`, `resolveCodeInterpretation()`, `activeCodeConditions()`, `CodeScaleKey`; `codeInterpretation()` artık kırpmasız çözümlere **delege** ediyor |
+| `src/scoring/mmpiInterpretation.ts` | `PatternHit.source?` alanı + **3 yeni desen** (`neurotic-step` · `neurotic-hat` · `neurotic-rising`, s.103-106) + `ProfileCodeInterpretation` ve `codeInterpretationForProfile()` (üçüncü yükselen testi ve T puanlarını profilden hesaplar) |
+| `src/components/results/MMPICodeTab.tsx` | profil bağlamlı çözümlayıcı; "Koşullu ek yorum" kutusu (kaynak sayfası + `manuel` notu); blok etiketi `clinical.find(...).fullName`; "yorum tanımlı değil" paragrafı yeni |
+| `src/components/results/MMPIPrintReport.tsx` | aynı çözümlayıcı; koşullar tek satır `pr-context` |
+
+**Çözümleme sözleşmesi (yeni):**
+
+```
+parseCode('027(8)') → { digits: '027', block: 'Si', rawCode: '027(8)' }
+BLOCK_CODES['Si:027'] VAR            → Si bloğunun 027(8) gövdesi  ✅
+BLOCK_CODES['Ma:19'] YOK → '19' iki hane → CODES['19'] (19/91, s.77 Hs gövdesi) ✅
+'794' → Pt:479 yok, 3 hane            → undefined (ARTIK 79/97 metni DÖNMEZ) ✅
+```
+
+1. Rakamlar **sıralanır** (`64` ↔ `46` aynı kanonik küme), **blok = kodun ilk rakamı**.
+2. Önce `BLOCK_CODES[blok:digits]` aranır (kaynağın o bloğa özgü başlığı).
+3. Yalnız **tam iki haneli** kodlar ortak `CODES` kaydına düşer; orada
+   `CODE_CONDITIONS` ile birleşir.
+4. Üç+ haneli / parantezli eşleşmeyen kod → **`undefined`** (kırpma yok).
+5. `resolveCodeInterpretation()` **tek örnek (singleton)** döndürür: `12` ve `21`
+   aynı nesnedir (cache; eski `assert.equal(a, b)` kimlik sözleşmesi korundu).
+
+**Kaynaktan eklenen gövdeler (yalnız birebir okunmuş 4 kayıt — DECISION-028):**
+
+| Blok:kod | Kaynak | Gövde (özet) |
+|---|---|---|
+| `Ma:19` (`91/19`) | s.153 | "Ender görülmektedir. Hastalar hipomanik durumdadırlar…" + `seeAlso`: `92/29 · 93/39 · 94/49 ("Eyleme vuruk davranış ile ilgilidir") · 95/59 · 96/69 · 97/79 · 98/89` |
+| `Pa:46` (`64/46`) | s.130-131 | "Bu koddaki bireyler immatür, narsisistik, pasif- bağımlı kişilerdir…" (kitabın "düşmancıdır" yazımı **korundu**) + koşul: "64/46 kodunun yanında 8 alt testi de yükselmişse süreç daha kötü olur" |
+| `Si:049` | s.157 | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" |
+| `Si:027` (`027(8)`) | s.157 | "Bireyde güçlü ruminatif davranışlar görülebilir." |
+
+**Kullanıcıya etkisi (önceki davranış → yeni):** `'049'` `40/04` (Pd) metnini
+gösteriyordu → **kendi** Si gövdesini gösteriyor; `'027(8)'` `20/02` → kendi
+gövdesi; `'91'` Hs `19/91` → Ma `91/19`; `'64'` Pd `46/64` → Pa `64/46`;
+`'794'`/`'8726'`/`'273/723'`/`'213/231'` **alakasız** iki-haneli gövdeler → "tanımlı değil".
+
+**Bağlanan koşullar (CONFLICT-027 / 025 / 034 — 12 koşul, 2'si `manual`):**
+`12` (5 T farkı) · `13` (Yüksek K: 2,7,8 < 70 ∧ F < 50) · `26` (Pa ve/veya 4&8 > 70) ·
+`27` (85 T üzeri) · `49` (K > 50 · Si < 50) · `07` (Mf < 40 T) · `68` (Pt ≥ 70) ·
+`89` (yaş 27 → **manuel** · üçüncü yükselen 4/7/6) · `08` (üçüncü yükselen 7/2) ·
+`Pa:46` (Sc > 70).
+
+**Yeni örüntüler (CONFLICT-033, 3/9):** basamak orantısı · şapka · yükselen eğilim —
+eşikler kaynak cümlesinden ("> 70 T", "Hs 70 T'nin altında") ve **kaynak
+referansı `source` alanında** (`s.103-104 · Şekil 18` vb.).
+
+### Doğrulama
+
+- `npx tsc --noEmit` → **0 hata**
+- `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (56 → 3 eski kilit yeni
+  davranışa güncellendi + 7 yeni CHANGE-014 testi)
+- `tests/mmpiInterpretation.test.ts` → **38/38 PASS** (29 → +9: 3 desen testi,
+  3 profil-bağlamlı kod testi, 3 SSR render testi)
+- `npm test` → **359/359 PASS** · 34 suite (önceki 343/343 · 30 suite)
+- `npm run build` → **PASS** · `optik-form.html` yeniden üretildi ve **commit edildi**
+  (CI `git diff --exit-code` kapısı)
+- **Güncellenen 3 eski kilit:** (i) batch 20 `91/19` "Ender görülmektedir **yok**"
+  → artık **var**; (ii) batch 21 `049 → 40/04` kırpma kilidi → `049` kendi gövdesi;
+  (iii) `12 ↔ 21` kimlik testi → cache ile korundu. Hiçbiri **geri alınmadı**,
+  hiçbiri "testi sil" ile geçilmedi.
+- **REGRESSION YOK** · puanlama/ölçek matematiğine (ham puan, T, düzeltme, anahtarlar)
+  **etkisi yoktur** — yalnız yorum katmanı

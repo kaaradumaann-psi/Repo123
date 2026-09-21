@@ -250,6 +250,12 @@ Kod yalnızca **tek ölçek** ve **iki noktalı kod** katmanına sahiptir →
 **CONFLICT-033 (P1)**. Üçlü kod altyapısı yokluğunun **ikinci ve daha ağır**
 sonucu: bu örüntüler klinik yorum üretmez.
 
+> **→ CHANGE-014 (2026-09-22):** 2-3-4 artık kodda (`neurotic-step` ·
+> `neurotic-hat` · `neurotic-rising`; s.103-106 alıntıları `mmpiInterpretation.ts`
+> desen katmanında), 1 (konversiyon vadisi) önceden vardı → **4/4 konfigürasyon
+> temsil ediliyor**. Bu satırlar **kod tipi başlığı değildir**, yukarıdaki 148'lik
+> başlık sayacını **değiştirmez** (desen katmanı → CONFLICT-033).
+
 ## Pd (4) kod bloğu I (s.111-113) — **5 VAR / 4 YOK**
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |
@@ -341,7 +347,7 @@ direktifi) · CONFLICT-035 (terim sapması)
 | 1 | `61/16` | s.130 | **VAR** ✅ | çapraz ref `16/61` |
 | 2 | `62/26` | s.130 | **VAR** ✅ | çapraz ref `26/62` |
 | 3 | `63/36` | s.130 | **VAR** ✅ | çapraz ref `36/63` |
-| 4 | `64/46` | s.130-131 | **VAR** ✅ | ⚠️ **çağrı Pd bloğu `46/64` metnini döndürüyor** → CONFLICT-036 |
+| 4 | `64/46` | s.130-131 | **VAR** ✅ | ⚠️ ~~çağrı Pd bloğu `46/64` metnini döndürüyor~~ → **CHANGE-014: `Pa:46` ayrık kaydında, uyarı KAPANDI** (başlık sayacı değişmedi) |
 | 5 | **`648`** | s.131 | **YOK** ❌ | `'648'` → `46/64` (kırpma) |
 | 6 | `65/56` | s.131 | **VAR** ✅ | `56/65` (Pd bloğunda) |
 | 7 | `67/76` | s.131 | **VAR** ✅ | ⚠️ kaynak Pd ve Pa bloğunda farklı bağlam → CONFLICT-031 |
@@ -460,7 +466,7 @@ değişmez.
 | — | '9. Hipomani (Ma) Alt Testi' girişi + **Tablo 16** + Graham listeleri | s.149-150 | (kod tipi değil) | Tablo 16 P0 ✅ MATCH (batch 19); listeler CONFLICT-026 |
 | 1 | **Yüksek 9/Yüksek K Kodu** | s.152 | **YOK** ❌ | 4 sayısal koşul → CONFLICT-039 + 027 (+4) |
 | 2 | **Yüksek 9/Düşük K Kodu** | s.153 | **YOK** ❌ | CONFLICT-039 |
-| 3 | **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** | s.153 | **YOK** ❌ | kanonik `'19'` = s.77 Hs gövdesi → **CONFLICT-036 vaka 2** |
+| 3 | **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** | s.153 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: kanonik `'19'` = s.77 Hs gövdesiydi → **CONFLICT-036 vaka 2 KAPANDI** (`Ma:19` ayrık kaydı) |
 | — | `92/29 · 93/39 · 94/49 · 95/59 · 96/69 · 97/79 · 98/89` **(Bakınız)** | s.153 | ✅ UYUMLU | 7 çapraz ref, hedefler mevcut → başlık sayılmaz |
 | — | not: 'Eyleme vuruk davranış ile ilgilidir' | s.153 | **YOK** ❌ | CONFLICT-025 (+1) — başlık değil |
 | 4 | **90/09 Kodu** | s.153 | **VAR** ✅ | gövde 5/5 sadık |
@@ -481,8 +487,8 @@ değişmez.
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |
 |---|---|---|---|---|
-| 1 | **`049 Kodu`** | s.157 | **YOK** ❌ | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" — CODES'ta gövde yok; `codeInterpretation('049')` → **`40/04`** metni (CONFLICT-030 somut vaka) |
-| 2 | **`027(8) Kodu`** | s.157 | **YOK** ❌ | "Bireyde güçlü ruminatif davranışlar görülebilir." — yok; `codeInterpretation('027(8)')` → **`20/02`** metni; parantezli notasyon modelde adreslenemiyor |
+| 1 | **`049 Kodu`** | s.157 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: ~~**YOK** ❌~~ | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" — CODES'ta gövde yok; `codeInterpretation('049')` → **`40/04`** metni (CONFLICT-030 somut vaka) |
+| 2 | **`027(8) Kodu`** | s.157 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: ~~**YOK** ❌~~ | "Bireyde güçlü ruminatif davranışlar görülebilir." — yok; `codeInterpretation('027(8)')` → **`20/02`** metni; parantezli notasyon modelde adreslenemiyor |
 | — | 9 Bakınız çifti (`01/10`…`09/90`) | s.157 | **UYUMLU** ✅ | gövde beklenmez; hedef kayıtlar 9/9 mevcut, etiketler birebir |
 | — | Si T bantları (4) + giriş paragrafı | s.157 | kodda **VAR** | `SI_T_BANDS` 4/4 bant; 70+ bandında 2 kuyruk cümlesi eksik → 025/033 |
 | — | **s.158** | p87 L | — | **BOŞ SAYFA** (koyu piksel %0.62) → bölüm s.157'de kapanır |
@@ -502,3 +508,27 @@ değişmez.
 > satırlarındaki **tarihsel tutarsızlık** (Hs satırı "31/31/0" ↔ anlatıda "9 VAR /
 > 22 YOK") **FINAL'da yeniden sayılarak** çözülecek; eski satırlar sessizce
 > düzeltilmiyor (denetim ilkesi).
+
+## CHANGE-014 (DECISION-029/A) sonrası sayım — 2026-09-22
+
+Kod tarafı değişti; **başlık evreni aynı**, yalnız 3 başlık YOK → VAR döndü:
+
+| # | Başlık | Sayfa | Eski | Yeni | Nerede |
+|---|---|---|---|---|---|
+| 1 | **`91/19 Kodu`** | s.153 | YOK ❌ | **VAR** ✅ | `BLOCK_CODES['Ma:19']` |
+| 2 | **`049 Kodu`** | s.157 | YOK ❌ | **VAR** ✅ | `BLOCK_CODES['Si:049']` |
+| 3 | **`027(8) Kodu`** | s.157 | YOK ❌ | **VAR** ✅ | `BLOCK_CODES['Si:027']` |
+| — | **`64/46 Kodu`** | s.130-131 | VAR (başlık) + ⚠️ yanlış blok metni | VAR + ⚠️ **kaldı** | `BLOCK_CODES['Pa:46']` — sayaç **değişmez** |
+
+| Blok | Başlık | VAR | YOK |
+|---|---|---|---|
+| **TOPLAM (Bölüm 5 · s.63-157) — CHANGE-014 sonrası** | **148** | **106** | **44** |
+
+> Sayım kuralı aynı: **batch deltası kesin, eski satırlar sessizce düzeltilmiyor**
+> (üstteki ⚠️ uyarıları duruyor; FINAL'da `SOURCE_INDEX` üzerinden yeniden sayılacak).
+> **Kalan 44 YOK = içerik işi**: kod modeli artık onları taşıyabilecek durumda
+> (`BLOCK_CODES` + `parseCode` varyantları), ama DECISION-028 gereği **okunmamış
+> gövde yazılmaz** — 44 başlığın kaynak taraması BÖLÜM 5'te yapıldı, gövdelerin
+> tamamı henüz koda alınmadı (DECISION-029 kabulü bunu zorunlu kılmıyordu).
+> Ayrıca **kırpma kalktığı için** eşleşmeyen 3+ haneli kodlar (ör. `794`, `8726`)
+> artık **alakasız metin değil `undefined`** döndürüyor.

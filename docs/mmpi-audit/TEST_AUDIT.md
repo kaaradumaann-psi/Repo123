@@ -689,3 +689,43 @@ tests/mmpiKeyIntegrity.test.ts` → **56/56 PASS** · `npm test` → **343/343 P
 **Kural uygulaması:** coverage kontrolleri `toLowerCase()` + noktalama kırpan `norm()`
 ile (cmp'de parantezler de soyuldu: "(Ayrıca bakınız…)" fragmenti böyle bulundu);
 bant/kod başlıkları **görselden** sayıldı (`BAND-HEAD-DROP` + `INVENTORY-DOUBLE-COUNT`).
+
+## CHANGE-014 — kod çözümlemesi blok-yerel + koşullu yorumlar · 2026-09-22
+
+**Kod değişikliği olduğu için test ZORUNLU (protokol).** `mmpiKeyIntegrity`
+**56 → 63** · `mmpiInterpretation` **29 → 38** · tam suite **343 → 359 PASS** (34 suite).
+
+**3 eski kilit YENİ davranışa güncellendi (geri alınmadı, silinmedi):**
+1. batch 20 `91/19`: eskiden `doesNotMatch(/Ender görülmektedir/)` (kırpma kurbanı
+   kanıtı) → artık `codeInterpretation('91')` **`91/19` + `block:'Ma'`** ve cümleler
+   **VAR**; `'19'` için tersine "Hs gövdesi etkilenmedi" kilidi eklendi
+2. batch 21 `049`/`027(8)`: eskiden `code === '40/04'` / `'20/02'` → artık kendi
+   gövdeleri + **kırpmanın gittiğinin negatif kanıtı** (`794`·`8726`·`273/723`·
+   `213/231` → `undefined`)
+3. `12 ↔ 21` **kimlik** testi (`assert.equal`) — `withConditions()` her çağrıda yeni
+   nesne üretip kırdı → çözümlenen kayıt **cache**'lendi (`RESOLVED_CACHE`), test
+   eski haliyle geçiyor (davranış sözleşmesi korundu)
+
+**Yeni `tests/mmpiKeyIntegrity.test.ts` (+7):** `91/19` ve `64/46` gövde sadakati
+(alıntı regex'leri) · `KNOWN_BLOCK_CODES` = tam 4 kayıt · `12↔21` singleton +
+blok/ortak ayrımı · `activeCodeConditions` **49** (K>50 ∧ Si<50; ikisi de
+sağlanmazsa `[]`) · **89** `manual` + üçüncü-yükselen koşulu · **13/12** eşikleri
+(fark ≤ 5 T) · **64/46** Sc > 70 koşulu · **ölü anahtar testi**: 9 koşullu
+anahtarın tamamı her iki sıralamadan çözümleniyor (`70`→`07`, `86`→`68` düzeltmesi
+bu testle yakalandı)
+
+**Yeni `tests/mmpiInterpretation.test.ts` (+9):** 3 desen testi (Şekil 18/19/20;
+eşik sınır vakaları dâhil: Hs 70+ çıkarsa şapka **bozulur**) · `codeInterpretationForProfile`
+(`049` → `Si`; `794`/`8726` → `undefined`; `27` 85 T koşulu profil T'siyle açılıyor) ·
+**SSR render** ×3 (`MMPICodeTab`: `64/46` + "Paranoya (6)" blok etiketi + koşul
+kutusu **yok**; Sc yükselince "8 alt testi de yükselmişse…" + `s.131` **var**;
+`MMPIPrintReport` aynı kaydı kullanıyor) · "normal profilde hiçbir kritik desen
+görülmez" (`deepEqual([])`) testi **yeni desenlerle de geçiyor** (yanlış pozitif yok)
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0 hata** · `npm test` → **359/359 PASS** ·
+`npm run build` → **PASS** (`optik-form.html` yeniden üretildi — `src/` değiştiği için
+üretim **farklı**, commit'e dâhil) · `git diff --check` temiz.
+
+**Not:** `KNOWN_CODES` kilidi (`every(/^\d{2}$/)`) **anlamlı kalmaya devam ediyor** —
+blok kayıtları **ayrı** `BLOCK_CODES` kayıt defterinde; `CODES` iki haneli ortak
+kayıtlar olarak duruyor.

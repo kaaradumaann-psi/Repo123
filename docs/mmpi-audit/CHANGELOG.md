@@ -1477,3 +1477,37 @@ Tarih: 2026-09-22 · Kaynak: **s.157** (PDF p86 R) + **s.158 (BOŞ SAYFA)** (p87
 `cmp-si-batch21.ts` (6 fark, hepsi yorum katmanı) · typecheck **0** ·
 `mmpiKeyIntegrity.test.ts` **56/56 PASS** (+6) · `npm test` **343/343 PASS** (30 suite) ·
 `npm run build` **PASS** (`optik-form.html` üretim farkı yok).
+
+---
+
+## 2026-09-22 — Oturum 8 (devam 3): **DECISION-029 ONAYLANDI (A) → CHANGE-014 UYGULANDI**
+
+- Kullanıcı onayı ("A'dan devam") ile **DECISION-029 seçenek (A)** kabul edildi →
+  **ilk kez bu turda `src/` değişti** (4 dosya; daha önce 21 batch boyunca
+  `src/` değiştirilmemişti)
+- **Kod kimliği:** blok = kodun **ilk rakamı**; `parseCode()` + `CODE_DIGIT_SCALE` +
+  ayrık **`BLOCK_CODES`** (4 kayıt) → `CODES` (45) olduğu gibi kaldı
+- **Kırpma kaldırıldı:** `slice(0,2)` gitti → eşleşme yoksa `undefined`
+  (CONFLICT-030 kapandı; 33 kalan örnek artık **yanlış metin değil** tanımsız)
+- **Kaynağa sadık 4 yeni gövde:** `Ma:19` (s.153) · `Pa:46` (s.130-131) ·
+  `Si:049` · `Si:027` `027(8)` (s.157) — hiçbiri uydurulmadı, hepsi görsel okumalı
+- **Koşullu yorum katmanı:** `CodeCondition { source, quote, test?, manual? }` →
+  **12 koşul** (`12 13 26 27 49 07 68 89 08` + `Pa:46`); yaş gibi profil-dışı
+  veriler **`manual`** (elle değerlendirme notu) — `MMPIProfile`'da `age` yok
+- **Örüntü katmanı:** nevrotik üçlü **3 yeni desen** (Şekil 18/19/20, s.103-106) +
+  `PatternHit.source` → CONFLICT-033 **4/4 konfigürasyon** temsili
+- **UI:** `MMPICodeTab` + `MMPIPrintReport` profil bağlamlı
+  `codeInterpretationForProfile()`; "Koşullu ek yorum" kutusu ve blok etiketi;
+  "yorum tanımlı değil" durumu kelimelendi
+- **Test/CI:** tsc **0** · `mmpiKeyIntegrity` **63/63** · `mmpiInterpretation`
+  **38/38** · `npm test` **359/359 PASS** (34 suite) · `npm run build` **PASS**
+  (`optik-form.html` senkron, commit'te)
+- **Bulunup düzeltilen kendi hatamız:** `CODE_CONDITIONS` anahtarları `'70'`/`'86'`
+  olarak yazılmıştı, çözümleyici **sıralı** hane (`'07'`/`'68'`) ile arıyor →
+  **2 koşul ölüydü**; anahtarlar düzeltildi ve **ölü-anahtar testi** eklendi
+- **Kapsam güncellendi:** `CONFLICT-024_KAPSAM.md` **148 → 106 VAR / 44 YOK**
+  (3 başlık YOK→VAR; `64/46` sayaç dışı) · **FIXED:** 030, 036 (2 vaka) ·
+  **FIXED-kısmı:** 031 (`87` hâlâ Pt gövdesinde), 033 (kalan 5 örüntü) ·
+  **OPEN:** 024, 025 (paragraflar), 027 (~33 koşul), 039
+- **Sıradaki:** PHASE 10 — BÖLÜM 6, s.159-170 (render'lar hazır: `p088_R`,
+  `p089_{L,R}` OCR bekliyor); gövde göçü (44 başlık) ayrı ve **batch batch** iş

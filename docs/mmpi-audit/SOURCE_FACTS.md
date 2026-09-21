@@ -3055,3 +3055,26 @@ Status: **VERIFIED** · **Kod değişikliği YOK** (eksik içerik sınıfı → 
 karıştırılmamalı; s.159'dan sonrası **PHASE 10**). s.159'daki "demografik
 değişkenler belli kodları yorumlamada önemlidir" cümlesi **CONFLICT-034'ün genel
 çerçevesi** olarak kayda geçti (kodda yaş/eğitim/cinsiyet bağlamı yok).
+
+---
+
+## SOURCE-CODE-CHANGE-014 · CHANGE-014 ile **kodda VAR** olan gövdeler — 2026-09-22
+
+Yukarıdaki dört kayıt "kaynakta VAR / kodda YOK" olarak belgelenmişti;
+**DECISION-029 (A) onayı + CHANGE-014** ile koda alındı. Alıntılar **birebir**
+kaynak metnidir (150 dpi tam sayfa görsel okuma: `.audit/pages/p073_{L,R}.png`
+s.130-131 · `p084_R.png` s.153 · `p086_R.png` s.157); OCR tek başına esas alınmadı.
+
+| Fact | Sayfa | Artık koda karşılığı |
+|---|---|---|
+| `91/19 Kodu` gövdesi | s.153 | `mmpiSourceCodes.ts` → `BLOCK_CODES['Ma:19']` (metin + 8 `seeAlso` çapraz ref'i) |
+| `64/46 Kodu` gövdesi | s.130-131 | `BLOCK_CODES['Pa:46']` (metin + `seeAlso` + **Sc > 70 koşulu**) |
+| `049 Kodu` | s.157 | `BLOCK_CODES['Si:049']` |
+| `027(8) Kodu` | s.157 | `BLOCK_CODES['Si:027']` (`rawCode: '027(8)'` — parantezli notasyon artık adreslenebiliyor) |
+| Nevrotik üçlü konfigürasyonları 2-3-4 | s.103-106 | `mmpiInterpretation.ts` → `neurotic-step` / `neurotic-hat` / `neurotic-rising` (+ `PatternHit.source`) |
+| Koşullu cümleler (12 anahtar) | s.68 · 72 · 87 · 118-121 · 142 · 146 · 147-150 · 131 | `CODE_CONDITIONS` + `Pa:46` → `CodeCondition[]` (`quote` + `test`/`manual`) |
+
+**Hâlâ YOK (bilerek bekletiliyor — DECISION-028):** `Yüksek 9/Düşük K Kodu` gövdesi
+(s.153) · Si `70+` bandının 2 kuyruk cümlesi (s.157) · s.156→157 süzülen giriş
+paragrafı (0/3) · 12/21 lise-ergen paragrafları (s.68) · `Yüksek 9/Yüksek K`
+K-örüntüleri (s.152) · kalan 44 eksik gövde başlığı.
