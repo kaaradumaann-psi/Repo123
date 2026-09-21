@@ -104,20 +104,59 @@ Supabase Auth'ta oluşturulur; uygulamanın tablolarına parola yazılmaz.
 
 ## 5. AI karar desteği (ai-interpretation)
 
-Sonuç ekranlarındaki "Yapay Zekâ Yorumu" bölümü, OpenAI uyumlu bir LLM uç
-noktasına istek atar. Anahtar **yalnız Edge Function çalışma zamanında**
-yaşar; frontend'e, `.env`'e veya Git'e asla yazılmaz:
+Sonuç panelinin son sekmesi "Yapay Zekâ Yorumu", bir LLM sağlayıcısına istek atar.
+Anahtar **yalnız Edge Function çalışma zamanında** yaşar; frontend'e, `.env`'e
+veya Git'e asla yazılmaz.
+
+### 5.1 Google Gemini (önerilen/yerel yol)
 
 ```sh
 supabase functions deploy ai-interpretation
-supabase secrets set AI_API_KEY=sk-... AI_MODEL=gpt-4o-mini \
+supabase secrets set AI_API_KEY=AQ.Ab... AI_MODEL=gemini-2.5-flash \
   ALLOWED_ORIGINS=https://your-app.example.com
 ```
 
+- Fonksiyon, `AI_MODEL` "gemini" ile başladığı için sağlayıcıyı **otomatik**
+  Gemini seçer ve Google'ın yerel `generateContent` ucuna
+  (`https://generativelanguage.googleapis.com/v1beta/models/<model>:generateContent`)
+  istek atar; anahtar `x-goog-api-key` başlığıyla taşınır.
+- **Neden yerel uç nokta şart:** Google 2026'da anahtar biçimini `AIza…` yerine
+  `AQ.…` ("Auth key") olarak değiştirdi. Yeni anahtarlar yerel uç noktada sorunsuz
+  çalışır ama OpenAI uyumlu `/chat/completions` yolunda **401/403 ile reddedilir**
+  ("Multiple authentication credentials received" / "ACCESS_TOKEN_TYPE_UNSUPPORTED").
+  Belirti, arayüzde "Yapay zekâ servisi anahtar doğrulaması geçmedi…" + 502'dir.
+- Google **Cloud Console**'dan oluşturulan anahtarlarda projede **Generative
+  Language API** açık olmalı (APIs & Services → Library) ve anahtar **uygulama
+  kısıtlı (application restriction) olmamalı** ya da sunucu taraflı kullanıma
+  uygun tanımlanmalıdır; aksi halde 401/403 sürer.
+- Anahtarı taşırken biçimiyle oynamayın (kısaltmayın, boşluk bırakmayın);
+  `supabase secrets list` ile tanımlı olduğunu doğrulayın.
+- Alternatif otomatik seçim ipuçları: `AI_PROVIDER=gemini` açıkça verilebilir;
+  `AI_API_BASE` bir `generativelanguage.googleapis.com` adresine işaret ediyorsa
+  ya da `AI_MODEL` unutulmuş ama anahtar `AIza.`/`AQ.` ile başlıyorsa gene Gemini
+  seçilir. Biçim kontrolü yalnız sağlayıcı seçimi içindir; anahtar doğrulaması
+  Google tarafında yapılır.
+
+### 5.2 OpenAI uyumlu uç nokta (alternatif)
+
+```sh
+supabase secrets set AI_API_KEY=sk-... AI_PROVIDER=openai \
+  AI_MODEL=gpt-4o-mini ALLOWED_ORIGINS=https://your-app.example.com
+```
+
 - `AI_API_BASE` (opsiyonel, varsayılan `https://api.openai.com/v1`) — herhangi
-  bir OpenAI uyumlu `/chat/completions` uç noktası.
+  bir OpenAI uyumlu `/chat/completions` uç noktası. `AI_PROVIDER=openai` ile
+  Gemini model adlı bir geçiş/proxy servis de zorlanabilir.
+
+### 5.3 Ortak sözleşme
+
 - `AI_API_KEY` tanımlı değilken fonksiyon 503 döner; arayüz "henüz
-  yapılandırılmamış" gösterir ve AI bölümü sessizce kapanır.
+  yapılandırılmamış" gösterir ve AI sekmesi bilgi kutusuyla sınırlı kalır.
+- Sağlayıcı hataları ayırt edilebilir mesajlara çevrilir (hepsi 502 ile):
+  401/403 → anahtar doğrulaması (Gemini'de Generative Language API/kısıt ipucuyla),
+  404 → `AI_MODEL` bulunamadı, 429 → kota/hız sınırı, safety bloklaması → filtre
+  mesajı. Ham sağlayıcı mesajı istemciye taşınmaz; durum kodu + kısa özet
+  yalnız sunucu günlüğüne yazılır.
 - İstemci yalnız **sayısal profil özetini** gönderir (ham metin/prompt yok);
   fonksiyon bu özetin her alanını bağımsız doğrular. `mode=record` ise kayıt,
   service role ile okunur ve çağrının o kayda RLS ile erişme hakkı taşıdığı

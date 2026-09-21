@@ -63,6 +63,45 @@ test('ai-interpretation: durum kodlu hatalar FunctionError ile taşınır', () =
   assert.ok(!/const error: \{ message: string; code: number \}/.test(code), 'düz nesne fırlatma kullanılmamalı');
 });
 
+test('ai-interpretation: Gemini yerel uç noktası (generateContent) desteklenir', () => {
+  const code = source('ai-interpretation');
+  // Google 2026'da AIza.* yerine AQ.* ("Auth key") vermeye başladı; bu anahtarlar
+  // OpenAI uyumlu /chat/completions yolunda 401/403 ile reddedilir ve YALNIZCA
+  // Gemini'nin yerel generateContent ucunda x-goog-api-key ile çalışır.
+  assert.match(code, /:generateContent/, 'Gemini yerel ucuna istek atılmalı');
+  assert.match(code, /'x-goog-api-key': apiKey/,
+    'anahtar x-goog-api-key başlığıyla taşınmalı (query string loglara sızmaz, Bearer AQ.* reddedilir)');
+  assert.match(code, /systemInstruction/, 'sistem promptu Gemini istemine de gömülü olmalı');
+  assert.match(code, /generationConfig/, 'üretim ayarları Gemini isteminde yer almalı');
+
+  // Sağlayıcı seçimi: açık AI_PROVIDER > uç nokta hostu > model adı > anahtar ipucu.
+  assert.match(code, /function resolveAiProvider\(\): AiProvider/);
+  assert.match(code, /Deno\.env\.get\('AI_PROVIDER'\)/);
+  assert.match(code, /model\.startsWith\('gemini'\)/, 'AI_MODEL=gemini-* sağlayıcıyı otomatik seçmeli');
+  assert.match(code, /key\.startsWith\('AIza'\) \|\| key\.startsWith\('AQ\.'\)/,
+    'AI_MODEL unutulduğunda AIza.*/AQ.* anahtar ipucu Geminiye yönlendirmeli');
+
+  // callGemini gövdesinde OpenAI usulü Authorization başlığı bulunmamalı.
+  const start = code.indexOf('async function callGemini');
+  const end = code.indexOf('async function callOpenAiCompatible');
+  assert.ok(start >= 0 && end > start, 'callGemini/callOpenAiCompatible fonksiyonları bulunamadı');
+  assert.ok(!/Authorization\s*:/.test(code.slice(start, end)),
+    'Gemini yolunda anahtar Authorization başlığıyla gönderilmemeli');
+});
+
+test('ai-interpretation: sağlayıcı hataları ayırt edilebilir mesajlara çevrilir', () => {
+  const code = source('ai-interpretation');
+  assert.match(code, /function upstreamFailure\(/);
+  assert.match(code, /401 \|\| status === 403[\s\S]{0,240}AI_API_KEY secret/);
+  assert.match(code, /status === 404\)[\s\S]{0,200}AI_MODEL secret/,
+    '404 (model yok) için AI_MODEL ipucu vermeli');
+  assert.match(code, /status === 429\)[\s\S]{0,200}kota/, '429 için kota mesajı vermeli');
+  assert.match(code, /güvenlik filtreleri/, 'Gemini safety bloklaması ayrı mesaj vermeli');
+  // Teşhis için sağlayıcı durum kodu + kısa özet sunucu günlüğüne yazılır (anahtar/gövde asla).
+  assert.match(code, /console\.error\('ai-interpretation: sağlayıcı hatası'/);
+  assert.match(code, /function logUpstreamFailure\(/);
+});
+
 test('admin-users: doğrulama hataları 400, veritabanı kaynaklı hatalar 500 olarak sınıflanır', () => {
   const code = source('admin-users');
   assert.match(code, /class ValidationError extends Error/);

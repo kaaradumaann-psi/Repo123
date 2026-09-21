@@ -16,7 +16,6 @@ import { Icon } from './Icon';
 import { useOnlineStatus } from '../workspace/useOnlineStatus';
 import { buildProfileFromAnswers, buildProfileFromRawScoresObject } from '../scoring/mmpiScoring';
 import { scanToAnswers } from '../scoring/omrAnswers';
-import { AiInterpretationPanel } from './results/AiInterpretationPanel';
 import { MMPIResultsPanel } from './results/MMPIResultsPanel';
 import {
   clearDraft,
@@ -1629,12 +1628,9 @@ function ReviewPanel({
                   ? scanToAnswers(definition, scan)
                   : undefined
             }
-          />
-          {/* Kayıt öncesi önizleme: taslak modunda yorum üretilir (recordId yok). */}
-          <AiInterpretationPanel
-            profile={profile}
-            method={method}
-            client={{ age: client.age }}
+            /* "Yapay Zekâ Yorumu" (son sekme): taslak modunda yorum üretilir
+               (recordId yok); yalnız yaş taşınır (KVKK). */
+            aiContext={{ method, client: { age: client.age } }}
           />
         </>
       ) : (

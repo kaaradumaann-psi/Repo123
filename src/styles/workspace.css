@@ -2377,29 +2377,123 @@
   }
   .report-section-title svg { color: var(--accent-ink); }
 
-  /* ---- Yapay zekâ yorumu (karar desteği) ---- */
-  .ai-interpretation-section { gap: 14px; }
-  .ai-interpretation-head {
+  /* ---- Yapay zekâ yorumu sekmesi (karar desteği) ---- */
+  /* Hero: sekmenin kimliği — gradyan zemin, simge rozeti ve üretim eylemi */
+  .ai-tab { gap: 14px; }
+  .ai-hero {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
     gap: 16px;
+    padding: 20px 22px;
+    background:
+      radial-gradient(140px 140px at 6% -30%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+      linear-gradient(135deg, var(--primary-tint), var(--bg-soft) 70%);
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-lg);
+    flex-wrap: wrap;
   }
-  .ai-interpretation-sub {
-    margin: 6px 0 0;
-    max-width: 60ch;
+  .ai-hero-badge {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: #fff;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 30%, transparent);
+    flex: none;
   }
-  .ai-interpretation-result {
+  .ai-hero-body { flex: 1; min-width: 260px; }
+  .ai-hero-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 21px;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .ai-hero-title em { font-style: italic; }
+  .ai-hero-sub {
+    margin: 8px 0 0;
+    max-width: 62ch;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .ai-hero-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .ai-hero-btn { align-self: center; flex: none; }
+
+  /* Durum kartları: yoğun (parlak iskelet) ve sonuç */
+  .ai-status-card {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
   }
-  .ai-interpretation-meta {
+  .ai-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .ai-skeleton { display: flex; flex-direction: column; gap: 10px; }
+  .ai-skeleton span {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-soft) 25%, var(--slate-50) 45%, var(--bg-soft) 65%);
+    background-size: 280% 100%;
+    animation: ai-shimmer 1.4s ease-in-out infinite;
+  }
+  .ai-skeleton span:nth-child(2) { width: 92%; }
+  .ai-skeleton span:nth-child(3) { width: 74%; }
+  @keyframes ai-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+  }
+  .ai-result-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .ai-result-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+  }
+  .ai-result-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+  .ai-result-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-border);
+    color: var(--accent-ink);
+    font-size: 11.5px;
+    font-weight: 700;
   }
   .ai-interpretation-actions {
     display: flex;
@@ -2434,6 +2528,11 @@
     border-radius: var(--radius-md);
   }
   .ai-disclaimer svg { flex: none; margin-top: 2px; }
+
+  @media (max-width: 720px) {
+    .ai-hero { flex-direction: column; align-items: stretch; }
+    .ai-hero-btn { align-self: stretch; justify-content: center; }
+  }
 
   /* ---- "Kaydı Düzenle" revizyon bandı ---- */
   .ws-revision-banner { margin-bottom: 12px; }

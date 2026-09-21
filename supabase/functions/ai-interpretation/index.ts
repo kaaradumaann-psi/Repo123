@@ -12,9 +12,16 @@
  *  6. En iyi çaba hız limiti: kullanıcı başına 1 istek/10 saniye + 20 istek/saat.
  *
  * Ortam değişkenleri:
- *  - AI_API_BASE  (varsayılan https://api.openai.com/v1 — OpenAI uyumlu her uç nokta)
  *  - AI_API_KEY   (zorunlu; tanımlı değilken 503 döner ve arayüz "yapılandırılmamış" der)
- *  - AI_MODEL     (varsayılan gpt-4o-mini)
+ *  - AI_MODEL     (sağlayıcıya göre: Gemini'de gemini-2.5-flash, OpenAI uyumluda gpt-4o-mini;
+ *                  "gemini" ile başlıyorsa sağlayıcı otomatik Gemini seçilir)
+ *  - AI_API_BASE  (opsiyonel; Gemini: https://generativelanguage.googleapis.com/v1beta,
+ *                  OpenAI uyumlu: https://api.openai.com/v1)
+ *  - AI_PROVIDER  (opsiyonel: gemini | openai — boşken model/uç nokta/anahtar ipucuyla
+ *                  otomatik seçilir. Google 2026'da AIza.* yerine AQ.* ("Auth key")
+ *                  anahtarlar vermeye başladı; bu anahtarlar Gemini'nin YEREL
+ *                  generateContent ucunda (x-goog-api-key) çalışır ama OpenAI uyumlu
+ *                  /chat/completions yolunda 401/403 ile reddedilir.)
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -240,11 +247,157 @@ function userPrompt(summary: AiSummary): string {
     `\nEn yüksek T: ${summary.maxT.toFixed(1)}, en düşük T: ${summary.minT.toFixed(1)}`;
 }
 
-async function callModel(summary: AiSummary): Promise<{ text: string; model: string }> {
+/* ---------------- LLM çağrısı: sağlayıcı seçimi ---------------- */
+
+type AiProvider = 'gemini' | 'openai';
+
+/** AI_API_KEY zorunlu; yoksa arayüzün "henüz yapılandırılmamış" mesajını taşıyan 503. */
+function requireApiKey(): string {
   const apiKey = Deno.env.get('AI_API_KEY') ?? '';
   if (!apiKey) {
     throw new FunctionError('Yapay zekâ yorum özelliği henüz yapılandırılmamış (AI_API_KEY secret\'ı tanımlı değil).', 503);
   }
+  return apiKey;
+}
+
+/**
+ * LLM sağlayıcı seçimi: `AI_PROVIDER` (gemini|openai) > `AI_API_BASE` hostu >
+ * `AI_MODEL` adı > anahtar biçimi ipucu > OpenAI uyumlu varsayılan.
+ *
+ * Neden: Google 2026'da anahtar biçimini AIza.* → AQ.* ("Auth key") olarak
+ * değiştirdi; yeni anahtarlar Gemini'nin YEREL `generateContent` ucunda
+ * (`x-goog-api-key`) çalışır ama OpenAI uyumlu `/chat/completions` yolunda
+ * 401/403 ile reddedilir ("Multiple authentication credentials received" /
+ * "ACCESS_TOKEN_TYPE_UNSUPPORTED"). Anahtar biçimi burada yalnız sağlayıcı
+ * seçimi için bir ipucudur; anahtarın kendisi hiçbir zaman biçimsel olarak
+ * doğrulanmaya çalışılmaz (biçim bir API sözleşmesi değildir).
+ */
+function resolveAiProvider(): AiProvider {
+  const declared = (Deno.env.get('AI_PROVIDER') ?? '').trim().toLowerCase();
+  if (declared === 'gemini' || declared === 'google') return 'gemini';
+  if (declared === 'openai') return 'openai';
+  const base = (Deno.env.get('AI_API_BASE') ?? '').trim().toLowerCase();
+  if (base.includes('generativelanguage.googleapis.com')) return 'gemini';
+  const model = (Deno.env.get('AI_MODEL') ?? '').trim().toLowerCase();
+  if (model.startsWith('gemini')) return 'gemini';
+  if (model.startsWith('gpt-') || model.startsWith('o1') || model.startsWith('o3') ||
+    model.startsWith('o4') || model.startsWith('chatgpt')) return 'openai';
+  // AI_MODEL unutulduysa anahtar biçimi ipucu: AIza.*/AQ.* → Gemini.
+  const key = Deno.env.get('AI_API_KEY') ?? '';
+  if (key.startsWith('AIza') || key.startsWith('AQ.')) return 'gemini';
+  return 'openai';
+}
+
+/**
+ * Sağlayıcıdan dönen hata durumunu ayırt edilebilir, eyleme dönük mesaja çevirir.
+ * Ham sağlayıcı mesajı istemciye taşınmaz; yalnız sunucu günlüğüne kısa özet yazılır.
+ */
+function upstreamFailure(provider: AiProvider, status: number): FunctionError {
+  if (status === 401 || status === 403) {
+    return new FunctionError(
+      'Yapay zekâ servisi anahtar doğrulaması geçmedi; yöneticiniz AI_API_KEY secret\'ını kontrol etmeli.' +
+      (provider === 'gemini'
+        ? ' (Google anahtarı geçerli olmalı; Cloud Console anahtarlarında Generative Language API açık ve anahtar uygulama kısıtlı olmamalı.)'
+        : ''),
+      502,
+    );
+  }
+  if (status === 404) {
+    return new FunctionError('Yapay zekâ modeli bulunamadı; yöneticiniz AI_MODEL secret\'ını kontrol etmeli.', 502);
+  }
+  if (status === 429) {
+    return new FunctionError('Yapay zekâ servisi kota/hız sınırına takıldı; lütfen daha sonra tekrar deneyin.', 502);
+  }
+  return new FunctionError(
+    `Yapay zekâ servisi yanıt veremedi (${provider === 'gemini' ? 'Gemini' : 'OpenAI uyumlu servis'}, HTTP ${status}); lütfen sonra tekrar deneyin.`,
+    502,
+  );
+}
+
+/** Sunucu günlüğü: sağlayıcı durum kodu + kısa hata özeti. Anahtar/gövde ASLA loglanmaz. */
+function logUpstreamFailure(provider: AiProvider, model: string, status: number, snippet: string): void {
+  console.error('ai-interpretation: sağlayıcı hatası', {
+    provider, model, status, snippet: snippet.slice(0, 500),
+  });
+}
+
+/* ---------------- LLM çağrısı: Gemini yerel uç noktası ---------------- */
+
+/**
+ * Gemini `generateContent` (Google AI Studio / Cloud "AQ.*" ve "AIza.*" anahtarları).
+ * Anahtar `x-goog-api-key` başlığıyla taşınır: `?key=` sorguya yazılmaz (proxy/log
+ * kayıtlarına sızmaz) ve OpenAI usulü `Authorization` başlığı yeni AQ.* anahtarlarını
+ * reddettiği için kullanılmaz.
+ */
+async function callGemini(summary: AiSummary): Promise<{ text: string; model: string }> {
+  const apiKey = requireApiKey();
+  const base = (Deno.env.get('AI_API_BASE') ?? 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+  const model = (Deno.env.get('AI_MODEL') ?? 'gemini-2.5-flash').replace(/^models\//, '');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 90_000);
+  try {
+    const upstream = await fetch(`${base}/models/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt() }] },
+        contents: [{ role: 'user', parts: [{ text: userPrompt(summary) }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 8192 },
+      }),
+    });
+    const raw = await upstream.text().catch(() => '');
+    if (!upstream.ok) {
+      logUpstreamFailure('gemini', model, upstream.status, raw);
+      throw upstreamFailure('gemini', upstream.status);
+    }
+    let payload: {
+      candidates?: { content?: { parts?: { text?: unknown }[] }; finishReason?: unknown }[];
+      promptFeedback?: { blockReason?: unknown };
+    };
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = {};
+    }
+    const parts = payload.candidates?.[0]?.content?.parts;
+    const text = Array.isArray(parts)
+      ? parts.map(part => (part && typeof part.text === 'string' ? part.text : '')).join('')
+      : '';
+    if (!text.trim() || text.length > 20_000) {
+      const blockReason = typeof payload.promptFeedback?.blockReason === 'string' ? payload.promptFeedback.blockReason : null;
+      console.error('ai-interpretation: Gemini boş/uzun yanıt', {
+        model,
+        finishReason: typeof payload.candidates?.[0]?.finishReason === 'string' ? payload.candidates[0].finishReason : null,
+        blockReason,
+      });
+      throw new FunctionError(
+        blockReason
+          ? 'Yapay zekâ yanıtı güvenlik filtreleri nedeniyle üretilemedi; lütfen tekrar deneyin.'
+          : 'Yapay zekâ beklendiği biçimde yanıt üretmedi; lütfen tekrar deneyin.',
+        502,
+      );
+    }
+    return { text: text.trim(), model };
+  } catch (error) {
+    if (error instanceof FunctionError) throw error;
+    // Ağ/zaman aşımı ya da bozuk gövde: ham istisna metni istemciye taşınmaz.
+    throw new FunctionError(
+      controller.signal.aborted
+        ? 'Yapay zekâ servisi zamanında yanıt vermedi; lütfen tekrar deneyin.'
+        : 'Yapay zekâ servisine bağlantı kurulamadı; lütfen tekrar deneyin.',
+      502,
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/* ---------------- LLM çağrısı: OpenAI uyumlu uç nokta ---------------- */
+
+/** `/chat/completions` (OpenAI ve uyumlu her sağlayıcı). */
+async function callOpenAiCompatible(summary: AiSummary): Promise<{ text: string; model: string }> {
+  const apiKey = requireApiKey();
   const base = (Deno.env.get('AI_API_BASE') ?? 'https://api.openai.com/v1').replace(/\/+$/, '');
   const model = Deno.env.get('AI_MODEL') ?? 'gpt-4o-mini';
   const controller = new AbortController();
@@ -264,15 +417,17 @@ async function callModel(summary: AiSummary): Promise<{ text: string; model: str
         ],
       }),
     });
+    const raw = await upstream.text().catch(() => '');
     if (!upstream.ok) {
-      throw new FunctionError(
-        upstream.status === 401 || upstream.status === 403
-          ? 'Yapay zekâ servisi anahtar doğrulaması geçmedi; yöneticiniz AI_API_KEY secret\'ını kontrol etmeli.'
-          : 'Yapay zekâ servisi yanıt veremedi; lütfen sonra tekrar deneyin.',
-        502,
-      );
+      logUpstreamFailure('openai', model, upstream.status, raw);
+      throw upstreamFailure('openai', upstream.status);
     }
-    const payload = await upstream.json() as { choices?: { message?: { content?: unknown } }[] };
+    let payload: { choices?: { message?: { content?: unknown } }[] };
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = {};
+    }
     const text = payload.choices?.[0]?.message?.content;
     if (typeof text !== 'string' || !text.trim() || text.length > 20_000) {
       throw new FunctionError('Yapay zekâ beklendiği biçimde yanıt üretmedi; lütfen tekrar deneyin.', 502);
@@ -290,6 +445,10 @@ async function callModel(summary: AiSummary): Promise<{ text: string; model: str
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function callModel(summary: AiSummary): Promise<{ text: string; model: string }> {
+  return resolveAiProvider() === 'gemini' ? callGemini(summary) : callOpenAiCompatible(summary);
 }
 
 /* ---------------- ana işleyici ---------------- */

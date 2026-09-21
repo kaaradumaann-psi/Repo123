@@ -84,8 +84,10 @@ supabase functions deploy ai-interpretation   # yapay zekâ yorumu kullanılacak
 supabase secrets set ALLOWED_ORIGINS=https://UYGULAMA-ADRESINIZ,http://localhost:5173
 supabase secrets list        # ALLOWED_ORIGINS görünüyor mu?
 
-# 4) Yapay zekâ yorumu için (opsiyonel)
-supabase secrets set AI_API_KEY=sk-... AI_MODEL=gpt-4o-mini
+# 4) Yapay zekâ yorumu için (opsiyonel) — Gemini anahtarları (AIza.* / AQ.*) için:
+supabase secrets set AI_API_KEY=AQ.Ab... AI_MODEL=gemini-2.5-flash
+#    OpenAI uyumlu uç nokta kullanılacaksa:
+#    supabase secrets set AI_API_KEY=sk-... AI_PROVIDER=openai AI_MODEL=gpt-4o-mini
 
 # 5) Doğrula
 npm run diagnose:supabase
@@ -115,7 +117,11 @@ tamamını koyabilir ve bu danışan verisini konsola/log toplayıcısına taş�
 | `PGRST301` / `PGRST302` | JWT süresi dolmuş / geçersiz | Çıkış yapıp yeniden giriş yapın |
 | `23503` / `23505` / `23514` | FK, uniqueness veya CHECK ihlali | Girilen veriyi/tekrar denemeyi kontrol edin |
 | CORS / `Failed to fetch` | `ALLOWED_ORIGINS` eksik | `supabase secrets set ALLOWED_ORIGINS=…` |
-| `503` (AI) | `AI_API_KEY` tanımlı değil | `supabase secrets set AI_API_KEY=…` (arayüz bölümü kapalı kalır) |
+| `503` (AI) | `AI_API_KEY` tanımlı değil | `supabase secrets set AI_API_KEY=… AI_MODEL=gemini-2.5-flash` (AI sekmesi bilgi kutusuyla sınırlı kalır) |
+| `502` (AI) "anahtar doğrulaması geçmedi" | Gemini (`AQ.…`/`AIza…`) anahtarı OpenAI uyumlu `/chat/completions` yolunda kullanıldı; ya da anahtar geçersiz/kısıtlı | `AI_MODEL=gemini-…` ile yerel Gemini yolu açılır (bkz. `supabase/README.md` §5.1). Hâlâ sürerse: Cloud Console'da Generative Language API açık mı, anahtar uygulama kısıtlı mı, anahtar tam/pastalandı mı? |
+| `502` (AI) "modeli bulunamadı" | `AI_MODEL` değeri o sağlayıcıda yok | `supabase secrets set AI_MODEL=gemini-2.5-flash` (ya da sağlayıcıdaki geçerli ad) |
+| `502` (AI) "kota/hız sınırına takıldı" | Google/OpenAI kotası ya da hız limiti doldu | Bir süre bekleyin; Google Cloud'da faturalandırma/kota ayarlarını kontrol edin |
+| `502` (AI) "güvenlik filtreleri nedeniyle" | Sağlayıcı safety filtresi yanıtı engelledi | Tekrar deneyin; sürerse farklı bir `AI_MODEL` deneyin |
 
 ## İlk Admin hesabı
 
