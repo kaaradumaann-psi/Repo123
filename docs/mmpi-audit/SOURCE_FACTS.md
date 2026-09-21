@@ -936,7 +936,8 @@ Status: **VERIFIED** (F bandı tolerans olarak kabul)
 
 ## SOURCE-CONFIG-012 · Konfigürasyon 12 — Güvenilir cevaplayıcı (s.54, p35 L)
 
-Fact — aynen:
+Fact — aynen (**Visual: CONFIRMED** — s.54 tam sayfa okundu; Şekil 12 çizgisi
+L≈50 → F≈68 → K≈58, metinle tutarlı):
 > "Konfigürasyon 12: L alt testi **50 T puanına yakın**, F alt testi **70 T
 > puanının altında**, K alt testi **50 T puanının üstündedir**."
 > "Bu geçerli bir profildir. Birey yönergeleri dikkatli bir biçimde okuyarak
@@ -952,7 +953,8 @@ Status: **VERIFIED** · K üst sınırı **UNVERIFIED (fazladan sınır)**
 
 ## SOURCE-CONFIG-013 · Konfigürasyon 13 — Akut / süreğen (s.55, p35 R)
 
-Fact — aynen:
+Fact — aynen (**Visual: CONFIRMED** — s.55 tam sayfa okundu; Şekil 13 çizgisi
+L≈52, F ve K ≈58 düz seyir, "hemen hemen eşit" ile tutarlı):
 > "Konfigürasyon 13: Bu konfigürasyonda L alt testi **50 T puanının üstünde**,
 > F ve K alt testleri **hemen hemen eşittir ve 55 T puanının üstündedir**."
 Ek liste: 1. Akut bozukluk · 2. Ciddi bozukluğu olmasına karşın oldukça

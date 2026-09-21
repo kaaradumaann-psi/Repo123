@@ -54,7 +54,9 @@ Last completed:
 Konf. 6 (rastgele) ✓ · Konf. 7 (tümüne doğru) ✓/❌ ulaşılamaz → CONFLICT-019 ·
 Konf. 8 (tümüne yanlış) → kaynak içi tutarsızlık, REJECTED (DECISION-020) ·
 Konf. 9 (yardım isteği) ✓ düzeltildi · Konf. 10 ✓ birebir · Konf. 11 ✓ ·
-Konf. 12 ✓ · Konf. 13 ✓ birebir → **CHANGE-008 (4 eşik düzeltmesi)**
+Konf. 12 ✓ (görsel) · Konf. 13 ✓ birebir (görsel) → **CHANGE-008**
+**Not: 15/15 konfigürasyonun TAMAMI metin + şekil olarak görsel doğrulandı**
+(Şekil 6-15 tam sayfa okumaları; `v_p032..p035_full.png`).
 
 Önceki batch:
 **PHASE 4 batch 2 — kitap s.43-47 (PDF p29 R – p31 R) DONE:**
