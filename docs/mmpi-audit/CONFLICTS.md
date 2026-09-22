@@ -1947,3 +1947,33 @@ Kaynak örüntüleri sayarken **sürekli çekince** bildiriyor; hiçbiri koda ta
 
 **Impact:** **P2** — sayısal hata değil; **aşırı güven üreten sunum** riski. Çözüm kanalı
 DECISION-030’un (C) şıkkında (desen kartlarına kaynak `source` + “tanı yerine geçmez” notu).
+
+---
+
+## CONFLICT-043 (P2 · **OPEN**) — `cry-for-help`: ilişki kaynakta, eşik kodda; kaynak bandı “80 ve üstü T puanı”
+
+Area: `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` · `cry-for-help` (desen kartı)
+
+Source: kitap **s.36** (PDF p26 L) — “F alt testi yükselme nedenleri” listesinin **4. maddesi**
+→ `SOURCE-VALIDITY-F-006` (batch 24’te, 150 dpi tam sayfa + 225 dpi kadrajla açıldı) ·
+bant başlığı: “**80 ve üstü T puanı:** F alt testi 90 T puanını aşarsa bu profil dikkatli
+değerlendirilmelidir.” · komşu bant: s.37 → `SOURCE-VALIDITY-F-005` (“80 T ve üstü — dikkatli
+değerlendirme; 5 yükselme nedeni sıralanır”).
+
+Source value: “Yardım çağrısı profili. **2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.**”
+— kaynak **sayısal eşik vermiyor**; bağlam **80 T üstü** bandı (+ “90 T’yi aşarsa dikkatli”).
+
+Current implementation: `hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma`
+
+Comparison: **KISMİ MATCH** — ilişkisel koşul birebir ve CHANGE-016 ile karta taşındı
+(`source` + `quote`) ✅; **`F ≥ 70` eşiği kod tarafındadır** ve kaynağın bant başlığıyla
+(80 T) uyumsuz. 70-79 T bandındaki profiller kartı vuruyor; kaynak o bandı “70-79 T — ego işlev
+bozulması” başlığında anlatıyor, yardım çağrısı maddesini değil.
+
+Impact: **P2** — sayı uydurma değil, **bant kaydırması** (yanlış pozitif olasılığı 70-79 T
+aralığında). Eşik **değiştirilmedi**; davranışın değişmesi **DECISION-032** kapısına bağlı.
+Kartın `manualNote` alanı bant farkını arayüzde söylüyor.
+
+Status: **OPEN** · kapanış/durum kanıtı: `scripts/mmpi-audit/cmp-b6-batch24.ts` (1)-(5)
+· eşik kilidi `tests/mmpiInterpretation.test.ts` → batch-24 describe’ı (F 68,8 T vurmuyor /
+F 71 T vuruyor).

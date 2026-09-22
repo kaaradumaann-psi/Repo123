@@ -821,3 +821,35 @@ corpus’unda).
 tests/mmpiInterpretation.test.ts` → **47/47 PASS** · `npm test` → **368/368 PASS**
 (35 suite) · `npm run build` → **PASS** (`src/` değişti → `optik-form.html` yeniden
 üretildi ve commit’e dâhil) · `git diff --check` temiz.
+
+## PHASE 10 batch 24 — CHANGE-016 · kalan desen kartlarında kaynak atfı (DECISION-030/A 5. madde)
+
+**Amaç:** BÖLÜM 6 kartları CHANGE-015 ile kaynaklanmıştı; BÖLÜM 5 kod gövdelerine dayanan
+`cry-for-help`, `depressive-27`, `49`, `89` kartlarında `source`/`quote` yoktu. Kural:
+**yalnız** SOURCE_FACTS’ta birebir ve sayfalanmış satır taşınır; kaynakta olmayan sayı
+üretilmez, eşiğe dokunulmaz.
+
+**Eklenen testler (7):** `tests/mmpiInterpretation.test.ts` → **47 → 54/54 PASS**
+1. dört kartın `source` değeri **birebir** (s.36 · s.87+89 · s.118-119 · s.147-148),
+2. `cry-for-help` alıntısının s.36 4. maddeyle birebirliği + `manualNote`ta bant (80 T) ve
+   CONFLICT-043 atfı,
+3. **eşik kilidi:** F 68,8 T → vurmuyor · F 71 T → vuruyor (sayı sessizce değiştirilemez;
+   DECISION-032 onayı olmadan (A) seçeneği testte kırılır),
+4. `depressive-27` alıntısının s.89 ⚠️ kritik koşulu olduğu + eşiğin kod tarafı olduğunun
+   kartta açık beyan edilmesi,
+5. `49` alıntısının kod katmanındaki `CODES['49']` gövdesiyle (noktalama duyarsız) uyumu ve
+   `89`da **bilinçli `quote` yokluğu**,
+6. **kapsam kapanışı:** `detectPatterns()` 18 kayıt → kaynaksız set **yalnız**
+   `['neurotic-triad','multi-high']`,
+7. UI render: `Kaynak: s.36 · F yükselme nedenleri (4. madde)` + alıntı metni sekmede çıkıyor.
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-b6-batch24.ts` (salt-okunur, 6 bölüm) →
+**SONUÇ: 0 FARK · P0 BULGU YOK**. (5) bölümü kart sayılarını SOURCE_FACTS’ın **alıntı
+satırları** + kod-gövdesi + BÖLÜM 6 çekinceleri corpus’unda arar; bulamazsa kartın
+“eşik kod tarafındadır” notunu şart koşar — yani **sayı üretimini değil, sayının
+sahiplenilmesini** denetler. `cmp-b6-batch23.ts` hâlâ **0 FARK**; `cmp-b6-batch22.ts`
+tarihsî (7 FARK, yokluk ölçümü).
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiInterpretation` → **54/54** ·
+`npm test` → **375/375** (36 suite) · `npm run build` → **PASS** (`src/` değişti →
+`optik-form.html` yeniden üretildi, commit’e dâhil) · `git diff --check` temiz.

@@ -973,3 +973,34 @@ yeniden üretimi. **Tek seferde toplu doldurma yok** (DECISION-028: okunmamış 
 
 **Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 23’ün kod tarafı CHANGE-015 ile
 sınırlıdır; 031 yalnız **kapı tanımıdır**).
+
+---
+
+## DECISION-032 — **ADAY · KULLANICI ONAYI BEKLİYOR**: `cry-for-help` F bandı (kod `≥ 70` T ↔ kaynak bandı “80 ve üstü T puanı”)
+
+**Tetik:** batch 24 · CHANGE-016 · `CONFLICT-043`.
+
+**Kaynak (görsel okumalı, `SOURCE-VALIDITY-F-006` · kitap s.36 = PDF p26 L):**
+> “**80 ve üstü T puanı:** F alt testi 90 T puanını aşarsa bu profil dikkatli
+> değerlendirilmelidir. F alt testi yükselme nedenleri şunlar olabilir:”
+
+4. madde (birebir): “Yardım çağrısı profili. **2 ve 7 testleri 6, 8 ve 9 testlerinden
+yüksektir.**” → kaynak **ilişkiyi** veriyor, **eşik vermiyor**; listenin bağlamı **80 T üstü**
+bandıdır (s.37 bandı `SOURCE-VALIDITY-F-005` aynı sıralamayı “80 T ve üstü” satırına bağlıyor).
+
+**Kod:** `cry-for-help` = `F ≥ 70 ∧ D > (Pa,Sc,Ma) ∧ Pt > (Pa,Sc,Ma)` — CHANGE-016 eşiğe
+**dokunmadı**; bant farkı kartın `manualNote` alanında yazılı ve testle kilitli.
+
+**Seçenekler:**
+- **(A) Eşiği bandına çek:** `F >= 80` + `rule`/`detail` metninin güncellenmesi. Kaynakla en
+  sıkı mutabakat; **70-79 T**’deki yardım çağrısı profilleri artık vurmaz.
+- **(B) 70 kalsın, beyan yeter:** eşik aynı; bant farkı `manualNote` + (isterse) desen
+  çekinceleri kutusuna tek satır eklenmesiyle söylenir. **Kod davranışı değişmez.**
+- **(C) `manual` yap:** sayısal `hit` kaldırılıp kart `negatif-egim` modeline taşınır.
+
+**Öneri: (B).** DECISION-028’in “kaynak sayı vermiyorsa sayı üretme” ilkesi burada **eşiği
+80’e çekmeyi de** yasaklar: 80 T, bu madde için kaynakta verilmiş bir desen koşulu değil,
+bandın kendi “dikkatli değerlendirme” direktifidir. (A) yalnızca “bant = koşul” kabulüyle
+meşrulaşır ve o kabul kaynakta yok.
+
+**Bu kayıt yazılırken kod değişikliği YAPILMADI** (CONFLICT-043 OPEN; eşik testi kırmıyor).

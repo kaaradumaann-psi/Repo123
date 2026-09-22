@@ -225,6 +225,11 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     name: 'Yardım Çağrısı Profili',
     rule: 'F ≥ 70 ve 2 ile 7 testleri 6, 8 ve 9 testlerinden yüksek',
     detail: 'F yükselmesinin nedenlerinden biri: yardım çağrısı profili; 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
+    source: 's.36 · F yükselme nedenleri (4. madde)',
+    quote: 'Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
+    manualNote: 'Kaynak bu maddeye sayısal bir eşik vermez; “F ≥ 70” koşulu kod tarafındadır. Liste kitabın “80 ve üstü T puanı” başlığı altındadır (s.36-37, SOURCE-VALIDITY-F-005) → bant farkı CONFLICT-043 olarak kayıtlıdır, eşik onaysız değiştirilmedi.',
+    // Batch 24 (DECISION-030/A 5. madde devamı): s.36 görsel okumayla doğrulandı;
+    // eşik değişmedi (CONFLICT-043 → DECISION-032 adayı).
     hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma,
   });
   hits.push({
@@ -244,6 +249,9 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     name: 'Depresif Kod (2-7 / 7-2)',
     rule: 'Pt ≥ 70 ve D ≥ 60',
     detail: '27/72 kodunun görünümü: pasif, bağımlı, yüksek standartlar koyarak stres yaşayan; stres arttığında yapışırcasına bağımlı hale gelen bireyler. 278/728 kodunda intihar olasılığı dikkatle değerlendirilmelidir.',
+    source: 's.87 · 27/72 + s.89 · 278/728 (CODE)',
+    quote: 'Bu kodda, özellikle alt testlerden K ve Hs, 50 T puanının altında olduğunda ve/veya Ma alt testi yükseldiğinde intihar olasılığı dikkatle değerlendirilmelidir.',
+    manualNote: 'Kaynağın intihar riski koşulu K ve Hs < 50 T ve/veya Ma yükselmesidir (s.89); desenin “Pt ≥ 70 ∧ D ≥ 60” eşiği kod tarafındadır (kaynak bu desene sayı vermez). 27 kodunun 85 T koşulu kod katmanında CODE_CONDITIONS içinde değerlendirilir.',
     hit: Pt >= 70 && D >= 60,
   });
   hits.push({
@@ -251,6 +259,13 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     name: '4-9 / 9-4 Modeli',
     rule: 'Pd ≥ 70 ve Ma ≥ 70',
     detail: '49/94 kodu: kendi isteklerini ön plana çıkarma, sınırlar, kurallar ve düzenlemelere kızma; benmerkezci, narsisistik, kısa vadeli hedef odaklı. 20 yaş üstünde örüntü daha kalıcıdır; psikoterapi prognozu genellikle çok kötüdür.',
+    source: 's.118-119 · 49/94 Kodu (CODE)',
+    quote: 'Hem yetişkinler, hem de ergenler için, bu kod kendi isteklerini ön plana çıkarma ve sınırlar, kurallar ve düzenlemelere kızma ile bağlantılıdır.',
+    // Batch 24: kart metni CODES['49'] gövdesiyle aynı kaynağa dayanır (SOURCE-CODE-PD-014,
+    // gövde MATCH). Kaynağın sayısal koşulları (K > 50 T, üçüncü yükselen test 2/5/7/0 > 70 T,
+    // Si < 50 T) CHANGE-014'te CODE_CONDITIONS['49'] olarak bağlandı; “Pd ≥ 70 ∧ Ma ≥ 70”
+    // eşiği kod tarafındadır ve kitabın genel yükselme tanımıyla uyumludur (s.160: “Yükselmenin
+    // hepsi 70 T puanına yakın ya da bunun üstündedir”).
     hit: Pd >= 70 && Ma >= 70,
   });
   hits.push({
@@ -258,6 +273,11 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     name: '8-9 / 9-8 Modeli',
     rule: 'Sc ≥ 70 ve Ma ≥ 70',
     detail: '89/98 kodu: ergenlerde ve yetişkinlerde ciddi psikopatoloji; gerginlik, ajitasyon, uykusuzluk, fikir uçuşmaları. Kod daha da yükselirse delüzyon ve halüsinasyonlarla psikotik tablo ortaya çıkar.',
+    source: 's.147-148 · 89/98 Kodu (CODE)',
+    // Batch 24: SOURCE-SC-006 gövdeyi MATCH doğruladı; kayıt kısaltmalı (“…”) alıntı
+    // içerdiği için UI'a birebir `quote` taşınmadı (birebir okuma ayrı tur). “Sc ≥ 70 ∧
+    // Ma ≥ 70” eşiği kod tarafındadır; yaş (27'den küçük) ve üçüncü yükselen test
+    // (4/7/6) koşulları CODE_CONDITIONS['89'] içindedir (CHANGE-014).
     hit: Sc >= 70 && Ma >= 70,
   });
   hits.push({

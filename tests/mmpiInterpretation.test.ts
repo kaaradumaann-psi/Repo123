@@ -9,7 +9,7 @@ import {
   detectPatterns,
   detectSingleElevations,
 } from '../src/scoring/mmpiInterpretation';
-import { canonicalCode } from '../src/scoring/mmpiSourceCodes';
+import { canonicalCode, resolveCodeInterpretation } from '../src/scoring/mmpiSourceCodes';
 import type { ItemAnswer, RawScores } from '../src/workspace/caseTypes';
 
 const baseRaw: RawScores = {
@@ -718,5 +718,81 @@ describe('PHASE 10 batch 22 → DECISION-030/A (CHANGE-015) — BÖLÜM 6 profil
     assert.match(html, /Elle değerlendirilir/);            // negatif-egim satırı
     assert.match(html, /Butcher 1984/);
     assert.doesNotMatch(html, /\*\*/, 'desen kartlarında ham markdown kalıntısı yok');
+  });
+});
+
+describe('PHASE 10 batch 24 · DECISION-030/A 5. madde devamı — kalan desen kartlarında kaynak atfı', () => {
+  // CHANGE-015 BÖLÜM 6 kartlarını kaynaklandırmıştı; bu turda BÖLÜM 5 kod gövdelerine
+  // dayanan dört desen kartı (cry-for-help, depressive-27, 49, 89) sayfa atfı aldı.
+  // Kural: yalnız SOURCE_FACTS’ta **birebir ve sayfalanmış** satır taşınır; kaynakta
+  // olmayan sayı üretilmez/eşiğe dokunulmaz (CONFLICT-043 → DECISION-032 adayı).
+  const rec = (raw: Parameters<typeof profile>[0], id: string) => {
+    const found = detectPatterns(profile(raw)).find(x => x.id === id);
+    assert.ok(found, `${id} kaydı olmalı`);
+    return found!;
+  };
+
+  it('dört kart sayfa atfı taşır (s.36 / s.87 / s.118 / s.147)', () => {
+    const want: Record<string, string> = {
+      'cry-for-help': 's.36 · F yükselme nedenleri (4. madde)',
+      'depressive-27': 's.87 · 27/72 + s.89 · 278/728 (CODE)',
+      '49': 's.118-119 · 49/94 Kodu (CODE)',
+      '89': 's.147-148 · 89/98 Kodu (CODE)',
+    };
+    for (const [id, src] of Object.entries(want)) {
+      assert.equal(rec({ K: 0 }, id).source, src, `${id} · source`);
+    }
+  });
+
+  it('cry-for-help alıntısı s.36’daki 4. maddeyle birebir (Visual: CONFIRMED)', () => {
+    const r = rec({ K: 0 }, 'cry-for-help');
+    assert.equal(r.quote, 'Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.');
+    assert.match(r.manualNote ?? '', /CONFLICT-043/);
+    assert.match(r.manualNote ?? '', /80 ve üstü T puan[ıi]/, 'bant başlığı kartta belirtilir');
+  });
+
+  it('F ≥ 70 eşiği DEĞİŞMEDİ: F 68,8 T vurmuyor, F 71 T vuruyor (eşik ancak DECISION-032 ile)', () => {
+    const under = rec({ F: 17, K: 0, D: 31, Pt: 40, Pa: 5, Sc: 10, Ma: 5 }, 'cry-for-help');
+    const over = rec({ F: 18, K: 0, D: 31, Pt: 40, Pa: 5, Sc: 10, Ma: 5 }, 'cry-for-help');
+    assert.equal(under.hit, false, 'F 68.8 T · kodun eşiği 70');
+    assert.equal(over.hit, true, 'F 71 T · kodun eşiği 70');
+  });
+
+  it('depressive-27 · s.89 intihar riski koşulu karta taşındı (eşik kod tarafı, elle)', () => {
+    const r = rec({ K: 0 }, 'depressive-27');
+    assert.match(r.quote ?? '', /K ve Hs, 50 T puan[ıi]n[ıi]n altında oldu[ğg]unda/);
+    assert.match(r.quote ?? '', /intihar olas[ıi]l[ıi][ğg][ıi] dikkatle de[ğg]erlendirilmelidir/);
+    assert.match(r.quote ?? '', /de[ğg]erlendirilmelidir\.\s*$/, 'alıntı s.89 cümlesiyle bitmeli');
+    assert.match(r.manualNote ?? '', /Pt . 70/, 'eşiğin kod tarafı olduğu açıkça yazılı');
+  });
+
+  it('49 · 89 kartlarının dayandığı kod gövdeleriyle uyumu (kod katmanı çapraz kontrolü)', () => {
+    // '49'un alıntısı BÖLÜM 5 gövdesiyle aynı cümledir (CODES['49'] gövdesi virgülleri
+    // düşürdüğü için noktalama duyarsız karşılaştırılır); '89'da birebir okuma kısaltmalı
+    // olduğu için KASITLI olarak quote yok — yalnız sayfa atfı taşınır.
+    const q49 = rec({ K: 0 }, '49').quote ?? '';
+    assert.ok(q49.length > 40);
+    const body49 = resolveCodeInterpretation('49')!.text;
+    const strip = (t: string) => t.replace(/[,.]/g, '').toLowerCase();
+    assert.ok(strip(body49).includes(strip(q49)), "CODES['49'] gövdesi alıntıyı içermeli");
+    assert.equal(rec({ K: 0 }, '89').quote, undefined, '89 · kısaltmalı alıntı UI’a taşınmadı');
+  });
+
+  it('kaynaksız bırakılan kartlar bilinçli: neurotic-triad ve multi-high (kod tarafı eşikler)', () => {
+    assert.equal(rec({ K: 0 }, 'neurotic-triad').source, undefined, '≥ 65 eşiğinin kaynakta sayısı yok');
+    assert.equal(rec({ K: 0 }, 'multi-high').source, undefined, 'kodun kendi göstergesi (#8 ayrı kayıt)');
+    const ids = detectPatterns(profile({ K: 0 })).map(x => x.id);
+    assert.equal(ids.length, 18);
+    assert.deepEqual(ids.filter(id => !rec({ K: 0 }, id).source), ['neurotic-triad', 'multi-high']);
+  });
+
+  it('UI: sayfa atfı olan dört kart da “Kaynak:” satırıyla render edilir', async () => {
+    const { createElement } = await import('react');
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { MMPIExtraTab } = await import('../src/components/results/MMPIExtraTab');
+    const p = profile({ F: 18, K: 0, D: 31, Pt: 40, Pa: 5, Sc: 10, Ma: 5 });
+    const html = renderToStaticMarkup(createElement(MMPIExtraTab, { profile: p }));
+    assert.match(html, /Kaynak: s\.36 · F yükselme nedenleri \(4\. madde\)/);
+    assert.match(html, /2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir\./);
   });
 });

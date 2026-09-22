@@ -261,6 +261,12 @@ sonucu: bu örüntüler klinik yorum üretmez.
 > örüntüler **yine** bu dosyanın **148 başlık sayacına girmez**; sayaç **148 → 106 VAR /
 > 44 YOK** olarak değişmedi (kalıcı iş: 024’ün 44 gövdesi → **DECISION-031 adayı**).
 >
+> **→ CHANGE-016 (batch 24, 2026-09-22):** BÖLÜM 5 kod gövdelerine dayanan dört **desen
+> kartı** (`cry-for-help` · `depressive-27` · `49` · `89`) sayfa atfı + birebir alıntı aldı;
+> BÖLÜM 2 tarafında s.36’nın F-yükselme listesi ilk kez `SOURCE_FACTS`a yazıldı
+> (`SOURCE-VALIDITY-F-006`). Bunlar da **kod tipi başlığı değildir** → sayaç
+> **148 → 106 VAR / 44 YOK** olarak **değişmedi** (eşik/bant farkı → CONFLICT-043).
+>
 > **→ CHANGE-014 (2026-09-22):** 2-3-4 artık kodda (`neurotic-step` ·
 > `neurotic-hat` · `neurotic-rising`; s.103-106 alıntıları `mmpiInterpretation.ts`
 > desen katmanında), 1 (konversiyon vadisi) önceden vardı → **4/4 konfigürasyon

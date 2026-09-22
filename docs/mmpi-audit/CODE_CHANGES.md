@@ -580,3 +580,46 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
   çekince taşıyor; `negatif-egim` “Elle değerlendirilir” listesinde; sekmede
   “Yorum Çekinceleri (BÖLÜM 6)” kutusu var. Ham markdown kalıntısı testi:
   `doesNotMatch(/\*\*/)` → arayüz metinlerinde `**` yok (`<b>` etiketi kullanılıyor).
+
+---
+
+## CHANGE-016 — kalan dört desen kartında kaynak atfı (DECISION-030/A · 5. madde devamı · batch 24)
+
+**Area:** `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` · yeni salt-okunur araç
+`scripts/mmpi-audit/cmp-b6-batch24.ts` · `tests/mmpiInterpretation.test.ts`.
+
+**Source:** `SOURCE-VALIDITY-F-006` (s.36 — bu turda yazıldı) · `SOURCE-CODE-014/015`
+(s.87 · 27/72 ve s.89 · 278/728) · `SOURCE-CODE-PD-014` (s.118-119) · `SOURCE-SC-006`
+(s.147-148). **Yalnız** bu kayıtlardaki birebir ve sayfalanmış satırlar taşındı.
+
+**Değişiklikler (sunum/atıf katmanı — hiçbir `hit` koşulu değişmedi):**
+1. `cry-for-help` → `source: 's.36 · F yükselme nedenleri (4. madde)'` + `quote` (birebir:
+   “Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.”) + `manualNote`
+   (eşik kod tarafı; kaynak bandı “80 ve üstü T puanı” → **CONFLICT-043** / **DECISION-032**).
+2. `depressive-27` → `source: 's.87 · 27/72 + s.89 · 278/728 (CODE)'` + `quote` (s.89’un
+   ⚠️ kritik koşulu: K ve Hs < 50 T ve/veya Ma↑ → “intihar olasılığı dikkatle
+   değerlendirilmelidir”) + `manualNote` (Pt ≥ 70 ∧ D ≥ 60 kod tarafı; 85 T koşulu
+   `CODE_CONDITIONS` katmanında — CHANGE-014).
+3. `49` → `source: 's.118-119 · 49/94 Kodu (CODE)'` + `quote` + yorum satırı: K > 50 T,
+   üçüncü yükselen test 2/5/7/0 > 70 T ve Si < 50 T koşulları `CODE_CONDITIONS['49']` içinde;
+   `Pd/Ma ≥ 70` kapısı kitabın genel yükselme tanımıyla uyumlu (s.160: “Yükselmenin hepsi
+   70 T puanına yakın ya da bunun üstündedir”).
+4. `89` → `source: 's.147-148 · 89/98 Kodu (CODE)'`; `quote` **bilinçli yok** — SOURCE-SC-006
+   gövdeyi kısaltmalı (“…”) aktarıyor, birebir okuma ayrı tur ister; uydurma alıntı yerine
+   yalnız sayfa atfı taşındı.
+5. `neurotic-triad` ve `multi-high` **kaynaksız kaldı** (kodun kendi ≥ 65 göstergeleri);
+   “kaynaksız set = yalnız bu ikisi” kuralı hem testte hem araçta kilitli.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS** (47 → +7)
+- `npm test` → **375/375 PASS** · 36 suite (önceki 368/368 · 35)
+- `npx tsx scripts/mmpi-audit/cmp-b6-batch24.ts` → **SONUÇ: 0 FARK · P0 BULGU YOK**
+  ((1) kapsam defteri · (2) sayfa atfı ↔ SOURCE_* kaydı · (3) `quote` ↔ SOURCE_FACTS birebir ·
+  (4) eşik kilidi: statik `hit` ifadeleri + F 68,8/71 davranışı · (5) sayı üretimi denetimi:
+  corpus’ta olmayan sayı **yalnız** “kod tarafındadır” notuyla geçebilir · (6) UI zinciri)
+- `cmp-b6-batch23.ts` yeniden çalıştırıldı → **0 FARK** (CHANGE-016 bozmadı)
+- `npm run build` → **PASS** · `src/` değişti → **`optik-form.html` yeniden üretildi ve
+  commit edildi** · `git diff --check` temiz
+- **REGRESSION YOK:** puanlama/ölçek matematiği ve tüm `hit` koşulları aynı; yalnız desen
+  kartlarının atıf alanları büyüdü.

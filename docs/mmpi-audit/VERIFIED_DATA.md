@@ -824,3 +824,9 @@ değişti — BÖLÜM 6 eşikleri koda alındı (`conversion-v` 70/10 · `psycho
 `mmpiInterpretation` **47/47** · `npm test` **368/368 PASS** (35 suite) · tsc **0** ·
 build **PASS** (`optik-form.html` senkron) · kapanış kanıtı
 `scripts/mmpi-audit/cmp-b6-batch23.ts` → **0 FARK** (sayı üretim denetimi dâhil).
+→ **GÜNCEL (batch 24 / CHANGE-016, 2026-09-22):** BÖLÜM 5 gövdelerine dayanan dört desen
+kartı kaynak atfı aldı (`cry-for-help` s.36 · `depressive-27` s.87+89 · `49` s.118-119 ·
+`89` s.147-148); s.36’daki F-yükselme listesi `SOURCE-VALIDITY-F-006` olarak ilk kez yazıldı
+(görsel okuma). **Eşik değişmedi** → CONFLICT-043 (P2, OPEN) + DECISION-032 adayı.
+`mmpiInterpretation` **54/54** · `npm test` **375/375** (36 suite) · tsc **0** · build **PASS**
+(`optik-form.html` senkron) · kapanış kanıtı `scripts/mmpi-audit/cmp-b6-batch24.ts` → **0 FARK**.

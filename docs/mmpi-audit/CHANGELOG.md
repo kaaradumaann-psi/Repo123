@@ -1597,3 +1597,35 @@ Otomatik denetim: `cmp-b6-batch23.ts` (6) bölümü — 9 kaydın içindeki **t�
 **365 → 368/368** (35 suite) · `npm run build` **PASS** → `optik-form.html` yeniden
 üretildi ve commit’e dâhil · `cmp-b6-batch23.ts` → **0 FARK** (batch-22 aracı 9 → 7
 FARK; (4)/(5) bölümleri yokluk ölçtüğü için tarihsî) · `git diff --check` temiz.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 24 — CHANGE-016: kalan desen kartlarında kaynak atfı
+
+**Kapsam:** DECISION-030/A’nın 5. maddesinin BÖLÜM 6 dışındaki kısmı kapatıldı. BÖLÜM 5 kod
+gövdelerine dayanan dört desen kartı atıf aldı: `cry-for-help` (s.36 · 4. madde) ·
+`depressive-27` (s.87 + s.89 kritik koşul) · `49` (s.118-119) · `89` (s.147-148).
+`source` + `quote` (+ eşiği ilgilendiren yerlerde `manualNote`) arayüzde; **hiçbir `hit`
+koşulu değişmedi**.
+
+**Yeni kaynak kaydı:** `SOURCE-VALIDITY-F-006` — s.36’daki 5 maddelik F-yükselme listesi
+**ilk kez** SOURCE_FACTS’ta (`SOURCE_INDEX` sayfayı “DONE” saymış ama listeyi yazmamıştı).
+Okuma: 150 dpi tam sayfa (satır başları) + 225 dpi kadrajlar (satır sonları, omuz boşluğuna
+kadar) — `TABLO-NUMBERS` kuralı gereği OCR kullanılmadı.
+
+**Bulgu:** `cry-for-help` ilişkisi kaynakta birebir, **eşiği yok**; liste “80 ve üstü T
+puanı” bandı altında → **CONFLICT-043 (P2) AÇILDI**, eşik değiştirilmedi; kapı
+**DECISION-032 (ADAY · PENDING)**. `neurotic-triad` ve `multi-high` **bilerek** kaynaksız.
+
+**Kapanış:** sayaçlar **16 açık** (0 P0 · 5 P1 · 7 P2 · 2 P3 + 2 FIXED-kısmı) ·
+**FIXED 16 · REJECTED 9 · 43 kayıt** · `CONFLICT-024` sayacı (148/106/44) **değişmedi** ·
+`DECISION-031` adayı duruyor (44 gövde + ~33 koşul).
+
+**Doğrulama:** tsc **0** · `mmpiInterpretation` **47 → 54/54** · `npm test` **368 → 375/375**
+(36 suite) · `npm run build` **PASS** → `optik-form.html` yeniden üretildi ·
+`cmp-b6-batch24.ts` → **0 FARK** · `cmp-b6-batch23.ts` → **0 FARK** · `git diff --check` temiz.
+
+**Ortam notu:** tur başlarken sandbox snapshot’ı `f3794ed` üzerine sıfırlanmıştı (denetim
+dizinleri untracked, `node_modules` yok); `git fetch` + `git reset --mixed fae032a` ile
+worktree’nin push edilmiş halle **birebir** olduğu doğrulandı, `npm ci` + `pip install pymupdf`
+yeniden kuruldu — kayıp iş yok.

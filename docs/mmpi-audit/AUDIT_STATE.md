@@ -54,7 +54,8 @@ s.171 = p93 R = **BÖLÜM 7** girişi (PHASE 8 zaten DONE → bölüm sıçramas
 ~~Sonraki hedef: **DECISION-030 onayı** (041 eşikleri + 6 yeni desen + 042 çekinceleri) —
 onaysız `src/` değişmez.~~ → **ONAYLANDI (A) ve CHANGE-015 ile UYGULANDI (batch 23).**
 Paralel açık iş: **CONFLICT-024'ün 44 eksik gövdesi** (içerik) ve PHASE 7 /
-PHASE 11-13 + **FINAL**. Yeni `src/` işi için sıradaki kapı: **DECISION-031 (ADAY · PENDING)**.
+PHASE 11-13 + **FINAL**. Yeni `src/` işi için sıradaki kapı: **DECISION-031 (ADAY · PENDING)** (44 gövde + ~33 koşul)
+ve batch 24 ile **DECISION-032 (ADAY · PENDING)** (`cry-for-help` F bandı).
 → ✅ **DECISION-029 ONAYLANDI (A) ve CHANGE-014 ile UYGULANDI** (030 + 036 FIXED;
 031/033 FIXED-kısmı; 024/025/027/039 içerik tarafı hâlâ bekliyor).
 → ✅ **PHASE 10 kaynak taraması BİTTİ (batch 22)** — yeni karar kapısı: **DECISION-030**
@@ -65,6 +66,13 @@ yazılırken **kod değişikliği YAPILMADI**.
 (`manual`) eklendi (11 → **18** kayıt) · `PatternHit.quote/caveat/manualNote` +
 `MMPI_PATTERN_CAVEATS` UI'a taşındı · **CONFLICT-041 ve 042 FIXED** ·
 kanıt `cmp-b6-batch23.ts` → **0 FARK** · test **368/368** (35 suite) · `optik-form.html` yeniden üretildi.
+→ ✅ **PHASE 10 batch 24 — CHANGE-016 (DECISION-030/A 5. madde devamı)** (2026-09-22):
+BÖLÜM 5 gövdelerine dayanan **4 desen kartı** kaynak atfı aldı (`cry-for-help` s.36 ·
+`depressive-27` s.87+89 · `49` s.118-119 · `89` s.147-148); s.36’nın F-yükselme listesi
+**ilk kez** SOURCE_FACTS’a yazıldı (`SOURCE-VALIDITY-F-006`, görsel okuma). **Hiçbir `hit`
+koşulu değişmedi**; `cry-for-help` bant farkı **CONFLICT-043 (P2, OPEN)** + **DECISION-032
+adayı**. Kaynaksız set bilinçli: `neurotic-triad` + `multi-high`. Kanıt
+`cmp-b6-batch24.ts` → **0 FARK** · test **375/375** (36 suite) · `optik-form.html` yeniden üretildi.
 21-44; envanter bu etiketleri p83 R + p84 L'de gördü) → **Ma kod bloğu** (`91/19` …
 `90/09`) → `Si (0)` girişi + **Tablo 17** → **CONFLICT-024/030/031/033 KARARI**
 
@@ -635,11 +643,12 @@ Bilinen kısıtlar:
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
 | `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **56/56 PASS** (CHANGE-014 ile **63/63**: 4 blok gövdesi sadakati + `KNOWN_BLOCK_CODES` sayımı + `12↔21` singleton + `activeCodeConditions` (49/89/13/12/64) + **ölü-anahtar** kilidi; 3 eski kilit yeni davranışa güncellendi — (batch 21: Si bantları + 030 kırpma kilidi) |
-| `npx tsx --test tests/mmpiInterpretation.test.ts` | **47/47 PASS** (44 → batch 23 ile +3: 6 batch-22 kilidi **yeni davranışa** yazıldı (eşik mutabakatı, kural↔davranış döngüleri, `multi-high` ayrışması, çekince **varlığı**, UI render) + `negatif-egim` `manual` kilidi + `source`/`quote` zorunluluğu + bant ayrışması) |
+| `npx tsx --test tests/mmpiInterpretation.test.ts` | **54/54 PASS** (44 → batch 23 +3 → **batch 24 +7**: `source` birebirliği, `quote`↔SOURCE_FACTS eşleşmesi, **eşik kilidi** (F 68,8 vurmuyor / 71 vuruyor), kaynaksız-set kapanışı, UI render) · tarihçe: (44 → batch 23 +3: 6 batch-22 kilidi **yeni davranışa** yazıldı (eşik mutabakatı, kural↔davranış döngüleri, `multi-high` ayrışması, çekince **varlığı**, UI render) + `negatif-egim` `manual` kilidi + `source`/`quote` zorunluluğu + bant ayrışması) |
 | `npx tsx scripts/mmpi-audit/cmp-b6-batch23.ts` | **SONUÇ: 0 FARK** — CHANGE-015 kapanış kanıtı: 18 kayıt, #1/#2 eşikleri kaynakla birebir, eski FP'ler vurmuyor, #4-#10 kaynak tanımıyla vuruyor, #7 `manual`, 8/8 çekince taşındı, **sayı üretim denetimi** (desen metnindeki her sayı `SOURCE-B6-001/002` corpus'unda) |
+| `npx tsx scripts/mmpi-audit/cmp-b6-batch24.ts` | **SONUÇ: 0 FARK · P0 BULGU YOK** — CHANGE-016 kapanış kanıtı: (1) kapsam defteri (kaynaksız set = yalnız `neurotic-triad`, `multi-high`) · (2) sayfa atfı ↔ SOURCE_* kaydı · (3) `quote` SOURCE_FACTS alıntı satırlarıyla **birebir** · (4) statik + davranışsal **eşik kilidi** · (5) sayı üretimi denetimi (corpus’ta olmayan sayı yalnız “kod tarafındadır” notuyla geçer) · (6) UI zinciri |
 | `npx tsx scripts/mmpi-audit/cmp-b6-batch22.ts` | (tarihsî) 9 FARK → CHANGE-015 sonrası **7 FARK**: (2) bölümündeki eşik sapmaları kapandı; (4)/(5) bölümleri **yokluk** iddiasını ölçtüğü için artık historical — yerini `cmp-b6-batch23.ts` aldı |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **368/368 PASS** · 35 suite (batch 23, +3 net: 44 → 47 `mmpiInterpretation`) |
+| `npm test` | **375/375 PASS** · 36 suite (batch 23: 368/368 · batch 24, +7 net: 47 → 54 `mmpiInterpretation`) |
 | `npm run build` | **PASS** (0) — `src/` değişti → `optik-form.html` yeniden üretildi ve **commit'e dâhil** |
 
 **REGRESSION: YOK** — puanlama/ölçek matematiği (ham puan, T, K düzeltmesi, anahtarlar) değişmedi; yalnız yorum katmanı.
@@ -694,6 +703,9 @@ Kalan açık: **15 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 6 P
 (006, 007, 022, 025, 034, 039) · 2 P3 (026, 032); ayrıca **2 FIXED-kısmı**
 (031, 033 — kayıt içerik tarafı için açık tutuluyor). **CHANGE-014 ile FIXED: 030 · 036 (2 vaka)** ·
 **CHANGE-015 ile FIXED: 041 (P1) · 042 (P2)** → **FIXED 16 · REJECTED 9 · 42 kayıt**.
+**Güncel sayaç (batch 24): CONFLICT-043 AÇILDI (P2, OPEN — CHANGE-016 eşik değiştirmedi) →
+43 kayıt · FIXED 16 · REJECTED 9 · 16 açık** (0 P0 · 5 P1 · 7 P2 · 2 P3 + 2 FIXED-kısmı);
+karar kapısı **DECISION-032 (ADAY)**.
 **Yeni (batch 18): CONFLICT-038 AÇILDI ve AYNI TURDA FIXED** → sayaç değişmedi
 (FIXED: 12 · REJECTED: 8). 025/026/027/030/031 satırları Sc/Pt örnekleriyle
 genişledi (024 KAPSAM: 140/100/42).
@@ -716,6 +728,15 @@ FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 00
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
+
+2026-09-22 — Oturum 8 (devam 6): **PHASE 10 batch 24 — CHANGE-016 UYGULANDI** — DECISION-030/A
+5. maddesi BÖLÜM 5 tarafına tamamlandı: `cry-for-help` (s.36 · 4. madde, **yeni
+`SOURCE-VALIDITY-F-006` kaydı görsel okumayla**), `depressive-27` (s.87 + s.89 ⚠️ kritik koşul),
+`49` (s.118-119), `89` (s.147-148) kartları `source`/`quote` (+ `manualNote`) aldı; `hit`
+koşullarına **dokunulmadı**; bant farkı **CONFLICT-043 (P2, OPEN)** + **DECISION-032 adayı**;
+`cmp-b6-batch24.ts` → **0 FARK** · `npm test` **375/375** (36 suite) · tsc **0** · build **PASS**.
+⚠️ Operasyonel not: tur başında sandbox snapshot’ı `f3794ed`e sıfırlanmıştı → `git fetch` +
+`git reset --mixed fae032a` (worktree push edilmiş halle birebir) + `npm ci` ile toparlandı.
 
 2026-09-22 — Oturum 8 (devam 5): **PHASE 10 batch 23 — DECISION-030 ONAYLANDI (A) → CHANGE-015 UYGULANDI** —
 BÖLÜM 6 eşikleri kaynağa çekildi (`conversion-v` 70/10 · `psychotic-v` 80/80/70), 6 desen

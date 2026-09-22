@@ -159,6 +159,39 @@ Fact (T puanı bantları):
 Visual: CONFIRMED
 Status: **VERIFIED**
 
+### SOURCE-VALIDITY-F-006 · F alt testi yükselme nedenleri listesi (kitap s.36, PDF p26 L) — batch 24
+
+**Bu turda açıldı:** `SOURCE_INDEX.md` s.36’yı “F yükselme nedenleri, araştırma özetleri · DONE”
+diye işaretlemişti, **ancak listenin kendisi SOURCE_FACTS’a hiç yazılmamıştı** → desen kartı
+`cry-for-help` (F ≥ 70 ∧ 2,7 > 6,8,9) kaynaksızdı. 4. madde bundan böyle kayıtta.
+
+Okuma yöntemi: satır **başları** 150 dpi tam sayfa (`p026_L.png`), satır **sonları** 225 dpi
+kadrajlarla (`.audit/pages/b24_s36_item4c.png`) — omuz boşluğu kadraja alındı; birleştirilen
+satırlarda kesim noktaları “…” ile işaretlendi.
+
+Bant başlığı — aynen (**Visual: CONFIRMED**):
+> “**80 ve üstü T puanı:** F alt testi 90 T puanını aşarsa bu profil dikkatli değerlendirilmelidir.
+> F alt testi yükselme nedenleri şunlar olabilir:”
+
+Numaralı liste — aynen:
+1. “İlişki kurmak istememe. Hepsi doğru ya da hepsi yanlış yanıt biçimi…”
+2. “Görme ya da okuma güçlüğü nedeniyle anlamada sorun ya da psi… konfüzyon.”
+3. “Sahte kötülük. Eğer hastanın kendini kötü göstermede kazançları varsa bu durum ortaya çıkmaktadır. Mahkumiyet, malulen emeklilik…gibi nedenlerle simülasyon yapma.”
+4. “**Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.**”
+5. “Eğer 1 ve 4 alt testleri dışlanırsa açık psikoz ya da ciddi psikopatoloji vardır. 6 ve 8 testleri yükselmiştir. Düşünce bozukluğuna ya da ilişkili semptomlara bakın.”
+
+Kod: `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` · `cry-for-help`
+- **İlişki (2 ve 7 > 6, 8 ve 9):** 4. madde **birebir** karta taşındı (`source` + `quote`) ✅
+- **Sayısal eşik:** kaynak bu maddede **hiçbir T eşiği vermiyor**; liste bant başlığı
+  **“80 ve üstü T puanı”** altındadır (bkz. `SOURCE-VALIDITY-F-005`, s.37: “80 T ve üstü —
+  dikkatli değerlendirme; **5 yükselme nedeni** sıralanır”). Kodun eşiği **`F ≥ 70`**
+  → **bant farkı**; eşik **değiştirilmedi** (onaysız sayı değişikliği yasağı)
+  → **CONFLICT-043 (P2, OPEN)** · **DECISION-032** adayı.
+- 1., 2., 3. ve 5. maddeler kodda desen olarak **yok** (yalnız adı geçiyor) → bu turun
+  kapsamı dışında; BÖLÜM 2 (geçerlik) tarafında ayrıca ele alınacak.
+
+Status: **VERIFIED** (4. madde, görsel okumalı) · eşik/bant uyumsuzluğu **OPEN (CONFLICT-043)**
+
 ---
 
 ## K alt testi (Düzeltme)
