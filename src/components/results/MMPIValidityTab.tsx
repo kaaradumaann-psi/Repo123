@@ -278,9 +278,6 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
               <span>Genel Değerlendirme</span>
             </header>
             <p className="mv-verdict-text">{validityAnalysis.interpretation}</p>
-            <p className="mv-panel-note">
-              Kesme puanları tanı koymaz; bulgular klinik görüşme ve diğer kaynaklarla birlikte değerlendirilir.
-            </p>
             {config && (
               <p className="mv-panel-note">
                 <b>{config.name}: </b>

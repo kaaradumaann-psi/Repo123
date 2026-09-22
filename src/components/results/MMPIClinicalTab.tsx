@@ -1,124 +1,211 @@
-import type { MMPIProfile } from '../../scoring/mmpiScoring';
+import type { MMPIProfile, ScaleResult } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
-import { SCALE_MEANINGS, clinicalBandFor, detectSingleElevations, tColor } from '../../scoring/mmpiInterpretation';
-import { DisclosureControls, DisclosureRow, useDisclosureGroup } from './Disclosure';
+import {
+  SCALE_MEANINGS,
+  clinicalBandFor,
+  detectSingleElevations,
+  tColor,
+  type SingleElevationHit,
+} from '../../scoring/mmpiInterpretation';
+import {
+  SCALE_DOSSIERS,
+  dossierSourceLine,
+  grahamListsFor,
+  tabloDetail,
+  type ClinicalScaleId,
+  type GrahamItem,
+  type GrahamList,
+} from '../../scoring/mmpiScaleDossiers';
 import { Icon } from '../Icon';
 
-/** T puanının 0–120 ölçeğinde konumu; 50 ortalama, 70 klinik sınır. */
-function TBar({ tScore, color }: { tScore: number; color: string }) {
-  const pct = (value: number) => `${Math.min(100, Math.max(0, (value / 120) * 100))}%`;
+function GrahamItemView({ item }: { item: GrahamItem }) {
+  if (typeof item === 'string') return <li>{item}</li>;
   return (
-    <span className="mmpi-tbar" aria-hidden="true">
-      <span className="mmpi-tbar-fill" style={{ width: pct(tScore), background: color }} />
-      <span className="mmpi-tbar-mark" style={{ left: pct(50) }} />
-      <span className="mmpi-tbar-mark is-limit" style={{ left: pct(70) }} />
-    </span>
+    <li>
+      {item.text}
+      {item.sub.length > 0 && (
+        <ul className="graham-sub">
+          {item.sub.map((s, i) => (
+            <li key={i}>{s}</li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+function GrahamListBlock({ list }: { list: GrahamList }) {
+  return (
+    <div className="graham-block">
+      {list.label && <p className="graham-label">{list.label}</p>}
+      <ol className="graham-list">
+        {list.items.map((item, i) => (
+          <GrahamItemView key={i} item={item} />
+        ))}
+      </ol>
+    </div>
   );
 }
 
 /**
- * Klinik Ölçekler — her ölçek tek satırda özetlenir (T puanı, düzey ve profil
- * çubuğu); ayrıntılı yorum yalnızca istendiğinde açılır. Klinik eşiği (T ≥ 70)
- * aşan ölçekler açık gelir, böylece dikkat gerektiren tablo ilk bakışta görünür.
+ * Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987) kartı.
+ * Yalnızca klinik olarak anlamlı ölçekler için üretilir: T ≥ 70 (Klinik
+ * Yükseklik) ya da T ≤ 40 (Klinik Düşüklük). Bölümler: Klinik Açıklama ve
+ * Analiz → Graham (1987) listeleri → Demografik ve Klinik Notlar → Koşullu
+ * ek yorum → Ek Klinik Bilgiler → kaynak (yalnız kart altlığında).
  */
-export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
-  const singles = detectSingleElevations(profile);
-  const singleFor = (id: ScaleId) => singles.find(hit => hit.scale === id);
+function ScaleDossierCard({
+  profile,
+  scale,
+  singleHits,
+}: {
+  profile: MMPIProfile;
+  scale: ScaleResult;
+  singleHits: SingleElevationHit[];
+}) {
+  const id = scale.id as ClinicalScaleId;
+  const dossier = SCALE_DOSSIERS[id];
+  const high = scale.tScore >= 70;
+  const tMap = Object.fromEntries(profile.clinical.map(s => [s.id, s.tScore])) as Record<ScaleId, number>;
+  const band = clinicalBandFor(id, profile.gender, scale.tScore);
+  const { range, lists } = grahamListsFor(id, scale.tScore, high ? 'high' : 'low');
+  const tab = tabloDetail(id, profile.gender);
 
-  const elevated = profile.clinical.filter(scale => scale.tScore >= 70);
-  const ids = profile.clinical.map(scale => scale.id);
-  const group = useDisclosureGroup(elevated.map(scale => scale.id));
+  const conditions = [
+    ...(dossier.conditions ?? [])
+      .map(c => ({ when: c.when, sentence: c.sentence, active: c.match(tMap) }))
+      .sort((a, b) => Number(b.active) - Number(a.active)),
+    ...singleHits.filter(h => h.scale === id).map(h => ({ when: h.entry.rule, sentence: h.entry.text, active: true })),
+  ];
 
   return (
-    <div role="tabpanel" className="mmpi-tab-panel">
-      <section className="mmpi-list-card">
-        <header className="mmpi-list-head">
-          <div className="mmpi-list-title">
-            <span className="mmpi-card-dot" />
-            <b>Klinik Ölçekler</b>
-            <span className="mmpi-list-note">
-              {elevated.length > 0
-                ? `${elevated.length} ölçek klinik eşiğin üzerinde (T ≥ 70) — açık gelir.`
-                : 'Klinik eşiği aşan ölçek yok; tüm satırlar kapalı.'}
-            </span>
+    <article className={`scale-dossier ${high ? 'is-high' : 'is-low'}`}>
+      <header className="scale-dossier-head">
+        <div className="scale-dossier-id">
+          <span className="scale-avatar" style={{ background: tColor(scale.tScore) }}>
+            {scale.shortName}
+          </span>
+          <div className="scale-dossier-titles">
+            <h3>{scale.fullName}</h3>
+            <p>Kategori: Klinik Ölçek</p>
           </div>
-          <DisclosureControls ids={ids} group={group} total={profile.clinical.length} />
-        </header>
-
-        <div className="mmpi-disc-list">
-          {profile.clinical.map(scale => {
-            const meaning = SCALE_MEANINGS[scale.id as ScaleId];
-            const band = clinicalBandFor(scale.id as ScaleId, profile.gender, scale.tScore);
-            const single = singleFor(scale.id as ScaleId);
-            const tone = scale.tScore >= 70 ? 'alert' : scale.tScore >= 60 ? 'watch' : 'ok';
-            return (
-              <DisclosureRow
-                key={scale.id}
-                id={scale.id}
-                tone={tone}
-                open={group.isOpen(scale.id)}
-                onToggle={group.toggle}
-                title={
-                  <>
-                    <span className="clin-chip" style={{ background: tColor(scale.tScore) }}>
-                      {scale.shortName}
-                    </span>
-                    <strong>{scale.fullName}</strong>
-                  </>
-                }
-                summary={band ? `${band.rangeLabel} · ${band.label}` : scale.level}
-                value={
-                  <>
-                    <TBar tScore={scale.tScore} color={tColor(scale.tScore)} />
-                    <span className="mmpi-disc-t" style={{ color: tColor(scale.tScore) }}>
-                      {scale.tScore.toFixed(1)}
-                    </span>
-                  </>
-                }
-              >
-                <p className="clin-desc">{meaning.measures}</p>
-                {band && <p className="clin-signal">{band.text}</p>}
-                {single && (
-                  <p className="clin-signal is-low">
-                    <b>
-                      Sadece {scale.shortName} yükselmesi ({single.entry.rule}):{' '}
-                    </b>
-                    {single.entry.text}
-                  </p>
-                )}
-                <div className="mmpi-disc-stats">
-                  <div className="clin-stat">
-                    <span>Ham</span>
-                    <b>{scale.rawScore}</b>
-                  </div>
-                  {scale.kAdded !== undefined && (
-                    <div className="clin-stat">
-                      <span>K eklemesi</span>
-                      <b className="k">+{scale.kAdded}</b>
-                    </div>
-                  )}
-                  {scale.kCorrectedRaw !== undefined && (
-                    <div className="clin-stat">
-                      <span>Düzeltilmiş ham</span>
-                      <b>{scale.kCorrectedRaw}</b>
-                    </div>
-                  )}
-                  <div className="clin-stat">
-                    <span>T puanı</span>
-                    <b style={{ color: tColor(scale.tScore) }}>{scale.tScore.toFixed(1)}</b>
-                  </div>
-                </div>
-              </DisclosureRow>
-            );
-          })}
         </div>
+        <div className="scale-dossier-scores">
+          <span className={`klinik-pill ${high ? 'is-high' : 'is-low'}`}>
+            {high ? 'KLİNİK YÜKSEKLİK' : 'KLİNİK DÜŞÜKLÜK'}
+          </span>
+          <span className="score-t" style={{ color: tColor(scale.tScore) }}>
+            T {Math.round(scale.tScore)}
+          </span>
+          <span className="score-raw">Ham: {scale.rawScore}</span>
+        </div>
+      </header>
+
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">KLİNİK AÇIKLAMA VE ANALİZ</h4>
+        <blockquote className="dossier-quote">
+          {band ? band.text : high ? SCALE_MEANINGS[id].high : SCALE_MEANINGS[id].low}
+        </blockquote>
       </section>
 
-      <p className="mmpi-summary-note">
-        <Icon name="info" size={13} /> T puanı 50 ortalamadır; 70 ve üzeri klinik eşik kabul edilir. K düzeltmesi
-        yalnızca Hs, Pd, Pt, Sc ve Ma ölçeklerine uygulanır. Satır başlığındaki çubuk, puanın 0–120 aralığındaki
-        yerini gösterir.
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">
+          {scale.shortName} ({dossier.number}) ALT TESTİNDE {high ? 'YÜKSEK' : 'DÜŞÜK'} PUAN ALAN BİREYİN: (GRAHAM 1987)
+        </h4>
+        {range && <p className="graham-range">Kaynakta bu düzey için verilen liste: {range}</p>}
+        {lists.map((list, i) => (
+          <GrahamListBlock key={i} list={list} />
+        ))}
+      </section>
+
+      {dossier.notes && dossier.notes.length > 0 && (
+        <section className="dossier-sec">
+          <h4 className="dossier-sec-title">Demografik ve Klinik Notlar</h4>
+          {dossier.notes.map((note, i) => (
+            <div key={i} className="dossier-note">
+              {note.title && <p className="graham-label">{note.title}</p>}
+              {note.paragraphs?.map((p, j) => (
+                <p key={j}>{p}</p>
+              ))}
+              {note.list && (
+                <ul className="dossier-note-list">
+                  {note.list.map((item, j) => (
+                    <li key={j}>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {conditions.length > 0 && (
+        <section className="dossier-sec">
+          <h4 className="dossier-sec-title">Koşullu ek yorum</h4>
+          <ul className="dossier-cond-list">
+            {conditions.map((c, i) => (
+              <li key={i} className={c.active ? 'is-active' : undefined}>
+                <span className="cond-when">{c.when}:</span> {c.sentence}
+                {c.active && (
+                  <span className="cond-active-chip" title="Bu profil için koşul sağlanıyor">
+                    <Icon name="checkCircle" size={12} /> bu profilde geçerli
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">EK KLİNİK BİLGİLER</h4>
+        <p>{dossier.overview}</p>
+        <p>
+          <b>Tablo {tab.no}:</b> {tab.title} (Madde Sayısı: {tab.count})
+        </p>
+        <p>
+          <b>Doğru Maddeler ({tab.dogru.length} adet):</b> {tab.dogru.join(', ')}
+        </p>
+        <p>
+          <b>Yanlış Maddeler ({tab.yanlis.length} adet):</b> {tab.yanlis.join(', ')}
+        </p>
+        {tab.kEkleli && <p>K Eklemeli bir alt testtir.</p>}
+        {tab.extraNote && <p className="dossier-extra-note">{tab.extraNote}</p>}
+        <p>
+          Erkeklerde ortalama: {tab.normMale.toFixed(2)}, kadınlarda: {tab.normFemale.toFixed(2)} (Savaşır, 1981)
+        </p>
+      </section>
+
+      <footer className="dossier-source">{dossierSourceLine(id)}</footer>
+    </article>
+  );
+}
+
+/**
+ * Klinik Ölçekler sekmesi — "Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987)".
+ * T-skoru 70 ve üzeri ya da 40 ve altı olan ölçekler klinik olarak anlamlı
+ * kabul edilir ve otomatik olarak vurgulanır; diğer ölçekler kart almaz.
+ */
+export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
+  const flagged = profile.clinical.filter(s => s.tScore >= 70 || s.tScore <= 40);
+  const singleHits = detectSingleElevations(profile);
+
+  return (
+    <div role="tabpanel" className="mmpi-tab-panel mmpi-clinical-report">
+      <p className="clinical-report-note">
+        T-skoru 70 ve üzeri veya 40 ve altı olan ölçekler klinik olarak anlamlı kabul edilir ve otomatik olarak
+        vurgulanır.
       </p>
+      {flagged.length === 0 ? (
+        <div className="mmpi-box info">
+          <Icon name="info" size={14} />
+          <span>Bu profilde T-skoru 70 ve üzeri ya da 40 ve altı klinik ölçek bulunmuyor.</span>
+        </div>
+      ) : (
+        flagged.map(scale => (
+          <ScaleDossierCard key={scale.id} profile={profile} scale={scale} singleHits={singleHits} />
+        ))
+      )}
     </div>
   );
 }

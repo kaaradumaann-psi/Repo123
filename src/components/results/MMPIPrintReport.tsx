@@ -7,6 +7,7 @@ import {
   tColor,
   thirdHighestClinical,
 } from '../../scoring/mmpiInterpretation';
+import { stripPageRefs } from '../../scoring/mmpiScaleDossiers';
 import { MMPIScoreChart } from './MMPIScoreChart';
 
 export type PrintReportMeta = {
@@ -224,7 +225,7 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
             <div className="pr-note">
               <b>Profil Kodu {profileCode}: </b>
               {codeEntry
-                ? codeEntry.text
+                ? stripPageRefs(codeEntry.text)
                 : 'Bu iki noktalı koda ilişkin ayrı bir kod yorumu tanımlı değildir; ölçek yorumları yukarıdadır.'}
             </div>
             {codeEntry?.diagnosis && codeEntry.diagnosis.length > 0 && (
@@ -232,21 +233,21 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
             )}
             {codeResolved && codeResolved.activeConditions.length > 0 && (
               <p className="pr-context">
-                Koşullu ek yorum: {codeResolved.activeConditions.map(c => `${c.quote} (${c.source})`).join(' ')}
+                Koşullu ek yorum: {codeResolved.activeConditions.map(c => stripPageRefs(c.quote)).join(' ')}
               </p>
             )}
             {multiResolved && multiResolved.entry.code !== codeEntry?.code && (
               <>
                 <div className="pr-note" style={{ marginTop: '0.5rem' }}>
                   <b>Çok Noktalı Kod Analizi ({multiResolved.entry.code}): </b>
-                  {multiResolved.entry.text}
+                  {stripPageRefs(multiResolved.entry.text)}
                 </div>
                 {multiResolved.entry.diagnosis && multiResolved.entry.diagnosis.length > 0 && (
                   <p className="pr-context">Olası tanılar: {multiResolved.entry.diagnosis.join(', ')}.</p>
                 )}
                 {multiResolved.activeConditions.length > 0 && (
                   <p className="pr-context">
-                    Koşullu ek yorum: {multiResolved.activeConditions.map(c => `${c.quote} (${c.source})`).join(' ')}
+                    Koşullu ek yorum: {multiResolved.activeConditions.map(c => stripPageRefs(c.quote)).join(' ')}
                   </p>
                 )}
               </>
@@ -456,9 +457,8 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
       </section>
 
       <p className="pr-foot">
-        T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kesme puanları tanı
-        koymaz; klinik karar uygulayıcı uzmana aittir. Kaynak künyeleri ve doğrulama durumları uygulamanın
-        &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
+        T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kaynak künyeleri
+        ve doğrulama durumları uygulamanın &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
         {meta.scoringVersion ? ` Puanlama motoru: v${meta.scoringVersion}.` : ''}
       </p>
     </div>

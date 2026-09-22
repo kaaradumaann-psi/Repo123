@@ -1,5 +1,6 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import { codeInterpretationForProfile, thirdHighestClinical } from '../../scoring/mmpiInterpretation';
+import { stripPageRefs } from '../../scoring/mmpiScaleDossiers';
 import { Icon } from '../Icon';
 
 /**
@@ -95,7 +96,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           </h4>
           {entry ? (
             <>
-              <p className="clin-signal">{entry.text}</p>
+              <p className="clin-signal">{stripPageRefs(entry.text)}</p>
               {entry.diagnosis && entry.diagnosis.length > 0 && (
                 <div className="mmpi-box info">
                   <b>Olası Tanı:</b>
@@ -109,7 +110,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                   </ul>
                 </div>
               )}
-              {entry.seeAlso && <p className="mmpi-summary-note">{entry.seeAlso}</p>}
+              {entry.seeAlso && <p className="mmpi-summary-note">{stripPageRefs(entry.seeAlso)}</p>}
               {resolved && resolved.activeConditions.length > 0 && (
                 <div className="mmpi-box info">
                   <b>Koşullu ek yorum:</b>
@@ -117,12 +118,10 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                     {resolved.activeConditions.map((c, i) => (
                       <li key={i}>
                         <Icon name="info" size={12} />
-                        {c.quote}
-                        <span className="mmpi-code-name">
-                          {' '}
-                          ({c.source}
-                          {c.manual ? ' · yaş/süre bilgisi gerekir, elle değerlendirilmelidir' : ''})
-                        </span>
+                        {stripPageRefs(c.quote)}
+                        {c.manual ? (
+                          <span className="mmpi-code-name"> (yaş/süre bilgisi gerekir, elle değerlendirilmelidir)</span>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
@@ -131,7 +130,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
               {multiResolved && multiResolved.entry.code !== entry.code && (
                 <div className="mmpi-box info" style={{ marginTop: '0.75rem' }}>
                   <b>Genişletilmiş Çok Noktalı Kod Analizi: {multiResolved.entry.code}</b>
-                  <p className="clin-signal" style={{ marginTop: '0.35rem' }}>{multiResolved.entry.text}</p>
+                  <p className="clin-signal" style={{ marginTop: '0.35rem' }}>{stripPageRefs(multiResolved.entry.text)}</p>
                   {multiResolved.entry.diagnosis && multiResolved.entry.diagnosis.length > 0 && (
                     <div style={{ marginTop: '0.35rem' }}>
                       <b>Olası Tanı ({multiResolved.entry.code}):</b>
@@ -147,7 +146,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                   )}
                   {multiResolved.entry.seeAlso && (
                     <p className="mmpi-summary-note" style={{ marginTop: '0.35rem' }}>
-                      {multiResolved.entry.seeAlso}
+                      {stripPageRefs(multiResolved.entry.seeAlso)}
                     </p>
                   )}
                   {multiResolved.activeConditions.length > 0 && (
@@ -157,8 +156,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                         {multiResolved.activeConditions.map((c, i) => (
                           <li key={i}>
                             <Icon name="info" size={12} />
-                            {c.quote}
-                            <span className="mmpi-code-name"> ({c.source})</span>
+                            {stripPageRefs(c.quote)}
                           </li>
                         ))}
                       </ul>
@@ -178,9 +176,6 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           )}
         </section>
       </div>
-      <p className="mmpi-summary-note">
-        Olası tanılar yol göstericidir; kesme puanları tanı koymaz ve klinik karar uygulayıcı uzmana aittir.
-      </p>
     </div>
   );
 }
