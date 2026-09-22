@@ -8,7 +8,7 @@
  */
 
 /** Puanlama motorunun sürümü. Anahtar/norm/formül değişikliğinde artırılır. */
-export const SCORING_ENGINE_VERSION = '2.0.0';
+export const SCORING_ENGINE_VERSION = '2.1.0';
 
 /**
  * T dönüşümünde kullanılan norm kaynağının kısa etiketi.

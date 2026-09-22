@@ -182,6 +182,16 @@ export const MMPI_PATTERN_CAVEATS: PatternCaveat[] = [
  * yorum rehberinde tanımlanan klasik profil konfigürasyonları. Eşikler ve
  * yorumlar kaynak rapora dayanır; tanı değil, yol gösterici göstergedir.
  */
+export function detectKPlus(profile: MMPIProfile): boolean {
+  const t = (id: ScaleId): number => profile.scales.find(s => s.id === id)?.tScore ?? 50;
+  const L = t('L');
+  const F = t('F');
+  const K = t('K');
+  const clinicalUnder70 = profile.clinical.every(s => s.tScore < 70);
+  const clinicalCountUnder60 = profile.clinical.filter(s => s.tScore <= 60).length;
+  return clinicalUnder70 && clinicalCountUnder60 >= 6 && K > F && L > F && (K - F) >= 5;
+}
+
 export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   const t = (id: ScaleId): number => profile.scales.find(s => s.id === id)?.tScore ?? 50;
   const Hs = t('Hs');
@@ -206,6 +216,17 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   const clinicalT = profile.clinical.map(s => s.tScore);
 
   const hits: PatternHit[] = [];
+
+  // SOURCE-FK-003 (Mark & Seeman 1963, s.57 · Şekil 16) — K+ Profili
+  hits.push({
+    id: 'k-plus',
+    name: 'K+ Profili (Mark & Seeman 1963) — Şekil 16',
+    rule: 'K > F ∧ L > F ∧ K − F ≥ 5 T ∧ klinik T < 70 ∧ en az 6 klinik T ≤ 60',
+    detail: 'Bazen bir profilde tek anlamlı yükselme K alt testinde gözlenir. Bu profilde hiçbir klinik test 70 T puanının üstünde değildir. Bu kişiler utangaç, kaygılı ve ketlenmişlerdir. Ayrıca sorunlarının psikolojik olabileceği konusunda dirençlidirler. Yakın kişiler arası ilişkilerden kaçınırlar ve pasif direnç gösterirler. Kişilik özellikleri şizoid yapıdadır.',
+    quote: 'Bazen bir profilde tek anlamlı yükselme K alt testinde gözlenir. Bu profilde hiçbir klinik test 70 T puanının üstünde değildir. (6 ya da daha çok klinik test 60 T puanı ya da altındadır.) K+ profilinde K ve L alt testleri F\'den yüksektir ve K alt testi, F alt testinin en az 5 T puanı üstündedir. Mark ve Seeman (1963) bu tür profilleri K+ profili olarak adlandırmaktadır.',
+    source: 's.57 · Şekil 16',
+    hit: detectKPlus(profile),
+  });
 
   hits.push({
     id: 'conversion-v',

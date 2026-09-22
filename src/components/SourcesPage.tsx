@@ -68,7 +68,7 @@ const GROUPS: SourceGroup[] = [
           'Ceyhun, A. A., & Oral, G. (2003). MMPI profillerini yorumlama el kitabı. Çizgi Tıp Yayınevi.',
         isAp7: true,
         status: 'A',
-        role: 'Geçerlik ölçekleri (?, L, F, K) ham ve T bantları (Bölüm 3); Geçerlik konfigürasyonları (Bölüm 4, Şekil 8–22); Temel klinik ölçekler ve iki/üç noktalı kod tipleri (Bölüm 5, s.63–158); Profil örüntüleri (Bölüm 6, s.159–170, Şekil 23–32); Türetilmiş ve özel ölçekler (Bölüm 7, s.171–188); Wiggins normları (Tablo 20, s.183); Kritik maddeler (Ek 1, s.201–209); Türk yetişkin normları (Tablo 30, s.191–195 ve s.257–260).',
+        role: 'Geçerlik ölçekleri (?, L, F, K) ham ve T bantları (Bölüm 3); Geçerlik konfigürasyonları (Bölüm 4, Şekil 8–22); Temel klinik ölçekler ve iki/üç noktalı kod tipleri (Bölüm 5, s.63–158); Profil örüntüleri (Bölüm 6, s.159–170, Şekil 23–32); Türetilmiş ve özel ölçekler (Bölüm 7, s.171–188); Wiggins normları (Tablo 20, s.183); Kritik maddeler (Ek 1, s.215–233); Türk yetişkin normları (Tablo 30, s.195).',
         usedIn: [
           'Klinik Ölçekler',
           'Geçerlik Analizleri',

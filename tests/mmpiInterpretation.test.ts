@@ -539,7 +539,9 @@ describe('PHASE 10 batch 22 → DECISION-030/A (CHANGE-015) — BÖLÜM 6 profil
   // “kodda YOK / sapma var” kilidi olarak yazdı; DECISION-030/A (kullanıcı onayı
   // “A’dan devam et”) eşikleri kaynağa çekti ve 7 örüntüyü ekledi → kilitlerin yönü
   // bilinçli olarak çevrildi (TEST_AUDIT.md · CHANGE-015).
+  // PHASE 16 (MISSING-KPLUS-001): k-plus (Mark & Seeman 1963, s.57 · Şekil 16) eklendi → 19 kayıt.
   const kitapIds = [
+    'k-plus',
     'conversion-v', 'cry-for-help', 'psychotic-v', 'depressive-27', '49', '89',
     'neurotic-triad', 'neurotic-step', 'neurotic-hat', 'neurotic-rising',
     'kus-kanadi', 'pasif-agresif-v', 'pozitif-egim', 'negatif-egim', 'yuzen-profil',
@@ -550,6 +552,27 @@ describe('PHASE 10 batch 22 → DECISION-030/A (CHANGE-015) — BÖLÜM 6 profil
     assert.ok(found, `desen kaydı olmalı: ${id}`);
     return found!;
   };
+
+  it('#0 K+ Profili (Mark & Seeman 1963, s.57 · Şekil 16 · MISSING-KPLUS-001): K ve L > F, K-F ≥ 5, klinik < 70, ≥6 klinik ≤ 60', () => {
+    const kp = byId(profile({ K: 0 }), 'k-plus');
+    assert.equal(kp.rule, 'K > F ∧ L > F ∧ K − F ≥ 5 T ∧ klinik T < 70 ∧ en az 6 klinik T ≤ 60');
+    assert.match(kp.quote ?? '', /Mark ve Seeman \(1963\) bu tür profilleri K\+ profili olarak adlandırmaktadır/);
+    assert.equal(kp.source, 's.57 · Şekil 16');
+
+    // Pozitif vuru örneği: L=55 T, F=45 T, K=58 T (K-F=13 ≥ 5, K>F, L>F), tüm klinik testler < 70 T ve ≥ 6 tanesi ≤ 60 T
+    const pozitif = profile({ L: 8, F: 4, K: 18, Hs: 10, D: 18, Hy: 18, Pd: 14, Mf: 22, Pa: 8, Pt: 12, Sc: 14, Ma: 14, Si: 20 });
+    assert.equal(byId(pozitif, 'k-plus').hit, true);
+
+    // Negatif sınır kontrolleri:
+    // 1) K - F < 5 T (K=50 T, F=48 T, fark=2) → vurmaz
+    const kFarkAz = profile({ L: 7, F: 5, K: 12, Hs: 10, D: 18, Hy: 18, Pd: 14, Mf: 22, Pa: 8, Pt: 12, Sc: 14, Ma: 14, Si: 20 });
+    // 2) Bir klinik ölçek ≥ 70 T (Hs=75 T) → vurmaz
+    const klinikYuksek = profile({ L: 8, F: 4, K: 18, Hs: 25, D: 18, Hy: 18, Pd: 14, Mf: 22, Pa: 8, Pt: 12, Sc: 14, Ma: 14, Si: 20 });
+    assert.equal(byId(klinikYuksek, 'k-plus').hit, false);
+    // 3) 6'dan az klinik ölçek ≤ 60 T (5 ölçek 65 T) → vurmaz
+    const besOlcekDusuk = profile({ L: 8, F: 4, K: 18, Hs: 19, D: 28, Hy: 27, Pd: 28, Mf: 30, Pa: 8, Pt: 12, Sc: 14, Ma: 14, Si: 20 });
+    assert.equal(byId(besOlcekDusuk, 'k-plus').hit, false);
+  });
 
   it('#1 Konversiyon V: kaynak eşiği 70 T / 10 T koda çekildi (eski 65/5 sapması kapandı)', () => {
     // s.160 (Şekil 23): “Test Hs ve Hy, D alt testinden 10 ya da daha fazla T puanı
@@ -611,7 +634,7 @@ describe('PHASE 10 batch 22 → DECISION-030/A (CHANGE-015) — BÖLÜM 6 profil
 
   it('#4-#10 yedi örüntü DECISION-030/A ile kodda (eski “YOK” kilidi bilinçli kırıldı)', () => {
     const ids = detectPatterns(profile({ K: 0 })).map(x => x.id);
-    assert.deepEqual(ids, kitapIds, 'desen seti 11 → 18 kayıt (6 desen + negatif eğim eklendi)');
+    assert.deepEqual(ids, kitapIds, 'desen seti 18 → 19 kayıt (K+ profili eklendi)');
 
     // #4 Kuş Kanadı (s.163): Hs/D/Hy/Pd ≥ 70 T + kadınlarda Mf = 50 T
     const kus = profile({ K: 0, Hs: 26, D: 35, Hy: 29, Pd: 33, Mf: 33 }, 'Kadın');
@@ -787,7 +810,7 @@ describe('PHASE 10 batch 24 · DECISION-030/A 5. madde devamı — kalan desen k
     assert.equal(rec({ K: 0 }, 'neurotic-triad').source, undefined, '≥ 65 eşiğinin kaynakta sayısı yok');
     assert.equal(rec({ K: 0 }, 'multi-high').source, undefined, 'kodun kendi göstergesi (#8 ayrı kayıt)');
     const ids = detectPatterns(profile({ K: 0 })).map(x => x.id);
-    assert.equal(ids.length, 18);
+    assert.equal(ids.length, 19);
     assert.deepEqual(ids.filter(id => !rec({ K: 0 }, id).source), ['neurotic-triad', 'multi-high']);
   });
 
