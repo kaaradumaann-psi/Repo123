@@ -517,3 +517,92 @@ describe('CHANGE-014 (DECISION-029/A) — kod sekmesi blok-yerel gövdeyi ve ko�
     assert.match(html, /immat\u00fcr, narsisistik/);
   });
 });
+
+describe('PHASE 10 batch 22 — BÖLÜM 6 profil örüntülerinin sayısal eşikleri (kitap s.159-169)', () => {
+  // BÖLÜM 6 "…ENVANTERİNİ YORUMLAMA YAKLAŞIMI" 10 numaralı örüntü veriyor
+  // (Şekil 23-32, s.160-169). Eşikler **görsel okumalı** (150 dpi tam sayfa,
+  // .audit/pages/p088_*…p092_*); docs/mmpi-audit/SOURCE_FACTS.md → SOURCE-B6-001.
+  const kitapIds = [
+    'conversion-v', 'cry-for-help', 'psychotic-v', 'depressive-27', '49', '89',
+    'neurotic-triad', 'neurotic-step', 'neurotic-hat', 'neurotic-rising', 'multi-high',
+  ];
+
+  it('#1 Konversiyon V: kaynak “≥ 70 T ve D’den ≥ 10 T yüksek”, kod 65/5 → BİLİNEN SAPMA (CONFLICT-041)', () => {
+    // s.160 (Şekil 23): “Test Hs ve Hy, D alt testinden 10 ya da daha fazla T puanı
+    // yüksektir ve Hs ve Hy en az 70 T puanındadır.”
+    const kaynakDisi = profile({ K: 0, Hs: 20, Hy: 27, D: 25 }); // 66.7 / 66.3 / 59.2
+    const cv = detectPatterns(kaynakDisi).find(x => x.id === 'conversion-v')!;
+    assert.equal(cv.hit, true, 'kod alt eşiği düşük → kaynakta vurmayacak profil kodda vuruyor');
+    assert.equal(cv.rule, 'Hs ≥ 65 ve Hy ≥ 65 ve ikisinin en düşüğü D’den en az 5 T yüksek');
+    // kaynak tanımını karşılayan profil kodda da vurmalı (yanlış negatif yok)
+    const kaynakUyumlu = profile({ K: 0, Hs: 23, Hy: 31, D: 21 }); // 74.1 / 74.8 / 50.8
+    assert.equal(detectPatterns(kaynakUyumlu).find(x => x.id === 'conversion-v')!.hit, true);
+  });
+
+  it('#2 Paranoid V: kaynak Pa ve Sc 80 T / Pt 70 T, kod 70 eşiğinde → BİLİNEN SAPMA', () => {
+    // s.161 (Şekil 24): “Pa ve Sc alt testleri 80 T puanında, Pt alt ölçeği ise 70 T
+    // puanındadır.”
+    const aralikta = profile({ K: 0, Pa: 21, Sc: 52, Pt: 34 }); // 74.5 / 74.5 / 59.7
+    const pv = detectPatterns(aralikta).find(x => x.id === 'psychotic-v')!;
+    assert.equal(pv.hit, true, 'kaynak 80 T der; kod 70 T’de vuruyor (bilinçli kayıt, DECISION-030)');
+    assert.equal(pv.rule, 'Pa ≥ 70 ve Sc ≥ 70 ve her ikisi de Pt’den yüksek');
+    assert.equal(detectPatterns(profile({ K: 0, Pa: 25, Sc: 60, Pt: 34 })).find(x => x.id === 'psychotic-v')!.hit, true);
+  });
+
+  it('#3 “Pd Yükselliği” Profili BİREBİR kodda (s.162, Şekil 25 ↔ SINGLE_PD)', () => {
+    // s.162: “Pd alt testi 70 T puanının üstündedir ve bütün alt testlerden en az
+    // 10 T puanı yüksektir.” (s.111’deki “Sadece Pd yükselmesi” kuralıyla çapraz teyit)
+    assert.ok(detectSingleElevations(profile({ K: 0, Pd: 32 })).some(x => x.scale === 'Pd'), 'Pd 72.0 T, en yüksek öteki 50.8 T');
+    assert.ok(!detectSingleElevations(profile({ K: 0, Pd: 32, Sc: 52 })).some(x => x.scale === 'Pd'), 'Sc (74.5 T) farkı 10’un altına düşürür');
+    assert.ok(!detectSingleElevations(profile({ K: 0, Pd: 30 })).some(x => x.scale === 'Pd'), 'Pd 67.5 T → eşik altı');
+  });
+
+  it('#4-#10 altı örüntü kodda temsil edilmiyor (YOK kilidi; DECISION-030 adayı)', () => {
+    const ids = detectPatterns(profile({ K: 0 })).map(x => x.id);
+    assert.deepEqual(ids, kitapIds, 'desen seti belgelendiği gibi 11 kayıt');
+    const yok = ['kus-kanadi', 'pasif-agresif-v', 'pozitif-egim', 'negatif-egim', 'yuzen-profil', 'batik-profil', 'sinir-profil'];
+    for (const id of yok) assert.ok(!ids.includes(id), `${id} koda eklenmedi — eklenirse bu test bilinçli kırılır`);
+
+    // Kaynak tanımını GERÇEKTEN karşılayan profiller: hiçbiri desen üretmiyor.
+    const kusKanadi = profile({ K: 0, Hs: 26, D: 35, Hy: 29, Pd: 33, Mf: 34, Pa: 22, Pt: 45, Sc: 60 }, 'Kadın');
+    assert.ok(kusKanadi.clinical.filter(s => ['Hs', 'D', 'Hy', 'Pd'].includes(s.id)).every(s => s.tScore >= 70), 'Hs/D/Hy/Pd ≥ 70 T');
+    const pasifAgresif = profile({ K: 0, Pd: 33, Pa: 22, Mf: 36 }, 'Kadın');
+    const pozitifEgim = profile({ K: 0, Pa: 21, Pt: 45, Sc: 60, Ma: 30 });
+    const negatifEgim = profile({ K: 0, Hs: 26, D: 35, Hy: 32, Pa: 5, Pt: 10, Sc: 10, Ma: 5 });
+    const yuzen = profile({ K: 0, Hs: 23, D: 32, Hy: 31, Pd: 32, Mf: 38, Pa: 25, Pt: 45, Sc: 60, Ma: 30, F: 20 });
+    const batik = profile({ K: 0, Hs: 15, D: 21, Hy: 20, Pd: 23, Mf: 30, Pa: 12, Pt: 29, Sc: 31, Ma: 20, Si: 25 });
+    const sinir = profile({ K: 0, Hs: 18, D: 25, Hy: 24, Pd: 27, Mf: 33, Pa: 16, Pt: 35, Sc: 40, Ma: 24, Si: 30, F: 14 });
+    const adaylar: Array<[string, ReturnType<typeof profile>]> = [
+      ['Kuş Kanadı (Şekil 26)', kusKanadi], ['Pasif-Agresif V (Şekil 27)', pasifAgresif],
+      ['Psikotik/yükselen eğim (Şekil 28)', pozitifEgim], ['Nevrotik eğim (Şekil 29)', negatifEgim],
+      ['“Yüzen” Profil (Şekil 30)', yuzen], ['Batık Profil (Şekil 31)', batik], ['Sınır Profil (Şekil 32)', sinir],
+    ];
+    for (const [ad, prof] of adaylar) {
+      const vuran = detectPatterns(prof).filter(h => h.hit).map(h => h.name).join(' | ');
+      assert.ok(
+        !/Kuş Kanadı|Pasif-Agresif|Yüzen|Batık|Sınır Profil|pozitif eğim|negatif eğim/i.test(vuran),
+        `${ad} için kodda desen adı üretilmemeli (bulgu: ${vuran || 'vuran yok'})`,
+      );
+    }
+  });
+
+  it('#8 “Yüzen” Profil ≠ kodun multi-high’ı (3+ ≥65 ↔ Hs→Ma TAMAMI >70 + F↑)', () => {
+    const yuzen = profile({ K: 0, Hs: 23, D: 32, Hy: 31, Pd: 32, Mf: 38, Pa: 25, Pt: 45, Sc: 60, Ma: 30, F: 20 });
+    assert.ok(
+      yuzen.clinical.filter(s => s.id !== 'Si').every(s => s.tScore > 70),
+      'kaynak tanımı: “Hs’den Ma’ya kadar olan bütün değerler 70 T puanının üstünde”',
+    );
+    assert.ok(yuzen.scales.find(s => s.id === 'Si')!.tScore < 70, 'Si dışarıda bırakılmalı (kaynak Hs→Ma der)');
+    const mh = detectPatterns(yuzen).find(x => x.id === 'multi-high')!;
+    assert.equal(mh.rule, '3 veya daha fazla klinik ölçek T ≥ 65');
+    assert.doesNotMatch(mh.detail, /borderline/i, 'kaynak: “Bu profil borderline kişilik bozukluğu olan kişilere özgüdür” kodda yok');
+  });
+
+  it('BÖLÜM 6 uyarı direktifleri hiçbir desen metninde geçmiyor (CONFLICT-042)', () => {
+    const all = detectPatterns(profile({ K: 0 })).map(h => [h.name, h.rule, h.detail].join(' ')).join(' ');
+    assert.doesNotMatch(all, /kod tipi verilemez/i);      // s.167 “Bu profil tipiyle bağlantılı bir kod tipi verilemez.”
+    assert.doesNotMatch(all, /tan[ıi]s[ıi]n[ıi]n konulmas[ıi] do[ğg]ru de[ğg]il/i); // s.166
+    assert.doesNotMatch(all, /en d[üu][şs][üu]k oldu[ğg]u alt testlere/i);            // s.168 Batık
+    assert.doesNotMatch(all, /zek[âa] d[üu]zeyleri 80/i);                             // s.159
+  });
+});

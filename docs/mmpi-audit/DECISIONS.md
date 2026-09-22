@@ -841,3 +841,48 @@ yazılmadı) → **CONFLICT-031 FIXED-kısmı**. `Yüksek 9/Düşük K` gövdesi
 **Test/CI sonucu:** `npx tsc --noEmit` **0 hata** · `npm test` **359/359 PASS**
 (34 suite; +16 test) · `npm run build` **PASS** (`optik-form.html` yeniden üretildi,
 senkron) · **REGRESSION YOK**.
+
+---
+
+## DECISION-030 — **ADAY · KULLANICI ONAYI BEKLİYOR**: BÖLÜM 6 örüntü eşikleri ve eksik desenler
+**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
+**Tetikleyen:** PHASE 10 batch 22 — **BÖLÜM 6 kaynak taraması bitti (s.159-169; s.170 boş sayfa)**.
+
+**Karar verilmesi gereken şey — tek madde değil, üç katman:**
+
+| # | Bulgu | Kanıt |
+|---|---|---|
+| 1 | İki desenin **eşiği kaynakta yok** (kod 65/5 ve 70/70; kitap 70/10 ve 80/70) → **yanlış pozitif** | **CONFLICT-041** #1-#2 · `SOURCE-B6-001` (s.160-161) |
+| 2 | **7 desen hiç yok** (Kuş Kanadı · Pasif-Agresif V · pozitif/negatif eğim · Yüzen · Batık · Sınır) | **CONFLICT-041** #4-#10 · Şekil 26-32 |
+| 3 | Kaynağın **çekince direktifleri** arayüzde yok (“tanı konulması doğru değildir” · “kod tipi verilemez” · “en düşüğe bakılmalı” · demografi/zekâ-eğitim ön koşulu) | **CONFLICT-042** + **CONFLICT-034** · `SOURCE-B6-002` |
+
+**Seçenek (A) — önerilen: eşikleri kaynağa çek + 6 deseni ekle (sayısı olanları):**
+- `conversion-v` → `Hs ≥ 70 ∧ Hy ≥ 70 ∧ min(Hs,Hy) − D ≥ 10` (s.160 birebir);
+  `psychotic-v` → `Pa ≥ 80 ∧ Sc ≥ 80 ∧ Pt ≥ 70`? **HAYIR — dikkat:** kaynak #2’de Pt’yi
+  “70 T puanındadır” diye **eşik değil gözlem** olarak veriyor; güvenli biçim
+  `Pa ≥ 80 ∧ Sc ≥ 80 ∧ min(Pa,Sc) > Pt` + `rule` içinde “(kaynak Pt = 70 T der)” notu
+- **Yeni desenler:** `kus-kanadi` (kadın koşulu `profile.gender` ile) · `pasif-agresif-v`
+  (kadın) · `pozitif-egim` / `negatif-egim` (Mf dikey bölme: nevrotik = Hs,D,Hy; psikotik = Pa,Pt,Sc,Ma)
+  · `yuzen-profil` (Hs→Ma tamamı > 70 ∧ F ≥ 70) · `batik-profil` (tüm klinik 45-54) ·
+  `sinir-profil` (60-70 arası + klinik > 54) — **hepsi `source: 's.1xx · Şekil 2x'`** ve
+  **`detail` yalnız kaynak cümlesi** (DECISION-028)
+- #7 (negatif eğim) **`manual`/metin** kalır: kaynak “belirgin düşüklük” diyor, sayı vermiyor
+- `multi-high` **kaynağa uydurulmaz** (kodun kendi güvenlik ağı); yerine `yuzen-profil` eklenir
+- **Eşik değişikliği = davranış değişikliği** → `mmpiInterpretation` testlerinde **iki**
+  kademe: (i) batch 22 kilitleri yeni eşiklere güncellenir, (ii) yeni eşiklerin sınır vakaları
+  (T=70/69.9, fark=10/9.9, T=80/79.9) eklenir
+
+**Seçenek (B) — yalnız (1):** eşikler düzeltilir, 7 desen **bilinen kayıt** olarak açık kalır.
+**Maliyeti:** kaynağın profil-okuma katmanının yarısı kullanıcıya hiç ulaşmaz.
+
+**Seçenek (C) — yalnız (3):** hiçbir sayı değişmez; desen kartlarına `source` + “tanı yerine
+geçmez” notu basılır (UI-only). **Maliyeti:** yanlış pozitifler devam eder.
+
+**Onaylanırsa sıralama:** (i) eşikler + `rule` metinleri + test güncellemesi → (ii) 6 yeni
+desen (kaynak cümleleriyle) → (iii) UI çekince notları (042) → (iv) `KAPSAM`/`CONFLICTS`
+kapanış kayıtları. **Reddedilirse:** 041/042 P1/P2 olarak açık kalır, `src/` değişmez.
+
+**Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 22 = görsel okuma + docs + test kilidi).
+Bölüm 6’da **P0 bulgu yok** (anahtar/norm/puanlama katmanı burada değil); sapmalar **yorum
+katmanı**nadirdir ve CHANGE-014’ün `source`/`rule` alanları sayesinde ilk kez **ölçülebilir**
+durumda.

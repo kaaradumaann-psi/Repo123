@@ -729,3 +729,47 @@ görülmez" (`deepEqual([])`) testi **yeni desenlerle de geçiyor** (yanlış po
 **Not:** `KNOWN_CODES` kilidi (`every(/^\d{2}$/)`) **anlamlı kalmaya devam ediyor** —
 blok kayıtları **ayrı** `BLOCK_CODES` kayıt defterinde; `CODES` iki haneli ortak
 kayıtlar olarak duruyor.
+
+## PHASE 10 batch 22 — BÖLÜM 6 örüntü eşikleri (kitap s.159-169) · 2026-09-22
+
+**Kod değişikliği YOK** (DECISION-029 (A) kapsamı bitti; yeni iş **DECISION-030** onayına
+bağlı) → bu turun testleri **yalnız kilit** işlevi görüyor: düzeltme yapıldığında **bilinçli
+kırılacak** testler.
+
+**Yeni denetim aracı:** `scripts/mmpi-audit/cmp-b6-batch22.ts` (5 bölüm: #1 eşiği · #2
+eşiği · #3 `SINGLE_PD` davranışı · #4-#10 “kaynağın tanimini GERÇEKTEN karşılayan profil”
+taraması · 042 çekince metinleri) → **SONUÇ: 9 FARK** (2 eşik sapması + 7 eksik desen);
+**P0 bulgu yok.** #4-#10 için aday profillerin gerçekten eşiği karşıladığı betikte
+T-değerleriyle basılıyor (ör. Batık: Hs=47 … Si=50 → 45-54 aralığı).
+
+**Yeni `tests/mmpiInterpretation.test.ts` describe’ı “PHASE 10 batch 22” (+6 test, 38 → 44):**
+1. **#1 Konversiyon V sapması:** Hs 66.7 / Hy 66.3 / D 59.2 profilinde `conversion-v.hit === true`
+   (kaynak vurmayacak) + `rule` dizesi **equality** kilidi (“Hs ≥ 65 ve Hy ≥ 65 … en az 5 T”)
+   + kaynak tanımını karşılayan profilin de vurması (yanlış negatif yok)
+2. **#2 Paranoid V sapması:** Pa 74.5 / Sc 74.5 / Pt 59.7 → `psychotic-v.hit === true` +
+   `rule` equality + 80 T’lik profil de vuruyor
+3. **#3 Pd Yükselliği BİREBİR:** `detectSingleElevations()` → Pd 72.0 T & en yüksek öteki 50.8 T
+   → **VAR**; Sc 74.5 T eklenince (fark < 10) → **YOK**; Pd 67.5 T → **YOK** (eşik altı)
+4. **#4-#10 YOK:** `detectPatterns()` kimlik listesi **11 kayıtla `deepEqual`** + 7 aday
+   `id`’nin yokluğu + **kaynak tanımını GERÇEKTEN karşılayan 7 profil** (kadın profilleri dâhil:
+   Kuş Kanadı Hs 70.7/D 71.9/Hy 70.5/Pd 72.5/Mf 47.2; Pasif-Agresif V Pd 72.5/Pa 74.1/Mf 41.8)
+   için **desen adı üretilmediğinin** regex kontrolü — yani “test var ama bir şey iddia etmiyor”
+   tuzağı yok
+5. **#8 `multi-high` ≠ “Yüzen” Profili:** Hs→Ma tamamı > 70 T (Si dışarıda, `assert` bunu
+   doğruluyor) + `multi-high.rule` = “3 veya daha fazla klinik ölçek T ≥ 65” equality +
+   `detail` içinde “borderline” **geçmiyor** (kaynak cümlesi kodda yok)
+6. **042 uyarı direktifleri:** birleştirilmiş desen metninde `kod tipi verilemez` /
+   `tanısının konulması doğru değil` / `en düşük olduğu alt testlere` / `zekâ düzeyleri 80`
+   **yok** (dört `doesNotMatch`)
+
+**Ham puan → T hesabı** testlerde `K: 0` verilerek K düzeltmesi devre dışı bırakıldı
+(aksi halde Hs/Pd/Pt/Sc/Ma’da 0.2-1.0 T kayma); eşik yakınlığı nedeniyle her profil
+**sayısal olarak yazdırılıp** doğrulandı (T’ler test yorumunda not edildi).
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0 hata** · `npx tsx --test
+tests/mmpiInterpretation.test.ts` → **44/44 PASS** · `npm test` → **365/365 PASS** (35 suite)
+· `npm run build` → **PASS** (`src/` değişmedi → `optik-form.html` üretim farkı **YOK**).
+
+**Kural uygulaması:** sayısal eşikler **yalnız görselden** (`TABLO-NUMBERS`): #10’daki
+“54 T” OCR’da “S4T” diye düşmüştü; #9’un “45-54” aralığı ölçek bandı `45-59` ile
+karıştırılmadı. `p093_L` (s.170) **0 satır OCR + %0.24 koyu piksel** → `BLANK-PAGE`.

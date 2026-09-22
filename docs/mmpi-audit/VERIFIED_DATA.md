@@ -812,5 +812,8 @@ Sc 78 · Ma 46 · **Si 70** = 10 klinik anahtar).
 **PHASE 9/10 KAYNAK SETİ: s.63-157 TAMAMI OKUNDU** (Bölüm 5 kapandı) · **Kod
 değişikliği YOK** · `mmpiKeyIntegrity` **56/56 PASS** · `npm test` **343/343 PASS**.
 → **GÜNCEL (CHANGE-014, 2026-09-22):** DECISION-029 (A) onayı ile `src/` değişti ·
-`mmpiKeyIntegrity` **63/63** · `npm test` **359/359 PASS** (34 suite) · tsc **0** ·
+`mmpiKeyIntegrity` **63/63** · `npm test` **359/359 PASS** (34 suite)
+→ **GÜNCEL (batch 22, 2026-09-22):** BÖLÜM 6 kaynak taraması bitti (s.159-169, s.170 boş) ·
+`mmpiInterpretation` **44/44** · `npm test` **365/365 PASS** (35 suite) · `src/` değişmedi ·
+eşik farkları **CONFLICT-041/042** olarak kayıtlı, düzeltme **DECISION-030** onayını bekliyor. · tsc **0** ·
 build PASS (`optik-form.html` senkron).

@@ -1511,3 +1511,49 @@ Tarih: 2026-09-22 · Kaynak: **s.157** (PDF p86 R) + **s.158 (BOŞ SAYFA)** (p87
   **OPEN:** 024, 025 (paragraflar), 027 (~33 koşul), 039
 - **Sıradaki:** PHASE 10 — BÖLÜM 6, s.159-170 (render'lar hazır: `p088_R`,
   `p089_{L,R}` OCR bekliyor); gövde göçü (44 başlık) ayrı ve **batch batch** iş
+
+---
+
+## 2026-09-22 — Oturum 8 (devam 4): **PHASE 10 batch 22 — BÖLÜM 6 kaynak taraması BİTTİ (s.159-169; s.170 boş)**
+
+- **BÖLÜM 6 “Minnesota Çok Yönlü Kişilik Envanterini Yorumlama Yaklaşımı”** kitabın
+  yorum katmanının **çatısı**: s.159 girişi + s.160-169’da **10 numaralı profil örüntüsü**
+  (Şekil 23-32, kutu içi sayısal eşiklerle) + 7 **Olgu** anlatısı; **s.170 BOŞ SAYFA**
+  (PDF p93 L · koyu piksel **%0.24** · OCR **0 satır**) → bölüm **s.169'da kapandı**;
+  s.171 = p93 R = **BÖLÜM 7** girişi (PHASE 8 zaten DONE)
+- **Yöntem:** `render --pages 90-93 --dpi 150` → `ocr --pages 90-93 --dpi 200` →
+  **her sayfa tam görselden okundu**; eşikler **görselden** (`TABLO-NUMBERS`): #10’daki
+  “**54 T**” OCR’da “S4T” diye düşmüştü, #9’un “**45-54**” aralığı ölçek bandı `45-59`
+  ile karıştırılmadı
+- **Kod ↔ kaynak (10 desen):** #3 `Pd Yükselliği` → `SINGLE_PD` **BİREBİR** ✅ ·
+  #1 `Konversiyon V` kaynak **Hs/Hy ≥ 70 T + D’den ≥ 10 T** ↔ kod **65/5** ·
+  #2 `Paranoid V` kaynak **Pa/Sc 80 T, Pt 70 T** ↔ kod **70/70** → **ikisi de yanlış
+  pozitif üretiyor** · #4 Kuş Kanadı · #5 Pasif-Agresif V (Kadın) · #6 pozitif eğim ·
+  #7 negatif eğim · #8 “Yüzen” · #9 Batık · #10 Sınır → **7 desen KODDA YOK** ·
+  `multi-high` (3+ ≥ 65) #8’in **yerine geçmez**
+- **Kök neden notu:** #1/#2 eşikleri BÖLÜM 5’te **nicel olmadığı** için koda sabit sayı
+  olarak girmişti; kitabın **tek sayısal** tanımı BÖLÜM 6’da → **CONFLICT-041 (P1)**
+- **#7’de kaynak sayı vermiyor** (“belirgin düşüklük”) → kodlanırsa yalnız **metin/`manual`**
+  (DECISION-028: sayı uydurulmaz)
+- **CONFLICT-042 (P2) açıldı:** çekince direktifleri arayüzde yok — “tanısının konulması
+  **doğru değildir**” (s.166) · “bu profil tipiyle bağlantılı **kod tipi verilemez**” (s.167) ·
+  “**en düşük** olduğu alt testlere bakılmalı” (s.168) · “**hiçbir zaman körlemesine**
+  değerlendirme yapılmamalıdır” + yaş/cinsiyet/eğitim/medenî durum/meslek (s.159) ·
+  “zekâ 80 üstü + ortaokul” (s.159) · “60-64 T ise **MMPI’dan geliştirilen diğer testler**
+  daha yararlı olabilir (Butcher 1984)” (s.169, `MMPIDerived` ile **UYUMLU**, gerekçe metni yok)
+- **CONFLICT-034** kanıtı **genelleşti** (tek kod direktifi değil, bölümün ön koşulu) ·
+  **CONFLICT-033**’e BÖLÜM 6 notu eklendi (Şekil 23-32 ile 033’ün kapsamı birleşiyor)
+- **DECISION-030 adayı yazıldı (PENDING):** (A) eşikleri kaynağa çek + 6 deseni ekle +
+  UI çekince notları · (B) yalnız eşikler · (C) yalnız çekinceler — **öneri (A)**;
+  **bu turda `src/` DEĞİŞMEDİ**
+- **Yeni kanıt aracı:** `scripts/mmpi-audit/cmp-b6-batch22.ts` → **SONUÇ: 9 FARK**,
+  **P0 bulgu yok**
+- **Testler (+6 kilit, `mmpiInterpretation` 38 → 44):** #1/#2 sapmaları `rule` equality,
+  #3 davranış (1 pozitif + 2 negatif), #4-#10 **yokluk + aday profiller**, `multi-high`
+  ≠ “Yüzen”, 042 `doesNotMatch` ×4 — **desen eklenince testler bilinçli kırılacak**
+
+### Doğrulama
+
+`npx tsc --noEmit` → **0 hata** · `npx tsx --test tests/mmpiInterpretation.test.ts` →
+**44/44 PASS** · `npm test` → **365/365 PASS** (35 suite) · `npm run build` → **PASS**
+(`src/` değişmedi → `optik-form.html` üretim farkı **YOK**) · `git diff --check` temiz

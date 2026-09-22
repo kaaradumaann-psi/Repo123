@@ -250,6 +250,11 @@ Kod yalnızca **tek ölçek** ve **iki noktalı kod** katmanına sahiptir →
 **CONFLICT-033 (P1)**. Üçlü kod altyapısı yokluğunun **ikinci ve daha ağır**
 sonucu: bu örüntüler klinik yorum üretmez.
 
+> **→ PHASE 10 batch 22 (s.160-169, Şekil 23-32):** BÖLÜM 6’daki **10 profil örüntüsü**
+> bu dosyanın **sayacı DIŞINDADIR** — kod tipi başlığı değil, profil örüntüsüdür;
+> eşik/temsil farkları **CONFLICT-041** altında izleniyor (#1 70/10 ↔ 65/5 · #2 80/70 ↔
+> 70/70 · #3 birebir · #4-#10 YOK).
+>
 > **→ CHANGE-014 (2026-09-22):** 2-3-4 artık kodda (`neurotic-step` ·
 > `neurotic-hat` · `neurotic-rising`; s.103-106 alıntıları `mmpiInterpretation.ts`
 > desen katmanında), 1 (konversiyon vadisi) önceden vardı → **4/4 konfigürasyon

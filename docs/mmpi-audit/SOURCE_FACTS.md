@@ -3078,3 +3078,83 @@ s.130-131 · `p084_R.png` s.153 · `p086_R.png` s.157); OCR tek başına esas al
 (s.153) · Si `70+` bandının 2 kuyruk cümlesi (s.157) · s.156→157 süzülen giriş
 paragrafı (0/3) · 12/21 lise-ergen paragrafları (s.68) · `Yüksek 9/Yüksek K`
 K-örüntüleri (s.152) · kalan 44 eksik gövde başlığı.
+
+---
+
+## SOURCE-B6-001 · **BÖLÜM 6 profil örüntüleri #1-#10** — kitap s.160-169 (PDF p88 L – p92 R)
+
+Sayısal eşikler **kutu içi kaynak cümlelerinden**; her biri **150 dpi tam sayfa
+görsel okumasıyla** doğrulandı (`.audit/pages/p088_L…p092_R.png`). Kod tarafı
+karşılaştırması: `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` ve
+`detectSingleElevations()`.
+
+| # | Örüntü (kaynak adı) | Sayfa · Şekil | Kaynak kuralı (birebir) | Kodda |
+|---|---|---|---|---|
+| 1 | **Konversiyon V** | s.160 · Şekil 23 | “Test Hs ve Hy, D alt testinden **10 ya da daha fazla T puanı** yüksektir ve **Hs ve Hy en az 70 T puanındadır**. Bu klasik konversiyon V’de diğer alt testler de yükselir, ancak bu Hs ve Hy kadar değildir.” | ⚠️ `conversion-v` = **65/5** → **eşik sapması** (041) |
+| 2 | **Paranoid V** | s.161 · Şekil 24 (“Paranoid V, Psikotik V”) | “**Pa ve Sc alt testleri 80 T puanında, Pt alt ölçeği ise 70 T puanındadır.** Bu profil örüntüsüne ilişkin ayrıntılı bilgi Sc alt testinin yorumlanmasında verilmiştir.” | ⚠️ `psychotic-v` = **Pa,Sc ≥ 70 ∧ min > Pt** → **eşik sapması** (041) |
+| 3 | **Pd Yükselliği Profili** | s.162 · Şekil 25 | “**Pd alt testi 70 T puanının üstündedir ve bütün alt testlerden en az 10 T puanı yüksektir.**” | ✅ `SINGLE_PD`: `Pd ≥ 70 ∧ Pd − max(öteki klinik) ≥ 10` — **BİREBİR** (s.111 ile çapraz teyit) |
+| 4 | **“Kuş Kanadı” Profili** | s.163 · Şekil 26 | “Hs, D, Hy ve Pd testleri **70 T puanına yükselmiş** ve **kadınlarda Mf alt testi 50 T puanındadır**. Psikotik testlerde de yükselme vardır. Bu yükselme kuş kanadına benzediği için profil bu adı almaktadır.” | ❌ YOK |
+| 5 | **Pasif-Agresif V (Kadınlarda)** | s.164 · Şekil 27 | “**4 ve 6 70 T puanında ya da üstünde, Mf alt testi 50 T puanının altındadır.** Diğer alt testler 70 T puanında olsa bile bu pasif-agresif kişilik bozukluğudur.” | ❌ YOK |
+| 6 | **Psikotik Yükselme (pozitif eğim)** | s.165 · Şekil 28 | “Mf alt testinden çizilen dikey bir çizgi MMPI’ı nevrotik (profilin sol tarafı) ve psikotik (profilin sağ tarafı) olarak ikiye böler. **Pozitif eğim, psikotik testlerin 70 T puanının üstünde olması, nevrotik testlerin 70 T puanının altında kalmasıdır.**” | ❌ YOK |
+| 7 | **Nevrotik Yükselme (negatif eğim)** | s.166 · Şekil 29 | “Negatif eğim, ise profilin sol ya da nevrotik bölümünün yükselmesi ve **psikotik testlerde belirgin düşüklük** olmasıdır. Bu nevrotik bir uyumu göstermektedir.” | ❌ YOK — **nicel eşik yok** (“belirgin”) → kodlanırsa eşiği kaynakta olmayan bir sayı olur |
+| 8 | **“Yüzen” Profil** | s.167 · Şekil 30 | “Bu profilde **Hs’den, Ma’ya kadar olan bütün değerler 70 T puanının üstündedir** ve buna **F alt testindeki yükselme** eşlik eder. Bu profil **borderline kişilik bozukluğu** olan kişilere özgüdür.” + “**Bu profil tipiyle bağlantılı bir kod tipi verilemez.**” | ❌ YOK — `multi-high` (3+ ≥ 65) **aynı şey değil** |
+| 9 | **Batık Profil** | s.168 · Şekil 31 | “Profilin **45-54 T puanı arasında** yer alması: Yorum yapmak zordur. Tek başına bu tür bir yükselmenin anlamı yoktur. **T puanlarının en düşük olduğu alt testlere bakmak gerekmektedir.**” | ❌ YOK |
+| 10 | **Sınır Profil** | s.169 · Şekil 32 | “**T puanı 60-70 arasındadır.** Geçerlik testlerinde bir yükselme vardır, ancak bu tam bir yükselme değildir. **Klinik alt testlerdeki T puanları 54 T puanının üstündedir.** Bu aradaki yükselmeler semptom belirtmez, daha çok kişilik özelliklerini gösterir… 60-70 T puanı aralığındaki profili bu özelliklerin onun kişilik yapısının bir parçası olduğuna işaret etmektedir.” | ❌ YOK |
+
+**Şekil alt yazıları (birebir):** “Şekil 23. Konversiyon V ya da Psikosomatik V.” ·
+“Şekil 24. Paranoid V, Psikotik V.” · “Şekil 25. "Pd Yükselliği" Profili.” ·
+“Şekil 26. "Kuş Kanadı" Profili.” · “Şekil 27. Pasif-Agresif V (Kadınlarda).” ·
+“Şekil 28. "Psikotik" ya da pozitif eğim.” · “Şekil 29. "Nevrotik" ya da negatif eğim.” ·
+“Şekil 30. "Yüzen" Profil.” · “Şekil 31. Batik Profil.” (metin **“Batık”** diyor,
+alt yazım **“Batik”**) · “Şekil 32. Sınır Profil.”
+
+**Sayısal okuma uyarısı:** #10’daki “**54 T** puanının üstündedir” OCR’da
+“S4T” olarak düşmüştü → **görselden** okundu (`TABLO-NUMBERS` kuralı). #9’un
+aralığı **45-54**; ölçek bantlarındaki `45-59` ile **karıştırılmamalı** (biri profil
+düzeyi desen, diğeri tek ölçek bandı).
+
+## SOURCE-B6-002 · **BÖLÜM 6 bağlam ve uyarı direktifleri** — kitap s.159-160, 166-167, 169
+
+- **s.159 (giriş):** “MMPI profilini yorumlamadan önce testi veren kişi, değerlendirme
+  için gönderilen bireyin bazı özelliklerini dikkate almalıdır. **Hiçbir zaman
+  körlemesine bir değerlendirme yapılmamalıdır.** İlk aşamada test verilecek bireyin
+  **demografik özellikleri belirlenmelidir: Yaş, cinsiyet, eğitim, medenî durum,
+  meslek.** gibi.”
+- **s.159:** “Genel olarak MMPI yorumları, **zekâ düzeyleri 80’in üzerinde olan
+  yetişkinlere** yöneliktir. **Eğitim düzeyi olarak ortaokul kabul edilmektedir.**
+  … MMPI alt testlerinin bazıları yaştan etkilenmektedir. Örneğin, **Hs ve D alt
+  testlerde yaşın ilerlemesi ile yükselme** olduğu saptanmıştır.”
+- **s.159:** “Bazen birey "anlaşılması zor" olarak değerlendirme amacıyla
+  gönderilmektedir, eğer değerlendirme yapan kişi MMPI geçerlik testlerinden **K alt
+  testini bu bireyin profilinde yüksek bulursa** ”anlaşılması zor”un ne anlama
+  geldiğini açıklayabilir. Bu bilgi, bireyin **aşırı kontrolünü kaldıracak olası
+  terapötik yöntemler için yol gösterici** olabilir.”
+- **s.159:** “Hasta psikiyatri kliniğinde yatıyor ya da ayaktan izleniyorsa hastanın
+  **psikopatolojisinin ne olduğunun bilinmesi** önemlidir.”
+- **s.159-160 (“Kod tipini belirleme”):** “MMPI profilini değerlendirmede bu alanda
+  **eğitim almamış bir kişinin kod tipini belirlemesi oldukça zordur.** Ancak klinik
+  testlerde belirgin yükselmenin olduğu durumlarda kolaylıkla görülebilir.
+  **Yükselmenin hepsi 70 T puanına yakın ya da bunun üstündedir.** Bunun yanı sıra
+  **ikili ve üçlü kodları belirlemede, hastadan alınan bilgi ve testi veren kişinin
+  deneyimi önemlidir.**”
+- **s.166:** “**Sadece bu tür yükselmelerle testi alan kişiye nevrotik ya da psikotik
+  tanısının konulması doğru değildir.** Bu nedenle profile ilk bakıldığında psikotik
+  ya da nevrotik profil olduğuna karar verildikten sonra ayrıntılı değerlendirme
+  yapılmalıdır.” (s.167’ye taşan cümle)
+- **s.167:** “Bu profil tipiyle bağlantılı **bir kod tipi verilemez.** Borderline
+  kişilik bozukluğu olan hastalar bu tür bir profil verebilirler.”
+- **s.169:** “MMPI’yı değerlendirirken testlerin T puanlarına göre de değerlendirme
+  yapılabilmektedir… **Eğer klinik testler 60-64 T puanı arasında ise MMPI’dan
+  geliştirilen diğer testler bireyi değerlendirmede daha yararlı olabilir
+  (Butcher 1984).**” → **BÖLÜM 7’ye geçiş gerekçesi**; `MMPIDerived`/`PERSONALITY_KEYS`
+  varlığıyla **UYUMLU**, ancak bu gerekçe metni koda alınmadı (**BİLGİ**).
+
+**Sayfa yapısı:** s.159-169 arası **11 sayfa**; **s.170 BOŞ SAYFA** (PDF p93 L ·
+koyu piksel %0.24 · OCR 0 satır). Her örüntü kutusunun altında profil grafiği var
+(eksenler: `? L F K` + `Hs D Hy Pd Mf Pa Pt Sc Ma Si`, üstte ölçek numaraları
+`1 2 3 4 5 6 7 8 9 0`, yatay çizgiler **30 / 50 / 70**) → **eğri değerleri OCR ile
+okunmaz** (`DECISION-014` uyarısı); sayısal eşikler yalnız **kutu metninden** alındı.
+
+**Olgu anlatıları (7 adet: 38, 42, 21, 23, 40 yaş vb.)** vaka formundadır; hiçbir
+kod kaydına girmesi gerekmez → **EXTRA/KAYIT DIŞI** (kullanıcı arayüzüne klinik vaka
+metni taşınması DECISION-028 kapsamında **yok**).

@@ -1209,6 +1209,14 @@ kaybolur). CONFLICT-030/031 ile aynı kök neden.
 ---
 
 ## CONFLICT-033 — **Nevrotik üçlü profil konfigürasyonları** kodda yok (P1, ✅ **FIXED-kısmı** — CHANGE-014)
+
+> **→ PHASE 10 batch 22:** BÖLÜM 6, s.160-169’da **10 numaralı örüntü listesini** veriyor
+> (Şekil 23-32) — bu kayıt için yeni kanıt katmanı: **#1 Konversiyon V ve #2 Paranoid V
+> burada sayısal olarak TEKRARLANIYOR ve FARKLI eşikle** (70/10 ve 80/70); kodun
+> `conversion-v` (65/5) ve `psychotic-v` (70/70) eşikleri **BÖLÜM 5’te nicel tanım
+> olmadığı için** kaynak-dışıydı → ayrıntı ve sınıflandırma **CONFLICT-041**’de.
+> **#4-#10 (Kuş Kanadı · Pasif-Agresif V · pozitif/negatif eğim · Yüzen · Batık · Sınır)
+> kodda YOK** → bu yüzden 033 “kısmi” durumda.
 > **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** Nevrotik üçlünün **4/4 konfigürasyonu** artık kodda: `konversiyon-vadisi` önceden vardı; `neurotic-step` (Şekil 18) · `neurotic-hat` (Şekil 19) · `neurotic-rising` (Şekil 20) eklendi, eşikler kaynak cümlesinden (>70 T / Hs<70 T) ve `PatternHit.source` alanı geldi. **033'ün diğer 5 örüntüsü (Paranoid Vadi Şekil 22 · Si↑+4↑+9↑ · Si↑+(2|7)↑+8↑ · K-örüntüleri) hâlâ YOK** → kayıt bu yüzden tamamen kapatılmadı.
 
 
@@ -1263,9 +1271,18 @@ kararına** bağlıdır (üçlü kod altyapısı). Karar tüm klinik ölçek blo
 
 ---
 
-## CONFLICT-034 — Kod yorumlarında "yaş/eğitim/cinsiyet" zorunluluğu yok (P2)
+## CONFLICT-034 — Kod yorumlarında "yaş/eğitim/cinsiyet" zorunluluğu yok (P2, OPEN — kanıtı BÖLÜM 6 ile genelleşti)
 
 Area: `mmpiSourceCodes.ts` — tüm kod kayıtları
+
+**→ PHASE 10 batch 22 (s.159):** bölümün **genel direktifi** bulundu — “Hiçbir zaman
+körlemesine bir değerlendirme yapılmamalıdır. İlk aşamada test verilecek bireyin
+**demografik özellikleri belirlenmelidir: Yaş, cinsiyet, eğitim, medenî durum, meslek.**
+gibi” + “**zekâ düzeyleri 80’in üzerinde olan yetişkinlere… eğitim düzeyi olarak
+ortaokul**” + “**Hs ve D alt testlerde yaşın ilerlemesi ile yükselme**”. Yani bu direktif
+tek bir kodun değil **BÖLÜM 6’nın tamamının** ön koşulu. `MMPIProfile`'da `age`/`education`
+**yok** → CHANGE-014’ün `conditions[].manual` kanalı tek taşınabilir biçim (UI “elle
+değerlendirilmelidir” der). Kayıt **OPEN** — kod değişikliği DECISION-030 onayına bağlı.
 
 Source (**Visual: CONFIRMED**, s.112, `v_pd112_lowconf.png`):
 > "**Bu kod tipi hastanın yaşı, eğitimi ve cinsiyeti dikkate alınarak
@@ -1836,3 +1853,80 @@ bulguların **tek tasarım kararı** artık kanıt eksikliği olmadan verilebili
 blok + sıralı kod + K/parantez varyantı** (024/030/031/039 tek çatı), `conditions[]`
 (027/025: 45 sayısal koşul) ve `patterns[]` (033: 9 örüntü) eklenmesi. **Kullanıcı
 onayı olmadan `src/` değişmez** (DECISION-027/028); bu turda da **kod değişikliği YOK**.
+
+---
+
+## CONFLICT-041 (P1 · OPEN) — BÖLÜM 6’nın 10 profil örüntüsü: 2 eşik sapması + 7 desen yok
+
+Area: `src/scoring/mmpiInterpretation.ts` — `detectPatterns()` / `detectSingleElevations()`
+
+Source: **`SOURCE-B6-001`** · kitap s.160-169 · Şekil 23-32 · **150 dpi tam sayfa görsel
+okuması** (`.audit/pages/p088_L.png` … `p092_R.png`)
+
+**Sayım: 10 desenden 1’i birebir · 2’si eşik sapması · 7’si YOK.**
+
+| # | Desen | Kaynak eşiği (birebir) | Kod | Sınıf |
+|---|---|---|---|---|
+| 1 | Konversiyon V | Hs ve Hy **≥ 70 T**; Hs ve Hy, **D’den ≥ 10 T** yüksek | `conversion-v`: Hs,Hy **≥ 65**, fark **≥ 5** | ⚠️ eşik sapması |
+| 2 | Paranoid V | **Pa ve Sc 80 T**, **Pt 70 T** | `psychotic-v`: Pa,Sc **≥ 70** ∧ min > Pt | ⚠️ eşik sapması |
+| 3 | Pd Yükselliği | Pd **> 70 T** ∧ bütün alt testlerden **≥ 10 T** yüksek | `SINGLE_PD`: `Pd ≥ 70 ∧ Pd − max(öteki klinik) ≥ 10` | ✅ **BİREBİR** |
+| 4 | Kuş Kanadı | Hs,D,Hy,Pd **≥ 70 T** ∧ kadınlarda **Mf = 50 T** ∧ psikotiklerde yükselme | — | ❌ YOK |
+| 5 | Pasif-Agresif V (Kadın) | **4 ve 6 ≥ 70 T** ∧ **Mf < 50 T** | — | ❌ YOK |
+| 6 | Psikotik (pozitif) eğim | psikotik testler **> 70 T** ∧ nevrotik testler **< 70 T** | — | ❌ YOK |
+| 7 | Nevrotik (negatif) eğim | nevrotik taraf yüksek ∧ psikotiklerde “**belirgin düşüklük**” | — | ❌ YOK (**nicel eşik kaynakta yok**) |
+| 8 | “Yüzen” Profil | **Hs→Ma TAMAMI > 70 T** ∧ **F↑**; “borderline’a özgü”; **“kod tipi verilemez”** | `multi-high`: 3+ ölçek **≥ 65** | ❌ YOK (kodunki başka kural) |
+| 9 | Batık Profil | profil **45-54 T**; “anlamı yoktur, **en düşük** alt testlere bakılmalı” | — | ❌ YOK |
+| 10 | Sınır Profil | T **60-70** ∧ klinik **> 54 T** ∧ geçerlikte **kısmi** yükselme | — | ❌ YOK |
+
+**Impact (neden P1):** #1 ve #2 **mevcut arayüzde kullanıcıya “desen var” diye gösteriliyor**.
+Kod eşiği daha düşük olduğundan **kaynağın desen saymayacağı profiller** desen üretiyor
+(yanlış pozitif). Örnek: Hs 66.7 / Hy 66.3 / D 59.2 → kodda “Konversiyon Vadisi” vuruyor;
+kitapta vurması için Hs ve Hy’nin **en az 70 T** ve D’den **≥ 10 T** yüksek olması gerekiyor.
+Örnek #2: Pa 74.5 / Sc 74.5 → kodda “Paranoid Vadi / Psikotik V” vuruyor; kaynak **80 T** der.
+
+**Kök neden:** bu iki eşiğin kaynağı BÖLÜM 5’teki **nicel-olmayan** tanım (s.103, Şekil 17:
+“Hs ve Hy yükselmiş, D düşmüştür” — **sayı yok**). Kitabın **tek sayısal** tanımı BÖLÜM 6’da
+(s.160-161). Yani kod bir şeyi yanlış okumadı; **kaynakta olmayan bir sayıyı sabitlemiş** oldu
+— sonuç yine de kullanıcı için yanlış bir klinik etiket. **CHANGE-014’ün `source` alanı
+bu boşluğu görünür kıldı.**
+
+**Çözüm biçimi:** **DECISION-030** (kod değişikliği onayı bekleniyor). #7 için kaynakta sayısal
+eşik olmadığından yalnız **metin/`manual`** taşınabilir — sayı uydurulmaz (DECISION-028).
+
+**Kanıt betiği:** `scripts/mmpi-audit/cmp-b6-batch22.ts` → **SONUÇ: 9 FARK**
+(2 eşik sapması + 7 eksik desen; #3 `SINGLE_PD` birebir) + 7 çekince maddesi YOK;
+**P0 bulgu yok**. Aday profillerin kaynağın tanımını gerçekten karşıladığı betikte
+T-değerleriyle basılıyor (Kuş Kanadı Hs=71 D=72 Hy=71 Pd=73 Mf=47 · Pasif-Agresif V
+Pd=73 Pa=74 Mf=42 · pozitif eğim Pa=75 Pt=77 Sc=83 Ma=73 / nevrotik taraf 49-51 ·
+Yüzen Hs→Ma 72-84 · Batık 47-52 · Sınır 58-62).
+
+**Test kilidi:** `tests/mmpiInterpretation.test.ts` → “PHASE 10 batch 22” describe’ı: #1/#2
+sapmaları `rule` dizesi equality ile, #3 davranışla (1 pozitif + 2 negatif vaka), #4-#10
+yokluğu kimlik listesiyle kilitli; desen eklenirse test **bilinçli kırılır**.
+
+---
+
+## CONFLICT-042 (P2 · OPEN) — BÖLÜM 6’nın uyarı/kapsam direktifleri arayüzde yok
+
+Area: `src/components/results/MMPIExtraTab.tsx` · `MMPICodeTab.tsx` · `mmpiInterpretation.ts`
+
+Source: **`SOURCE-B6-002`** · kitap s.159-160, s.166, s.167, s.168, s.169
+
+Kaynak örüntüleri sayarken **sürekli çekince** bildiriyor; hiçbiri koda taşınmadı:
+1. **s.166:** “Sadece bu tür yükselmelerle testi alan kişiye **nevrotik ya da psikotik tanısının
+   konulması doğru değildir**.” → desen kartlarında böyle bir çekince yok.
+2. **s.167:** “Bu profil tipiyle bağlantılı **bir kod tipi verilemez**.” → çoklu yükselmede de
+   arayüz iki-haneli kod yorumunu göstermeye devam ediyor.
+3. **s.168 (Batık):** “Tek başına bu tür bir yükselmenin **anlamı yoktur**… **en düşük** olduğu
+   alt testlere bakmak gerekmektedir.”
+4. **s.159:** “**Hiçbir zaman körlemesine bir değerlendirme yapılmamalıdır**” + demografi listesi
+   (→ **CONFLICT-034** ile aynı kanal).
+5. **s.160:** “**Yükselmenin hepsi 70 T puanına yakın ya da bunun üstündedir**… ikili ve üçlü
+   kodları belirlemede **hastadan alınan bilgi ve testi veren kişinin deneyimi** önemlidir.”
+   → `codeInterpretationForProfile()` bunu anmıyor.
+6. **s.169:** “Eğer klinik testler **60-64 T** arasında ise **MMPI’dan geliştirilen diğer testler**
+   bireyi değerlendirmede daha yararlı olabilir (Butcher 1984).” → `MMPIDerived` **var**,
+   gerekçe metni **yok** (BİLGİ).
+
+**Impact:** **P2** — sayısal hata değil; **aşırı güven üreten sunum** riski. Çözüm kanalı
+DECISION-030’un (C) şıkkında (desen kartlarına kaynak `source` + “tanı yerine geçmez” notu).
