@@ -1977,3 +1977,26 @@ Kartın `manualNote` alanı bant farkını arayüzde söylüyor.
 Status: **OPEN** · kapanış/durum kanıtı: `scripts/mmpi-audit/cmp-b6-batch24.ts` (1)-(5)
 · eşik kilidi `tests/mmpiInterpretation.test.ts` → batch-24 describe’ı (F 68,8 T vurmuyor /
 F 71 T vuruyor).
+
+---
+
+## CONFLICT-044 (P3 · **OPEN**) — `KAPSAM` satır 385: `68/86` “YOK” diyor, aynı kod tipinin kaydı var
+
+Area: `docs/mmpi-audit/CONFLICT-024_KAPSAM.md` (satır 385, Pa bloğu tablosu) ↔ `src/scoring/mmpiSourceCodes.ts`
+
+Source: Pa (6) bloğu taraması (s.130-135) — satır `68/86` için **YOK ❌** demiş; aynı
+dosyada başka bir bölüm satırı aynı etiketi **VAR ✅** sayıyor (ara → kapanış evrimi).
+
+Current implementation: `CODES['68']` → `code: '68/86'` **mevcut** (+1 koşullu yorum) ve
+`resolveCodeInterpretation('68')` bu kaydı döndürüyor.
+
+Comparison: **ÇELİŞKİ (belge içi)** — ya satır 385 **Pa bloğunun ayrı gövdesini** kastediyor
+(blok-yerel kayıt yok → gerçek durum: `Pa:68` benzeri bir ayrık kayıt gerekiyor) ya da
+sayım satırı **yanlış sınıflandırılmış**. `final-count.ts` kanonik eşleşmeyi ayrı tuttuğu
+için bu vaka “başka kod tipine kanonikleşme” değil, **aynı tip** olarak işaretlendi.
+
+Impact: **P3** — sayısal davranış hatası yok; DECISION-031’in **iş kümesi sayımını**
+(44 gövde) etkileyebilecek tek belge-side belirsizlik.
+
+Status: **OPEN** — Pa bloğu gövdelerinin kaynakla (s.130-135) satır-satır karşılaştırılmasıyla
+kapanır; **kod değişikliği gerektirmiyor** (gövde eklenmesi DECISION-031 kapısından geçer).

@@ -549,3 +549,13 @@ Kod tarafı değişti; **başlık evreni aynı**, yalnız 3 başlık YOK → VAR
 > tamamı henüz koda alınmadı (DECISION-029 kabulü bunu zorunlu kılmıyordu).
 > Ayrıca **kırpma kalktığı için** eşleşmeyen 3+ haneli kodlar (ör. `794`, `8726`)
 > artık **alakasız metin değil `undefined`** döndürüyor.
+
+> **→ FINAL sayımı (batch 25 · `npx tsx scripts/mmpi-audit/final-count.ts`):** satırdan
+> yeniden sayım **164 başlık satırı → 152 eşsiz etiket** (sayısal 133 · adlı varyant 12 ·
+> atıf 16 · tanıya gömülü 3); “kod tipi değil / — / boş sayfa” gerekçesiyle **9 satır dışlandı**,
+> **57 satır** başlık tablosu dışında (doğrulama/konfigürasyon/BÖLÜM 6 tabloları). Bu, yukarıdaki
+> **148** başlık iddiasıyla **4 fark**; ayrıca son TOPLAM satırı **106 + 44 = 150 ≠ 148 (2 fark)**.
+> Çapraz sorgu: **sayısal VAR 54 → 54’ü kayıtlı**; YOK sayısal 83 → **79’u kodda tanımsız** ve
+> **0’ı iki haneli / 81’i 3+ haneli**. Araç ayrıca `68/86` (satır 385) için **CONFLICT-044 (P3,
+> OPEN)** buldu. **Hiçbir satır yeniden yazılmadı** — sayımlar DECISION-028 gereği yalnız
+> kaynak taramasıyla değişebilir; bu not ölçüm sonucudur.

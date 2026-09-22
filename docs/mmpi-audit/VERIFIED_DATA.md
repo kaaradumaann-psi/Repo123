@@ -171,6 +171,11 @@ Kod (`SCORING_KEYS.K`): **birebir aynı** ✅ MATCH
 Araç: `scripts/mmpi-audit/compare-keys.py`
 Sütun `Doğrulama`: `V` = görsel doğrulandı · `O` = yalnızca OCR
 
+> **FINAL sayımı (batch 25 · `scripts/mmpi-audit/final-count.ts`):** bu bölümün beş tablosunda
+> **46 satır · 46 MATCH · 0 DIFF · 0 MISSING · V 14 · O 32** (V+O = satır → her satır
+> doğrulanmış). `AUDIT_STATE`’teki “32 O / **9 V** ↔ “33”” anlatımı **bayat**: doğru sayım
+> **O 32 · V 14**; “33” hiçbir tablo sayısıyla eşleşmiyor. Eski satırlar değiştirilmedi.
+
 ## Geçerlik ve klinik ölçekler
 
 | Ölçek | Madde | Kaynak | Kod | Sonuç | Doğrulama |

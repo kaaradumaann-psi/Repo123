@@ -974,6 +974,15 @@ yeniden üretimi. **Tek seferde toplu doldurma yok** (DECISION-028: okunmamış 
 **Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 23’ün kod tarafı CHANGE-015 ile
 sınırlıdır; 031 yalnız **kapı tanımıdır**).
 
+**Boyutlandırma ölçümü (batch 25 · `final-count.ts`, kod değişikliği yok):** çözümlenemeyen
+YOK başlıkların **0’ı iki haneli**, **81’i 3+ haneli** → bu kapıdan geçecek iş kümesi
+tamamen **blok-yerel/çok haneli** başlıklardır (`BLOCK_CODES` + `parseCode` varyant modeli
+bunu taşıyabiliyor). Bu kapalı sayımın yanındaki **tek belge-side belirsizlik**
+`CONFLICT-044` (`68/86`, satır 385). Ayrıca `KAPSAM` defter sayacı **148** iken satırdan
+sayım **152** (fark 4) ve son TOPLAM satırı **VAR+YOK = 150** (fark 2) veriyor; onay
+gelirse ilk iş **satır satır yeniden sınıflandırma**, sonra gövde göçü.
+
+
 ---
 
 ## DECISION-032 — **ADAY · KULLANICI ONAYI BEKLİYOR**: `cry-for-help` F bandı (kod `≥ 70` T ↔ kaynak bandı “80 ve üstü T puanı”)

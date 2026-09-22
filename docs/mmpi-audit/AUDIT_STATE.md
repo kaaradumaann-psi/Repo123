@@ -73,6 +73,11 @@ BÖLÜM 5 gövdelerine dayanan **4 desen kartı** kaynak atfı aldı (`cry-for-h
 koşulu değişmedi**; `cry-for-help` bant farkı **CONFLICT-043 (P2, OPEN)** + **DECISION-032
 adayı**. Kaynaksız set bilinçli: `neurotic-triad` + `multi-high`. Kanıt
 `cmp-b6-batch24.ts` → **0 FARK** · test **375/375** (36 suite) · `optik-form.html` yeniden üretildi.
+→ ✅ **PHASE 10 batch 25 — FINAL SAYIM ARACI YAZILDI (bu turda `src/` DEĞİŞMEDİ)** (2026-09-22):
+`scripts/mmpi-audit/final-count.ts` → **HATA 0 · NOT 7** — Ek 9 **V 14 / O 32 · 46/46 MATCH**,
+kod defteri **49 kayıt · 12 koşul**, `KAPSAM` **152 eşsiz etiket ↔ 148 defter** (VAR+YOK 150,
+fark 2); **çözümlenemeyen YOK: iki haneli 0 / 3+ haneli 81** → DECISION-031’in 44 gövdesi
+tamamen 3+ hane/blok-yerel kümesinde. Bulgu **CONFLICT-044 (P3, OPEN)**.
 21-44; envanter bu etiketleri p83 R + p84 L'de gördü) → **Ma kod bloğu** (`91/19` …
 `90/09`) → `Si (0)` girişi + **Tablo 17** → **CONFLICT-024/030/031/033 KARARI**
 
@@ -526,6 +531,11 @@ taşındı. **041 + 042 FIXED.** Kanıt: `cmp-b6-batch23.ts` → **0 FARK**.
 **FINAL** (OCR-only sayım tutarsızlığı, DECISION-011, `KAPSAM` Hs satırı
 31|31|0 ↔ 9 VAR/22 YOK, `SYSTEM.md` test sayısı, **CONFLICT-007** = depoda olmayan
 `docs/kaynak-denetimi.md` atıfları).
+→ **FINAL’ın sayım kısmı ölçüldü (batch 25):** üç kalem birden araçla yeniden sayıldı — Ek 9
+V/O (**14/32**, “9 V” bayat), kod kayıt defteri (**45 + 4 = 49 kayıt · 12 koşul**) ve
+`KAPSAM` başlık evreni (**164 satır → 152 eşsiz etiket ↔ defter 148 · VAR+YOK = 150**).
+Kalan FINAL işleri: DECISION-011 satırının metin düzeltmesi + `KAPSAM` satırlarının
+yeniden sınıflandırılması (ikisi de **içerik/onay işi**, DECISION-031 kapısı).
 
 **Kurallar (kalıcı):** `BAND-HEAD-DROP` · `TABLO-NUMBERS` (P0 listeleri görselden) ·
 `ASCII-FOLD` · `BLANK-PAGE` · **`INVENTORY-DOUBLE-COUNT` (yeni: envanter `X/Y`yi iki
@@ -646,6 +656,7 @@ Bilinen kısıtlar:
 | `npx tsx --test tests/mmpiInterpretation.test.ts` | **54/54 PASS** (44 → batch 23 +3 → **batch 24 +7**: `source` birebirliği, `quote`↔SOURCE_FACTS eşleşmesi, **eşik kilidi** (F 68,8 vurmuyor / 71 vuruyor), kaynaksız-set kapanışı, UI render) · tarihçe: (44 → batch 23 +3: 6 batch-22 kilidi **yeni davranışa** yazıldı (eşik mutabakatı, kural↔davranış döngüleri, `multi-high` ayrışması, çekince **varlığı**, UI render) + `negatif-egim` `manual` kilidi + `source`/`quote` zorunluluğu + bant ayrışması) |
 | `npx tsx scripts/mmpi-audit/cmp-b6-batch23.ts` | **SONUÇ: 0 FARK** — CHANGE-015 kapanış kanıtı: 18 kayıt, #1/#2 eşikleri kaynakla birebir, eski FP'ler vurmuyor, #4-#10 kaynak tanımıyla vuruyor, #7 `manual`, 8/8 çekince taşındı, **sayı üretim denetimi** (desen metnindeki her sayı `SOURCE-B6-001/002` corpus'unda) |
 | `npx tsx scripts/mmpi-audit/cmp-b6-batch24.ts` | **SONUÇ: 0 FARK · P0 BULGU YOK** — CHANGE-016 kapanış kanıtı: (1) kapsam defteri (kaynaksız set = yalnız `neurotic-triad`, `multi-high`) · (2) sayfa atfı ↔ SOURCE_* kaydı · (3) `quote` SOURCE_FACTS alıntı satırlarıyla **birebir** · (4) statik + davranışsal **eşik kilidi** · (5) sayı üretimi denetimi (corpus’ta olmayan sayı yalnız “kod tarafındadır” notuyla geçer) · (6) UI zinciri |
+| `npx tsx scripts/mmpi-audit/final-count.ts` | **HATA 0 · NOT 7** (exit 0) — FINAL sayım aracı: (A) Ek 9 **46 satır · 46 MATCH · 0 DIFF · 0 MISSING · V 14 / O 32** (`VERIFIED_DATA` iddiasıyla birebir; “9 V” satırı bayat) · (B) `KNOWN_CODES 45 + KNOWN_BLOCK_CODES 4 = 49`, **12 koşullu yorum** (CHANGE-014’le aynı) + `46`/`64/46` model sınırı · (C) **164 başlık satırı → 152 eşsiz etiket**, defter 148 (VAR+YOK 150 · **fark 2**), **çözümlenemeyen YOK: iki haneli 0 / 3+ haneli 81** |
 | `npx tsx scripts/mmpi-audit/cmp-b6-batch22.ts` | (tarihsî) 9 FARK → CHANGE-015 sonrası **7 FARK**: (2) bölümündeki eşik sapmaları kapandı; (4)/(5) bölümleri **yokluk** iddiasını ölçtüğü için artık historical — yerini `cmp-b6-batch23.ts` aldı |
 | `npm run typecheck` | **PASS** |
 | `npm test` | **375/375 PASS** · 36 suite (batch 23: 368/368 · batch 24, +7 net: 47 → 54 `mmpiInterpretation`) |
@@ -706,6 +717,8 @@ Kalan açık: **15 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 6 P
 **Güncel sayaç (batch 24): CONFLICT-043 AÇILDI (P2, OPEN — CHANGE-016 eşik değiştirmedi) →
 43 kayıt · FIXED 16 · REJECTED 9 · 16 açık** (0 P0 · 5 P1 · 7 P2 · 2 P3 + 2 FIXED-kısmı);
 karar kapısı **DECISION-032 (ADAY)**.
+**Güncel sayaç (batch 25): CONFLICT-044 AÇILDI (P3, OPEN — sayım aracı bulgusu; kod değişmedi)
+→ 44 kayıt · FIXED 16 · REJECTED 9 · 17 açık** (0 P0 · 5 P1 · 7 P2 · 3 P3 + 2 FIXED-kısmı).
 **Yeni (batch 18): CONFLICT-038 AÇILDI ve AYNI TURDA FIXED** → sayaç değişmedi
 (FIXED: 12 · REJECTED: 8). 025/026/027/030/031 satırları Sc/Pt örnekleriyle
 genişledi (024 KAPSAM: 140/100/42).
@@ -728,6 +741,16 @@ FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 00
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
+
+2026-09-22 — Oturum 8 (devam 7): **PHASE 10 batch 25 — FINAL SAYIM ARACI (`final-count.ts`)** —
+`src/` **değişmedi**; yalnız salt-okunur araç + belge anotasyonları (test sayısı aynı). Üç FINAL
+sayımı ölçüldü: (A) Ek 9 **46 satır · MATCH 46 · V 14 / O 32** (“32 O ✓ · 9 V ✗ · “33” ✗”),
+(B) kod defteri **49 kayıt · 12 koşul** (CHANGE-014’le mutabık) + `resolve('46') → 46/64`
+model sınırı, (C) `KAPSAM` **164 satır → 152 eşsiz etiket** ↔ defter **148** (VAR+YOK 150,
+fark 2) ve **çözümlenemeyen YOK’ların 0’ı iki haneli / 81’i 3+ haneli** → DECISION-031’in iş
+kümesi tümüyle **blok-yerel/çok haneli**. Yeni bulgu **CONFLICT-044 (P3, OPEN)** (satır 385
+`68/86`). Araç **HATA 0 · NOT 7** · `npm test` **375/375** · tsc **0** · build **PASS**
+(`optik-form.html` değişmedi) · `git diff --check` temiz.
 
 2026-09-22 — Oturum 8 (devam 6): **PHASE 10 batch 24 — CHANGE-016 UYGULANDI** — DECISION-030/A
 5. maddesi BÖLÜM 5 tarafına tamamlandı: `cry-for-help` (s.36 · 4. madde, **yeni
@@ -948,7 +971,14 @@ Blocking:       none
 ### Bilinen kısıtlar (engelleyici değil)
 
 - 33 anahtar yalnızca OCR doğrulamalı (`OCR-CONFIRMED`, DECISION-011)
+  → **FINAL SAYIMI (batch 25 · `scripts/mmpi-audit/final-count.ts`):** Ek 9 tablolarında
+  **O = 32 · V = 14 · satır = 46** — “33” değil (V + O = satır → her satır doğrulanmış;
+  `Doğrulama` hücresi belirsiz satır **0**). DECISION-011’in metni **belge düzeltmesi**
+  olarak bekliyor; sayı değiştirilmedi, buraya yalnız ölçüm yazıldı.
 - Ek 10 hücre hücre okunmadı (norm kaynağı değil, DECISION-016)
 - ~~`WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8~~ → **KAPANDI** (Tablo 20, 26/26 MATCH)
 - Türkçe OCR modeli yok → tüm sayısal fact'ler görsel doğrulamalı
 - OCR-only sayım tutarsızlığı (32 O / 9 V ↔ "33"): FINAL öncesi sayılacak
+  → ✅ **ÖLÇÜLDÜ (batch 25)** — tablo: **O 32 (iddia ✓) · V 14 (“9 V” bayat) · 46 satır**;
+  anlatıdaki **“33”** hiçbir sayıyla eşleşmiyor (O+V = 46) → FINAL’da yazılacak düzeltme
+  **“V 14 / O 32”**. Kanıt: `npx tsx scripts/mmpi-audit/final-count.ts` → **(A)**.

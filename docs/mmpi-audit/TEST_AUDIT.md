@@ -853,3 +853,51 @@ tarihsî (7 FARK, yokluk ölçümü).
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiInterpretation` → **54/54** ·
 `npm test` → **375/375** (36 suite) · `npm run build` → **PASS** (`src/` değişti →
 `optik-form.html` yeniden üretildi, commit’e dâhil) · `git diff --check` temiz.
+
+## PHASE 10 batch 25 — FINAL sayım aracı (`scripts/mmpi-audit/final-count.ts`)
+
+**Amaç:** FINAL listesindeki üç sayım kalemi **tek seferde**, bellekten değil kayıttan
+ölçülsün; ayrışan satır **sebibiyle** görünsün; hiçbir eski satır sessizce düzeltilmesin.
+Araç **salt-okunur** ve `src/`e dokunmaz (bu turda kod değişikliği YOK → `optik-form.html`
+değişmedi).
+
+**(A) Ek 9 — madde anahtarları** (`VERIFIED_DATA.md`, “Madde anahtarları” → “Özel ölçekler”
+tablosunun sonuna kadar; sonraki H1’e kadar değil): **46 satır · 46 MATCH (5 “düzeltildi”) ·
+0 DIFF · 0 MISSING · V 14 · O 32 · belirsiz 0**. → `VERIFIED_DATA`’ın “46 MATCH / 0 DIFF /
+0 MISSING” iddiası **birebir**; `AUDIT_STATE`in “32 O / **9 V** ↔ “33”” satırı **bayat**
+(doğru: **O 32 · V 14**; “33” hiçbir sayıyla eşleşmiyor, O+V = 46). V+O = satır → her satır
+doğrulanmış. Tablo tablosuna dağılım: geçerlik/klinik 14 (V5/O9) · kişilik 11 (V5/O6) ·
+alkol 2 (V1/O1) · Wiggins 13 (V1/O12) · özel 6 (V2/O4).
+
+**(B) Kod kayıt defteri:** `KNOWN_CODES 45` (tamamı iki haneli) + `KNOWN_BLOCK_CODES 4`
+= **49 kayıt**, tamamı `resolveCodeInterpretation()` ile çözümleniyor; **bağlanmış koşullu
+yorum 12** → `12/21(1) 13/31(1) 26/62(1) 27/72(1) 49/94(2) 68/86(1) 89/98(2) 70/07(1)
+80/08(1) 64/46(1)` → **CHANGE-014’ün “12 koşul” iddiasıyla aynı**. Ek bulgu (model sınırı):
+`resolve('46') → 46/64` ama blok-yerel kayıt `64/46` — rakam sorgusu ilk haneden blok
+türettiği için `Pa:46` yalnızca `64/46` yazılınca bulunuyor (UI profilden gelen kodu
+kullandığı için çalışıyor; **sayım** ise `code` etiketini kaynak metinden okuyarak yapıyor).
+
+**(C) `KAPSAM` başlık evreni:** 164 başlık satırı → **152 eşsiz etiket** (sayısal 133 ·
+adlı varyant 12 · atıf 16 · tanıya gömülü 3 · sınıfsız 0), **9 satır “kod tipi değil/—”
+diye dışlandı**, 57 satır başlık tablosu dışında (Gövde↔Kod doğrulama, konfigürasyon,
+CHANGE-014 eski/yeni, BÖLÜM 6 örüntüleri) → **başlık sayılmadı**. Durum “son satır geçerli”
+kuralıyla alınıyor (ara “devam ediyor” ↔ KAPANIŞ evrimi); **5 etiket** birden çok bölümde
+farklı durumla anılıyor. Çapraz sorgu: **sayısal VAR 54 → 54’ü kodda çözümleniyor**;
+tanıya gömülü 3 başlık (`782`, `872`, `784/874`) üst kayıt `78/87.diagnosis` içinde
+doğrulandı; `32 → 23` ve `21 → 12/21` kanonikleşmeleri belgede **CONFLICT-031/033** altında
+izahlı; `34 → 34/43` kanonik çakışma (ayrı başlık sayılmamalı). **YOK denilen sayısal
+başlıkların 79’u kodda gerçekten tanımsız** ve **bunların 0’ı iki haneli, 81’i 3+ haneli**
+→ DECISION-031’in iş kümesi tümüyle **blok-yerel/çok haneli** başlıklar. Defterle karşılaştırma:
+**148 iddia ↔ 152 sayım (fark 4)**; son TOPLAM satırı kendi içinde kapalı değil
+(**106+44 = 150 ≠ 148, fark 2**) → Hs satırının `31|31|0` ↔ “9 VAR/22 YOK” kayması dahil
+tarihsî birikim; **eski satırlar yazılmadı**, ölçüm buraya ve `AUDIT_STATE`e not düşüldü.
+
+**Yeni bulgu:** `CONFLICT-044 (P3, OPEN)` — `KAPSAM` satır 385 `68/86` YOK diyor, oysa aynı
+kod tipinin kaydı (`CODES['68']` → `68/86`) var; ara/kapanış satırları da çelişiyor →
+blok-yerel gövde mi kastediliyor, kaynak sayfasıyla (s.130-135 Pa bloğu) netleştirilecek.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `npx tsx scripts/mmpi-audit/final-count.ts`
+→ **HATA 0 · NOT 7** (exit 0) · `mmpiInterpretation` **54/54** · `npm test` **375/375**
+(36 suite) · `npm run build` **PASS** (`src/` değişmedi → `optik-form.html` **aynı**) ·
+`git diff --check` temiz. Test **sayısı değişmedi** (araç salt-okunur; test dosyalarına
+dokunulmadı).

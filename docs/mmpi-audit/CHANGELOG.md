@@ -1629,3 +1629,28 @@ puanı” bandı altında → **CONFLICT-043 (P2) AÇILDI**, eşik değiştirilm
 dizinleri untracked, `node_modules` yok); `git fetch` + `git reset --mixed fae032a` ile
 worktree’nin push edilmiş halle **birebir** olduğu doğrulandı, `npm ci` + `pip install pymupdf`
 yeniden kuruldu — kayıp iş yok.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 25 — FINAL sayım aracı: `scripts/mmpi-audit/final-count.ts`
+
+**Ne:** FINAL listesindeki üç sayım kalemi tek salt-okunur araçta ölçüldü; `src/` ve test
+dosyaları **değişmedi** (yeni test yok; `optik-form.html` aynı).
+
+**(A) Ek 9:** 46 satır · 46 MATCH · 0 DIFF · 0 MISSING · **V 14 / O 32** → `VERIFIED_DATA`
+iddiası birebir; `AUDIT_STATE`’in “32 O / 9 V ↔ “33”” satırı bayat (**V 14**, “33” karşılıksız).
+**(B) Kod defteri:** `KNOWN_CODES 45 + KNOWN_BLOCK_CODES 4 = 49`, **12 koşullu yorum**
+(CHANGE-014’le mutabık); ek bulgu — `resolve('46') → 46/64`, blok-yerel `64/46` yalnız
+tam etiketle bulunuyor (UI’ı etkilemiyor; sayım `code` etiketini kaynak metinden okuyor).
+**(C) KAPSAM:** 164 başlık satırı → **152 eşsiz etiket** ↔ defter **148** (fark 4); son TOPLAM
+satırı **106+44 = 150 ≠ 148** (fark 2); sayısal VAR 54/54 kayıtlı; YOK 83 → **79 tanımsız**,
+**0 iki haneli / 81 üç+ haneli**; 9 satır “kod tipi değil” diye dışlandı, 57 satır tablo-dışı.
+
+**Bulgu:** **CONFLICT-044 (P3, OPEN)** — `KAPSAM` satır 385 `68/86` YOK ↔ `CODES['68']` mevcut.
+
+**Kapanış:** sayaçlar **17 açık** (0 P0 · 5 P1 · 7 P2 · 3 P3 + 2 FIXED-kısmı) · **FIXED 16 ·
+REJECTED 9 · 44 kayıt** · `CONFLICT-024` sayacı belgede **148/106/44** kaldı (yeniden sayım
+yalnız **not olarak** yazıldı, satırlar yeniden yazılmadı).
+
+**Doğrulama:** tsc **0** · `final-count.ts` → **HATA 0 · NOT 7** (exit 0) · `mmpiInterpretation`
+**54/54** · `npm test` **375/375** (36 suite) · `npm run build` **PASS** · `git diff --check` temiz.
