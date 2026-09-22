@@ -1707,3 +1707,17 @@ kurallar bağlandı (`78/87`, `79/97`, `70/07`, `Pt:47/74`).
 
 **Doğrulama:** tsc **0** · `cmp-pt-batch30.ts` **0 FARK** · `tests/mmpiPtBlock.test.ts` **11/11 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 31 — CHANGE-024: Sc (8) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında yedinci blok olan Sc (8) bloğu (s.143-148) tamamlandı.
+4 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Sc:68`, `Sc:78`,
+`Sc:8726`, `Sc:paranoid_valley`), 10 çapraz ölçek takma adı ve 6 kod için koşullu kurallar
+bağlandı (`Sc:86`, `Sc:87`, `8726`, `paranoid_valley`, `89`, `08`). `parseCode()` motoruna `8726` ve
+`paranoid_valley` kalıp tanıma kuralları eklendi.
+
+**Doğrulama:** tsc **0** · `cmp-sc-batch31.ts` **0 FARK** · `tests/mmpiScBlock.test.ts` **13/13 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiInterpretation.test.ts` **54/54 PASS** ·
+`npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).

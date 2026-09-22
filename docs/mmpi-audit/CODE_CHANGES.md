@@ -916,3 +916,55 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
 - `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **212/212 PASS** (37 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-024 — DECISION-031 (A): Bölüm 5 Sc (8) Bloğu Kod Göçü ve Koşullu Yorumlar (s.143-148)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiScBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `tests/mmpiInterpretation.test.ts` · `tests/mmpiPtBlock.test.ts` · `scripts/mmpi-audit/cmp-sc-batch31.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan yedinci blok: **Sc (Şizofreni / 8) bloğu (s.143-148)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `BLOCK_CODES`: Sc bloğundaki 4 yeni kod tanımı ve 10 çapraz ölçek takma adı eklendi:
+     `Sc:68` (86/68 bloğa özel gövde ve tanıları: "6 ve 8'in T puanı 80'nin üstünde, 7 de 70 T puanındadır...", tanılar: Paranoid durum, Paranoid şizofreni, Şizoid kişilik, s.146).
+     `Sc:78` (87/78 bloğa özel gövdesi: "Endişeli, kendi kendini tetkik edebilen, derin düşünceye dalan kişilerdir...", s.146).
+     `Sc:8726` (`8726 / Yüksek 9` müstakil kodu ve tanısı: "Ajite şizofren bir hastayı göstermektedir...", tanı: Ajite şizofreni, s.146).
+     `Sc:paranoid_valley` (Paranoid Vadi / Şekil 22 müstakil kodu ve tanısı: "Bu örüntüyü gösteren hastalar, duygusal olarak geri çekilmişlerdir...", tanı: Paranoid şizofreni, s.147).
+     Çapraz takma adlar: `Sc:86`, `Pa:86`, `Sc:87`, `Pt:87`, `Sc:8726_high9`, `Pt:8726`, `Ma:8726`, `Sc:psychotic_v`, `Pa:paranoid_valley`, `Pa:psychotic_v`.
+   - `CODE_CONDITIONS`: Sc bloğuna ait kodlar için koşullu kurallar makinece değerlendirilebilir testlerle bağlandı:
+     - `Sc:86`: Pa, Sc ≥ 80 T ve Pt 65-75 T akut psikotik durum (s.146).
+     - `Sc:87`: Pt & Sc ≥ 75 ∧ Sc > Pt şizofreni eğilimi (s.146).
+     - `8726`: Ma ≥ 70 T ajite hipomani uyarısı (s.146).
+     - `Sc:paranoid_valley`: Pa, Sc ≥ 70 T ve Pt vadi dibi (s.147).
+     - `89/98`: Yaş < 27 manuel notu ve 3. test 4, 7 veya 6 (s.147-148).
+     - `80/08`: 3. test Pt (7) veya D (2) (s.148).
+   - `parseCode`: `8726` ve `paranoid_valley`/`psikotik_v` kalıplarını Sc bloğuna yönlendiren çözümleme mantığı eklendi.
+2. `tests/mmpiScBlock.test.ts`:
+   - 13 yeni test ile Sc bloğunun kod çözme doğruluğu, tanı sadakati, 86 vs 68 ve 87 vs 78 blok ayrımı ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Sc bloğundaki 14 anahtar eklenerek toplam kayıt 140 blok koduna ulaştırıldı.
+   - Ortak iki-haneli koşul simetrisi testinde blok-özelleştirilmiş 68/86 ve 78/87 kayıtları için özel ayrım eklendi.
+4. `tests/mmpiInterpretation.test.ts`:
+   - `8726` artık `8726 / Yüksek 9` kendi gövdesine çözümlendiği için test güncellendi.
+5. `scripts/mmpi-audit/cmp-sc-batch31.ts`:
+   - Sc bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-sc-batch31.ts` → **SONUÇ: 0 FARK · Sc BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiScBlock.test.ts` → **13/13 PASS**
+- `npx tsx --test tests/mmpiPtBlock.test.ts` → **11/11 PASS**
+- `npx tsx --test tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
+- `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

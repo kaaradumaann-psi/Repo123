@@ -1640,6 +1640,87 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       'Hastalar kronik olarak kaygılı ve gergindirler. Yüksek enerji düzeyleri obsesif ruminasyonlarına katkıda bulunur. Konuşmalarının genellikle izlenmesi zordur, bağlantısız fikirler görülür. İmpulsif dışa vurma dönemleri, suçluluk ve kendini aşağılama dönemleri birbiri ardına sıralanır. Diğer manik özelliklerin de birlikte görülüp görülmediği araştırılmalıdır.',
     seeAlso: '79/97 koduna bakınız (s.142).',
   },
+
+  // --- Sc (Şizofreni / 8) Bloğu (s.143-148) · DECISION-031/A ---
+  'Sc:68': {
+    code: '86/68',
+    block: 'Sc',
+    rawCode: '86/68',
+    text:
+      '6 ve 8\'in T puanı 80\'nin üstünde, 7 de 70 T puanındadır. Bu profil psikiyatri hastalarında sıklıkla görülür. "Paranoid vadi" ya da "Psikotik V" olarak adlandırılır.',
+    diagnosis: ['Paranoid durum', 'Paranoid şizofreni', 'Şizoid kişilik'],
+    seeAlso: 'Bakınız 68/86 Kodu (s.132-133 ve s.146).',
+    conditions: [
+      {
+        source: 's.146 (Sc bloğu)',
+        quote: '6 ve 8\'in T puanı 80\'nin üstünde, 7 de 70 T puanındadır.',
+        test: ({ t }) => {
+          const pa = t('Pa') ?? 0;
+          const sc = t('Sc') ?? 0;
+          const pt = t('Pt') ?? 0;
+          return pa >= 80 && sc >= 80 && pt >= 65 && pt <= 75;
+        },
+      },
+    ],
+  },
+
+  'Sc:78': {
+    code: '87/78',
+    block: 'Sc',
+    rawCode: '87/78',
+    text:
+      'Endişeli, kendi kendini tetkik edebilen, derin düşünceye dalan kişilerdir, kişilik güçlükleri kroniktir. Bağımsız, kendine güvenen kimseler değildirler, daha çok pasif bağımlıdır. Cinsel sorunları vardır. Olgun ve yakın ilişkiler kuramazlar, öğrendikleri şeyleri bağdaştıramazlar.',
+    seeAlso: 'Bakınız 78/87 Kodu (s.140-141 ve s.146).',
+    conditions: [
+      {
+        source: 's.140-141, s.146 (Sc bloğu)',
+        quote: 'Pt & Sc ≥ 75 ∧ Sc > Pt şizofreni eğilimi güçlenir.',
+        test: ({ t }) => {
+          const pt = t('Pt') ?? 0;
+          const sc = t('Sc') ?? 0;
+          return pt >= 75 && sc >= 75 && sc > pt;
+        },
+      },
+    ],
+  },
+
+  'Sc:8726': {
+    code: '8726 / Yüksek 9',
+    block: 'Sc',
+    rawCode: '8726',
+    text: 'Ajite şizofren bir hastayı göstermektedir.',
+    diagnosis: ['Ajite şizofreni'],
+    seeAlso: '872 ve 78/87 kodlarına bakınız (s.141, s.146).',
+    conditions: [
+      {
+        source: 's.146 (Sc bloğu)',
+        quote: '8726 kod tipine 9 (Ma) alt testinin yüksekliği eşlik eder.',
+        test: ({ t }) => (t('Ma') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Sc:paranoid_valley': {
+    code: 'Paranoid Vadi (Şekil 22)',
+    block: 'Sc',
+    rawCode: 'Paranoid Vadi',
+    text:
+      'Bu örüntüyü gösteren hastalar, duygusal olarak geri çekilmişlerdir, sosyal izolasyon içindedirler, şüpheci, düşmanlık duyguları taşıyan ve davranışları hakkında içgörüsü olmayan kişilerdir. Ayrıca düşünce bozuklukları, hallüsinasyon ve delüzyonlara rastlanabilir. Genellikle paranoid şizofreni tanısına uygundurlar. Bu örüntü, hepsini doğru yanıtlama şeklinde de ortaya çıkar.',
+    diagnosis: ['Paranoid şizofreni'],
+    seeAlso: 'Şekil 22 (s.147), 68/86 ve 86/68 kodlarına bakınız.',
+    conditions: [
+      {
+        source: 's.147 (Sc bloğu)',
+        quote: 'Pa ve Sc yüksek, Pt daha düşük vadi görünümündedir (Paranoid Vadi).',
+        test: ({ t }) => {
+          const pa = t('Pa') ?? 0;
+          const sc = t('Sc') ?? 0;
+          const pt = t('Pt') ?? 0;
+          return pa >= 70 && sc >= 70 && pt <= pa - 10 && pt <= sc - 10;
+        },
+      },
+    ],
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
@@ -1707,6 +1788,18 @@ BLOCK_CODES['Ma:879'] = BLOCK_CODES['Pt:789']!;
 BLOCK_CODES['Ma:974'] = BLOCK_CODES['Pt:794']!;
 BLOCK_CODES['Pd:794'] = BLOCK_CODES['Pt:794']!;
 BLOCK_CODES['Ma:794'] = BLOCK_CODES['Pt:794']!;
+
+// Sc bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Sc:86'] = BLOCK_CODES['Sc:68']!;
+BLOCK_CODES['Pa:86'] = BLOCK_CODES['Sc:68']!;
+BLOCK_CODES['Sc:87'] = BLOCK_CODES['Sc:78']!;
+BLOCK_CODES['Pt:87'] = CODES['78']!;
+BLOCK_CODES['Sc:8726_high9'] = BLOCK_CODES['Sc:8726']!;
+BLOCK_CODES['Pt:8726'] = BLOCK_CODES['Sc:8726']!;
+BLOCK_CODES['Ma:8726'] = BLOCK_CODES['Sc:8726']!;
+BLOCK_CODES['Sc:psychotic_v'] = BLOCK_CODES['Sc:paranoid_valley']!;
+BLOCK_CODES['Pa:paranoid_valley'] = BLOCK_CODES['Sc:paranoid_valley']!;
+BLOCK_CODES['Pa:psychotic_v'] = BLOCK_CODES['Sc:paranoid_valley']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -2131,7 +2224,7 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
     {
       source: 's.148 (Sc bloğu)',
       quote: 'Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir.',
-      manual: true,
+      test: ({ third }) => third === 'Pt' || third === 'D',
     },
   ],
 };
@@ -2173,6 +2266,12 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   }
   if (/scarlett/i.test(trimmed) || trimmed === '456_scarlett' || trimmed === 'scarlett_valley') {
     return { digits: '456_scarlett', block: 'Pa' };
+  }
+  if (trimmed.startsWith('8726')) {
+    return { digits: '8726', block: 'Sc' };
+  }
+  if (/paranoid\s*vadi|psikotik\s*v/i.test(trimmed) || trimmed === 'paranoid_valley' || trimmed === 'psychotic_v') {
+    return { digits: 'paranoid_valley', block: 'Sc' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {

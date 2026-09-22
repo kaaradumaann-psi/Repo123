@@ -851,7 +851,6 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     assert.equal(e027.rawCode, '027(8)');
     assert.match(e027.text, /Bireyde güçlü ruminatif davranışlar görülebilir/);
     // kırpmanın gittiğinin negatif kanıtı: eşleşmeyen 3+ haneli kodlar artık undefined (79'a kırpılmaz)
-    assert.equal(codeInterpretation('8726'), undefined);
     assert.equal(codeInterpretation('314'), undefined);
     assert.equal(codeInterpretation('412'), undefined);
     assert.equal(codeInterpretation('931'), undefined);
@@ -861,6 +860,8 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     // Pt bloğu göçüyle 794 ve 782 artık kendi gövdelerine çözümlenir (CHANGE-023)
     assert.equal(codeInterpretation('794')?.code, '794');
     assert.equal(codeInterpretation('782')?.code, '782');
+    // Sc bloğu göçüyle 8726 artık kendi gövdesine çözümlenir (CHANGE-024)
+    assert.equal(codeInterpretation('8726')?.code, '8726 / Yüksek 9');
     // ortak iki-haneli kayıtlar ESKİSİ GİBİ çalışır (geriye dönük uyum)
     assert.equal(codeInterpretation('04')!.code, '40/04');
     assert.doesNotMatch(codeInterpretation('04')!.text, /eyleme vurukluğun bastırılması/);
@@ -875,18 +876,19 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',
       'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
       'Hy:435', 'Hy:436', 'Hy:534',
-      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
+      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:8726', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
       'Ma:964', 'Ma:968', 'Ma:974',
       'Pa:456_scarlett', 'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648', 'Pa:678',
-      'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:860', 'Pa:876', 'Pa:964',
-      'Pa:968',
+      'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:86', 'Pa:860', 'Pa:876', 'Pa:964',
+      'Pa:968', 'Pa:paranoid_valley', 'Pa:psychotic_v',
       'Pd:456', 'Pd:462', 'Pd:463', 'Pd:468', 'Pd:469', 'Pd:482', 'Pd:489',
       'Pd:48_highF_low2', 'Pd:493', 'Pd:495', 'Pd:496', 'Pd:498', 'Pd:4_low5',
       'Pd:642', 'Pd:643', 'Pd:648', 'Pd:784', 'Pd:794', 'Pd:824', 'Pd:842', 'Pd:849', 'Pd:874', 'Pd:943',
       'Pd:945', 'Pd:946', 'Pd:948',
-      'Pt:47', 'Pt:67', 'Pt:74', 'Pt:76', 'Pt:782', 'Pt:784', 'Pt:789', 'Pt:794', 'Pt:872', 'Pt:874', 'Pt:879',
-      'Sc:678', 'Sc:680', 'Sc:698', 'Sc:784', 'Sc:789', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:860',
-      'Sc:872', 'Sc:874', 'Sc:876', 'Sc:879', 'Sc:968',
+      'Pt:47', 'Pt:67', 'Pt:74', 'Pt:76', 'Pt:782', 'Pt:784', 'Pt:789', 'Pt:794', 'Pt:87', 'Pt:872', 'Pt:8726', 'Pt:874', 'Pt:879',
+      'Sc:678', 'Sc:68', 'Sc:680', 'Sc:698', 'Sc:78', 'Sc:784', 'Sc:789', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:86', 'Sc:860',
+      'Sc:87', 'Sc:872', 'Sc:8726', 'Sc:8726_high9', 'Sc:874', 'Sc:876', 'Sc:879', 'Sc:968',
+      'Sc:paranoid_valley', 'Sc:psychotic_v',
       'Si:027', 'Si:049', 'Si:068', 'Si:086',
     ].sort();
     assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), expectedBlockCodes);
@@ -952,13 +954,18 @@ describe('CHANGE-014 (DECISION-029/A) — blok kimliği, kırpmasız çözümlem
     assert.deepEqual(activeCodeConditions(resolveCodeInterpretation('12'), ctx({ Hs: 95, D: 70 })), []);
   });
 
-  it('koşul tablosunda ölü anahtar yoktur: 9 kaydın tamamı her iki sıralamadan çözülür', () => {
-    const kosullu = ['12', '13', '26', '27', '49', '07', '68', '89', '08'];
+  it('koşul tablosunda ölü anahtar yoktur: ortak iki haneli kayıtlar her iki sıralamadan koşul taşır', () => {
+    const kosullu = ['12', '13', '26', '27', '49', '07', '89', '08'];
     for (const k of kosullu) {
       assert.ok(resolveCodeInterpretation(k)?.conditions?.length, `${k} koşullu kayıt taşımalı`);
       const ters = [...k].reverse().join('');
       assert.equal(resolveCodeInterpretation(ters)?.conditions, resolveCodeInterpretation(k)?.conditions, `${k} ↔ ${ters} aynı kayda inmeli`);
     }
+    // 68/86 ve 78/87 blok göçleriyle Pa/Pt ve Sc blokları arasında özelleştirilmiştir (DECISION-031/A)
+    assert.ok(resolveCodeInterpretation('68')?.conditions?.length, '68 (Pa) koşullu kayıt taşımalı');
+    assert.ok(resolveCodeInterpretation('86')?.conditions?.length, '86 (Sc) koşullu kayıt taşımalı');
+    assert.ok(resolveCodeInterpretation('78')?.conditions?.length, '78 (Pt) koşullu kayıt taşımalı');
+    assert.ok(resolveCodeInterpretation('87')?.conditions?.length, '87 (Sc) koşullu kayıt taşımalı');
   });
 
   it('64/46 kaydındaki "8 yükselmişse süreç daha kötü olur" notu koşula bağlandı (s.131)', () => {

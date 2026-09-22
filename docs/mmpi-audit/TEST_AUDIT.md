@@ -975,3 +975,33 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-pt-batch30.ts` → **SONUÇ: 0 FARK · Pt BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 31 — CHANGE-024 · Sc (8) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Sc (8) bloğundaki kod gövdelerinin (`Sc:68`, `Sc:78`, `Sc:8726`, `Sc:paranoid_valley`), tanı ve çapraz takma adlarının `BLOCK_CODES`'a taşınması ve ilgili 6 kod grubu için koşulların bağlanması (`Sc:86`, `Sc:87`, `8726`, `paranoid_valley`, `89`, `08`).
+
+**Eklenen testler (13):** `tests/mmpiScBlock.test.ts` → **13/13 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati:
+   - `Sc:86` / `86/68` bloğa özel gövdesi ve tanıları (Paranoid durum, Paranoid şizofreni, Şizoid kişilik),
+   - `Sc:87` / `87/78` bloğa özel gövdesi (endişeli, pasif bağımlı, cinsel sorunlar),
+   - `8726 / Yüksek 9` müstakil kodu ve tanısı (Ajite şizofreni),
+   - `Paranoid Vadi (Şekil 22)` örüntüsü, gövdesi ve tanısı (Paranoid şizofreni),
+   - `89/98` ve `80/08` kodları gövde sadakati ve tanıları,
+   - 86 vs 68 ve 87 vs 78 blok ayrım doğrulamaları,
+   - İki haneli Sc kodları ve Bakınız yönlendirmeleri.
+2. Koşul testleri:
+   - Sc:86 (Pa, Sc ≥ 80 T ve Pt 65-75 T akut psikotik durum),
+   - Sc:87 (Pt & Sc ≥ 75 ∧ Sc > Pt şizofreni eğilimi),
+   - 8726 (Ma ≥ 70 T ajite hipomani),
+   - Paranoid Vadi (Pa, Sc ≥ 70 T ve Pt vadi dibi),
+   - 89/98 (Yaş < 27 manuel notu ve 3. test 4, 7 veya 6),
+   - 80/08 (3. test 7 veya 2).
+
+**Güncellenen testler:**
+- `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`8726` artık kendi gövdesine çözümlendi; `KNOWN_BLOCK_CODES` listesine Sc bloğundaki 14 anahtar eklendi, toplam 140 blok kodu; 68/86 ve 78/87 blok-özelleştirilmiş koşul kontrolleri ayrıldı).
+- `tests/mmpiInterpretation.test.ts` → **54/54 PASS** (`8726` kendi gövdesine çözümlenme testi güncellendi).
+- `tests/mmpiPtBlock.test.ts` → **11/11 PASS** (`Pt:87` testi netleştirildi).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-sc-batch31.ts` → **SONUÇ: 0 FARK · Sc BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

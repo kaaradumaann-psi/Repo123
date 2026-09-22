@@ -3470,3 +3470,37 @@ metni taşınması DECISION-028 kapsamında **yok**).
 - **70/07 Kodu (s.142):**
   - "2 ve 8 alt testleri, en sık görülen üçüncü yüksekliktir." → `third in ['D', 'Sc']`.
   - "Kadınlarda eğer 5 alt testi, 40 T puanının altında ise aynı örüntü vardır." → `gender === 'Kadın' && Mf < 40 T`.
+
+---
+
+## BÖLÜM 5: Sc (8) KOD BLOĞU VERİLERİ (kitap s.143-148 · PDF p079_L - p082_R)
+
+### SOURCE-CODE-SC-001 — Sc Bloğu Sayfa ve Başlık Envanteri (kitap s.143-148)
+- **Görsel ve OCR Taraması:** PDF p079_L (s.143) ile p082_R (s.148) arasındaki sayfalar RapidOCR ve pymupdf ile taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Doğrulanan Başlıklar:**
+  1. `81/18 Kodu` (s.146) — Bakınız 18/81 Kodu.
+  2. `82/28 Kodu` (s.146) — Bakınız 28/82 Kodu.
+  3. `83/38 Kodu` (s.146) — Bakınız 38/83 Kodu.
+  4. `84/48 Kodu` (s.146) — Bakınız 48/84 Kodu.
+  5. `85/58 Kodu` (s.146) — Bakınız 58/85 Kodu.
+  6. `86/68 Kodu` (s.146) — Olası Tanı: Paranoid durum, Paranoid şizofreni, Şizoid kişilik. 6 ve 8'in T puanı 80'in üstünde, 7 de 70 T puanındadır. "Paranoid vadi" ya da "Psikotik V" olarak adlandırılır.
+  7. `87/78 Kodu` (s.146) — Olası Tanı: Şizofreni (veya Şizofrenik Reaksiyon) ve Depresyon. Endişeli, kendi kendini tetkik edebilen, derin düşünceye dalan kişilerdir, kişilik güçlükleri kroniktir. Bağımsız değillerdir, pasif bağımlıdır.
+  8. `8726 / Yüksek 9 Kodu` (s.146) — Olası Tanı: Şizofreni (Ajite Şizofreni). Ajite şizofren bir hastayı göstermektedir.
+  9. `Paranoid Vadi (Şekil 22)` (s.147) — Olası Tanı: Paranoid şizofreni. Pa ve Sc > 70 T, Pt daha düşük vadi görünümünde. Duygusal geri çekilme, sosyal izolasyon, şüphecilik, düşmanlık, hezeyan/delüzyonlar.
+  10. `89/98 Kodu` (s.147-148) — Olası Tanı: Şizofreni, Madde kullanımına bağlı psikoz. Yaşı 27'den küçük olanlarda görülür; üçüncü yükselen alt test 4, 7 ya da 6'dır.
+  11. `80/08 Kodu` (s.148) — Olası Tanı: Şizoid Kişilik. Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir.
+
+### SOURCE-CODE-SC-002 — Sc Bloğu Koşullu Yorum Kuralları (Conditions)
+- **Sc:86 / 86/68 Kodu (s.146):**
+  - "6 ve 8'in T puanı 80'nin üstünde, 7 de 70 T puanındadır." → `Pa >= 80 && Sc >= 80 && Pt >= 65 && Pt <= 75`.
+- **Sc:87 / 87/78 Kodu (s.146):**
+  - "Pt & Sc ≥ 75 ∧ Sc > Pt şizofreni eğilimi güçlenir." → `Pt >= 75 && Sc >= 75 && Sc > Pt`.
+- **8726 / Yüksek 9 Kodu (s.146):**
+  - "8726 kod tipine 9 (Ma) alt testinin yüksekliği eşlik eder." → `Ma >= 70 T`.
+- **Paranoid Vadi / Şekil 22 (s.147):**
+  - "Pa ve Sc yüksek, Pt daha düşük vadi görünümündedir (Paranoid Vadi)." → `Pa >= 70 && Sc >= 70 && Pt <= Pa - 10 && Pt <= Sc - 10`.
+- **89/98 Kodu (s.147-148):**
+  - "Yaşı 27'den küçük olanlarda görülür..." → `manual: true` (yaş < 27 klinik notu).
+  - "...üçüncü yükselen alt test 4, 7 ya da 6'dır." → `third in ['Pd', 'Pt', 'Pa']`.
+- **80/08 Kodu (s.148):**
+  - "Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir." → `third === 'Pt' || third === 'D'`.

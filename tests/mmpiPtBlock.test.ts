@@ -110,7 +110,7 @@ describe('DECISION-031/A — Pt (Psikasteni / 7) Bloğu Kod Yorumları ve Koşul
 
     it('İki haneli Pt kodları ve Bakınız yönlendirmeleri çözümlenir (s.137-142)', () => {
       assert.equal(resolveCodeInterpretation('78')?.code, '78/87');
-      assert.equal(resolveCodeInterpretation('87')?.code, '78/87');
+      assert.equal(resolveCodeInterpretation('Pt:87')?.code, '78/87');
       assert.equal(resolveCodeInterpretation('79')?.code, '79/97');
       assert.equal(resolveCodeInterpretation('97')?.code, '79/97');
       assert.equal(resolveCodeInterpretation('70')?.code, '70/07');

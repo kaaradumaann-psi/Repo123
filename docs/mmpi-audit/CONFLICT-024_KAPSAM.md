@@ -388,8 +388,9 @@ eksik + yanlış metin dönüyor).
 | Pd (s.107-120) | 20 | 9 | 13 |
 | Mf (s.121-126) | 10 | 9 | 1 |
 | Pa (s.130-135) | 15 | 15 | 0 |
-| **Pt (s.137-142)** | **15** | **15** | **0** |
-| **TOPLAM** | **130** | **98** | **32** |
+| Pt (s.137-142) | 15 | 15 | 0 |
+| **Sc (s.143-148)** | **10** | **10** | **0** |
+| **TOPLAM** | **140** | **108** | **32** |
 
 ## Pt (7) kod bloğu (s.140-142) — **15 VAR / 0 YOK** (CHANGE-023 ile TAMAMLANDI)
 
@@ -411,57 +412,19 @@ eksik + yanlış metin dönüyor).
 | 14 | `70/07` | s.142 | **VAR** ✅ | 2 koşul bağlandı (`third D/Sc`, `Kadın Mf < 40`) (CHANGE-023) |
 | — | `278/728`, `478/728`, `478/748` | s.140 | (çapraz ref) | kaynakta "bakınız"; `78/87` koşulunda atıf taşır |
 
-## Batch 18 — Sc bloğu (s.146)
+## Batch 18 & Batch 31 — Sc bloğu (s.143-148) — **10 VAR / 0 YOK** (CHANGE-024 ile TAMAMLANDI)
 
-| Kod | Kaynak sayfa | Kaynak | Kodda |
-|---|---|---|---|
-| **8726/Yüksek 9** | s.146 | ✅ ("Ajite şizofren bir hastayı göstermektedir.") | ❌ (`'8726'` → `78/87` kırpma) |
-
-İki-ölçekli ama **gövdesi eksik** olan başlık (bu dosyanın değil, CONFLICT-031'in
-konusu): `87/78` — Sc bloğunun metni kodda yok, `87` çağrısı Pt bloğunun `78/87`
-metnini döndürüyor.
-
-`86/68` Sc bloğunda **VAR** sayıldı: gövde, Pa bloğu kaydının (`68/86`) son
-cümlesinde mevcut; yalnız "7 de 70 T puanındadır" eşiği kayıp (CONFLICT-027).
-`81/18 · 82/28 · 83/38 · 84/48 · 85/58` beş başlık kaynakta **"Bakınız"**
-çapraz referansıdır → ayrı gövde beklenmez, **UYUMLU** (CONFLICT-024 dışı).
-
-### Kümülatif kapsam (PHASE 9/10)
-
-| Blok | İncelenen | VAR | YOK |
-|---|---|---|---|
-| Hs (s.63-78) | 31 | 31 | 0 |
-| D (s.79-92) | 27 | 9 | 18 |
-| Hy (s.95-101) | 12 | 12 | 0 |
-| Pd (s.107-120) | 20 | 9 | 13 |
-| Mf (s.121-126) | 10 | 9 | 1 |
-| Pa (s.130-135) | 15 | 9 | 6 |
-| Pt (s.137-141) | 15 | 14 | 1 |
-| **Pt KAPANIŞI (s.142)** | **2** | **1** | **1** |
-| Sc (s.146) | 8 | 6 | 2 |
-| **Sc KAPANIŞI (s.147-148)** | **2** | **2** | **0** |
-| **TOPLAM** | **142** | **102** | **42** |
-
-
-> **FINAL sayım notu (batch 18):** yukarıdaki tablo satır satır toplanarak
-> **140 / 100 / 42** bulundu. Tablodaki **Hs satırı** ("31 | 31 | 0") ile
-> CONFLICT-024'ün Hs kapsamı (**9 VAR / 22 YOK**) hâlâ uzlaştırılmadı — bu satır
-> batch 1-2 kayıtlarından geldiği gibi bırakıldı; **tüm blok seti çıkarıldıktan
-> sonraki FINAL sayımında** düzeltilecek (VAR+YOK ≠ İncelenen olan tek satır odur).
-> **Pt satırı** batch 18 ile 15 → **17 başlığa** çıktı (s.142 kapanışı: `794` YOK,
-> `70/07` VAR); **Sc satırı** yeni eklendi (s.146: 8 başlık → 6 VAR / 2 YOK).
-
-## Sc bloğu kapanış sayımı (s.147-148) — **2 VAR / 0 YOK**
-
-| # | Kaynak başlığı | Sayfa | Kodda | Not |
+| Kod | Kaynak sayfa | Kaynak | Kodda | Not |
 |---|---|---|---|---|
-| 1 | `89/98` | s.147-148 | **VAR** ✅ | gövde sadık (8/10 parça) · `diagnosis` = "Şizofreni / Madde kullanımına bağlı psikoz" ✅ · **eksik cümle:** "Yaşı 27'den küçük olanlarda görülür, üçüncü yükselen alt test 4, 7 ya da 6'dır." → CONFLICT-025/027/034 |
-| 2 | `80/08` | s.148 | **VAR** ✅ | gövde sadık (7/8 parça) · `diagnosis` = "Şizoid Kişilik" ✅ · **eksik cümle:** "Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir." → CONFLICT-025/027 |
-| — | **Şekil 22 Paranoid Vadi** (Pa↑ Pt↓ Sc↑) | s.147 | **YOK** ❌ | kod tipi değil, **üç-ölçekli konfigürasyon** → CONFLICT-033 (kapsamı 5 → 6) |
+| **8726/Yüksek 9** | s.146 | ✅ ("Ajite şizofren bir hastayı göstermektedir.") | **VAR** ✅ | `Sc:8726` müstakil kodu eklendi (CHANGE-024) |
+| **87/78** | s.146 | ✅ ("Endişeli, kendi kendini tetkik edebilen...") | **VAR** ✅ | `Sc:78` / `Sc:87` bloğa özel gövdesi eklendi (CHANGE-024) |
+| **86/68** | s.146 | ✅ ("6 ve 8'in T puanı 80'nin üstünde, 7 de 70...") | **VAR** ✅ | `Sc:68` / `Sc:86` bloğa özel gövdesi ve tanısı eklendi (CHANGE-024) |
+| **Paranoid Vadi (Şekil 22)** | s.147 | ✅ ("Bu örüntüyü gösteren hastalar...") | **VAR** ✅ | `Sc:paranoid_valley` müstakil örüntüsü eklendi (CHANGE-024) |
+| **89/98** | s.147-148 | ✅ (Yaş < 27 ve 3. test 4, 7 veya 6) | **VAR** ✅ | Gövde MATCH · 2 koşul bağlandı (CHANGE-024) |
+| **80/08** | s.148 | ✅ (3. test 7 veya 2) | **VAR** ✅ | Gövde MATCH · 3. test koşulu bağlandı (CHANGE-024) |
+| `81/18 · 82/28 · 83/38 · 84/48 · 85/58` | s.146 | (çapraz ref) | **VAR** ✅ | "Bakınız" çapraz referansları uyumlu |
 
-**Blok toplamı (Sc, s.143-148): 10 başlık → 8 VAR / 2 YOK.** s.149-150'de (Ma
-girişi + Tablo 16 + Graham listeleri) kod tipi başlığı yok → kapsam sayımı
-değişmez.
+**Sc Bloğu Özeti (s.143-148):** 10 başlığın tamamı VAR, 0 YOK. CHANGE-024 ile Sc bloğu göçü tamamlandı.
 
 ## Ma (9) bloğu + Si (0) girişi (s.149-156) — batch 20 sayımı
 
