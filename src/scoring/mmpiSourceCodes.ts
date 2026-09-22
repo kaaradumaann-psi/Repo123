@@ -402,6 +402,388 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
     rawCode: '027(8)',
     text: 'Bireyde güçlü ruminatif davranışlar görülebilir.',
   },
+
+  // --- Hs (Hipokondriasis / 1) Bloğu (s.67-78) · DECISION-031/A ---
+  // s.68-69: 123/213 Kodu
+  'Hs:123': {
+    code: '123/213',
+    block: 'Hs',
+    rawCode: '123/213',
+    text:
+      'Bu koddaki bireylerde belirgin bir somatizasyon bozukluğu ve hipokondriyak uğraşlar görülür. Bedensel ' +
+      'işlevleri ile aşırı ilgilidirler ve sıklıkla birden fazla fiziksel yakınma bildirirler. Ağrı, halsizlik, ' +
+      'çabuk yorulma, uyku bozuklukları, mide-bağırsak sorunları ve kardiyak yakınmalar sıktır. Yaşadıkları ' +
+      'duygusal ve psikolojik sorunları bedenselleştirerek ifade ederler. Bedensel semptomların psikolojik ' +
+      'kökenli olduğunu kabul etmezler ve içgörüleri oldukça sınırlıdır. Pasif-bağımlı kişilik özellikleri ' +
+      'taşırlar, sorumluluk almaktan kaçınırlar ve hastalık semptomları yoluyla ikincil kazanç sağlarlar. ' +
+      'Depresif duygulanım, anksiyete ve karamsarlık tabloya eşlik eder. Tedavide psikoterapiye dirençlidirler; ' +
+      'somatik tedavilere yönelmek isterler ancak tıbbi tedavilerden de nadiren tam fayda görürler.',
+    diagnosis: [
+      'Belirgin somatizasyon bozukluğu ve hipokondriyak uğraşlar',
+      'Pasif-bağımlı kişilik bozukluğu',
+      'Depresif bozukluk',
+    ],
+    seeAlso: '213 ve 231 kodlarına da bakınız (s.69).',
+    conditions: [
+      {
+        source: 's.69',
+        quote: '213 kodunda 2 ve 1 alt testleri arasında belirgin fark varsa 213/231 kodlarına bakılır.',
+        manual: true,
+      },
+    ],
+  },
+  // s.69: 1234 Kodu
+  'Hs:1234': {
+    code: '1234',
+    block: 'Hs',
+    rawCode: '1234',
+    text:
+      'Bu koddaki bireyler pasif-agresif kişilik örüntüsü sergilerler. Öfke ve düşmanlık duygularını doğrudan ' +
+      'ifade etmekte zorlanırlar; öfkelerini dolaylı yollardan, somatik yakınmalar ve inatçı, dirençli ' +
+      'tutumlarla gösterirler. Aile ve evlilik ilişkilerinde ciddi çatışmalar yaşarlar. Alkol kötüye kullanımı ' +
+      've bağımlılık sorunları görülebilir. Tedaviye ve değişime dirençlidirler; başkalarını suçlama eğilimindedirler.',
+    diagnosis: [
+      'Pasif-agresif kişilik',
+      'Somatizasyon bozukluğu',
+      'Alkol bağımlılığı / kötüye kullanımı',
+    ],
+    seeAlso: '123/213 ve 24/42 kodlarına bakınız (s.69).',
+  },
+  // s.69: 1236 Kodu
+  'Hs:1236': {
+    code: '1236',
+    block: 'Hs',
+    rawCode: '1236',
+    text:
+      'Bu koddaki bireylerde somatizasyon ve hipokondriyak yakınmaların yanı sıra belirgin kuşkuculuk, ' +
+      'alınganlık ve paranoid eğilimler görülür. Diğer insanların kendilerine haksızlık yaptığını, onları ' +
+      'anlamadığını veya kasıtlı olarak zarar vermeye çalıştığını düşünürler. Bedensel semptomlarını başkalarının ' +
+      'hatalı tutumlarına veya çevresel faktörlere bağlarlar. Kişilerarası ilişkilerde aşırı mesafeli, güvensiz ' +
+      've savunucudurlar. Tedavi ilişkisi kurmak oldukça zordur; hekimleri ve terapistleri yetersizlikle suçlayabilirler.',
+    diagnosis: [
+      'Paranoid özellikli somatizasyon bozukluğu',
+      'Paranoid kişilik özellikleri',
+    ],
+    seeAlso: '123/213 ve 16/61 kodlarına bakınız (s.69).',
+  },
+  // s.69: 1237 Kodu
+  'Hs:1237': {
+    code: '1237',
+    block: 'Hs',
+    rawCode: '1237',
+    text:
+      'Bu kod tipinde pasif-bağımlı kişilik yapısında anksiyete ve psikofizyolojik reaksiyonlar ön plandadır. ' +
+      'Bireyler sürekli bir endişe, gerginlik, kuruntu ve panik hali içindedirler. Somatik yakınmalar çok ' +
+      'çeşitlidir; çarpıntı, terleme, titreme, nefes darlığı ve gastrointestinal spazmlar yaygındır. ' +
+      'Obsesif-kompulsif eğilimler ve ruminasyonlar tabloya eşlik edebilir. Yoğun yetersizlik duyguları ' +
+      'yaşarlar ve başkalarına bağımlı olmaya ihtiyaç duyarlar; ancak bu bağımlılık ilişkilerinde de yoğun ' +
+      'kaygı hissederler.',
+    diagnosis: [
+      'Pasif bağımlı kişilik yapısında anksiyete ve psikofizyolojik reaksiyon',
+      'Yaygın anksiyete bozukluğu',
+      'Panik bozukluk',
+    ],
+    seeAlso: '123/213 ve 17/71 kodlarına bakınız (s.69).',
+  },
+  // s.69: 1270 Kodu
+  'Hs:1270': {
+    code: '1270',
+    block: 'Hs',
+    rawCode: '1270',
+    text:
+      'Bu koddaki bireyler sosyal olarak son derece içe çekilmiş, utangaç ve yetersizlik duyguları yoğun ' +
+      'olan kişilerdir. Bedensel yakınmalar ve kronik anksiyete nedeniyle sosyal ortamlardan kaçınırlar. ' +
+      'Depresif duygulanım ve apati belirgindir. Kendilerine güvenleri son derece düşüktür; başkalarıyla ' +
+      'ilişki kurmaktan korkarlar ve yalnızlığı tercih ederler. Ruminatif düşünceler ve bedensel meşguliyetler ' +
+      'yaşamlarını kısıtlar.',
+    diagnosis: [
+      'Sosyal fobi / Çekingen kişilik bozukluğu',
+      'Kronik distimi ve anksiyete',
+    ],
+    seeAlso: '127/217 ve 10/01 kodlarına bakınız (s.69).',
+  },
+  // s.69-70: 12378 Kodu
+  'Hs:12378': {
+    code: '12378',
+    block: 'Hs',
+    rawCode: '12378',
+    text:
+      'Bu profil ağır bir psikopatolojiye işaret eder. Yoğun somatik yakınmalar, derin depresyon, aşırı kaygı ' +
+      've obsesyonların yanı sıra yabancılaşma, düşünce karmaşası ve psikotik sınırlarda gezinme görülür. ' +
+      'Birey gerçeklikten kopma yaşantıları, bizar somatik delüzyonlar ve yoğun panik yaşayabilir. Günlük ' +
+      'işlevsellik ciddi şekilde bozulmuştur. Kriz durumlarında hastaneye yatış gerekebilir.',
+    diagnosis: [
+      'Ağır nevrotik çözülme veya sınırda (borderline) durum',
+      'Psikotik özellikli ağır depresyon',
+    ],
+    seeAlso: '123/213, 17/71 ve 18/81 kodlarına bakınız (s.70).',
+  },
+  // s.70: 128/218 Kodu
+  'Hs:128': {
+    code: '128/218',
+    block: 'Hs',
+    rawCode: '128/218',
+    text:
+      'Bu koddaki bireylerde hipokondriyak ve depresif belirtilere bizar somatik düşünceler ve psikotik ' +
+      'eğilimler eşlik eder. Beden organlarının çürüdüğü, çalışmadığı veya biçim değiştirdiği şeklinde somatik ' +
+      'delüzyonlar bulunabilir. Şiddetli anksiyete, ajitasyon ve yabancılaşma duyguları yaygındır. Sosyal geri ' +
+      'çekilme belirgindir. Düşünce süreçlerinde çözülmeler ve mantık hataları gözlenebilir.',
+    diagnosis: [
+      'Şizoafektif bozukluk',
+      'Psikotik depresyon',
+      'Şizofreni (somatik tip)',
+    ],
+    seeAlso: '18/81 ve 28/82 kodlarına bakınız (s.70).',
+  },
+  // s.70: 129/219 Kodu
+  'Hs:129': {
+    code: '129/219',
+    block: 'Hs',
+    rawCode: '129/219',
+    text:
+      'Bu kod tipi sıklıkla beyin hasarı veya organik beyin sendromu olan bireylerde görülür. Hastalar gergin, ' +
+      'huzursuz ve ajitedir; aşırı etkinlik göstermeye çalışırlar ancak bedensel kısıtlılıkları ve bilişsel ' +
+      'yetersizlikleri nedeniyle çabuk engellenir ve öfkelenirler. Somatik yakınmalarla birlikte depresif ve ' +
+      'manik dalgalanmalar yaşayabilirler. Kendi kısıtlılıklarını inkar etme ve abartılı çabalara girme eğilimindedirler.',
+    diagnosis: [
+      'Organik beyin bozukluğuna bağlı duygulanım bozukluğu',
+      'Bipolar bozukluk (karışık dönem)',
+    ],
+    seeAlso: '19/91 ve 29/92 kodlarına bakınız (s.70).',
+  },
+  // s.70: 120/210 Kodu
+  'Hs:120': {
+    code: '120/210',
+    block: 'Hs',
+    rawCode: '120/210',
+    text:
+      'Bu koddaki bireyler kronik bedensel yakınmalar ve depresif ruh hali nedeniyle sosyal ilişkilerden ' +
+      'tamamen elini eteğini çekmiş kişilerdir. İçe kapanık, sessiz, utangaç ve pasiftirler. İnsan ilişkilerinde ' +
+      'rahatsızlık duyarlar ve yalnız yaşamayı tercih ederler. Somatizasyon ve hipokondriasis onların sosyal ' +
+      'temaslardan kaçınma ve sorumluluktan uzak durma araçlarıdır. Tedavi motivasyonları oldukça düşüktür.',
+    diagnosis: [
+      'Distimik bozukluk ve şizoid/çekingen kişilik',
+      'Kronik somatizasyon bozukluğu',
+    ],
+    seeAlso: '10/01 ve 20/02 kodlarına bakınız (s.70).',
+  },
+  // s.72-73: 132/312 Kodu
+  'Hs:132': {
+    code: '132/312',
+    block: 'Hs',
+    rawCode: '132/312',
+    text:
+      'Bu profil klasik "nevrotik triad" yükselmesidir. Hastalar belirgin histerik ve hipokondriyak özelliklerin ' +
+      'yanı sıra depresif duygulanım sergilerler. Beden yakınmaları çok yaygın ve dramatiktir; baş ağrıları, ' +
+      'sırt ve boyun ağrıları, göğüs ağrıları, halsizlik ve mide-bağırsak sorunları sıktır. Sorunlarını çözmede ' +
+      'inkar ve bastırma mekanizmalarını yoğun biçimde kullanırlar. Duygusal çatışmalarını bedenselleştirerek ' +
+      'çevrelerinden ilgi, şefkat ve destek elde ederler. Pasif-bağımlı ilişki örüntüleri kurarlar. Tedaviye ' +
+      'ilişkin içgörüleri düşüktür; semptomlarının organik kökenli olduğuna inanırlar ve psikolojik açıklamaları ' +
+      'kesinlikle reddederler.',
+    diagnosis: [
+      'Somatizasyon bozukluğu / Hipokondriyazis',
+      'Konversiyon bozukluğu',
+      'Distimi ve histerik kişilik',
+    ],
+    seeAlso: '13/31, 23/32 ve 123/213 kodlarına bakınız (s.73).',
+  },
+  // s.73-74: 134/314 Kodu
+  'Hs:134': {
+    code: '134/314',
+    block: 'Hs',
+    rawCode: '134/314',
+    text:
+      'Bu koddaki bireylerde somatizasyon ve histerik özelliklerin altında güçlü bir öfke, düşmanlık ve isyan ' +
+      'duygusu yatar. Ancak bu öfkelerini doğrudan ifade etmek yerine bedensel semptomlar ve pasif-agresif ' +
+      'davranışlar yoluyla çevrelerini manipüle etmek için kullanırlar. Aile ve evlilik çatışmaları çok ' +
+      'yoğundur. Alkol kullanımı ve fevri davranışlar görülebilir. Başkalarını suçlama eğilimindedirler ve ' +
+      'ilişkilerinde talepkar, bencil ve manipülatiftirler.',
+    diagnosis: [
+      'Pasif-agresif kişilik bozukluğu',
+      'Histerik kişilik bozukluğu',
+      'Somatoform bozukluk ve dürtü kontrol güçlükleri',
+    ],
+    seeAlso: '13/31 ve 14/41 kodlarına bakınız (s.74).',
+  },
+  // s.74: 1342 Kodu
+  'Hs:1342': {
+    code: '1342',
+    block: 'Hs',
+    rawCode: '1342',
+    text:
+      'Bu kod tipinde yoğun somatizasyon, histerik savunmalar ve antisosyal/dürtüsel eğilimlerle birlikte ' +
+      'belirgin depresyon ve suçluluk duyguları bulunur. Bireyler çevreleriyle kronik çatışma halindedir; ' +
+      'eyleme vuruk davranışlar sergiledikten sonra yoğun depresyon ve pişmanlık yaşayabilirler, ancak bu ' +
+      'döngüyü kırmakta zorlanırlar. Alkol ve madde kötüye kullanımı sıktır.',
+    diagnosis: [
+      'Dürtü kontrol bozukluğu ve komorbid depresyon',
+      'Sınırda veya pasif-agresif kişilik örüntüsü',
+    ],
+    seeAlso: '134/314 ve 24/42 kodlarına bakınız (s.74).',
+  },
+  // s.74: 136/316 Kodu
+  'Hs:136': {
+    code: '136/316',
+    block: 'Hs',
+    rawCode: '136/316',
+    text:
+      'Bu koddaki bireylerde somatizasyon ve histerik özelliklerin yanında belirgin paranoid eğilimler, ' +
+      'alınganlık ve kuşkuculuk vardır. Öfkelerini bastırmaya çalışırlar ancak bunu başaramadıklarında çevreye ' +
+      'yansıtırlar ve başkalarını kendilerine düşman olmakla suçlarlar. Hastalık semptomlarını başkalarının ' +
+      'hatalı tutumlarının bir sonucu olarak görürler. Tıbbi personelle ve aile üyeleriyle sürekli tartışma ' +
+      've sürtüşme yaşarlar.',
+    diagnosis: [
+      'Paranoid özellikli somatoform bozukluk',
+      'Paranoid kişilik bozukluğu',
+    ],
+    seeAlso: '13/31 ve 16/61 kodlarına bakınız (s.74).',
+    conditions: [
+      {
+        source: 's.74',
+        quote:
+          'Pa alt testi Hy alt testinden 10 T puanı veya daha fazla yüksek olduğunda paranoid özellikler ve ' +
+          'hezeyansal düşünceler çok daha belirgindir.',
+        test: ({ t }) => ((t('Pa') ?? 0) - (t('Hy') ?? 0)) >= 10,
+      },
+      {
+        source: 's.74',
+        quote:
+          'Hy alt testi Pa alt testinden 10 T puanı veya daha fazla yüksek olduğunda histerik savunmalar ve ' +
+          'bedenselleştirme ön plandadır.',
+        test: ({ t }) => ((t('Hy') ?? 0) - (t('Pa') ?? 0)) >= 10,
+      },
+    ],
+  },
+  // s.74-75: 137 Kodu
+  'Hs:137': {
+    code: '137',
+    block: 'Hs',
+    rawCode: '137',
+    text:
+      'Bu koddaki bireylerde bedensel yakınmalar, histerik özellikler ve kronik anksiyete-gerginlik bir aradadır. ' +
+      'Kişi sürekli bir panik, endişe ve felaket beklentisi içindedir. Kalp çarpıntısı, göğüs sıkışması, ' +
+      'titreme ve bayılma hissi gibi panik benzeri semptomlar sıktır. Obsesif ruminasyonlar ve sağlık kaygıları ' +
+      'yoğundur. İntihar düşünceleri veya girişimleri eşlik edebilir. Tedaviye yoğun yardım arayışıyla gelirler ' +
+      'ancak kaygıları nedeniyle terapiye uyum sağlamakta güçlük çekerler.',
+    diagnosis: [
+      'Panik bozukluk ve agorafobi',
+      'Hipokondriyazis ve yaygın anksiyete bozukluğu',
+    ],
+    seeAlso: '13/31 ve 17/71 kodlarına bakınız (s.75).',
+    conditions: [
+      {
+        source: 's.75',
+        quote:
+          'Ma alt testi yüksek ve/veya K 50 T puanının altında olduğunda intihar riski ve aşırı ajitasyon olasılığı artar.',
+        test: ({ t }) => (t('Ma') ?? 0) >= 70 || (t('K') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.75: 138/318 Kodu
+  'Hs:138': {
+    code: '138/318',
+    block: 'Hs',
+    rawCode: '138/318',
+    text:
+      'Bu profil ciddi bir kişilik patolojisine veya psikotik bir sürece işaret eder. Yoğun somatik yakınmalar, ' +
+      'histerik konversiyon semptomları ve yabancılaşma duyguları bir aradadır. Bireylerde bizar bedensel ' +
+      'delüzyonlar, cinsel kimlik karmaşası, depresif çökkünlük ve ani öfke patlamaları görülebilir. Gerçeklik ' +
+      'testi zayıflamıştır; stres altında psikotik dekompansasyon gelişebilir. İlişkilerinde sınırda (borderline) ' +
+      'özellikler, yoğun terk edilme korkusu ve manipülatif intihar tehditleri sık gözlenir.',
+    diagnosis: [
+      'Borderline kişilik bozukluğu',
+      'Şizofreni (psödonörotik veya somatik tip)',
+      'Ağır somatoform bozukluk',
+    ],
+    seeAlso: '13/31 ve 18/81 kodlarına bakınız (s.75).',
+  },
+  // s.75: 1382 Kodu
+  'Hs:1382': {
+    code: '1382',
+    block: 'Hs',
+    rawCode: '1382',
+    text:
+      'Bu koddaki bireylerde hipokondriyak ve histerik savunmaların, psikotik yabancılaşmanın yanında derin ' +
+      'bir depresyon ve çökkünlük eşlik eder. Birey yoğun suçluluk, umutsuzluk ve değersizlik hisseder. ' +
+      'Bedensel işlevlerinin tamamen bozulduğu veya çürüdüğü yönünde delüzyonlar (nihilistik hezeyanlar) ' +
+      'ortaya çıkabilir. İntihar riski oldukça yüksektir.',
+    diagnosis: [
+      'Psikotik depresyon',
+      'Şizoafektif bozukluk',
+    ],
+    seeAlso: '138/318 ve 28/82 kodlarına bakınız (s.75).',
+  },
+  // s.75-76: 139 Kodu
+  'Hs:139': {
+    code: '139',
+    block: 'Hs',
+    rawCode: '139',
+    text:
+      'Bu koddaki bireylerde somatizasyon, histerik özellikler ve aşırı enerji-ajitasyon birlikte görülür. ' +
+      'Hastalar gergin, huzursuz ve sabırsızdır. Bedensel semptomlarını dramatik ve abartılı bir dille ifade ' +
+      'ederler. Sürekli hareket halinde olmalarına karşın başladıkları işleri bitiremezler. Çabuk sinirlenir ' +
+      've öfke patlamaları gösterirler. Organik beyin hasarı olan hastalarda da bu örüntü görülebilir.',
+    diagnosis: [
+      'Somatoform bozukluk ve hipomanik durum',
+      'Organik duygulanım bozukluğu',
+    ],
+    seeAlso: '13/31 ve 19/91 kodlarına bakınız (s.76).',
+    conditions: [
+      {
+        source: 's.76',
+        quote:
+          'Alt test 4 yüksek ve K alt testi düşük olduğunda fevri davranışlar, öfke patlamaları ve antisosyal eyleme vurukluk riski belirgindir.',
+        test: ({ t }) => (t('Pd') ?? 0) >= 70 && (t('K') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.76: Yüksek 1 / Düşük 4 Kodu
+  'Hs:14_low4': {
+    code: 'Yüksek 1 / Düşük 4',
+    block: 'Hs',
+    rawCode: 'Yüksek 1 / Düşük 4',
+    text:
+      'Yüksek 1/Düşük 4 örüntüsü karşılaşılan sorunlarla başa çıkamama ve ev yaşantısındaki güçlüklerle ' +
+      'bağlantılıdır; öfkelerini kolaylıkla dile getirmelerine karşın psikofizyolojik tepkiler verirler; ' +
+      'sürekli yakınma ve karamsarlık genel özellikleridir. Bireyler aşırı pasif, uyumlu ve bağımlıdır; ' +
+      'çatışmalardan kaçınmak için bedensel semptomlar geliştirirler.',
+    diagnosis: [
+      'Pasif-bağımlı kişilik yapısı ve somatizasyon',
+    ],
+    seeAlso: '14/41 koduna bakınız (s.76).',
+  },
+  // s.76: 146 Kodu
+  'Hs:146': {
+    code: '146',
+    block: 'Hs',
+    rawCode: '146',
+    text:
+      'Bu koddaki bireylerde somatik yakınmalar, dürtüsellik ve belirgin paranoid kuşkuculuk bir aradadır. ' +
+      'Kişilerarası ilişkilerinde savunucu, alıngan ve kavgacıdırlar. Kurallara uymakta zorlanırlar ve ' +
+      'karşılaştıkları sorunlarda çevrelerindeki kişileri suçlarlar. Bedensel rahatsızlıklarını başkalarının ' +
+      'eylemlerine bağlarlar. Sosyal çevrelerinde sürekli gerginlik ve geçimsizlik yaratırlar.',
+    diagnosis: [
+      'Paranoid ve antisosyal özellikli kişilik bozukluğu',
+      'Somatizasyon bozukluğu',
+    ],
+    seeAlso: '14/41 ve 16/61 kodlarına bakınız (s.76).',
+  },
+  // s.76: 1469 Kodu
+  'Hs:1469': {
+    code: '1469',
+    block: 'Hs',
+    rawCode: '1469',
+    text:
+      'Bu kod tipinde somatik meşguliyetler, antisosyal dürtüler, paranoid kuşkuculuk ve aşırı psikomotor ' +
+      'ajitasyon birleşir. Bireyler son derece sabırsız, huzursuz, tahrik edici ve saldırgan olabilirler. ' +
+      'Dürtü kontrolleri çok zayıftır; fevri öfke patlamaları ve yıkıcı davranışlar gösterebilirler. Yasal ' +
+      'sorunlar ve madde kullanımı sıktır. Bireyin davranışlarını kontrol altında tutması güçtür.',
+    diagnosis: [
+      'Ağır dürtü kontrol bozukluğu ve antisosyal kişilik',
+      'Hipomanik durumla birlikte paranoid reaksiyon',
+    ],
+    seeAlso: '146 ve 49/94 kodlarına bakınız (s.76).',
+  },
 };
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
@@ -423,6 +805,20 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
         return hs !== undefined && d !== undefined && Math.abs(hs - d) <= 5;
       },
     },
+    {
+      source: 's.68',
+      quote: '3 alt testi 1’in 5 T puanı alanı içindeyse 123/213 kodlarına da bakınız.',
+      test: ({ t }) => {
+        const hs = t('Hs');
+        const hy = t('Hy');
+        return hs !== undefined && hy !== undefined && Math.abs(hs - hy) <= 5;
+      },
+    },
+    {
+      source: 's.68',
+      quote: 'Pd, Ma ve Mf alt testleri de yükseldiğinde dürtüsel eyleme vurukluk ve bağımlılık çatışmaları belirginleşir.',
+      test: ({ t }) => (t('Pd') ?? 0) >= 70 && (t('Ma') ?? 0) >= 70,
+    },
   ],
   '13': [
     {
@@ -432,6 +828,66 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
         'kendini normal, sorumluluk sahibi, yardımsever ve sempatik olarak sunmaya çalışır.',
       test: ({ t }) =>
         (t('D') ?? 100) < 70 && (t('Pt') ?? 100) < 70 && (t('Sc') ?? 100) < 70 && (t('F') ?? 100) < 50,
+    },
+    {
+      source: 's.72',
+      quote: 'Düşük 2 ile birlikte histerik kişilik özellikleri ve klasik psikosomatik semptomlar gösterirler.',
+      test: ({ t }) => (t('D') ?? 100) < 50,
+    },
+    {
+      source: 's.72',
+      quote: '13/31 kodunda 2, 7, 8 ve 9 alt testleri 70 T puanının üzerinde ve K alt testi düşük olduğunda ciddi bir psikolojik bozulma söz konusudur.',
+      test: ({ t }) => (t('D') ?? 0) >= 70 && (t('Pt') ?? 0) >= 70 && (t('Sc') ?? 0) >= 70 && (t('Ma') ?? 0) >= 70 && (t('K') ?? 100) < 50,
+    },
+    {
+      source: 's.72',
+      quote: 'L ve K alt testleri 70 T puanının üzerinde olduğunda bireyler kendilerini olduğundan daha iyi gösterme eğilimindedirler.',
+      test: ({ t }) => (t('L') ?? 0) >= 70 && (t('K') ?? 0) >= 70,
+    },
+  ],
+  '14': [
+    {
+      source: 's.76',
+      quote: 'Alt test 3 de birlikte yükselmişse aile ve evlilik sorunları, kızgınlık ve sosyal yetersizlik duyguları ile birlikte bağımlılık-bağımsızlık çatışmaları ön plana çıkmıştır.',
+      test: ({ t }) => (t('Hy') ?? 0) >= 70,
+    },
+  ],
+  '16': [
+    {
+      source: 's.77',
+      quote: 'Alt test 8 de yükselmişse alışılmamış somatik uğraşların varlığı dikkate alınmalı, belki de somatik delüzyonların olabileceği düşünülmelidir',
+      test: ({ t }) => (t('Sc') ?? 0) >= 70,
+    },
+    {
+      source: 's.77',
+      quote: 'Alt test 4’ün T değeri 70’ten azsa Paranoid Şizofreni düşünülmelidir.',
+      test: ({ t }) => (t('Pd') ?? 100) < 70,
+    },
+  ],
+  '18': [
+    {
+      source: 's.77',
+      quote: 'Eğer F alt testi de yükselmişse şizofreni; pre-psikotik bozukluk tanısı da düşünülmelidir.',
+      test: ({ t }) => (t('F') ?? 0) >= 70,
+    },
+  ],
+  '19': [
+    {
+      source: 's.78',
+      quote: 'Eğer bu profilde 2 ve 3 alt testlerinin değerleri 50 T puanından aşağıda ise 129 ve 139 koduna bakınız.',
+      test: ({ t }) => (t('D') ?? 100) < 50 && (t('Hy') ?? 100) < 50,
+    },
+  ],
+  '01': [
+    {
+      source: 's.78',
+      quote: 'Üçüncü yükselen alt test 8 olduğu zaman genellikle çok sayıda somatik yakınmalarla birlikte şizoid çekilme ve sosyal yetersizliğin olduğu söylenebilir.',
+      test: ({ third }) => third === 'Sc',
+    },
+    {
+      source: 's.78',
+      quote: 'Sıklıkla 2 ve 3 yükselen testlerdir ve eğer T değeri 70’in üstünde ise destek sistemleri zayıflamıştır ve maskeli depresyon vardır.',
+      test: ({ t }) => (t('D') ?? 0) >= 70 && (t('Hy') ?? 0) >= 70,
     },
   ],
   '26': [
@@ -520,10 +976,21 @@ export type CodeRef = {
 /** Kod düğümünü ayrıştırır: "91/19" → 91, "027(8)" → 027 + (8). */
 export function parseCode(code: string | undefined): CodeRef | undefined {
   if (!code) return undefined;
-  const m = code.trim().match(/^(\d{2,})(?:\s*\((\d)\))?/);
+  const trimmed = code.trim();
+  if (/yüksek\s*1.*düşük\s*4/i.test(trimmed) || trimmed === '1_low4' || trimmed === '14_low4') {
+    return { digits: '14_low4', block: 'Hs' };
+  }
+  const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
+  if (colonMatch && colonMatch[2]) {
+    const blk = colonMatch[1] as CodeScaleKey;
+    const raw = colonMatch[2];
+    const qual = colonMatch[3];
+    return { digits: raw, qualifier: qual, block: blk };
+  }
+  const m = trimmed.match(/^(\d{2,})(?:\s*\((\d)\))?/);
   const raw = m?.[1];
   if (!raw) return undefined;
-  const digits = raw.split('').sort().join('');
+  const digits = raw.length === 2 ? raw.split('').sort().join('') : raw;
   const lead = raw[0] ?? '';
   return { digits, qualifier: m?.[2], block: CODE_DIGIT_SCALE[lead] };
 }

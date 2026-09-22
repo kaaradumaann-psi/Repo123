@@ -37,27 +37,25 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | **N/A** — Kaynak kitap (Ceyhun & Oral 2003) MMPI-1 standardıdır, Harris-Lingoes alt ölçekleri içermez; projenin türetilmiş ölçekleri (kişilik bozuklukları, Wiggins, özel ölçekler) Bölüm 7 kapsamında **PHASE 8**'de doğrulandı. |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5) | ✅ **KAYNAK TARAMASI DONE (s.63-157, batch 21)** — Hs · D · Hy · Pd · Mf · Pa · Pt · Sc · Ma · **Si** bloklarının tamamı okundu; **s.158 BOŞ SAYFA** → bölüm s.157'de biter. Kod tarafı: kapsam **148 başlık → 103 VAR / 47 YOK** → **CONFLICT-024** · koşullu cümleler → **025** / **027 (45)** · kırpma → **030 (37 örnek)** · blok-bazlı gövde → **031** + **036 (2 vaka)** · örüntüler → **033 (9)** · ilişki bölümleri/K-örüntüsü → **039** · ✅ **DECISION-029 ONAYLANDI (A) → CHANGE-014 UYGULANDI** (2026-09-22): blok-yerel kod kimliği + **kırpmasız** çözümleme + 12 koşul + 4 blok gövdesi; kapsam **106 VAR / 44 YOK** |
-| 10 | Interpretation (Bölüm 6) | ✅ **DONE** — Bölüm 6 kaynak taraması s.159-170 bitti (batch 22); DECISION-030 (A) onaylandı ve CHANGE-015 ile uygulandı (batch 23: 18 desen kaydı, 8 çekince); batch 24 CHANGE-016 ile kalan 4 desen kartı kaynaklandı (`cry-for-help`, `depressive-27`, `49`, `89`); CONFLICT-041/042 FIXED, 043 OPEN (DECISION-032 adayı) · kanıt cmp-b6-batch23/24 → **0 FARK** |
+| 9 | Code types (Bölüm 5) | 🔄 **BLOK-BLOK GÖÇ (DECISION-031 = A · batch 25)** — İlk blok **Hs (1) bloğu (s.67-78) TAMAMLANDI (CHANGE-018)**: 20 kod gövdesi kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`123/213`, `1234`, `1236`, `1237`, `1270`, `12378`, `128/218`, `129/219`, `120/210`, `132/312`, `134/314`, `1342`, `136/316`, `137`, `138/318`, `1382`, `139`, `Yüksek 1 / Düşük 4`, `146`, `1469`); 10 koşul makinece değerlendirilebilir testlerle bağlandı; çakışma (123 vs 132) engellendi; mutabakat `cmp-hs-batch25.ts` 0 FARK · `tests/mmpiHsBlock.test.ts` 16/16 PASS. Sıradaki blok: **D (Depresyon / 2) bloğu (s.82-94)**. |
+| 10 | Interpretation (Bölüm 6) | ✅ **DONE** — Bölüm 6 kaynak taraması s.159-170 bitti (batch 22); DECISION-030 (A) onaylandı ve CHANGE-015 ile uygulandı (batch 23: 18 desen kaydı, 8 çekince); batch 24 CHANGE-016 ile kalan 4 desen kartı kaynaklandı (`cry-for-help`, `depressive-27`, `49`, `89`); CONFLICT-041/042 FIXED, 043 FIXED (DECISION-032 = B) · kanıt cmp-b6-batch23/24 → **0 FARK** |
 | 11 | AI interpretation | ✅ **DONE** — §39 uyumu (AI hesaplama yapmaz), KVKK sahte isimlendirme (isim/soyad iletilmez), klinik sınırlar (tanı/tedavi yasağı) ve yetkilendirme doğrulandı; 8 test PASS. |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** · `npm test` **380/380 PASS** (36 suite) · `mmpiKeyIntegrity` **63/63** · `mmpiInterpretation` **54/54** · `verify:pdf` PASS · `tsc` 0 |
+| 14 | Tests | **IN_PROGRESS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS |
 
 ## Current position
 
 Current book page:
-**170** (🏁 **BOŞ SAYFA** — koyu piksel %0.24 · OCR 0 satır → **BÖLÜM 6 s.159-169'da
-KAPANDI**) — PDF p93 L.
-- **PHASE 10 batch 22 DONE:** 11 sayfa okundu (s.159 girişi + s.160-169'daki 10 örüntü kutusu, Şekil 23-32), sayısal eşikler görselden; CONFLICT-041 ve CONFLICT-042 açıldı.
-- **PHASE 10 batch 23 DONE:** DECISION-030 = A ONAYLANDI → CHANGE-015 UYGULANDI: `conversion-v` 70/10 · `psychotic-v` 80/80/70 · 6 desen + `negatif-egim` (`manual`) eklendi (11 → 18 kayıt) · `PatternHit.quote/caveat/manualNote` + `MMPI_PATTERN_CAVEATS` UI'a taşındı · CONFLICT-041 ve 042 FIXED · kanıt `cmp-b6-batch23.ts` → 0 FARK · test 368/368.
-- **PHASE 10 batch 24 DONE:** CHANGE-016 (DECISION-030/A 5. madde devamı): BÖLÜM 5 gövdelerine dayanan 4 desen kartı kaynak atfı aldı (`cry-for-help` s.36 · `depressive-27` s.87+89 · `49` s.118-119 · `89` s.147-148); s.36’nın F-yükselme listesi ilk kez SOURCE_FACTS’a yazıldı (`SOURCE-VALIDITY-F-006`). `cry-for-help` bant farkı CONFLICT-043 (P2, OPEN) + DECISION-032 adayı. Kanıt `cmp-b6-batch24.ts` → 0 FARK · test 375/375 · optik-form.html güncel.
-- **PHASE 11 DONE:** Yapay zekâ yorum katmanı denetlendi: §39 uyumu (AI hesaplama yapmaz, ham cevap almaz), KVKK m.4/3-d sahte isimlendirme, klinik tanı/tedavi yasağı ve yetki sınırları doğrulandı; tests/aiInterpretation.test.ts eklendi (5/5 PASS, toplam 380/380 PASS).
+**s.67-78 (Hs Bloğu Göçü TAMAMLANDI)** · Sıradaki: **s.82-94 (D Bloğu)**
+- **PHASE 9 batch 25 DONE (DECISION-031/A · CHANGE-018):** Hs (1) bloğu s.67-78 kitaptan görsel okunarak ve OCR ile teyit edilerek tüm 20 kod gövdesi (`BLOCK_CODES`) ve 10 koşul (`CODE_CONDITIONS`) aktarıldı. 123 ile 132 çakışması `parseCode()` digit-sort düzeltmesiyle çözüldü. Mutabakat `cmp-hs-batch25.ts` (0 FARK) ve `tests/mmpiHsBlock.test.ts` (16 test) ile kilitlendi.
+- **PHASE 10 DONE:** Bölüm 6 (Şekil 23-32) örüntü kutuları ve Bölüm 5 atıfları tamamlandı (CHANGE-015/016, DECISION-030/A).
+- **PHASE 11 DONE:** Yapay zekâ yorum katmanı denetlendi: §39 uyumu, KVKK m.4/3-d sahte isimlendirme, klinik tanı/tedavi yasağı ve yetki sınırları doğrulandı; tests/aiInterpretation.test.ts eklendi.
 - **DECISION-032 = B KABUL (2026-09-22):** cry-for-help F ≥ 70 T otomatik eşiği korundu; s.36'daki 80 T ve üzeri bant bağlamı manualNote ile taşındı (CONFLICT-043 FIXED).
-- **Sıradaki kapılar:** DECISION-031 (Bölüm 5 44 gövde + ~33 koşul) · PHASE 12 (UI) / PHASE 13 (Report).
+- **Sıradaki kapı:** DECISION-031 gereği Bölüm 5 sonraki bloğu: **D (Depresyon / 2) alt testi kod bloğu (s.82-94)**.
 
 Last completed:
-**PHASE 10 batch 24 — CHANGE-016 (DECISION-030/A 5. madde devamı) DONE (2026-09-22):**
+**PHASE 9 batch 25 — CHANGE-018 (DECISION-031/A Hs Bloğu Göçü) DONE (2026-09-22):**
 BÖLÜM 5 kod gövdelerine dayanan dört desen kartı sayfa atfı + alıntı aldı:
 `cry-for-help` (s.36 - F yükselme nedenleri, 4. madde) · `depressive-27` (s.87 · 27/72 ve
 s.89 · 278/728 kritik koşul) · `49` (s.118-119) · `89` (s.147-148). Hiçbir `hit` koşulu
@@ -513,7 +511,7 @@ Kanıt `cmp-b6-batch24.ts` → **0 FARK** · test **375/375 PASS** (36 suite).
 
 → **SIRADAKİ KARARLAR:**
 - **DECISION-032 (ADAY · PENDING):** `cry-for-help` F bandı (`≥ 70` ↔ `80 ve üstü T`; öneri B).
-- **DECISION-031 (ADAY · PENDING):** CONFLICT-024'ün 44 eksik gövdesi + 027'nin ~33 koşulu (Bölüm 5 içerik işi).
+- **DECISION-031 = A KABUL (2026-09-22):** CONFLICT-024'ün 44 eksik gövdesi + 027'nin ~33 koşulu blok blok tamamlanacak (ilk blok: Hs).
 - **PHASE 11 (AI Interpretation):** AI istemi, karar destek sınırları ve source trace denetimi.
 
 **Diğer açık işler:** PHASE 11-13 (AI/UI/rapor) · **FINAL** (OCR-only sayım tutarsızlığı,
@@ -841,7 +839,7 @@ Code changes:   17 (CHANGE-001..017; CHANGE-016: 4 kart atfı; CHANGE-017: DECIS
 Tests:          380/380 PASS (36 suite) · typecheck PASS · build PASS
                 mmpiKeyIntegrity 63/63 · mmpiInterpretation 54/54
                 batch 24: optik-form.html güncel ve senkron
-Next:           (1) **DECISION-031 (ADAY · PENDING)**: CONFLICT-024 44 eksik gövde + 027 ~33 koşul (Seçenek A göçü)
+Next:           (1) **DECISION-031 = A (KABUL)**: Bölüm 5 Hs bloğu göçü (CONFLICT-024 / 027)
                 (2) **PHASE 12 (UI)** + **PHASE 13 (Rapor)** → **FINAL**
 Blocking:       none
 ```
@@ -859,7 +857,7 @@ Blocking:       none
    Bölüm 6 desenleri ve AI yorum katmanı denetlendi ve güvence altına alındı.
 2. **Sıradaki iş:**
    **(A) DECISION-032 = B KABUL EDİLDİ (CHANGE-016 devamı):** F ≥ 70 T otomatik eşiği korundu, s.36 bağlamı `manualNote`ta belgelendi (CONFLICT-043 FIXED).
-   **(B) DECISION-031:** CONFLICT-024'ün 44 eksik gövdesi + 027'nin ~33 koşulu (Bölüm 5 kademeli içerik göçü).
+   **(B) DECISION-031 = A KABUL EDİLDİ:** Bölüm 5 kademeli göç (ilk blok: Hs / Hipokondriasis).
    **(C) PHASE 12/13:** Kullanıcı arayüzü (UI) ve Yazdırma Raporu (Print Report) denetimi → **FINAL**.
 3. **Sonra:** FINAL: OCR-only sayım tutarsızlığı, DECISION-011 (33 anahtar), `CONFLICT-024_KAPSAM.md`
    Hs satırı sayımı, **CONFLICT-007** = depoda olmayan `docs/kaynak-denetimi.md` atıfları.

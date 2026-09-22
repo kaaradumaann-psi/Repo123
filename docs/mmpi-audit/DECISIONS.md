@@ -942,10 +942,22 @@ Bölüm 6’da **P0 bulgu yok** (anahtar/norm/puanlama katmanı burada değil); 
 katmanı**nadirdir ve CHANGE-014’ün `source`/`rule` alanları sayesinde ilk kez **ölçülebilir**
 durumda.
 
-## DECISION-031 — **ADAY · KULLANICI ONAYI BEKLİYOR**: CONFLICT-024’ün 44 eksik gövdesi + 027’nin ~33 koşulu (BÖLÜM 5 içerik göçü)
-**Tarih:** 2026-09-22 · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
-**Tetikleyen:** PHASE 10 batch 23 — DECISION-030/A uygulandı (CHANGE-015); BÖLÜM 6 tarafı
-kapanan ilk **desen katmanı** kararı oldu; geriye BÖLÜM 5’in **içerik** ayağı kaldı.
+## DECISION-031 — **KABUL · SEÇENEK (A)**: CONFLICT-024’ün 44 eksik gövdesi + 027’nin ~33 koşulu (BÖLÜM 5 içerik göçü — Blok blok)
+**Tarih:** 2026-09-22 · **Durum:** **KABUL (A) — kullanıcı onayı 2026-09-22** (Uygulama: Blok blok)
+
+### ONAY (2026-09-22) — kullanıcı: “**DECISION-031 için daha önce açıkça A seçeneğini onayladım: DECISION-031 = A — Blok blok tamamla.**”
+
+**Uygulama Esasları (A planı):**
+1. Her blok kitaptaki ilgili sayfadan görsel olarak doğrulanır.
+2. Kaynak metni SOURCE_FACTS / VERIFIED_DATA ile ilişkilendirilir.
+3. Sayısal eşik veya yorum uydurulmaz (DECISION-028 kuralı).
+4. Yalnızca kaynakta doğrulanmış bilgi `src/` içine uygulanır.
+5. İlgili testler güncellenir.
+6. Audit kayıtları güncellenir.
+7. Typecheck + ilgili testler çalıştırılır.
+8. Bir blok tamamlanmadan sonraki bloğa geçilmez.
+9. Kaynakta doğrulanamayan bilgiler `UNVERIFIED`/`NEEDS_REVIEW` olarak bırakılır.
+10. İlk blok: **Hs (Hipokondriasis / 1)** bloğu.
 
 **Elimizdeki durum (CHANGE-015 sonrası):**
 

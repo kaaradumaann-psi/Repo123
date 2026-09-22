@@ -651,3 +651,45 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npm run verify:pdf` → **PASS**
 - `npm run build` → **PASS** (`optik-form.html` güncel ve senkron)
 - `npm test` → **380/380 PASS** (36 suite)
+
+---
+
+## CHANGE-018 — DECISION-031 (A): Bölüm 5 Hs (1) Bloğu Kod Göçü ve Koşullu Yorumlar (s.67-78)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiHsBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı (2026-09-22):
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- İlk tamamlanan blok: **Hs (Hipokondriasis / 1) bloğu (s.67-78)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `parseCode()`: 3+ haneli kodların kanonik digit-sort ile birbirine çakışması (`132`'nin `123`'e dönüşmesi) engellendi (`digits = raw.length === 2 ? raw.split('').sort().join('') : raw`).
+   - `BLOCK_CODES`: Hs bloğundaki 20 çok haneli ve blok-yerel kod gövdesi kitaptaki tanı ve yönlendirmeleriyle birlikte eklendi:
+     `Hs:123` (123/213), `Hs:1234`, `Hs:1236`, `Hs:1237`, `Hs:1270`, `Hs:12378`, `Hs:128` (128/218), `Hs:129` (129/219), `Hs:120` (120/210), `Hs:132` (132/312), `Hs:134` (134/314), `Hs:1342`, `Hs:136` (136/316), `Hs:137`, `Hs:138` (138/318), `Hs:1382`, `Hs:139`, `Hs:14_low4` (Yüksek 1 / Düşük 4), `Hs:146`, `Hs:1469`.
+   - `CODE_CONDITIONS`: Hs bloğuna ait 10 koşul makinece değerlendirilebilir testlerle bağlandı:
+     - `12/21`: 1-2 farkı ≤ 5 T (s.68), 3 testi 1'in 5 T alanı içinde (s.68), Pd+Ma ≥ 70 T (s.68)
+     - `13/31`: Yüksek K (s.72), Düşük 2 (s.72), 2,7,8,9 ≥ 70 T ∧ K < 50 T (s.72), L ve K ≥ 70 T (s.72)
+     - `14/41`: 3 testi ≥ 70 T (s.76)
+     - `16/61`: 8 testi ≥ 70 T (s.77), 4 testi < 70 T Paranoid Şizofreni (s.77)
+     - `18/81`: F testi ≥ 70 T (s.77)
+     - `19/91`: 2 ve 3 testleri < 50 T (s.78)
+     - `10/01`: Üçüncü test Sc (s.78), 2 ve 3 testleri ≥ 70 T maskeli depresyon (s.78)
+     - `136/316`: Pa - Hy ≥ 10 T ve Hy - Pa ≥ 10 T (s.74)
+     - `137`: Ma ≥ 70 T veya K < 50 T (s.75)
+     - `139`: Pd ≥ 70 T ve K < 50 T (s.76)
+2. `tests/mmpiHsBlock.test.ts`:
+   - 16 yeni test ile Hs bloğunun kod çözme doğruluğu, çakışmasızlığı (123 vs 132), tanı sadakati ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesi 4'ten 24'e güncellendi (Hs bloğundaki 20 kod eklendi).
+4. `scripts/mmpi-audit/cmp-hs-batch25.ts`:
+   - Hs bloğu mutabakat denetçisi eklendi; 28 kapsam kontrolü ve 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-hs-batch25.ts` → **SONUÇ: 0 FARK · Hs BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpi*.test.ts` → **170/170 PASS** (38 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
