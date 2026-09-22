@@ -1,6 +1,6 @@
 {
-  "phase": 17,
-  "status": "CLINICAL_COMPLETION_PHASE_16_17",
+  "phase": 20,
+  "status": "PRODUCTION_VALIDATION_PHASE_18_19_20",
   "clinicalLogicChanged": true,
   "clinicalChanges": {
     "kPlusProfile": "IMPLEMENTED (Mark & Seeman 1963, s.57 · Şekil 16 · MISSING-KPLUS-001)",
@@ -10,14 +10,15 @@
     "lRawBands": "UNCHANGED (L_RAW_BANDS preserved in evaluateValidity)",
     "kRawBands": "UNCHANGED (K_RAW_BANDS preserved in evaluateValidity)",
     "wigginsSoc": "UNCHANGED (27 items per Ek 9c, DECISION-024 · CONFLICT-021)",
-    "ocrOnlyConditionalRules": "UNCHANGED (conditions intact)"
+    "ocrOnlyConditionalRules": "UNCHANGED (conditions intact)",
+    "scoringEngineVersion": "2.1.0"
   },
-  "generatedAt": "2026-09-22T16:39:40.305Z",
+  "generatedAt": "2026-09-22T16:55:17.985Z",
   "tests": {
-    "suites": 76,
-    "passed": 528,
+    "suites": 85,
+    "passed": 540,
     "failed": 0,
-    "total": 528
+    "total": 540
   },
   "codes": {
     "canonical": 45,

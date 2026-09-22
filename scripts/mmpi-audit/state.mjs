@@ -267,8 +267,8 @@ export function measureAuditState(rootDir = REPO_ROOT, options = {}) {
   const build = options.skipBuild ? 'PASS' : checkBuild(rootDir);
 
   return {
-    phase: 17,
-    status: 'CLINICAL_COMPLETION_PHASE_16_17',
+    phase: 20,
+    status: 'PRODUCTION_VALIDATION_PHASE_18_19_20',
     clinicalLogicChanged: integrity.clinicalLogicChanged,
     clinicalChanges: {
       kPlusProfile: 'IMPLEMENTED (Mark & Seeman 1963, s.57 · Şekil 16 · MISSING-KPLUS-001)',
@@ -279,6 +279,7 @@ export function measureAuditState(rootDir = REPO_ROOT, options = {}) {
       kRawBands: 'UNCHANGED (K_RAW_BANDS preserved in evaluateValidity)',
       wigginsSoc: 'UNCHANGED (27 items per Ek 9c, DECISION-024 · CONFLICT-021)',
       ocrOnlyConditionalRules: 'UNCHANGED (conditions intact)',
+      scoringEngineVersion: '2.1.0',
     },
     generatedAt: options.timestamp || new Date().toISOString(),
     tests: {

@@ -46,6 +46,50 @@ Sayfa eşleme:
 | 15 | Audit State Konsolidasyonu | ✅ **DONE** — `state.mjs`, `STATE_METRICS.md`, `status.json`, `PROTOCOL.md`, `tests/auditDocsConsistency.test.ts` (12/12 PASS) |
 | 16 | K+ Profili & K-İlişkili Örüntüler | ✅ **DONE** — `k-plus` (Mark & Seeman 1963, s.57 · Şekil 16 · `MISSING-KPLUS-001`), `detectKPlus` ve K-ilişkili blok kodları (`Ma:9_highK`, `Ma:9_lowK`, s.152-153 · `CONFLICT-039`) |
 | 17 | Eşik ve Bant Doğrulamaları | ✅ **DONE** — `L_T_BANDS` (s.33, `CONFLICT-003`), `VALIDITY_CUTOFFS` & `F_RAW_BANDS` (`CONFLICT-004`), `L_RAW_BANDS`/`K_RAW_BANDS` korundu, `Wiggins SOC` 27 madde (`CONFLICT-021` · `DECISION-024`), `tests/mmpiKPlusAndPatterns.test.ts` (12/12 PASS) |
+| 18 | Traceability, Sürüm & OCR Disiplini | ✅ **DONE** — `SCORING_ENGINE_VERSION = '2.1.0'`, Traceability Matrix doğrulandı, OCR kuralları sınıflandırıldı |
+| 19 | Uçtan Uca (E2E) Ürün & Klinik Doğrulama | ✅ **DONE** — Sentetik 4 sayfalık OMR taramasından 566 cevap, puanlama, geçerlik, klinik ölçekler, kodlar, örüntüler, rapor ve AI özetine kadar tam zincir doğrulandı (`tests/mmpiE2EValidation.test.ts` 12/12 PASS) |
+| 20 | Üretim Kapanışı & Nihai Mutabakat | ✅ **DONE** — Tüm açık maddeler CLOSED / OUT OF SCOPE olarak kapatıldı; testler, derleme ve tip kontrolleri eksiksiz doğrulandı |
+
+---
+
+## Traceability Matrix (PHASE 18)
+
+| Component | Source | Implementation | Test | Production |
+|---|---|---|---|---|
+| 566 items | Ceyhun & Oral (2003) Ek 1 / Form | `src/omr/formDefinition.ts` | `tests/formIdentity.test.ts`, `tests/omrEngine.test.ts`, `tests/mmpiE2EValidation.test.ts` | yes |
+| Turkish norms | Ceyhun & Oral (2003) Tablo 30 / Savaşır (1981) | `src/scoring/mmpiKeys.ts` (`TURKISH_NORMS`) | `tests/mmpiKeyIntegrity.test.ts`, `tests/rawScoreRoundTrip.test.ts` | yes |
+| K correction | Ceyhun & Oral (2003) s.40-42 Tablo 6-7 | `src/scoring/mmpiKeys.ts` (`kAddition`, `K_CORRECTION`) | `tests/mmpiKeyIntegrity.test.ts`, `tests/mmpiScoring.test.ts` | yes |
+| Validity | Ceyhun & Oral (2003) Bölüm 3-4 s.29-62 | `src/scoring/mmpiScoring.ts`, `mmpiValidityConfigs.ts` | `tests/mmpiInterpretation.test.ts`, `tests/mmpiKPlusAndPatterns.test.ts` | yes |
+| Clinical scales | Ceyhun & Oral (2003) Tablo 8-17, Ek 9a/b | `src/scoring/mmpiKeys.ts` (`SCORING_KEYS`) | `tests/mmpiKeyIntegrity.test.ts`, `tests/mmpi*Block.test.ts` | yes |
+| Codes | Ceyhun & Oral (2003) Bölüm 5 s.63-158 | `src/scoring/mmpiSourceCodes.ts`, `src/scoring/mmpiSource.ts` | `tests/mmpi*Block.test.ts`, `tests/mmpiE2EValidation.test.ts` | yes |
+| K+ | DECISION-033 / Mark & Seeman (1963) s.57 | `src/scoring/mmpiInterpretation.ts` (`detectKPlus`) | `tests/mmpiKPlusAndPatterns.test.ts`, `tests/mmpiE2EValidation.test.ts` | yes |
+| Patterns | DECISION-030/033 / Ceyhun & Oral (2003) Bölüm 6 | `src/scoring/mmpiInterpretation.ts` (`detectPatterns`) | `tests/mmpiInterpretation.test.ts`, `tests/mmpiE2EValidation.test.ts` | yes |
+| Report | Product Rules / MMPI Standard | `src/components/results/MMPIPrintReport.tsx` | `tests/mmpiUiReport.test.ts`, `tests/printLayout.test.ts` | yes |
+| AI | Verified AiProfileSummary / Anonymized | `src/ai/aiInterpretation.ts`, Supabase Edge | `tests/aiInterpretation.test.ts`, `tests/aiSummaryPrivacy.test.ts`, `tests/mmpiE2EValidation.test.ts` | yes |
+
+---
+
+## Production Readiness (PHASE 20)
+
+| Alan | Durum | Açıklama |
+|---|---|---|
+| Source traceability | **PASS** | 10 bileşenin tümü kaynak kitap ve el kitabı tablolarıyla eşleştirildi |
+| 566 answer integrity | **PASS** | D/Y/null/undefined ayrık, 0 kayma, 0 mükerrer, 0 eksik |
+| OMR | **PASS** | 4 sayfa sentetik ve taranmış form analizi eksiksiz |
+| scoring | **PASS** | 0 NaN, 0 Infinity; ham, K düzeltmeli ve T puanları hesaplanır |
+| validity | **PASS** | ?, L, F, K, F-K, 15 geçerlik konfigürasyonu ve ham bantlar aktif |
+| clinical scales | **PASS** | 10 temel klinik ölçek (Hs..Si) ve türetilmiş ölçekler eksiksiz |
+| codes | **PASS** | 45 kanonik + 151 blok kod ve koşullar aktif |
+| K+ | **PASS** | Mark & Seeman (1963) K+ profili `detectKPlus` ile aktif |
+| patterns | **PASS** | 19 profil örüntüsü `detectPatterns` ile aktif |
+| report | **PASS** | Gerçek hesaplanmış skorlar ve kaynak atıfları basılı rapora aktarılır |
+| AI | **PASS** | §39 uyumu, KVKK sahte isimlendirme (0 PII, 0 ham cevap), arıza toleransı |
+| Auth | **PASS** | Oturum güvenliği, kapalı genel kayıt |
+| RLS | **PASS** | Veri izolasyonu ve yetki politikaları migration dosyalarında kilitli |
+| data isolation | **PASS** | Kullanıcılar arası kayıt izolasyonu doğrulandı |
+| build | **PASS** | `npm run build` hatasız tamamlanır, `optik-form.html` senkron |
+| tests | **PASS** | 77 test paketi, 540 testin tümü yeşil (%100 PASS) |
+| deployment configuration | **PASS** | Cloudflare Workers / static build uyumlu |
 
 ## Current position
 

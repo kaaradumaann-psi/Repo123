@@ -1112,3 +1112,31 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsc --noEmit` → **0 hata (PASS)**
 - `npm test` → **528/528 PASS (76 suite)**
 - `npm run build` → **PASS**
+
+---
+
+## CHANGE-029 — PHASE 18, 19 & 20: Sürüm Güncellemesi, Uçtan Uca Doğrulama ve Üretim Kapanışı
+
+**Area:** `src/scoring/version.ts` · `package.json` · `tests/mmpiE2EValidation.test.ts` · `docs/mmpi-audit/AUDIT_STATE.md` · `docs/mmpi-audit/status.json` · `docs/mmpi-audit/STATE_METRICS.md`.
+
+**Amaç:** PHASE 18 (Traceability / Version / Audit Closure), PHASE 19 (End-to-End Product & Clinical Validation) ve PHASE 20 (Production Closure) adımlarının eksiksiz uygulanması.
+
+**Değişiklikler:**
+1. `src/scoring/version.ts` & `package.json`:
+   - `SCORING_ENGINE_VERSION` `2.1.0` sürümüne yükseltildi (K+ profil tespiti, klinik örüntü doğrulama ve geçerlik eşik mutabakatı iziyle).
+2. `tests/mmpiE2EValidation.test.ts`:
+   - 12 yeni uçtan uca ürün ve klinik doğrulama testi eklendi:
+     - Sürüm ve anahtar izlenebilirliği,
+     - 4 sayfalık sentetik OMR taraması ile 566 cevap çıkarımı ve sayfa sınır/kayma kontrolleri,
+     - Puanlama, geçerlik, klinik ölçekler (Hs..Si) ve türetilmiş ölçekler zinciri,
+     - Bölüm 5 kod çözümleme ve koşul tetikleme (`Ma:9_highK`, `Ma:9_lowK`),
+     - Bölüm 6 19 profil örüntüsü ve K+ profil tespiti,
+     - AI entegrasyonu KVKK m.4/3-d (0 isim/soyisim) ve §39 (0 ham cevap) sözleşmesi,
+     - Raporlama modeli ve veri izolasyonu.
+3. `docs/mmpi-audit/AUDIT_STATE.md`:
+   - Traceability Matrix, Production Readiness tablosu ve kalan maddelerin nihai sınıflandırması (`CLOSED` / `OUT OF SCOPE`) güncellendi.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata (PASS)**
+- `npm test` → **540/540 PASS (77 suite)**
+- `npm run build` → **PASS**
