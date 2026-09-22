@@ -189,6 +189,10 @@
     border-top: 1px solid var(--hairline);
   }
 
+  /* Kaydetme sonrası "Kaydı görüntüle" bir <a> düğmesidir; alt çizgi olmasın. */
+  .ws-nav .btn-primary,
+  .ws-nav .btn-secondary { text-decoration: none; }
+
   .ws-panel {
     display: flex;
     flex-direction: column;
@@ -2539,6 +2543,73 @@
   }
   .ws-revision-link:hover { opacity: 0.8; }
 
+  /* ---- "Kaydı Düzenle" düzenleme modu kartı ----
+     Her adımda görünür: ne yapıldığı, sonucun ne olacağı ve nasıl çıkılacağı
+     tek bakışta anlaşılır biçimde yazılıdır. */
+  .ws-edit-panel {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    background: var(--white);
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-align: left;
+  }
+  .ws-edit-panel-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-border);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .ws-edit-panel-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ws-edit-panel-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .ws-edit-panel-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--soft);
+  }
+  .ws-edit-panel-desc b { color: var(--text); }
+  .ws-edit-panel-roadmap { color: var(--muted); }
+  .ws-edit-panel-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .ws-edit-panel-id { color: var(--muted); }
+  .ws-edit-panel-actions {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    flex: none;
+  }
+
+  @media (max-width: 720px) {
+    .ws-edit-panel { flex-direction: column; }
+    .ws-edit-panel-actions { flex-direction: row; }
+  }
+
   /* ---- Uzman değerlendirme notu (B4) ---- */
   .expert-notes-hint { margin: 0; font-size: 12.5px; }
   .expert-notes-input {
@@ -2880,6 +2951,36 @@
     border-top: 1px solid var(--hairline);
   }
   .client-info-details .record-page-context { padding: 0 18px 14px; margin: 0; }
+
+  /* ---- Uzman değerlendirme notu: açılır-kapanır bölüm (kapalı başlar) ---- */
+  .expert-notes-details .expert-notes-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 18px 16px;
+    border-top: 1px solid var(--hairline);
+  }
+  .expert-notes-status {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--bg-soft);
+    border: 1px solid var(--hairline);
+    color: var(--soft);
+    white-space: nowrap;
+  }
+  .expert-notes-status.is-dirty {
+    background: var(--warning-tint);
+    border-color: var(--warning-border);
+    color: var(--warning);
+  }
+  .expert-notes-status.is-saved {
+    background: var(--success-tint);
+    border-color: var(--success-border);
+    color: var(--success);
+  }
+  .expert-notes-details .expert-notes-hint { margin: 0; }
 
   .mmpi-results-panel.is-embedded { padding-top: 14px; }
   .mmpi-tabs { row-gap: 8px; }
