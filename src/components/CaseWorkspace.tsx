@@ -196,6 +196,8 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(() => boot?.updatedAt ?? null);
   const [storageWarning, setStorageWarning] = useState('');
   const [confirmNew, setConfirmNew] = useState(false);
+  /** "Kaydı Düzenle" oturumunu bırakma onayı. */
+  const [confirmCancelEdit, setConfirmCancelEdit] = useState(false);
   const [outbox, setOutbox] = useState<OutboxEntry[]>(() => loadOutbox(actor.id));
   const [flushing, setFlushing] = useState(false);
   const [flushNote, setFlushNote] = useState('');
@@ -451,26 +453,27 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     void getRecordDetail(recordId)
       .then(record => {
         const edit = buildEditStateFromRecord(record);
-        if (!edit) throw new Error('Bu kayıt düzenleme için uygun değil; cevaplarda ya da künyede eksik var.');
+        if (!edit.ok) throw new Error(edit.error);
+        const state = edit.state;
         releaseScanPreviewUrls(scan);
         submissionKey.current = crypto.randomUUID();
-        setClient(edit.client);
-        setMethod(edit.method);
-        setAnswers(edit.answers);
+        setClient(state.client);
+        setMethod(state.method);
+        setAnswers(state.answers);
         setCurrentItem(0);
-        setRaw(edit.raw);
+        setRaw(state.raw);
         setScan(null);
         setScanKey(key => key + 1);
         setSaved(null);
         setConditionsAccepted(false);
-        setRevisionOf(edit.revisionOf);
+        setRevisionOf(state.revisionOf);
         setRevisionReason('Düzenleme');
-        setRevisionNote(edit.note);
+        setRevisionNote(state.note);
         setRestoreDismissed(true);
         setStep('entry');
       })
       .catch(cause => {
-        setEditLoadError(cause instanceof Error ? cause.message : 'Kayıt düzenleme için yüklenemedi.');
+        setEditLoadError(cause instanceof Error ? cause.message : 'Kayıt düzenleme için yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.');
       })
       .finally(() => setEditLoading(false));
   }
@@ -522,8 +525,10 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
 
   /* ---------------- Akış eylemleri ---------------- */
 
-  function startNew() {
+  /** Çalışma alanını tamamen temizler (danışan, veri, tarama, revizyon bağı). */
+  function resetWork(nextStep: CaseStep) {
     setConfirmNew(false);
+    setConfirmCancelEdit(false);
     clearDraft(actor.id);
     setDraftSnapshot(null);
     setClient(emptyClientIntake());
@@ -546,7 +551,19 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     setRevisionNote(null);
     setEditLoadError('');
     submissionKey.current = crypto.randomUUID();
-    setStep('intake');
+    setStep(nextStep);
+  }
+
+  function startNew() {
+    resetWork('intake');
+  }
+
+  /**
+   * "Kaydı Düzenle" oturumunu kapatır. Kullanıcı emin olsun diye onay ister:
+   * orijinal kayda zaten dokunulmadı; yalnızca bu cihazdaki taslak silinir.
+   */
+  function discardEdit() {
+    resetWork('home');
   }
 
   function requestNew() {
@@ -727,6 +744,35 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
       ? `Taslak kaydedildi ${formatClock(lastSavedAt)}`
       : 'Taslak hazırlanıyor…';
 
+  /* ---------------- "Kaydı Düzenle" ortak durum bantları ----------------
+   * Hazırlık (kayıt yükleniyor) ve hata durumları home ile akış görünümünde
+   * aynı davranır; kullanıcı hiçbir anda ekranda ne olduğunu tahmin etmek
+   * zorunda kalmaz. */
+  const editPreparingBanner = editLoading ? (
+    <div className="ws-edit-panel ws-edit-panel-loading" role="status" aria-live="polite">
+      <div className="ws-edit-panel-icon" aria-hidden="true">
+        <span className="spinner-sm" />
+      </div>
+      <div className="ws-edit-panel-body">
+        <strong className="ws-edit-panel-title">Kayıt düzenleme için hazırlanıyor…</strong>
+        <p className="ws-edit-panel-desc">
+          Seçtiğiniz kaydın bilgileri ve verileri forma yükleniyor. Hazır olduğunda doğrudan düzeltme
+          adımına geçeceksiniz.
+        </p>
+      </div>
+    </div>
+  ) : null;
+
+  const editErrorBanner = editLoadError ? (
+    <div className="status-banner error-banner" role="alert">
+      <Icon name="alert" size={16} />
+      <span style={{ flex: 1 }}>{editLoadError}</span>
+      <button type="button" className="btn-secondary btn-sm" onClick={() => setEditLoadError('')}>
+        Kapat
+      </button>
+    </div>
+  ) : null;
+
   if (step === 'home') {
     return (
       <section className="ws-home" aria-labelledby="ws-home-title">
@@ -739,6 +785,9 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
           otomatik kaydedilir; F5 ve internet kesintisinde kaybolmaz. Optik okuma mevcut OMR
           hattını kullanır; kayıt sonrası T skorları, geçerlik ve profil analizleri aynı ekranda hesaplanır.
         </p>
+
+        {editPreparingBanner}
+        {editErrorBanner}
 
         {flowOrigin === 'signin' && hasResumableDraft && draftSnapshot && (
           <div className="ws-restore-card" role="status">
@@ -874,8 +923,9 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
 
         {pendingEditId && (
           <ConfirmDialog
-            title="Yarım kalan çalışma yerine düzenleme açılsın mı?"
-            description="Bu hesapta yarım kalan bir çalışma var. Düzenlemeyi açmak yarım çalışmayı siler; kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+            tone="neutral"
+            title="Yarım çalışma kapatılıp düzenleme açılsın mı?"
+            description="Bu cihazda tamamlanmamış bir çalışma var. Kaydı düzenlemeye başlamak için bu yarım çalışma silinecek — kuyruktaki kayıtlar etkilenmez ve bu işlem geri alınamaz. Düzenlemeye alınan kaydın orijinali hiçbir zaman değişmez."
             confirmLabel="Evet, düzenlemeyi aç"
             busy={editLoading}
             onConfirm={() => {
@@ -888,12 +938,6 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
               window.history.replaceState(null, '', window.location.pathname);
             }}
           />
-        )}
-        {editLoadError && (
-          <div className="status-banner error-banner" role="alert">
-            <Icon name="alert" size={16} />
-            <span>{editLoadError}</span>
-          </div>
         )}
       </section>
     );
@@ -943,7 +987,15 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
               disabled={busy || !!saved || blankExceeded || !conditionsAccepted}
               onClick={() => void saveAndAnalyze()}
             >
-              {busy ? 'Kaydediliyor…' : 'Analizi başlat'}
+              {busy
+                ? 'Kaydediliyor…'
+                : revisionOf
+                  ? online
+                    ? 'Değişiklikleri kaydet'
+                    : 'Değişiklikleri kuyruğa al'
+                  : online
+                    ? 'Analizi başlat'
+                    : 'Kuyruğa al'}
             </button>
           )}
         </div>
@@ -957,15 +1009,59 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         {storageWarning && <span className="ws-hint is-error">{storageWarning}</span>}
       </div>
 
-      {/* "Kaydı Düzenle" çalışması: revizyon bağlamı her adımda görünür ve
-          kapatılamaz — sonuç orijinale bağlanmamış bir kayıt olmasın diye.
-          Metin: tam not (applyRecordEdit) yoksa orijinal id'den türetilen kısa
-          metin — taslak üzerinden geri dönüşte bile bağlam kaybolmaz. */}
+      {/* "Kaydı Düzenle" modu: her adımda görünür — ne olduğu, sonucun ne
+          olacağı ve nasıl çıkılacağı tek kartta açıkça yazılır. Bilgi eksik
+          kalmasın diye kendiliğinden kapanmaz; yalnızca "Düzenlemeyi bırak"
+          ile (onayla) çıkılır. */}
       {revisionOf && !saved && (
-        <div className="status-banner info-banner ws-revision-banner" role="status">
-          <Icon name="refresh" size={16} />
+        <section className="ws-edit-panel" role="status" aria-label="Kayıt düzenleme modu">
+          <div className="ws-edit-panel-icon" aria-hidden="true">
+            <Icon name="edit" size={18} />
+          </div>
+          <div className="ws-edit-panel-body">
+            <strong className="ws-edit-panel-title">Kayıt düzenleme modu</strong>
+            <p className="ws-edit-panel-desc">
+              Şu an <b>{`${client.firstName} ${client.lastName}`.trim() || 'Danışan'}</b> kaydının bir
+              kopyası üzerinde çalışıyorsunuz. Buradaki düzeltmeler <b>orijinal kaydı silmez</b>:
+              “Değişiklikleri kaydet” dediğinizde orijinalin altında saklanan{' '}
+              <b>yeni bir revizyon kaydı</b> oluşur.
+            </p>
+            {revisionNote && <p className="ws-edit-panel-desc">{revisionNote}</p>}
+            <p className="ws-edit-panel-desc ws-edit-panel-roadmap">
+              Yol haritası: veride düzelt → <b>Kontrol</b>’de gözden geçir →{' '}
+              <b>Değişiklikleri kaydet</b>.
+            </p>
+            <div className="ws-edit-panel-links">
+              <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+                Orijinal kaydı görüntüle
+              </a>
+              <span className="ws-edit-panel-id mono-sub">Kayıt no: {revisionOf.slice(0, 8)}…</span>
+            </div>
+          </div>
+          <div className="ws-edit-panel-actions">
+            <button
+              type="button"
+              className="btn-secondary btn-sm"
+              onClick={() => setConfirmCancelEdit(true)}
+              title="Düzenlemeyi bırak — bu cihazdaki taslak silinir, orijinal kayda dokunulmaz"
+            >
+              Düzenlemeyi bırak
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* Revizyon kaydedildiyse: orijinalin değişmediğinin açık onayı + bağlantılar. */}
+      {revisionOf && saved && saved.id !== 'local' && (
+        <div className="status-banner success-banner ws-revision-banner" role="status">
+          <Icon name="checkCircle" size={16} />
           <span style={{ flex: 1 }}>
-            {revisionNote ?? `Bu çalışma ${revisionOf.slice(0, 8)}… kaydının düzenlemesidir; orijinal kayıt değişmez.`}{' '}
+            <strong>Değişiklikler kaydedildi.</strong> Orijinal kayıt silinmedi; düzeltmeleriniz ona
+            bağlı yeni bir revizyon kaydı olarak yazıldı.{' '}
+            <a href={`/kayitlar/${saved.id}`} className="ws-revision-link">
+              Yeni kaydı görüntüle
+            </a>
+            {' · '}
             <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
               Orijinal kaydı görüntüle
             </a>
@@ -973,38 +1069,14 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         </div>
       )}
 
-      {/* Revizyon kaydedildiyse: orijinalin değişmediğinin açık onayı + bağlantı. */}
-      {revisionOf && saved && saved.id !== 'local' && (
-        <div className="status-banner success-banner" role="status">
-          <Icon name="checkCircle" size={16} />
-          <span style={{ flex: 1 }}>
-            Revizyon <strong>{saved.id}</strong> olarak yazıldı; orijinal kayıt{' '}
-            <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
-              {revisionOf.slice(0, 8)}…
-            </a>{' '}
-            değişmeden korundu.
-          </span>
-        </div>
-      )}
-
-      {editLoadError && (
-        <div className="status-banner error-banner" role="alert">
-          <Icon name="alert" size={16} />
-          <span>{editLoadError}</span>
-          <button
-            type="button"
-            className="btn-secondary btn-sm"
-            onClick={() => setEditLoadError('')}
-          >
-            Kapat
-          </button>
-        </div>
-      )}
+      {editPreparingBanner}
+      {editErrorBanner}
 
       {pendingEditId && (
         <ConfirmDialog
-          title="Yarım kalan çalışma yerine düzenleme açılsın mı?"
-          description="Bu hesapta yarım kalan bir çalışma var. Düzenlemeyi açmak yarım çalışmayı siler; kuyruktaki kayıtlar etkilenmez. Bu işlem geri alınamaz."
+          tone="neutral"
+          title="Yarım çalışma kapatılıp düzenleme açılsın mı?"
+          description="Bu cihazda tamamlanmamış bir çalışma var. Kaydı düzenlemeye başlamak için bu yarım çalışma silinecek — kuyruktaki kayıtlar etkilenmez ve bu işlem geri alınamaz. Düzenlemeye alınan kaydın orijinali hiçbir zaman değişmez."
           confirmLabel="Evet, düzenlemeyi aç"
           busy={editLoading}
           onConfirm={() => {
@@ -1178,6 +1250,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
           flushNote={flushNote}
           flushing={flushing}
           conditionsAccepted={conditionsAccepted}
+          revisionOf={revisionOf}
           onConditions={setConditionsAccepted}
           onFlush={() => void flushOutbox()}
           onBack={() => setStep('entry')}
@@ -1195,6 +1268,16 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
           confirmLabel="Evet, temiz başla"
           onConfirm={startNew}
           onCancel={() => setConfirmNew(false)}
+        />
+      )}
+
+      {confirmCancelEdit && (
+        <ConfirmDialog
+          title="Düzenleme bırakılsın mı?"
+          description="Bu cihazdaki düzenleme taslağınız silinir (kuyruktaki kayıtlar etkilenmez). Orijinal kayıt zaten hiç değişmedi; istediğiniz zaman yeniden “Kaydı Düzenle” diyebilirsiniz."
+          confirmLabel="Evet, düzenlemeyi bırak"
+          onConfirm={discardEdit}
+          onCancel={() => setConfirmCancelEdit(false)}
         />
       )}
     </div>
@@ -1458,6 +1541,7 @@ function ReviewPanel({
   flushNote,
   flushing,
   conditionsAccepted,
+  revisionOf,
   onConditions,
   onFlush,
   onBack,
@@ -1484,6 +1568,8 @@ function ReviewPanel({
   flushNote: string;
   flushing: boolean;
   conditionsAccepted: boolean;
+  /** "Kaydı Düzenle" oturumuysa orijinal kaydın id'si (revizyon olarak yazılır). */
+  revisionOf: string | null;
   onConditions: (next: boolean) => void;
   onFlush: () => void;
   onBack: () => void;
@@ -1547,8 +1633,9 @@ function ReviewPanel({
             Verileri <em>gözden geçirin</em> ve profili inceleyin
           </h2>
           <p className="ws-muted">
-            Kayıt veritabanına bu ekrandan yazılır. Aşağıda Türk normlarına göre hesaplanmış T skorları ve profil grafiği anlık olarak gösterilir.
-            Bir şeyi düzeltmeniz gerekirse ilgili adıma tek tıkla dönün; hiçbir veri kaybolmaz.
+            {revisionOf
+              ? 'Düzenleme bu ekrandan yazılır: orijinal kayıt silinmez, değişiklikler ona bağlı yeni bir revizyon kaydı olarak kaydedilir. Aşağıda Türk normlarına göre hesaplanmış T skorları ve profil grafiği anlık gösterilir; düzeltmek istediğiniz adıma tek tıkla dönün, hiçbir veri kaybolmaz.'
+              : 'Kayıt veritabanına bu ekrandan yazılır. Aşağıda Türk normlarına göre hesaplanmış T skorları ve profil grafiği anlık olarak gösterilir. Bir şeyi düzeltmeniz gerekirse ilgili adıma tek tıkla dönün; hiçbir veri kaybolmaz.'}
           </p>
         </div>
         {!saved && (
@@ -1802,13 +1889,20 @@ function ReviewPanel({
             <strong>
               {saved.id === 'local'
                 ? 'Analiz bu oturum için hesaplandı'
-                : 'Kayıt veritabanına yazıldı'}
+                : revisionOf
+                  ? 'Değişiklikler kaydedildi'
+                  : 'Kayıt veritabanına yazıldı'}
             </strong>
             {saved.id === 'local' ? (
               <p>
                 Profil ve tüm hesaplamalar yukarıda tamamlanmıştır. Bu hesap psikolog kayıt
                 yetkisine sahip olmadığından sonuç veritabanına yazılmadı; kaydı ancak aktif
                 psikolog hesabıyla oluşturabilirsiniz.
+              </p>
+            ) : revisionOf ? (
+              <p>
+                Orijinal kayıt silinmedi; düzeltmeleriniz ona bağlı <strong>yeni bir revizyon kaydı</strong>{' '}
+                olarak yazıldı. Profil ve tüm hesaplamalar yukarıda tamamlanmıştır.
               </p>
             ) : (
               <p>
@@ -1822,9 +1916,21 @@ function ReviewPanel({
 
       <div className="ws-nav">
         {saved ? (
-          <button type="button" className="btn-primary" onClick={onNew}>
-            Yeni işlem
-          </button>
+          <>
+            <button
+              type="button"
+              className={saved.id === 'local' ? 'btn-primary' : 'btn-secondary'}
+              onClick={onNew}
+            >
+              Yeni işlem
+            </button>
+            {saved.id !== 'local' && (
+              <a href={`/kayitlar/${saved.id}`} className="btn-primary">
+                {revisionOf ? 'Yeni kaydı görüntüle' : 'Kaydı görüntüle'}
+                <Icon name="arrowRight" size={16} />
+              </a>
+            )}
+          </>
         ) : (
           <>
             <button type="button" className="btn-secondary" onClick={onBack}>
@@ -1837,7 +1943,15 @@ function ReviewPanel({
               onClick={onSave}
               title={!conditionsAccepted ? 'Önce uygulama koşullarını doğrulayın' : undefined}
             >
-              {busy ? 'Kaydediliyor…' : online ? 'Analizi başlat' : 'Kuyruğa al'}
+              {busy
+                ? 'Kaydediliyor…'
+                : revisionOf
+                  ? online
+                    ? 'Değişiklikleri kaydet'
+                    : 'Değişiklikleri kuyruğa al'
+                  : online
+                    ? 'Analizi başlat'
+                    : 'Kuyruğa al'}
             </button>
           </>
         )}

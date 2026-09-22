@@ -234,10 +234,11 @@ export function MyRecordsPanel() {
                           type="button"
                           className="action-btn-secondary"
                           onClick={() => navigate(`/islem?duzenle=${record.id}`)}
-                          title="Kaydı düzenle (yeni revizyon oluşturur)"
-                          aria-label={`${record.firstName} ${record.lastName} kaydını düzenle`}
+                          title="Kaydı düzenle — form bu kaydın bir kopyasıyla dolar; düzeltmeler orijinal kaydı silmez, ona bağlı yeni bir revizyon kaydı oluşturur"
+                          aria-label={`${record.firstName} ${record.lastName} kaydını düzenle (orijinal kayıt silinmez, yeni revizyon oluşur)`}
                         >
                           <Icon name="edit" size={15} />
+                          <span>Düzenle</span>
                         </button>
                         <button
                           type="button"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EXPERT_NOTES_MAX, getRecordDetail, updateExpertNotes } from '../records/supabaseRecords';
 import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
@@ -82,6 +82,17 @@ export function RecordDetailPage({
   const [notesSaved, setNotesSaved] = useState('');
   const [notesBusy, setNotesBusy] = useState(false);
   const [notesMessage, setNotesMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  /* Uzman notu bölümü AÇILIR-KAPANIR ve KAPALI başlar (kullanıcı isterse elle
+     açar). Yapay zekâ yorumu not eklendiğinde metin kaybolmasın diye bölüm
+     kendiliğinden açılır ve görünür kaydırılır. */
+  const notesDetailsRef = useRef<HTMLDetailsElement | null>(null);
+
+  function openNotesSection() {
+    const details = notesDetailsRef.current;
+    if (!details) return;
+    details.open = true;
+    details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 
   useEffect(() => {
     let active = true;
@@ -242,7 +253,7 @@ export function RecordDetailPage({
               type="button"
               className="btn-secondary btn-sm"
               onClick={() => navigate(`/islem?duzenle=${record.id}`)}
-              title="Kaydı düzenle: cevaplar yeni bir revizyon kaydı olarak düzenlenir, orijinal kayıt değişmez"
+              title="Kaydı düzenle: form, bu kaydın bir kopyasıyla dolar. Düzeltmeleriniz orijinal kaydı silmez; ona bağlı yeni bir revizyon kaydı oluşturur."
             >
               <Icon name="edit" size={15} />
               <span>Kaydı Düzenle</span>
@@ -307,9 +318,10 @@ export function RecordDetailPage({
             <div className="status-banner info-banner no-print" role="status">
               <Icon name="scan" size={16} />
               <span style={{ flex: 1 }}>
-                Optik form son hali bu kayıtta korunuyor: set <code className="mono-sub">{batchId ?? '—'}</code> ·
+                Optik formun son hali bu kayıtta korunuyor: set <code className="mono-sub">{batchId ?? '—'}</code> ·
                 4/4 sayfa · {reviewedCount} manuel düzeltme · {historyCount} denetim olayı.
-                Kaydı düzenlerseniz revizyon bu detayı kopyalamaz; optik kayıt her zaman burada kalır.
+                Kaydı düzenleseniz bile bu optik detaylar aynen burada kalır; düzeltmeleriniz ayrı bir
+                revizyon kaydı olarak yazılır.
               </span>
             </div>
           );
@@ -381,61 +393,81 @@ export function RecordDetailPage({
           {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
         </details>
 
-        <section className="report-section expert-notes-section" aria-labelledby="expert-notes-title">
-          <h3 id="expert-notes-title" className="report-section-title">
-            <Icon name="sheet" size={16} /> Uzman Değerlendirme Notu
-          </h3>
-          <p className="ws-muted expert-notes-hint">
-            Kayıt sonrası klinik değerlendirmenizi buraya yazın; not bu kayda kalıcı olarak eklenir ve
-            Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır. Tanısal kesin ifadelerden
-            kaçının; not yalnızca bu kaydı görebilen hesaplarca okunabilir.
-          </p>
-          {canWriteNotes ? (
-            <textarea
-              className="expert-notes-input"
-              value={notesDraft}
-              onChange={event => setNotesDraft(event.target.value)}
-              rows={5}
-              maxLength={EXPERT_NOTES_MAX}
-              placeholder="Örn. Profil bulguları klinik görüşmeyle tutarlı; izlem önerildi..."
-              aria-label="Uzman değerlendirme notu"
-            />
-          ) : (
-            record.expertNotes && (
-              <p className="expert-notes-readonly ws-muted">{record.expertNotes}</p>
-            )
-          )}
-          <div className="expert-notes-footer">
-            <span className="ws-muted expert-notes-count">
-              {notesDraft.length} / {EXPERT_NOTES_MAX}
-              {record.notesUpdatedAt
-                ? ` · Son kayıt: ${new Date(record.notesUpdatedAt).toLocaleString('tr-TR', {
-                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                  })}`
-                : ''}
+        {/* Uzman değerlendirme notu — AÇILIR-KAPANIR bölüm ve KAPALI başlar;
+            kullanıcı isterse elle açar. Not, Yazdır / PDF raporunda her zaman
+            "Uzman Değerlendirme Notu" bölümü olarak basılır (bu kısaltma
+            yalnızca ekran içindir). */}
+        <details className="client-info-details expert-notes-details" ref={notesDetailsRef}>
+          <summary>
+            <Icon name="sheet" size={15} />
+            Uzman Değerlendirme Notu
+            <span
+              className={`expert-notes-status ${
+                notesDirty ? 'is-dirty' : notesSaved.trim() ? 'is-saved' : ''
+              }`}
+            >
+              {notesDirty
+                ? 'Kaydedilmedi'
+                : notesSaved.trim()
+                  ? 'Kayıtlı'
+                  : canWriteNotes
+                    ? 'Boş'
+                    : 'Not yok'}
             </span>
-            {canWriteNotes && (
-              <div className="expert-notes-actions">
-                {notesMessage && (
-                  <span
-                    className={notesMessage.kind === 'error' ? 'expert-notes-msg is-error' : 'expert-notes-msg is-ok'}
-                    role="status"
-                  >
-                    {notesMessage.text}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  className="btn-primary btn-sm"
-                  onClick={() => void saveNotes()}
-                  disabled={notesBusy || !notesDirty}
-                >
-                  {notesBusy ? 'Kaydediliyor…' : 'Notu Kaydet'}
-                </button>
-              </div>
+          </summary>
+          <div className="expert-notes-body">
+            <p className="ws-muted expert-notes-hint">
+              Kayıt sonrası klinik değerlendirmenizi buraya yazın; not bu kayda kalıcı olarak eklenir ve
+              Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır. Tanısal kesin ifadelerden
+              kaçının; not yalnızca bu kaydı görebilen hesaplarca okunabilir.
+            </p>
+            {canWriteNotes ? (
+              <textarea
+                className="expert-notes-input"
+                value={notesDraft}
+                onChange={event => setNotesDraft(event.target.value)}
+                rows={5}
+                maxLength={EXPERT_NOTES_MAX}
+                placeholder="Örn. Profil bulguları klinik görüşmeyle tutarlı; izlem önerildi..."
+                aria-label="Uzman değerlendirme notu"
+              />
+            ) : record.expertNotes ? (
+              <p className="expert-notes-readonly ws-muted">{record.expertNotes}</p>
+            ) : (
+              <p className="expert-notes-readonly ws-muted">Bu kayıt için uzman değerlendirme notu yok.</p>
             )}
+            <div className="expert-notes-footer">
+              <span className="ws-muted expert-notes-count">
+                {notesDraft.length} / {EXPERT_NOTES_MAX}
+                {record.notesUpdatedAt
+                  ? ` · Son kayıt: ${new Date(record.notesUpdatedAt).toLocaleString('tr-TR', {
+                      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })}`
+                  : ''}
+              </span>
+              {canWriteNotes && (
+                <div className="expert-notes-actions">
+                  {notesMessage && (
+                    <span
+                      className={notesMessage.kind === 'error' ? 'expert-notes-msg is-error' : 'expert-notes-msg is-ok'}
+                      role="status"
+                    >
+                      {notesMessage.text}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="btn-primary btn-sm"
+                    onClick={() => void saveNotes()}
+                    disabled={notesBusy || !notesDirty}
+                  >
+                    {notesBusy ? 'Kaydediliyor…' : 'Notu Kaydet'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </section>
+        </details>
 
         {profile ? (
           <MMPIResultsPanel
@@ -449,11 +481,15 @@ export function RecordDetailPage({
               client: client && typeof client.age === 'number' ? { age: client.age } : null,
               recordId: record.id,
               onInsertIntoNotes: canWriteNotes
-                ? text => setNotesDraft(previous => {
-                    const separator = previous.trim() ? '\n\n' : '';
-                    const next = `${previous}${separator}${text}`;
-                    return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
-                  })
+                ? text => {
+                    setNotesDraft(previous => {
+                      const separator = previous.trim() ? '\n\n' : '';
+                      const next = `${previous}${separator}${text}`;
+                      return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
+                    });
+                    // Not metni kaybolmasın diye kapalı bölüm açılır ve kaydırılır.
+                    openNotesSection();
+                  }
                 : undefined,
             }}
           />
