@@ -7,6 +7,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { buildProfileFromRawScoresObject } from '../src/scoring/mmpiScoring';
 import type { MMPIProfile } from '../src/scoring/mmpiScoring';
 import { MMPIClinicalTab } from '../src/components/results/MMPIClinicalTab';
+import { MMPIPrintReport } from '../src/components/results/MMPIPrintReport';
+import { K_CORRECTION } from '../src/scoring/mmpiKeys';
 import { SCALE_DOSSIERS, grahamListsFor } from '../src/scoring/mmpiScaleDossiers';
 import type { ClinicalScaleId } from '../src/scoring/mmpiScaleDossiers';
 
@@ -72,18 +74,30 @@ describe('Klinik rapor arayüzü — açılır bölümler ve verimlilik', () => 
 
     for (const scale of flagged) {
       const card = cardOf(html, scale.id);
-      const grahamFold = card.slice(
-        card.indexOf('ALT TESTİNDE'),
-        card.indexOf('ALT TESTİNDE') + 400,
-      );
-      const before = card.lastIndexOf('aria-expanded="true"', card.indexOf('ALT TESTİNDE'));
-      const closedAt = card.lastIndexOf('aria-expanded="false"', card.indexOf('ALT TESTİNDE'));
-      const isOpen = before > closedAt;
-      assert.equal(
-        isOpen,
-        scale.id === lead.id,
-        `${scale.id} Graham bölümü açık durumu beklenenden farklı (${grahamFold.slice(0, 60)}…)`,
-      );
+      const titleAt = card.indexOf('ALT TESTİNDE');
+      assert.ok(titleAt > 0, `${scale.id} Graham başlığı bulunmalı`);
+      // Graham katlamasının KENDİ düğmesini oku (kart başlığı düğmesiyle karışmasın).
+      const headAt = card.lastIndexOf('class="mmpi-disc-head"', titleAt);
+      assert.ok(headAt > 0, `${scale.id} Graham katlama düğmesi bulunmalı`);
+      const tagEnd = card.indexOf('>', headAt);
+      const isOpen = /aria-expanded="true"/.test(card.slice(headAt, tagEnd));
+      assert.equal(isOpen, scale.id === lead.id, `${scale.id} Graham bölümü açık durumu beklenenden farklı`);
+    }
+  });
+
+  it('kart başlığının tamamı katlama düğmesidir ve özet kapalıyken de görünür', () => {
+    for (const scale of flaggedOf(profile)) {
+      const card = cardOf(html, scale.id);
+      const toggleAt = card.indexOf('class="scale-dossier-toggle"');
+      assert.ok(toggleAt > 0, `${scale.id} kart başlığı bir düğme olmalı`);
+      const tagEnd = card.indexOf('>', toggleAt);
+      assert.match(card.slice(toggleAt, tagEnd), /aria-expanded="true"/, 'kartlar varsayılan açık gelir');
+      assert.match(card.slice(toggleAt, tagEnd), /aria-controls="/);
+      // Özet bilgiler (durum rozeti, T, ham/K+) başlıkta, yani katlamadan bağımsız.
+      const headSlice = card.slice(0, card.indexOf('class="scale-dossier-body"'));
+      assert.match(headSlice, /KLİNİK (YÜKSEKLİK|DÜŞÜKLÜK)/);
+      assert.match(headSlice, /T skoru/);
+      assert.match(headSlice, /Ham: \d+/);
     }
   });
 
@@ -102,12 +116,19 @@ describe('Klinik rapor arayüzü — açılır bölümler ve verimlilik', () => 
   it('her kartta katlanabilir bölümler için tek toplu denetim vardır', () => {
     assert.match(html, /Tümünü aç/);
     assert.match(html, /Tümünü kapat/);
-    const expected = flaggedOf(profile).reduce((total, s) => {
+    const flagged = flaggedOf(profile);
+    const expected = flagged.reduce((total, s) => {
       const id = s.id as ClinicalScaleId;
       const hasNotes = (SCALE_DOSSIERS[id].notes?.length ?? 0) > 0;
-      return total + 2 + (hasNotes ? 1 : 0); // graham + tablo + (varsa) notlar
+      // kart gövdesi + graham + tablo + (varsa) demografik notlar
+      return total + 3 + (hasNotes ? 1 : 0);
     }, 0);
-    assert.match(html, new RegExp(`1 / ${expected} açık`), 'sayaç katlanabilir bölüm sayısıyla uyumlu olmalı');
+    const openCount = flagged.length + 1; // tüm kartlar + en belirgin Graham listesi
+    assert.match(
+      html,
+      new RegExp(`${openCount} / ${expected} açık`),
+      'sayaç katlanabilir bölüm sayısıyla uyumlu olmalı',
+    );
     assert.equal((html.match(/aria-expanded=/g) ?? []).length, expected);
   });
 
@@ -134,6 +155,20 @@ describe('Klinik rapor arayüzü — açılır bölümler ve verimlilik', () => 
         `${scale.id} klinik açıklaması katlanmış bir gövdenin içinde kalmamalı`,
       );
     }
+  });
+
+  it('ölçü satırı dört değeri tek satırda taşır ve K oranı klasik ekleme tablosundan gelir', () => {
+    const hs = cardOf(html, 'Hs');
+    assert.match(hs, /<dt>Madde Sayısı<\/dt><dd>33<\/dd>/);
+    assert.match(hs, /<dt>Doğru \(D\)<\/dt><dd>11 madde<\/dd>/);
+    assert.match(hs, /<dt>Yanlış \(Y\)<\/dt><dd>22 madde<\/dd>/);
+    // K_CORRECTION.Hs = 0.5 → kaynak: OCR_PDF_FULL_AUDIT.md "Hs (+.5K)"
+    assert.match(hs, /<dt>K düzeltmesi<\/dt><dd>\+0\.5K<\/dd>/);
+    assert.match(hs, /K Eklemeli bir alt testtir\. Klasik ekleme tablosuna göre ham puana 0\.5×K eklenir\./);
+    // K düzeltmesi olmayan ölçek kendi tablo numarasıyla anılır (Tablo 9 = D).
+    const d = cardOf(html, 'D');
+    assert.match(d, /<dt>K düzeltmesi<\/dt><dd>Uygulanmaz<\/dd>/);
+    assert.match(d, /Tablo 9’de “K Eklemeli” işareti yoktur/);
   });
 
   it('madde numarası tablosu başlığı kaynak başlığıyla birebir verilir', () => {
@@ -246,8 +281,13 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
     assert.ok(screenRules.length >= 35);
   });
 
+  // Tipografi sözleşmesi yalnız EKRAN kuralları için geçerlidir: kâğıt (A4)
+  // bloğu kendi ölçüsünü kullanır (.pr-* ailesi 8.5-9.5px ile basılır).
+  const screenDossierRules = dossierRules.filter(r => r.atRules.some(a => a.startsWith('@media screen')));
+
   it('kartın içinde serif (var(--font-display)) kullanılmaz', () => {
-    for (const rule of dossierRules) {
+    assert.ok(screenDossierRules.length >= 35);
+    for (const rule of screenDossierRules) {
       assert.doesNotMatch(
         rule.declarations,
         /font-family:\s*var\(--font-display\)/,
@@ -258,7 +298,7 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
   });
 
   it('10px altı metin ve 700 üstü ağırlık yoktur', () => {
-    for (const rule of dossierRules) {
+    for (const rule of screenDossierRules) {
       for (const size of [...rule.declarations.matchAll(/font-size:\s*([\d.]+)px/g)]) {
         assert.ok(Number(size[1]) >= 10, `${rule.selector} font-size ${size[1]}px okunabilirlik sınırının altında`);
       }
@@ -269,6 +309,22 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
         );
       }
     }
+  });
+
+  it('ölçü satırı flex’tir: ızgarada boş (gri) hücre bırakmaz', () => {
+    const facts = screenDossierRules.find(r => r.selector === '.dossier-facts');
+    assert.ok(facts, '.dossier-facts kuralı bulunmalı');
+    assert.match(facts!.declarations, /display:\s*flex/, 'hücreler genişliği paylaşmalı');
+    assert.match(facts!.declarations, /flex-wrap:\s*wrap/);
+    assert.doesNotMatch(
+      facts!.declarations,
+      /grid-template-columns/,
+      'auto-fit ızgara, sığmayan hücrede gri boşluk bırakır',
+    );
+    assert.ok(
+      !dossierRules.some(r => r.selector === '.dossier-fact.is-wide'),
+      'K düzeltmesi artık satırı kaplamıyor; dört ölçü aynı satırda',
+    );
   });
 
   it('Graham listesi geniş ekranda iki sütun, dar ekranda tek sütundur', () => {
@@ -286,13 +342,106 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
     assert.match(narrow!.declarations, /columns:\s*1/);
   });
 
+  it('kâğıtta Graham 1987 ölçek dosyası basılır', () => {
+    const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
+    for (const selector of ['.pr-dossier', '.pr-graham', '.pr-dossier-source', '.pr-dossier-facts']) {
+      assert.ok(printRules.some(r => r.selector === selector), `${selector} kâğıt kuralı olmalı`);
+    }
+    const graham = printRules.find(r => r.selector === '.pr-graham')!;
+    assert.match(graham.declarations, /columns:\s*2/, 'kâğıtta uzun liste iki sütuna dağılmalı');
+  });
+
   it('kâğıtta katlanmış hiçbir bölüm eksik basılmaz', () => {
     const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
     const unfold = printRules.find(r => r.selector === '.mmpi-disc-body[hidden]');
     assert.ok(unfold, 'yazdırmada katlanmış gövdeleri açan kural olmalı');
     assert.match(unfold!.declarations, /display:\s*flex\s*!important/);
+    const cardBody = printRules.find(r => r.selector === '.scale-dossier-body[hidden]');
+    assert.ok(cardBody, 'yazdırmada katlanmış kart gövdeleri de açılmalı');
+    assert.match(cardBody!.declarations, /display:\s*flex\s*!important/);
     const chrome = printRules.find(r => r.selector.includes('.clin-report-tools'));
     assert.ok(chrome, 'yazdırmada toplu denetimler gizlenmeli');
     assert.match(chrome!.declarations, /display:\s*none\s*!important/);
+  });
+});
+
+
+/* --------------------------------------------------------------------------
+   Yazdırma / PDF raporu — kâğıt da aynı kaynağı taşır.
+   -------------------------------------------------------------------------- */
+
+describe('Yazdırma raporu (PDF) kaynak içeriği eksiksiz taşır', () => {
+  const profile = mixedProfile();
+  const html = renderToStaticMarkup(
+    createElement(MMPIPrintReport, {
+      profile,
+      meta: {
+        fullName: 'Örnek Danışan',
+        testDate: '2026-09-23',
+        reportDate: '2026-09-23',
+        psychologist: 'Uzm. Psk.',
+        gender: 'Erkek',
+        age: '32',
+        occupation: '—',
+        education: 'Lisans',
+        method: 'Örnek',
+        duration: '45 dk',
+        reason: 'Doğrulama',
+        followUp: '—',
+        marital: '—',
+        revisionOf: 'ec1b0864-d76b-4cbd-9f58-2404cd73ff41',
+        revisionReason: 'Düzenleme',
+      },
+    }),
+  );
+
+  it('klinik olarak anlamlı her ölçek için Graham (1987) listesi basılır', () => {
+    assert.match(html, /Ölçek Bazlı Detaylı Klinik Yorum \(Graham 1987\)/);
+    // `class="pr-dossier"` (tırnak dahil) yalnız blok kökünde geçer; -lead/-notes
+    // gibi türetilmiş sınıflarla karışmaz.
+    const chunks = html.split('class="pr-dossier"').slice(1);
+    assert.equal(chunks.length, flaggedOf(profile).length, 'belirgin ölçek sayısı kadar dosya bloğu basılmalı');
+    for (const scale of flaggedOf(profile)) {
+      const block = chunks.find(chunk => chunk.includes(`>${scale.fullName} (${scale.shortName}) —`));
+      assert.ok(block, `${scale.id} dosya bloğu başlığı basılmalı`);
+      assert.match(block!, /alt testinde (yüksek|düşük) puan alan bireyin özellikleri/);
+      // Kaynaktaki liste kâğıda da aktarılır (kapalı bölüm kalmaz).
+      const items = grahamListsFor(scale.id as ClinicalScaleId, scale.tScore, scale.tScore >= 70 ? 'high' : 'low')
+        .lists.flatMap(l => l.items);
+      assert.ok(items.length > 0);
+      const first = items[0]!;
+      assert.ok(
+        block!.includes(escapeHtml(typeof first === 'string' ? first : first.text)),
+        `${scale.id} Graham listesi kâğıda aktarılmalı`,
+      );
+      assert.match(block!, new RegExp(`Kaynak: Graham \\(1987\\)`), 'kâğıtta kaynak künyesi olmalı');
+    }
+  });
+
+  it('K düzeltmesi oranları klasik ekleme tablosuyla birebir verilir', () => {
+    // Kaynak: Tablo 8-17 dipnotları + OCR denetimi (Hs +.5K, Pd +.4K, Pt +1K, Sc +1K, Ma +.2K)
+    assert.equal(K_CORRECTION.Hs, 0.5);
+    assert.equal(K_CORRECTION.Pd, 0.4);
+    assert.equal(K_CORRECTION.Pt, 1.0);
+    assert.equal(K_CORRECTION.Sc, 1.0);
+    assert.equal(K_CORRECTION.Ma, 0.2);
+    assert.match(html, /K düzeltmesi \(klasik ekleme tablosu\): Hs \+0\.5K, Pd \+0\.4K, Pt \+1K, Sc \+1K, Ma \+0\.2K/);
+    assert.match(html, /D, Hy, Mf, Pa ve\s+Si ölçeklerine K eklenmez/);
+  });
+
+  it('künye basılır; dosya adı ve satır içi sayfa referansı sızmaz', () => {
+    assert.match(html, /Ceyhun, A\. A\., &amp; Oral, G\. \(2003\)/);
+    assert.match(html, /Savaşır, I\. \(1981\)/);
+    assert.doesNotMatch(html, /kaynak\.pdf/i);
+    // Künye satırları dışında gövdeye sayfa referansı girmez.
+    const body = html
+      .replace(/<p class="pr-dossier-source">[\s\S]*?<\/p>/g, '')
+      .replace(/<p class="pr-foot">[\s\S]*?<\/p>/g, '');
+    assert.doesNotMatch(body, /s\.\d/);
+  });
+
+  it('revizyon kökeni kâğıtta izlenebilir kalır', () => {
+    assert.match(html, /ec1b0864-d76b-4cbd-9f58-2404cd73ff41/);
+    assert.match(html, /Neden: Düzenleme/);
   });
 });

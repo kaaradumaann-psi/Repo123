@@ -56,6 +56,44 @@ function fileDate(value: string | null | undefined): string {
 }
 
 /**
+ * Revizyon kökeni şeridi. Kapatılabilir; kapatma durumu ÇAĞIRAN tarafta tutulur
+ * ve kalıcı depolamaya yazılmaz, böylece sayfa yenilendiğinde (F5) ya da başka
+ * bir kayıt açıldığında izlenebilirlik bilgisi kendiliğinden geri gelir.
+ * Kapatma düğmesi kâğıda basılmaz (`no-print`); şeridin kendisi basılır.
+ */
+export function RevisionNotice({
+  revisionOf,
+  revisionReason,
+  onDismiss,
+}: {
+  revisionOf: string;
+  revisionReason?: string | null;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="status-banner info-banner" role="status">
+      <Icon name="refresh" size={16} />
+      <span style={{ flex: 1 }}>
+        Bu kayıt <strong>{revisionOf.slice(0, 8)}…</strong> kaydının düzenlenmiş (revizyon) halidir.
+        {revisionReason ? ` Neden: ${revisionReason}.` : ''}{' '}
+        <a href={`/kayitlar/${revisionOf}`} className="ws-revision-link">
+          Orijinal kaydı görüntüle
+        </a>
+      </span>
+      <button
+        type="button"
+        className="close-banner-btn no-print"
+        aria-label="Revizyon bilgisini gizle (sayfa yenilenince geri gelir)"
+        title="Sayfa yenilenince (F5) tekrar görünür"
+        onClick={onDismiss}
+      >
+        <Icon name="close" size={16} />
+      </button>
+    </div>
+  );
+}
+
+/**
  * Test kaydı detay sayfası — açılır pencere değil, tam sayfa.
  * `/kayitlar/:id` rotasıyla açılır; Supabase RLS erişimi zorlar
  * (yönetici tüm kayıtları, psikolog yalnız kendi kayıtlarını görür).
@@ -82,6 +120,11 @@ export function RecordDetailPage({
   const [notesSaved, setNotesSaved] = useState('');
   const [notesBusy, setNotesBusy] = useState(false);
   const [notesMessage, setNotesMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  /* Revizyon şeridi kapatılabilir. Kapatma durumu YALNIZ bellekte tutulur
+     (localStorage/sessionStorage'a yazılmaz); böylece sayfa yenilendiğinde (F5)
+     veya başka bir kayıt açıldığında izlenebilirlik bilgisi kendiliğinden geri
+     gelir ve revizyon kökeni kalıcı olarak gizlenemez. */
+  const [revisionHidden, setRevisionHidden] = useState(false);
   /* Uzman notu bölümü AÇILIR-KAPANIR ve KAPALI başlar (kullanıcı isterse elle
      açar). Yapay zekâ yorumu not eklendiğinde metin kaybolmasın diye bölüm
      kendiliğinden açılır ve görünür kaydırılır. */
@@ -93,6 +136,10 @@ export function RecordDetailPage({
     details.open = true;
     details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+
+  useEffect(() => {
+    setRevisionHidden(false);
+  }, [recordId]);
 
   useEffect(() => {
     let active = true;
@@ -292,17 +339,12 @@ export function RecordDetailPage({
         </header>
 
         {/* Revizyon zinciri: bu kayıt bir başka kaydın "Düzenle" sonucuysa. */}
-        {parsed.revisionOf && (
-          <div className="status-banner info-banner" role="status">
-            <Icon name="refresh" size={16} />
-            <span style={{ flex: 1 }}>
-              Bu kayıt <strong>{parsed.revisionOf.slice(0, 8)}…</strong> kaydının düzenlenmiş (revizyon) halidir.
-              {parsed.revisionReason ? ` Neden: ${parsed.revisionReason}.` : ''}{' '}
-              <a href={`/kayitlar/${parsed.revisionOf}`} className="ws-revision-link">
-                Orijinal kaydı görüntüle
-              </a>
-            </span>
-          </div>
+        {parsed.revisionOf && !revisionHidden && (
+          <RevisionNotice
+            revisionOf={parsed.revisionOf}
+            revisionReason={parsed.revisionReason}
+            onDismiss={() => setRevisionHidden(true)}
+          />
         )}
 
         {/* Optik formun son hali (OMR kayıtlarında): batch, kaynak ve manuel düzeltme özeti.

@@ -1,13 +1,23 @@
-import type { MMPIProfile } from '../../scoring/mmpiScoring';
+import type { MMPIProfile, ScaleResult } from '../../scoring/mmpiScoring';
+import { K_CORRECTION } from '../../scoring/mmpiKeys';
 import type { ScaleId } from '../../scoring/mmpiKeys';
 import {
   clinicalBandFor,
   codeInterpretationForProfile,
   detectPatterns,
+  detectSingleElevations,
   tColor,
   thirdHighestClinical,
 } from '../../scoring/mmpiInterpretation';
-import { stripPageRefs } from '../../scoring/mmpiScaleDossiers';
+import {
+  SCALE_DOSSIERS,
+  dossierSourceLine,
+  grahamListsFor,
+  stripPageRefs,
+  tabloDetail,
+  type ClinicalScaleId,
+  type GrahamItem,
+} from '../../scoring/mmpiScaleDossiers';
 import { MMPIScoreChart } from './MMPIScoreChart';
 
 export type PrintReportMeta = {
@@ -38,6 +48,94 @@ export type PrintReportMeta = {
 
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
   tone === 'alert' ? '#c2372c' : tone === 'watch' ? '#96660a' : '#0c8a5c';
+
+/** Graham (1987) maddesi — alt maddeler (a., b., …) girintili basılır. */
+function PrintGrahamItem({ item }: { item: GrahamItem }) {
+  if (typeof item === 'string') return <li>{item}</li>;
+  return (
+    <li>
+      {item.text}
+      {item.sub.length > 0 && (
+        <ul className="pr-graham-sub">
+          {item.sub.map((sub, index) => (
+            <li key={index}>{sub}</li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+/**
+ * Yazdırma raporu için ölçek dosyası bloğu — ekrandaki kartın kâğıt karşılığı.
+ * Yalnız klinik olarak anlamlı ölçekler (T ≥ 70 ya da T ≤ 40) için üretilir ve
+ * kaynaktaki bölümleri aynı sırayla taşır: Graham (1987) listesi → demografik
+ * notlar → bu profilde sağlanan koşullu yorumlar → kaynak künyesi.
+ */
+function PrintScaleDossier({ profile, scale }: { profile: MMPIProfile; scale: ScaleResult }) {
+  const id = scale.id as ClinicalScaleId;
+  const dossier = SCALE_DOSSIERS[id];
+  const high = scale.tScore >= 70;
+  const tMap = Object.fromEntries(profile.clinical.map(s => [s.id, s.tScore])) as Record<ScaleId, number>;
+  const { range, lists } = grahamListsFor(id, scale.tScore, high ? 'high' : 'low');
+  const notes = dossier.notes ?? [];
+  const tab = tabloDetail(id, profile.gender);
+  const kRatio = K_CORRECTION[id];
+  const conditions = [
+    ...(dossier.conditions ?? [])
+      .map(c => ({ when: c.when, sentence: stripPageRefs(c.sentence), active: c.match(tMap) }))
+      .filter(c => c.active),
+    ...detectSingleElevations(profile)
+      .filter(h => h.scale === id)
+      .map(h => ({ when: h.entry.rule, sentence: stripPageRefs(h.entry.text), active: true })),
+  ];
+
+  return (
+    <div className="pr-dossier">
+      <h3>
+        {scale.fullName} ({scale.shortName}) — T {scale.tScore.toFixed(1)} ·{' '}
+        {high ? 'Klinik Yükseklik' : 'Klinik Düşüklük'}
+      </h3>
+      <p className="pr-dossier-lead">
+        {scale.shortName} ({dossier.number}) alt testinde {high ? 'yüksek' : 'düşük'} puan alan bireyin özellikleri
+        (Graham 1987):
+      </p>
+      {range && <p className="pr-context">Kaynakta bu düzey için verilen liste: {range}.</p>}
+      <ol className="pr-graham">
+        {lists.flatMap(list => list.items).map((item, index) => (
+          <PrintGrahamItem key={index} item={item} />
+        ))}
+      </ol>
+
+      {notes.map((note, index) => (
+        <div className="pr-dossier-notes" key={index}>
+          <b>{note.title ? `${note.title}: ` : 'Demografik ve klinik notlar: '}</b>
+          {note.paragraphs?.map((paragraph, j) => (
+            <span key={j}>{paragraph} </span>
+          ))}
+          {note.list && <span>{note.list.join(' ')}</span>}
+        </div>
+      ))}
+
+      {conditions.map((condition, index) => (
+        <div className="pr-dossier-cond" key={index}>
+          <b>Koşullu ek yorum — {condition.when}: </b>
+          {condition.sentence}
+        </div>
+      ))}
+
+      <p className="pr-dossier-facts">
+        Tablo {tab.no}: {tab.count} madde ({tab.dogru.length} doğru / {tab.yanlis.length} yanlış) ·{' '}
+        {tab.kEkleli
+          ? `K Eklemeli bir alt testtir (+${kRatio}K).`
+          : 'K düzeltmesi uygulanmaz.'}{' '}
+        Erkeklerde ortalama {tab.normMale.toFixed(2)}, kadınlarda {tab.normFemale.toFixed(2)} (Savaşır, 1981 —
+        Tablo 30).
+      </p>
+      <p className="pr-dossier-source">{dossierSourceLine(id)}</p>
+    </div>
+  );
+}
 
 function dash(value: string | null | undefined): string {
   return value && value.trim() !== '' ? value : '—';
@@ -84,6 +182,9 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
 
   const patterns = detectPatterns(profile);
   const hitPatterns = patterns.filter(p => p.hit && !p.manual);
+
+  /** Klinik olarak anlamlı ölçekler: T ≥ 70 ya da T ≤ 40 (ekrandaki kartla aynı eşik). */
+  const flaggedClinical = clinical.filter(scale => scale.tScore >= 70 || scale.tScore <= 40);
 
   const notableDerived = (itemLevel?.derivedScales ?? []).filter(s => s.tone !== 'ok');
   const notableWiggins = (itemLevel?.derivedScales ?? []).filter(s => s.category === 'wiggins' && s.tone !== 'ok');
@@ -205,6 +306,11 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
           </tbody>
         </table>
 
+        <p className="pr-context">
+          K düzeltmesi (klasik ekleme tablosu): Hs +0.5K, Pd +0.4K, Pt +1K, Sc +1K, Ma +0.2K; D, Hy, Mf, Pa ve
+          Si ölçeklerine K eklenmez.
+        </p>
+
         <h3>Klinik Ölçek Yorumları</h3>
         {clinical.map(scale => {
           const band = clinicalBandFor(scale.id as ScaleId, profile.gender, scale.tScore);
@@ -255,6 +361,19 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
           </>
         )}
       </section>
+
+      {flaggedClinical.length > 0 && (
+        <section className="pr-block" aria-label="Ölçek bazlı detaylı klinik yorum">
+          <h2>Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987)</h2>
+          <p className="pr-context">
+            Yalnız T ≥ 70 (klinik yükseklik) veya T ≤ 40 (klinik düşüklük) olan ölçekler listelenir; diğer
+            ölçekler normal aralıktadır.
+          </p>
+          {flaggedClinical.map(scale => (
+            <PrintScaleDossier key={scale.id} profile={profile} scale={scale} />
+          ))}
+        </section>
+      )}
 
       {hitPatterns.length > 0 && (
         <section className="pr-block" aria-label="Profil örüntüleri">
@@ -457,8 +576,10 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
       </section>
 
       <p className="pr-foot">
-        T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kaynak künyeleri
-        ve doğrulama durumları uygulamanın &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
+        T skorları cinsiyete özgü Türk normlarıyla ve klasik K düzeltme tablosuyla hesaplanmıştır. Kaynaklar:
+        Graham, J. R. (1987); Ceyhun, A. A., &amp; Oral, G. (2003), <i>MMPI profillerini yorumlama el kitabı</i>;
+        Savaşır, I. (1981) Türk standardizasyon normları. Künyelerin doğrulama durumları uygulamanın
+        &ldquo;Kaynaklar&rdquo; sayfasında listelenir.
         {meta.scoringVersion ? ` Puanlama motoru: v${meta.scoringVersion}.` : ''}
       </p>
     </div>

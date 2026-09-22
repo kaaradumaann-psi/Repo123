@@ -1,4 +1,6 @@
+import { useId } from 'react';
 import type { MMPIProfile, ScaleResult } from '../../scoring/mmpiScoring';
+import { K_CORRECTION } from '../../scoring/mmpiKeys';
 import type { ScaleId } from '../../scoring/mmpiKeys';
 import {
   SCALE_MEANINGS,
@@ -35,9 +37,14 @@ import { Icon } from '../Icon';
      kalır. Yazdırmada tümü kendiliğinden açılır.
    ========================================================================== */
 
-type SectionKey = 'graham' | 'notes' | 'tablo';
+/**
+ * Katlanabilir bölüm anahtarları. `card` kartın bütün gövdesini kapatır
+ * (başlık her zaman görünür kalır); diğer üçü gövdenin içindeki uzun kaynak
+ * bölümleridir.
+ */
+type SectionKey = 'card' | 'graham' | 'notes' | 'tablo';
 
-const SECTION_KEYS: readonly SectionKey[] = ['graham', 'notes', 'tablo'];
+const SECTION_KEYS: readonly SectionKey[] = ['card', 'graham', 'notes', 'tablo'];
 
 const sectionId = (scaleId: string, key: SectionKey) => `${scaleId}:${key}`;
 
@@ -126,37 +133,57 @@ function ScaleDossierCard({
   const notes = dossier.notes ?? [];
   const isOpen = (key: SectionKey) => group.isOpen(sectionId(id, key));
   const onToggle = (key: SectionKey) => group.toggle(sectionId(id, key));
+  const bodyId = `${useId()}-dossier`;
+  const cardOpen = isOpen('card');
+  /** Klasik ekleme tablosu oranı (Hs .5K, Pd .4K, Pt 1K, Sc 1K, Ma .2K). */
+  const kRatio = K_CORRECTION[id];
 
   return (
-    <article id={`dossier-${id}`} className={`scale-dossier ${high ? 'is-high' : 'is-low'}`}>
-      <header className="scale-dossier-head">
-        <div className="scale-dossier-id">
-          <span className="scale-dossier-dot" aria-hidden="true" />
-          <div className="scale-dossier-titles">
-            <p className="scale-dossier-eyebrow">Kategori: Klinik Ölçek · Alt test {dossier.number}</p>
-            <h3 className="scale-dossier-name">
-              {scale.name}
-              <span className="scale-dossier-short">{scale.shortName}</span>
-            </h3>
-          </div>
-        </div>
-        <div className="scale-dossier-scores">
-          <span className={`klinik-pill ${high ? 'is-high' : 'is-low'}`}>
-            {high ? 'KLİNİK YÜKSEKLİK' : 'KLİNİK DÜŞÜKLÜK'}
+    <article
+      id={`dossier-${id}`}
+      className={`scale-dossier ${high ? 'is-high' : 'is-low'} ${cardOpen ? 'is-open' : ''}`}
+    >
+      {/* Başlık satırının tamamı bir düğmedir: kart gövdesi buradan katlanır.
+          Özet bilgiler (durum, T, çubuk, ham/K+) kapalıyken de görünür kalır. */}
+      <h3 className="scale-dossier-heading">
+        <button
+          type="button"
+          className="scale-dossier-toggle"
+          aria-expanded={cardOpen}
+          aria-controls={bodyId}
+          onClick={() => onToggle('card')}
+        >
+          <span className="mmpi-disc-chevron" aria-hidden="true">
+            <Icon name="right" size={14} />
           </span>
-          <div className="scale-dossier-tgroup">
-            <span className="score-t">{Math.round(scale.tScore)}</span>
-            <span className="score-t-label">T skoru</span>
-          </div>
-          <TBar t={scale.tScore} />
-          <div className="scale-dossier-stats">
-            <span className="dossier-stat">Ham: {scale.rawScore}</span>
-            {scale.kAdded !== undefined && <span className="dossier-stat">K+: {scale.kAdded}</span>}
-          </div>
-        </div>
-      </header>
+          <span className="scale-dossier-id">
+            <span className="scale-dossier-dot" aria-hidden="true" />
+            <span className="scale-dossier-titles">
+              <span className="scale-dossier-eyebrow">Kategori: Klinik Ölçek · Alt test {dossier.number}</span>
+              <span className="scale-dossier-name">
+                {scale.name}
+                <span className="scale-dossier-short">{scale.shortName}</span>
+              </span>
+            </span>
+          </span>
+          <span className="scale-dossier-scores">
+            <span className={`klinik-pill ${high ? 'is-high' : 'is-low'}`}>
+              {high ? 'KLİNİK YÜKSEKLİK' : 'KLİNİK DÜŞÜKLÜK'}
+            </span>
+            <span className="scale-dossier-tgroup">
+              <span className="score-t">{Math.round(scale.tScore)}</span>
+              <span className="score-t-label">T skoru</span>
+            </span>
+            <TBar t={scale.tScore} />
+            <span className="scale-dossier-stats">
+              <span className="dossier-stat">Ham: {scale.rawScore}</span>
+              {scale.kAdded !== undefined && <span className="dossier-stat">K+: {scale.kAdded}</span>}
+            </span>
+          </span>
+        </button>
+      </h3>
 
-      <div className="scale-dossier-body">
+      <div id={bodyId} className="scale-dossier-body" hidden={!cardOpen}>
         <section className="dossier-sec">
           <h4 className="dossier-sec-title">KLİNİK AÇIKLAMA VE ANALİZ</h4>
           <p className="dossier-lead">{band ? band.text : high ? SCALE_MEANINGS[id].high : SCALE_MEANINGS[id].low}</p>
@@ -231,6 +258,8 @@ function ScaleDossierCard({
         <section className="dossier-sec">
           <h4 className="dossier-sec-title">EK KLİNİK BİLGİLER</h4>
           <p className="dossier-para">{dossier.overview}</p>
+          {/* Dört ölçü tek satırda: hücreler flex ile dağılır, böylece ızgarada
+              hiç boş (gri) hücre kalmaz ve K düzeltmesi de sığar. */}
           <dl className="dossier-facts">
             <div className="dossier-fact">
               <dt>Madde Sayısı</dt>
@@ -244,14 +273,25 @@ function ScaleDossierCard({
               <dt>Yanlış (Y)</dt>
               <dd>{tab.yanlis.length} madde</dd>
             </div>
-            <div className="dossier-fact is-wide">
+            <div className="dossier-fact">
               <dt>K düzeltmesi</dt>
-              <dd>{tab.kEkleli ? 'K Eklemeli bir alt testtir.' : 'Uygulanmaz'}</dd>
+              <dd>{tab.kEkleli ? `+${kRatio}K` : 'Uygulanmaz'}</dd>
             </div>
           </dl>
+          <p className="dossier-para dossier-knote">
+            {tab.kEkleli
+              ? `K Eklemeli bir alt testtir. Klasik ekleme tablosuna göre ham puana ${kRatio}\u00d7K eklenir.`
+              : `Bu alt teste K düzeltmesi uygulanmaz (Tablo ${tab.no}\u2019de \u201cK Eklemeli\u201d işareti yoktur).`}
+          </p>
           {tab.extraNote && <p className="dossier-extra-note">{tab.extraNote}</p>}
+          {/* Normlar kitabın kendi standardizasyon tablosundan (Tablo 30) okunur.
+              Bazı alt test tablolarının dipnotu farklı bir değer basar (Hy kadın,
+              Pt kadın, Si erkek); bu kaynak içi çelişkiler CONFLICT-028/037/040
+              olarak denetlendi ve Tablo 30 esas alındı. Atıf bu yüzden tabloyu
+              da anar: kitap dipnotuyla karşılaştıran uzman farkın nedenini görür. */}
           <p className="dossier-para dossier-norms">
-            Erkeklerde ortalama: {tab.normMale.toFixed(2)}, kadınlarda: {tab.normFemale.toFixed(2)} (Savaşır, 1981)
+            Erkeklerde ortalama: {tab.normMale.toFixed(2)}, kadınlarda: {tab.normFemale.toFixed(2)} (Savaşır, 1981) —
+            Tablo 30
           </p>
         </section>
 
@@ -292,8 +332,9 @@ function ScaleDossierCard({
  *
  * Açılır bölümlerin açık/kapalı durumu tek bir grupta tutulur ve üstteki
  * "Tümünü aç / Tümünü kapat" denetimiyle topluca yönetilir. Varsayılan:
- * yalnız en belirgin ölçeğin Graham (1987) listesi açıktır; geri kalan
- * uzun kaynak listeleri kapalı gelir.
+ * tüm kart gövdeleri açıktır (başlık satırı kapalıyken de özeti taşır) ve
+ * yalnız en belirgin ölçeğin Graham (1987) listesi açıktır; geri kalan uzun
+ * kaynak listeleri kapalı gelir.
  */
 export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
   const flagged = profile.clinical.filter(s => s.tScore >= 70 || s.tScore <= 40);
@@ -304,7 +345,12 @@ export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
   const sectionIds = flagged.flatMap(s =>
     SECTION_KEYS.filter(key => key !== 'notes' || hasNotes(s.id as ClinicalScaleId)).map(key => sectionId(s.id, key)),
   );
-  const defaultOpen = leadId ? [sectionId(leadId, 'graham')] : [];
+  // Varsayılan: tüm kartlar açık (başlık zaten özettir), Graham listesi yalnız
+  // en belirgin ölçekte açık gelir.
+  const defaultOpen = [
+    ...flagged.map(s => sectionId(s.id, 'card')),
+    ...(leadId ? [sectionId(leadId, 'graham')] : []),
+  ];
   const group = useDisclosureGroup(defaultOpen);
 
   return (

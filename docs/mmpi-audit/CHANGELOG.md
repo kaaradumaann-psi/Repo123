@@ -1789,3 +1789,20 @@ eksiksiz tamamlanarak kilitlendi.
   - `tests/mmpiClinicalReportUi.test.ts` (yeni) — **16/16 PASS**.
   - `tests/mmpiInterpretation.test.ts` — eski `aria-expanded` yokluğu beklentisi yeni açılır bölüm sözleşmesiyle değiştirildi.
   - Toplam: **589/589 PASS** (103 suite).
+
+---
+
+## 2026-09-23 — CHANGE-031: Klinik kart kullanılabilirliği, PDF'e Graham 1987 aktarımı, Tablo 12 denetim betiği onarımı
+
+**Kapsam:**
+- **Klinik kart (`MMPIClinicalTab.tsx`):**
+  - Ölçü satırı grid → **flex**: sağdaki gri boşluk kalktı, K düzeltmesi (`+0.5K` … `+0.2K` / `Uygulanmaz`) aynı satıra sığdı; kaynak cümlesi + klasik ekleme oranı altına alındı.
+  - **Kart başlığı katlanabilir** (tüm satır düğme, `aria-expanded`/`aria-controls`); özet bilgiler kapalıyken de görünür.
+  - Norm atfı **"(Savaşır, 1981) — Tablo 30"** olarak netleşti (dipnot çelişkileri CONFLICT-028/037/040 REJECTED).
+- **PDF (`MMPIPrintReport.tsx`):**
+  - **"Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987)"** bölümü eklendi: belirgin ölçekler için Graham listesi, demografik notlar, sağlanan koşullu yorumlar, Tablo özeti ve künye.
+  - Klasik K ekleme tablosu dipnotu ve rapor altlığında onaylı künye.
+- **Kayıt detayı (`RecordDetailPage.tsx`):** revizyon şeridi `RevisionNotice` bileşenine ayrıldı ve **kapatılabilir**; durum yalnız bellekte, `[recordId]` ile sıfırlanır → **F5'te geri gelir**.
+- **Denetim aracı:** `cmp-tablo12.ts` Mf'nin cinsiyete özel anahtarına uyarlandı (betik `TypeError` ile çöküyordu, Tablo 12 denetlenmiyordu) → **0 FARK**.
+- **Kaynak doğrulaması:** Tablo 9-17 madde sayıları, K oranları ve 26 norm hücresi; Tablo 15/16/30 OCR metninden (p80 L, p83 L, p105) doğrudan okundu.
+- **Testler:** `auditScripts.test.ts` (7) + `recordDetailUi.test.ts` (4) yeni; `mmpiClinicalReportUi.test.ts` 24. Toplam **608/608 PASS** (106 suite) · tsc **0** · build **PASS**.

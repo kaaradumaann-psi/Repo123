@@ -1173,3 +1173,64 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsc --noEmit` → **0 hata (PASS)**
 - `npm test` → **589/589 PASS (103 suite)**
 - `npm run build` → **PASS** (`optik-form.html` yeniden üretildi ve senkron)
+
+---
+
+## CHANGE-031 — Klinik Kart Kullanılabilirlik Düzeltmeleri, PDF Raporuna Graham 1987 Aktarımı ve Tablo 12 Denetim Betiği Onarımı
+
+**Area:** `src/components/results/MMPIClinicalTab.tsx` · `src/components/results/MMPIPrintReport.tsx` · `src/components/RecordDetailPage.tsx` · `src/styles/workspace.css` · `scripts/mmpi-audit/cmp-tablo12.ts` · `tests/*`.
+
+**Amaç:** CHANGE-030 sonrası kullanıcı geri bildirimi: (1) ölçü satırında sağda gri boşluk kalıyordu ve K düzeltmesi sığmıyordu, (2) kart başlığı katlanamıyordu, (3) PDF raporunda Graham 1987 içeriği yoktu, (4) revizyon şeridi kapatılamıyordu. Ayrıca denetim araçlarında sessiz bir çökme bulundu.
+
+**Kaynak doğrulaması (bu değişiklikte ekrana/kağıda çıkan her sayı):**
+
+| Katman | Kaynak | Doğrulama |
+|---|---|---|
+| Tablo 9 (D) 20+40=60 | kitap s.78-81 | `cmp-tablo9.ts` → **BİREBİR MATCH** |
+| Tablo 10 (Hy) 13+47=60 | s.93-94 | `cmp-tablo10.ts` → **BİREBİR MATCH** |
+| Tablo 11 (Pd) 24+26=50 | s.107-110 | `cmp-tablo11.ts` → **BİREBİR MATCH** |
+| Tablo 12 (Mf) 28+32=60 | s.122 | `cmp-tablo12.ts` → **BİREBİR MATCH** (betik onarıldı, bkz. 5) |
+| Tablo 13 (Pa) 25+15=40 | s.128 | `cmp-tablo13.ts` → **BİREBİR MATCH** |
+| Tablo 14 (Pt) 39+9=48 | s.137-141 | `cmp-tablo14.ts` → **BİREBİR MATCH** |
+| Tablo 15 (Sc) 59+19=78 | s.144 / **OCR p80 L** | `cmp-sc-batch18.ts` → **BİREBİR MATCH**; OCR metni "Tablo15…(Madde Sayısı:78)" + "KEklemeli" doğrudan okundu |
+| Tablo 16 (Ma) 35+11=46 | s.150 / OCR p83 L | `cmp-ma-batch19.ts` → 0 FARK |
+| Tablo 17 (Si) 34+36=70 | s.156 / OCR p86 L | `cmp-si-batch21.ts` → 0 FARK |
+| K oranları Hs .5 / Pd .4 / Pt 1 / Sc 1 / Ma .2 | `OCR_PDF_FULL_AUDIT.md:323` | `K_CORRECTION` birebir |
+| Normlar (26 hücre) | **OCR p105 = Tablo 30** | `mmpiKeyIntegrity` "26 norm hücresinin tamamı kaynak Tablo 30 ile birebir" + OCR satırları elle okundu (`29.82 … 31.06 … 8.2`, `13.19 4.07 … 15.89`, `1996 440 … 19.72 4.36`, `23.86 797 … 29.88 7.52`) |
+
+**Bulunan ve çözülen iki kaynak-içi çelişki (kod Tablo 30'u izler):**
+- Tablo 15 dipnotu OCR'da kadın Sc için **31.08** okunuyor; Tablo 30 **31.06** (sd 8.2). Kod 31.06 → Tablo 30 esas.
+- Tablo 17 dipnotu Si erkek için **26.86**; Tablo 30 **23.86** (sd 7.97) → **CONFLICT-040 REJECTED**, kod 23.86.
+- Pt kadın: s.138 metni **29.90**, Tablo 30 **29.20** → **CONFLICT-037 REJECTED**, kod 29.20.
+- Hy kadın → **CONFLICT-028 REJECTED**.
+- Bu yüzden kart ve PDF'teki norm atfı artık **"(Savaşır, 1981) — Tablo 30"** biçiminde: kitap dipnotuyla karşılaştıran uzman farkın nedenini görür, hata sanmaz.
+
+**Değişiklikler:**
+1. `MMPIClinicalTab.tsx` — ölçü satırı:
+   - `.dossier-facts` grid'den **flex** satırına çevrildi. `repeat(auto-fit, minmax(140px,1fr))` dördüncü hücre sığmadığında **boş (gri zeminli) hücre** bırakıyordu; flex'te hücreler genişliği paylaştığı için boşluk oluşmaz. `.dossier-fact.is-wide` kaldırıldı.
+   - **K düzeltmesi** artık aynı satırda ve klasik ekleme oranıyla: `+0.5K` (Hs) … `+0.2K` (Ma); K almayan ölçeklerde `Uygulanmaz`. Kaynak cümlesi hemen altta: *"K Eklemeli bir alt testtir. Klasik ekleme tablosuna göre ham puana 0.5×K eklenir."* K almayan ölçeklerde cümle **kendi tablo numarasıyla** anılır (D → "Tablo 9'da", Hy → "Tablo 10'da", Mf → "Tablo 12'de"); önceki taslakta hepsi yanlış biçimde Tablo 17'ye bağlanmıştı.
+2. `MMPIClinicalTab.tsx` — kart başlığı katlanabilir:
+   - Başlık satırının tamamı (`Kategori: Klinik Ölçek · Alt test N`, ölçek adı + kısa ad, durum rozeti, T + çubuk, Ham/K+) tek bir `<button>`; `aria-expanded` + `aria-controls` taşır. Gövde `hidden` ile kapanır, içerik DOM'da kalır.
+   - Katlama durumu aynı `useDisclosureGroup` grubunda; "Tümünü aç / Tümünü kapat" kartları da yönetir. Varsayılan: kartlar açık, Graham listesi yalnız en belirgin ölçekte açık.
+   - `<p>`/`<div>` öğeleri düğme içine giremeyeceği için başlık `<h3><button>…</button></h3>` yapısına geçti (DisclosureRow ile aynı desen).
+3. `MMPIPrintReport.tsx` — PDF kaynak içeriğiyle tamamlandı:
+   - Yeni bölüm **"Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987)"**: T ≥ 70 ya da T ≤ 40 olan her ölçek için Graham listesi (kâğıtta iki sütun), demografik notlar, **bu profilde sağlanan** koşullu yorumlar, Tablo N özeti (madde sayısı + D/Y + K oranı + norm) ve kaynak künyesi.
+   - Klinik tablonun altına **klasik ekleme tablosu** dipnotu eklendi (Hs +0.5K … Ma +0.2K; D/Hy/Mf/Pa/Si'ye eklenmez).
+   - Rapor altlığına onaylı künye eklendi (Graham 1987 · Ceyhun & Oral 2003 · Savaşır 1981); `stripPageRefs` gövdede korunur, sayfa aralığı yalnız künye satırlarında.
+4. `RecordDetailPage.tsx` — revizyon şeridi:
+   - `RevisionNotice` bileşenine ayrıldı ve **kapatılabilir** (`close-banner-btn`, `aria-label`, `title`).
+   - Kapatma durumu `useState(false)` ile **yalnız bellekte**; `localStorage`/`sessionStorage`'a yazılmaz ve `[recordId]` değişince sıfırlanır → **F5'te geri gelir**, başka kayıtta da geri gelir. Kapatma düğmesi `no-print`; şeridin kendisi kâğıda basılır (izlenebilirlik).
+5. `scripts/mmpi-audit/cmp-tablo12.ts` — **onarım:**
+   - Betik `SCORING_KEYS.Mf`'nin eski düz alanlarını (`trueItems`/`falseItems`/`reversedForFemales`) okuyordu; Mf cinsiyete özel (`{male, female}`) yapıya geçildiğinden `TypeError: Cannot read properties of undefined` ile **çöküyordu** ve Tablo 12 fiilen denetlenmiyordu.
+   - Yeni hâli `isGendered` ile erkek anahtarını Tablo 12'yle, kadın anahtarını (*) maddeleri (69, 179, 231, 297, 133) ters çevrilmiş beklenen listelerle karşılaştırır ve 5 maddenin gerçekten yön değiştirdiğini doğrular. Sonuç: **0 FARK** (erkek 28+32, kadın 25+35).
+6. `src/styles/workspace.css`: `.scale-dossier-heading`/`.scale-dossier-toggle` (düğme başlık, chevron, hover/odak), `.scale-dossier-body[hidden]`, `.dossier-knote`, flex ölçü satırı; `@media print`'e `.scale-dossier-body[hidden] { display: flex !important }` ve yeni `.pr-dossier*` kâğıt kuralları.
+7. **Testler:**
+   - `tests/auditScripts.test.ts` (yeni, **7 test**): `cmp-tablo*.ts` betiklerinin çökmeden çalıştığını ve `FARK VAR` üretmediğini kilitler — Tablo 12 çökmesi bu testle yakalanırdı.
+   - `tests/recordDetailUi.test.ts` (yeni, **4 test**): revizyon şeridinin içeriği, kapatma düğmesinin erişilebilirliği/`no-print` oluşu, neden boşken basılmaması ve **kapatma durumunun kalıcı depolamaya yazılmadığı**.
+   - `tests/mmpiClinicalReportUi.test.ts` (**24 test**): kart başlığı katlama sözleşmesi, ölçü satırının flex olması (grid boşluğu yasak), K oranı + kaynak cümlesi + doğru tablo numarası, PDF'te Graham blokları / K dipnotu / künye / revizyon izi.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata (PASS)**
+- `npm test` → **608/608 PASS (106 suite)**
+- `npm run build` → **PASS**
+- `cmp-tablo9/10/11/12/13/14.ts` → **6/6 BİREBİR MATCH, 0 FARK**
