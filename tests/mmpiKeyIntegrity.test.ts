@@ -869,27 +869,27 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     // blok kayıtları CODES'a karışmaz
     assert.ok(KNOWN_CODES.every((k) => /^\d{2}$/.test(k)), 'CODES anahtarları iki haneli kalır');
     const expectedBlockCodes = [
-      'D:207', 'D:213', 'D:231', 'D:243', 'D:247', 'D:248', 'D:248_highF',
+      'D:027', 'D:207', 'D:213', 'D:231', 'D:243', 'D:247', 'D:248', 'D:248_highF',
       'D:270', 'D:273', 'D:274', 'D:275', 'D:278', 'D:281', 'D:284', 'D:287',
       'Hs:120', 'Hs:123', 'Hs:1234', 'Hs:1236', 'Hs:1237', 'Hs:12378', 'Hs:1270',
       'Hs:128', 'Hs:129', 'Hs:132', 'Hs:134', 'Hs:1342', 'Hs:136', 'Hs:137',
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',
       'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
       'Hy:435', 'Hy:436', 'Hy:534',
-      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:8726', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
+      'Ma:049', 'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:8726', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
       'Ma:964', 'Ma:968', 'Ma:974', 'Ma:9K', 'Ma:9_highK', 'Ma:9_lowK', 'Ma:high9_highK', 'Ma:high9_lowK',
       'Pa:456_scarlett', 'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648', 'Pa:678',
       'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:86', 'Pa:860', 'Pa:876', 'Pa:964',
       'Pa:968', 'Pa:paranoid_valley', 'Pa:psychotic_v',
-      'Pd:456', 'Pd:462', 'Pd:463', 'Pd:468', 'Pd:469', 'Pd:482', 'Pd:489',
+      'Pd:049', 'Pd:456', 'Pd:462', 'Pd:463', 'Pd:468', 'Pd:469', 'Pd:482', 'Pd:489',
       'Pd:48_highF_low2', 'Pd:493', 'Pd:495', 'Pd:496', 'Pd:498', 'Pd:4_low5',
       'Pd:642', 'Pd:643', 'Pd:648', 'Pd:784', 'Pd:794', 'Pd:824', 'Pd:842', 'Pd:849', 'Pd:874', 'Pd:943',
       'Pd:945', 'Pd:946', 'Pd:948',
-      'Pt:47', 'Pt:67', 'Pt:74', 'Pt:76', 'Pt:782', 'Pt:784', 'Pt:789', 'Pt:794', 'Pt:87', 'Pt:872', 'Pt:8726', 'Pt:874', 'Pt:879',
-      'Sc:678', 'Sc:68', 'Sc:680', 'Sc:698', 'Sc:78', 'Sc:784', 'Sc:789', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:86', 'Sc:860',
+      'Pt:027', 'Pt:47', 'Pt:67', 'Pt:74', 'Pt:76', 'Pt:782', 'Pt:784', 'Pt:789', 'Pt:794', 'Pt:87', 'Pt:872', 'Pt:8726', 'Pt:874', 'Pt:879',
+      'Sc:027', 'Sc:678', 'Sc:68', 'Sc:680', 'Sc:698', 'Sc:78', 'Sc:784', 'Sc:789', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:86', 'Sc:860',
       'Sc:87', 'Sc:872', 'Sc:8726', 'Sc:8726_high9', 'Sc:874', 'Sc:876', 'Sc:879', 'Sc:968',
       'Sc:paranoid_valley', 'Sc:psychotic_v',
-      'Si:027', 'Si:049', 'Si:068', 'Si:086',
+      'Si:027', 'Si:0278', 'Si:049', 'Si:068', 'Si:086',
     ].sort();
     assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), expectedBlockCodes);
   });

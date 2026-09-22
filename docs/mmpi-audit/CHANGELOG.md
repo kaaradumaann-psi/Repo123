@@ -1735,3 +1735,17 @@ notu bağlandı. `parseCode()` motoruna Yüksek 9 kalıpları eklendi.
 
 **Doğrulama:** tsc **0** · `cmp-ma-batch32.ts` **0 FARK** · `tests/mmpiMaBlock.test.ts` **9/9 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 33 — CHANGE-026: Si (0) bloğu kod göçü ve Bölüm 5 Kod Bloğu Göçü Kapanışı (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında dokuzuncu ve son klinik blok olan Si (0) bloğu (s.154-158)
+tamamlandı. `Si:049` ve `Si:027` kodlarına koşullu yorum kuralları (`Si, Pd, Ma >= 70` eyleme vurukluk
+bastırılması; `D/Pt >= 70 && Sc >= 70` ruminatif davranışlar) eklendi. 6 çapraz ölçek takma adı
+(`Pd:049`, `Ma:049`, `D:027`, `Pt:027`, `Sc:027`, `Si:0278`) bağlandı.
+Böylece Bölüm 5'teki 9 klinik ölçek bloğunun tüm kod göçleri (Hs, D, Hy, Pd, Pa, Pt, Sc, Ma, Si)
+eksiksiz tamamlanarak kilitlendi.
+
+**Doğrulama:** tsc **0** · `cmp-si-batch33.ts` **0 FARK** · `tests/mmpiSiBlock.test.ts` **6/6 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).

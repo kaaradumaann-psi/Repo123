@@ -1029,3 +1029,24 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-ma-batch32.ts` → **SONUÇ: 0 FARK · Ma BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiMaBlock` → **9/9** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 33 — CHANGE-026 · Si (0) bloğu kod göçü ve Bölüm 5 Kapanışı (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Si (0) bloğundaki kodların (`Si:049`, `Si:027`) koşullu yorum kurallarının bağlanması, çapraz takma adların eklenmesi ve Bölüm 5 kod göçünün nihai olarak kapatılması.
+
+**Eklenen testler (6):** `tests/mmpiSiBlock.test.ts` → **6/6 PASS**
+1. Kod çözme doğruluğu ve sadakati:
+   - `049` kodu gövdesi, bloğu ve takma adları (`Si:049`, `Pd:049`, `Ma:049`) (s.157),
+   - `027(8)` kodu gövdesi, bloğu ve takma adları (`027`, `Si:027`, `Si:0278`, `D:027`, `Pt:027`, `Sc:027`) (s.158),
+   - İki haneli Si kodları ve Bakınız yönlendirmeleri (01, 02, 03, 04, 05, 06, 07, 08, 09),
+   - 068 ve 086 kodlarının 680/860 hedefine yönlendirilmesi.
+2. Koşul testleri:
+   - 049 (Si, Pd ve Ma >= 70 T eyleme vurukluğun bastırılması),
+   - 027(8) (D/Pt >= 70 T ve Sc >= 70 T ruminatif davranışların kuvvetlenmesi).
+
+**Güncellenen testler:**
+- `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`KNOWN_BLOCK_CODES` listesine Si bloğundaki 6 yeni anahtar eklenerek toplam kayıt 151 blok koduna ulaştırıldı).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-si-batch33.ts` → **SONUÇ: 0 FARK · Si BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiMaBlock` → **9/9** · `mmpiSiBlock` → **6/6** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

@@ -3537,3 +3537,31 @@ metni taşınması DECISION-028 kapsamında **yok**).
   - "Kod oldukça nadirdir, özellikle erkeklerde çok az görülür." → `gender === 'Erkek'`.
 - **94/49 Kodu (s.153):**
   - "Eyleme vuruk davranış ile ilgilidir." → klinik atıf.
+
+---
+
+## BÖLÜM 5: Si (0) KOD BLOĞU VERİLERİ (kitap s.154-158 · PDF p084_L - p086_L)
+
+### SOURCE-CODE-SI-001 — Si Bloğu Sayfa ve Başlık Envanteri (kitap s.154-158)
+- **Görsel ve OCR Taraması:** PDF p084_L (s.154, boş sayfa), p084_R (s.155, Si girişi), p085_L (s.156, Tablo 17), p085_R (s.157, Si T bantları ve kod listesi) ve p086_L (s.158, boş sayfa) RapidOCR ve pymupdf ile taranarak tüm başlıklar, metinler ve koşullar doğrulandı.
+- **Doğrulanan Başlıklar:**
+  1. `Tablo 17` (s.156) — Sosyal içedönüklük alt testi: Madde numaraları ve puanlama yönü (34 Doğru + 36 Yanlış = 70 madde, P0 MATCH).
+  2. `T Bantları` (s.157) — 70+ T / 60-69 T / 45-59 T / 25-44 T (4 bant MATCH).
+  3. `01/10 Kodu` (s.157) — Bakınız 10/01 Kodu.
+  4. `02/20 Kodu` (s.157) — Bakınız 20/02 Kodu.
+  5. `03/30 Kodu` (s.157) — Bakınız 30/03 Kodu.
+  6. `04/40 Kodu` (s.157) — Bakınız 40/04 Kodu.
+  7. `05/50 Kodu` (s.157) — Bakınız 50/05 Kodu.
+  8. `06/60 Kodu` (s.157) — Bakınız 60/06 Kodu.
+  9. `07/70 Kodu` (s.157) — Bakınız 70/07 Kodu.
+  10. `08/80 Kodu` (s.157) — Bakınız 80/08 Kodu.
+  11. `09/90 Kodu` (s.157) — Bakınız 90/09 Kodu.
+  12. `049 Kodu` (s.157) — Psikiyatrik olgularda eyleme vurukluğun bastırılması.
+  13. `027(8) Kodu` (s.157-158) — Bireyde güçlü ruminatif davranışlar görülebilir.
+  14. `068 / 086 Kodları` (s.158) — Bakınız 680 / 860 Kodu.
+
+### SOURCE-CODE-SI-002 — Si Bloğu Koşullu Yorum Kuralları (Conditions)
+- **049 Kodu (s.157):**
+  - "Alt test Si'deki yükselmeye, alt test 4 ve 9'daki yükselmeler de eşlik ediyorsa, eyleme vurukluğun bastırıldığı düşünülmelidir." → `Si >= 70 && Pd >= 70 && Ma >= 70`.
+- **027(8) Kodu (s.157-158):**
+  - "Alt test 2 ya da 7 özellikle alt test 8'in eşlik ettiği durumlarda, ruminatif davranışların kuvvetlendiği görülür." → `(D >= 70 || Pt >= 70) && Sc >= 70`.

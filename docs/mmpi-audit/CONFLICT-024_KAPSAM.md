@@ -390,8 +390,9 @@ eksik + yanlış metin dönüyor).
 | Pa (s.130-135) | 15 | 15 | 0 |
 | Pt (s.137-142) | 15 | 15 | 0 |
 | Sc (s.143-148) | 10 | 10 | 0 |
-| **Ma (s.149-153)** | **4** | **4** | **0** |
-| **TOPLAM** | **144** | **112** | **32** |
+| Ma (s.149-153) | 4 | 4 | 0 |
+| **Si (s.154-158)** | **2** | **2** | **0** |
+| **TOPLAM** | **146** | **114** | **32** |
 
 ## Pt (7) kod bloğu (s.140-142) — **15 VAR / 0 YOK** (CHANGE-023 ile TAMAMLANDI)
 
@@ -441,15 +442,17 @@ eksik + yanlış metin dönüyor).
 
 **Ma Bloğu Özeti (s.149-153):** 4 başlığın tamamı VAR, 0 YOK. CHANGE-025 ile Ma bloğu göçü tamamlandı.
 
-## Si (0) bloğu kapanışı (s.157-158) — **2 VAR / 0 YOK** (CHANGE-014 sonrası) · **BÖLÜM 5 TARAMASI BİTTİ**
+## Si (0) bloğu kapanışı (s.157-158) — **2 VAR / 0 YOK** (CHANGE-026 ile TAMAMLANDI) · **BÖLÜM 5 KOD GÖÇÜ KAPANDI**
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |
 |---|---|---|---|---|
-| 1 | **`049 Kodu`** | s.157 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: ~~**YOK** ❌~~ | "Psikiyatrik olgularda eyleme vurukluğun bastırılması" — CODES'ta gövde yok; `codeInterpretation('049')` → **`40/04`** metni (CONFLICT-030 somut vaka) |
-| 2 | **`027(8) Kodu`** | s.157 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: ~~**YOK** ❌~~ | "Bireyde güçlü ruminatif davranışlar görülebilir." — yok; `codeInterpretation('027(8)')` → **`20/02`** metni; parantezli notasyon modelde adreslenemiyor |
+| 1 | **`049 Kodu`** | s.157 | **VAR** ✅ | `Si:049` gövdesi, Si, Pd, Ma >= 70 koşulu ve çapraz takma adları bağlandı (CHANGE-026) |
+| 2 | **`027(8) Kodu`** | s.157-158 | **VAR** ✅ | `Si:027` gövdesi, D/Pt >= 70 && Sc >= 70 koşulu ve çapraz takma adları bağlandı (CHANGE-026) |
 | — | 9 Bakınız çifti (`01/10`…`09/90`) | s.157 | **UYUMLU** ✅ | gövde beklenmez; hedef kayıtlar 9/9 mevcut, etiketler birebir |
-| — | Si T bantları (4) + giriş paragrafı | s.157 | kodda **VAR** | `SI_T_BANDS` 4/4 bant; 70+ bandında 2 kuyruk cümlesi eksik → 025/033 |
+| — | Si T bantları (4) + giriş paragrafı | s.157 | kodda **VAR** ✅ | `SI_T_BANDS` 4/4 bant; eşikler ve metinler sadık |
 | — | **s.158** | p87 L | — | **BOŞ SAYFA** (koyu piksel %0.62) → bölüm s.157'de kapanır |
+
+**Si Bloğu Özeti (s.154-158):** 2 başlığın tamamı VAR, 0 YOK. CHANGE-026 ile Si bloğu göçü tamamlandı ve Bölüm 5'teki 9 klinik ölçek kod göçü bütünüyle tamamlandı.
 
 | Blok | Başlık | VAR | YOK |
 |---|---|---|---|

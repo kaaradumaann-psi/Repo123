@@ -398,12 +398,28 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
     block: 'Si',
     rawCode: '049',
     text: 'Psikiyatrik olgularda eyleme vurukluğun bastırılması',
+    seeAlso: 's.157 (Si alt testinin diğer alt testlerle ilişkisi).',
+    conditions: [
+      {
+        source: 's.157 (Si bloğu)',
+        quote: 'Alt test Si\'deki yükselmeye, alt test 4 ve 9\'daki yükselmeler de eşlik ediyorsa, eyleme vurukluğun bastırıldığı düşünülmelidir.',
+        test: ({ t }) => (t('Si') ?? 0) >= 70 && (t('Pd') ?? 0) >= 70 && (t('Ma') ?? 0) >= 70,
+      },
+    ],
   },
   'Si:027': {
     code: '027(8)',
     block: 'Si',
     rawCode: '027(8)',
     text: 'Bireyde güçlü ruminatif davranışlar görülebilir.',
+    seeAlso: 's.157-158 (Si alt testinin diğer alt testlerle ilişkisi).',
+    conditions: [
+      {
+        source: 's.157 (Si bloğu)',
+        quote: 'Alt test 2 ya da 7 özellikle alt test 8\'in eşlik ettiği durumlarda, ruminatif davranışların kuvvetlendiği görülür.',
+        test: ({ t }) => ((t('D') ?? 0) >= 70 || (t('Pt') ?? 0) >= 70) && (t('Sc') ?? 0) >= 70,
+      },
+    ],
   },
 
   // --- Hs (Hipokondriasis / 1) Bloğu (s.67-78) · DECISION-031/A ---
@@ -1854,6 +1870,14 @@ BLOCK_CODES['Pa:psychotic_v'] = BLOCK_CODES['Sc:paranoid_valley']!;
 BLOCK_CODES['Ma:9K'] = BLOCK_CODES['Ma:9_highK']!;
 BLOCK_CODES['Ma:high9_highK'] = BLOCK_CODES['Ma:9_highK']!;
 BLOCK_CODES['Ma:high9_lowK'] = BLOCK_CODES['Ma:9_lowK']!;
+
+// Si bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Pd:049'] = BLOCK_CODES['Si:049']!;
+BLOCK_CODES['Ma:049'] = BLOCK_CODES['Si:049']!;
+BLOCK_CODES['D:027'] = BLOCK_CODES['Si:027']!;
+BLOCK_CODES['Pt:027'] = BLOCK_CODES['Si:027']!;
+BLOCK_CODES['Sc:027'] = BLOCK_CODES['Si:027']!;
+BLOCK_CODES['Si:0278'] = BLOCK_CODES['Si:027']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);

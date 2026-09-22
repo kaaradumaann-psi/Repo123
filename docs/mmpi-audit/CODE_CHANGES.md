@@ -1015,3 +1015,44 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
 - `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-026 — DECISION-031 (A): Bölüm 5 Si (0) Bloğu Kod Göçü ve Bölüm 5 Kapanışı (s.154-158)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiSiBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-si-batch33.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan dokuzuncu blok ve **Bölüm 5 Kapanışı**: **Si (Sosyal İçe Dönüklük / 0) bloğu (s.154-158)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `BLOCK_CODES`: Si bloğundaki `Si:049` ve `Si:027` kayıtlarına `conditions` ve `seeAlso` atıfları bağlandı:
+     - `Si:049`: Si, Pd, Ma >= 70 T eyleme vurukluğun bastırılması koşulu (s.157).
+     - `Si:027`: D/Pt >= 70 T ve Sc >= 70 T ruminatif davranışların kuvvetlenmesi koşulu (s.157-158).
+     - Çapraz takma adlar eklendi: `Pd:049`, `Ma:049`, `D:027`, `Pt:027`, `Sc:027`, `Si:0278`.
+2. `tests/mmpiSiBlock.test.ts`:
+   - 6 yeni test ile Si bloğunun kod çözme doğruluğu, metin sadakati, çapraz takma adlar ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Si bloğundaki 6 yeni anahtar eklenerek toplam kayıt 151 blok koduna ulaştırıldı.
+4. `scripts/mmpi-audit/cmp-si-batch33.ts`:
+   - Si bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-si-batch33.ts` → **SONUÇ: 0 FARK · Si BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiSiBlock.test.ts` → **6/6 PASS**
+- `npx tsx --test tests/mmpiMaBlock.test.ts` → **9/9 PASS**
+- `npx tsx --test tests/mmpiScBlock.test.ts` → **13/13 PASS**
+- `npx tsx --test tests/mmpiPtBlock.test.ts` → **11/11 PASS**
+- `npx tsx --test tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
+- `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
