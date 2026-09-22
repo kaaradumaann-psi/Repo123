@@ -1671,3 +1671,39 @@ tablolarının gerçek dağılımı **O = 32 · V = 14 · satır = 46** (V + O =
 batch 25 ile **birebir aynı**, diff alındı) · `cmp-b6-batch23/24.ts` → **0 FARK** · tsc **0** ·
 `npm test` **375/375** (36 suite) · `npm run build` **PASS** (`src/` dokunulmadı →
 `optik-form.html` **değişmedi**) · `git diff --check` temiz.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 27 — CONFLICT-044 sayfa okumasıyla kapandı (yalnız BELGE; `src/` değişmedi)
+
+**Amaç:** FINAL listesindeki tek kalan açık denetim bulgusunu (`CONFLICT-044`, P3) kod
+onayı gerektirmeden, yalnız **kaynak sayfa okumasıyla** kapatmak. “devam et” yetkisi
+`src/` değişikliğini kapsamaz — bu tur **belge-only**’dır.
+
+**Sayfa kanıtı (`extract.py render --pages 74,75 --half both --dpi 300`):**
+- s.132 (p074 L): “**68/86 Kodu (Ayrıca 468/648, 486/846, 489/849 kodlarına bakınız)**”
+  başlığı + kendi gövdesi (“Bu kodu alan kişilerde yoğun aşağıklık ve güvensizlik
+  duyguları dikkati çeker…”, “Paranoid vadide 6 ve 8 alt testleri 70 T puanı civarındadır
+  ve 7 alt testi 10 T puanı aşağıdadır.”) → KAPSAM:373 **VAR ✅** doğrulandı.
+- s.133 (p074 R): `680/860 Kodları`, `69/96 Kodu (Ayrıca 698/968 kodlarına bakınız.)`,
+  `694/964 Kodları` + 68/86 gövdesinin “Olası tanı” dökümü — **ayrıksı `68/86` başlığı
+  yok** → KAPSAM:374-376 ile birebir uyumlu.
+- s.134 (p075 L): `698/968 Kodları` gövdesi “…Eğer 8 alt testi, 6’dan 5 T puanı aşağıda
+  ise 68/86 koduna bakın.” + `60/06 Kodu` + `456 Alt Testlerinin Örüntüsü`
+  (“4 ve 6 alt testleri T puanı olarak 65’in üzerinde, 5 alt testi T puanı olarak 35’tedir”
+  → Ek-örüntüler satırıyla birebir) — **`68/86` burada başlık değil, koşullu geçiş**.
+- s.135 (p075 R): yalnız **Şekil 21 · Şcarlett O’Hara vadisi** (Pd–Mf–Pa) → KAPSAM:386 ✓.
+
+**Sonuç:** KAPSAM:385 “YOK ❌” satırı bir **geçiş kuralını** anlatır (“kod başlığı değil”
+tablosu); başlık/gövde kaybı yok → **CONFLICT-044 FIXED (belge-only)**; `CODES['68']` doğ-
+ru; DECISION-031 iş kümesi **44** sabit. `final-count.ts` davranışı değiştirilmedi (NOT 7
+bilinçli olarak aynı basılıyor; yorum belgede).
+
+**İşlenen kayıtlar (append-only; hiçbir satır yeniden yazılmadı):** CONFLICTS.md (044 →
+FIXED + KAPANDI notu) · CONFLICT-024_KAPSAM.md (satır 385 notu + FINAL bloğu oku) ·
+DECISIONS.md (DECISION-031 güncellemesi) · AUDIT_STATE.md (bulgu satırı + sayaç **FIXED 17
+· 16 açık · 2 P3** + Last update “devam 9”) · TEST_AUDIT.md · TOOLING.md (NOT #5 gerekçesi).
+
+**Doğrulama:** `npx tsx scripts/mmpi-audit/final-count.ts` → **HATA 0 · NOT 7**, NOT/HATA
+satırları batch 26 çıktısıyla **birebir aynı** (diff boş) · `npx tsc --noEmit` **0** ·
+`npm test` **375/375** (36 suite) · belge-only olduğu için build/UI delta yok.

@@ -895,6 +895,9 @@ tarihsî birikim; **eski satırlar yazılmadı**, ölçüm buraya ve `AUDIT_STAT
 **Yeni bulgu:** `CONFLICT-044 (P3, OPEN)` — `KAPSAM` satır 385 `68/86` YOK diyor, oysa aynı
 kod tipinin kaydı (`CODES['68']` → `68/86`) var; ara/kapanış satırları da çelişiyor →
 blok-yerel gövde mi kastediliyor, kaynak sayfasıyla (s.130-135 Pa bloğu) netleştirilecek.
+→ **Netleşti (batch 27 · p074 L + p074 R + p075 L + p075 R okundu):** satır 385 bir
+**geçiş-kuralı satırıdır**, başlık/gövde kaybı yoktur → **CONFLICT-044 FIXED
+(belge-only)**; testler yeniden koşuldu (375/375) ve araç çıktısı diff’i boş (NOT 7 sabit).
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `npx tsx scripts/mmpi-audit/final-count.ts`
 → **HATA 0 · NOT 7** (exit 0) · `mmpiInterpretation` **54/54** · `npm test` **375/375**

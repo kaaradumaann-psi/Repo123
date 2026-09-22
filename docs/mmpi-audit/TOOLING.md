@@ -86,3 +86,8 @@ durum için “son satır geçerli” kuralını uygular ve sayısal başlıklar
 Çıkış kodu: `HATA = 0` → **0**; parser bir satırı hiç sınıflandıramazsa veya iki haneli bir
 “VAR” başlık kodda resolve edilmiyorsa **1**. `NOT` satırları belge tarafı düzeltme önerisidir;
 araç hiçbir dosyayı yazmaz.
+
+> **Batch 27 notu:** (C) bloğunun `68/86 (satır 385)` NOT’u bir **kural-satırı okumasıdır**
+> (KAPSAM’daki “Ek örüntüler — kod başlığı değil” tablosundan); kaynak sayfası okunarak
+> gerekçelendi ve **CONFLICT-044 → FIXED (belge-only)**. Araç davranışı bilinçli olarak
+> değiştirilmedi: bulgu satırları ölçüm olarak basılmaya devam eder, yorum belgededir.

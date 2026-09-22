@@ -1980,7 +1980,7 @@ F 71 T vuruyor).
 
 ---
 
-## CONFLICT-044 (P3 · **OPEN**) — `KAPSAM` satır 385: `68/86` “YOK” diyor, aynı kod tipinin kaydı var
+## CONFLICT-044 (P3 · ✅ **FIXED (batch 27 · belge-only · sayfa okuması)**) — `KAPSAM` satır 385: `68/86` “YOK” diyor, aynı kod tipinin kaydı var
 
 Area: `docs/mmpi-audit/CONFLICT-024_KAPSAM.md` (satır 385, Pa bloğu tablosu) ↔ `src/scoring/mmpiSourceCodes.ts`
 
@@ -2000,3 +2000,24 @@ Impact: **P3** — sayısal davranış hatası yok; DECISION-031’in **iş küm
 
 Status: **OPEN** — Pa bloğu gövdelerinin kaynakla (s.130-135) satır-satır karşılaştırılmasıyla
 kapanır; **kod değişikliği gerektirmiyor** (gövde eklenmesi DECISION-031 kapısından geçer).
+
+> **KAPANDI (2026-09-22 · batch 27 · sayfa okuması → FIXED · belge-only):** s.132–s.135
+> yarımları kaynakta okundu (`extract.py render --pages 74,75 --half both --dpi 300` →
+> p074 L/R + p075 L/R). **s.132 (p074 L):** “**68/86 Kodu (Ayrıca 468/648, 486/846,
+> 489/849 kodlarına bakınız)**” gerçek bir başlık ve kendi gövdesiyle duruyor (“Bu kodu
+> alan kişilerde yoğun aşağıklık ve güvensizlik duyguları dikkati çeker…”, “Paranoid
+> vadide 6 ve 8 alt testleri 70 T puanı civarındadır ve 7 alt testi 10 T puanı
+> aşağıdadır.”); gövde cümlesi s.133 başında “Olası tanı: Paranoid durum Paranoid
+> şizofreni (6 ve 8 alt testleri 75 T puanının üstünde ise) · Şizoid kişilik” ile
+> tamamlanıyor. **s.133 (p074 R):** başlıklar `680/860 Kodları`, `69/96 Kodu (Ayrıca
+> 698/968 kodlarına bakınız.)`, `694/964 Kodları` — **ayrıksı `68/86` başlığı yok**.
+> **s.134 (p075 L):** başlıklar `698/968 Kodları`, `60/06 Kodu`, `456 Alt Testlerinin
+> Örüntüsü`; `68/86` burada **yalnız** 698/968 gövdesinin koşullu cümlesi: “Eğer 8 alt
+> testi, 6’dan 5 T puanı aşağıda ise 68/86 koduna bakın.” (ardından “Olası tanı:
+> Şizofreni paranoid tip”). **s.135 (p075 R):** yalnız **Şekil 21 · Şcarlett O’Hara
+> vadisi** (Pd–Mf–Pa, 30/50/70/90 ızgarası) — Ek-örüntüler satırıyla birebir uyumlu.
+> **Hüküm:** KAPSAM:385 “YOK ❌” satır 385’teki tablonun başlığında açıklandığı gibi bir
+> **geçiş kuralına** aittir (“Ek örüntüler — kod başlığı değil, sayısal tarama kuralı”),
+> başlık/gövde kaybı **yoktur**; `CODES['68']` kaydı doğrudur → **sayım aracının bu
+> NOT’u bir sınıflandırma-okuması olarak belgelendi, kod değişmedi, hiçbir satır
+> yeniden yazılmadı.** DECISION-031 iş kümesi **44** olarak sabittir.

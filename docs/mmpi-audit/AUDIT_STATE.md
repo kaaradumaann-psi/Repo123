@@ -77,7 +77,8 @@ adayı**. Kaynaksız set bilinçli: `neurotic-triad` + `multi-high`. Kanıt
 `scripts/mmpi-audit/final-count.ts` → **HATA 0 · NOT 7** — Ek 9 **V 14 / O 32 · 46/46 MATCH**,
 kod defteri **49 kayıt · 12 koşul**, `KAPSAM` **152 eşsiz etiket ↔ 148 defter** (VAR+YOK 150,
 fark 2); **çözümlenemeyen YOK: iki haneli 0 / 3+ haneli 81** → DECISION-031’in 44 gövdesi
-tamamen 3+ hane/blok-yerel kümesinde. Bulgu **CONFLICT-044 (P3, OPEN)**.
+tamamen 3+ hane/blok-yerel kümesinde. Bulgu **CONFLICT-044 (P3, OPEN)** → batch 27’de
+**KAPANDI · FIXED (belge-only · s.132+s.133+s.134+s.135 sayfa okuması; kod değişmedi)**.
 21-44; envanter bu etiketleri p83 R + p84 L'de gördü) → **Ma kod bloğu** (`91/19` …
 `90/09`) → `Si (0)` girişi + **Tablo 17** → **CONFLICT-024/030/031/033 KARARI**
 
@@ -721,6 +722,9 @@ Kalan açık: **15 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 6 P
 karar kapısı **DECISION-032 (ADAY)**.
 **Güncel sayaç (batch 25): CONFLICT-044 AÇILDI (P3, OPEN — sayım aracı bulgusu; kod değişmedi)
 → 44 kayıt · FIXED 16 · REJECTED 9 · 17 açık** (0 P0 · 5 P1 · 7 P2 · 3 P3 + 2 FIXED-kısmı).
+**Güncel sayaç (batch 27): CONFLICT-044 KAPANDI → FIXED (P3 · belge-only sayfa okuması;
+kod, sayımlar ve `final-count.ts` çıktıları DEĞİŞMEDİ) → 44 kayıt · FIXED 17 · REJECTED 9 ·
+16 açık** (0 P0 · 5 P1 · 7 P2 · 2 P3 + 2 FIXED-kısmı).
 **Yeni (batch 18): CONFLICT-038 AÇILDI ve AYNI TURDA FIXED** → sayaç değişmedi
 (FIXED: 12 · REJECTED: 8). 025/026/027/030/031 satırları Sc/Pt örnekleriyle
 genişledi (024 KAPSAM: 140/100/42).
@@ -743,6 +747,8 @@ FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 00
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
+
+2026-09-22 — Oturum 8 (devam 9): **PHASE 10 batch 27 — CONFLICT-044 sayfa okumasıyla KAPANDI (belge-only)** — s.132–s.135 (p074 L/R + p075 L/R · 300 dpi) kaynakta okundu: `68/86 Kodu` başlığı ve gövdesi **s.132**’de VAR; s.133/s.134’te ayrıksı `68/86` başlığı yok — KAPSAM:385, `698/968` gövdesindeki koşullu geçiş cümlesinin (“Eğer 8 alt testi, 6’dan 5 T puanı aşağıda ise 68/86 koduna bakın.”) kural-satırıdır. Sayaç: **44 kayıt · FIXED 17 · REJECTED 9 · 16 açık (2 P3)**; `src/`, testler ve `optik-form.html` **değişmedi**; `final-count.ts` çıktısı birebir aynı (HATA 0 · NOT 7). Sıradaki kapılar: **DECISION-031 · DECISION-032**.
 
 2026-09-22 — Oturum 8 (devam 8): **PHASE 10 batch 26 — belge-only sayım düzeltmesi** — DECISION-011’in “33 anahtar” sayısı ölçümle güncellendi (**O 32 · V 14 · satır 46**); `src/`, testler ve `optik-form.html` **değişmedi**; araç bulguları aynı (HATA 0 · NOT 7). DECISION-030/A onayı **tükenmiştir** (CHANGE-015 + CHANGE-016); sıradaki kapı **DECISION-031**.
 

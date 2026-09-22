@@ -988,6 +988,12 @@ bunu taşıyabiliyor). Bu kapalı sayımın yanındaki **tek belge-side belirsiz
 sayım **152** (fark 4) ve son TOPLAM satırı **VAR+YOK = 150** (fark 2) veriyor; onay
 gelirse ilk iş **satır satır yeniden sınıflandırma**, sonra gövde göçü.
 
+> **Güncelleme (batch 27 · sayfa okuması):** “tek belge-side belirsizlik” kapanmıştır —
+> `CONFLICT-044` **FIXED (belge-only)**: s.134’teki satır bir geçiş-kuralı satırıdır;
+> `68/86 Kodu` başlığı ve gövdesi s.132’dedir. İş kümesi sayısı **44 DEĞİŞMEDİ**; ilk iş
+> artık yalnız 148↔152/150 defter NOT’larının gerekçe düzeltmesi + gövde göçüdür
+> (onay kapısı aynıdır).
+
 
 ---
 

@@ -389,6 +389,15 @@ direktifi) · CONFLICT-035 (terim sapması)
 **Pa bloğundan açılan yeni çelişki:** **CONFLICT-036** (`64/46` Pa bloğu gövdesi
 eksik + yanlış metin dönüyor).
 
+> **Satır 385 notu (batch 27 · sayfa okuması · CONFLICT-044 KAPANDI/FIXED · belge-only):**
+> `698/968 → 68/86 geçişi` satırı bu tabloya aittir — “**kod başlığı değil**, sayısal
+> tarama kuralı”. Sayfa okuması (p074 L/R + p075 L/R): s.133 ve s.134’te ayrıksı `68/86`
+> başlığı **yoktur**; s.134’te `68/86` yalnız `698/968 Kodları` gövdesindeki koşullu
+> cümledir (“Eğer 8 alt testi, 6’dan 5 T puanı aşağıda ise 68/86 koduna bakın.”), başlık
+> + gövde ise **s.132**’dedir (“68/86 Kodu (Ayrıca 468/648, 486/846, 489/849 kodlarına
+> bakınız)”). 10. satırdaki **VAR ✅** doğrudur; `final-count.ts` bu kural satırını evrene
+> almaya devam eder (ölçüm davranışı bilinçli değişmedi — bulgu buradaki notla karşılandı).
+
 ### Kümülatif kapsam (PHASE 9/10, blok blok)
 
 | Blok | İncelenen | VAR | YOK |
@@ -559,3 +568,8 @@ Kod tarafı değişti; **başlık evreni aynı**, yalnız 3 başlık YOK → VAR
 > **0’ı iki haneli / 81’i 3+ haneli**. Araç ayrıca `68/86` (satır 385) için **CONFLICT-044 (P3,
 > OPEN)** buldu. **Hiçbir satır yeniden yazılmadı** — sayımlar DECISION-028 gereği yalnız
 > kaynak taramasıyla değişebilir; bu not ölçüm sonucudur.
+>
+> **Batch 27 oku:** yukarıdaki “CONFLICT-044 (P3, OPEN)” bulgusu sayfa okumasıyla
+> **KAPANDI → FIXED (belge-only)**; çözümlenemeyen YOK evreni yine **0 iki haneli /
+> 81 3+ haneli**, DECISION-031 iş kümesi **44**; araç çıktısı **birebir aynı** (HATA 0 ·
+> NOT 7) — satır 385 artık bu dosyada kural-satırı olarak ayrıca notludur.
