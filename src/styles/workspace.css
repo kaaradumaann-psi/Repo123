@@ -1626,6 +1626,12 @@
   .mmpi-pattern-main b { font-size: 12.5px; color: var(--slate-800); display: block; }
   .mmpi-pattern-main span { font-size: 11px; color: var(--muted); }
   .mmpi-pattern-main p { font-size: 11.5px; color: var(--soft); margin: 4px 0 0; line-height: 1.45; }
+  .mmpi-pattern-main .mmpi-pattern-source { display: block; font-size: 10.5px; color: var(--accent-ink); margin-top: 2px; }
+  .mmpi-pattern-main .mmpi-pattern-quote { font-style: italic; color: var(--muted); }
+  .mmpi-pattern-main .mmpi-pattern-note { display: flex; gap: 5px; align-items: flex-start; font-size: 11px; color: var(--muted); }
+  .mmpi-pattern-main .mmpi-pattern-note svg { flex: none; margin-top: 2px; }
+  .mmpi-pattern-main .mmpi-box { margin-top: 6px; }
+  .mmpi-pattern-manual { margin-top: 8px; }
   .pattern-pill {
     flex: none;
     font-size: 10.5px;

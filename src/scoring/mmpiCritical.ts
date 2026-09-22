@@ -1,6 +1,13 @@
 /**
  * Kritik maddeler ve klinik izlenimler.
  *
+ * KAYNAK DURUMU (denetim kaydı): Kaynak kitapta "kritik madde" listesi YOKTUR
+ * (Ek 1 madde metni, Ek 9 ölçek anahtarı, Ek 10 norm tabloları içerir).
+ * Bu liste **kaynak dışı bir klinik derlemedir**; madde numaraları ve yönleri
+ * doğrulanmış, etiketleri kaynak madde metinleriyle uyumlu hâle getirilmiştir
+ * (bkz. docs/mmpi-audit/CONFLICTS.md → CONFLICT-023, DECISION-026).
+ * Etiketler tanı değil, uygulayıcı için kontrol listesi niteliğindedir.
+ *
  * Kritik maddeler: klinik açıdan acil anlam taşıyan, yanıtı doğrudan
  * değerlendirilmesi gereken maddelerdir (intihar, kendine/başkasına zarar,
  * sanrısal yaşantılar vb.). Madde metinleri telifli olduğundan gösterilmez;
@@ -24,22 +31,22 @@ export type CriticalItemDef = {
 };
 
 export const CRITICAL_ITEMS: CriticalItemDef[] = [
-  { id: 27, expected: 1, label: 'Ruhsal/Bilişsel Karmaşa' },
-  { id: 33, expected: 1, label: 'Sosyal Çekilme' },
+  { id: 27, expected: 1, label: 'Etkilenme / Sanrısal Deneyim' },
+  { id: 33, expected: 1, label: 'Tuhaf/Bizar Yaşantı' },
   { id: 44, expected: 1, label: 'Bedensel/Organik Yakınma' },
   { id: 48, expected: 1, label: 'Ruhsal Kontrol Kaybı' },
   { id: 66, expected: 1, label: 'Gerçek Dışılık / Sanrısal Düşünce' },
-  { id: 69, expected: 1, label: 'Sosyal/Ailevi Huzursuzluk' },
-  { id: 85, expected: 1, label: 'Ruhsal Sıkıntı / Kaygı' },
+  { id: 69, expected: 1, label: 'Bedensel Ağrı' },
+  { id: 85, expected: 1, label: 'Dürtü Kontrolü / Aşırma İsteği' },
   { id: 114, expected: 1, label: 'Bedensel/Organik Belirti' },
   { id: 121, expected: 1, label: 'Gerçek Dışılık / Sanrısal Düşünce' },
   { id: 123, expected: 1, label: 'Şüphecilik / Alınganlık' },
   { id: 139, expected: 1, label: 'Kendine/Başkasına Zarar Verme' },
-  { id: 146, expected: 1, label: 'Sosyal Uyumsuzluk' },
-  { id: 151, expected: 1, label: 'Sosyal Çekilme / Yabancılaşma' },
+  { id: 146, expected: 1, label: 'Sosyal Aktivite İhtiyacı' },
+  { id: 151, expected: 1, label: 'Zehirlenme Sanrısı / Şüphecilik' },
   { id: 156, expected: 1, label: 'Bedensel/Organik Belirti' },
-  { id: 168, expected: 1, label: 'Bağımlılık Potansiyeli' },
-  { id: 179, expected: 1, label: 'Bedensel/Organik Belirti' },
+  { id: 168, expected: 1, label: 'Bilişsel Karmaşa' },
+  { id: 179, expected: 1, label: 'Cinsel Sıkıntı' },
   { id: 182, expected: 1, label: 'Fobik Kaygı' },
   { id: 184, expected: 1, label: 'Ruhsal Kontrol Kaybı' },
   { id: 200, expected: 1, label: 'Gerçek Dışılık / Sanrısal Düşünce' },
@@ -51,16 +58,16 @@ export const CRITICAL_ITEMS: CriticalItemDef[] = [
   { id: 275, expected: 1, label: 'Ruhsal Kontrol Kaybı' },
   { id: 291, expected: 1, label: 'Ruhsal Kontrol Kaybı' },
   { id: 293, expected: 1, label: 'Şüphecilik / Sanrısal Düşünce' },
-  { id: 334, expected: 1, label: 'Depresif Çökkünlük' },
-  { id: 337, expected: 1, label: 'Depresif Çökkünlük' },
+  { id: 334, expected: 1, label: 'Algı Bozukluğu (Koku)' },
+  { id: 337, expected: 1, label: 'Huzursuzluk / Anksiyete' },
   { id: 339, expected: 1, label: 'İntihar Riski / Depresyon' },
   { id: 345, expected: 1, label: 'Sanrısal Düşünce / Ruhsal Kayıp' },
   { id: 349, expected: 1, label: 'Şüphecilik / Sanrısal Düşünce' },
   { id: 350, expected: 1, label: 'Sanrısal Düşünce / Ruhsal Kayıp' },
-  { id: 354, expected: 1, label: 'Bedensel / Nörolojik Belirti' },
-  { id: 20, expected: 0, label: 'Alkol/Madde Sorunları' },
-  { id: 37, expected: 0, label: 'Ruhsal Sıkıntı' },
-  { id: 133, expected: 0, label: 'Ailevi Sorunlar' },
+  { id: 354, expected: 1, label: 'Kesici Alet Korkusu (Fobi)' },
+  { id: 20, expected: 0, label: 'Cinsel Doyumsuzluk' },
+  { id: 37, expected: 0, label: 'Cinsel Sorunlar' },
+  { id: 133, expected: 0, label: 'Cinsel Uyumsuzluk' },
   { id: 74, expected: 1, label: 'Cinsel Uyumsuzluk / Kimlik Kaygısı', gender: 'Erkek' },
   { id: 74, expected: 0, label: 'Cinsel Uyumsuzluk / Kimlik Kaygısı', gender: 'Kadın' },
 ];

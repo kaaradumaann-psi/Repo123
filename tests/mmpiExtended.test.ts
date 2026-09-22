@@ -109,7 +109,12 @@ describe('geçerlik konfigürasyonları', () => {
     assert.ok(config);
     assert.match(config!.name, /V Şekli/);
   });
-  it('tümüne yanlış: L,F,K hepsi 75+', () => {
+  it('tümüne yanlış: L,F,K hepsi 75+ (uygulamadaki pratik eşik)', () => {
+    // Kaynak s.50 "L, F ve K tümü 80 T puanının üzerindedir" der; ANCAK kitabın
+    // kendi anahtarı ve Tablo 30 normlarıyla gerçek bir "tümüne yanlış"
+    // yanıtlayıcı F = 75.3 T üretir → kaynağın F>80 koşulu ulaşılamazdır
+    // (kaynak içi tutarsızlık). Bu yüzden pratik eşik 75 korunmuştur.
+    // Kanıt: DECISION-020 · CONFLICT-018 · SOURCE-CONFIG-008
     const config = detectValidityConfig(81, 76, 82);
     assert.ok(config);
     assert.match(config!.name, /Yanlış/);

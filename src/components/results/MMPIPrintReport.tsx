@@ -1,6 +1,6 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
-import { clinicalBandFor, codePointInterpretation, tColor } from '../../scoring/mmpiInterpretation';
+import { clinicalBandFor, codeInterpretationForProfile, tColor } from '../../scoring/mmpiInterpretation';
 import { MMPIScoreChart } from './MMPIScoreChart';
 
 export type PrintReportMeta = {
@@ -47,7 +47,8 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
   const { validityAnalysis, profileCode, clinical, itemLevel } = profile;
   const fk = validityAnalysis.fkAnalysis;
   const config = validityAnalysis.validityConfig;
-  const codeEntry = codePointInterpretation(profileCode);
+  const codeResolved = codeInterpretationForProfile(profileCode, profile);
+  const codeEntry = codeResolved?.entry;
 
   const notableDerived = (itemLevel?.derivedScales ?? []).filter(s => s.tone !== 'ok');
   const notableWiggins = (itemLevel?.derivedScales ?? []).filter(s => s.category === 'wiggins' && s.tone !== 'ok');
@@ -194,6 +195,11 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
             </div>
             {codeEntry?.diagnosis && codeEntry.diagnosis.length > 0 && (
               <p className="pr-context">Olası tanılar: {codeEntry.diagnosis.join(', ')}.</p>
+            )}
+            {codeResolved && codeResolved.activeConditions.length > 0 && (
+              <p className="pr-context">
+                Koşullu ek yorum: {codeResolved.activeConditions.map(c => `${c.quote} (${c.source})`).join(' ')}
+              </p>
             )}
           </>
         )}

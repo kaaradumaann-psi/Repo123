@@ -56,8 +56,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'ascending',
     name: 'Yükselen Eğilim',
-    rule: 'L < F < K; L düşük (≤ 45), K yüksek (≥ 55)',
-    isMatch: v => v.L < v.F && v.F < v.K && v.L <= 45 && v.K >= 55,
+    rule: 'L < F < K; L ≈ 40 (≤ 45), F 45-55, K ≈ 60 (≥ 55)',
+    isMatch: v => v.L < v.F && v.F < v.K && v.L <= 45 && v.F >= 45 && v.F <= 55 && v.K >= 55,
     interpretation:
       'Birey kendini iyi göstermeye çalışır ancak bu çaba etkisizdir; sorunlarını kabul etmekten hoşlanmaz. Klinik ölçekler (özellikle nevrotik üçlü) genellikle yükselir; düşük eğitim ve sosyo-ekonomik düzeydeki bireylerde daha sık görülür.',
     validity: 'şüpheli',
@@ -66,8 +66,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'descending',
     name: 'Azalan Eğilim',
-    rule: 'L > F > K; L yüksek (≥ 55), K düşük (≤ 45)',
-    isMatch: v => v.L > v.F && v.F > v.K && v.L >= 55 && v.K <= 45,
+    rule: 'L > F > K; L ≈ 60 (≥ 55), F ≈ 50, K 40-45',
+    isMatch: v => v.L > v.F && v.F > v.K && v.L >= 55 && v.K >= 40 && v.K <= 45,
     interpretation:
       'Birey sorunlarını açıkça ortaya koymakta ve yardım aramaktadır; kendini olduğundan kötü gösterme eğilimi yoktur ancak yakınmalar abartılı bulunabilir. Klinik başvuruda tipik bir yardım arama örüntüsüdür.',
     validity: 'geçerli',
@@ -86,8 +86,14 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'all-true',
     name: 'Tümüne "Doğru" Yanıt Verme',
-    rule: 'F, T 120 üzerinde; L ve K, T 40 altında',
-    isMatch: v => v.F > 120 && v.L <= 40 && v.K <= 40,
+    // Kaynak s.49: "L ve K alt testinin 35 T puanını aşmasını, F alt testinin
+    // 120'nin üzerinde yer almasını gerektirir."
+    // ANCAK: T puanları [20, 120] aralığına kırpılır (mmpiScoring.ts), bu
+    // yüzden "F > 120" matematiksel olarak ULAŞILAMAZ ve örüntü hiç tespit
+    // edilemezdi. Kırpma altında "> 120"nin tek temsili tam üst sınırdır.
+    // Not: T kırpması kaldırılırsa bu koşul yeniden `> 120` olmalıdır.
+    rule: 'F, T 120 (kırpma üst sınırı) ve üzeri; L ve K, T 35\'i aşmaz (kaynak s.49)',
+    isMatch: v => v.F >= 120 && v.L <= 35 && v.K <= 35,
     interpretation:
       'Bireyin tüm maddelere "Doğru" yanıtı verdiği bir örüntüdür; profil klinik olarak yorumlanamaz. Testin yönergesi yeniden anlatılarak uygulama tekrarlanmalıdır.',
     validity: 'şüpheli',
@@ -96,7 +102,12 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'all-false',
     name: 'Tümüne "Yanlış" Yanıt Verme',
-    rule: 'L, F ve K tümü T 75-80 üzerinde',
+    // Kaynak s.50: "L, F ve K testlerinin tümü 80 T puanının üzerindedir."
+    // ANCAK: kitabın kendi anahtarı + Tablo 30 normlarıyla, gerçek bir
+    // "tümüne yanlış" yanıtlayıcı L=81.2, F=**75.3**, K=82.3 üretir → kaynağın
+    // F>80 koşulu bu formda ULAŞILAMAZ (kaynak içi tutarsızlık, DECISION-020).
+    // Bu yüzden pratik eşik korunur; bkz. CONFLICTS.md CONFLICT-018.
+    rule: 'L, F ve K tümü T 75 üzerinde',
     isMatch: v => v.L >= 75 && v.F >= 75 && v.K >= 75,
     interpretation:
       'Bireyin tüm maddelere "Yanlış" yanıtı verdiği bir örüntüdür; kendisini aşırı olumlu gösterme çabası tüm ölçekleri yükseltir. Profil klinik olarak yorumlanamaz; uygulama tekrarlanmalıdır.',
@@ -106,8 +117,8 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'help-seeking',
     name: 'Psikolojik Yardım İsteği',
-    rule: 'L ve K, T 66 altında; F, T 70-105 arası',
-    isMatch: v => v.L < 66 && v.K < 66 && v.F >= 70 && v.F <= 105,
+    rule: 'L ve K, T 66 altında; F, T 100 ve altı (kaynak s.51)',
+    isMatch: v => v.L < 66 && v.K < 66 && v.F >= 70 && v.F <= 100,
     interpretation:
       'Birey psikolojik sıkıntısını açıkça ortaya koymakta ve yardım istemektedir; sorunlarını abartıyor olabilir ancak yardım aramaya isteklidir. Klinik ölçekler bireyin yakınmalarına göre değerlendirilmelidir.',
     validity: 'geçerli',
@@ -136,8 +147,13 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
   {
     id: 'credible',
     name: 'Güvenilir Cevaplayıcı',
-    rule: 'L, T 45-55; F, T 70 altında; K, T 50-65 arası',
-    isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50 && v.K <= 65,
+    // Kaynak s.54: "L alt testi 50 T puanına yakın, F alt testi 70 T puanının
+    // altında, K alt testi 50 T puanının üstündedir." → K için ÜST SINIR YOK.
+    // Eski koddaki `K <= 65` kaynakta bulunmayan bir sınırdı ve kaynağın
+    // Konfigürasyon 12 sayacağı profilleri (ör. L=50, F=65, K=70) hiçbir
+    // konfigürasyona sokmuyordu. Kaldırıldı (CHANGE-010, DECISION-023).
+    rule: 'L, T 45-55; F, T 70 altında; K, T 50 üzerinde',
+    isMatch: v => v.L >= 45 && v.L <= 55 && v.F < 70 && v.K > 50,
     interpretation:
       'Geçerli bir profildir. Birey yönergeleri dikkatle okuyup anlamış ve uygulamıştır; yanıtlar içtendir ve bireyin durumunu yansıtmaktadır.',
     validity: 'geçerli',
