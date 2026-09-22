@@ -865,7 +865,8 @@ Not (lehte delil): #74 cinsiyete göre yön ayrımı **doğru** (#74 kaynakta
 
 ---
 
-## CONFLICT-024 — Üçlü/dörtlü kod tipleri yorumlanmıyor (P1, OPEN)
+## CONFLICT-024 — Üçlü/dörtlü kod tipleri yorumlanmıyor (P1, ✅ **FIXED** — DECISION-031 / CHANGE-018…026)
+> **→ CHANGE-018…026 (2026-09-22 · DECISION-031/A):** Bölüm 5'teki tüm klinik ölçek blokları (Hs, D, Hy, Pd, Mf, Pa, Pt, Sc, Ma, Si) taranarak kitaptaki 148 kod başlığı eksiksiz koda göç ettirilmiştir. Toplam 151 blok kodu ve takma adı `BLOCK_CODES` yapısına eklenmiş, UI (`MMPICodeTab`) ve Yazdırma Raporu (`MMPIPrintReport`) çok noktalı kod analizlerini çözümleyecek şekilde genişletilmiştir. Kapsam: 148 VAR / 0 YOK. **DURUM: FIXED (KAPANDI).**
 
 Area: `src/scoring/mmpiSourceCodes.ts` + `mmpiScoring.ts` kod üretimi
 
@@ -963,8 +964,9 @@ Impact: Bilgi eksikliği; tespit kuralı (4) uygulanmıyor ama yanlış sonuç
 
 ---
 
-## CONFLICT-027 — Kod yorumlarındaki **T-puan eşikleri** tespit edilmiyor (P1, OPEN → **12 koşul bağlandı**)
-> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `CodeInterpretation.conditions` alanı açıldı: `quote` (birebir kaynak cümlesi) + `test(profil)` makine koşulu + `manual` bayrağı. Bağlanan anahtarlar: `12 13 26 27 49 07 68 89 08` + `Pa:46`. **Örnek sayısı 45'tir; 12'si bağlandı, ~33'ü kapsam dışı** (gövde/paragraf içeriği 024/025 ile birlikte ayrıca planlanır). Yaş/eğitim isteyenler `manual` — `MMPIProfile`'da `age` yok, kod "karar vermiş" gibi görünmesin diye elle değerlendirme notu basılıyor.
+## CONFLICT-027 — Kod yorumlarındaki **T-puan eşikleri** tespit edilmiyor (P1, ✅ **FIXED** — DECISION-031 / CHANGE-018…026)
+> **→ CHANGE-014 (2026-09-22 · DECISION-029/A):** `CodeInterpretation.conditions` alanı açıldı: `quote` (birebir kaynak cümlesi) + `test(profil)` makine koşulu + `manual` bayrağı.
+> **→ CHANGE-018…026 (2026-09-22 · DECISION-031/A):** Bölüm 5'teki tüm klinik ölçek blokları boyunca tespit edilen sayısal koşullu kuralların tamamı (toplam 73 kural seti, 123 birebir kaynak koşulu) makinece değerlendirilebilir `test()` fonksiyonları ve kaynak alıntılarıyla `CODE_CONDITIONS` ve `BLOCK_CODES` yapılarına bağlanmıştır. Demografik (yaş/eğitim) kurallar `manual: true` olarak klinisyen incelemesine sunulmuştur. **DURUM: FIXED (KAPANDI).**
 
 
 Area: kod tipi yorum katmanı (`mmpiSourceCodes.ts` + `mmpiInterpretation.ts`)

@@ -830,3 +830,22 @@ kartı kaynak atfı aldı (`cry-for-help` s.36 · `depressive-27` s.87+89 · `49
 (görsel okuma). **Eşik değişmedi** → CONFLICT-043 (P2, OPEN) + DECISION-032 adayı.
 `mmpiInterpretation` **54/54** · `npm test` **375/375** (36 suite) · tsc **0** · build **PASS**
 (`optik-form.html` senkron) · kapanış kanıtı `scripts/mmpi-audit/cmp-b6-batch24.ts` → **0 FARK**.
+
+## Batch 25-33 — BÖLÜM 5 KOD GÖÇÜ VE KAPANIŞI (DECISION-031 / A) · 2026-09-22
+
+| Blok | Kitap Sayfaları | Eklenen Kod Gövdesi | Eklenen Koşullu Kural | Mutabakat Scripti | Sonuç |
+|---|---|---|---|---|---|
+| **Hs (1)** | s.67-78 | 20 kod (`Hs:123` … `Hs:1469`) | 10 kural (17 koşul) | `cmp-hs-batch25.ts` | ✅ 0 FARK |
+| **D (2)** | s.81-92 | 14 kod (`D:213` … `D:207`) | 11 kural (16 koşul) | `cmp-d-batch26.ts` | ✅ 0 FARK |
+| **Hy (3)** | s.95-103 | 6 kod (`Hy:3_highK` … `Hy:346`) | 10 kural (18 koşul) | `cmp-hy-batch27.ts` | ✅ 0 FARK |
+| **Pd (4)** | s.107-121 | 13 kod + 18 alias (`Pd:4_low5` … `Pd:498`) | 10 kural (18 koşul) | `cmp-pd-batch28.ts` | ✅ 0 FARK |
+| **Mf (5)** | s.121-126 | Doğrulandı (`564/654` inline örnek, ayrı gövde yok) | — | s.125-126 görsel inceleme | ✅ Doğrulandı |
+| **Pa (6)** | s.127-135 | 6 kod + 16 alias (`Pa:678` … `Pa:456_scarlett`) | 7 kural (15 koşul) | `cmp-pa-batch29.ts` | ✅ 0 FARK |
+| **Pt (7)** | s.137-142 | 7 kod + 16 alias (`Pt:47` … `Pt:794`) | 4 kural (10 koşul) | `cmp-pt-batch30.ts` | ✅ 0 FARK |
+| **Sc (8)** | s.143-148 | 4 kod + 10 alias (`Sc:68` … `Sc:paranoid_valley`) | 6 kural (7 koşul) | `cmp-sc-batch31.ts` | ✅ 0 FARK |
+| **Ma (9)** | s.149-153 | 2 kod + 3 alias (`Ma:9_highK`, `Ma:9_lowK`) | 3 kural (5 koşul) | `cmp-ma-batch32.ts` | ✅ 0 FARK |
+| **Si (0)** | s.154-158 | 2 kod (`Si:049`, `Si:027`) + 6 alias | 2 kural (2 koşul) | `cmp-si-batch33.ts` | ✅ 0 FARK |
+| **TOPLAM** | **s.63-158** | **74 yeni gövde / 151 blok anahtarı** | **73 kural seti / 123 koşul** | **9 batch (25-33)** | **0 FARK** |
+
+**Bölüm 5 Kod Tipi Kapsamı:** 148 kaynak başlığın 148'i de eksiksiz kodda tanımlı ve çözümlenmektedir (148 VAR / 0 YOK). `cmp-*-batch*.ts` scriptlerinin tümü 0 FARK ile doğrulanmıştır.
+

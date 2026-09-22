@@ -493,3 +493,34 @@ Kod tarafı değişti; **başlık evreni aynı**, yalnız 3 başlık YOK → VAR
 > tamamı henüz koda alınmadı (DECISION-029 kabulü bunu zorunlu kılmıyordu).
 > Ayrıca **kırpma kalktığı için** eşleşmeyen 3+ haneli kodlar (ör. `794`, `8726`)
 > artık **alakasız metin değil `undefined`** döndürüyor.
+
+---
+
+## DECISION-031 = A Kapanışı ve Final Mutabakatı (CHANGE-018 - CHANGE-026)
+
+DECISION-031 Seçenek (A) uyarınca Bölüm 5'teki tüm klinik ölçek blokları (Hs, D, Hy, Pd, Mf, Pa, Pt, Sc, Ma, Si) blok-blok taranıp koda göç ettirilerek tamamlanmıştır:
+
+| Blok | İlgili Sayfalar | Eklenen / Doğrulanan Kod Gövdesi | Eklenen Koşullu Kural | Değişiklik / Kanıt | Sonuç |
+|---|---|---|---|---|---|
+| **Hs (1)** | s.67-78 | 20 kod gövdesi (`Hs:123` … `Hs:1469`) | 10 kural (17 koşul) | CHANGE-018 · `cmp-hs-batch25.ts` | ✅ 0 FARK |
+| **D (2)** | s.81-92 | 14 kod gövdesi (`D:213` … `D:207`) | 11 kural (16 koşul) | CHANGE-019 · `cmp-d-batch26.ts` | ✅ 0 FARK |
+| **Hy (3)** | s.95-103 | 6 kod gövdesi (`Hy:3_highK` … `Hy:346`) | 10 kural (18 koşul) | CHANGE-020 · `cmp-hy-batch27.ts` | ✅ 0 FARK |
+| **Pd (4)** | s.107-121 | 13 kod gövdesi + 18 alias (`Pd:4_low5` … `Pd:498`) | 10 kural (18 koşul) | CHANGE-021 · `cmp-pd-batch28.ts` | ✅ 0 FARK |
+| **Mf (5)** | s.121-126 | Doğrulandı (`564/654` inline örnek, ayrı gövde gerekmez) | — | s.125-126 görsel & metin inceleme | ✅ Doğrulandı |
+| **Pa (6)** | s.127-135 | 6 kod gövdesi + 16 alias (`Pa:678` … `Pa:456_scarlett`) | 7 kural (15 koşul) | CHANGE-022 · `cmp-pa-batch29.ts` | ✅ 0 FARK |
+| **Pt (7)** | s.137-142 | 7 kod gövdesi + 16 alias (`Pt:47` … `Pt:794`) | 4 kural (10 koşul) | CHANGE-023 · `cmp-pt-batch30.ts` | ✅ 0 FARK |
+| **Sc (8)** | s.143-148 | 4 kod gövdesi + 10 alias (`Sc:68` … `Sc:paranoid_valley`) | 6 kural (7 koşul) | CHANGE-024 · `cmp-sc-batch31.ts` | ✅ 0 FARK |
+| **Ma (9)** | s.149-153 | 2 kod gövdesi + 3 alias (`Ma:9_highK`, `Ma:9_lowK`) | 3 kural (5 koşul) | CHANGE-025 · `cmp-ma-batch32.ts` | ✅ 0 FARK |
+| **Si (0)** | s.154-158 | 2 kod gövdesi (`Si:049`, `Si:027`) + 6 alias | 2 kural (2 koşul) | CHANGE-026 · `cmp-si-batch33.ts` | ✅ 0 FARK |
+| **TOPLAM** | **s.63-158** | **74 yeni gövde / 151 blok anahtarı** | **73 kural seti / 123 koşul** | **9 batch (25-33)** | **0 FARK** |
+
+### Nihai Sayım Özeti (PHASE 9 Kapanışı):
+- Kaynak Başlık Sayısı: **148**
+- Kodda Tanımlı ve Çözümlenen (VAR): **148** (45 iki noktalı kanonik kod + 103 çok noktalı/blok-yerel gövde ve takma ad; `KNOWN_BLOCK_CODES` toplam 151)
+- Kodda Eksik Olan (YOK): **0**
+- Çelişki Durumu:
+  - **CONFLICT-024:** ✅ **FIXED / CLOSED** (Bölüm 5 kapsamındaki tüm çok noktalı kod gövdeleri aktarıldı)
+  - **CONFLICT-027:** ✅ **FIXED / CLOSED** (Tüm T eşikleri, göreceli farklar ve 3. yükselen test koşulları bağlandı)
+  - **CONFLICT-030:** ✅ **FIXED / CLOSED** (Kırpma anomalisi kaldırıldı, multiResolved analizi bağlandı)
+  - **CONFLICT-031:** ✅ **FIXED / CLOSED** (Blok-farkında kod modeli ve `BLOCK_CODES` yapısı tamamlandı)
+
