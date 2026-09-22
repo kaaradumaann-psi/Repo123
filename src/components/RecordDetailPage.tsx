@@ -56,11 +56,14 @@ function fileDate(value: string | null | undefined): string {
 }
 
 /**
- * Test kaydı detay sayfası — sadeleştirilmiş üst bilgi + site dili.
- * Üst çubuk: yalnızca geri + işlemler (Düzenle / Yazdır)
- * Başlık: danışan adı, meta satır (tarih, yöntem, süre, uzman, norm),
- *         sağda geçerlik pili + kod + kısa ID (mono, küçük)
- * Kaynak künyesi ve disclaimer klinik tabda; genel sayfa sade.
+ * Test kaydı detay sayfası — açılır pencere değil, tam sayfa.
+ * `/kayitlar/:id` rotasıyla açılır; Supabase RLS erişimi zorlar
+ * (yönetici tüm kayıtları, psikolog yalnız kendi kayıtlarını görür).
+ *
+ * Ekran: kısa özet şeridi + sekmeli çalışma görünümü (progressive disclosure).
+ * Baskı/PDF: yalnızca gerekli MMPI verisini taşıyan profesyonel rapor
+ * (`MMPIPrintReport`); yazdırma dosya adı document.title üzerinden
+ * `MMPI_Klinik_Raporu_<Danisan>_<gg-AA-yyyy>` olarak önerilir.
  */
 export function RecordDetailPage({
   recordId,
@@ -74,10 +77,14 @@ export function RecordDetailPage({
   const [record, setRecord] = useState<FullRecordDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Uzman notu: kayıt sonrası klinik değerlendirme; rapora aktarılır.
   const [notesDraft, setNotesDraft] = useState('');
   const [notesSaved, setNotesSaved] = useState('');
   const [notesBusy, setNotesBusy] = useState(false);
   const [notesMessage, setNotesMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  /* Uzman notu bölümü AÇILIR-KAPANIR ve KAPALI başlar (kullanıcı isterse elle
+     açar). Yapay zekâ yorumu not eklendiğinde metin kaybolmasın diye bölüm
+     kendiliğinden açılır ve görünür kaydırılır. */
   const notesDetailsRef = useRef<HTMLDetailsElement | null>(null);
 
   function openNotesSection() {
@@ -127,6 +134,7 @@ export function RecordDetailPage({
   const fullName = `${client?.firstName ?? record?.firstName ?? ''} ${client?.lastName ?? record?.lastName ?? ''}`.trim();
   const testDate = client?.testDate ?? record?.applicationDate ?? '';
 
+  // Yazdır/PDF kaydedilirken tarayıcının önerdiği dosya adı rapor adıyla eşleşsin.
   useEffect(() => {
     if (loading || error || !record) return;
     const previous = document.title;
@@ -188,6 +196,8 @@ export function RecordDetailPage({
     }
   }
 
+  /* "Kaydı Düzenle": yalnız aktif psikolog ve yalnız kendi kaydı (klinik kayıt
+     oluşturma yetkisi RLS'te PSYCHOLOG+active'e aittir; Admin düzenleyemez). */
   const canEditRecord =
     viewer != null &&
     viewer.active === true &&
@@ -196,6 +206,9 @@ export function RecordDetailPage({
     viewer.id === record.createdBy;
 
   const notesDirty = notesDraft.trim() !== notesSaved.trim();
+  // Not yetkisi RLS ile aynıdır: Admin görünür tüm kayıtlara, aktif psikolog
+  // yalnızca kendi kaydına yazabilir. Klinik alanlar veritabanı trigger'ı ile
+  // değişmez; burada yalnızca expert_notes alanı düzenlenebilir.
   const canWriteNotes =
     viewer != null &&
     viewer.active === true &&
@@ -231,16 +244,16 @@ export function RecordDetailPage({
             <Icon name="left" size={15} />
             <span>Listeye dön</span>
           </button>
-          <div className="record-page-topbar-actions">
+          <div className="record-page-actions">
             {canEditRecord && (
               <button
                 type="button"
                 className="btn-secondary btn-sm"
                 onClick={() => navigate(`/islem?duzenle=${record.id}`)}
-                title="Kaydı düzenle: form, bu kaydın bir kopyasıyla dolar."
+                title="Kaydı düzenle: form, bu kaydın bir kopyasıyla dolar. Düzeltmeleriniz orijinal kaydı silmez; ona bağlı yeni bir revizyon kaydı oluşturur."
               >
                 <Icon name="edit" size={15} />
-                <span>Düzenle</span>
+                <span>Kaydı Düzenle</span>
               </button>
             )}
             <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
@@ -250,20 +263,18 @@ export function RecordDetailPage({
           </div>
         </div>
 
-        <header className="record-page-header is-clean">
+        <header className="record-page-header">
           <div className="record-page-id">
             <h1 className="record-page-name">{fullName || 'Danışan'}</h1>
-            <div className="record-page-meta-row">
-              <span className="record-meta">{dash(testDate)}</span>
-              {parsed.method && <span className="record-meta-dot">·</span>}
-              {parsed.method && <span className="record-meta">{methodLabel(parsed.method)}</span>}
-              {parsed.testDuration && <span className="record-meta-dot">·</span>}
-              {parsed.testDuration && <span className="record-meta">{parsed.testDuration}</span>}
-              {record.psychologistName && <span className="record-meta-dot">·</span>}
-              {record.psychologistName && <span className="record-meta is-psych">{record.psychologistName}</span>}
-              {profile && <span className="record-meta-dot">·</span>}
-              {profile && <span className="record-meta">{profile.gender} normları</span>}
-            </div>
+            <p className="record-page-sub">
+              {dash(testDate)}
+              {parsed.method ? ` · ${methodLabel(parsed.method)}` : ''}
+              {parsed.testDuration ? ` · ${parsed.testDuration}` : ''}
+              {record.psychologistName ? ` · ${record.psychologistName}` : ''}
+              <span className="record-page-id-chip mono-sub" title="Kayıt ID">
+                #{record.id.slice(0, 8)}
+              </span>
+            </p>
           </div>
           {profile && (
             <div className="record-page-status">
@@ -274,14 +285,13 @@ export function RecordDetailPage({
                 />
                 <span>{validityStatusDisplay(profile.validityAnalysis.status).label}</span>
               </span>
-              {profile.profileCode && <span className="mmpi-chip mmpi-chip-code">Kod {profile.profileCode}</span>}
-              <span className="record-id-mono" title={record.id}>
-                {record.id.slice(0, 8)}
-              </span>
+              {profile.profileCode && <span className="mmpi-chip mmpi-chip-code">Kod: {profile.profileCode}</span>}
+              <span className="mmpi-chip">{profile.gender} normları</span>
             </div>
           )}
         </header>
 
+        {/* Revizyon zinciri: bu kayıt bir başka kaydın "Düzenle" sonucuysa. */}
         {parsed.revisionOf && (
           <div className="status-banner info-banner" role="status">
             <Icon name="refresh" size={16} />
@@ -295,6 +305,9 @@ export function RecordDetailPage({
           </div>
         )}
 
+        {/* Optik formun son hali (OMR kayıtlarında): batch, kaynak ve manuel düzeltme özeti.
+            Piksel verisi sunucuda tutulmaz; madde sonuçları + manuel düzeltmeler +
+            denetim izi bu kayıtta kalır. */}
         {parsed.method === 'omr' && omrPages.length === 4 && (() => {
           const batchId = omrPages[0]?.batchId;
           const reviewedCount = omrPages.reduce(
@@ -306,8 +319,8 @@ export function RecordDetailPage({
             <div className="status-banner info-banner no-print" role="status">
               <Icon name="scan" size={16} />
               <span style={{ flex: 1 }}>
-                Optik formun son hali bu kayıtta korunuyor: set <code className="mono-sub">{batchId ?? '—'}</code> ·
-                4/4 sayfa · {reviewedCount} manuel düzeltme · {historyCount} denetim olayı.
+                Optik set <code className="mono-sub">{batchId ?? '—'}</code> · 4/4 sayfa · {reviewedCount} manuel
+                düzeltme · {historyCount} denetim olayı — optik detaylar bu kayıtta korunur.
               </span>
             </div>
           );
@@ -379,6 +392,10 @@ export function RecordDetailPage({
           {parsed.clinicalContext && <p className="ws-muted record-page-context">{parsed.clinicalContext}</p>}
         </details>
 
+        {/* Uzman değerlendirme notu — AÇILIR-KAPANIR bölüm ve KAPALI başlar;
+            kullanıcı isterse elle açar. Not, Yazdır / PDF raporunda her zaman
+            "Uzman Değerlendirme Notu" bölümü olarak basılır (bu kısaltma
+            yalnızca ekran içindir). */}
         <details className="client-info-details expert-notes-details" ref={notesDetailsRef}>
           <summary>
             <Icon name="sheet" size={15} />
@@ -400,7 +417,8 @@ export function RecordDetailPage({
           <div className="expert-notes-body">
             <p className="ws-muted expert-notes-hint">
               Kayıt sonrası klinik değerlendirmenizi buraya yazın; not bu kayda kalıcı olarak eklenir ve
-              Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır.
+              Yazdır / PDF raporunda “Uzman Değerlendirme Notu” bölümü olarak yer alır. Tanısal kesin ifadelerden
+              kaçının; not yalnızca bu kaydı görebilen hesaplarca okunabilir.
             </p>
             {canWriteNotes ? (
               <textarea
@@ -455,6 +473,8 @@ export function RecordDetailPage({
             embedded
             profile={profile}
             answers={answers ?? undefined}
+            /* "Yapay Zekâ Yorumu" (son sekme): kayıt modunda kayıt sahipliği
+               sunucuda yeniden doğrulanır; yalnız yaş taşınır (KVKK). */
             aiContext={{
               method: parsed.method ?? 'quick',
               client: client && typeof client.age === 'number' ? { age: client.age } : null,
@@ -466,6 +486,7 @@ export function RecordDetailPage({
                       const next = `${previous}${separator}${text}`;
                       return next.length > EXPERT_NOTES_MAX ? next.slice(0, EXPERT_NOTES_MAX) : next;
                     });
+                    // Not metni kaybolmasın diye kapalı bölüm açılır ve kaydırılır.
                     openNotesSection();
                   }
                 : undefined,
@@ -478,13 +499,17 @@ export function RecordDetailPage({
               <strong>Profil hesaplanamadı</strong>
               <p className="ws-muted">
                 Bu kaydın verisi skorlamaya uygun değil (cinsiyet normlara uygun seçilmemiş olabilir ya da cevap/ham
-                puan verisi eksik).
+                puan verisi eksik). Aşağıda ham verileri görebilirsiniz.
               </p>
             </div>
           </div>
         )}
+
+        {/* Ham veri bölümü: profil varken optik cevaplar “Soru Yanıtları”
+            sekmesinde zaten görünür; profilsiz kayıtlarda ham veri gösterilir. */}
       </div>
 
+      {/* Profilsüz kayıtlarda ham veri hem ekranda hem baskıda görünür. */}
       {!profile && parsed.quickAnswers && (
         <section className="report-section" aria-label="Hızlı giriş cevapları">
           <h3 className="report-section-title">

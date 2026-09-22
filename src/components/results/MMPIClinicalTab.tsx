@@ -1,359 +1,211 @@
-import { useMemo, useState } from 'react';
-import type { MMPIProfile } from '../../scoring/mmpiScoring';
+import type { MMPIProfile, ScaleResult } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
 import {
+  SCALE_MEANINGS,
   clinicalBandFor,
-  codeInterpretationForProfile,
   detectSingleElevations,
   tColor,
+  type SingleElevationHit,
 } from '../../scoring/mmpiInterpretation';
-import { GRAHAM_DETAILS } from '../../scoring/mmpiGrahamDetails';
+import {
+  SCALE_DOSSIERS,
+  dossierSourceLine,
+  grahamListsFor,
+  tabloDetail,
+  type ClinicalScaleId,
+  type GrahamItem,
+  type GrahamList,
+} from '../../scoring/mmpiScaleDossiers';
 import { Icon } from '../Icon';
 
-/** T-bar: 0–120, marks at 50 and 70 */
-function TBar({ tScore, color }: { tScore: number; color: string }) {
-  const pct = (v: number) => `${Math.min(100, Math.max(0, (v / 120) * 100))}%`;
+function GrahamItemView({ item }: { item: GrahamItem }) {
+  if (typeof item === 'string') return <li>{item}</li>;
   return (
-    <div className="clin-tbar" aria-hidden="true">
-      <div className="clin-tbar-track">
-        <div className="clin-tbar-fill" style={{ width: pct(tScore), background: color }} />
-        <span className="clin-tbar-mark" style={{ left: pct(50) }} data-label="50" />
-        <span className="clin-tbar-mark is-limit" style={{ left: pct(70) }} data-label="70" />
-      </div>
-      <div className="clin-tbar-labels">
-        <span>0</span>
-        <span>50</span>
-        <span>70</span>
-        <span>120</span>
-      </div>
+    <li>
+      {item.text}
+      {item.sub.length > 0 && (
+        <ul className="graham-sub">
+          {item.sub.map((s, i) => (
+            <li key={i}>{s}</li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+function GrahamListBlock({ list }: { list: GrahamList }) {
+  return (
+    <div className="graham-block">
+      {list.label && <p className="graham-label">{list.label}</p>}
+      <ol className="graham-list">
+        {list.items.map((item, i) => (
+          <GrahamItemView key={i} item={item} />
+        ))}
+      </ol>
     </div>
   );
 }
 
-type ScaleCardProps = {
-  scaleId: ScaleId;
-  fullName: string;
-  shortName: string;
-  tScore: number;
-  rawScore: number;
-  kAdded?: number;
-  kCorrectedRaw?: number;
-  bandLabel: string;
-  bandRange: string;
-  bandText: string;
-  isHigh: boolean;
-  isLow: boolean;
-  isElevated: boolean;
-  singleText?: string;
-  singleRule?: string;
-  activeConditions: { quote: string; source: string }[];
-};
+/**
+ * Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987) kartı.
+ * Yalnızca klinik olarak anlamlı ölçekler için üretilir: T ≥ 70 (Klinik
+ * Yükseklik) ya da T ≤ 40 (Klinik Düşüklük). Bölümler: Klinik Açıklama ve
+ * Analiz → Graham (1987) listeleri → Demografik ve Klinik Notlar → Koşullu
+ * ek yorum → Ek Klinik Bilgiler → kaynak (yalnız kart altlığında).
+ */
+function ScaleDossierCard({
+  profile,
+  scale,
+  singleHits,
+}: {
+  profile: MMPIProfile;
+  scale: ScaleResult;
+  singleHits: SingleElevationHit[];
+}) {
+  const id = scale.id as ClinicalScaleId;
+  const dossier = SCALE_DOSSIERS[id];
+  const high = scale.tScore >= 70;
+  const tMap = Object.fromEntries(profile.clinical.map(s => [s.id, s.tScore])) as Record<ScaleId, number>;
+  const band = clinicalBandFor(id, profile.gender, scale.tScore);
+  const { range, lists } = grahamListsFor(id, scale.tScore, high ? 'high' : 'low');
+  const tab = tabloDetail(id, profile.gender);
 
-function ScaleCard({
-  shortName,
-  fullName,
-  tScore,
-  rawScore,
-  kAdded,
-  kCorrectedRaw,
-  bandLabel,
-  bandRange,
-  bandText,
-  isHigh,
-  isLow,
-  isElevated,
-  singleText,
-  singleRule,
-  activeConditions,
-}: ScaleCardProps) {
-  const [open, setOpen] = useState(isElevated);
-  const color = tColor(tScore);
-  const graham = GRAHAM_DETAILS[shortName];
-  const showHigh = tScore >= 70;
-  const showLow = tScore <= 40;
+  const conditions = [
+    ...(dossier.conditions ?? [])
+      .map(c => ({ when: c.when, sentence: c.sentence, active: c.match(tMap) }))
+      .sort((a, b) => Number(b.active) - Number(a.active)),
+    ...singleHits.filter(h => h.scale === id).map(h => ({ when: h.entry.rule, sentence: h.entry.text, active: true })),
+  ];
 
   return (
-    <article className={`clin-card ${isHigh ? 'is-high' : ''} ${isLow ? 'is-low' : ''} ${isElevated ? 'is-elevated' : ''}`}>
-      <header className="clin-card-head">
-        <div className="clin-card-title">
-          <span className="clin-card-dot" style={{ background: color }} />
-          <span className="clin-card-chip" style={{ background: color }}>
-            {shortName}
+    <article className={`scale-dossier ${high ? 'is-high' : 'is-low'}`}>
+      <header className="scale-dossier-head">
+        <div className="scale-dossier-id">
+          <span className="scale-avatar" style={{ background: tColor(scale.tScore) }}>
+            {scale.shortName}
           </span>
-          <h4 className="clin-card-name">{fullName}</h4>
-          <span className={`clin-level-badge ${isHigh ? 'is-high' : isLow ? 'is-low' : ''}`}>
-            {bandLabel}
-          </span>
-        </div>
-        <div className="clin-card-scores">
-          <div className="clin-card-t">
-            <span className="clin-card-t-label">T</span>
-            <b style={{ color }}>{tScore.toFixed(1)}</b>
+          <div className="scale-dossier-titles">
+            <h3>{scale.fullName}</h3>
+            <p>Kategori: Klinik Ölçek</p>
           </div>
-          <TBar tScore={tScore} color={color} />
+        </div>
+        <div className="scale-dossier-scores">
+          <span className={`klinik-pill ${high ? 'is-high' : 'is-low'}`}>
+            {high ? 'KLİNİK YÜKSEKLİK' : 'KLİNİK DÜŞÜKLÜK'}
+          </span>
+          <span className="score-t" style={{ color: tColor(scale.tScore) }}>
+            T {Math.round(scale.tScore)}
+          </span>
+          <span className="score-raw">Ham: {scale.rawScore}</span>
         </div>
       </header>
 
-      <div className="clin-card-meta">
-        <span className="clin-meta-item">
-          <em>Ham</em> {rawScore}
-        </span>
-        {kAdded !== undefined && (
-          <span className="clin-meta-item">
-            <em>K+</em> +{kAdded}
-          </span>
-        )}
-        {kCorrectedRaw !== undefined && (
-          <span className="clin-meta-item">
-            <em>Düz. ham</em> {kCorrectedRaw}
-          </span>
-        )}
-        <span className="clin-meta-item">
-          <em>Aralık</em> {bandRange}
-        </span>
-      </div>
-
-      <div className="clin-card-body">
-        <p className="clin-card-band">{bandText}</p>
-
-        {singleText && (
-          <div className="clin-card-single">
-            <b>Sadece {shortName} yükselmesi ({singleRule}):</b> {singleText}
-          </div>
-        )}
-
-        {activeConditions.length > 0 && (
-          <div className="clin-card-conditions">
-            <div className="clin-conditions-title">
-              <Icon name="info" size={12} />
-              <span>Koşullu ek yorum</span>
-            </div>
-            {activeConditions.map((c, idx) => (
-              <p key={idx} className="clin-condition">
-                {c.quote}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {(graham && (showHigh || showLow || isElevated)) && (
-          <div className="clin-card-graham">
-            <button
-              type="button"
-              className="clin-graham-toggle"
-              onClick={() => setOpen(v => !v)}
-              aria-expanded={open}
-            >
-              <span className={`clin-graham-chevron ${open ? 'is-open' : ''}`} aria-hidden="true">
-                <Icon name="right" size={12} />
-              </span>
-              <span>
-                {showHigh
-                  ? `Yüksek puan özellikleri (Graham 1987) — ${graham.high.length} madde`
-                  : showLow
-                  ? `Düşük puan özellikleri (Graham 1987) — ${graham.low.length} madde`
-                  : `Klinik özellikler (Graham 1987)`}
-              </span>
-            </button>
-            {open && (
-              <div className="clin-graham-body">
-                {showHigh && (
-                  <ul className="clin-graham-list">
-                    {graham.high.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-                {showLow && !showHigh && (
-                  <ul className="clin-graham-list">
-                    {graham.low.map((item, i) => (
-                      <li key={i}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-                {!showHigh && !showLow && (
-                  <>
-                    <p className="clin-graham-note">T puanı klinik eşik dışında; her iki yön için kısa özet:</p>
-                    <div className="clin-graham-two">
-                      <div>
-                        <b>Yüksek puan:</b>
-                        <ul>
-                          {graham.high.slice(0, 6).map((item, i) => (
-                            <li key={i}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <b>Düşük puan:</b>
-                        <ul>
-                          {graham.low.slice(0, 5).map((item, i) => (
-                            <li key={i}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-/**
- * Ölçek Bazlı Detaylı Klinik Rapor — site tasarım diliyle uyumlu
- * - Her ölçek kartı: T skoru, düzey, bar (0-120, 50 ve 70 işaretli)
- * - T>=70 veya T<=40 vurgulanır ve otomatik açılır
- * - Band metni kaynak-doğruludur (mmpiSource.ts)
- * - Graham 1987 listeleri koşullu olarak gösterilir
- * - Koşullu ek yorumlar (CODE_CONDITIONS) sadece koşul sağlanınca gösterilir
- * - Kaynak künyesi altta, s29 gibi iç kodlar metin içinde yok
- */
-export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
-  const singles = detectSingleElevations(profile);
-  const singleFor = (id: ScaleId) => singles.find(h => h.scale === id);
-
-  const codeResolved = useMemo(
-    () => (profile.profileCode ? codeInterpretationForProfile(profile.profileCode, profile) : undefined),
-    [profile],
-  );
-
-  const activeConditions = codeResolved?.activeConditions ?? [];
-
-  // Koşullu yorumları ilgili ölçekle eşleştirmek için basit heuristik:
-  // quote içinde ölçek numarası veya adı geçiyorsa ilgili ölçeğe at.
-  const conditionsByScale = useMemo(() => {
-    const map: Record<string, typeof activeConditions> = {};
-    profile.clinical.forEach(s => {
-      map[s.id] = [];
-    });
-    activeConditions.forEach(cond => {
-      const q = cond.quote.toLowerCase();
-      // Ölçek adları / rakam eşleştirmesi
-      const matches: ScaleId[] = [];
-      if (q.includes('alt test 1') || q.includes('test 1') || q.includes(' hs') || q.includes('(1)')) matches.push('Hs');
-      if (q.includes('alt test 2') || q.includes('test 2') || q.includes(' d ') || q.includes('depresyon') || q.includes('(2)')) matches.push('D');
-      if (q.includes('alt test 3') || q.includes('test 3') || q.includes(' hy') || q.includes('(3)')) matches.push('Hy');
-      if (q.includes('alt test 4') || q.includes('test 4') || q.includes(' pd') || q.includes('(4)')) matches.push('Pd');
-      if (q.includes('alt test 5') || q.includes('test 5') || q.includes(' mf') || q.includes('(5)')) matches.push('Mf');
-      if (q.includes('alt test 6') || q.includes('test 6') || q.includes(' pa') || q.includes('(6)')) matches.push('Pa');
-      if (q.includes('alt test 7') || q.includes('test 7') || q.includes(' pt') || q.includes('(7)')) matches.push('Pt');
-      if (q.includes('alt test 8') || q.includes('test 8') || q.includes(' sc') || q.includes('(8)')) matches.push('Sc');
-      if (q.includes('alt test 9') || q.includes('test 9') || q.includes(' ma') || q.includes('(9)')) matches.push('Ma');
-      if (q.includes('alt test 0') || q.includes('test 0') || q.includes(' si') || q.includes('(0)')) matches.push('Si');
-      // Eğer hiçbir ölçek eşleşmezse, kodun kendisine ait ölçeklere ata
-      if (matches.length === 0 && profile.profileCode) {
-        const digits = profile.profileCode.split('');
-        const idByDigit: Record<string, ScaleId> = {
-          '1': 'Hs',
-          '2': 'D',
-          '3': 'Hy',
-          '4': 'Pd',
-          '5': 'Mf',
-          '6': 'Pa',
-          '7': 'Pt',
-          '8': 'Sc',
-          '9': 'Ma',
-          '0': 'Si',
-        };
-        digits.forEach(d => {
-          const sid = idByDigit[d];
-          if (sid) matches.push(sid);
-        });
-      }
-      // Tekrarları temizle
-      const uniq = Array.from(new Set(matches));
-      uniq.forEach(sid => {
-        if (!map[sid]) map[sid] = [];
-        map[sid].push(cond);
-      });
-    });
-    return map;
-  }, [activeConditions, profile]);
-
-  const elevatedCount = profile.clinical.filter(s => s.tScore >= 70 || s.tScore <= 40).length;
-
-  return (
-    <div role="tabpanel" className="mmpi-tab-panel clin-report">
-      <section className="clin-report-intro">
-        <div className="clin-intro-head">
-          <span className="mmpi-card-dot" />
-          <h3>Ölçek Bazlı Detaylı Klinik Rapor</h3>
-          <span className="clin-source-badge">Graham 1987 · Türk Normları</span>
-        </div>
-        <p className="clin-intro-text">
-          T-skoru <b>70 ve üzeri</b> veya <b>40 ve altı</b> olan ölçekler klinik olarak anlamlı kabul edilir ve
-          otomatik olarak vurgulanır. Çubuk 0–120 aralığını gösterir; 50 ortalama, 70 klinik eşiktir.
-          {elevatedCount > 0
-            ? ` Bu profilde ${elevatedCount} ölçek anlamlı aralıkta.`
-            : ' Bu profilde anlamlı aralıkta ölçek yok.'}
-        </p>
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">KLİNİK AÇIKLAMA VE ANALİZ</h4>
+        <blockquote className="dossier-quote">
+          {band ? band.text : high ? SCALE_MEANINGS[id].high : SCALE_MEANINGS[id].low}
+        </blockquote>
       </section>
 
-      <div className="clin-cards">
-        {profile.clinical.map(scale => {
-          const band = clinicalBandFor(scale.id as ScaleId, profile.gender, scale.tScore);
-          const single = singleFor(scale.id as ScaleId);
-          const isHigh = scale.tScore >= 70;
-          const isLow = scale.tScore <= 40;
-          const isElevated = isHigh || isLow;
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">
+          {scale.shortName} ({dossier.number}) ALT TESTİNDE {high ? 'YÜKSEK' : 'DÜŞÜK'} PUAN ALAN BİREYİN: (GRAHAM 1987)
+        </h4>
+        {range && <p className="graham-range">Kaynakta bu düzey için verilen liste: {range}</p>}
+        {lists.map((list, i) => (
+          <GrahamListBlock key={i} list={list} />
+        ))}
+      </section>
 
-          return (
-            <ScaleCard
-              key={scale.id}
-              scaleId={scale.id as ScaleId}
-              shortName={scale.shortName}
-              fullName={scale.fullName}
-              tScore={scale.tScore}
-              rawScore={scale.rawScore}
-              kAdded={scale.kAdded}
-              kCorrectedRaw={scale.kCorrectedRaw}
-              bandLabel={band?.label ?? scale.level}
-              bandRange={band?.rangeLabel ?? `${scale.tScore.toFixed(0)} T`}
-              bandText={band?.text ?? ''}
-              isHigh={isHigh}
-              isLow={isLow}
-              isElevated={isElevated}
-              singleText={single?.entry.text}
-              singleRule={single?.entry.rule}
-              activeConditions={conditionsByScale[scale.id] ?? []}
-            />
-          );
-        })}
-      </div>
+      {dossier.notes && dossier.notes.length > 0 && (
+        <section className="dossier-sec">
+          <h4 className="dossier-sec-title">Demografik ve Klinik Notlar</h4>
+          {dossier.notes.map((note, i) => (
+            <div key={i} className="dossier-note">
+              {note.title && <p className="graham-label">{note.title}</p>}
+              {note.paragraphs?.map((p, j) => (
+                <p key={j}>{p}</p>
+              ))}
+              {note.list && (
+                <ul className="dossier-note-list">
+                  {note.list.map((item, j) => (
+                    <li key={j}>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
 
-      {activeConditions.length > 0 && (
-        <section className="clin-extra-conditions">
-          <h4>
-            <Icon name="info" size={14} />
-            Koşullu Ek Yorumlar (yalnızca koşul sağlandığında)
-          </h4>
-          <ul>
-            {activeConditions.map((c, i) => (
-              <li key={i}>
-                {c.quote}
-                <span className="clin-cond-source"> — {c.source}</span>
+      {conditions.length > 0 && (
+        <section className="dossier-sec">
+          <h4 className="dossier-sec-title">Koşullu ek yorum</h4>
+          <ul className="dossier-cond-list">
+            {conditions.map((c, i) => (
+              <li key={i} className={c.active ? 'is-active' : undefined}>
+                <span className="cond-when">{c.when}:</span> {c.sentence}
+                {c.active && (
+                  <span className="cond-active-chip" title="Bu profil için koşul sağlanıyor">
+                    <Icon name="checkCircle" size={12} /> bu profilde geçerli
+                  </span>
+                )}
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <footer className="clin-report-footer">
+      <section className="dossier-sec">
+        <h4 className="dossier-sec-title">EK KLİNİK BİLGİLER</h4>
+        <p>{dossier.overview}</p>
         <p>
-          <b>Kaynak:</b> Graham, J.R. (1987). MMPI: Guide to Interpretation; Dahlstrom ve ark. (1972);
-          Savaşır (1981) Türk normları — Tablo 30; Ceyhun & Oral (2003) Türkçe uyarlama.
-          Bant yorumları <code>mmpiSource.ts</code> içindeki doğrulanmış metinlerdir; kod koşulları{' '}
-          <code>mmpiSourceCodes.ts</code> · <code>CODE_CONDITIONS</code> üzerinden değerlendirilir.
+          <b>Tablo {tab.no}:</b> {tab.title} (Madde Sayısı: {tab.count})
         </p>
-        <p className="clin-footer-disclaimer">
-          T skorları tanı koymaz; kesme puanları yalnızca uzmana yol gösterir. Klinik karar uygulayıcı uzmana
-          aittir.
+        <p>
+          <b>Doğru Maddeler ({tab.dogru.length} adet):</b> {tab.dogru.join(', ')}
         </p>
-      </footer>
+        <p>
+          <b>Yanlış Maddeler ({tab.yanlis.length} adet):</b> {tab.yanlis.join(', ')}
+        </p>
+        {tab.kEkleli && <p>K Eklemeli bir alt testtir.</p>}
+        {tab.extraNote && <p className="dossier-extra-note">{tab.extraNote}</p>}
+        <p>
+          Erkeklerde ortalama: {tab.normMale.toFixed(2)}, kadınlarda: {tab.normFemale.toFixed(2)} (Savaşır, 1981)
+        </p>
+      </section>
+
+      <footer className="dossier-source">{dossierSourceLine(id)}</footer>
+    </article>
+  );
+}
+
+/**
+ * Klinik Ölçekler sekmesi — "Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987)".
+ * T-skoru 70 ve üzeri ya da 40 ve altı olan ölçekler klinik olarak anlamlı
+ * kabul edilir ve otomatik olarak vurgulanır; diğer ölçekler kart almaz.
+ */
+export function MMPIClinicalTab({ profile }: { profile: MMPIProfile }) {
+  const flagged = profile.clinical.filter(s => s.tScore >= 70 || s.tScore <= 40);
+  const singleHits = detectSingleElevations(profile);
+
+  return (
+    <div role="tabpanel" className="mmpi-tab-panel mmpi-clinical-report">
+      <p className="clinical-report-note">
+        T-skoru 70 ve üzeri veya 40 ve altı olan ölçekler klinik olarak anlamlı kabul edilir ve otomatik olarak
+        vurgulanır.
+      </p>
+      {flagged.length === 0 ? (
+        <div className="mmpi-box info">
+          <Icon name="info" size={14} />
+          <span>Bu profilde T-skoru 70 ve üzeri ya da 40 ve altı klinik ölçek bulunmuyor.</span>
+        </div>
+      ) : (
+        flagged.map(scale => (
+          <ScaleDossierCard key={scale.id} profile={profile} scale={scale} singleHits={singleHits} />
+        ))
+      )}
     </div>
   );
 }
