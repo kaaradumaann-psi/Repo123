@@ -853,8 +853,11 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     // kırpmanın gittiğinin negatif kanıtı: eşleşmeyen 3+ haneli kodlar artık undefined
     assert.equal(codeInterpretation('794'), undefined, "'794' Pt bloğunda ayrı başlıktı; 79/97 metni dönemez");
     assert.equal(codeInterpretation('8726'), undefined);
-    assert.equal(codeInterpretation('273/723'), undefined);
-    assert.equal(codeInterpretation('213/231'), undefined);
+    assert.equal(codeInterpretation('314'), undefined);
+    assert.equal(codeInterpretation('412'), undefined);
+    // D bloğu göçüyle 273/723 ve 213/231 artık kendi gövdelerine çözümlenir (CHANGE-019)
+    assert.equal(codeInterpretation('273/723')?.code, '273/723');
+    assert.equal(codeInterpretation('213/231')?.code, '213/231');
     // ortak iki-haneli kayıtlar ESKİSİ GİBİ çalışır (geriye dönük uyum)
     assert.equal(codeInterpretation('04')!.code, '40/04');
     assert.doesNotMatch(codeInterpretation('04')!.text, /eyleme vurukluğun bastırılması/);
@@ -862,6 +865,8 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     // blok kayıtları CODES'a karışmaz
     assert.ok(KNOWN_CODES.every((k) => /^\d{2}$/.test(k)), 'CODES anahtarları iki haneli kalır');
     const expectedBlockCodes = [
+      'D:207', 'D:213', 'D:231', 'D:243', 'D:247', 'D:248', 'D:248_highF',
+      'D:270', 'D:273', 'D:274', 'D:275', 'D:278', 'D:281', 'D:284', 'D:287',
       'Hs:120', 'Hs:123', 'Hs:1234', 'Hs:1236', 'Hs:1237', 'Hs:12378', 'Hs:1270',
       'Hs:128', 'Hs:129', 'Hs:132', 'Hs:134', 'Hs:1342', 'Hs:136', 'Hs:137',
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',

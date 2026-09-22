@@ -3205,3 +3205,68 @@ okunmaz** (`DECISION-014` uyarısı); sayısal eşikler yalnız **kutu metninden
 **Olgu anlatıları (7 adet: 38, 42, 21, 23, 40 yaş vb.)** vaka formundadır; hiçbir
 kod kaydına girmesi gerekmez → **EXTRA/KAYIT DIŞI** (kullanıcı arayüzüne klinik vaka
 metni taşınması DECISION-028 kapsamında **yok**).
+
+---
+
+## BÖLÜM 5: D (2) KOD BLOĞU VERİLERİ (kitap s.81-92 · PDF p048_R - p054_L)
+
+### SOURCE-CODE-D-001 — D Bloğu Sayfa ve Başlık Envanteri (kitap s.81-92)
+- **Görsel ve OCR Taraması:** PDF p048_R (s.81) ile p054_L (s.92) arasındaki sayfalar taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Başlık Envanteri:**
+  1. `21/12 Kodu` (s.82)
+  2. `23 Kodu` (s.82-83)
+  3. `213/231 Kodu` (s.83-84) — Olası Tanılar: Depresif reaksiyon ya da somatoform bozukluk.
+  4. `24/42 Kodu` (s.84-85)
+  5. `243/432 Kodu` (s.85)
+  6. `247/427/472 ve 742 Kodları` (s.85-86) — Olası Tanılar: Pasif-agresif kişilik bozukluğu, Depresif semptomlar, Anksiyete bozukluğu.
+  7. `248 Kodu` (s.86)
+  8. `248/Yüksek F Kodu` (s.86) — Olası Tanı: Temel şizofrenik konfigürasyon.
+  9. `25/52 Kodu` (s.86-87)
+  10. `26/62 Kodu` (s.87)
+  11. `27/72 Kodu` (s.87-88)
+  12. `273/723 Kodu` (s.88)
+  13. `274/724 Kodu` (s.88) — Olası Tanı: Depresif reaksiyon.
+  14. `275/725 Kodu` (s.88-89)
+  15. `278/728 Kodu` (s.89) — İntihar riski.
+  16. `270 Kodu` (s.90) — Olası Tanı: Şizoid kişilik bozukluğu.
+  17. `28/82 Kodu` (s.90)
+  18. `281/821 Kodu` (s.90)
+  19. `284/824 Kodu` (s.91)
+  20. `287/827 Kodu` (s.91) — İntihar riski.
+  21. `29/92 Kodu` (s.91-92)
+  22. `20/02 Kodu` (s.92) — Olası Tanı: Pasif-agresif kişilik bozukluğu.
+  23. `207 Kodu` (s.92)
+
+### SOURCE-CODE-D-002 — D Bloğu Koşullu Yorum Kuralları (Conditions)
+- **23 Kodu (s.83):**
+  - "Düşük Mf ya da düşük Ma (özellikle düşük 9) alt testi olanlarda apati ve hareketsizlik daha belirgindir." → `Mf < 50` veya `Ma < 50` T.
+- **24/42 Kodu (s.84):**
+  - "3, 7 ya da 8 alt testleri üçüncü yükselen test ise bu kod tiplerine bakılmalıdır." → `third in ['Hy', 'Pt', 'Sc']`.
+- **27/72 Kodu (s.87):**
+  - "Yükselme 85 T puanının üstünde ise ilaç tedavisi gerekir." → `elevation > 85 T`.
+  - "Hs alt testi de yükselmişse somatik yakınmalar belirginleşir." → `Hs >= 70 T`.
+- **20/02 Kodu (s.92):**
+  - "7 ya da 4 alt testlerinin üçüncü yükselen test olduğu durumlarda pasif-bağımlı ya da pasif-agresif kişilik özellikleri ön plana çıkar." → `third in ['Pt', 'Pd']`.
+- **213/231 Kodu (s.84):**
+  - "7 alt testi de yükselmişse bu hastalarda anksiyete, ajitasyon ve endişe görülür." → `Pt >= 70 T`.
+- **247/427/472/742 Kodları (s.85-86):**
+  - Erkekler: "Bu kod tipi olan erkekler, genellikle bağımlı ve pasif bir rolü benimserler (özellikle Mf yükselmişse)." → `gender === 'Erkek' && Mf >= 70 T`.
+  - Kadınlar: "Kadınlar (özellikle Mf alt testi düşükse), geleneksel kadın rolünü aşırı benimseyebilirler." → `gender === 'Kadın' && Mf < 50 T`.
+- **248 Kodu (s.86):**
+  - "F alt testi de yükselmişse, bu bireylerde şizofreni olasılığı düşünülmelidir." → `F >= 70 T`.
+- **274/724 Kodu (s.88):**
+  - "Hy alt testi de yükselmişse kronik alkolizm öyküsü sık görülür." → `Hy >= 70 T`.
+  - "Kadınlarda (özellikle düşük Mf) bağımlılık gereksinimleri daha belirgindir." → `gender === 'Kadın' && Mf < 50 T`.
+- **275/725 Kodu (s.89):**
+  - "Pd alt testi düşükse, yetersizlik ve bağımlılık duyguları daha belirgindir." → `Pd < 50 T`.
+- **278/728 Kodu (s.89):**
+  - ⚠️ **Kritik İntihar Uyarısı:** "K ve Hs alt testleri düşük (özellikle 50 T puanının altında) ya da Ma alt testi yüksekse intihar olasılığı dikkatle değerlendirilmelidir." → `(K < 50 && Hs < 50) || Ma >= 70`.
+  - "Si alt testi yükselmişse, içe çekilme ve süreğen depresyon görülür." → `Si >= 70 T`.
+  - "Pd alt testi düşükse, başkalarına aşırı bağımlı olurlar." → `Pd < 50 T`.
+  - "Kadınlarda Mf alt testi düşükse pasif ve bağımlı özellikler belirginleşir." → `gender === 'Kadın' && Mf < 50 T`.
+- **281/821 Kodu (s.90):**
+  - "Hy alt testi de yükselmişse somatik yakınmalar ön plana çıkar." → `Hy >= 70 T`.
+- **284/824 Kodu (s.91):**
+  - "Pd alt testi 80 T puanının üstünde ise kontrol kaybı ve öfke patlamaları görülebilir." → `Pd > 80 T`.
+- **287/827 Kodu (s.91):**
+  - ⚠️ **Kritik İntihar Uyarısı:** "K alt testi düşük ve Ma alt testi yüksekse intihar düşünceleri ve girişimleri açısından acil dikkat gerekir." → `K < 50 && Ma >= 70`.

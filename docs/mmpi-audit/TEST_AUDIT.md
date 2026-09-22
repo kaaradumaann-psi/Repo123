@@ -853,3 +853,33 @@ tarihsî (7 FARK, yokluk ölçümü).
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiInterpretation` → **54/54** ·
 `npm test` → **375/375** (36 suite) · `npm run build` → **PASS** (`src/` değişti →
 `optik-form.html` yeniden üretildi, commit’e dâhil) · `git diff --check` temiz.
+
+## PHASE 9/10 batch 25 — CHANGE-018 · Hs (1) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Hs (1) bloğundaki çok haneli ve eksik kodların (`123/213`, `1234`, `1236`,
+`1237`, `1270`, `12378`, `128/218`, `129/219`, `120/210`, `132/312`, `134/314`, `1342`,
+`136/316`, `137`, `138/318`, `1382`, `139`, `Yüksek 1 / Düşük 4`, `146`, `1469`)
+`BLOCK_CODES`'a taşınması ve koşulların bağlanması.
+
+**Eklenen testler (16):** `tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+1. Kod çözme doğruluğu: 123/213, 1234, 1236, 1237, 1270, 12378, 128, 129, 120, 134, 1342, 136, 137, 138, 1382, 139, 14_low4, 146, 1469.
+2. Çakışma önleme: 123 ve 132'nin sıralama bozulmadan ayrık kalması.
+3. Koşul testleri: 12/21 (Hy 5 T farkı, Pd+Ma), 13/31 (düşük 2, 2/7/8/9 yüksekliği), 14/41 (Hy ≥ 70), 16/61 (Sc ≥ 70, Pd < 70), 18/81 (F ≥ 70), 19/91 (2 ve 3 < 50), 10/01 (üçüncü 8, 2 ve 3 > 70), 136/316 (Pa - Hy 10 T farkı), 137 (Ma yüksek / K < 50), 139 (Pd yüksek / K < 50).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-hs-batch25.ts` → **SONUÇ: 0 FARK · Hs BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+## PHASE 9/10 batch 26 — CHANGE-019 · D (2) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 D (2) bloğundaki çok haneli ve eksik kodların (`213/231`, `243/432`,
+`247/427/472/742`, `248`, `248 / Yüksek F`, `273/723`, `274/724`, `275/725`, `278/728`,
+`270`, `281/821`, `284/824`, `287/827`, `207`) `BLOCK_CODES`'a taşınması ve koşulların bağlanması.
+
+**Eklenen testler (16):** `tests/mmpiDBlock.test.ts` → **16/16 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati: 213/231, 243/432, 247/427, 248, 248/F, 273, 274, 275, 278, 270, 281, 284, 287, 207.
+2. Koşul testleri: 23 (düşük Mf/Ma), 24/42 (3, 7 veya 8 üçüncü test), 27/72 (Hs ≥ 70 T), 20/02 (7 veya 4 üçüncü test), 213/231 (Pt ≥ 70 T), 247/427 (Erkek Mf ≥ 70 / Kadın Mf < 50), 274/724 (Hy ≥ 70 T kronik alkolizm), 275/725 (Pd < 50 T yetersizlik), 278/728 (K & Hs < 50 veya Ma ≥ 70 intihar riski / Si ≥ 70), 284/824 (Pd > 80 T kontrol kaybı), 287/827 (K < 50 ∧ Ma ≥ 70 intihar riski).
+
+**Güncellenen testler:** `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (D bloğu 15 anahtarı `KNOWN_BLOCK_CODES`'a eklendi; çözümlenen 213/231 ve 273/723 assertion'ları güncellendi).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-d-batch26.ts` → **SONUÇ: 0 FARK · D BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

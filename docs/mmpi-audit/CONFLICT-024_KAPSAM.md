@@ -46,21 +46,29 @@ Hs bloğu mutabakatı: `scripts/mmpi-audit/cmp-hs-batch25.ts` → **0 FARK** (28
 
 ---
 
-## 2. D (2) alt testi kod bloğu (s.82-94) — SIRADAKİ BLOK
-| `247/427/472`, `742` | s.85 | "Ayrıca 274'e bakınız" |
-| `248` | s.86 | |
-| `248 / Yüksek F` | s.86 | alt-kod ("Temel şizofrenik konfigürasyon") |
-| `26/62` | s.87 | **Pa ve/veya 4,8 > 70 T → psikoz erken dönem** |
-| `27/72` | s.87 | **85 T üstü → ilaç gerekli** |
-| `275/725`, `278/728`, `273/723`, `271/721`, `270/720` | s.87 | "en sık üçlü kodlar" |
-| `24/42` + atıflar `3, 7 ya da 8` | s.84 | üçüncü yükselen test |
+## 2. D (2) alt testi kod bloğu (s.81-92) — TAMAMLANDI (batch 26 · CHANGE-019)
+| Kod | Kaynak Sayfa | Durum | Not |
+|---|---|---|---|
+| `213/231` | s.83-84 | ✅ EKLENDİ | Pt ≥ 70 T koşulu bağlı |
+| `243/432` | s.85 | ✅ EKLENDİ | Tanı ve yönlendirmeler tam |
+| `247/427/472/742` | s.85-86 | ✅ EKLENDİ | Erkek Mf ≥ 70 / Kadın Mf < 50 koşulları bağlı |
+| `248` | s.86 | ✅ EKLENDİ | F ≥ 70 T koşulu bağlı |
+| `248 / Yüksek F` | s.86 | ✅ EKLENDİ | Şizofrenik konfigürasyon |
+| `273/723` | s.88 | ✅ EKLENDİ | Hs ≥ 70 T koşulu bağlı |
+| `274/724` | s.88 | ✅ EKLENDİ | Hy ≥ 70 T / Kadın Mf < 50 T koşulları bağlı |
+| `275/725` | s.88-89 | ✅ EKLENDİ | Pd < 50 T koşulu bağlı |
+| `278/728` | s.89 | ✅ EKLENDİ | K/Hs < 50 veya Ma ≥ 70 (intihar), Si ≥ 70, Pd < 50, Kadın Mf < 50 koşulları bağlı |
+| `270` | s.90 | ✅ EKLENDİ | Şizoid kişilik bozukluğu tanısı tam |
+| `281/821` | s.90 | ✅ EKLENDİ | Hy ≥ 70 T koşulu bağlı |
+| `284/824` | s.91 | ✅ EKLENDİ | Pd > 80 T koşulu bağlı |
+| `287/827` | s.91 | ✅ EKLENDİ | K < 50 ∧ Ma ≥ 70 (intihar) koşulu bağlı |
+| `207` | s.92 | ✅ EKLENDİ | Anksiyete/depresyon özellikleri tam |
 
-### D (2) alt testi kod bloğu — KAPANIŞ (s.82-87)
+D bloğu mutabakatı: `scripts/mmpi-audit/cmp-d-batch26.ts` → **0 FARK** (11 koşul, 15 kod gövdesi, 16 test tam).
 
-**Kodda VAR (4):** `21/12`, `23`, `24/42`, `25/52`, `26/62`, `27/72`
-**Kodda YOK (12+):** `213/231`, `231/321`, `234/324`, `237/327`, `239`, `243/432`,
-`247/427/472`, `742`, `274`, `248`, `248+YüksekF`, `275/725`, `278/728`,
-`273/723`, `271/721`, `270/720`, `Nat`
+---
+
+## 3. Hy (3) alt testi kod bloğu (s.95-103) — SIRADAKİ BLOK
 
 ### Kritik kaynak cümlesi (s.83, D bloğu)
 > "**En sık üçlü kodlar 231/321, 234/324 ve 237/327'dir.**"
@@ -87,49 +95,37 @@ Kodda üçlü kod altyapısı **hiç yok** (CONFLICT-024).
 
 ---
 
-## D (2) alt testi kod bloğu — KAPANIŞ (s.82-92) · batch 7
+## D (2) alt testi kod bloğu — KAPANIŞ (s.81-92) · batch 26 GÖÇ EDİLDİ
 
-| Kod | Kaynak | Kodda | Not |
+| Kod | Kaynak | Kodda | Durum / Not |
 |---|---|---|---|
-| `21/12` | s.82 | ✅ VAR | |
-| `23` | s.82-83 | ✅ VAR | |
-| `24/42` | s.84 | ✅ VAR | |
-| `25/52` | s.86 | ✅ VAR | |
-| `26/62` | s.87 | ✅ VAR | |
-| `27/72` | s.87 | ⚠️ VAR ama **metni 273/723'ün** (CONFLICT-030) | |
-| `28/82` | s.90 | ✅ VAR | |
+| `21/12` | s.82 | ✅ VAR | Gövde tam |
+| `23` | s.82-83 | ✅ VAR | Düşük Mf/Ma koşulları bağlandı (batch 26) |
+| `24/42` | s.84 | ✅ VAR | 3, 7 veya 8 üçüncü test koşulu bağlandı (batch 26) |
+| `25/52` | s.86 | ✅ VAR | Gövde tam |
+| `26/62` | s.87 | ✅ VAR | Pa ve/veya 4,8 > 70 T koşulu bağlı |
+| `27/72` | s.87 | ✅ VAR | 85 T üstü ilaç + Hs ≥ 70 koşulları bağlandı (batch 26) |
+| `28/82` | s.90 | ✅ VAR | Gövde tam |
 | `29/92` | s.91-92 | ✅ VAR | 3 tip birey + yüksek enerji ✓ |
-| `20/02` | s.92 | ✅ VAR | tanı: Pasif-agresif ✓ |
-| `270` | s.90 | ❌ YOK | → `27/72` kaydına düşüyor |
-| `273/723` | s.88 | ❌ YOK | → `27/72` kaydına düşüyor |
-| `274/724` | s.88 | ❌ YOK | → `27/72` kaydına düşüyor |
-| `275/725` | s.88-89 | ❌ YOK | → `27/72` kaydına düşüyor |
-| `278/728` | s.89 | ❌ YOK | → `27/72` kaydına düşüyor |
-| `207` | s.92 | ❌ YOK | → `20/02` kaydına düşüyor |
-| `281/821` | s.90 | ❌ YOK | |
-| `284/824` | s.91 | ❌ YOK | |
-| `482/842` | s.91 | ❌ YOK | atıf |
-| `287/827` | s.91 | ❌ YOK | |
-| `213/231` | s.83 | ❌ YOK | → `12/21`e düşüyor |
-| `231/321`, `234/324`, `237/327` | s.83 | ❌ YOK | **"en sık üçlü kodlar"** |
-| `243/432` | s.85 | ❌ YOK | |
-| `247/427/472`, `742` | s.85 | ❌ YOK | → `24/42` · `47/74`e düşüyor |
-| `248` (+`Yüksek F` alt-kodu) | s.86 | ❌ YOK | → `24/42`ye düşüyor |
-| `271/721`, `270/720` | s.87 | ❌ YOK | **"en sık üçlü kodlar"** |
+| `20/02` | s.92 | ✅ VAR | tanı: Pasif-agresif ✓; 7 veya 4 üçüncü test koşulu bağlandı (batch 26) |
+| `270` | s.90 | ✅ VAR | `BLOCK_CODES['D:270']` eklendi (batch 26) |
+| `273/723` | s.88 | ✅ VAR | `BLOCK_CODES['D:273']` eklendi (batch 26) |
+| `274/724` | s.88 | ✅ VAR | `BLOCK_CODES['D:274']` eklendi (batch 26) |
+| `275/725` | s.88-89 | ✅ VAR | `BLOCK_CODES['D:275']` eklendi (batch 26) |
+| `278/728` | s.89 | ✅ VAR | `BLOCK_CODES['D:278']` eklendi (batch 26) |
+| `207` | s.92 | ✅ VAR | `BLOCK_CODES['D:207']` eklendi (batch 26) |
+| `281/821` | s.90 | ✅ VAR | `BLOCK_CODES['D:281']` eklendi (batch 26) |
+| `284/824` | s.91 | ✅ VAR | `BLOCK_CODES['D:284']` eklendi (batch 26) |
+| `287/827` | s.91 | ✅ VAR | `BLOCK_CODES['D:287']` eklendi (batch 26) |
+| `213/231` | s.83-84 | ✅ VAR | `BLOCK_CODES['D:213']` + alias `D:231` eklendi (batch 26) |
+| `243/432` | s.85 | ✅ VAR | `BLOCK_CODES['D:243']` eklendi (batch 26) |
+| `247/427/472/742` | s.85-86 | ✅ VAR | `BLOCK_CODES['D:247']` eklendi (batch 26) |
+| `248` (+`Yüksek F`) | s.86 | ✅ VAR | `BLOCK_CODES['D:248']` + `D:248_highF` eklendi (batch 26) |
 
 ### D bloğu özeti
 
-**Kodda VAR: 9** (`21/12`, `23`, `24/42`, `25/52`, `26/62`, `27/72`, `28/82`,
-`29/92`, `20/02`) · **Kodda YOK: 18** (yukarıdaki ❌ satırları).
-
-### ⚠️ Mekanizma kanıtı (batch 7 — CONFLICT-030)
-
-`mmpiSourceCodes.ts:305` → `CODES[canonicalCode(code.slice(0, 2))]`
-
-**Kırpma yalnızca "eksik" değil, "yanlış" sonuç üretir:** 13 farklı üçlü/dörtlü
-kod **yanlış** iki-ölçekli kayda düşer. Örnek: `274/724` → `27/72` metni +
-`seeAlso` **kullanıcıyı tekrar `274/724`'e yollar** (kapalı döngü).
-Ayrıntı ve tam tablo: `CONFLICTS.md` → **CONFLICT-030**.
+**Kodda VAR: 23 kod kaydı** (9 iki-haneli kanonik + 14 blok-yerel/çok-haneli).
+Kırpma anomalisi (CONFLICT-030) D bloğunda tamamen çözümlendi.
 
 ### Hs + D blokları toplamı (CONFLICT-024 kapsamı tamamlandı)
 

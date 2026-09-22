@@ -1629,3 +1629,31 @@ puanı” bandı altında → **CONFLICT-043 (P2) AÇILDI**, eşik değiştirilm
 dizinleri untracked, `node_modules` yok); `git fetch` + `git reset --mixed fae032a` ile
 worktree’nin push edilmiş halle **birebir** olduğu doğrulandı, `npm ci` + `pip install pymupdf`
 yeniden kuruldu — kayıp iş yok.
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 25 — CHANGE-018: Hs (1) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A (Bölüm 5 kod göçü blok-blok tamamlama) kapsamında ilk blok olan
+Hs (1) bloğu tamamlandı. 20 kod gövdesi kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a
+eklendi (`123/213`, `1234`, `1236`, `1237`, `1270`, `12378`, `128/218`, `129/219`, `120/210`,
+`132/312`, `134/314`, `1342`, `136/316`, `137`, `138/318`, `1382`, `139`, `Yüksek 1 / Düşük 4`,
+`146`, `1469`); 10 koşul makinece değerlendirilebilir testlerle bağlandı; çakışma (123 vs 132) engellendi.
+
+**Doğrulama:** tsc **0** · `cmp-hs-batch25.ts` **0 FARK** · `tests/mmpiHsBlock.test.ts` **16/16 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS**.
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 26 — CHANGE-019: D (2) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında ikinci blok olan D (2) bloğu (s.81-92) tamamlandı.
+14 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`213/231`, `243/432`,
+`247/427/472/742`, `248`, `248 / Yüksek F`, `273/723`, `274/724`, `275/725`, `278/728`, `270`,
+`281/821`, `284/824`, `287/827`, `207`); 11 koşul makinece değerlendirilebilir testlerle bağlandı
+(özellikle kritik intihar riski koşulları: 278/728 K/Hs < 50 veya Ma >= 70, 287/827 K < 50 ∧ Ma >= 70);
+`248/F` ayrıştırma desteği eklendi.
+
+**Doğrulama:** tsc **0** · `cmp-d-batch26.ts` **0 FARK** · `tests/mmpiDBlock.test.ts` **16/16 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiHsBlock.test.ts` **16/16 PASS** ·
+`npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).

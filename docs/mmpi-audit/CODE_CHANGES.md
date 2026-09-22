@@ -693,3 +693,50 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
 - `npx tsx --test tests/mmpi*.test.ts` → **170/170 PASS** (38 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-019 — DECISION-031 (A): Bölüm 5 D (2) Bloğu Kod Göçü ve Koşullu Yorumlar (s.81-92)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiDBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-d-batch26.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan ikinci blok: **D (Depresyon / 2) bloğu (s.81-92)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `parseCode()`: `248/F` veya `248 / Yüksek F` içeren girdilerin doğrudan `248_highF` anahtarına çözümlenmesi sağlandı.
+   - `BLOCK_CODES`: D bloğundaki 14 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle birlikte eklendi:
+     `D:213` (213/231) + alias `D:231`, `D:243` (243/432), `D:247` (247/427/472/742), `D:248`, `D:248_highF` (248 / Yüksek F), `D:273` (273/723), `D:274` (274/724), `D:275` (275/725), `D:278` (278/728), `D:270`, `D:281` (281/821), `D:284` (284/824), `D:287` (287/827), `D:207`.
+   - `CODE_CONDITIONS`: D bloğuna ait 11 koşul makinece değerlendirilebilir testlerle bağlandı:
+     - `23`: Düşük Mf veya Ma (<50 T) apati uyarısı; Ma <50 T hareketsizlik uyarısı (s.83).
+     - `24/42`: 3, 7 veya 8 üçüncü yükselen test (s.84).
+     - `27/72`: 85 T üstü ilaç uyarısı; Hs ≥ 70 T somatizasyon uyarısı (s.87).
+     - `20/02`: 7 veya 4 üçüncü yükselen test (s.92).
+     - `213/231`: Pt ≥ 70 T endişe/ajitasyon uyarısı (s.84).
+     - `247/427`: Erkek Mf ≥ 70 T bağımlılık; Kadın Mf < 50 T aşırı geleneksel rol (s.85-86).
+     - `248`: F ≥ 70 T şizofreni riski (s.86).
+     - `274/724`: Hy ≥ 70 T kronik alkolizm (s.88); Kadın Mf < 50 T bağımlılık (s.88).
+     - `275/725`: Pd < 50 T yetersizlik ve bağımlılık (s.89).
+     - `278/728`: **Kritik intihar riski** (K < 50 ∧ Hs < 50) veya Ma ≥ 70; Si ≥ 70 kronik depresyon; Pd < 50 yapışkan bağımlılık; Kadın Mf < 50 (s.89).
+     - `281/821`: Hy ≥ 70 T somatizasyon (s.90).
+     - `284/824`: Pd > 80 T kontrol kaybı ve öfke patlamaları korkusu (s.91).
+     - `287/827`: **Kritik intihar riski** (K < 50 ∧ Ma ≥ 70 T) panik ve ajitasyon (s.91).
+2. `tests/mmpiDBlock.test.ts`:
+   - 16 yeni test ile D bloğunun kod çözme doğruluğu, tanı sadakati ve tüm koşulların (özellikle intihar riski kontrolleri) T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine D bloğundaki 15 anahtar (`D:207`, `D:213`, `D:231`, `D:243`, `D:247`, `D:248`, `D:248_highF`, `D:270`, `D:273`, `D:274`, `D:275`, `D:278`, `D:281`, `D:284`, `D:287`) eklendi (toplam 39 blok anahtarı).
+   - Eski negatif kırpma testlerindeki `213/231` ve `273/723` assertion'ları artık başarıyla çözüldüğü için güncellendi; yerlerine henüz göçmemiş kodlar kondu (`314`, `412`).
+4. `scripts/mmpi-audit/cmp-d-batch26.ts`:
+   - D bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-d-batch26.ts` → **SONUÇ: 0 FARK · D BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **154/154 PASS** (31 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

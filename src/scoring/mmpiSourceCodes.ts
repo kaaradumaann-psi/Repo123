@@ -784,7 +784,370 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
     ],
     seeAlso: '146 ve 49/94 kodlarına bakınız (s.76).',
   },
+
+  // --- D (Depresyon / 2) Bloğu (s.82-94) · DECISION-031/A ---
+  // s.83-84: 213/231 Kodları
+  'D:213': {
+    code: '213/231',
+    block: 'D',
+    rawCode: '213/231',
+    text:
+      'Yorumu 21 koduna benzerdir; ancak depresyon, durumun daha önemli bir parçasıdır. Bağımlı, immatür ' +
+      'bireylerdir, mutsuzluğu tolere etmeyi öğrenmişlerdir. Bu hastalar depresyonun yanı sıra baş ağrısı, ' +
+      'göğüs ağrısı ya da bulantı ve kusma gibi hipokondriyak yakınmalar gösterirler. Ancak, bunların ' +
+      'depresyonu gülümseyen bir depresyon olabilir, yani bunlar ağlarken gülümserler, ancak neden olduğunu ' +
+      'bilmezler. Kızgınlığı inkar ederler, ketlenmişlerdir ve abartılmış bir sevgi gereksinimleri vardır. ' +
+      'Tipik olarak yakın aile üyelerinden çok az destek gördüklerini düşünürler ve bunların önemli bir ' +
+      'kısmının çok genç yaşta iken ebeveynlerinden birini kaybetme öyküsü vardır. Duygusal açıdan bağlanmada ' +
+      'çatışma yaşamaktadırlar. Sempati talebinde bulunmalarına ve semptomlarından ikincil kazançlar sağlamalarına ' +
+      'karşın, çok fazla bağımlı olmaktan dolayı hoşnut değillerdir. Alt test 7 de yükseldiğinde endişe, ' +
+      'klinik görünümün özel bir parçasıdır.',
+    diagnosis: [
+      'Depresif reaksiyon ya da somatoform bozukluk',
+    ],
+    seeAlso: 'Ayrıca 123 koduna da bakınız (s.83).',
+    conditions: [
+      {
+        source: 's.84',
+        quote: 'Alt test 7 de yükseldiğinde endişe, klinik görünümün özel bir parçasıdır.',
+        test: ({ t }) => (t('Pt') ?? 0) >= 70,
+      },
+    ],
+  },
+  // s.85: 243/432 Kodları
+  'D:243': {
+    code: '243/432',
+    block: 'D',
+    rawCode: '243/432',
+    text:
+      '24/42 kodundaki yorumlarda tanımlanan özelliklere ek olarak bu bireyler kızgınlığı bastırma ve inkar ' +
+      'yoluyla duygusal kontrol etmeye çalışırlar. Kızgınlıklarını pasif-agresif biçimlerde ya da (eğer açıksa) ' +
+      'öfke patlamaları biçiminde ifade ederler. İmmaturite, bencillik ve başkalarının onları nasıl gördüğüne ' +
+      'ilişkin içgörü eksikliği vardır. Bu bireyler, eyleme vuruk davranışları olan uçlardaki bireylerle ' +
+      'ilişki kurarlar ve bu nedenle de kendi antisosyal eğilimlerini başkası aracılığıyla tatmin ederler.',
+    seeAlso: '24/42 koduna bakınız (s.85).',
+  },
+  // s.85-86: 247/427/472 ve 742 Kodları
+  'D:247': {
+    code: '247/427/472/742',
+    block: 'D',
+    rawCode: '247/427/472/742',
+    text:
+      'Bireyin öfkesinden kaynaklanan aile ve evlilik sorunları vardır ancak birey bunu ifade edemez ve ' +
+      'sonuçta suçluluk duyguları ortaya çıkar. Gergin, endişeli ve sosyal açıdan yetersizdir, depresyonu ' +
+      'vardır. Depresyonlarını ortadan kaldırma çabası içinde aşırı alkol kullanımı ya da epizodik alkol ' +
+      'alımları vardır. Bu bireyler genelde başarısızdır, olası başarısızlık nedeniyle herhangi bir şeyi ' +
+      'denemekten korkuyor gibidirler. Sorunlarının açıkça görülmesine karşın bunları tartışmada samimi ve ' +
+      'açık değildirler. Ayrıca, çok küçük problemlere aşırı tepki gösterirler ve bunlar sanki olağanüstüymüş ' +
+      'gibi davranırlar. Bu örüntüdeki erkekler, genellikle bağımlı ve immatür yapıda olmalarına karşın ' +
+      '(özellikle test 5 de yüksek ise) sözel olarak saldırgandırlar. Evlilik sorunları vardır ve genellikle ' +
+      'eş güçlü ve baskındır ve/veya kısa süreli evlilikler yaparlar. Bu erkekler annelerine daha yakındırlar. ' +
+      'Kadınlar (özellikle Mf alt testi düşükse) kendilerini güçsüz, aşağılanmış, suçlu ve çekingen olarak ' +
+      'sunarlar. Bunlar gerçekte başkalarının kendilerini korumasını ve baskı altına almasını isterler. Bu tür ' +
+      'ilişkiler sıklıkla suçluluk duygularının, genellikle ifade edilmeyen öfkenin bedelinin ödenmesi gibidir. ' +
+      'Bireylerin öyküsünde çok çalışkan ve başarılı bir baba vardır. Terapi prognozu sıklıkla iyi değildir, ' +
+      'çünkü tedavideki kaygıya dayanma konusunda isteksizdirler. Katı, yönlendirici, amaç yönelimli terapi, ' +
+      'belki de atılganlık eğitimini içeren tedavi düşünülmelidir.',
+    diagnosis: [
+      'Pasif-agresif kişilik bozukluğu',
+      'Depresif semptomlar',
+      'Anksiyete bozukluğu',
+    ],
+    seeAlso: 'Ayrıca 274 koduna da bakınız (s.85).',
+    conditions: [
+      {
+        source: 's.85',
+        quote:
+          'Bu örüntüdeki erkekler, genellikle bağımlı ve immatür yapıda olmalarına karşın (özellikle test 5 de yüksek ise) sözel olarak saldırgandırlar.',
+        test: ({ t, gender }) => gender === 'Erkek' && (t('Mf') ?? 0) >= 70,
+      },
+      {
+        source: 's.85-86',
+        quote:
+          'Kadınlar (özellikle Mf alt testi düşükse) kendilerini güçsüz, aşağılanmış, suçlu ve çekingen olarak sunarlar.',
+        test: ({ t, gender }) => gender === 'Kadın' && (t('Mf') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.86: 248 Kodu
+  'D:248': {
+    code: '248',
+    block: 'D',
+    rawCode: '248',
+    text:
+      'Depresyon, küskünlük, aile ve evlilik sorunları çok olsa da, bu tür bireyler 24/42 kod tiplerinden ' +
+      'daha az açık kızgınlık biçiminde eyleme vurma davranışı gösterirler. Bunun yerine, kızgınlık içeren ' +
+      'fanteziler kurarlar, başkalarına karşı kendilerini güvensiz, uzak ve bağları kopmuş gibi hissederler. ' +
+      'Ancak dürtüleri üzerindeki kontrolü kaybetmekten korkarlar ve doğal olmayan, rahatsız edici düşünceler ' +
+      'üzerinde çok fazla dururlar. Sıklıkla başkaları tarafından huysuz ve nasıl davranacakları belli olmayan ' +
+      'kişiler olarak görülürler. Çeşitli cinsel sorunlar, intihar düşünceleri ve çok sayıda intihar girişimleri vardır.',
+    seeAlso: '24/42 ve 28/82 kodlarına bakınız (s.86).',
+    conditions: [
+      {
+        source: 's.86',
+        quote: '248 Kodu / Yüksek F Kodu: Temel şizofrenik konfigürasyon',
+        test: ({ t }) => (t('F') ?? 0) >= 70,
+      },
+    ],
+  },
+  // s.86: 248 Kodu / Yüksek F Kodu
+  'D:248_highF': {
+    code: '248 / Yüksek F',
+    block: 'D',
+    rawCode: '248 / Yüksek F',
+    text:
+      'Temel şizofrenik konfigürasyon. 248 kodundaki depresif, küskün ve dürtü kontrol güçlüklerine yüksek F ' +
+      'eşlik ettiğinde açık psikotik çözülme ve şizofrenik süreç ön plana çıkar.',
+    diagnosis: [
+      'Temel şizofrenik konfigürasyon',
+      'Şizofreni',
+    ],
+    seeAlso: '248 ve 28/82 kodlarına bakınız (s.86).',
+  },
+  // s.88: 273/723 Kodları
+  'D:273': {
+    code: '273/723',
+    block: 'D',
+    rawCode: '273/723',
+    text:
+      'Bu hastalar pasiftir, kişiler arası ilişkilerinde bağımlı olduklarında kendilerini çok rahat hissederler. ' +
+      'Korunduklarında ve başkalarının bakımı altına alındıklarında bu duruma çok kolay uyum sağlarlar. ' +
+      'Bireyler, çoğunlukla kendileri için çok yüksek standartlar belirleyerek stres yaşarlar. Stresleri ' +
+      'arttığında başkalarından yardım isterler, depresyon ve endişeleri içinde belirgin bir biçimde ve ' +
+      'yapışırcasına bağımlı hale gelirler. Bu görünen çaresizlik, uysallık ve kendini değersizleştirme ' +
+      'düşünceleri başkalarını, onları kurtarma ve korumaya yöneltir. Hs alt testi de yükselmişse, bu ' +
+      'bireyler kaygıyla bağlantılı somatik yakınmaların yanı sıra, kendine acıma, suçlama ve başkalarının ' +
+      'onlara bakmasını istemelerine karşın sosyal geri çekilme gösterirler.',
+    seeAlso: '27/72 ve 23/32 kodlarına bakınız (s.88).',
+    conditions: [
+      {
+        source: 's.88',
+        quote:
+          'Hs alt testi de yükselmişse, bu bireyler kaygıyla bağlantılı somatik yakınmaların yanı sıra, kendine acıma, suçlama ve başkalarının onlara bakmasını istemelerine karşın sosyal geri çekilme gösterirler.',
+        test: ({ t }) => (t('Hs') ?? 0) >= 70,
+      },
+    ],
+  },
+  // s.88: 274/724 Kodları
+  'D:274': {
+    code: '274/724',
+    block: 'D',
+    rawCode: '274/724',
+    text:
+      'Yoğun yetersizlik ve suçluluk duyguları vardır. Kendilerini küçülterek, kendi zayıflık ve yetersizlikleriyle ' +
+      'sürekli uğraşırlar. Diğer kişilere olan aşırı bağımlılıklarını kabul etmezler. Çoklu nevrotik belirtilerin ' +
+      'gerçek bir düşünce bozukluğunu maskelemesi ihtimali dikkatle incelenmelidir. İntihar düşünceleri, niyeti ' +
+      've planı sıklıkla görülür. Bu açıdan değerlendirilmelidir. Hastaların olası klinik tanısı depresif ' +
+      'reaksiyon olmakla birlikte, kişilik yapıları oldukça kalıcıdır. Temel anksiyetelerini ve davranış ' +
+      'biçimlerini değiştirmek çok zordur. Bu koddaki erkekler çoğunlukla annelerine bağımlıdır ve kendileri ' +
+      'için de bağımlı ilişki ararlarsa da genellikle buna eşlik eden kontrolü istemez ve ilişkiyi sonlandırırlar. ' +
+      'Alt test 3 yükseldiğinde kronik alkolizm olasılığı fazladır, alkol kaygıyı azaltmak ve depresyonla başa ' +
+      'çıkmak amacıyla kullanılmaktadır. Bu profildeki kadınlar sıklıkla babaları tarafından ilgi ve övünme ' +
+      'nesnesi olmuşlardır. Genellikle, kendilerini izole ederler, zayıf ve çekingen görünmeye çalışırlar ' +
+      '(özellikle alt test 5 düşükse). Diğerleri ile ilişkilerinde güçlükler yaşasalar da evli erkeklerle ' +
+      'uzun süreli ilişkileri olabilir.',
+    diagnosis: [
+      'Depresif reaksiyon',
+    ],
+    seeAlso:
+      'Eğer test 4 ve 7 birbirlerinin 5 T puanı alanı içindeyse 247 ve 427 kod yorumlarına da bakınız (s.88).',
+    conditions: [
+      {
+        source: 's.88',
+        quote:
+          'Alt test 3 yükseldiğinde kronik alkolizm olasılığı fazladır, alkol kaygıyı azaltmak ve depresyonla başa çıkmak amacıyla kullanılmaktadır.',
+        test: ({ t }) => (t('Hy') ?? 0) >= 70,
+      },
+      {
+        source: 's.88',
+        quote:
+          'Bu profildeki kadınlar sıklıkla babaları tarafından ilgi ve övünme nesnesi olmuşlardır. Genellikle, kendilerini izole ederler, zayıf ve çekingen görünmeye çalışırlar (özellikle alt test 5 düşükse).',
+        test: ({ t, gender }) => gender === 'Kadın' && (t('Mf') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.88-89: 275/725 Kodları
+  'D:275': {
+    code: '275/725',
+    block: 'D',
+    rawCode: '275/725',
+    text:
+      'Bireyde endişe, depresyon ve aşırı düzeyde aynı şeyler üzerinde durmaya ek olarak, çekingenlik görülür. ' +
+      'Kronik bir başarısızlık duygusu ya da kendilik değeri konusunda ambivalansları var gibidir. Kendilerini ' +
+      'yetersiz, zayıf, aşağılanmış, suçlu ve pasif olarak tanımlarlar; 4 alt testi düşük olduğunda daha ' +
+      'belirgindir. Bireyler sürekli olarak başkalarının onları küçümsediği ilişkiler arayarak depresyonları ' +
+      'için bedel öderler ve bu tür ilişkilerde çok rahat ederler. Karşı cinsle ilişkilerde güçlükler vardır.',
+    seeAlso: '27/72 ve 25/52 kodlarına bakınız (s.88).',
+    conditions: [
+      {
+        source: 's.89',
+        quote:
+          'Kendilerini yetersiz, zayıf, aşağılanmış, suçlu ve pasif olarak tanımlarlar; 4 alt testi düşük olduğunda daha belirgindir.',
+        test: ({ t }) => (t('Pd') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.89: 278/728 Kodları
+  'D:278': {
+    code: '278/728',
+    block: 'D',
+    rawCode: '278/728',
+    text:
+      'Kişisel yeterliliklerine ilişkin kuşkularla dolu olan bu bireylerde intihar düşüncesi ya da girişimi ' +
+      'olasılığı yüksektir. Obsesif düşünme, korkular ve fobiler çok görülür, bunların yanı sıra kendi ' +
+      'başarısızlıkları üzerinde yoğunlaşırlar. Bu insanlar çoğunlukla çok titiz ve mükemmeliyetçidir, ' +
+      'kendileri ve başkaları için çok yüksek standartlar koyarlar ve bu standartlara ulaşamadıklarında çok ' +
+      'fazla suçluluk yaşarlar. Aşırı biçimde kendilerini sorgulamaları ve kendi kendilerine baskı yapmaları ' +
+      'sıklıkla belirli bir şeye odaklanma güçlüklerine ve performansta düşmeye yol açar ve bu da onların ' +
+      'depresyon ve kaygısını arttırır. Karşı cinsle, aşk ilişkileri gibi duygusal bağlantılar kurmada özel ' +
+      'zorlukları vardır. Sıklıkla bu tür ilişkilerin çok ufak ayrıntıları üzerinde odaklanır ve olması ' +
+      'gerekenden daha fazla dikkat eder ve endişelenirler. Kontrol, eleştiri, kabul edilme ve kızgınlığın ' +
+      'ifadesi gibi durumlar sorun alanlarıdır. Bu kodda, özellikle alt testlerden K ve Hs, 50 T puanının ' +
+      'altında olduğunda ve/veya Ma alt testi yükseldiğinde intihar olasılığı dikkatle değerlendirilmelidir. ' +
+      'Bu kodda Ma alt testinin yükselmesi, depresyonun ajite yönünü gösterir. Eğer Si alt testi yükselmişse ' +
+      'bireyin depresyonu daha çok kroniktir ve buna utangaçlık, içe çekilme ve fiziksel yetersizlik duyguları ' +
+      'eşlik eder. Alt testlerden Pd düşük olduğunda pasiflik ve çekingenlik ön plandadır, sıklıkla cinsel ' +
+      'ilgilerde azalma ve cinsel yetersizlik buna eşlik eder. Kadınlarda 278/728 kodunda 5 alt testi düşmüşse ' +
+      'bu kişiler, kendileri için bedel ödemeleri gerektiğini hissederler ve hatta bu şekilde başkalarının ' +
+      'kızgınlığını arttırırlar. Bu kadınlar çoğunlukla mazohistik biçimde kendilerine kızarlar. Baş ağrıları, ' +
+      'sırt ağrıları ve cinsel güçlükleri içeren çok çeşitli fiziksel yakınmaları vardır. Çoklu nevrotik ' +
+      'semptomlar gösterirler. Major semptomlardan depresyon, sinirlilik ve obsesyonlar görülür. Kararsızlık, ' +
+      'şüphe ve kaygı karakterleridir. Obsesyonlarından dolayı düşünceye iyi kanalize olamazlar. Düşünce ' +
+      'bozukluğunun değerlendirilmesi önemlidir. Sosyal açıdan yetersizdirler. Aşırı obsesyonları için ' +
+      'psikofarmakolojik tedavi gerekir. Psikoterapide daha çok problem çözücü ve destekleyici terapi tercih edilmelidir.',
+    seeAlso: '27/72 ve 28/82 kodlarına bakınız (s.89).',
+    conditions: [
+      {
+        source: 's.89',
+        quote:
+          'Bu kodda, özellikle alt testlerden K ve Hs, 50 T puanının altında olduğunda ve/veya Ma alt testi yükseldiğinde intihar olasılığı dikkatle değerlendirilmelidir.',
+        test: ({ t }) => ((t('K') ?? 100) < 50 && (t('Hs') ?? 100) < 50) || (t('Ma') ?? 0) >= 70,
+      },
+      {
+        source: 's.89',
+        quote:
+          'Eğer Si alt testi yükselmişse bireyin depresyonu daha çok kroniktir ve buna utangaçlık, içe çekilme ve fiziksel yetersizlik duyguları eşlik eder.',
+        test: ({ t }) => (t('Si') ?? 0) >= 70,
+      },
+      {
+        source: 's.89',
+        quote:
+          'Alt testlerden Pd düşük olduğunda pasiflik ve çekingenlik ön plandadır, sıklıkla cinsel ilgilerde azalma ve cinsel yetersizlik buna eşlik eder.',
+        test: ({ t }) => (t('Pd') ?? 100) < 50,
+      },
+      {
+        source: 's.89',
+        quote:
+          'Kadınlarda 278/728 kodunda 5 alt testi düşmüşse bu kişiler, kendileri için bedel ödemeleri gerektiğini hissederler',
+        test: ({ t, gender }) => gender === 'Kadın' && (t('Mf') ?? 100) < 50,
+      },
+    ],
+  },
+  // s.90: 270 Kodu
+  'D:270': {
+    code: '270',
+    block: 'D',
+    rawCode: '270',
+    text:
+      'Gergin, depresif, sinirli, kendini aşağılayan, suçluluk duyguları olan kişilerdir. Devamlı aynı konu ' +
+      'üzerinde düşünürler; yetersizlik, güvensizlik duyguları vardır. Aşırı kontrollü olmaya çalışırlar, ' +
+      'duygularını açığa vurmada zorluk çekerler, kişiler arası ilişkilerde bağımlıdırlar, kendilerini ortaya ' +
+      'koymaktan kaçınırlar. İçe dönük tutumları kronik düzeydedir. Şizoid kişilik bozukluğu tanısı konulabilir.',
+    diagnosis: [
+      'Şizoid kişilik bozukluğu',
+    ],
+    seeAlso: '27/72 ve 20/02 kodlarına bakınız (s.90).',
+  },
+  // s.90-91: 281/821 Kodları
+  'D:281': {
+    code: '281/821',
+    block: 'D',
+    rawCode: '281/821',
+    text:
+      '28/82 kodu ile bağlantılı genel özelliklere ek olarak, bu bireylerin çok çeşitli somatik yakınmaları vardır. ' +
+      'Genellikle bunlar belirsiz ya da medikal yönden atipiktir ve titremeler, düşünme güçlükleri ya da hatta ' +
+      'somatik delüzyonlar içerebilir. Bu örüntü psikotik bir epizoddan önce gelen kendi üzerinde yoğunlaşmayı ' +
+      'temsil ediyor olabilir ve genellikle açık bir gerginlik ve entellektüel konfüzyon ile bağlantılıdır. ' +
+      'Diğer bireylerde, özellikle test 3 de yükselmiş ise, bu somatik yakınmalar ve bunlarla bağlantılı ' +
+      'davranışlar, terapisti kurtarma ve koruma rolüne çekme girişimini temsil edebilir.',
+    seeAlso: '28/82 ve 128/218 kodlarına bakınız (s.90).',
+    conditions: [
+      {
+        source: 's.91',
+        quote:
+          'Diğer bireylerde, özellikle test 3 de yükselmiş ise, bu somatik yakınmalar ve bunlarla bağlantılı davranışlar, terapisti kurtarma ve koruma rolüne çekme girişimini temsil edebilir.',
+        test: ({ t }) => (t('Hy') ?? 0) >= 70,
+      },
+    ],
+  },
+  // s.91: 284/824 Kodları
+  'D:284': {
+    code: '284/824',
+    block: 'D',
+    rawCode: '284/824',
+    text:
+      'Yetişkinlerde bu kod sıklıkla şizoid ya da şizofrenik durumlarla bağlantılıdır ve F alt testi de ' +
+      'yükselmiştir. 28/82\'nin özelliklerine ek olarak kızgınlık, isyankarlık ve düşmanlık duyguları ön plandadır. ' +
+      'Kontrolünü kaybetme korkuları çoktur (özellikle Pd alt testi 80\'in üzerinde ise) ve eyleme vuruk ' +
+      'davranışlar, garip ve tuhaf şekillerde olur. Sosyal alanda ve evlilikte uyumsuzluk olasıdır ' +
+      '(test 4, test 2 ya da 8\'in 5 T puanı alanı içinde ise 482/842 kodlarının yorumuna bakınız). ' +
+      'Ergenlerde bu kod, yetişkinlerde belirtilen devamlı bir patolojiyi temsil etmiyor olabilir. Bunun ' +
+      'yerine, bu kod daha çok birçok ergende bulunan isyankarlığı ve sosyal gruptan uzaklaşmayı yansıtır. ' +
+      'Dürtü kontrolünde zayıflık vardır ve bunun yanı sıra doğal olmayan davranışlar ve duygularda kısıtlılık ' +
+      'görülür, ancak altta yatan patoloji daha az şiddetlidir.',
+    seeAlso: '28/82 ve 482/842 kodlarına bakınız (s.91).',
+    conditions: [
+      {
+        source: 's.91',
+        quote:
+          'Kontrolünü kaybetme korkuları çoktur (özellikle Pd alt testi 80\'in üzerinde ise) ve eyleme vuruk davranışlar, garip ve tuhaf şekillerde olur.',
+        test: ({ t }) => (t('Pd') ?? 0) > 80,
+      },
+    ],
+  },
+  // s.91: 287/827 Kodları
+  'D:287': {
+    code: '287/827',
+    block: 'D',
+    rawCode: '287/827',
+    text:
+      'Bu kod tipindeki hastalar anksiyete, ajitasyon ve panik benzeri belirtiler gösterirler, kendilerini ' +
+      'insanlardan uzak hissederler, eleştiriye çok fazla duyarlıdırlar ve genelde insanlara güvenmezler. ' +
+      'Bunlar çoğu zaman belirli bir şeye odaklanamama, baş dönmesi epizodları, mental konfüzyon, uykusuzluk, ' +
+      'görev ve sorumlulukları yerine getirme yeteneğinin azalması gibi önemli bilişsel güçlükler tanımlarlar. ' +
+      'Gerçekten psikotik olan bireylerde sıklıkla hallusinasyonlar ya da açık düşünce bozuklukları vardır. ' +
+      'Tipik olarak bu bireyler, genellikle bağımlılık korkularına bağlı olarak yakın kişilerarası ilişkilerden ' +
+      'kaçınırlar ve duygusal bağlanmadan korkarlar. Sıklıkla cinsellik ve kendini ifade etme konularında ' +
+      'çatışmaları vardır. İntihar düşünceleri, zihnin sürekli bir şeyle meşgul olması ve tehditler çok ' +
+      'olasıdır ve eğer K alt testi 50 T puanının altında ise ve Ma alt testi 70 T puanının üzerinde ise bunlar ' +
+      'dikkatle değerlendirilmelidir. İntihar çoğunlukla garip biçimlerde gerçekleştirilir.',
+    seeAlso: '28/82 ve 278/728 kodlarına bakınız (s.91).',
+    conditions: [
+      {
+        source: 's.91',
+        quote:
+          'İntihar düşünceleri, zihnin sürekli bir şeyle meşgul olması ve tehditler çok olasıdır ve eğer K alt testi 50 T puanının altında ise ve Ma alt testi 70 T puanının üzerinde ise bunlar dikkatle değerlendirilmelidir.',
+        test: ({ t }) => (t('K') ?? 100) < 50 && (t('Ma') ?? 0) >= 70,
+      },
+    ],
+  },
+  // s.92: 207 Kodu
+  'D:207': {
+    code: '207',
+    block: 'D',
+    rawCode: '207',
+    text:
+      'Bu kod tipindeki bireyler gergin, kaygılı, ürkek kişilerdir. Kendilik değerinde düşme vardır. ' +
+      'Şizoid içe çekilme gösterirler. Sosyal ortamlarda yetersizlik duygusu ve gerçek sosyal beceri eksikliği ' +
+      'ile içe dönük tutum sergilerler. İnsanlarla etkileşimlerinde güvensizdirler, karşı cinsle ilişkilerinde ' +
+      'mutsuzdurlar. Depresyonları ile yaşamayı öğrenmişlerdir. Bu bireylerin saldırganlık ve öfke patlamaları ' +
+      'göstermesi beklenmez.',
+    seeAlso: '20/02 ve 270 kodlarına bakınız (s.92).',
+  },
 };
+
+// 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
+BLOCK_CODES['D:231'] = BLOCK_CODES['D:213']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -890,6 +1253,25 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ t }) => (t('D') ?? 0) >= 70 && (t('Hy') ?? 0) >= 70,
     },
   ],
+  '23': [
+    {
+      source: 's.83',
+      quote: '23 kodlu kadınlar (özellikle düşük Mf ya da düşük Ma) zayıflık, apati ve belirgin depresyon gösterirler.',
+      test: ({ t }) => (t('Mf') ?? 100) < 50 || (t('Ma') ?? 100) < 50,
+    },
+    {
+      source: 's.83',
+      quote: 'Bireyler kendilerini sıklıkla (özellikle düşük 9) zayıf, yorgun ya da tükenmiş hissederler',
+      test: ({ t }) => (t('Ma') ?? 100) < 50,
+    },
+  ],
+  '24': [
+    {
+      source: 's.84',
+      quote: 'Çoğunlukla 3, 7 ya da 8 üçüncü yükselen testtir.',
+      test: ({ third }) => third === 'Hy' || third === 'Pt' || third === 'Sc',
+    },
+  ],
   '26': [
     {
       source: 's.87',
@@ -907,6 +1289,19 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
         'derecede odaklanamayacak kadar ajite ve endişeli olduğu anlamına gelir ve daha etkili müdahale formları ' +
         '(ilaç gibi) gerekli olabilir.',
       test: ({ t }) => (t('D') ?? 0) > 85 || (t('Pt') ?? 0) > 85,
+    },
+    {
+      source: 's.87',
+      quote:
+        'Hs alt testi de yükselmişse bu bireyler kaygıyla bağlantılı somatik yakınmaların yanı sıra kendine acıma, suçlama ve başkalarının onlara bakmasını istemelerine karşın sosyal geri çekilme gösterirler.',
+      test: ({ t }) => (t('Hs') ?? 0) >= 70,
+    },
+  ],
+  '02': [
+    {
+      source: 's.92',
+      quote: 'Bu kod tipinde çoğunlukla test 7 ya da 4, üçüncü en yüksek testtir.',
+      test: ({ third }) => third === 'Pt' || third === 'Pd',
     },
   ],
   '49': [
@@ -979,6 +1374,9 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   const trimmed = code.trim();
   if (/yüksek\s*1.*düşük\s*4/i.test(trimmed) || trimmed === '1_low4' || trimmed === '14_low4') {
     return { digits: '14_low4', block: 'Hs' };
+  }
+  if (trimmed.startsWith('248') && (trimmed.includes('F') || trimmed.includes('f'))) {
+    return { digits: '248_highF', block: 'D' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {
