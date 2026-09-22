@@ -870,6 +870,8 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
       'Hs:120', 'Hs:123', 'Hs:1234', 'Hs:1236', 'Hs:1237', 'Hs:12378', 'Hs:1270',
       'Hs:128', 'Hs:129', 'Hs:132', 'Hs:134', 'Hs:1342', 'Hs:136', 'Hs:137',
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',
+      'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
+      'Hy:435', 'Hy:436', 'Hy:534',
       'Ma:19', 'Pa:46', 'Si:027', 'Si:049',
     ].sort();
     assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), expectedBlockCodes);

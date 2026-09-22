@@ -883,3 +883,29 @@ tarihsî (7 FARK, yokluk ölçümü).
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-d-batch26.ts` → **SONUÇ: 0 FARK · D BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 27 — CHANGE-020 · Hy (3) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Hy (3) bloğundaki çok haneli ve eksik kodların (`Yüksek 3 / Yüksek K`, `Hy:32`,
+`321`, `Yüksek 3 / Düşük 4`, `345/435/534`, `346/436`) `BLOCK_CODES`'a taşınması ve
+ilgili 10 kod için 18 koşulun bağlanması.
+
+**Eklenen testler (16):** `tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati: Yüksek 3 / Yüksek K, Hy:32, 321, Yüksek 3 / Düşük 4, 345/435/534, 346/436, 34, 35, 36, 37, 38, 39, 03.
+2. Koşul testleri:
+   - Hy:3_highK (Hy/K ≥ 70, F/Sc < 50),
+   - Hy:32 (D ile Hy farkı ≤ 5 T, erkek üçüncü 1/8/9, kadın Mf < 50 T, kadın üçüncü 1/4/8),
+   - 34/43 (erkek üçüncü 2/5/6, kadın üçüncü 2/6/8, 3 > 4 ketlenme, 4 > 3 ifade),
+   - 345/435/534 (Hy > Pd ∧ K > 50),
+   - 346/436 (Pa ile Hy farkı ≤ 5 T),
+   - 35/53 (üçüncü Pd veya Pa),
+   - 36/63 (üçüncü Si/Sc, Pa - Hy ≥ 5 T, Hy > Pa),
+   - 37/73 (üçüncü Hs/D/Pd),
+   - 39/93 (Si < 40 T, üçüncü Pd),
+   - 30/03 (üçüncü Hs veya D).
+
+**Güncellenen testler:** `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (Hy bloğundaki 9 anahtar `KNOWN_BLOCK_CODES`'a eklendi).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-hy-batch27.ts` → **SONUÇ: 0 FARK · Hy BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

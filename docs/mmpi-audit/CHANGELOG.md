@@ -1657,3 +1657,17 @@ eklendi (`123/213`, `1234`, `1236`, `1237`, `1270`, `12378`, `128/218`, `129/219
 **Doğrulama:** tsc **0** · `cmp-d-batch26.ts` **0 FARK** · `tests/mmpiDBlock.test.ts` **16/16 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiHsBlock.test.ts` **16/16 PASS** ·
 `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 27 — CHANGE-020: Hy (3) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında üçüncü blok olan Hy (3) bloğu (s.95-103) tamamlandı.
+6 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Yüksek 3 / Yüksek K`,
+`Hy:32`, `321`, `Yüksek 3 / Düşük 4`, `345/435/534`, `346/436`); 10 kod için 18 koşullu kural
+makinece değerlendirilebilir testlerle bağlandı (özellikle 34/43 cinsiyet ve yükseklik farkları,
+32 5 T farkı ve cinsiyet rolleri, 345 ve 346 kuralları); `parseCode` güncellendi.
+
+**Doğrulama:** tsc **0** · `cmp-hy-batch27.ts` **0 FARK** · `tests/mmpiHyBlock.test.ts` **16/16 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiDBlock.test.ts` **16/16 PASS** ·
+`tests/mmpiHsBlock.test.ts` **16/16 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).

@@ -1144,10 +1144,136 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       'göstermesi beklenmez.',
     seeAlso: '20/02 ve 270 kodlarına bakınız (s.92).',
   },
+
+  /* ------------------------------------------------------------------ */
+  /* Hy (Histeri / 3) alt testi kod bloğu (kitap s.95-103)              */
+  /* ------------------------------------------------------------------ */
+
+  'Hy:3_highK': {
+    code: 'Yüksek 3 / Yüksek K',
+    block: 'Hy',
+    text:
+      'Alt testler 3 ve K ikisi birden yüksek olduğunda ve F ve Sc alt testleri düşük olduğunda, sevilme, kabul edilme ve kendisini yaşamı üzerinde kontrol sağlıyor gibi gösterme gereksinimi çok abartılıdır. Karakter olarak, bu bireyler çok katı bir optimizm gösterirler ve bazı şeyler görünür biçimde felaket ya da başarısızlıkla çevrelenmişken bile bu iyimserliği ısrarla sürdürürler. Bu insanların diğerleri ile iyi ilişkileri ve uyumları vardır ve kızgınlık, bozulma ya da zedeleyici duyguların olduğu ya da bağımsız karar vermeleri ya da güç kullanmaları gereken durumlardan kaçınırlar (ya da çok rahatsız olurlar).',
+    seeAlso: '13/31 ve 32 kodlarına bakınız (s.96).',
+    conditions: [
+      {
+        source: 's.96',
+        quote:
+          'Alt testler 3 ve K ikisi birden yüksek olduğunda ve F ve Sc alt testleri düşük olduğunda, sevilme, kabul edilme ve kendisini yaşamı üzerinde kontrol sağlıyor gibi gösterme gereksinimi çok abartılıdır.',
+        test: ({ t }) => {
+          const hy = t('Hy');
+          const k = t('K');
+          const f = t('F');
+          const sc = t('Sc');
+          return hy !== undefined && k !== undefined && f !== undefined && sc !== undefined &&
+            hy >= 70 && k >= 70 && f < 50 && sc < 50;
+        },
+      },
+    ],
+  },
+
+  'Hy:32': {
+    code: '32',
+    block: 'Hy',
+    text:
+      '23 kod tiplerinin aksine, bu bireyler sağlıkları ve bir ölçüde de belirgin olmayan depresyonları ile fazlaca ilgilenirler. Yorgunluk, gastrik yakınmalar, baş ağrıları ve baş dönmesi geneldir, ancak çeşitli fiziksel yakınmalar da olabilir. Genellikle bu semptomlar hafiftir ve anksiyete ve depresyon duygularını kontrol etme çabaları ile açık olarak ilişkilidir. Erkekler, anksiyeteyle ilgili olarak genellikle gergin ve meraklıdırlar, iş sorunları ile kendilerini üzerler, gerginliğin sonucu semptomlar ortaya çıkarlar. Bedensel sorunlarının psikolojik yorumlarını reddederler ve içgörüleri yoktur, yardım alma olasılıkları düşüktür. Erkekler için test 1, 8 ve 9 sıklıkla üçüncü en yüksek testtir. 32 kodlu kadınların sıklıkla sorunlu evlilik öyküsü (boşanmalar nadiren olsa da) vardır, kocaları ile cinsel ilişkiyi istemezler ve cinsellikten hoşlanmadıklarını belirtirler. Tipik olarak, depresiftirler, eşlerinin sadakatsizliğinden ve alkol almasından yakınırlar. Eleştiriye ya da reddedilmeye karşı aşırı duyarlıdırlar ve bu kadınların çoğu kronik mutsuzluğa dayanabilirler. Genelde, kendilerini yetersiz hissederler ve önemli ölçüde kendi kendilerine ilişkin kuşkuları vardır. Yorgunluk ve tükenmişlikten yakınabilirler (özellikle eğer test 5 düşük ise), ancak işlerinde çalışkan olma eğilimi gösterirler. Çarpıntı, terleme, uykusuzluk ve belirsiz korku gibi fiziksel semptomlar sıklıkla bildirilir. Bazen bu profil menapoz güçlükleri ile bağlantılıdır. Kadınlar için çoğunlukla 1, 4 ve 8, üçüncü en yüksek testtir. Bu kod tipindeki kadınlar, daha çok evliliklerinde güçlükler yaşarlar. Boşanma azdır ve çoğunluğunda frijidite vardır.',
+    seeAlso: '2 alt testi 3 alt testinin 5 T puanı sınırları içinde ise 23 koduna da bakınız (s.96).',
+    conditions: [
+      {
+        source: 's.96',
+        quote: 'Eğer 2 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise 23 koduna da bakınız.',
+        test: ({ t }) => {
+          const d = t('D');
+          const hy = t('Hy');
+          return d !== undefined && hy !== undefined && Math.abs(d - hy) <= 5;
+        },
+      },
+      {
+        source: 's.96',
+        quote: 'Erkekler için test 1, 8 ve 9 sıklıkla üçüncü en yüksek testtir.',
+        test: ({ gender, third }) => gender === 'Erkek' && (third === 'Hs' || third === 'Sc' || third === 'Ma'),
+      },
+      {
+        source: 's.97',
+        quote: 'Yorgunluk ve tükenmişlikten yakınabilirler (özellikle eğer test 5 düşük ise), ancak işlerinde çalışkan olma eğilimi gösterirler.',
+        test: ({ gender, t }) => {
+          const mf = t('Mf');
+          return gender === 'Kadın' && mf !== undefined && mf < 50;
+        },
+      },
+      {
+        source: 's.97',
+        quote: 'Kadınlar için çoğunlukla 1, 4 ve 8, üçüncü en yüksek testtir.',
+        test: ({ gender, third }) => gender === 'Kadın' && (third === 'Hs' || third === 'Pd' || third === 'Sc'),
+      },
+    ],
+  },
+
+  'Hy:321': {
+    code: '321',
+    block: 'Hy',
+    text:
+      '32 kodlu bireylerin özelliklerine ek olarak, bu bireyler kabızlık, ishal, anoreksiya, uykusuzluk, kas gerginliği, genital bölgede ağrı, çarpıntılar ve tükenmişlik gibi çok çeşitli hipokondriyak yakınmalar gösterirler. Bu profildeki kadınlar sıklıkla tekrarlayan jinekolojik yakınmalar getirir ve/veya histerektomi olurlar. Erkekler sıklıkla gastrik rahatsızlık ya da ülser gösterirler. Her iki cinste, evlilik sorunları ve cinsellikle ilgili duygusal çatışmalar olabilir. Bunlar depresyon ve endişeyle ilgilidir. Depresyon ve endişe, aşağılık hatta umutsuzluk duyguları ile bağlantılıdır. Bireylerin kendileri ya da başkaları hakkında fikirleri yoktur ve bunun bir sonucu olarak sıklıkla kendilerini rahatsız edici kişiler arası ilişkilerin içinde bulurlar. Engelleyici durumlar karşısında kendini cezalandırıcı biçimde depresif olmaya da kendilerine zarar verecek biçimlerde tepki gösterme eğilimindedirler. Örneğin, sıklıkla başkalarının eleştiri ya da reddetmesini tolere edemezler. Karışık semptomatoloji ile eşleşen kronik nevrotik bir durumu ortaya koyan bu hastalarda depresyon, çökkünlük, gerilim, kaygı ile birlikte özellikle baş ağrısı ve uykusuzluğun eşlik ettiği çoklu somatik yakınmaları vardır. Özellikle histerik davranışları ile ikincil kazançları gözlenebilir. Tedavi motivasyonları düşüktür. Yetersizlik duyguları, genellikle kronik nevrotik bir durum sergiler.',
+    seeAlso: '32 ve 123/213 kodlarına bakınız (s.97).',
+  },
+
+  'Hy:34_low4': {
+    code: 'Yüksek 3 / Düşük 4',
+    block: 'Hy',
+    text:
+      'Alt test 3\'ün önemli ölçüde yüksek olduğu durumda, birey kızgınlık duygularını dolaylı olarak gösterir ya da dışavuran davranışları olan bireylerle birlikte kızgınlık ve isyan duygularını ifade eder. Sıklıkla bu bireyler, bağımlılık bağımsızlık çatışması yaşarlar. Kızgın bir biçimde çok fazla istenmek ve yeterli derecede istenmemek arasında gider gelirler. Bağımlı olmak istemelerine karşın, bunda kendi rollerinin ne olduğu konusunda içgörüleri yoktur. Bastırma, inkar ve kızgınlığın aşırı kontrol edilmesinden dolayı, öfke patlamaları olduğunda tipik olarak aşırı öfkelidirler, ancak hemen bunu iyi bir biçimde rasyonalize ederler. 34 kodlarında, 4\'ün 3\'ten önemli ölçüde yüksek olduğu durumlarda, kızgınlık baskındır, ancak uzun süre baskı altında tutulmuştur ve sonra öfke patlamaları ile ifade edilir, hatta bazen ciddi saldırı ya da cinayetlerle sonlanır. Bunların patlamaları çok şaşırtıcı olur, çünkü öfkeyi başlatan sıklıkla çok küçük bir olaydır. Bazen bu bireylerde şiddet patlamaları döngüsel bir örüntüde olur. Kadınlarla yapılan bir araştırmada arkadaşları bu kadınların sabırsız olduklarını belirtirken kadınlar kendilerini konuşkan, enerji dolu, tam anlaşılmayan kişiler olarak tanımlamaktadır. 3\'te bastırma, 4\'te saldırganlık fazladır, 3 yüksek, 4 oldukça yüksek ise pasif-agresif kişiliktir. Sinsi tipler ufak bir hadise çıkarıp önemli birşeyi engellerler.',
+    diagnosis: ['Pasif-agresif kişilik bozukluğu'],
+    seeAlso: '34/43 koduna bakınız (s.98-99).',
+  },
+
+  'Hy:345': {
+    code: '345/435/534',
+    block: 'Hy',
+    text:
+      'Bu profildeki erkekler, diğerleriyle olan ilişkilerinde belirgin bir biçimde immatür ve genellikle cinsel yönden yetersizdirler. Sıklıkla sıradan cinsel ilişkiden farklı bir ilişki ararlar, teşhircilik görülebilir, homoseksüel olma korkuları vardır. Alt test 3, 4\'ten yüksekse ve K alt testi 50 T puanının üstündeyse, duyguların ve isteklerin eyleme dökülme olasılığı düşüktür.',
+    seeAlso: '34/43 ve 35/53 kodlarına bakınız (s.99).',
+    conditions: [
+      {
+        source: 's.99',
+        quote:
+          'Alt test 3, 4\'ten yüksekse ve K alt testi 50 T puanının üstündeyse, duyguların ve isteklerin eyleme dökülme olasılığı düşüktür.',
+        test: ({ t }) => {
+          const hy = t('Hy');
+          const pd = t('Pd');
+          const k = t('K');
+          return hy !== undefined && pd !== undefined && k !== undefined && hy > pd && k > 50;
+        },
+      },
+    ],
+  },
+
+  'Hy:346': {
+    code: '346/436',
+    block: 'Hy',
+    text:
+      'Sıklıkla bu bireyler uyumlu gibi görünseler de, dönemsel aşırı eyleme vuruk davranış öyküleri olabilir ve bunu uzun süre devam eden sıradan davranışlar izler. Sıklıkla bu bireyler eleştiriye aşırı duyarlıdırlar ve kızgınlık duygularının bir sonucu olarak gergin ve kaygılıdırlar. Genellikle bunların kızgınlığı aile üyelerine yöneliktir, ancak zihinlerinde bu durumu iyi bir biçimde rasyonalize eder ve kendilerini haklı çıkarırlar. Çoğu, eyleme vuruk davranışları olan bireylerle uzun-süreli (ancak sıklıkla çalkantılı) ilişkiler kurarlar, böylece kendi kızgınlık ve isyankar impulslarına başkaları aracılığıyla doyum sağlarlar. Onların düşünceleri genellikle diğerlerini suçlamaya yöneliktir ve bu bireyler nadiren değişme gereksinimi duyarlar ve psikolojik tedaviyi reddederler.',
+    seeAlso: '6 alt testi 3 alt testinin 5 T puanı sınırları içinde ise 36/63 kodlarına da bakınız (s.99).',
+    conditions: [
+      {
+        source: 's.99',
+        quote: 'Eğer 6 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise, 36/63 kodlarına da bakınız.',
+        test: ({ t }) => {
+          const pa = t('Pa');
+          const hy = t('Hy');
+          return pa !== undefined && hy !== undefined && Math.abs(pa - hy) <= 5;
+        },
+      },
+    ],
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
 BLOCK_CODES['D:231'] = BLOCK_CODES['D:213']!;
+
+// Hy bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Hy:435'] = BLOCK_CODES['Hy:345']!;
+BLOCK_CODES['Hy:534'] = BLOCK_CODES['Hy:345']!;
+BLOCK_CODES['Hy:436'] = BLOCK_CODES['Hy:346']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -1304,6 +1430,80 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ third }) => third === 'Pt' || third === 'Pd',
     },
   ],
+  '34': [
+    {
+      source: 's.98',
+      quote: 'Erkekler için test 2, 5 ve 6 sıklıkla üçüncü en yüksek testtir.',
+      test: ({ gender, third }) => gender === 'Erkek' && (third === 'D' || third === 'Mf' || third === 'Pa'),
+    },
+    {
+      source: 's.98',
+      quote: 'Kadınlar için üçüncü en yüksek testler sıklıkla 2, 6 ve 8\'dir.',
+      test: ({ gender, third }) => gender === 'Kadın' && (third === 'D' || third === 'Pa' || third === 'Sc'),
+    },
+    {
+      source: 's.98',
+      quote: '3 ve 4\'ün göreceli yüksekliklerinde 3 yüksekse kızgınlık ve dürtüler ketlenir.',
+      test: ({ t }) => (t('Hy') ?? 0) > (t('Pd') ?? 0),
+    },
+    {
+      source: 's.98',
+      quote: '3 ve 4\'ün göreceli yüksekliklerinde 4 yüksekse öfke daha fazla ifade edilir.',
+      test: ({ t }) => (t('Pd') ?? 0) > (t('Hy') ?? 0),
+    },
+  ],
+  '35': [
+    {
+      source: 's.99',
+      quote: '4 ya da 6 genellikle üçüncü yüksek testtir.',
+      test: ({ third }) => third === 'Pd' || third === 'Pa',
+    },
+  ],
+  '36': [
+    {
+      source: 's.100',
+      quote: 've sıklıkla üçüncü yükselen test Si ya da Sc\'dir.',
+      test: ({ third }) => third === 'Si' || third === 'Sc',
+    },
+    {
+      source: 's.100',
+      quote:
+        'Alt test 6, 3\'ten 5 ya da daha fazla T puanı yüksek olduğunda, bu birey güç ve prestij kazanmak ister ve kızgın bir biçimde bencildir, hatta bu acımasız manipülasyonlar noktasına gidebilir.',
+      test: ({ t }) => ((t('Pa') ?? 0) - (t('Hy') ?? 0)) >= 5,
+    },
+    {
+      source: 's.100',
+      quote:
+        'Alt test 3, 6\'dan yüksekse, bu tür bireyler kızgınlıklarının farkında değildirler, ancak bu başkaları için çok açık olabilir.',
+      test: ({ t }) => (t('Hy') ?? 0) > (t('Pa') ?? 0),
+    },
+  ],
+  '37': [
+    {
+      source: 's.100',
+      quote: 'Her iki cinsiyette de 1, 2 ve 4 alt testleri sıklıkla üçüncü en yüksek testtir.',
+      test: ({ third }) => third === 'Hs' || third === 'D' || third === 'Pd',
+    },
+  ],
+  '39': [
+    {
+      source: 's.101',
+      quote: 'özellikle eğer alt test Si 40 T puanının altında ise çok yüzeysel olabilirler.',
+      test: ({ t }) => (t('Si') ?? 100) < 40,
+    },
+    {
+      source: 's.101',
+      quote: 'En sık görülen üçlü kod tipi 394/934\'tür.',
+      test: ({ third }) => third === 'Pd',
+    },
+  ],
+  '03': [
+    {
+      source: 's.101',
+      quote: 'Üçüncü en yüksek test 1 ve 2\'dir.',
+      test: ({ third }) => third === 'Hs' || third === 'D',
+    },
+  ],
   '49': [
     {
       source: 's.118-121 (Pd bloğu)',
@@ -1377,6 +1577,12 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   }
   if (trimmed.startsWith('248') && (trimmed.includes('F') || trimmed.includes('f'))) {
     return { digits: '248_highF', block: 'D' };
+  }
+  if (/yüksek\s*3.*yüksek\s*k/i.test(trimmed) || trimmed === '3_highK' || trimmed === '3K') {
+    return { digits: '3_highK', block: 'Hy' };
+  }
+  if (/yüksek\s*3.*düşük\s*4/i.test(trimmed) || trimmed === '3_low4' || trimmed === '34_low4') {
+    return { digits: '34_low4', block: 'Hy' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {

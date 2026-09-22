@@ -3270,3 +3270,56 @@ metni taşınması DECISION-028 kapsamında **yok**).
   - "Pd alt testi 80 T puanının üstünde ise kontrol kaybı ve öfke patlamaları görülebilir." → `Pd > 80 T`.
 - **287/827 Kodu (s.91):**
   - ⚠️ **Kritik İntihar Uyarısı:** "K alt testi düşük ve Ma alt testi yüksekse intihar düşünceleri ve girişimleri açısından acil dikkat gerekir." → `K < 50 && Ma >= 70`.
+
+---
+
+## BÖLÜM 5: Hy (3) KOD BLOĞU VERİLERİ (kitap s.95-103 · PDF p055_R - p059_R)
+
+### SOURCE-CODE-HY-001 — Hy Bloğu Sayfa ve Başlık Envanteri (kitap s.95-103)
+- **Görsel ve OCR Taraması:** PDF p055_R (s.95) ile p059_R (s.103) arasındaki sayfalar taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Başlık Envanteri:**
+  1. `Yüksek 3 / Yüksek K Kodu` (s.96) — Katı optimizm, kaçınma davranışı.
+  2. `31 Kodu (Bakınız 13/31 Kodu)` (s.96)
+  3. `32 Kodu (Eğer 2 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise 23 koduna da bakınız.)` (s.96-97) — 23'ün aksine belirgin somatik/depresif ilgilenme.
+  4. `321 Kodu` (s.97) — Kronik nevrotik durum, yaygın hipokondriyak semptomlar.
+  5. `34/43 Kodu` (s.97-98) — Olası Tanı: Pasif-agresif kişilik bozukluğu, agresif tip.
+  6. `Yüksek 3 / Düşük 4 Kodu` (s.98-99) — Olası Tanı: Pasif-agresif kişilik bozukluğu.
+  7. `345/435/534 Kodları` (s.99) — İmmatür, cinsel yetersizlik kaygıları.
+  8. `346/436 Kodları` (s.99) — Eleştiriye duyarlılık, dönemsel eyleme vurukluk.
+  9. `35/53 Kodu` (s.99)
+  10. `36/63 Kodu` (s.99-100)
+  11. `37/73 Kodu` (s.100-101)
+  12. `38/83 Kodu` (s.101) — Olası Tanılar: Şizofreni, Bazı durumlarda histerik nevroz.
+  13. `39/93 Kodu` (s.101) — En sık görülen üçlü kod: 394/934.
+  14. `30/03 Kodu` (s.101)
+
+### SOURCE-CODE-HY-002 — Hy Bloğu Koşullu Yorum Kuralları (Conditions)
+- **Yüksek 3 / Yüksek K Kodu (s.96):**
+  - "Alt testler 3 ve K ikisi birden yüksek olduğunda ve F ve Sc alt testleri düşük olduğunda..." → `Hy >= 70 && K >= 70 && F < 50 && Sc < 50`.
+- **32 Kodu (s.96-97):**
+  - "Eğer 2 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise 23 koduna da bakınız." → `|D - Hy| <= 5 T`.
+  - "Erkekler için test 1, 8 ve 9 sıklıkla üçüncü en yüksek testtir." → `gender === 'Erkek' && third in ['Hs', 'Sc', 'Ma']`.
+  - "Yorgunluk ve tükenmişlikten yakınabilirler (özellikle eğer test 5 düşük ise)..." → `gender === 'Kadın' && Mf < 50 T`.
+  - "Kadınlar için çoğunlukla 1, 4 ve 8, üçüncü en yüksek testtir." → `gender === 'Kadın' && third in ['Hs', 'Pd', 'Sc']`.
+- **34/43 Kodu (s.97-98):**
+  - "Erkekler için test 2, 5 ve 6 sıklıkla üçüncü en yüksek testtir." → `gender === 'Erkek' && third in ['D', 'Mf', 'Pa']`.
+  - "Kadınlar için üçüncü en yüksek testler sıklıkla 2, 6 ve 8'dir." → `gender === 'Kadın' && third in ['D', 'Pa', 'Sc']`.
+  - "3 ve 4'ün göreceli yüksekliklerinde 3 yüksekse kızgınlık ketlenir..." → `Hy > Pd`.
+  - "4 yüksekse öfke daha fazla ifade edilir..." → `Pd > Hy`.
+- **345/435/534 Kodları (s.99):**
+  - "Alt test 3, 4'ten yüksekse ve K alt testi 50 T puanının üstündeyse, duyguların ve isteklerin eyleme dökülme olasılığı düşüktür." → `Hy > Pd && K > 50 T`.
+- **346/436 Kodları (s.99):**
+  - "Eğer 6 alt testi, 3 alt testinin 5 T puanı sınırları içinde ise 36/63 kodlarına da bakınız." → `|Pa - Hy| <= 5 T`.
+- **35/53 Kodu (s.99):**
+  - "4 ya da 6 genellikle üçüncü yüksek testtir." → `third in ['Pd', 'Pa']`.
+- **36/63 Kodu (s.99-100):**
+  - "ve sıklıkla üçüncü yükselen test Si ya da Sc'dir." → `third in ['Si', 'Sc']`.
+  - "Alt test 6, 3'ten 5 ya da daha fazla T puanı yüksek olduğunda..." → `Pa - Hy >= 5 T`.
+  - "Alt test 3, 6'dan yüksekse..." → `Hy > Pa`.
+- **37/73 Kodu (s.100-101):**
+  - "Her iki cinsiyette de 1, 2 ve 4 alt testleri sıklıkla üçüncü en yüksek testtir." → `third in ['Hs', 'D', 'Pd']`.
+- **39/93 Kodu (s.101):**
+  - "özellikle eğer alt test Si 40 T puanının altında ise çok yüzeysel olabilirler." → `Si < 40 T`.
+  - "En sık görülen üçlü kod tipi 394/934'tür." → `third === 'Pd'`.
+- **30/03 Kodu (s.101):**
+  - "Üçüncü en yüksek test 1 ve 2'dir." → `third in ['Hs', 'D']`.

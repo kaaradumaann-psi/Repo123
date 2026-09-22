@@ -740,3 +740,47 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
 - `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **154/154 PASS** (31 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-020 — DECISION-031 (A): Bölüm 5 Hy (3) Bloğu Kod Göçü ve Koşullu Yorumlar (s.95-103)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiHyBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-hy-batch27.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan üçüncü blok: **Hy (Histeri / 3) bloğu (s.95-103)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `parseCode()`: `Yüksek 3 / Yüksek K` (`3_highK`), `Yüksek 3 / Düşük 4` (`34_low4`) ayrıştırma desteği eklendi.
+   - `BLOCK_CODES`: Hy bloğundaki 6 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle birlikte eklendi:
+     `Hy:3_highK` (Yüksek 3 / Yüksek K), `Hy:32` (32, s.96 metni: "23 kod tiplerinin aksine"), `Hy:321` (321, s.97 metni), `Hy:34_low4` (Yüksek 3 / Düşük 4), `Hy:345` (345/435/534) + aliases (`Hy:435`, `Hy:534`), `Hy:346` (346/436) + alias (`Hy:436`).
+   - `CODE_CONDITIONS`: Hy bloğuna ait 10 kod için 18 koşullu kural makinece değerlendirilebilir testlerle bağlandı:
+     - `Hy:3_highK`: Hy ≥ 70, K ≥ 70, F < 50, Sc < 50 (s.96).
+     - `Hy:32`: D ile Hy farkı ≤ 5 T (s.96); Erkek üçüncü test 1/8/9 (s.96); Kadın Mf < 50 T (s.97); Kadın üçüncü test 1/4/8 (s.97).
+     - `34/43`: Erkek üçüncü test 2/5/6 (s.98); Kadın üçüncü test 2/6/8 (s.98); 3 > 4 kızgınlık ketlenmesi; 4 > 3 öfke ifadesi (s.98).
+     - `345/435/534`: Hy > Pd ∧ K > 50 eyleme dökülme düşüklüğü (s.99).
+     - `346/436`: Pa ile Hy farkı ≤ 5 T (s.99).
+     - `35/53`: Üçüncü test Pd veya Pa (s.99).
+     - `36/63`: Üçüncü test Si veya Sc (s.100); Pa - Hy ≥ 5 T farkı (s.100); Hy > Pa farkındalık (s.100).
+     - `37/73`: Üçüncü test Hs, D veya Pd (s.100).
+     - `39/93`: Si < 40 T yüzeysellik (s.101); Üçüncü test Pd ("394/934", s.101).
+     - `30/03`: Üçüncü test Hs veya D (s.101).
+2. `tests/mmpiHyBlock.test.ts`:
+   - 16 yeni test ile Hy bloğunun kod çözme doğruluğu, tanı sadakati ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Hy bloğundaki 9 anahtar (`Hy:32`, `Hy:321`, `Hy:345`, `Hy:346`, `Hy:34_low4`, `Hy:3_highK`, `Hy:435`, `Hy:436`, `Hy:534`) eklendi (toplam 48 blok anahtarı).
+4. `scripts/mmpi-audit/cmp-hy-batch27.ts`:
+   - Hy bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-hy-batch27.ts` → **SONUÇ: 0 FARK · Hy BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **170/170 PASS** (34 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

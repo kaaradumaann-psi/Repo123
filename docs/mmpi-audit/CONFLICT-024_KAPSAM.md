@@ -68,29 +68,30 @@ D bloğu mutabakatı: `scripts/mmpi-audit/cmp-d-batch26.ts` → **0 FARK** (11 k
 
 ---
 
-## 3. Hy (3) alt testi kod bloğu (s.95-103) — SIRADAKİ BLOK
+## 3. Hy (3) alt testi kod bloğu (s.95-103) — TAMAMLANDI (batch 27 · CHANGE-020)
 
-### Kritik kaynak cümlesi (s.83, D bloğu)
-> "**En sık üçlü kodlar 231/321, 234/324 ve 237/327'dir.**"
+| Kod | Kaynak | Kodda | Durum / Not |
+|---|---|---|---|
+| `Yüksek 3 / Yüksek K` | s.96 | ✅ VAR | `BLOCK_CODES['Hy:3_highK']` eklendi; Hy/K ≥ 70, F/Sc < 50 koşulu bağlı |
+| `31` | s.96 | ✅ `13/31` | kaynak "(Bakınız 13/31 Kodu)" der → **atıf doğru** |
+| `32` | s.96-97 | ✅ VAR | `BLOCK_CODES['Hy:32']` eklendi; s.96 metni ("23 kod tiplerinin aksine") + 4 koşul |
+| `321` | s.97 | ✅ VAR | `BLOCK_CODES['Hy:321']` eklendi; s.97 metni ve hipokondriyak semptomlar |
+| `34/43` | s.97-98 | ✅ VAR | Cinsiyet 3. testler (erkek D/Mf/Pa, kadın D/Pa/Sc) ve 3 vs 4 göreceli yükseklik koşulları bağlı |
+| `Yüksek 3 / Düşük 4` | s.98-99 | ✅ VAR | `BLOCK_CODES['Hy:34_low4']` eklendi; pasif-agresif kişilik tanısı tam |
+| `345/435/534` | s.99 | ✅ VAR | `BLOCK_CODES['Hy:345']` (+ `Hy:435`, `Hy:534` alias) eklendi; Hy > Pd ∧ K > 50 koşulu bağlı |
+| `346/436` | s.99 | ✅ VAR | `BLOCK_CODES['Hy:346']` (+ `Hy:436` alias) eklendi; Pa ve Hy 5 T farkı koşulu bağlı |
+| `35/53` | s.99 | ✅ VAR | 3. test Pd veya Pa koşulu bağlı |
+| `36/63` | s.99-100 | ✅ VAR | 3. test Si/Sc, Pa - Hy ≥ 5 T farkı, Hy > Pa koşulları bağlı |
+| `37/73` | s.100-101 | ✅ VAR | 3. test Hs/D/Pd koşulu bağlı |
+| `38/83` | s.101 | ✅ VAR | Olası Tanı: Şizofreni, Bazı durumlarda histerik nevroz |
+| `39/93` | s.101 | ✅ VAR | Si < 40 T ve 3. test Pd ("394/934") koşulları bağlı |
+| `30/03` | s.101 | ✅ VAR | 3. test Hs veya D koşulu bağlı |
 
-→ Kaynak, üçlü kodları yalnızca tanımlamıyor; **frekans sırası** bile veriyor.
-Kodda üçlü kod altyapısı **hiç yok** (CONFLICT-024).
+Hy bloğu mutabakatı: `scripts/mmpi-audit/cmp-hy-batch27.ts` → **0 FARK** (10 koşullu kural seti, 6 yeni kod gövdesi, 16 test tam).
 
+---
 
-### D kod bloğu — devam (s.90-91)
-
-| Kod | Kaynak | Kodda |
-|---|---|---|
-| `270` | s.90 | ❌ |
-| `28/82` | s.90 | ✅ VAR |
-| `281/821` | s.90 | ❌ |
-| `284/824` | s.91 | ❌ |
-| `482/842` | s.91 (atıf) | ❌ |
-| `287/827` | s.91 | ❌ |
-| `29/92` | s.91 | ✅ VAR |
-
-**D bloğu güncel sayım:** Kodda **VAR 6** (`21/12`, `23`, `24/42`, `25/52`,
-`26/62`, `27/72`, `28/82`, `29/92`) · **YOK 16+**
+## 4. Pd (4) alt testi kod bloğu (s.107-121) — SIRADAKİ BLOK
 
 
 ---
@@ -138,46 +139,33 @@ Kırpma anomalisi (CONFLICT-030) D bloğunda tamamen çözümlendi.
 
 ---
 
-## Hy (3) alt testi kod bloğu (s.95-100) — batch 8
+## Hy (3) alt testi kod bloğu (s.95-101) — batch 27 GÖÇ EDİLDİ
 
-| Kod | Kaynak | Kodda | Not |
+| Kod | Kaynak | Kodda | Durum / Not |
 |---|---|---|---|
-| `Yüksek 3 / Yüksek K` | s.96 | ❌ YOK | F ve Sc düşük koşulu |
+| `Yüksek 3 / Yüksek K` | s.96 | ✅ VAR | `BLOCK_CODES['Hy:3_highK']` eklendi; Hy/K ≥ 70, F/Sc < 50 koşulu bağlı |
 | `31` | s.96 | ✅ `13/31` | kaynak "(Bakınız 13/31 Kodu)" der → **atıf doğru** |
-| `32` | s.96-97 | ❌ YOK | ⚠️ `23`e düşüyor → **CONFLICT-031** (D bloğunun metni) |
-| `321` | s.97 | ❌ YOK | → `23`e düşüyor |
-| `34/43` | s.97-98 | ✅ VAR | 3 varyant + göreceli yükseklik koşulu eksik |
-| `Yüksek 3 / Düşük 4` | s.98 | ❌ YOK | |
-| `34` (4 dominant) | s.98 | ❌ YOK | → `34/43`e düşüyor |
-| `345/435/534` | s.99 | ❌ YOK | → `34/43`e düşüyor; **534 varyantı hiç erişilemez** |
-| `346/436` | s.99 | ❌ YOK | → `36/63`e düşüyor |
-| `35/53` | s.99 | ✅ VAR | |
-| `36/63` | s.99-100 | ✅ VAR | |
-| `54/45` notu | s.99 | ❌ YOK | "5'teki yükselmeyi dikkate almamak…" yorum kuralı |
+| `32` | s.96-97 | ✅ VAR | `BLOCK_CODES['Hy:32']` eklendi; s.96 metni ("23 kod tiplerinin aksine") + 4 koşul |
+| `321` | s.97 | ✅ VAR | `BLOCK_CODES['Hy:321']` eklendi; s.97 metni ve hipokondriyak semptomlar |
+| `34/43` | s.97-98 | ✅ VAR | Cinsiyet 3. testler (erkek D/Mf/Pa, kadın D/Pa/Sc) ve 3 vs 4 göreceli yükseklik koşulları bağlı |
+| `Yüksek 3 / Düşük 4` | s.98-99 | ✅ VAR | `BLOCK_CODES['Hy:34_low4']` eklendi; pasif-agresif kişilik tanısı tam |
+| `345/435/534` | s.99 | ✅ VAR | `BLOCK_CODES['Hy:345']` (+ `Hy:435`, `Hy:534` alias) eklendi; Hy > Pd ∧ K > 50 koşulu bağlı |
+| `346/436` | s.99 | ✅ VAR | `BLOCK_CODES['Hy:346']` (+ `Hy:436` alias) eklendi; Pa ve Hy 5 T farkı koşulu bağlı |
+| `35/53` | s.99 | ✅ VAR | 3. test Pd veya Pa koşulu bağlı |
+| `36/63` | s.99-100 | ✅ VAR | 3. test Si/Sc, Pa - Hy ≥ 5 T farkı, Hy > Pa koşulları bağlı |
+| `37/73` | s.100-101 | ✅ VAR | 3. test Hs/D/Pd koşulu bağlı |
+| `38/83` | s.101 | ✅ VAR | Olası Tanı: Şizofreni, Bazı durumlarda histerik nevroz |
+| `39/93` | s.101 | ✅ VAR | Si < 40 T ve 3. test Pd ("394/934") koşulları bağlı |
+| `30/03` | s.101 | ✅ VAR | 3. test Hs veya D koşulu bağlı |
 
-### Blok toplamı
+### Blok toplamı (Hs + D + Hy TAMAMLANDI)
 
 | Blok | Kodda VAR | Kodda YOK |
 |---|---|---|
-| Hs (s.63-78) | 9 | 22 (+3 alt-kod) |
-| D (s.79-92) | 9 | 18 |
-| **Hy (s.95-100, devam ediyor)** | **3** (`13/31`, `34/43`, `35/53`, `36/63` → sayım: 4) | **8** |
-| **Genel toplam** | **22** | **48** |
-
-Not: Hy bloğu **s.100+**'da devam ediyor (`36/63` metni s.100'e taşıyor).
-
-
----
-
-## Hy (3) alt testi kod bloğu — DEVAM (s.100-101) · batch 9
-
-| Kod | Kaynak | Kodda | Not |
-|---|---|---|---|
-| `36/63` devamı | s.100 | ✅ VAR | 5 T fark koşulu eksik |
-| `37/73` | s.100 | ✅ VAR | içerik MATCH |
-| `38/83` | s.101 | ✅ VAR | Olası Tanı: Şizofreni ✓ |
-| `39/93` | s.101 | ✅ VAR | Si<40 T koşulu eksik |
-| `30/03` | s.101 | ✅ VAR | |
+| Hs (s.63-78) | 29 (9 kanonik + 20 blok-yerel) | 0 |
+| D (s.79-92) | 23 (9 kanonik + 14 blok-yerel) | 0 |
+| Hy (s.95-101) | 16 (10 kanonik + 6 blok-yerel) | 0 |
+| **Toplam** | **68** | **0 (üç blokta eksik kalmadı)** |
 | `394/934` | s.101 | ❌ YOK | **"en sık görülen üçlü kod tipi"** → `39/93`e düşüyor |
 
 → **Hy kod bloğu (s.95-101) kodda 8 VAR / 8 YOK.**
