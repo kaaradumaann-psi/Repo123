@@ -850,14 +850,17 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
     assert.equal(e027.code, '027(8)');
     assert.equal(e027.rawCode, '027(8)');
     assert.match(e027.text, /Bireyde güçlü ruminatif davranışlar görülebilir/);
-    // kırpmanın gittiğinin negatif kanıtı: eşleşmeyen 3+ haneli kodlar artık undefined
-    assert.equal(codeInterpretation('794'), undefined, "'794' Pt bloğunda ayrı başlıktı; 79/97 metni dönemez");
+    // kırpmanın gittiğinin negatif kanıtı: eşleşmeyen 3+ haneli kodlar artık undefined (79'a kırpılmaz)
     assert.equal(codeInterpretation('8726'), undefined);
     assert.equal(codeInterpretation('314'), undefined);
     assert.equal(codeInterpretation('412'), undefined);
+    assert.equal(codeInterpretation('931'), undefined);
     // D bloğu göçüyle 273/723 ve 213/231 artık kendi gövdelerine çözümlenir (CHANGE-019)
     assert.equal(codeInterpretation('273/723')?.code, '273/723');
     assert.equal(codeInterpretation('213/231')?.code, '213/231');
+    // Pt bloğu göçüyle 794 ve 782 artık kendi gövdelerine çözümlenir (CHANGE-023)
+    assert.equal(codeInterpretation('794')?.code, '794');
+    assert.equal(codeInterpretation('782')?.code, '782');
     // ortak iki-haneli kayıtlar ESKİSİ GİBİ çalışır (geriye dönük uyum)
     assert.equal(codeInterpretation('04')!.code, '40/04');
     assert.doesNotMatch(codeInterpretation('04')!.text, /eyleme vurukluğun bastırılması/);
@@ -872,17 +875,18 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',
       'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
       'Hy:435', 'Hy:436', 'Hy:534',
-      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
-      'Ma:964', 'Ma:968',
+      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
+      'Ma:964', 'Ma:968', 'Ma:974',
       'Pa:456_scarlett', 'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648', 'Pa:678',
       'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:860', 'Pa:876', 'Pa:964',
       'Pa:968',
       'Pd:456', 'Pd:462', 'Pd:463', 'Pd:468', 'Pd:469', 'Pd:482', 'Pd:489',
       'Pd:48_highF_low2', 'Pd:493', 'Pd:495', 'Pd:496', 'Pd:498', 'Pd:4_low5',
-      'Pd:642', 'Pd:643', 'Pd:648', 'Pd:824', 'Pd:842', 'Pd:849', 'Pd:943',
+      'Pd:642', 'Pd:643', 'Pd:648', 'Pd:784', 'Pd:794', 'Pd:824', 'Pd:842', 'Pd:849', 'Pd:874', 'Pd:943',
       'Pd:945', 'Pd:946', 'Pd:948',
-      'Sc:678', 'Sc:680', 'Sc:698', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:860',
-      'Sc:876', 'Sc:968',
+      'Pt:47', 'Pt:67', 'Pt:74', 'Pt:76', 'Pt:782', 'Pt:784', 'Pt:789', 'Pt:794', 'Pt:872', 'Pt:874', 'Pt:879',
+      'Sc:678', 'Sc:680', 'Sc:698', 'Sc:784', 'Sc:789', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:860',
+      'Sc:872', 'Sc:874', 'Sc:876', 'Sc:879', 'Sc:968',
       'Si:027', 'Si:049', 'Si:068', 'Si:086',
     ].sort();
     assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), expectedBlockCodes);

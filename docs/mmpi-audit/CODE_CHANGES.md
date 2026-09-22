@@ -874,3 +874,45 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
 - `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **201/201 PASS** (36 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-023 — DECISION-031 (A): Bölüm 5 Pt (7) Bloğu Kod Göçü ve Koşullu Yorumlar (s.137-142)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiPtBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-pt-batch30.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan altıncı blok: **Pt (Psikasteni / 7) bloğu (s.137-142)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `BLOCK_CODES`: Pt bloğundaki 7 yeni kod tanımı ve 16 çapraz ölçek takma adı eklendi:
+     `Pt:47` (74/47, pasif-agresif kişilik bozukluğu tanısı ve s.140 özel gövdesi), `Pt:67` (76/67, s.140 kaygı/kuşku/dolaylı düşmanlık gövdesi), `Pt:782` (782, Depresif Bozukluk ve Obsesif Kompulsif Bozukluk tanıları), `Pt:872` (872, Şizofrenik Reaksiyon tanısı), `Pt:784` (784/874, Şizofrenik Reaksiyon ve Şizoid Kişilik Bozukluğu tanıları), `Pt:789` (789, s.141 hostil/gergin/büyüklenmeci gövdesi), `Pt:794` (794, s.142 kronik kaygı ve impulsif dışavurum gövdesi).
+     Ayrıca çift yönlü ve çok-haneli çapraz blok çözünürlüğü için `Pt:74`, `Pt:76`, `Sc:872`, `Pt:874`, `Sc:874`, `Sc:784`, `Pd:784`, `Pd:874`, `Sc:789`, `Ma:789`, `Pt:879`, `Sc:879`, `Ma:879`, `Ma:974`, `Pd:794`, `Ma:794` takma adları tanımlandı.
+   - `CODE_CONDITIONS`: Pt bloğuna ait kodlar için koşullu kurallar makinece değerlendirilebilir testlerle bağlandı:
+     - `Pt:47 / 74`: D ≥ 70 T içe çevrilen saldırganlık / depresyon (s.140).
+     - `78/87`: 3. test D/Pd; Sc > Pt akut psikoz ve tuhaf kendine zarar/intihar; Pt > Sc düşünce bozukluğuna karşı savaş; Pt & Sc ≥ 75 ∧ Sc > Pt şizofreni (s.140-141).
+     - `79/97`: 3. test Sc/Pd; D ≥ 70 T anksiyöz gergin depresyon (s.141-142).
+     - `70/07`: 3. test D/Sc; Kadınlarda Mf < 40 T aynı örüntü kuralı (s.142).
+2. `tests/mmpiPtBlock.test.ts`:
+   - 11 yeni test ile Pt bloğunun kod çözme doğruluğu, tanı sadakati ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `794` negatif kırpma testi güncellendi (artık kendi gövdesine çözümleniyor, unmigrated kodlar ile negatif kırpma kontrolü sağlandı).
+   - `KNOWN_BLOCK_CODES` listesine Pt bloğundaki 23 anahtar eklenerek toplam kayıt 126 blok koduna ulaştırıldı.
+4. `scripts/mmpi-audit/cmp-pt-batch30.ts`:
+   - Pt bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-pt-batch30.ts` → **SONUÇ: 0 FARK · Pt BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiPtBlock.test.ts` → **11/11 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **212/212 PASS** (37 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

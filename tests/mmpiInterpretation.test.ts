@@ -296,8 +296,10 @@ describe('CHANGE-014 (DECISION-029/A) — profil bağlamlı kod yorumu', () => {
     assert.equal(si.entry.code, '049');
     assert.equal(si.entry.block, 'Si');
     // kaynakta ayrı başlık olan üç haneli kod artık BAŞKA koda düşmüyor:
-    assert.equal(codeInterpretationForProfile('794', p), undefined);
+    // Pt bloğu göçüyle (CHANGE-023) 794 kendi gövdesiyle çözümlenir (79'a kırpılmaz)
+    assert.equal(codeInterpretationForProfile('794', p)?.entry.code, '794');
     assert.equal(codeInterpretationForProfile('8726', p), undefined);
+    assert.equal(codeInterpretationForProfile('931', p), undefined);
   });
 
   it('koşullu ek yorumlar yalnız profil karşılık verdiğinde listelenir', () => {

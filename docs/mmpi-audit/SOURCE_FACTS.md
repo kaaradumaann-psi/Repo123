@@ -3432,3 +3432,41 @@ metni taşınması DECISION-028 kapsamında **yok**).
   - "2, 4 ve 3 yükselen diğer alt testlerdir." → `third in ['D', 'Pd', 'Hy']`.
 - **456 Alt Testlerinin Örüntüsü / Scarlett O'Hara Vadisi (s.134-135):**
   - "Bu örüntüye alt test 3'ün yükselmesi eşlik ediyorsa..." → `Hy >= 70 T`.
+
+---
+
+## BÖLÜM 5: Pt (7) KOD BLOĞU VERİLERİ (kitap s.137-142 · PDF p076_R - p079_L)
+
+### SOURCE-CODE-PT-001 — Pt Bloğu Sayfa ve Başlık Envanteri (kitap s.137-142)
+- **Görsel ve OCR Taraması:** PDF p076_R (s.137) ile p079_L (s.142) arasındaki sayfalar RapidOCR ve pymupdf ile taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Doğrulanan Başlıklar:**
+  1. `71/17 Kodu` (s.140) — Bakınız 17/71 Kodu.
+  2. `72/27 Kodu` (s.140) — Bakınız 27/72 Kodu.
+  3. `73/37 Kodu` (s.140) — Bakınız 37/73 Kodu.
+  4. `74/47 Kodu` (s.140) — Olası Tanı: Pasif-agresif kişilik bozukluğu. Kararsız, güvensiz, saldırganlıklarını kendilerine çevirdiklerinde depresyon.
+  5. `75/57 Kodu` (s.140) — Bakınız 57/75 Kodu.
+  6. `76/67 Kodu` (s.140) — Kaygılı, endişeli, kuşkucu, dolaylı düşmanlık, gerçek paranoid değillerdir.
+  7. `78/87 Kodu` (s.140-141) — Yetişkinlerde 8 > 7 akut psikotik durum ve tuhaf intihar/kendine zarar; 7 > 8 düşünce/davranış bozukluğuna karşı savaş; 7 < 8 ve 75+ T şizofreni.
+  8. `782 Kodu` (s.141) — Olası Tanı: Depresif Bozukluk, Obsesif Kompulsif Bozukluk.
+  9. `872 Kodu` (s.141) — Olası Tanı: Şizofrenik Reaksiyon (8 > 7 ve 2 eşlik eder).
+  10. `784/874 Kodları` (s.141) — Olası Tanı: Şizofrenik Reaksiyon, Şizoid Kişilik Bozukluğu.
+  11. `789 Kodu` (s.141) — Hostil, gergin, şüpheci, hiperaktif, grandiozite, düşük performans.
+  12. `79/97 Kodu` (s.141-142) — Ajitasyon, kas gerginlikleri, uykusuzluk, sırt ağrısı, manik örüntü.
+  13. `794 Kodu` (s.142) — Kronik kaygı, yüksek enerji, obsesif ruminasyon, kopuk fikirler, impulsif dışa vurma döngüleri.
+  14. `70/07 Kodu` (s.142) — Utangaç, erkeklerde fiziksel/sosyal yetersizlik ve anne/kardeş çatışması; kadınlarda Mf < 40 T aynı örüntü.
+
+### SOURCE-CODE-PT-002 — Pt Bloğu Koşullu Yorum Kuralları (Conditions)
+- **74/47 Kodu (s.140):**
+  - "Saldırganlıklarını kendilerine çevirdiklerinde depresyon görülür, ancak eyleme vuruk davranışları da olabilir." → `D >= 70 T`.
+- **78/87 Kodu (s.140-141):**
+  - "2 ve 4 diğer yükselen alt testlerdir (Eğer 2 ve 4, 8 alt testinin 5 T puanı altındaysa 278/728 ve 478/748 kodlarına bakınız)." → `third in ['D', 'Pd']`.
+  - "Yetişkinlerde 8 alt testi 7'den yüksekse akut psikotik durum vardır." → `Sc > Pt`.
+  - "8 alt testi, 7 alt testinden daha yüksekse intihar girişimi tuhaftır ve kendine zarar vermeyi içerir." → `Sc > Pt`.
+  - "7 > 8: Birey düşünce ve davranış bozukluğu geliştirmemek için hala savaş vermektedir." → `Pt > Sc`.
+  - "7 < 8: Her iki yükselmede 75 T puanının üstünde ve 8 alt testinde belirgin bir yükselme varsa tanı şizofrenidir." → `Pt >= 75 && Sc >= 75 && Sc > Pt`.
+- **79/97 Kodu (s.141-142):**
+  - "8 ve 4, üçüncü yükselen alt testtir." → `third in ['Sc', 'Pd']`.
+  - "Eğer 2 alt testi de yükselmişse depresyon görülür, ancak klinik tabloda anksiyete ve gerginlik ön plandadır." → `D >= 70 T`.
+- **70/07 Kodu (s.142):**
+  - "2 ve 8 alt testleri, en sık görülen üçüncü yüksekliktir." → `third in ['D', 'Sc']`.
+  - "Kadınlarda eğer 5 alt testi, 40 T puanının altında ise aynı örüntü vardır." → `gender === 'Kadın' && Mf < 40 T`.

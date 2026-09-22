@@ -1565,6 +1565,81 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       },
     ],
   },
+
+  // --- Pt (Psikasteni / 7) Bloğu (s.137-142) · DECISION-031/A ---
+  'Pt:47': {
+    code: '74/47',
+    block: 'Pt',
+    rawCode: '74/47',
+    text:
+      'Psikiyatrik hasta grubunda pasif agresif kişilik bozukluğu tanısı konulabilir. Kararsız, güvensiz kişilerdir. Sadece sinirli olduklarını belirtirler. Saldırganlıklarını kendilerine çevirdiklerinde depresyon görülür, ancak eyleme vuruk davranışları da olabilir.',
+    diagnosis: ['Pasif-agresif kişilik bozukluğu'],
+    seeAlso: 'Bakınız 47/74 Kodu (s.140).',
+    conditions: [
+      {
+        source: 's.140',
+        quote: 'Saldırganlıklarını kendilerine çevirdiklerinde depresyon görülür, ancak eyleme vuruk davranışları da olabilir.',
+        test: ({ t }) => (t('D') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pt:67': {
+    code: '76/67',
+    block: 'Pt',
+    rawCode: '76/67',
+    text:
+      'Bu hastalar kaygılı, endişeli, kuşkucudurlar. Düşmanlık duygularını dolaylı yollardan ifade ederler. Gerçek paranoid değillerdir. Kişilik yapılarını değiştirmek zordur.',
+    seeAlso: 'Bakınız 67/76 Kodu (s.140).',
+  },
+
+  'Pt:782': {
+    code: '782',
+    block: 'Pt',
+    rawCode: '782',
+    text:
+      '78/87 koduna 2 alt testinin eşlik ettiği durumdur. Olası Tanı: Depresif Bozukluk, Obsesif Kompulsif Bozukluk.',
+    diagnosis: ['Depresif Bozukluk', 'Obsesif Kompulsif Bozukluk'],
+    seeAlso: '78/87 koduna ve 872 koduna bakınız (s.141).',
+  },
+
+  'Pt:872': {
+    code: '872',
+    block: 'Pt',
+    rawCode: '872',
+    text:
+      '78/87 kodunda 8 alt testinin 7\'den yüksek olduğu ve 2\'nin eşlik ettiği tablodur. Olası Tanı: Şizofrenik Reaksiyon.',
+    diagnosis: ['Şizofrenik Reaksiyon'],
+    seeAlso: '78/87 koduna ve 782 koduna bakınız (s.141).',
+  },
+
+  'Pt:784': {
+    code: '784/874',
+    block: 'Pt',
+    rawCode: '784/874',
+    text:
+      '78/87 koduna 4 alt testinin eşlik ettiği tablodur. Olası Tanı: Şizofrenik Reaksiyon, Şizoid Kişilik Bozukluğu.',
+    diagnosis: ['Şizofrenik Reaksiyon', 'Şizoid Kişilik Bozukluğu'],
+    seeAlso: '78/87 koduna bakınız (s.141).',
+  },
+
+  'Pt:789': {
+    code: '789',
+    block: 'Pt',
+    rawCode: '789',
+    text:
+      'Hostil, gergin, şüpheci, hiperaktif, huzursuz bireylerdir. Günlerini fanteziler ve hayal kurmayla geçirirler. Yansıtmayı kullanır, uygunsuz duygudurum gösterirler. Sınırlı sosyal yaşantıları vardır. Diğerlerinden çocuksu tarzda ilgi ve sevgi beklerler, istekleri gerçekleşmediğinde ise gücenip, düşmanca davranırlar. Yakın duygusal ilişkiye giremezler. Kendilerine ilişkin grandioziteleri vardır, kendileri ile övünürler. Başarıya ulaşma isteklerinin çok fazla olmasına karşın orta düzeyde performans gösterirler.',
+    seeAlso: '78/87 koduna bakınız (s.141).',
+  },
+
+  'Pt:794': {
+    code: '794',
+    block: 'Pt',
+    rawCode: '794',
+    text:
+      'Hastalar kronik olarak kaygılı ve gergindirler. Yüksek enerji düzeyleri obsesif ruminasyonlarına katkıda bulunur. Konuşmalarının genellikle izlenmesi zordur, bağlantısız fikirler görülür. İmpulsif dışa vurma dönemleri, suçluluk ve kendini aşağılama dönemleri birbiri ardına sıralanır. Diğer manik özelliklerin de birlikte görülüp görülmediği araştırılmalıdır.',
+    seeAlso: '79/97 koduna bakınız (s.142).',
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
@@ -1614,6 +1689,24 @@ BLOCK_CODES['Ma:698'] = BLOCK_CODES['Pa:698']!;
 BLOCK_CODES['Ma:968'] = BLOCK_CODES['Pa:698']!;
 BLOCK_CODES['Sc:698'] = BLOCK_CODES['Pa:698']!;
 BLOCK_CODES['Sc:968'] = BLOCK_CODES['Pa:698']!;
+
+// Pt bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Pt:74'] = BLOCK_CODES['Pt:47']!;
+BLOCK_CODES['Pt:76'] = BLOCK_CODES['Pt:67']!;
+BLOCK_CODES['Sc:872'] = BLOCK_CODES['Pt:872']!;
+BLOCK_CODES['Pt:874'] = BLOCK_CODES['Pt:784']!;
+BLOCK_CODES['Sc:874'] = BLOCK_CODES['Pt:784']!;
+BLOCK_CODES['Sc:784'] = BLOCK_CODES['Pt:784']!;
+BLOCK_CODES['Pd:784'] = BLOCK_CODES['Pt:784']!;
+BLOCK_CODES['Pd:874'] = BLOCK_CODES['Pt:784']!;
+BLOCK_CODES['Sc:789'] = BLOCK_CODES['Pt:789']!;
+BLOCK_CODES['Ma:789'] = BLOCK_CODES['Pt:789']!;
+BLOCK_CODES['Pt:879'] = BLOCK_CODES['Pt:789']!;
+BLOCK_CODES['Sc:879'] = BLOCK_CODES['Pt:789']!;
+BLOCK_CODES['Ma:879'] = BLOCK_CODES['Pt:789']!;
+BLOCK_CODES['Ma:974'] = BLOCK_CODES['Pt:794']!;
+BLOCK_CODES['Pd:794'] = BLOCK_CODES['Pt:794']!;
+BLOCK_CODES['Ma:794'] = BLOCK_CODES['Pt:794']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -1909,8 +2002,13 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
   '07': [
     {
       source: 's.142 (Pt bloğu)',
-      quote: '70/07 kodunda 5 alt testi 40 T puanının altındadır.',
-      test: ({ t }) => (t('Mf') ?? 100) < 40,
+      quote: '2 ve 8 alt testleri, en sık görülen üçüncü yüksekliktir.',
+      test: ({ third }) => third === 'D' || third === 'Sc',
+    },
+    {
+      source: 's.142 (Pt bloğu)',
+      quote: 'Kadınlarda eğer 5 alt testi, 40 T puanının altında ise aynı örüntü vardır.',
+      test: ({ gender, t }) => gender === 'Kadın' && (t('Mf') ?? 100) < 40,
     },
   ],
   '67': [
@@ -1976,6 +2074,45 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       source: 's.133 (Pa bloğu)',
       quote: 'Kod daha çok kadınlarda görülmektedir; daldan dala atlayan, küçük durumlara aşırı tepki veren kişilerdir.',
       test: ({ gender }) => gender === 'Kadın',
+    },
+  ],
+  '78': [
+    {
+      source: 's.140 (Pt bloğu)',
+      quote: '2 ve 4 diğer yükselen alt testlerdir (Eğer 2 ve 4, 8 alt testinin 5 T puanı altındaysa 278/728 ve 478/748 kodlarına bakınız).',
+      test: ({ third }) => third === 'D' || third === 'Pd',
+    },
+    {
+      source: 's.140 (Pt bloğu)',
+      quote: 'Yetişkinlerde 8 alt testi 7\'den yüksekse akut psikotik durum vardır.',
+      test: ({ t }) => (t('Sc') ?? 0) > (t('Pt') ?? 0),
+    },
+    {
+      source: 's.140-141 (Pt bloğu)',
+      quote: '8 alt testi, 7 alt testinden daha yüksekse intihar girişimi tuhaftır ve kendine zarar vermeyi içerir.',
+      test: ({ t }) => (t('Sc') ?? 0) > (t('Pt') ?? 0),
+    },
+    {
+      source: 's.141 (Pt bloğu)',
+      quote: '7 > 8: Birey düşünce ve davranış bozukluğu geliştirmemek için hala savaş vermektedir.',
+      test: ({ t }) => (t('Pt') ?? 0) > (t('Sc') ?? 0),
+    },
+    {
+      source: 's.141 (Pt bloğu)',
+      quote: '7 < 8: Her iki yükselmede 75 T puanının üstünde ve 8 alt testinde belirgin bir yükselme varsa tanı şizofrenidir.',
+      test: ({ t }) => (t('Pt') ?? 0) >= 75 && (t('Sc') ?? 0) >= 75 && (t('Sc') ?? 0) > (t('Pt') ?? 0),
+    },
+  ],
+  '79': [
+    {
+      source: 's.141 (Pt bloğu)',
+      quote: '8 ve 4, üçüncü yükselen alt testtir.',
+      test: ({ third }) => third === 'Sc' || third === 'Pd',
+    },
+    {
+      source: 's.142 (Pt bloğu)',
+      quote: 'Eğer 2 alt testi de yükselmişse depresyon görülür, ancak klinik tabloda anksiyete ve gerginlik ön plandadır.',
+      test: ({ t }) => (t('D') ?? 0) >= 70,
     },
   ],
   '89': [

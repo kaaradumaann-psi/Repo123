@@ -1671,3 +1671,39 @@ makinece değerlendirilebilir testlerle bağlandı (özellikle 34/43 cinsiyet ve
 **Doğrulama:** tsc **0** · `cmp-hy-batch27.ts` **0 FARK** · `tests/mmpiHyBlock.test.ts` **16/16 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiDBlock.test.ts` **16/16 PASS** ·
 `tests/mmpiHsBlock.test.ts` **16/16 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 28 — CHANGE-021: Pd (4) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında dördüncü blok olan Pd (4) bloğu (s.107-121) tamamlandı.
+13 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Pd:4_low5`, `Pd:456`,
+`Pd:462`, `Pd:463`, `Pd:468`, `Pd:469`, `Pd:48_highF_low2`, `Pd:482`, `Pd:489`, `Pd:493`, `Pd:495`,
+`Pd:496`, `Pd:498`), 18 çapraz ölçek takma adı ve 10 kod için koşullu kurallar bağlandı.
+
+**Doğrulama:** tsc **0** · `cmp-pd-batch28.ts` **0 FARK** · `tests/mmpiPdBlock.test.ts` **17/17 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 29 — CHANGE-022: Pa (6) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında beşinci blok olan Pa (6) bloğu (s.127-135) tamamlandı.
+6 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Pa:678`, `Pa:679`,
+`Pa:680`, `Pa:694`, `Pa:698`, `Pa:456_scarlett`), 16 çapraz ölçek takma adı ve 7 kod için koşullu
+kurallar bağlandı (Psikotik Vadi, Paranoid Vadi, Scarlett O'Hara Vadisi, cinayet potansiyeli uyarısı).
+
+**Doğrulama:** tsc **0** · `cmp-pa-batch29.ts` **0 FARK** · `tests/mmpiPaBlock.test.ts` **14/14 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 30 — CHANGE-023: Pt (7) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında altıncı blok olan Pt (7) bloğu (s.137-142) tamamlandı.
+7 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Pt:47`, `Pt:67`,
+`Pt:782`, `Pt:872`, `Pt:784`, `Pt:789`, `Pt:794`), 16 çapraz ölçek takma adı ve 4 kod için koşullu
+kurallar bağlandı (`78/87`, `79/97`, `70/07`, `Pt:47/74`).
+
+**Doğrulama:** tsc **0** · `cmp-pt-batch30.ts` **0 FARK** · `tests/mmpiPtBlock.test.ts` **11/11 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).

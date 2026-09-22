@@ -957,3 +957,21 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-pa-batch29.ts` → **SONUÇ: 0 FARK · Pa BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 30 — CHANGE-023 · Pt (7) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Pt (7) bloğundaki çok haneli ve bloğa özel kodların (`Pt:47`, `Pt:67`, `Pt:782`, `Pt:872`, `Pt:784`, `Pt:789`, `Pt:794`) `BLOCK_CODES`'a taşınması ve ilgili 4 kod grubu için koşulların bağlanması.
+
+**Eklenen testler (11):** `tests/mmpiPtBlock.test.ts` → **11/11 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati: Pt:74/47 (pasif-agresif kişilik bozukluğu tanısı), Pt:76/67 (kaygı/kuşku/dolaylı düşmanlık), 782 (Depresif Bozukluk ve Obsesif Kompulsif Bozukluk tanıları), 872 (Şizofrenik Reaksiyon tanısı), 784/874 (Şizofrenik Reaksiyon ve Şizoid Kişilik Bozukluğu tanıları), 789 (hostil/gergin/büyüklenmeci gövdesi), 794 (kronik kaygı ve impulsif dışavurum gövdesi), 78, 79, 70, 71, 72, 73, 75.
+2. Koşul testleri:
+   - Pt:74 (D ≥ 70 T depresyon / içe dönen saldırganlık),
+   - 78/87 (3. test D/Pd, Sc > Pt akut psikoz/tuhaf intihar riski, 7 > 8 savaş, 7 < 8 şizofreni),
+   - 79/97 (3. test Sc/Pd, D ≥ 70 T anksiyöz gergin depresyon),
+   - 70/07 (3. test D/Sc, Kadın Mf < 40 T aynı örüntü kuralı).
+
+**Güncellenen testler:** `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`794` negatif kırpma testi çözünürlük doğrulamasına çevrildi; `KNOWN_BLOCK_CODES` listesine Pt bloğundaki 23 anahtar eklendi, toplam 126 blok kodu).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-pt-batch30.ts` → **SONUÇ: 0 FARK · Pt BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
