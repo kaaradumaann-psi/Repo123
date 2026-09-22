@@ -3113,6 +3113,14 @@ alt yazım **“Batik”**) · “Şekil 32. Sınır Profil.”
 aralığı **45-54**; ölçek bantlarındaki `45-59` ile **karıştırılmamalı** (biri profil
 düzeyi desen, diğeri tek ölçek bandı).
 
+> **→ UYGULANDI (DECISION-030/A · CHANGE-015, 2026-09-22):** bu tablodaki
+> “Kodda” sütunu artık tarihî. `conversion-v` **70/10** · `psychotic-v` **80/80/70**
+> oldu; #4 `kus-kanadi` · #5 `pasif-agresif-v` · #6 `pozitif-egim` · #8 `yuzen-profil` ·
+> #9 `batik-profil` · #10 `sinir-profil` **eklendi**; #7 `negatif-egim` kaynakta sayı
+> olmadığı için **`manual`** (otomatik vurmez) bırakıldı. #3 `SINGLE_PD` değişmedi.
+> Her BÖLÜM 6 kaydı `source` + `quote` (aşağıdaki cümlelerle birebir) taşıyor;
+> kapanış kanıtı `scripts/mmpi-audit/cmp-b6-batch23.ts` → **0 FARK**.
+
 ## SOURCE-B6-002 · **BÖLÜM 6 bağlam ve uyarı direktifleri** — kitap s.159-160, 166-167, 169
 
 - **s.159 (giriş):** “MMPI profilini yorumlamadan önce testi veren kişi, değerlendirme
@@ -3148,6 +3156,12 @@ düzeyi desen, diğeri tek ölçek bandı).
   geliştirilen diğer testler bireyi değerlendirmede daha yararlı olabilir
   (Butcher 1984).**” → **BÖLÜM 7’ye geçiş gerekçesi**; `MMPIDerived`/`PERSONALITY_KEYS`
   varlığıyla **UYUMLU**, ancak bu gerekçe metni koda alınmadı (**BİLGİ**).
+
+**Kod karşılığı (CHANGE-015):** bu direktiflerin 8’i `MMPI_PATTERN_CAVEATS` olarak
+`src/scoring/mmpiInterpretation.ts`'a alındı ve `MMPIExtraTab`’da “Yorum Çekinceleri
+(BÖLÜM 6)” kutusunda basılıyor; desen-özgül olanlar (#6/#7 → “tanı konulması doğru
+değildir”, #8 → “kod tipi verilemez”, #9 → “en düşük alt testlere bakılmalıdır”)
+ayrıca ilgili desenin `caveat` alanında duruyor → **CONFLICT-042 FIXED**.
 
 **Sayfa yapısı:** s.159-169 arası **11 sayfa**; **s.170 BOŞ SAYFA** (PDF p93 L ·
 koyu piksel %0.24 · OCR 0 satır). Her örüntü kutusunun altında profil grafiği var

@@ -1856,7 +1856,16 @@ onayı olmadan `src/` değişmez** (DECISION-027/028); bu turda da **kod değiş
 
 ---
 
-## CONFLICT-041 (P1 · OPEN) — BÖLÜM 6’nın 10 profil örüntüsü: 2 eşik sapması + 7 desen yok
+## CONFLICT-041 (P1 · **FIXED** — CHANGE-015 · DECISION-030/A) — BÖLÜM 6’nın 10 profil örüntüsü: 2 eşik sapması + 7 desen yoktu
+
+> **KAPANDI (2026-09-22):** kullanıcı onayı “A’dan devam et” → **DECISION-030 = A**.
+> `conversion-v` **65/5 → 70/10** · `psychotic-v` **70/70 → 80/80/70** · #4-#10’dan
+> **6 desen + `negatif-egim` (manual)** eklendi → **kayıt sayısı 11 → 18**.
+> Kapanış kanıtı: `scripts/mmpi-audit/cmp-b6-batch23.ts` → **SONUÇ: 0 FARK**
+> (eski `cmp-b6-batch22.ts` 9 FARK diyordu; (4)/(5) bölümleri **CHANGE-015 öncesi
+> yokluk** iddiasını ölçtüğü için artık historical — ayrıntı `TEST_AUDIT.md`).
+> Aşağıdaki tablo **bulgu anının** kaydıdır, silinmedi.
+
 
 Area: `src/scoring/mmpiInterpretation.ts` — `detectPatterns()` / `detectSingleElevations()`
 
@@ -1906,7 +1915,15 @@ yokluğu kimlik listesiyle kilitli; desen eklenirse test **bilinçli kırılır*
 
 ---
 
-## CONFLICT-042 (P2 · OPEN) — BÖLÜM 6’nın uyarı/kapsam direktifleri arayüzde yok
+## CONFLICT-042 (P2 · **FIXED** — CHANGE-015 · DECISION-030/A) — BÖLÜM 6’nın uyarı/kapsam direktifleri arayüzde yoktu
+
+> **KAPANDI (2026-09-22):** 8 direktif `MMPI_PATTERN_CAVEATS` (birebir kaynak
+> cümleleri + sayfa numarası) olarak `mmpiInterpretation.ts`'a, desen düzeyinde
+> çekinceler `PatternHit.caveat` alanına alındı; `MMPIExtraTab` **“Yorum Çekinceleri
+> (BÖLÜM 6)”** kutusunu ve desen kartlarında “Kaynak çekincesi” satırını basıyor.
+> Kanıt: `cmp-b6-batch23.ts` (5) bölümü 8/8 “taşındı” · test `BÖLÜM 6 çekinceleri …`
+> (batch 22’de aynı kilit `doesNotMatch` ile **yokluğu** doğruluyordu — yön çevrildi).
+
 
 Area: `src/components/results/MMPIExtraTab.tsx` · `MMPICodeTab.tsx` · `mmpiInterpretation.ts`
 

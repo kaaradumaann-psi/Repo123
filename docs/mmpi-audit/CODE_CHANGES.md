@@ -511,3 +511,72 @@ referansı `source` alanında** (`s.103-104 · Şekil 18` vb.).
   hiçbiri "testi sil" ile geçilmedi.
 - **REGRESSION YOK** · puanlama/ölçek matematiğine (ham puan, T, düzeltme, anahtarlar)
   **etkisi yoktur** — yalnız yorum katmanı
+
+---
+
+## CHANGE-015 — BÖLÜM 6 örüntü eşikleri kaynağa çekildi + 6 desen + çekince katmanı (DECISION-030 · seçenek A)
+
+Date: 2026-09-22
+Type: **Davranış değişikliği** (yalnız **yorum katmanı**: desen tespiti + desen arayüzü)
+Priority: **P1** (CONFLICT-041 — iki desende **yanlış pozitif** üreten eşik sapması) · birlikte **P2** CONFLICT-042 kapandı
+Source: `SOURCE-B6-001` (s.160-169 kutu metinleri, **150 dpi görsel okuma**) · `SOURCE-B6-002`
+(çekince direktifleri, s.159-160/166-167/169) · DECISION-030 **(A)**
+
+**Dosyalar (3 + stil):**
+
+| Dosya | Ne |
+|---|---|
+| `src/scoring/mmpiInterpretation.ts` | `PatternHit` alanları: `quote?` (birebir kaynak cümlesi) · `caveat?` (kaynağın çekincesi) · `manual?` (nicel eşiği yok → otomatik değerlendirilmez) · `manualNote?` (sayısal olmayan ayağın elle doğrulanacağı). `conversion-v` **65/5 → 70/10**, `psychotic-v` **70/70 → 80/80/70 (+vadi şekli)**. **6 yeni desen:** `kus-kanadi` · `pasif-agresif-v` · `pozitif-egim` · `yuzen-profil` · `batik-profil` · `sinir-profil` + **`negatif-egim` (`manual`)** → kayıt sayısı **11 → 18**. Yeni dışa aktarım **`MMPI_PATTERN_CAVEATS`** (BÖLÜM 6 direktifleri, kaynak sayfalı) |
+| `src/components/results/MMPIExtraTab.tsx` | Desen kartlarında **kaynak satırı + alıntı + çekince + elle-doğrulama notu**; `manual` kayıtlar **“elle değerlendirilir”** bölümüne ayrıldı (vurmadı listesine karışmıyor); sekmeye **“Yorum Çekinceleri (BÖLÜM 6)”** kutusu eklendi |
+| `src/styles/workspace.css` | `.mmpi-pattern-source` · `.mmpi-pattern-quote` · `.mmpi-pattern-note` (mevcut desen satırlarının devamı; yeni renk/tip yok) |
+
+**Eşik değişiminin kullanıma etkisi (önce → sonra):**
+
+| Desen | Eski `hit` | Yeni `hit` | Kaynak |
+|---|---|---|---|
+| `conversion-v` | `Hs,Hy ≥ 65 ∧ min − D ≥ 5` | `Hs,Hy ≥ 70 ∧ min − D ≥ 10` | s.160 |
+| `psychotic-v` | `Pa,Sc ≥ 70 ∧ min > Pt` | `Pa ≥ 80 ∧ Sc ≥ 80 ∧ Pt ≥ 70 ∧ min > Pt` | s.161 |
+
+→ **Eski eşikler daha gevşekti**; örnek: `Hs 66.7 / Hy 66.3 / D 59.2` ve
+`Pa 74.5 / Sc 74.5 / Pt 59.7` profilleri konuyu **vuruyor**, kaynağın tanımı
+**vurmuyordu** (CONFLICT-041 kanıtı) → şimdi ikisi de **vurmuyor**; kaynak
+tanımını karşılayan profiller (`74.1/74.8/50.8` ve `82.0/81.1/74.0`) **vurmaya
+devam ediyor** (yanlış negatif yok — testte kilitli).
+
+**Eklenen desenler (yalnız kaynak cümlelerindeki sayılar):**
+
+| id | Kural (kaynak) | Sayısal olmayan ayağı |
+|---|---|---|
+| `kus-kanadi` | Hs, D, Hy, Pd **≥ 70 T** (+ kadınlarda Mf **50 T**) | “Psikotik testlerde de yükselme vardır” → `manualNote` |
+| `pasif-agresif-v` | **Kadın** ∧ Pd ≥ 70 ∧ Pa ≥ 70 ∧ Mf **< 50** | “Diğer alt testler 70 T'da olsa bile” → `detail` |
+| `pozitif-egim` | Pa,Pt,Sc,Ma,Si **> 70** ∧ Hs,D,Hy,Pd **< 70** | — (bölme çizgisi: Mf hattı, s.165 cümlesi) |
+| `negatif-egim` | **`manual`** — kaynak “belirgin düşüklük” diyor, sayı vermiyor | tamamı elle (DECISION-028) |
+| `yuzen-profil` | Hs→Ma **tamamı > 70 T** | “F'teki yükselme eşlik eder” → `manualNote` |
+| `batik-profil` | tüm klinik ölçekler **45-54 T** (uçlar dâhil) | “en düşük olan alt testlere bakılmalıdır” → `caveat` |
+| `sinir-profil` | tüm klinik ölçekler **60-70 T** (kaynağın “> 54 T” cümlesi kapsanıyor) | “geçerlik testlerinde tam olmayan yükselme” → `manualNote` |
+
+**Üretilmeyen hiçbir şey yok:** hiçbir desene kaynakta olmayan eşik, ek yorum
+cümlesi veya tanı önerisi yazılmadı; `detail` alanındaki metinler BÖLÜM 6 kutu
+cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
+`SOURCE-B6-001/002` kayıtlarıyla harfiyen aynıdır.
+
+### Doğrulama (CHANGE-015 sonrası)
+
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **47/47 PASS** (44 → batch-22
+  describe’ı yeniden yazıldı: 6 kilit yeni davranışa, 9 teste çıktı; **bilinçli kırılma
+  listesi `TEST_AUDIT.md` → batch 23**)
+- `npm test` → **368/368 PASS** · 35 suite (önceki 365/365) · `mmpiKeyIntegrity` 63/63
+- `npx tsx scripts/mmpi-audit/cmp-b6-batch23.ts` → **SONUÇ: 0 FARK · P0 BULGU YOK**
+  (18 kayıt · #1/#2 eşik mutabakatı · eski FP’ler söndü · #4-#10 aynı profilde
+  tanım+vuru · Batık/Sınır bant ayrışması · 8/8 çekince · sayı üretim denetimi)
+- `npm run build` → **PASS** · `src/` değişti → **`optik-form.html` yeniden üretildi ve
+  commit edildi** (CI `git diff --exit-code` kapısı) · `git diff --check` temiz
+- **REGRESSION YOK:** puanlama/ölçek matematiği (ham puan, T, K düzeltmesi, anahtarlar,
+  normlar, bant metinleri) değişmedi — yalnız **yorum katmanı**. `multi-high` ve
+  `SINGLE_PD` davranışı kilitlerle korundu; `MMPIPrintReport` desen listesi
+  basmadığı için **dokunulmadı** (kontrol edildi).
+- **Arayüz etkisi:** “Desen Göstergeleri” kartları artık kaynak satırı + alıntı +
+  çekince taşıyor; `negatif-egim` “Elle değerlendirilir” listesinde; sekmede
+  “Yorum Çekinceleri (BÖLÜM 6)” kutusu var. Ham markdown kalıntısı testi:
+  `doesNotMatch(/\*\*/)` → arayüz metinlerinde `**` yok (`<b>` etiketi kullanılıyor).

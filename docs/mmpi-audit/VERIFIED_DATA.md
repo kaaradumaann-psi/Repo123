@@ -817,3 +817,10 @@ değişikliği YOK** · `mmpiKeyIntegrity` **56/56 PASS** · `npm test` **343/34
 `mmpiInterpretation` **44/44** · `npm test` **365/365 PASS** (35 suite) · `src/` değişmedi ·
 eşik farkları **CONFLICT-041/042** olarak kayıtlı, düzeltme **DECISION-030** onayını bekliyor. · tsc **0** ·
 build PASS (`optik-form.html` senkron).
+
+→ **GÜNCEL (batch 23 / CHANGE-015, 2026-09-22):** DECISION-030 (A) onayı ile `src/`
+değişti — BÖLÜM 6 eşikleri koda alındı (`conversion-v` 70/10 · `psychotic-v` 80/80/70) +
+6 desen + `negatif-egim` (`manual`) + `MMPI_PATTERN_CAVEATS` arayüzde.
+`mmpiInterpretation` **47/47** · `npm test` **368/368 PASS** (35 suite) · tsc **0** ·
+build **PASS** (`optik-form.html` senkron) · kapanış kanıtı
+`scripts/mmpi-audit/cmp-b6-batch23.ts` → **0 FARK** (sayı üretim denetimi dâhil).

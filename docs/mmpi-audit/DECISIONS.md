@@ -844,8 +844,59 @@ senkron) · **REGRESSION YOK**.
 
 ---
 
-## DECISION-030 — **ADAY · KULLANICI ONAYI BEKLİYOR**: BÖLÜM 6 örüntü eşikleri ve eksik desenler
-**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
+## DECISION-030 — **KABUL · SEÇENEK (A)**: BÖLÜM 6 örüntü eşikleri ve eksik desenler
+**Tarih:** 2026-09-22 (kayıt açıldı) · **Durum:** **KABUL (A) — kullanıcı onayı 2026-09-22** ·
+uygulama: **CHANGE-015** · onay öncesi durum (PENDING) bu kaydın altında aynen duruyor
+### ONAY (2026-09-22) — kullanıcı: “**A’dan devam et. DECISION-030 = A olarak onaylandı.**”
+
+**Onaylanan kapsam (kullanıcının maddeleri, aynen):**
+
+| # | Onay | Uygulama (CHANGE-015) |
+|---|---|---|
+| 1 | `conversion-v` → kaynak eşiğine göre **70/10** | `Hs ≥ 70 ∧ Hy ≥ 70 ∧ min(Hs,Hy) − D ≥ 10` (s.160) |
+| 2 | `psychotic-v` → **Pa/Sc ≥ 80 T, Pt ≥ 70 T** | `Pa ≥ 80 ∧ Sc ≥ 80 ∧ Pt ≥ 70 ∧ min(Pa,Sc) > Pt` (s.161) |
+| 3 | Eksik profil örüntülerini **kaynağa bağlı** şekilde ekle | 6 desen: `kus-kanadi` · `pasif-agresif-v` · `pozitif-egim` · `yuzen-profil` · `batik-profil` · `sinir-profil` (+ `negatif-egim` metin tabanlı) |
+| 4 | **#7 için sayı uydurma** — `manual`/metin | `PatternHit.manual = true`, `hit: false`; UI'da ayrı “elle değerlendirme” bölümü |
+| 5 | Desen kartlarına **`source`** | BÖLÜM 6'dan gelen 8 kaydın tamamında `source: 's.1xx · Şekil 2x/3x'` + `quote` (birebir kaynak cümlesi) |
+| 6 | “**tanı yerine geçmez**” ve kaynak çekinceleri UI'a | `PatternHit.caveat` + `MMPI_PATTERN_CAVEATS` → `MMPIExtraTab` “Yorum Çekinceleri (BÖLÜM 6)” kutusu |
+| — | “**Kaynakta olmayan hiçbir sayı veya yorum üretme.**” | Aşağıdaki **uygulama notları**: üç adet *aday-notu sapması* bu ilkeyle gerekçelendirildi |
+
+**Uygulama notları (aday metninden sapmalar — hepsi DECISION-028 gereği):**
+
+1. **Pt koşulu:** aday notu “Pt bir gözlemdir, eşik değildir; güvenli biçim `min(Pa,Sc) > Pt`”
+   demişti. Kullanıcı onayı **`Pt ≥ 70 T`** dedi → **ikisi birden** uygulandı
+   (`Pt ≥ 70 ∧ min(Pa,Sc) > Pt`); vadi şekli sayı içermediği için korundu, eşik
+   gevşetilmedi.
+2. **`yuzen-profil` F ayağı:** aday notu `F ≥ 70` önerdi. **Reddedildi** — s.167
+   “F alt testindeki yükselme eşlik eder” diyor, **sayı vermiyor**; sayı uydurmamak
+   için F koşulu `manualNote` olarak metne yazıldı, `hit` yalnız “Hs→Ma tamamı > 70”.
+3. **Eğim tarafları:** aday notu “nevrotik = Hs,D,Hy · psikotik = Pa,Pt,Sc,Ma” demişti.
+   Kaynağın kendi bölme cümlesi (“**Mf alt testinden çizilen dikey bir çizgi** MMPI'ı
+   nevrotik (sol) ve psikotik (sağ) olarak ikiye böler”, s.165) ölçekleri **Mf hattına
+   göre** ayırıyor → uygulanan kümeler: nevrotik = **Hs, D, Hy, Pd** · psikotik =
+   **Pa, Pt, Sc, Ma, Si** (sayı yok, yalnız kaynak cümlesinin geometrisi).
+4. **Kadın Mf = 50 T (#4):** kaynak “kadınlarda Mf alt testi 50 T puanındadır” der;
+   kodun T puanları tam sayı değil (ör. ham 33 → 49.9) → eşik **`Math.round(T) === 50`**
+   olarak uygulandı (sayı uydurma değil; 50 kaynağın sayısı, yuvarlama yalnız tam-sayı
+   okuma düzeni). **Erkeklerde Mf koşulu yok** (kaynak vermiyor).
+5. **#5 ve #4 cinsiyet kapısı:** Şekil 27 başlığında “**(Kadınlarda)**” yazıyor →
+   `pasif-agresif-v` yalnız `profile.gender === 'Kadın'` iken vurur.
+6. **Bant okuması:** “Profilin 45-54 T puanı arasında yer alması” (s.168) ve
+   “T puanı 60-70 arasındadır” (s.169) **tüm klinik ölçekler** için `every` olarak
+   uygulandı (uçlar dâhil); #10'un ikinci cümlesi (“klinik alt testler 54 T üstü”)
+   bu bant tarafından zaten kapsanıyor, kaynak cümlesi `quote`'ta duruyor.
+7. **`multi-high` değiştirilmedi:** kaynağın #8'i (“Yüzen” Profil) ile kodun
+   “3+ ölçek ≥ 65” kuralı **aynı tanım değil**; eski kayıt güvenlik ağı olarak kaldı,
+   `yuzen-profil` **ayrı** eklendi (CONFLICT-041 #8 notu doğrudan bunu ölçüyordu).
+8. **#3 “Pd Yükselliği”:** kodda zaten **birebir** olduğu için `SINGLE_PD`'ye
+   dokunulmadı (eşik/metin değişikliği yok).
+
+**Bilinçli kırılan kilitler (batch 22 → CHANGE-015):** #1/#2 `rule` eşitlik
+kayıtları · “kaynak-dışı profil kodda vuruyor” yanlış-pozitif kilidi (artık
+vurmuyor) · `deepEqual(ids, 11 kayıt)` · “#4-#10 YOK” kilidi · CONFLICT-042
+`doesNotMatch` direktif kilidi (yönü **çevrildi**: artık `match`) — hiçbiri
+**silinmedi**, hepsi yeni davranışa göre yeniden yazıldı (`TEST_AUDIT.md`).
+
 **Tetikleyen:** PHASE 10 batch 22 — **BÖLÜM 6 kaynak taraması bitti (s.159-169; s.170 boş sayfa)**.
 
 **Karar verilmesi gereken şey — tek madde değil, üç katman:**
@@ -882,7 +933,43 @@ geçmez” notu basılır (UI-only). **Maliyeti:** yanlış pozitifler devam ede
 desen (kaynak cümleleriyle) → (iii) UI çekince notları (042) → (iv) `KAPSAM`/`CONFLICTS`
 kapanış kayıtları. **Reddedilirse:** 041/042 P1/P2 olarak açık kalır, `src/` değişmez.
 
-**Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 22 = görsel okuma + docs + test kilidi).
+**Karar yazılırken kod değişikliği YAPILMADI** (batch 22 = görsel okuma + docs + test kilidi);
+kod tarafı **onay sonrası CHANGE-015** ile geldi.
+
+> Eski durum satırı (silinmedi, üstte KABUL'e taşındı): *“**PENDING — onay olmadan `src/`
+> değişmez** (DECISION-027/028)”*.
 Bölüm 6’da **P0 bulgu yok** (anahtar/norm/puanlama katmanı burada değil); sapmalar **yorum
 katmanı**nadirdir ve CHANGE-014’ün `source`/`rule` alanları sayesinde ilk kez **ölçülebilir**
 durumda.
+
+## DECISION-031 — **ADAY · KULLANICI ONAYI BEKLİYOR**: CONFLICT-024’ün 44 eksik gövdesi + 027’nin ~33 koşulu (BÖLÜM 5 içerik göçü)
+**Tarih:** 2026-09-22 · **Durum:** **PENDING — onay olmadan `src/` değişmez** (DECISION-027/028)
+**Tetikleyen:** PHASE 10 batch 23 — DECISION-030/A uygulandı (CHANGE-015); BÖLÜM 6 tarafı
+kapanan ilk **desen katmanı** kararı oldu; geriye BÖLÜM 5’in **içerik** ayağı kaldı.
+
+**Elimizdeki durum (CHANGE-015 sonrası):**
+
+| Şey | Sayı | Not |
+|---|---|---|
+| Kaynağın kod tipi başlığı | **148** | BÖLÜM 5, s.63-157 (kaynak taraması bitti) |
+| Kodda gövdesi olan | **106** | `CODES` + `BLOCK_CODES` (+ `seeAlso` aktarımları) |
+| **Gövdesi eksik başlık** | **44** | gövdeler kaynakta **okundu**; `BLOCK_CODES`/`parseCode` artık taşıyor (CHANGE-014) |
+| Koşullu cümle | **45** | **12** bağlandı (CHANGE-014) · **~33** bağlanmadı (CONFLICT-027) |
+| Modelde adreslenemeyen | — | `Yüksek 9/Düşük K` tipi K-ilişkili örüntüler (039) · `027(8)` benzeri parantez notasyonu Si dışında kullanılmıyor |
+
+**Seçenekler:**
+- **(A) Kademeli gövde göçü (blok blok):** her bloakta yalnız **birebir okunmuş** cümleler
+  `BLOCK_CODES`/`CODE_CONDITIONS`a girer; blok başına kanıt aracı (`cmp-*-batchNN.ts`) +
+  test kilidi + sayaç güncellemesi (106 → …). **Öneri: (A)** — CHANGE-014’ün kurduğu çatı
+  ve CHANGE-015’in “**sayı üretim denetimi**” kalıbı bu göçü doğrulanabilir kılıyor.
+- **(B) Yalnız koşul katmanı:** 44 gövde “tanımlı değil” olarak kalır, ~33 koşul bağlanır.
+- **(C) Hiçbiri:** 024/025/027/039 **açık kayıt** olarak FINAL’a taşınır (denetçiye rapor).
+
+**Onaylanırsa sıra:** (i) blok seçimi · (ii) o blok için 300-500 dpi bindirmeli kadrajla
+**sayı** kontrolü (`TABLO-NUMBERS`) · (iii) gövde + koşul eklemesi · (iv)
+`mmpiKeyIntegrity` kilitleri (gövde sadakati, “üretilmiş sayı yok” denetimi, `undefined`
+kalmaya devam edenler) · (v) `KAPSAM`/`CONFLICTS` sayaçları · (vi) `optik-form.html`
+yeniden üretimi. **Tek seferde toplu doldurma yok** (DECISION-028: okunmamış gövde yazılmaz).
+
+**Bu kayıt yazılırken kod değişikliği YAPILMADI** (batch 23’ün kod tarafı CHANGE-015 ile
+sınırlıdır; 031 yalnız **kapı tanımıdır**).

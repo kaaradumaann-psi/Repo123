@@ -1557,3 +1557,43 @@ Tarih: 2026-09-22 · Kaynak: **s.157** (PDF p86 R) + **s.158 (BOŞ SAYFA)** (p87
 `npx tsc --noEmit` → **0 hata** · `npx tsx --test tests/mmpiInterpretation.test.ts` →
 **44/44 PASS** · `npm test` → **365/365 PASS** (35 suite) · `npm run build` → **PASS**
 (`src/` değişmedi → `optik-form.html` üretim farkı **YOK**) · `git diff --check` temiz
+
+## Batch 23 — DECISION-030 ONAYLANDI (A) → CHANGE-015 UYGULANDI (2026-09-22)
+
+**Tetikleyen:** kullanıcının “**A’dan devam et. DECISION-030 = A olarak onaylandı.**”
+onayı + 6 maddelik kapsamı (eşikler · desenler · #7 `manual` · `source` · çekinceler ·
+“kaynakta olmayan hiçbir sayı veya yorum üretme”).
+
+**Sıra (kullanıcı talimatı: önce kayıt, sonra kod):** `DECISIONS.md` → DECISION-030
+**KABUL (A)** + onay tablosu + uygulama notları · `CODE_CHANGES.md` → **CHANGE-015**
+planı · **ardından** `src/` · **sonra** testler ve kapanış kayıtları.
+
+**Kod (3 dosya + stil):**
+- `src/scoring/mmpiInterpretation.ts` — `conversion-v` **65/5 → 70/10** · `psychotic-v`
+  **70/70 → 80/80/70** (+ vadi şekli) · **6 yeni desen + `negatif-egim` (`manual`)** →
+  **11 → 18 kayıt** · `PatternHit` alanları `quote`/`caveat`/`manual`/`manualNote` ·
+  yeni dışa aktarım **`MMPI_PATTERN_CAVEATS`** (8 kayıt, tamamı kaynak sayfalı)
+- `src/components/results/MMPIExtraTab.tsx` — kartlarda “Kaynak: s.1xx · Şekil 2x” +
+  birebir alıntı + “Kaynak çekincesi” kutusu + “elle doğrulanacak” notu; `manual`
+  kayıtlar **“Elle değerlendirilir”** listesinde (görülmeyenlere karışmıyor); sekmenin
+  altında **“Yorum Çekinceleri (BÖLÜM 6)”**
+- `src/styles/workspace.css` — `.mmpi-pattern-source` · `.mmpi-pattern-quote` ·
+  `.mmpi-pattern-note` · `.mmpi-pattern-manual`
+
+**Sayı üretimi denetimi (DECISION-028):** #7 “belirgin düşüklük” sayısız kaldı
+(`manual`); `yuzen-profil`in F ayağı ve `sinir-profil`in geçerlik ayağı **sayı
+vermediği için kurala girmedi** (`manualNote`); `kus-kanadi` kadın Mf koşulu
+kaynağın kendi sayısı (50 T) ile ve tam-sayı okuma düzeninde (`Math.round`) karşılandı;
+erkek profilinde Mf koşulu **aranmaz** (kaynak koşulu “kadınlarda” diye veriyor).
+Otomatik denetim: `cmp-b6-batch23.ts` (6) bölümü — 9 kaydın içindeki **tüm** sayılar
+`SOURCE-B6-001/002` corpus’unda (küme: 4 6 10 45 50 54 60 70 80).
+
+**Kapanış:** **CONFLICT-041 (P1) → FIXED** · **CONFLICT-042 (P2) → FIXED** · sayaçlar
+**15 açık** (0 P0 · 5 P1 · 6 P2 · 2 P3 + 2 FIXED-kısmı) · **FIXED 16 · REJECTED 9 ·
+42 kayıt** · `CONFLICT-024` sayacı (148/106/44) **değişmedi** · **DECISION-031 adayı
+(PENDING)** açıldı (024’ün 44 gövdesi + 027’nin ~33 koşulu).
+
+**Doğrulama:** tsc **0** · `mmpiInterpretation` **44 → 47/47** · `npm test`
+**365 → 368/368** (35 suite) · `npm run build` **PASS** → `optik-form.html` yeniden
+üretildi ve commit’e dâhil · `cmp-b6-batch23.ts` → **0 FARK** (batch-22 aracı 9 → 7
+FARK; (4)/(5) bölümleri yokluk ölçtüğü için tarihsî) · `git diff --check` temiz.

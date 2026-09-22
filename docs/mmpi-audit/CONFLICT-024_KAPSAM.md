@@ -255,6 +255,12 @@ sonucu: bu örüntüler klinik yorum üretmez.
 > eşik/temsil farkları **CONFLICT-041** altında izleniyor (#1 70/10 ↔ 65/5 · #2 80/70 ↔
 > 70/70 · #3 birebir · #4-#10 YOK).
 >
+> **→ CHANGE-015 (DECISION-030/A, 2026-09-22):** 041 **KAPANDI** — #1/#2 eşikleri kaynağa
+> çekildi (`conversion-v` **70/10** · `psychotic-v` **80/80/70**), #4-#10’dan 6 desen eklendi,
+> #7 `negatif-egim` sayı uydurulmadan **`manual`** bırakıldı (desen kaydı 11 → 18). Bu
+> örüntüler **yine** bu dosyanın **148 başlık sayacına girmez**; sayaç **148 → 106 VAR /
+> 44 YOK** olarak değişmedi (kalıcı iş: 024’ün 44 gövdesi → **DECISION-031 adayı**).
+>
 > **→ CHANGE-014 (2026-09-22):** 2-3-4 artık kodda (`neurotic-step` ·
 > `neurotic-hat` · `neurotic-rising`; s.103-106 alıntıları `mmpiInterpretation.ts`
 > desen katmanında), 1 (konversiyon vadisi) önceden vardı → **4/4 konfigürasyon

@@ -773,3 +773,51 @@ tests/mmpiInterpretation.test.ts` → **44/44 PASS** · `npm test` → **365/365
 **Kural uygulaması:** sayısal eşikler **yalnız görselden** (`TABLO-NUMBERS`): #10’daki
 “54 T” OCR’da “S4T” diye düşmüştü; #9’un “45-54” aralığı ölçek bandı `45-59` ile
 karıştırılmadı. `p093_L` (s.170) **0 satır OCR + %0.24 koyu piksel** → `BLANK-PAGE`.
+
+## Batch 23 — DECISION-030/A (CHANGE-015): desen eşikleri + 7 örüntü + bilinçli kırılan kilitler
+
+**Test dosyası:** `tests/mmpiInterpretation.test.ts` → **44 → 47 test** (batch-22
+describe’ı `PHASE 10 batch 22 → DECISION-030/A (CHANGE-015)` başlığıyla yeniden
+yazıldı; 6 test 9 teste çıktı).
+
+**Bilinçli kırılan 5 kilit (kod değişikliğinden ÖNCE koşularak doğrulandı — 5 fail /
+39 pass):**
+
+| # | Kilit (batch 22 hâli) | Neden kırıldı | Yeni hâli |
+|---|---|---|---|
+| 1 | `konversiyon vadisi: Hs ve Hy yüksek, D düşük` — `profile({K:0,Hs:22,Hy:27,D:23})` vuruyor | eşik 70/10’a çekildi → bu profil artık **vurmuyor** | aynı profil **negatif** vaka; kaynak-uyumlu profil (`Hs 23/Hy 31/D 21`) pozitif vaka |
+| 2 | `psikotik V: Pa ve Sc yüksek, Pt daha düşük` — `Pa:24,Sc:55,Pt:20` | Pa/Sc eşiği 80 T oldu | `Pa 24/Sc 58/Pt 43` (82.0/81.1/74.0) pozitif · `Pa 21/Sc 52/Pt 34` (74.5) negatif |
+| 3 | `#1 … BİLİNEN SAPMA` — `rule` equality “Hs ≥ 65 … 5 T” | `rule` metni kaynağa göre değişti | yeni `rule` dizesi + `source`/`quote` eşitlikleri + **kural↔davranış döngüsü** (6 profil) |
+| 4 | `#2 … BİLİNEN SAPMA` — `rule` equality “Pa ≥ 70 …” + FP `hit:true` | eşik 80/80/70 | yeni `rule` + FP artık `false` + Pt eşiği ayrı vaka + kural↔davranış döngüsü (6 profil) |
+| 5 | `#4-#10 altı örüntü kodda temsil edilmiyor` — `deepEqual(ids, 11)` + 7 `!ids.includes` + “aday profiller desen üretmesin” | 7 desen eklendi → 18 kayıt | `deepEqual(ids, 18)` + her desen için **kaynak tanımı karşılanınca vurur / karşılanınca vurmaz** kilitleri (Kadın Mf=50 tam-sayı okuması, cinsiyet kapısı, bant ayrışması) |
+
+**Yönü çevrilen kilit:** `BÖLÜM 6 uyarı direktifleri hiçbir desen metninde geçmiyor
+(CONFLICT-042)` `doesNotMatch` ×4 → `assert.match` (çekinceler artık `caveat`/`quote` ve
+`MMPI_PATTERN_CAVEATS`ta) + **UI render kilidi** (`Kaynak: s.167 · Şekil 30`,
+`Kaynak çekincesi:`, `Yorum Çekinceleri (BÖLÜM 6)`, `Elle değerlendirilir`,
+`Butcher 1984`, `doesNotMatch(/\*\*/)` = arayüzde ham markdown kalıntısı yok).
+
+**Dokunulmayan kilitler:** `#3 SINGLE_PD` (birebirdi, öyle kaldı — CHANGE-015 kapsamı
+dışı) · `multi-high.rule` equality (kodun kendi göstergesi; `source === undefined`
+olarak **kilitlendi**: kaynak deseni #8 ayrı kayıt) · `cry-for-help`/`depressive-27`/
+`49`/`89`/nevrotik üçlü testleri · `normal profilde hiçbir kritik desen görülmez`
+(K:12 taban profili `45-54` bandında **değil** → yeni `batik-profil` vurmuyor; sayı
+kontrolüyle doğrulandı) · `mmpiKeyIntegrity` 63/63.
+
+**Yeni davranış testte nasıl doğrulandı:** ham puanlar `TURKISH_NORMS` üzerinden
+**önce hesaplandı** (`.audit/probe1.ts`, `probe2.ts` — geçici), sonra testlere yazıldı;
+eşik sınır vakalarında (T 70.0 / 80.0 / 69.9 gibi) tam isabet veren ham puan olmadığı
+için **kural↔davranış eşdeğerliği** (`hit === kaynak formülü`, profilin kendi
+T-değerleriyle) kilitlendi — norm tablosu değişse de test bozulmayı yakalar.
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-b6-batch23.ts` (salt-okunur, 6 bölüm) →
+**SONUÇ: 0 FARK · P0 BULGU YOK**. (1) 18 kayıt · (2) #1/#2 eşikleri kaynakla birebir +
+eski FP’ler vurmuyor + kaynak tanımı vuruyor + #3 korundu · (3) #4-#10 aynı profilde
+tanım+vuru · (4) Batık/Sınır bant ayrışması · (5) 8/8 çekince taşındı + tüm çekinceler
+kaynak sayfalı · (6) **sayı üretim denetimi** (desen metnindeki sayılar `SOURCE-B6-001/002`
+corpus’unda).
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0 hata** · `npx tsx --test
+tests/mmpiInterpretation.test.ts` → **47/47 PASS** · `npm test` → **368/368 PASS**
+(35 suite) · `npm run build` → **PASS** (`src/` değişti → `optik-form.html` yeniden
+üretildi ve commit’e dâhil) · `git diff --check` temiz.

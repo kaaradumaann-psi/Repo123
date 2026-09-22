@@ -51,14 +51,20 @@ Current book page:
 KAPANDI**) — PDF p93 L. **PHASE 10 batch 22 DONE:** 11 sayfa okundu (s.159 girişi +
 s.160-169'daki 10 örüntü kutusu, Şekil 23-32), sayısal eşikler **görselden**;
 s.171 = p93 R = **BÖLÜM 7** girişi (PHASE 8 zaten DONE → bölüm sıçraması yok).
-Sonraki hedef: **DECISION-030 onayı** (041 eşikleri + 6 yeni desen + 042 çekinceleri) —
-onaysız `src/` değişmez. Paralel açık iş: **CONFLICT-024'ün 44 eksik gövdesi** (içerik)
-ve PHASE 7 / PHASE 11-13 + **FINAL**.
+~~Sonraki hedef: **DECISION-030 onayı** (041 eşikleri + 6 yeni desen + 042 çekinceleri) —
+onaysız `src/` değişmez.~~ → **ONAYLANDI (A) ve CHANGE-015 ile UYGULANDI (batch 23).**
+Paralel açık iş: **CONFLICT-024'ün 44 eksik gövdesi** (içerik) ve PHASE 7 /
+PHASE 11-13 + **FINAL**. Yeni `src/` işi için sıradaki kapı: **DECISION-031 (ADAY · PENDING)**.
 → ✅ **DECISION-029 ONAYLANDI (A) ve CHANGE-014 ile UYGULANDI** (030 + 036 FIXED;
 031/033 FIXED-kısmı; 024/025/027/039 içerik tarafı hâlâ bekliyor).
 → ✅ **PHASE 10 kaynak taraması BİTTİ (batch 22)** — yeni karar kapısı: **DECISION-030**
 (BÖLÜM 6 eşiklerinin kaynağa çekilmesi + 7 eksik desen + 042 çekince notları); bu kayıt
 yazılırken **kod değişikliği YAPILMADI**.
+→ ✅ **PHASE 10 batch 23 — DECISION-030 = A ONAYLANDI → CHANGE-015 UYGULANDI**
+(2026-09-22): `conversion-v` **70/10** · `psychotic-v` **80/80/70** · 6 desen + `negatif-egim`
+(`manual`) eklendi (11 → **18** kayıt) · `PatternHit.quote/caveat/manualNote` +
+`MMPI_PATTERN_CAVEATS` UI'a taşındı · **CONFLICT-041 ve 042 FIXED** ·
+kanıt `cmp-b6-batch23.ts` → **0 FARK** · test **368/368** (35 suite) · `optik-form.html` yeniden üretildi.
 21-44; envanter bu etiketleri p83 R + p84 L'de gördü) → **Ma kod bloğu** (`91/19` …
 `90/09`) → `Si (0)` girişi + **Tablo 17** → **CONFLICT-024/030/031/033 KARARI**
 
@@ -499,11 +505,14 @@ yap + `conditions?: {rule, test, text}[]` + `patterns?: {scales, op, text}[]`;
 7 çekince maddesi **YOK**. Bulgu kaydı: **CONFLICT-041 (P1)** · **CONFLICT-042 (P2)** ·
 **034** kanıtı genelleşti · **033** notu genişledi.
 
-**(C) ← SIRADAKİ KARAR: DECISION-030 (ADAY · PENDING, onaysız `src/` değişmez).**
-(A) eşikleri kaynağa çek (`conversion-v` → 70/10, `psychotic-v` → Pa/Sc ≥ 80) **+** 6
-deseni ekle (Kuş Kanadı · Pasif-Agresif V · pozitif/negatif eğim · Yüzen · Batık ·
-Sınır; #7'nin sayısal eşiği **kaynakta yok** → metin/`manual`) **+** UI çekince notları;
-(B) yalnız eşikler; (C) yalnız çekince notları. **Öneri: (A).**
+**(C) ✅ DECISION-030 ONAYLANDI (A) ve CHANGE-015 ile UYGULANDI (2026-09-22 · batch 23).**
+(A) eşikleri kaynağa çekti (`conversion-v` → **70/10**, `psychotic-v` → **Pa/Sc ≥ 80 ∧
+Pt ≥ 70 ∧ vadi şekli**) **+** 6 deseni ekledi (Kuş Kanadı · Pasif-Agresif V · pozitif
+eğim · Yüzen · Batık · Sınır) **+** #7 sayı uydurulmadan **`manual`** bırakıldı **+**
+desen kartlarına `source`/`quote` ve **BÖLÜM 6 çekinceleri** (`MMPI_PATTERN_CAVEATS`) UI'a
+taşındı. **041 + 042 FIXED.** Kanıt: `cmp-b6-batch23.ts` → **0 FARK**.
+→ **SIRADAKİ KARAR: DECISION-031 (ADAY · PENDING)** — 024'ün 44 eksik gövdesi +
+027'nin ~33 koşulu (içerik işi, onaysız `src/` değişmez).
 
 **Diğer açık işler:** PHASE 7 (subscales) · PHASE 11-13 (AI/UI/rapor) ·
 **FINAL** (OCR-only sayım tutarsızlığı, DECISION-011, `KAPSAM` Hs satırı
@@ -626,9 +635,11 @@ Bilinen kısıtlar:
 |---|---|
 | `npx tsx scripts/mmpi-audit/dump-keys.ts` + `compare-keys.py` | **46/46 MATCH, 0 DIFF** |
 | `npx tsx --test tests/mmpiKeyIntegrity.test.ts` | **56/56 PASS** (CHANGE-014 ile **63/63**: 4 blok gövdesi sadakati + `KNOWN_BLOCK_CODES` sayımı + `12↔21` singleton + `activeCodeConditions` (49/89/13/12/64) + **ölü-anahtar** kilidi; 3 eski kilit yeni davranışa güncellendi — (batch 21: Si bantları + 030 kırpma kilidi) |
-| `npx tsx --test tests/mmpiInterpretation.test.ts` | **44/44 PASS** (38 → batch 22 ile +6: #1/#2 eşik sapması, #3 tek-ölçek MATCH, #4-#10 yokluk + 7 aday profil, `multi-high` ≠ “Yüzen”, 042 çekince yokluğu) |
+| `npx tsx --test tests/mmpiInterpretation.test.ts` | **47/47 PASS** (44 → batch 23 ile +3: 6 batch-22 kilidi **yeni davranışa** yazıldı (eşik mutabakatı, kural↔davranış döngüleri, `multi-high` ayrışması, çekince **varlığı**, UI render) + `negatif-egim` `manual` kilidi + `source`/`quote` zorunluluğu + bant ayrışması) |
+| `npx tsx scripts/mmpi-audit/cmp-b6-batch23.ts` | **SONUÇ: 0 FARK** — CHANGE-015 kapanış kanıtı: 18 kayıt, #1/#2 eşikleri kaynakla birebir, eski FP'ler vurmuyor, #4-#10 kaynak tanımıyla vuruyor, #7 `manual`, 8/8 çekince taşındı, **sayı üretim denetimi** (desen metnindeki her sayı `SOURCE-B6-001/002` corpus'unda) |
+| `npx tsx scripts/mmpi-audit/cmp-b6-batch22.ts` | (tarihsî) 9 FARK → CHANGE-015 sonrası **7 FARK**: (2) bölümündeki eşik sapmaları kapandı; (4)/(5) bölümleri **yokluk** iddiasını ölçtüğü için artık historical — yerini `cmp-b6-batch23.ts` aldı |
 | `npm run typecheck` | **PASS** |
-| `npm test` | **365/365 PASS** · 35 suite (batch 22 sonrası, +6 kilit) |
+| `npm test` | **368/368 PASS** · 35 suite (batch 23, +3 net: 44 → 47 `mmpiInterpretation`) |
 | `npm run build` | **PASS** (0) — `src/` değişti → `optik-form.html` yeniden üretildi ve **commit'e dâhil** |
 
 **REGRESSION: YOK** — puanlama/ölçek matematiği (ham puan, T, K düzeltmesi, anahtarlar) değişmedi; yalnız yorum katmanı.
@@ -675,13 +686,14 @@ Bilinen kısıtlar:
 | CONFLICT-037 | P2 | Pt normu: s.138 metni 29.90 (Savaşır 1981 atfı) ↔ Tablo 30 29.20 | ✅ **REJECTED** (kod Tablo 30'u izler) |
 | **CONFLICT-039** | P2 | **K-ilişkili örüntüler modelde yok** (`Yüksek 9/Yüksek K` s.152 + `Yüksek 9/Düşük K` s.153; "X alt testinin diğer alt testlerle ilişkisi" bölümü her blokta: Sc s.146 · Ma s.152 · Si s.157) | **OPEN (YENİ, batch 20)** |
 | **CONFLICT-040** | P2 | Si normu: Tablo 17 dipnotu 26.86 ↔ Tablo 30 23.86 (s.195 yeniden okundu) | ✅ **REJECTED** (kod Tablo 30'u izler) |
-| **CONFLICT-041** | **P1** | **BÖLÜM 6 örüntü eşikleri:** #1 Konversiyon V (kaynak **70/10** ↔ kod **65/5**) · #2 Paranoid V (kaynak **80/70** ↔ kod **70/70**) → **yanlış pozitif**; **#4-#10 desen YOK** (Kuş Kanadı · Pasif-Agresif V · pozitif/negatif eğim · Yüzen · Batık · Sınır); **#3 Pd Yükselliği BİREBİR** (s.111 ile çapraz teyit) | **OPEN (YENİ, batch 22)** · **DECISION-030** bekliyor |
-| **CONFLICT-042** | P2 | BÖLÜM 6 **çekince direktifleri** arayüzde yok: “tanısının konulması doğru değildir” (s.166) · “bu profil tipiyle bağlantılı bir kod tipi verilemez” (s.167) · “en düşük olduğu alt testlere bakmak gerekmektedir” (s.168) · körlemesine değerlendirme yasağı + demografi (s.159 → 034) · 60-64 T → diğer testler (s.169) | **OPEN (YENİ, batch 22)** |
+| **CONFLICT-041** | **P1** | **BÖLÜM 6 örüntü eşikleri:** #1 Konversiyon V (kaynak **70/10** ↔ kod **65/5**) · #2 Paranoid V (kaynak **80/70** ↔ kod **70/70**) → **yanlış pozitif**; **#4-#10 desen YOK** (Kuş Kanadı · Pasif-Agresif V · pozitif/negatif eğim · Yüzen · Batık · Sınır); **#3 Pd Yükselliği BİREBİR** (s.111 ile çapraz teyit) | ✅ **FIXED** (CHANGE-015 · DECISION-030/A) |
+| **CONFLICT-042** | P2 | BÖLÜM 6 **çekince direktifleri** arayüzde yok: “tanısının konulması doğru değildir” (s.166) · “bu profil tipiyle bağlantılı bir kod tipi verilemez” (s.167) · “en düşük olduğu alt testlere bakmak gerekmektedir” (s.168) · körlemesine değerlendirme yasağı + demografi (s.159 → 034) · 60-64 T → diğer testler (s.169) | ✅ **FIXED** (CHANGE-015 · DECISION-030/A) |
 | CONFLICT-038 | P2 | **Sc `21-44` bandı: "konformaldir" ↔ kod "konservatiftir"** (s.146) | ✅ **FIXED** (DECISION-028 + CHANGE-013) |
 
-Kalan açık: **17 çelişki** → 0 P0 · 6 P1 (003, 004, 005, 024, 027, **041**) · 7 P2
-(006, 007, 022, 025, 034, 039, **042**) · 2 P3 (026, 032); ayrıca **2 FIXED-kısmı**
-(031, 033 — kayıt içerik tarafı için açık tutuluyor). **CHANGE-014 ile FIXED: 030 · 036 (2 vaka).**
+Kalan açık: **15 çelişki** → 0 P0 · 5 P1 (003, 004, 005, 024, 027) · 6 P2
+(006, 007, 022, 025, 034, 039) · 2 P3 (026, 032); ayrıca **2 FIXED-kısmı**
+(031, 033 — kayıt içerik tarafı için açık tutuluyor). **CHANGE-014 ile FIXED: 030 · 036 (2 vaka)** ·
+**CHANGE-015 ile FIXED: 041 (P1) · 042 (P2)** → **FIXED 16 · REJECTED 9 · 42 kayıt**.
 **Yeni (batch 18): CONFLICT-038 AÇILDI ve AYNI TURDA FIXED** → sayaç değişmedi
 (FIXED: 12 · REJECTED: 8). 025/026/027/030/031 satırları Sc/Pt örnekleriyle
 genişledi (024 KAPSAM: 140/100/42).
@@ -690,7 +702,8 @@ genişledi (024 KAPSAM: 140/100/42).
 **CONFLICT-033 eski kapsam: 6 konfig** (+1: **Şekil 22 Paranoid Vadi** — Pa↑ Pt↓ Sc↑, s.147; Scarlett O'Hara vadisi Şekil 21).
 **BÖLÜM 6 (batch 22) sayacı DIŞINDADIR:** Şekil 23-32 **kod tipi başlığı değil**, profil
 örüntüsüdür → 148 sayısına **eklenmedi** (desenler → CONFLICT-041).
-**CONFLICT-024 kümülatif kapsam: 148 başlık → 106 VAR / 44 YOK** (CHANGE-014: `91/19`·`049`·`027(8)` YOK→VAR; `64/46` sayacı değişmedi — ⚠️ satır kayması sürüyor, FINAL'da yeniden sayılacak). (batch 21: Si kapanışı +2 → 0 VAR / 2 YOK; 9 `Bakınız` ref'i uyumlu → `CONFLICT-024_KAPSAM.md`).
+**CONFLICT-024 kümülatif kapsam: 148 başlık → 106 VAR / 44 YOK** (CHANGE-015 bu sayacı
+**değiştirmedi** — BÖLÜM 6 örüntüleri kod tipi başlığı değil; desen katmanı → 041/042) (CHANGE-014: `91/19`·`049`·`027(8)` YOK→VAR; `64/46` sayacı değişmedi — ⚠️ satır kayması sürüyor, FINAL'da yeniden sayılacak). (batch 21: Si kapanışı +2 → 0 VAR / 2 YOK; 9 `Bakınız` ref'i uyumlu → `CONFLICT-024_KAPSAM.md`).
 **CONFLICT-025: +5 cümle (batch 21)** — Si `70+` bandı kuyruğu 2 (nevrotik üçlü + 2/7/8 atfı) · s.156-157 giriş paragrafı 3 (20 puan farkı · Si+4+9 · 2/7+8). (batch 20: +6 · batch 19: +2.)
 **CONFLICT-027 örnek sayısı: 45** (batch 21 +1: "Alt test Si'de **20 puanlık** bir farklılık olan çiftler…").
 **CONFLICT-030 örnek sayısı: 37** (batch 21 +2: `'049'` → `40/04` · `'027(8)'` → `20/02`) → **CHANGE-014 ile KAPANDI**: 4'ü kendi gövdesine kavuştu, kalanı `undefined` (yanlış metin YOK).
@@ -704,7 +717,15 @@ FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 01
 
 ## Last update
 
-2026-09-22 — Oturum 8 (devam 4): **PHASE 10 batch 22 — BÖLÜM 6 kaynak taraması BİTTİ (s.159-169; s.170 BOŞ SAYFA)** —
+2026-09-22 — Oturum 8 (devam 5): **PHASE 10 batch 23 — DECISION-030 ONAYLANDI (A) → CHANGE-015 UYGULANDI** —
+BÖLÜM 6 eşikleri kaynağa çekildi (`conversion-v` 70/10 · `psychotic-v` 80/80/70), 6 desen
++ `negatif-egim` (`manual`) eklendi (**11 → 18** kayıt), `PatternHit.quote/caveat/manualNote`
++ `MMPI_PATTERN_CAVEATS` UI'a taşındı → **CONFLICT-041 + 042 FIXED**; sayı uydurulmadı
+(#7 ve sayısız ayaklar `manual`); **DECISION-031 adayı açıldı (PENDING)** ·
+kanıt `cmp-b6-batch23.ts` → **0 FARK** · test **368/368** (35 suite) · tsc **0** ·
+build **PASS** (`optik-form.html` yeniden üretildi, commit'e dâhil)
+
+Önceki: 2026-09-22 — Oturum 8 (devam 4): **PHASE 10 batch 22 — BÖLÜM 6 kaynak taraması BİTTİ (s.159-169; s.170 BOŞ SAYFA)** —
 10 örüntü kutusu (Şekil 23-32) görselden okundu; **#3 `Pd Yükselliği` BİREBİR**,
 **#1/#2 EŞİK SAPMASI** (70/10 ↔ 65/5 · 80/70 ↔ 70/70) → **CONFLICT-041 (P1)**,
 **#4-#10 YOK**, çekince direktifleri YOK → **CONFLICT-042 (P2)**, **034** genelleşti;
@@ -740,17 +761,22 @@ Phase:          PHASE 0, 1, 2, 3, 6 — DONE
                 Si bant/kod bloğu için s.157-158 = PHASE 9/10 batch 21'e devir)
                 PHASE 10 — ✅ **BÖLÜM 6 KAYNAK TARAMASI DONE** (s.159-169; s.170 BOŞ
                 SAYFA %0.24/0 satır). 10 örüntü: 1 birebir · 2 eşik sapması · 7 YOK →
-                CONFLICT-041 (P1) + CONFLICT-042 (P2) → **DECISION-030 PENDING**
-                Kanıt: scripts/mmpi-audit/cmp-b6-batch22.ts → 9 FARK
+                CONFLICT-041 (P1) + CONFLICT-042 (P2) → **DECISION-030 KABUL (A)** ve
+                **CHANGE-015 UYGULANDI** (eşikler 70/10 · 80/80/70, +6 desen, negatif-egim
+                manual, kaynak/çekince katmanı UI'da) → 041 + 042 **FIXED**
+                Kanıt: cmp-b6-batch22.ts → 9 FARK (önce) · **cmp-b6-batch23.ts → 0 FARK**
                 PHASE 9/10 — ✅ **KAYNAK TARAMASI DONE** (Bölüm 5 kod tipleri
                 s.63-157; Hs·D·Hy·Pd·Mf·Pa·Pt·Sc·Ma·Si bloklarının tamamı +
                 s.158 BOŞ → bölüm kapandı). Kod tarafı: ✅ DECISION-029 (A) ONAYLANDI ve
                 CHANGE-014 ile UYGULANDI (blok kimliği + kırpmasız çözümleme +
                 koşullar + nevrotik desenler); kalan 44 gövde = içerik işi
                 PHASE 8 — ✅ DONE (anahtarlar + WIGGINS_NORMS 26/26 MATCH)
-                PHASE 14 — IN_PROGRESS (CHANGE-014 ile +16 · mmpiKeyIntegrity 63/63 ·
-                npm test 359/359 (34 suite))
-Completed:      PDF p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
+                PHASE 14 — IN_PROGRESS (CHANGE-014 ile +16 · CHANGE-015 ile +3 ·
+                mmpiKeyIntegrity 63/63 · mmpiInterpretation 47/47 · npm test 368/368
+                (35 suite))
+Completed:      PDF p88-p93 (kitap s.159-170: BÖLÜM 6 girişi + 10 örüntü kutusu +
+                s.170 BOŞ → bölüm kapandı; CHANGE-015 ile kod tarafı da kapandı),
+                p1-p8 (künye + içindekiler), p8-p16 (Bölüm 1),
                 p79-p81 (kitap s.142-146: Pt bloğu KAPANIŞI + Sc girişi +
                 TABLO 15 BİREBİR + Sc T bantları + Sc kod bloğu I),
                 p81-p83 (kitap s.147-150: Sc bloğu KAPANIŞI (Şekil 22 + `89/98`
@@ -843,7 +869,17 @@ Blocking:       none
    (`manual` = yaş/profil-dışı), 3 nevrotik desen. Testler **359/359**, tsc **0**,
    build **PASS**, `optik-form.html` commit'te. **Commit/push atılmadıysa önce
    `git status` + `git log --oneline -3` kontrol et** (uzak uç: PR #46).
-0. **SON İŞ (bu tur): PHASE 10 batch 22 DONE — BÖLÜM 6 kaynak taraması bitti
+0. **SON İŞ (bu tur): PHASE 10 batch 23 — DECISION-030 = A ONAYLANDI → CHANGE-015 KODDA.**
+   `src/` 3 dosya + stil değişti (`mmpiInterpretation.ts` · `MMPIExtraTab.tsx` ·
+   `workspace.css`): `conversion-v` **70/10** · `psychotic-v` **80/80/70** · 6 desen +
+   `negatif-egim` (`manual`) → **18 desen kaydı** · `PatternHit.quote/caveat/manual/
+   manualNote` + `MMPI_PATTERN_CAVEATS` UI'da → **CONFLICT-041 + 042 FIXED**. Sayı
+   uydurulmadı (#7 ve sayısız ayaklar `manual`/`manualNote`). Kanıt:
+   `cmp-b6-batch23.ts` → **0 FARK** · test **368/368** (35 suite) · tsc **0** · build
+   **PASS** + `optik-form.html` commit'te. Sıradaki kapı: **DECISION-031 (PENDING)** —
+   024'ün 44 gövdesi + 027'nin ~33 koşulu. **Commit/push atılmadıysa `git status` +
+   `git log --oneline -3` kontrol et** (uzak uç: PR #46).
+0. **SON İŞ (önceki tur): PHASE 10 batch 22 DONE — BÖLÜM 6 kaynak taraması bitti
    (s.159-169; s.170 BOŞ SAYFA).** 10 örüntü kutusu (Şekil 23-32) 150 dpi tam sayfa
    görselden okundu; eşikler görselden (`TABLO-NUMBERS`). `cmp-b6-batch22.ts` →
    **9 FARK**: #1 Konversiyon V **70/10 ↔ kod 65/5**, #2 Paranoid V **80/70 ↔ kod 70/70**
@@ -852,7 +888,8 @@ Blocking:       none
    **BİREBİR** ✅. Çekince direktifleri (s.166/167/168/159/160/169) arayüzde yok →
    **CONFLICT-041 (P1) + 042 (P2)** açıldı, **DECISION-030** adayı (PENDING) yazıldı;
    **034** kanıtı genelleşti, **033** notu genişledi. **src/ DEĞİŞMEDİ**; +6 kilit test,
-   **365/365 PASS**, tsc 0, build PASS.
+   **365/365 PASS**, tsc 0, build PASS. → **DECISION-030 (A) onaylandı ve CHANGE-015 ile
+   uygulandı** (yukarıdaki 0. satır); 041/042 **FIXED**, `src/scoring/*` değişti.
 1. **Nerede kaldık:** **PHASE 9/10 batch 21 DONE (kitap s.157-158) → 🏁 BÖLÜM 5
    (kod tipleri) KAYNAK TARAMASI BİTTİ: s.63-157 okundu, s.158 boş sayfa** (koyu piksel
    %0.62 → `BLANK-PAGE`). **Si bantları `SI_T_BANDS` 4/4 + eşikler birebir**, 3 bandın
@@ -877,7 +914,9 @@ Blocking:       none
    coverage `toLowerCase()`.
 3. **Sonra:** PHASE 7 (subscales) + PHASE 11-13 (AI/UI/rapor) → **FINAL**: OCR-only
    sayım tutarsızlığı, DECISION-011 (33 anahtar), `CONFLICT-024_KAPSAM.md` Hs satırı
-   (31|31|0 ↔ 9 VAR/22 YOK) yeniden sayımı, `SYSTEM.md` test sayısı,
+   (31|31|0 ↔ 9 VAR/22 YOK) yeniden sayımı,
+   ~~`SYSTEM.md` test sayısı~~ → **DÜZELTİLDİ (batch 23): `SYSTEM.md` 285/285 → 368/368**
+   (4 satır; eski snapshot not olarak belgede duruyor),
    **CONFLICT-007** = depoda olmayan `docs/kaynak-denetimi.md` atıfları.
    ⚠️ **Ortam notu:** sandbox sıfırlanırsa `npm install` + `pip install pymupdf
    rapidocr-onnxruntime opencv-python-headless` **ve `opencv-python` paketini

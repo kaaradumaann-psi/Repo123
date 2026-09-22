@@ -120,7 +120,63 @@ export type PatternHit = {
   hit: boolean;
   /** Kaynak sayfası/şekil numarası (DECISION-029/A ile eklenen örüntülerde zorunlu). */
   source?: string;
+  /** Kaynağın **birebir** cümlesi (DECISION-030/A): eşiğin nereden geldiği arayüzde okunur. */
+  quote?: string;
+  /** Kaynağın örüntüye ilişkin çekincesi/direktifi (birebir; yorum eklenmez). */
+  caveat?: string;
+  /**
+   * `true` → kaynakta **nicel eşik yok**; desen otomatik değerlendirilmez ve arayüzde
+   * “elle değerlendirilir” olarak listelenir (DECISION-028: sayı uydurulmaz).
+   */
+  manual?: boolean;
+  /** Kaynağın sayısal olmayan ayağı (ör. “F'teki yükselme”) → elle doğrulanacak kısım. */
+  manualNote?: string;
 };
+
+/**
+ * BÖLÜM 6'nın (s.159-169) **genel yorum direktifleri** — kaynak cümleleri birebirdir.
+ * Desen eşiklerinden bağımsızdır; arayüzde “Yorum Çekinceleri” olarak basılır
+ * (CONFLICT-042 → CHANGE-015).
+ */
+export type PatternCaveat = {
+  text: string;
+  source: string;
+};
+
+export const MMPI_PATTERN_CAVEATS: PatternCaveat[] = [
+  {
+    text: 'MMPI profilini yorumlamadan önce testi veren kişi, değerlendirme için gönderilen bireyin bazı özelliklerini dikkate almalıdır. Hiçbir zaman körlemesine bir değerlendirme yapılmamalıdır. İlk aşamada test verilecek bireyin demografik özellikleri belirlenmelidir: Yaş, cinsiyet, eğitim, medenî durum, meslek.',
+    source: 's.159 · Bölüm 6 girişi',
+  },
+  {
+    text: 'Genel olarak MMPI yorumları, zekâ düzeyleri 80’in üzerinde olan yetişkinlere yöneliktir. Eğitim düzeyi olarak ortaokul kabul edilmektedir.',
+    source: 's.159',
+  },
+  {
+    text: 'MMPI alt testlerinin bazıları yaştan etkilenmektedir. Örneğin, Hs ve D alt testlerde yaşın ilerlemesi ile yükselme olduğu saptanmıştır.',
+    source: 's.159',
+  },
+  {
+    text: 'MMPI profilini değerlendirmede bu alanda eğitim almamış bir kişinin kod tipini belirlemesi oldukça zordur. Ancak klinik testlerde belirgin yükselmenin olduğu durumlarda kolaylıkla görülebilir. Yükselmenin hepsi 70 T puanına yakın ya da bunun üstündedir. Bunun yanı sıra ikili ve üçlü kodları belirlemede, hastadan alınan bilgi ve testi veren kişinin deneyimi önemlidir.',
+    source: 's.159-160 · Kod tipini belirleme',
+  },
+  {
+    text: 'Sadece bu tür yükselmelerle testi alan kişiye nevrotik ya da psikotik tanısının konulması doğru değildir. Bu nedenle profile ilk bakıldığında psikotik ya da nevrotik profil olduğuna karar verildikten sonra ayrıntılı değerlendirme yapılmalıdır.',
+    source: 's.166 · Şekil 29',
+  },
+  {
+    text: 'Bu profil tipiyle bağlantılı bir kod tipi verilemez. Borderline kişilik bozukluğu olan hastalar bu tür bir profil verebilirler.',
+    source: 's.167 · Şekil 30',
+  },
+  {
+    text: 'T puanlarının en düşük olduğu alt testlere bakmak gerekmektedir.',
+    source: 's.168 · Şekil 31 (Batık Profil)',
+  },
+  {
+    text: 'Eğer klinik testler 60-64 T puanı arasında ise MMPI’dan geliştirilen diğer testler bireyi değerlendirmede daha yararlı olabilir (Butcher 1984).',
+    source: 's.169',
+  },
+];
 
 /**
  * yorum rehberinde tanımlanan klasik profil konfigürasyonları. Eşikler ve
@@ -132,20 +188,37 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   const D = t('D');
   const Hy = t('Hy');
   const Pd = t('Pd');
+  const Mf = t('Mf');
   const Pa = t('Pa');
   const Pt = t('Pt');
   const Sc = t('Sc');
   const Ma = t('Ma');
   const F = t('F');
 
+  /**
+   * DECISION-030/A — BÖLÜM 6 örüntülerinde kullanılan iki küme, kaynağın kendi
+   * bölme cümlesinden alınmıştır: “Mf alt testinden çizilen dikey bir çizgi MMPI'ı
+   * nevrotik (profilin sol tarafı) ve psikotik (profilin sağ tarafı) olarak ikiye
+   * böler” (s.165). Mf hattın kendisidir → hiçbir tarafa sayılmaz.
+   */
+  const neuroticScales: ScaleId[] = ['Hs', 'D', 'Hy', 'Pd'];
+  const psychoticScales: ScaleId[] = ['Pa', 'Pt', 'Sc', 'Ma', 'Si'];
+  const clinicalT = profile.clinical.map(s => s.tScore);
+
   const hits: PatternHit[] = [];
 
   hits.push({
     id: 'conversion-v',
     name: 'Konversiyon Vadisi / Dönüşüm V (1-3-2)',
-    rule: 'Hs ≥ 65 ve Hy ≥ 65 ve ikisinin en düşüğü D’den en az 5 T yüksek',
+    rule: 'Hs ≥ 70 T ∧ Hy ≥ 70 T ∧ ikisinin en düşüğü D’den en az 10 T yüksek',
     detail: '13/31 kodunun klasik görünümü: psikolojik sorunlar somatik yakınmalara dönüştürülür, psikolojik etkenler kabul edilmez; semptomlar ikincil kazanç sağlar (sorumluluk almama ve görevden kaçma). D’nin vadi oluşturması tipiktir.',
-    hit: Hs >= 65 && Hy >= 65 && Math.min(Hs, Hy) - D >= 5,
+    quote: 'Test Hs ve Hy, D alt testinden 10 ya da daha fazla T puanı yüksektir ve Hs ve Hy en az 70 T puanındadır. Bu klasik konversiyon V’de diğer alt testler de yükselir, ancak bu Hs ve Hy kadar değildir.',
+    source: 's.160 · Şekil 23',
+    manualNote: 'Diğer alt testlerdeki yükselme kaynakta “ancak bu Hs ve Hy kadar değildir” diye nitel olarak veriliyor; bu ayak profilden otomatik değerlendirilmez.',
+    // DECISION-030/A (CONFLICT-041 #1): eski eşik 65/5 idi — BÖLÜM 5 konversiyon
+    // vadisini nicel tanımlamadığı için koda sabit sayı girmişti; kitabın tek sayısal
+    // tanımı s.160’tadır ve **70 T / 10 T** der.
+    hit: Hs >= 70 && Hy >= 70 && Math.min(Hs, Hy) - D >= 10,
   });
   hits.push({
     id: 'cry-for-help',
@@ -157,9 +230,14 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
   hits.push({
     id: 'psychotic-v',
     name: 'Paranoid Vadi / Psikotik V (6-8 yükselmesi)',
-    rule: 'Pa ≥ 70 ve Sc ≥ 70 ve her ikisi de Pt’den yüksek',
+    rule: 'Pa ≥ 80 T ∧ Sc ≥ 80 T ∧ Pt ≥ 70 T ∧ Pa ve Sc, Pt’den yüksek',
     detail: '6 ve 8, 7’den yüksek olduğunda bu psikotik vadiyi oluşturur; ciddi psikopatoloji vardır ve paranoid tip şizofrenik bozukluklar düşünülebilir. 86/68 kodunda “Paranoid vadi” ya da “Psikotik V” olarak adlandırılır.',
-    hit: Pa >= 70 && Sc >= 70 && Math.min(Pa, Sc) > Pt,
+    quote: 'Pa ve Sc alt testleri 80 T puanında, Pt alt ölçeği ise 70 T puanındadır. Bu profil örüntüsüne ilişkin ayrıntılı bilgi Sc alt testinin yorumlanmasında verilmiştir.',
+    source: 's.161 · Şekil 24',
+    manualNote: 'Kaynak Pt’yi “70 T puanındadır” diye düzey olarak veriyor (eşik değil); vadi şekli bundan ayrı sayı içermediği için korundu. Ayrıntı için Sc alt testi yorumuna bakınız (s.161 atfı).',
+    // DECISION-030/A (CONFLICT-041 #2): eski eşik Pa/Sc ≥ 70 idi; kitap s.161’de
+    // 80 T der → 70-79 T bandındaki profiller **yanlış pozitif** üretiyordu.
+    hit: Pa >= 80 && Sc >= 80 && Pt >= 70 && Math.min(Pa, Sc) > Pt,
   });
   hits.push({
     id: 'depressive-27',
@@ -230,6 +308,91 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
       'erkeklerde kronik anksiyete ile gastrit/ülser tablosunda sık görülen bir seyir olarak tanımlar.',
     source: 's.106 · Şekil 20',
     hit: triadHigh && Hs < D && D < Hy,
+  });
+  // ─────────────────────────────────────────────────────────────────────────
+  // DECISION-030/A (CHANGE-015) — BÖLÜM 6 “MMPI’ı Yorumlama Yaklaşımı”nın profil
+  // örüntüleri #4-#10 (s.163-169, Şekil 26-32). Eşikler **yalnızca** kutu
+  // metnindeki sayılardır (150 dpi tam sayfa görsel okuma; kanıt:
+  // docs/mmpi-audit/SOURCE_FACTS.md → SOURCE-B6-001, karşılaştırma aracı
+  // scripts/mmpi-audit/cmp-b6-batch22.ts). Kaynağın sayı vermediği ayaklar
+  // `manualNote`/`manual` olarak bırakıldı — DECISION-028 gereği sayı üretilmedi.
+  // ─────────────────────────────────────────────────────────────────────────
+  hits.push({
+    id: 'kus-kanadi',
+    name: '“Kuş Kanadı” Profili — Şekil 26',
+    rule: 'Hs ≥ 70 T ∧ D ≥ 70 T ∧ Hy ≥ 70 T ∧ Pd ≥ 70 T (+ kadınlarda Mf = 50 T)',
+    quote: 'Hs, D, Hy ve Pd testleri 70 T puanına yükselmiş ve kadınlarda Mf alt testi 50 T puanındadır.',
+    detail: 'Bu yükselme kuş kanadına benzediği için profil bu adı almaktadır. Kaynak örüntüyü nevrotik bölgedeki dört alt testin (1-2-3-4) birlikte yükselmesi olarak çizer.',
+    manualNote: '“Psikotik testlerde de yükselme vardır” koşulu kaynakta sayısız verildiği için profilden otomatik değerlendirilmez.',
+    source: 's.163 · Şekil 26',
+    // Kadınlarda Mf = 50 T: kaynak tam sayı bir düzey veriyor, kodun T puanları
+    // kesirli olabildiği için eşik tam-sayı okuma düzeninde (yuvarlama) karşılanır.
+    hit: Hs >= 70 && D >= 70 && Hy >= 70 && Pd >= 70
+      && (profile.gender !== 'Kadın' || Math.round(Mf) === 50),
+  });
+  hits.push({
+    id: 'pasif-agresif-v',
+    name: 'Pasif-Agresif V (Kadınlarda) — Şekil 27',
+    rule: 'Kadın profil ∧ Pd ≥ 70 T ∧ Pa ≥ 70 T ∧ Mf < 50 T',
+    quote: '4 ve 6 70 T puanında ya da üstünde, Mf alt testi 50 T puanının altındadır. Diğer alt testler 70 T puanında olsa bile bu pasif-agresif kişilik bozukluğudur.',
+    detail: 'Kaynak örüntüyü “(Kadınlarda)” başlığıyla veriyor → cinsiyet koşulu kuralın parçasıdır; diğer alt testlerin yüksekliği örüntüyü bozmaz.',
+    source: 's.164 · Şekil 27',
+    hit: profile.gender === 'Kadın' && Pd >= 70 && Pa >= 70 && Mf < 50,
+  });
+  const psychoticAllHigh = psychoticScales.every(s => t(s) > 70);
+  const neuroticAllLow = neuroticScales.every(s => t(s) < 70);
+  hits.push({
+    id: 'pozitif-egim',
+    name: 'Psikotik Yükselme (pozitif eğim) — Şekil 28',
+    rule: 'Pa, Pt, Sc, Ma, Si > 70 T ∧ Hs, D, Hy, Pd < 70 T',
+    quote: 'Pozitif eğim, psikotik testlerin 70 T puanının üstünde olması, nevrotik testlerin 70 T puanının altında kalmasıdır.',
+    detail: 'Mf alt testinden çizilen dikey bir çizgi MMPI’ı nevrotik (profilin sol tarafı) ve psikotik (profilin sağ tarafı) olarak ikiye böler.',
+    caveat: 'Sadece bu tür yükselmelerle testi alan kişiye nevrotik ya da psikotik tanısının konulması doğru değildir.',
+    source: 's.165 · Şekil 28',
+    hit: psychoticAllHigh && neuroticAllLow,
+  });
+  hits.push({
+    id: 'negatif-egim',
+    name: 'Nevrotik Yükselme (negatif eğim) — Şekil 29',
+    rule: 'Kaynakta nicel eşik yok: nevrotik bölümün yükselmesi + psikotik testlerde “belirgin düşüklük”',
+    quote: 'Negatif eğim, ise profilin sol ya da nevrotik bölümünün yükselmesi ve psikotik testlerde belirgin düşüklük olmasıdır. Bu nevrotik bir uyumu göstermektedir.',
+    detail: 'Pozitif eğimin tersi yöndür. Kaynak “belirgin düşüklük” dışında sayı vermediği için bu örüntü profil üzerinden otomatik olarak vur duruma getirilmez (DECISION-028).',
+    caveat: 'Sadece bu tür yükselmelerle testi alan kişiye nevrotik ya da psikotik tanısının konulması doğru değildir.',
+    manualNote: 'Nevrotik bölümün yükselmesi ve psikotik testlerdeki düşüklük elle karşılaştırılmalıdır; arayüz bu örüntüde otomatik karar vermez.',
+    source: 's.166 · Şekil 29',
+    manual: true,
+    hit: false,
+  });
+  hits.push({
+    id: 'yuzen-profil',
+    name: '“Yüzen” Profil — Şekil 30',
+    rule: 'Hs → Ma arasındaki bütün klinik ölçekler > 70 T',
+    quote: 'Bu profilde Hs’den, Ma’ya kadar olan bütün değerler 70 T puanının üstündedir ve buna F alt testindeki yükselme eşlik eder. Bu profil borderline kişilik bozukluğu olan kişilere özgüdür.',
+    detail: 'Kodun “çoklu yükselme” göstergesinden farklıdır: burada Hs’den Ma’ya kadar tüm ölçeklerin 70 T üstü olması aranır (Si dışarıda).',
+    caveat: 'Bu profil tipiyle bağlantılı bir kod tipi verilemez.',
+    manualNote: 'F alt testindeki yükselme kaynakta sayısal olarak tanımlanmadı → F ayağı ayrıca elle incelenmelidir.',
+    source: 's.167 · Şekil 30',
+    hit: [Hs, D, Hy, Pd, Mf, Pa, Pt, Sc, Ma].every(v => v > 70),
+  });
+  hits.push({
+    id: 'batik-profil',
+    name: 'Batık Profil — Şekil 31',
+    rule: 'Bütün klinik ölçekler 45-54 T arasında',
+    quote: 'Profilin 45-54 T puanı arasında yer alması: Yorum yapmak zordur. Tek başına bu tür bir yükselmenin anlamı yoktur.',
+    detail: 'Şekil alt yazısı “Batik” olarak basılmıştır; metin “Batık” der (s.168).',
+    caveat: 'T puanlarının en düşük olduğu alt testlere bakmak gerekmektedir.',
+    source: 's.168 · Şekil 31',
+    hit: clinicalT.every(v => v >= 45 && v <= 54),
+  });
+  hits.push({
+    id: 'sinir-profil',
+    name: 'Sınır Profil — Şekil 32',
+    rule: 'Bütün klinik ölçekler 60-70 T arasında (kaynak ayrıca klinik T puanlarını 54 T üstü olarak not eder)',
+    quote: 'T puanı 60-70 arasındadır. Geçerlik testlerinde bir yükselme vardır, ancak bu tam bir yükselme değildir. Klinik alt testlerdeki T puanları 54 T puanının üstündedir.',
+    detail: 'Bu aradaki yükselmeler semptom belirtmez, daha çok kişilik özelliklerini gösterir…',
+    manualNote: 'Geçerlik testlerindeki “tam olmayan yükselme” kaynakta sayı vermiyor → bu ayak elle doğrulanmalıdır.',
+    source: 's.169 · Şekil 32',
+    hit: clinicalT.every(v => v >= 60 && v <= 70),
   });
   hits.push({
     id: 'multi-high',
