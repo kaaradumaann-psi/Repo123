@@ -1,7 +1,7 @@
 {
   "phase": 20,
   "status": "PRODUCTION_VALIDATION_PHASE_18_19_20",
-  "clinicalLogicChanged": true,
+  "clinicalLogicChanged": false,
   "clinicalChanges": {
     "kPlusProfile": "IMPLEMENTED (Mark & Seeman 1963, s.57 · Şekil 16 · MISSING-KPLUS-001)",
     "kRelatedPatterns": "IMPLEMENTED (Ma:9_highK, Ma:9_lowK, s.152-153 · CONFLICT-039)",
@@ -13,12 +13,12 @@
     "ocrOnlyConditionalRules": "UNCHANGED (conditions intact)",
     "scoringEngineVersion": "2.1.0"
   },
-  "generatedAt": "2026-09-22T18:40:08.240Z",
+  "generatedAt": "2026-09-22T23:18:47.279Z",
   "tests": {
-    "suites": 96,
-    "passed": 557,
+    "suites": 103,
+    "passed": 589,
     "failed": 0,
-    "total": 557
+    "total": 589
   },
   "codes": {
     "canonical": 45,
