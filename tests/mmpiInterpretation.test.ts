@@ -748,10 +748,11 @@ describe('PHASE 10 batch 24 · DECISION-030/A 5. madde devamı — kalan desen k
     const r = rec({ K: 0 }, 'cry-for-help');
     assert.equal(r.quote, 'Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.');
     assert.match(r.manualNote ?? '', /CONFLICT-043/);
+    assert.match(r.manualNote ?? '', /DECISION-032/);
     assert.match(r.manualNote ?? '', /80 ve üstü T puan[ıi]/, 'bant başlığı kartta belirtilir');
   });
 
-  it('F ≥ 70 eşiği DEĞİŞMEDİ: F 68,8 T vurmuyor, F 71 T vuruyor (eşik ancak DECISION-032 ile)', () => {
+  it('DECISION-032 (B): F ≥ 70 otomatik eşiği korundu (F 68,8 T vurmuyor, F 71 T vuruyor)', () => {
     const under = rec({ F: 17, K: 0, D: 31, Pt: 40, Pa: 5, Sc: 10, Ma: 5 }, 'cry-for-help');
     const over = rec({ F: 18, K: 0, D: 31, Pt: 40, Pa: 5, Sc: 10, Ma: 5 }, 'cry-for-help');
     assert.equal(under.hit, false, 'F 68.8 T · kodun eşiği 70');

@@ -976,7 +976,10 @@ sınırlıdır; 031 yalnız **kapı tanımıdır**).
 
 ---
 
-## DECISION-032 — **ADAY · KULLANICI ONAYI BEKLİYOR**: `cry-for-help` F bandı (kod `≥ 70` T ↔ kaynak bandı “80 ve üstü T puanı”)
+## DECISION-032 — **KABUL · SEÇENEK (B)**: `cry-for-help` F bandı (kod `≥ 70` T korunur, 80 T bağlamı `manualNote`ta taşınır)
+**Tarih:** 2026-09-22 · **Durum:** **KABUL (B) — kullanıcı onayı 2026-09-22** (CONFLICT-043 FIXED)
+
+### ONAY (2026-09-22) — kullanıcı: “**Seçenek B'yi onaylıyorum. DECISION-032 = B. `cry-for-help` (Yardım Çağrısı) için mevcut F ≥ 70 T otomatik eşiği korunsun. s.36'daki 80 T ve üzeri bant bilgisi eşik olarak kullanılmasın; kaynak bağlamı/manualNote olarak taşınsın.**”
 
 **Tetik:** batch 24 · CHANGE-016 · `CONFLICT-043`.
 
@@ -988,19 +991,12 @@ sınırlıdır; 031 yalnız **kapı tanımıdır**).
 yüksektir.**” → kaynak **ilişkiyi** veriyor, **eşik vermiyor**; listenin bağlamı **80 T üstü**
 bandıdır (s.37 bandı `SOURCE-VALIDITY-F-005` aynı sıralamayı “80 T ve üstü” satırına bağlıyor).
 
-**Kod:** `cry-for-help` = `F ≥ 70 ∧ D > (Pa,Sc,Ma) ∧ Pt > (Pa,Sc,Ma)` — CHANGE-016 eşiğe
-**dokunmadı**; bant farkı kartın `manualNote` alanında yazılı ve testle kilitli.
+**Kod:** `cry-for-help` = `F ≥ 70 ∧ D > (Pa,Sc,Ma) ∧ Pt > (Pa,Sc,Ma)` — F ≥ 70 T otomatik eşiği
+**korundu**; kaynak s.36'daki 80 T ve üzeri bant bilgisi eşik değil bağlamdır; kartın `manualNote`
+alanında ve test kilitlerinde açıkça belgelendi.
 
-**Seçenekler:**
-- **(A) Eşiği bandına çek:** `F >= 80` + `rule`/`detail` metninin güncellenmesi. Kaynakla en
-  sıkı mutabakat; **70-79 T**’deki yardım çağrısı profilleri artık vurmaz.
-- **(B) 70 kalsın, beyan yeter:** eşik aynı; bant farkı `manualNote` + (isterse) desen
-  çekinceleri kutusuna tek satır eklenmesiyle söylenir. **Kod davranışı değişmez.**
-- **(C) `manual` yap:** sayısal `hit` kaldırılıp kart `negatif-egim` modeline taşınır.
-
-**Öneri: (B).** DECISION-028’in “kaynak sayı vermiyorsa sayı üretme” ilkesi burada **eşiği
-80’e çekmeyi de** yasaklar: 80 T, bu madde için kaynakta verilmiş bir desen koşulu değil,
-bandın kendi “dikkatli değerlendirme” direktifidir. (A) yalnızca “bant = koşul” kabulüyle
-meşrulaşır ve o kabul kaynakta yok.
-
-**Bu kayıt yazılırken kod değişikliği YAPILMADI** (CONFLICT-043 OPEN; eşik testi kırmıyor).
+**Uygulanan Karar:**
+- **Seçenek B kabul edildi:** Eşik `F ≥ 70 T` olarak muhafaza edildi.
+- `manualNote`: 'Kaynak bu maddeye sayısal bir eşik vermez; “F ≥ 70” eşiği kod tarafındadır. Liste kitabın “80 ve üstü T puanı” başlığı altındadır (s.36-37, SOURCE-VALIDITY-F-005) — DECISION-032 (B) kararı uyarınca F ≥ 70 T otomatik eşiği korunmuş, 80 T bandı kaynak bağlamı olarak taşınmıştır (CONFLICT-043 FIXED).'
+- Testler: `tests/mmpiInterpretation.test.ts` güncellendi (`DECISION-032 (B): F ≥ 70 otomatik eşiği korundu`).
+- CONFLICT-043 → **FIXED** (kapanış kanıtı `cmp-b6-batch24.ts` ve test suite).

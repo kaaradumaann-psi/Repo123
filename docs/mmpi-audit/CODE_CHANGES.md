@@ -623,3 +623,31 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
   commit edildi** · `git diff --check` temiz
 - **REGRESSION YOK:** puanlama/ölçek matematiği ve tüm `hit` koşulları aynı; yalnız desen
   kartlarının atıf alanları büyüdü.
+
+---
+
+## CHANGE-017 — DECISION-032 (B): cry-for-help F bandı mutabakatı (CONFLICT-043 FIXED)
+
+**Area:** `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` · `tests/mmpiInterpretation.test.ts`.
+
+**Decision:** DECISION-032 = (B) Kullanıcı onayı (2026-09-22):
+- `cry-for-help` (Yardım Çağrısı) için mevcut F ≥ 70 T otomatik eşiği korundu.
+- Kaynak s.36'daki "80 ve üstü T puanı" bağlamı `manualNote` alanında belgelendi.
+- Sayısal davranış değişmedi; yanlış pozitifleri önleme adına kaynakta açıkça bulunmayan 80 T eşiği zorlanmadı.
+- CONFLICT-043 FIXED olarak kapatıldı.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiInterpretation.ts`: `cry-for-help` kartındaki `manualNote` ve yorum satırı DECISION-032 (B) kararıyla hizalandı.
+2. `tests/mmpiInterpretation.test.ts`: Test başlığı ve DECISION-032 kilitleri güncellendi (`54/54 PASS`).
+3. `docs/mmpi-audit/DECISIONS.md`: DECISION-032 KABUL (B) olarak kaydedildi.
+4. `docs/mmpi-audit/CONFLICTS.md`: CONFLICT-043 FIXED olarak güncellendi.
+5. `tests/aiInterpretation.test.ts`: PHASE 11 test paketi eklendi (5 test).
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
+- `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
+- `npx tsx scripts/mmpi-audit/cmp-b6-batch24.ts` → **0 FARK**
+- `npm run verify:pdf` → **PASS**
+- `npm run build` → **PASS** (`optik-form.html` güncel ve senkron)
+- `npm test` → **380/380 PASS** (36 suite)

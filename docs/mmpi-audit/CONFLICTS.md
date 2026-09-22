@@ -1950,7 +1950,7 @@ DECISION-030’un (C) şıkkında (desen kartlarına kaynak `source` + “tanı 
 
 ---
 
-## CONFLICT-043 (P2 · **OPEN**) — `cry-for-help`: ilişki kaynakta, eşik kodda; kaynak bandı “80 ve üstü T puanı”
+## CONFLICT-043 (P2 · **FIXED**) — `cry-for-help`: ilişki kaynakta, eşik kodda; kaynak bandı “80 ve üstü T puanı”
 
 Area: `src/scoring/mmpiInterpretation.ts` → `detectPatterns()` · `cry-for-help` (desen kartı)
 
@@ -1965,15 +1965,12 @@ Source value: “Yardım çağrısı profili. **2 ve 7 testleri 6, 8 ve 9 testle
 
 Current implementation: `hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma`
 
-Comparison: **KISMİ MATCH** — ilişkisel koşul birebir ve CHANGE-016 ile karta taşındı
-(`source` + `quote`) ✅; **`F ≥ 70` eşiği kod tarafındadır** ve kaynağın bant başlığıyla
-(80 T) uyumsuz. 70-79 T bandındaki profiller kartı vuruyor; kaynak o bandı “70-79 T — ego işlev
-bozulması” başlığında anlatıyor, yardım çağrısı maddesini değil.
+Comparison: **MATCH (bağlam açıklandı)** — ilişkisel koşul birebir ve CHANGE-016 ile karta taşındı
+(`source` + `quote`) ✅; DECISION-032 (B) kullanıcı onayıyla `F ≥ 70` otomatik eşiği korundu;
+80 T bant başlığı kaynak bağlamı olarak `manualNote` alanında ve test kilitlerinde açıklandı.
 
-Impact: **P2** — sayı uydurma değil, **bant kaydırması** (yanlış pozitif olasılığı 70-79 T
-aralığında). Eşik **değiştirilmedi**; davranışın değişmesi **DECISION-032** kapısına bağlı.
-Kartın `manualNote` alanı bant farkını arayüzde söylüyor.
+Impact: **P2** — DECISION-028 (sayı üretmeme) ve DECISION-032 (B) gereği, 80 T bir otomatik
+kesim noktası olarak zorlanmamış, kaynak bağlamı olarak belgelenmiştir.
 
-Status: **OPEN** · kapanış/durum kanıtı: `scripts/mmpi-audit/cmp-b6-batch24.ts` (1)-(5)
-· eşik kilidi `tests/mmpiInterpretation.test.ts` → batch-24 describe’ı (F 68,8 T vurmuyor /
-F 71 T vuruyor).
+Status: **FIXED** (2026-09-22, DECISION-032 = B onayı) · kapanış kanıtı: `scripts/mmpi-audit/cmp-b6-batch24.ts`
+· test kilidi: `tests/mmpiInterpretation.test.ts` (`DECISION-032 (B): F ≥ 70 otomatik eşiği korundu`).

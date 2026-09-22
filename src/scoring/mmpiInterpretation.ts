@@ -227,9 +227,9 @@ export function detectPatterns(profile: MMPIProfile): PatternHit[] {
     detail: 'F yükselmesinin nedenlerinden biri: yardım çağrısı profili; 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
     source: 's.36 · F yükselme nedenleri (4. madde)',
     quote: 'Yardım çağrısı profili. 2 ve 7 testleri 6, 8 ve 9 testlerinden yüksektir.',
-    manualNote: 'Kaynak bu maddeye sayısal bir eşik vermez; “F ≥ 70” koşulu kod tarafındadır. Liste kitabın “80 ve üstü T puanı” başlığı altındadır (s.36-37, SOURCE-VALIDITY-F-005) → bant farkı CONFLICT-043 olarak kayıtlıdır, eşik onaysız değiştirilmedi.',
-    // Batch 24 (DECISION-030/A 5. madde devamı): s.36 görsel okumayla doğrulandı;
-    // eşik değişmedi (CONFLICT-043 → DECISION-032 adayı).
+    manualNote: 'Kaynak bu maddeye sayısal bir eşik vermez; “F ≥ 70” eşiği kod tarafındadır. Liste kitabın “80 ve üstü T puanı” başlığı altındadır (s.36-37, SOURCE-VALIDITY-F-005) — DECISION-032 (B) kararı uyarınca F ≥ 70 T otomatik eşiği korunmuş, 80 T bandı kaynak bağlamı olarak taşınmıştır (CONFLICT-043 FIXED).',
+    // DECISION-032 (B) ONAYLANDI (2026-09-22): F ≥ 70 T otomatik eşiği korundu;
+    // kaynak s.36'daki 80 T ve üzeri bant bilgisi eşik değil bağlamdır (manualNote).
     hit: F >= 70 && D > Pa && D > Sc && D > Ma && Pt > Pa && Pt > Sc && Pt > Ma,
   });
   hits.push({
