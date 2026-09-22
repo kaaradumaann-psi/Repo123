@@ -1140,3 +1140,36 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsc --noEmit` → **0 hata (PASS)**
 - `npm test` → **540/540 PASS (77 suite)**
 - `npm run build` → **PASS**
+
+---
+
+## CHANGE-030 — Klinik Ölçekler Sekmesi: Ölçek Dosyası Kartının Tasarım ve Açılır Bölüm Yeniden Yapımı
+
+**Area:** `src/components/results/MMPIClinicalTab.tsx` · `src/styles/workspace.css` · `src/styles/screen.css` · `tests/mmpiClinicalReportUi.test.ts` · `tests/mmpiInterpretation.test.ts`.
+
+**Amaç:** "Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987)" kartı sitenin tasarım dilinden kopmuştu ve uzun kaynak listeleri (23-41 maddelik Graham listeleri, madde numarası tabloları) tek bir duvar hâlinde basılıyordu. Kart sitenin tipografi ve yüzey sözleşmesine bağlandı, uzun listeler katlanabilir hâle getirildi ve uzman için gezinme kısayolları eklendi.
+
+**Değişiklikler:**
+1. `src/components/results/MMPIClinicalTab.tsx`:
+   - **Graham (1987) bölümü kendi açılır-kapanır bölümüne alındı.** Diğer sekmelerle (Türetilmiş Ölçekler, Desenler & Sözlük, Kritik Bulgular) **aynı** `DisclosureRow` / `DisclosureControls` / `useDisclosureGroup` bileşenleri kullanılır; böylece açılır-kapanır davranış sekmeden sekmeye değişmez.
+   - Varsayılan durum, `Disclosure.tsx`'te belgelenen pedagojik kurala bağlandı: yalnız **en belirgin** (en yüksek T) ölçeğin Graham listesi açık gelir, diğer uzun listeler kapalı gelir; üstteki "Tümünü aç / Tümünü kapat" denetimi hepsini topluca yönetir.
+   - "Demografik ve Klinik Notlar" ile "Tablo N — madde numaraları ve puanlama yönü" de katlanabilir; **klinik anlatı (KLİNİK AÇIKLAMA VE ANALİZ, Koşullu ek yorum, EK KLİNİK BİLGİLER) her zaman görünür** kalır.
+   - Rapor başlığına **hızlı gezinme çipleri** (`#dossier-<ölçek>` hedefli) ve bölüm sayacı eklendi.
+   - Kart başlığına T çubuğu (0-120, 50 ortalama ve 70 klinik eşik işaretli — `.mmpi-tbar` dili) eklendi; sayısal T tek bakışta karşılaştırılabilir.
+   - Koşullu ek yorumlarda sağlanan/sağlanmayan koşullar ayrıştı ("Bu profilde geçerli" / "Koşul sağlanmıyor"); sağlanmayanlar solarak öne çıkan koşulu belirginleştirir.
+   - Renk artık satır içi stille değil kartın `.is-high` / `.is-low` durumu üzerinden tasarım token'larından gelir; satır içi stil yalnız geometri (çubuk genişliği/konumu) taşır.
+   - Madde numaraları virgül duvarı yerine "Doğru (D) / Yanlış (Y)" olarak iki sütunlu başvuru bloğunda verilir.
+2. `src/styles/workspace.css`:
+   - Kartın tüm kuralları `@media screen` içine alındı. Önceki blok dosyanın **kök düzeyindeydi** (`@media screen` dışında), yani ekran kuralları yazdırılabilir A4 sayfaya sızıyordu; dosyanın geri kalanının tümü sarılıydı.
+   - **Tipografi sözleşmesi:** serif (`--font-display`) ve italik karttan tamamen çıkarıldı (serif sitede yalnız 300 ağırlıkta panel başlığıdır); 9.5px metin kaldırıldı, en küçük metin 10.5px; ağırlıklar 400/600/700 ile sınırlandı (yayında web fontu yüklenmediği için `font-src 'none'` altında 800 sahte kalın üretir).
+   - 3px renkli sol kenarlık ve doygun renkli avatar dairesi kaldırıldı; sitenin dili olan 9px durum noktası + saç teli çerçeve kullanıldı.
+   - `@media print` bloğu eklendi: katlanmış gövdeler kâğıtta kendiliğinden açılır, gezinme/toplu denetimler gizlenir.
+3. `src/styles/workspace.css` (ortak açılır bölüm): açık durumda başlık ile gövde arasına saç teli ayraç ve üst boşluk eklendi, başlığın alt köşeleri düzleşti; böylece "açık mı kapalı mı" belirsizliği ve gövdenin başlığa yapışması kalktı.
+4. `src/styles/screen.css`: `--danger-ink` token'ı eklendi (`--accent-ink` ile aynı kural: dolgu rengi olan `#d2453a` küçük metinde koyulaştırılır).
+5. `tests/mmpiClinicalReportUi.test.ts` (yeni, **16 test**): açılır bölüm yapısı, en belirgin ölçeğin açık gelmesi, kapalı bölümün maddelerinin DOM'da kalması, toplu denetim sayacı, gezinme çipi/kart eşleşmesi, satır içi stil kısıtı ve CSS tarafında tipografi/@media/kâğıt sözleşmesi doğrulanır.
+6. `tests/mmpiInterpretation.test.ts`: `assert.doesNotMatch(clinical, /aria-expanded/)` beklentisi **tersine çevrildi**. Bu satır eski satır-bazlı liste arayüzünün kaldırıldığını belgeliyordu; kullanıcı isteğiyle Graham bölümü yeniden açılır-kapanır yapıldığı için artık `aria-expanded` + `aria-controls` + `Tümünü aç` ve kapalı gövdede kalan madde metinleri doğrulanıyor. Klinik içerik ve kaynak metin beklentileri değişmedi.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata (PASS)**
+- `npm test` → **589/589 PASS (103 suite)**
+- `npm run build` → **PASS** (`optik-form.html` yeniden üretildi ve senkron)

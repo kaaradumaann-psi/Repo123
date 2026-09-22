@@ -1769,3 +1769,23 @@ eksiksiz tamamlanarak kilitlendi.
   - `docs/kaynak-denetimi.md` ana bileşen–kaynak eşleştirme tablosu ve dürüstlük kaydıyla oluşturuldu (**CONFLICT-007 FIXED**).
 - **Testler (`tests/mmpiUiReport.test.ts`):**
   - 5 yeni birim testi eklendi (**5/5 PASS**). Toplam test: **503/503 PASS** (64 suite).
+
+---
+
+## 2026-09-22 — Klinik Ölçekler Sekmesi — CHANGE-030: Ölçek dosyası kartının tasarım ve açılır bölüm yeniden yapımı
+
+**Kapsam:**
+- **UI (`src/components/results/MMPIClinicalTab.tsx`):**
+  - Graham (1987) listesi, demografik notlar ve madde numarası tabloları **kendi açılır-kapanır bölümlerine** alındı; diğer sekmelerle aynı `DisclosureRow` / `DisclosureControls` bileşenleri kullanılır.
+  - Yalnız en belirgin (en yüksek T) ölçeğin Graham listesi açık gelir; "Tümünü aç / Tümünü kapat" toplu denetimi eklendi.
+  - Rapor başlığına hızlı gezinme çipleri, kart başlığına T çubuğu (50 ortalama / 70 klinik eşik işaretli) eklendi.
+  - Koşullu ek yorumlarda sağlanan ve sağlanmayan koşullar ayrıştı.
+- **Tasarım (`src/styles/workspace.css`, `src/styles/screen.css`):**
+  - Kartın tüm kuralları `@media screen` içine alındı — blok dosyanın kök düzeyinde duruyor ve yazdırılabilir A4 sayfaya sızıyordu.
+  - Serif/italik karttan çıkarıldı, 9.5px metin kaldırıldı, ağırlıklar 400/600/700 ile sınırlandı (`font-src 'none'` altında sahte kalın üretimi engellendi).
+  - 3px renkli sol kenarlık ve doygun avatar dairesi yerine sitenin 9px durum noktası + saç teli çerçeve dili kullanıldı; `--danger-ink` token'ı eklendi.
+  - `@media print`: katlanmış gövdeler kâğıtta açılır, denetimler gizlenir.
+- **Testler:**
+  - `tests/mmpiClinicalReportUi.test.ts` (yeni) — **16/16 PASS**.
+  - `tests/mmpiInterpretation.test.ts` — eski `aria-expanded` yokluğu beklentisi yeni açılır bölüm sözleşmesiyle değiştirildi.
+  - Toplam: **589/589 PASS** (103 suite).

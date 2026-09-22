@@ -1831,6 +1831,10 @@
   }
   .mmpi-disc-head:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
   .mmpi-disc-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  /* Açık durum net okunur: başlığın alt köşeleri düzleşir, gövde saç teli
+     ayraçla başlıktan ayrılır. Böylece "açık mı kapalı mı" belirsizliği ve
+     gövdenin başlığa yapışması ortadan kalkar. */
+  .mmpi-disc.is-open .mmpi-disc-head { border-radius: var(--radius-md) var(--radius-md) 0 0; }
   .mmpi-disc-chevron {
     display: grid;
     place-items: center;
@@ -1879,7 +1883,8 @@
   .mmpi-disc-num em { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--muted); }
   .mmpi-disc-hint { font-size: 11px; color: var(--muted); }
   .mmpi-disc-body {
-    padding: 0 14px 14px 46px;
+    padding: 12px 14px 14px 46px;
+    border-top: 1px solid var(--hairline);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1894,7 +1899,7 @@
     background: var(--bg-soft);
     border: 1px solid var(--hairline);
   }
-  .mmpi-disc-card > .mmpi-disc-body { padding-left: 14px; }
+  .mmpi-disc-card .mmpi-disc-body { padding-left: 14px; }
   .mmpi-section-block { display: flex; flex-direction: column; gap: 10px; }
   .wiggins-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 
@@ -3140,173 +3145,366 @@
   }
 }
 
-  /* ---- Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987) kartları ---- */
-  .mmpi-clinical-report { display: flex; flex-direction: column; gap: 16px; }
+/* ==========================================================================
+   ÖLÇEK BAZLI DETAYLI KLİNİK RAPOR (Graham 1987)
+   --------------------------------------------------------------------------
+   Sitenin editoryal dili birebir taşınır: kâğıt beyazı yüzey, saç teli
+   ayraç, tek vurgu mavisi, fısıltı düzeyinde gölge.
+
+   Tipografi sözleşmesi:
+   • Kartın TAMAMI arayüz yazı tipindedir (var(--font-sans)). Serif
+     (--font-display) sitede yalnız 300 ağırlıkta panel başlığı olarak
+     kullanılır; bir veri kartının içinde serif ya da italik gövde metni
+     yoktur, çünkü 12-13 px'de serif veriyle yarışır.
+   • Ağırlıklar 400 / 600 / 700 ile sınırlıdır. Yayında web fontu
+     yüklenmediği için (CSP: font-src 'none') sistem karşılıkları kullanılır
+     ve iki ağırlıklı yüzlerde 800 sahte kalın üretir.
+   • Mikro etiketler sitenin kendi ölçüsünde: 10.5px, 600, 0.08-0.1em aralık.
+     9-10px altı metin kullanılmaz.
+   • Türkçe başlıklar kaynak metindeki gibi büyük harfle YAZILIR;
+     text-transform'a bırakılmaz (Türkçe i/ı büyük harf eşlemesi yerel
+     ayara göre değişir).
+
+   Tamamı `@media screen` içindedir: yazdırılabilir A4 sayfası bu bloktan
+   tek bir bildirim almaz (kâğıt kuralları aşağıdaki @media print bloğunda).
+   ========================================================================== */
+@media screen {
+  .mmpi-clinical-report { display: flex; flex-direction: column; gap: 14px; }
+
+  /* --- Rapor başlığı: açıklama + hızlı gezinme + toplu aç/kapat --- */
+  .clin-report-head { display: flex; flex-direction: column; gap: 12px; }
+  .clin-report-head-text { display: flex; flex-direction: column; gap: 8px; }
   .clinical-report-note {
     margin: 0;
-    padding: 10px 14px;
-    border: 1px solid var(--primary-border);
-    border-radius: 10px;
-    background: var(--primary-tint);
-    color: var(--accent-ink);
-    font-size: 12px;
-    line-height: 1.55;
+    max-width: 78ch;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--soft);
   }
+  .clin-quicknav { display: flex; flex-wrap: wrap; gap: 8px; }
+  .clin-quicknav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 13px 6px 11px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    background: var(--white);
+    color: var(--soft);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .clin-quicknav-chip:hover { background: var(--bg-soft); border-color: var(--slate-300); color: var(--text); }
+  .clin-quicknav-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .clin-quicknav-chip.is-high { border-color: var(--danger-border); background: var(--danger-tint); }
+  .clin-quicknav-chip.is-low { border-color: var(--primary-border); background: var(--primary-tint); }
+  .clin-quicknav-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .clin-quicknav-chip.is-high .clin-quicknav-dot { background: var(--danger); }
+  .clin-quicknav-chip.is-low .clin-quicknav-dot { background: var(--accent-ink); }
+  .clin-quicknav-chip b { color: var(--text); font-weight: 700; letter-spacing: -0.01em; }
+  .clin-quicknav-t { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .clin-quicknav-chip.is-high .clin-quicknav-t { color: var(--danger-ink); }
+  .clin-quicknav-chip.is-low .clin-quicknav-t { color: var(--accent-ink); }
+  .clin-quicknav-chip em { font-style: normal; font-size: 11px; color: var(--muted); }
+  .clin-report-tools { display: flex; justify-content: flex-end; }
+
+  /* --- Ölçek kartı: saç teli çerçeve, renksiz yüzey --- */
   .scale-dossier {
     display: flex;
     flex-direction: column;
     background: var(--white);
     border: 1px solid var(--hairline);
-    border-left: 3px solid var(--hairline);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
+    scroll-margin-top: calc(var(--nav-h) + 14px);
     overflow: hidden;
   }
-  .scale-dossier.is-high { border-left-color: #d2453a; }
-  .scale-dossier.is-low { border-left-color: var(--primary-border); }
   .scale-dossier-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px 20px;
     flex-wrap: wrap;
-    padding: 14px 20px;
+    padding: 14px 18px;
     border-bottom: 1px solid var(--hairline);
     background: var(--bg-soft);
   }
-  .scale-dossier-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .scale-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: -0.01em;
-    flex: none;
-  }
-  .scale-dossier-titles h3 {
+  /* Durum rengi satır içi stille değil token'dan: yüksek = tehlike kırmızısı,
+     düşük = vurgu mavisi. Sitenin "önemli" deme biçimi yalnız bu ikisidir. */
+  .scale-dossier.is-high .scale-dossier-dot { background: var(--danger); }
+  .scale-dossier.is-low .scale-dossier-dot { background: var(--accent-ink); }
+  .scale-dossier-id { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+  .scale-dossier-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; margin-top: 9px; }
+  .scale-dossier-titles { min-width: 0; }
+  .scale-dossier-eyebrow {
     margin: 0;
-    font-family: var(--font-display);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--soft);
+  }
+  .scale-dossier-name {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 3px 0 0;
     font-size: 17px;
     font-weight: 600;
     letter-spacing: -0.02em;
+    line-height: 1.25;
     color: var(--text);
   }
-  .scale-dossier-titles p { margin: 2px 0 0; font-size: 11px; color: var(--muted); }
-  .scale-dossier-scores { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .scale-dossier-short {
+    padding: 1px 9px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    background: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--slate-700);
+  }
+
+  .scale-dossier-scores { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .klinik-pill {
     display: inline-flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: var(--radius-full);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.07em;
-    border: 1px solid transparent;
-  }
-  .klinik-pill.is-high { color: #a93028; background: var(--danger-tint); border-color: var(--danger-border); }
-  .klinik-pill.is-low { color: var(--accent-ink); background: var(--primary-tint); border-color: var(--primary-border); }
-  .score-t { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .score-raw { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .dossier-sec { padding: 14px 20px 2px; }
-  .dossier-sec-title {
-    margin: 0 0 8px;
     font-size: 10.5px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--slate-700);
-  }
-  .dossier-quote {
-    margin: 0;
-    padding: 2px 0 2px 14px;
-    border-left: 2px solid var(--primary-border);
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 14.5px;
-    line-height: 1.6;
-    color: var(--text);
-  }
-  .graham-range { margin: 0 0 6px; font-size: 11.5px; color: var(--muted); }
-  .graham-label { margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--slate-700); }
-  .graham-block + .graham-block { margin-top: 10px; }
-  .graham-list {
-    margin: 0;
-    padding-left: 20px;
-    columns: 2;
-    column-gap: 28px;
-  }
-  .graham-list > li {
-    font-size: 12.5px;
-    line-height: 1.55;
-    color: var(--text);
-    margin-bottom: 6px;
-    break-inside: avoid;
-  }
-  .graham-sub {
-    margin: 4px 0 0;
-    padding-left: 14px;
-    list-style: none;
-  }
-  .graham-sub li {
-    font-size: 11.5px;
-    line-height: 1.5;
-    color: var(--slate-700);
-    margin-bottom: 3px;
-    break-inside: avoid;
-  }
-  .dossier-note p { margin: 0 0 8px; font-size: 12.5px; line-height: 1.55; }
-  .dossier-note-list { margin: 0 0 8px; padding-left: 18px; }
-  .dossier-note-list li { font-size: 12.5px; line-height: 1.55; margin-bottom: 4px; }
-  .dossier-cond-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .dossier-cond-list > li {
-    position: relative;
-    font-size: 12.5px;
-    line-height: 1.55;
-    padding: 10px 12px;
-    border: 1px solid var(--hairline);
-    border-radius: 10px;
-    background: var(--bg-soft);
-  }
-  .dossier-cond-list > li.is-active {
-    border-color: var(--success-border);
-    background: var(--success-tint);
-  }
-  .cond-when { font-weight: 700; color: var(--slate-700); }
-  .cond-active-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: 8px;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background: var(--white);
-    border: 1px solid var(--success-border);
-    color: #0a6b49;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    border: 1px solid transparent;
     white-space: nowrap;
   }
-  .dossier-extra-note { color: var(--slate-700); }
+  .klinik-pill.is-high { color: var(--danger-ink); background: var(--danger-tint); border-color: var(--danger-border); }
+  .klinik-pill.is-low { color: var(--accent-ink); background: var(--primary-tint); border-color: var(--primary-border); }
+  .scale-dossier-tgroup { display: flex; align-items: baseline; gap: 6px; }
+  .score-t {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .scale-dossier.is-high .score-t { color: var(--danger); }
+  .scale-dossier.is-low .score-t { color: var(--accent-ink); }
+  .scale-dossier.is-high .mmpi-tbar-fill { background: var(--danger); }
+  .scale-dossier.is-low .mmpi-tbar-fill { background: var(--accent-ink); }
+  .score-t-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); }
+  .scale-dossier-tbar { width: 104px; }
+  .scale-dossier-stats { display: flex; align-items: center; gap: 16px; }
+  .dossier-stat {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-700);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* --- Kart gövdesi: bölümler arası tek ritim --- */
+  .scale-dossier-body { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; }
+  .dossier-sec { display: flex; flex-direction: column; gap: 8px; }
+  .dossier-sec-title {
+    margin: 0;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--soft);
+  }
+  .dossier-lead {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--hairline);
+    border-left: 2px solid var(--slate-300);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .dossier-para { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--slate-700); }
+  .dossier-norms { font-size: 12px; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .dossier-extra-note { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--muted); }
+
+  /* --- Graham (1987) listesi: kitap okuma sırası korunur (sütun öncelikli) --- */
+  .graham-block + .graham-block { margin-top: 12px; }
+  .graham-label { margin: 0 0 6px; font-size: 11.5px; font-weight: 600; color: var(--slate-700); }
+  .graham-list {
+    margin: 0;
+    padding-left: 22px;
+    columns: 2;
+    column-gap: 26px;
+    column-rule: 1px solid var(--hairline);
+  }
+  .graham-list > li {
+    margin-bottom: 7px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--slate-700);
+    break-inside: avoid;
+  }
+  .graham-list > li::marker { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .graham-sub { margin: 4px 0 0; padding-left: 14px; list-style: none; }
+  .graham-sub li {
+    margin-bottom: 3px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    break-inside: avoid;
+  }
+  .dossier-fold-hint {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* --- Demografik ve Klinik Notlar --- */
+  .dossier-note { display: flex; flex-direction: column; gap: 6px; }
+  .dossier-note + .dossier-note { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+  .dossier-note p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--slate-700); }
+  .dossier-note-list { margin: 0; padding-left: 18px; }
+  .dossier-note-list li { margin-bottom: 4px; font-size: 12.5px; line-height: 1.55; color: var(--slate-700); }
+
+  /* --- Koşullu ek yorum: sağlanan koşul öne çıkar, sağlanmayan solar --- */
+  .dossier-cond-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .dossier-cond-list > li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--white);
+  }
+  .dossier-cond-list > li.is-active { border-color: var(--success-border); background: var(--success-tint); }
+  .dossier-cond-list > li.is-passive { opacity: 0.7; }
+  .cond-flag {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    margin-top: 1px;
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    background: var(--bg-soft);
+    color: var(--slate-500);
+  }
+  .dossier-cond-list > li.is-active .cond-flag {
+    background: var(--white);
+    border-color: var(--success-border);
+    color: #0a6b49;
+  }
+  .cond-text { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .cond-when { font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .cond-sentence { font-size: 12.5px; line-height: 1.55; color: var(--slate-700); }
+  .cond-chip {
+    flex: none;
+    align-self: flex-start;
+    padding: 3px 10px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    background: var(--bg-soft);
+    color: var(--soft);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .cond-chip.is-active { background: var(--white); border-color: var(--success-border); color: #0a6b49; }
+
+  /* --- Ek klinik bilgiler: ölçüler tek satırlık ızgarada --- */
+  .dossier-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--hairline);
+    overflow: hidden;
+  }
+  .dossier-fact { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: var(--white); }
+  /* Cümle uzunluğundaki değer (K düzeltmesi) tüm satırı alır; dar hücrede
+     iki kelimeye bölünüp okunmaz hâle gelmez. */
+  .dossier-fact.is-wide { grid-column: 1 / -1; }
+  .dossier-fact.is-wide dd { font-weight: 400; color: var(--slate-700); }
+  .dossier-fact dt { font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); }
+  .dossier-fact dd {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Madde numarası tabloları: sayı dizisi eş aralıklı yüzle --- */
+  .tablo-block { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .tablo-col {
+    padding: 10px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+  }
+  .tablo-col-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .tablo-col-head span { font-size: 10.5px; font-weight: 600; color: var(--muted); }
+  .tablo-items {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--slate-700);
+    word-spacing: 1px;
+  }
+
   .dossier-source {
-    margin-top: 12px;
-    padding: 10px 20px 12px;
+    margin-top: 4px;
+    padding-top: 10px;
     border-top: 1px solid var(--hairline);
     font-size: 11px;
-    color: var(--muted);
     line-height: 1.5;
+    color: var(--muted);
   }
-  @media (max-width: 760px) {
-    .graham-list { columns: 1; }
-    .scale-dossier-head { align-items: flex-start; }
-    .scale-dossier-scores { width: 100%; justify-content: flex-start; }
-  }
+}
+
+/* Dar ekran: liste tek sütuna iner, başlık blokları üst üste biner. */
+@media screen and (max-width: 900px) {
+  .graham-list { columns: 1; column-rule: none; }
+  .clin-report-tools { justify-content: flex-start; }
+}
+
+@media screen and (max-width: 620px) {
+  .scale-dossier-head { align-items: flex-start; }
+  .scale-dossier-scores { width: 100%; gap: 10px 16px; }
+  .scale-dossier-tbar { order: 5; flex: 1 1 100%; width: auto; }
+  .scale-dossier-stats { gap: 14px; }
+  .dossier-cond-list > li { flex-wrap: wrap; }
+  .cond-chip { align-self: auto; }
+}
+
+/* Kâğıt: katlanmış hiçbir bölüm eksik basılmaz; denetimler gizlenir. */
+@media print {
+  .mmpi-disc-body[hidden] { display: flex !important; }
+  .mmpi-disc-chevron,
+  .clin-report-tools,
+  .clin-quicknav { display: none !important; }
+  .scale-dossier { box-shadow: none; break-inside: avoid-page; }
+  .scale-dossier-head { background: #fff; }
+}
 
   /* ---- Kayıt inceleme başlığı: sade özet şeridi ---- */
   .record-page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

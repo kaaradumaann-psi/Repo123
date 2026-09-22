@@ -362,8 +362,17 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
     // Satır içi sayfa referansı yok; kaynak yalnız kart altlığında (footer'da sayfa aralığı serbest)
     const clinicalBody = clinical.replace(/<footer class="dossier-source">[\s\S]*?<\/footer>/g, '');
     assert.doesNotMatch(clinicalBody, /s\.\d/);
-    // Eski satır-bazlı açılır liste arayüzü kalktı
-    assert.doesNotMatch(clinical, /aria-expanded/);
+    // Uzun kaynak listeleri (Graham 1987, demografik notlar, madde tabloları)
+    // kendi açılır-kapanır bölümündedir; diğer sekmelerle AYNI bileşen
+    // (DisclosureRow) kullanıldığı için davranış sekmeden sekmeye değişmez.
+    assert.match(clinical, /aria-expanded="true"/, 'en belirgin ölçeğin Graham listesi açık gelir');
+    assert.match(clinical, /aria-expanded="false"/, 'diğer uzun listeler kapalı gelir');
+    assert.match(clinical, /aria-controls="/);
+    assert.match(clinical, /Tümünü aç/);
+    // İçerik DOM'dan çıkarılmaz (hidden ile gizlenir): kapalı bölüm de metnini
+    // korur, böylece ekran okuyucu ve yazdırma çıktısı eksik kalmaz.
+    assert.match(clinical, /hidden=""/);
+    assert.match(clinicalBody, /Aşırı bedensel uğraşları vardır/);
 
     const code = renderToStaticMarkup(createElement(MMPICodeTab, { profile: p }));
     // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık yalnızca kod yorumunu anar.
