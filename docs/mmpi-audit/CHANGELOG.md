@@ -1749,3 +1749,23 @@ eksiksiz tamamlanarak kilitlendi.
 
 **Doğrulama:** tsc **0** · `cmp-si-batch33.ts` **0 FARK** · `tests/mmpiSiBlock.test.ts` **6/6 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 12 & 13 — CHANGE-027: UI ve Yazdırma Raporu Denetimi (CONFLICT-007 FIXED)
+
+**Kapsam:**
+- **UI (`src/components/results/MMPICodeTab.tsx`):**
+  - Çok noktalı kod analizi (üçlü ve dörtlü kodlar) bağlandı; profilde 1. ve 2. ölçeğe ek olarak 3. veya 4. ölçek yükselmesi kitapta tanımlı bir koda karşılık geldiğinde (ör. `123/213`, `278/728`, `782/872`, `8726`) ek analiz kartı basılır.
+  - Kod ölçek sıralama etiketleri (`1. en yüksek`, `2. ölçek`, `3. ölçek`...) 3+ ölçekli kodlar için düzeltildi.
+- **Rapor (`src/components/results/MMPIPrintReport.tsx`):**
+  - Çok noktalı kod analizleri basılı klinik rapora aktarıldı.
+  - Bölüm 6 profil örüntüleri (`detectPatterns`) tetiklendiğinde basılı rapora "Profil Örüntüleri & Konfigürasyonları (Bölüm 6)" bölümü eklendi.
+- **Kaynak Sayfası (`src/components/SourcesPage.tsx`):**
+  - Ceyhun, A. A., & Oral, G. (2003) el kitabı **Status A** (Özgün kaynak doğrulandı) APA 7 künyesine yükseltildi.
+  - Bölüm 05 ve 06'daki künyesiz arşiv atıfları güncellendi.
+  - Dipnot atıfları `docs/kaynak-denetimi.md` ve `docs/mmpi-audit/` ile hizalandı.
+- **Dokümantasyon (`docs/kaynak-denetimi.md`):**
+  - `docs/kaynak-denetimi.md` ana bileşen–kaynak eşleştirme tablosu ve dürüstlük kaydıyla oluşturuldu (**CONFLICT-007 FIXED**).
+- **Testler (`tests/mmpiUiReport.test.ts`):**
+  - 5 yeni birim testi eklendi (**5/5 PASS**). Toplam test: **503/503 PASS** (64 suite).

@@ -1056,3 +1056,34 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
 - `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-027 — PHASE 12 & 13: UI ve Yazdırma Raporu Denetimi (CONFLICT-007 FIXED)
+
+**Area:** `src/components/results/MMPICodeTab.tsx` · `src/components/results/MMPIPrintReport.tsx` · `src/components/SourcesPage.tsx` · `docs/kaynak-denetimi.md` · `tests/mmpiUiReport.test.ts`.
+
+**Amaç:** PHASE 12 (UI) ve PHASE 13 (Report) denetimi kapsamında, Bölüm 5'te göç ettirilen çok noktalı (üçlü ve dörtlü) kodların ve Bölüm 6 profil örüntülerinin kullanıcı arayüzü ve basılı klinik rapor çıktılarına eksiksiz yansıtılması; `SourcesPage.tsx` kaynak künyesinin Ceyhun & Oral (2003) Status A künyesine yükseltilmesi ve `docs/kaynak-denetimi.md` oluşturularak CONFLICT-007'nin kapatılması.
+
+**Değişiklikler:**
+1. `src/components/results/MMPICodeTab.tsx`:
+   - Çok noktalı kod analizi: 1. ve 2. klinik ölçeğe ek olarak 3. yükselen ölçek (ve gerekirse 4. ölçek) kitapta tanımlı bir koda karşılık geldiğinde (`123/213`, `278/728`, `782/872`, `8726` vb.) `multiResolved` olarak çözümlenir ve koda özel tanı, metin ve koşullarla ek analiz kartı basılır.
+   - Ölçek etiketleri: `index === 0 ? 'Kodun birinci (en yüksek) ölçeği' : index === 1 ? 'Kodun ikinci ölçeği' : `${index + 1}. ölçek`` ile 3+ ölçekli kodlar için düzeltildi.
+2. `src/components/results/MMPIPrintReport.tsx`:
+   - Çok noktalı kod analizi basılı klinik rapora eklendi.
+   - Bölüm 6 profil örüntüleri (`detectPatterns`) profilde görüldüğünde basılı raporda "Profil Örüntüleri & Konfigürasyonları (Bölüm 6)" başlığı altında kaynak, kural, alıntı ve kaynak çekincesiyle listelendi.
+3. `src/components/SourcesPage.tsx`:
+   - Ceyhun, A. A., & Oral, G. (2003) el kitabı Grup 01 altında **Status A** (Özgün kaynak doğrulandı) APA 7 künyesiyle eklendi; tüm bölümlerin eşleşme dökümü sağlandı.
+   - Grup 05 ve 06'daki künyesiz yerel rehber ifadeleri güncellendi; yalnızca doğrulanamayan yerel kural ve sabitler (Welsh A/R sabitleri, Dy 56 madde) dürüstlük kaydı olarak bırakıldı.
+   - Dipnotlar `docs/kaynak-denetimi.md` ve `docs/mmpi-audit/` ile hizalandı.
+4. `docs/kaynak-denetimi.md`:
+   - 14 ana bileşenin kod dosyası, kaynak künyesi ve doğrulama durumunu içeren master eşleştirme tablosu ve dürüstlük kaydıyla oluşturuldu (**CONFLICT-007 FIXED**).
+5. `tests/mmpiUiReport.test.ts`:
+   - 5 yeni kapsamlı birim testi ile UI çok noktalı kod gösterimi, basılı rapor örüntü ve kod aktarımı, SourcesPage doğrulaması ve `docs/kaynak-denetimi.md` dosya bütünlüğü kilitlendi (**5/5 PASS**).
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx --test tests/mmpiUiReport.test.ts` → **5/5 PASS**
+- `npx tsx --test tests/mmpi*Block.test.ts tests/mmpiKeyIntegrity.test.ts tests/mmpiInterpretation.test.ts tests/aiInterpretation.test.ts tests/mmpiUiReport.test.ts` → **245/245 PASS** (53 suite)
+- `npm test` → **503/503 PASS** (64 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

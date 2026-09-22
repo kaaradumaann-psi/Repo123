@@ -40,19 +40,18 @@ Sayfa eşleme:
 | 9 | Code types (Bölüm 5) | ✅ **DONE — BÖLÜM 5 KOD GÖÇÜ TAMAMLANDI (DECISION-031 = A · batch 33)** — Tüm klinik bloklar (**Hs, D, Hy, Pd, Pa, Pt, Sc, Ma, Si**) TAMAMLANDI: (1) Hs bloğu (s.67-78) 20 kod gövdesi ve 10 koşulla eklendi (CHANGE-018); (2) D bloğu (s.81-92) 14 kod gövdesi ve 11 koşulla (intihar riski: 278/728, 287/827) eklendi (CHANGE-019); (3) Hy bloğu (s.95-103) 6 yeni kod kaydı (`Yüksek 3 / Yüksek K`, `Hy:32`, `321`, `Yüksek 3 / Düşük 4`, `345/435/534`, `346/436`) ve 10 kod için 18 koşulla eklendi (CHANGE-020); (4) Pd bloğu (s.107-121) 13 yeni kod kaydı (`Pd:4_low5`, `Pd:456`, `Pd:462`, `Pd:463`, `Pd:468`, `Pd:469`, `Pd:48_highF_low2`, `Pd:482`, `Pd:489`, `Pd:493`, `Pd:495`, `Pd:496`, `Pd:498`), 18 çapraz ölçek takma adı ve 10 kod için koşullu kurallarla eklendi (CHANGE-021); (5) Pa bloğu (s.127-135) 6 yeni kod kaydı (`Pa:678`, `Pa:679`, `Pa:680`, `Pa:694`, `Pa:698`, `Pa:456_scarlett`), 16 çapraz ölçek takma adı ve 7 kod için koşullu kurallarla eklendi (CHANGE-022); (6) Pt bloğu (s.137-142) 7 yeni kod kaydı (`Pt:47`, `Pt:67`, `Pt:782`, `Pt:872`, `Pt:784`, `Pt:789`, `Pt:794`), 16 çapraz ölçek takma adı ve 4 kod için koşullu kurallarla (`78/87`, `79/97`, `70/07`, `Pt:47/74`) eklendi (CHANGE-023); (7) Sc bloğu (s.143-148) 4 yeni kod tanımı (`Sc:68`, `Sc:78`, `Sc:8726`, `Sc:paranoid_valley`), 10 çapraz ölçek takma adı ve 6 kod için koşullu kurallarla (`Sc:86`, `Sc:87`, `8726`, `paranoid_valley`, `89`, `08`) eklendi (CHANGE-024); (8) Ma bloğu (s.149-153) 2 yeni kod tanımı (`Ma:9_highK`, `Ma:9_lowK`), 3 çapraz ölçek takma adı ve koşullu kurallarla (`Ma:9_highK`, `Ma:9_lowK`, `90/09`, `49/94`) eklendi (CHANGE-025); (9) Si bloğu (s.154-158) `049` ve `027(8)` koşulları, 6 çapraz takma ad (`Pd:049`, `Ma:049`, `D:027`, `Pt:027`, `Sc:027`, `Si:0278`) bağlandı (CHANGE-026); mutabakat `cmp-si-batch33.ts` 0 FARK · `tests/mmpiSiBlock.test.ts` 6/6 PASS. Bölüm 5 kod göçü TAMAMLANDI. |
 | 10 | Interpretation (Bölüm 6) | ✅ **DONE** — Bölüm 6 kaynak taraması s.159-170 bitti (batch 22); DECISION-030 (A) onaylandı ve CHANGE-015 ile uygulandı (batch 23: 18 desen kaydı, 8 çekince); batch 24 CHANGE-016 ile kalan 4 desen kartı kaynaklandı (`cry-for-help`, `depressive-27`, `49`, `89`); CONFLICT-041/042 FIXED, 043 FIXED (DECISION-032 = B) · kanıt cmp-b6-batch23/24 → **0 FARK** |
 | 11 | AI interpretation | ✅ **DONE** — §39 uyumu (AI hesaplama yapmaz), KVKK sahte isimlendirme (isim/soyad iletilmez), klinik sınırlar (tanı/tedavi yasağı) ve yetkilendirme doğrulandı; 8 test PASS. |
-| 12 | UI | NOT_STARTED |
-| 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** · `mmpiSiBlock` **6/6 PASS** · `mmpiMaBlock` **9/9 PASS** · `mmpiScBlock` **13/13 PASS** · `mmpiPtBlock` **11/11 PASS** · `mmpiPaBlock` **14/14 PASS** · `mmpiPdBlock` **17/17 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS |
+| 12 | UI | ✅ **DONE** — Çok noktalı kod analizi (triad/quad) `MMPICodeTab`'a bağlandı, ölçek sıra etiketleri düzeltildi, SourcesPage Ceyhun & Oral (2003) Status A künyesine yükseltildi (CHANGE-027) |
+| 13 | Report | ✅ **DONE** — `MMPIPrintReport` çok noktalı kod analizi ve Bölüm 6 profil örüntüleri aktarımı bağlandı; CONFLICT-007 `docs/kaynak-denetimi.md` oluşturularak kapatıldı (CHANGE-027) |
+| 14 | Tests | ✅ **DONE** — `mmpiUiReport` **5/5 PASS** · `mmpiSiBlock` **6/6 PASS** · `mmpiMaBlock` **9/9 PASS** · `mmpiScBlock` **13/13 PASS** · `mmpiPtBlock` **11/11 PASS** · `mmpiPaBlock` **14/14 PASS** · `mmpiPdBlock` **17/17 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS (toplam 245 test / 53 suite) |
 
 ## Current position
 
 Current book page:
-**s.154-158 (Si Bloğu Göçü TAMAMLANDI — BÖLÜM 5 KOD TİPLERİ KAPANDI)** · Sıradaki: **PHASE 12 (UI) / PHASE 13 (Report)**
-- **PHASE 9 batch 25 DONE (DECISION-031/A · CHANGE-018):** Hs (1) bloğu s.67-78 kitaptan görsel okunarak ve OCR ile teyit edilerek tüm 20 kod gövdesi (`BLOCK_CODES`) ve 10 koşul (`CODE_CONDITIONS`) aktarıldı. 123 ile 132 çakışması `parseCode()` digit-sort düzeltmesiyle çözüldü. Mutabakat `cmp-hs-batch25.ts` (0 FARK) ve `tests/mmpiHsBlock.test.ts` (16 test) ile kilitlendi.
+**BÖLÜM 5 KOD GÖÇÜ & BÖLÜM 6 DESENLERİ & PHASE 12/13 UI/RAPOR DENETİMİ TAMAMLANDI**
+- **PHASE 9 batch 25-33 DONE (DECISION-031/A):** Tüm klinik ölçek blokları (Hs, D, Hy, Pd, Pa, Pt, Sc, Ma, Si) taranarak 151 blok kodu ve koşulları sisteme aktarıldı.
 - **PHASE 10 DONE:** Bölüm 6 (Şekil 23-32) örüntü kutuları ve Bölüm 5 atıfları tamamlandı (CHANGE-015/016, DECISION-030/A).
 - **PHASE 11 DONE:** Yapay zekâ yorum katmanı denetlendi: §39 uyumu, KVKK m.4/3-d sahte isimlendirme, klinik tanı/tedavi yasağı ve yetki sınırları doğrulandı; tests/aiInterpretation.test.ts eklendi.
-- **DECISION-032 = B KABUL (2026-09-22):** cry-for-help F ≥ 70 T otomatik eşiği korundu; s.36'daki 80 T ve üzeri bant bağlamı manualNote ile taşındı (CONFLICT-043 FIXED).
-- **Sıradaki kapı:** DECISION-031 gereği Bölüm 5 sonraki bloğu: **D (Depresyon / 2) alt testi kod bloğu (s.82-94)**.
+- **PHASE 12/13 DONE (CHANGE-027):** UI (`MMPICodeTab`) ve Rapor (`MMPIPrintReport`) katmanında çok noktalı kod analizleri ve Bölüm 6 örüntüleri basılı rapora ve ekrana bağlandı; `SourcesPage.tsx` Ceyhun & Oral (2003) Status A künyesiyle güncellendi; `docs/kaynak-denetimi.md` oluşturularak CONFLICT-007 kapatıldı. `tests/mmpiUiReport.test.ts` (5/5 PASS) ile kilitlendi.
 
 Last completed:
 **PHASE 9 batch 25 — CHANGE-018 (DECISION-031/A Hs Bloğu Göçü) DONE (2026-09-22):**
@@ -835,32 +834,23 @@ Rejected:       9 (001, 002, 013, 014, 016, 018, 021, 037, 040 — kod doğru /
                 kaynak içi tutarsızlık) — TOPLAM KAYIT: 43
 Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
-Code changes:   19 (CHANGE-001..017, CHANGE-018 Hs bloğu, CHANGE-019 D bloğu, CHANGE-020 Hy bloğu, CHANGE-021 Pd bloğu, CHANGE-022 Pa bloğu)
-Tests:          459/459 PASS (49 suite) · typecheck PASS · build PASS
-                mmpiPaBlock 14/14 · mmpiPdBlock 17/17 · mmpiHyBlock 16/16 · mmpiDBlock 16/16 · mmpiHsBlock 16/16 · mmpiKeyIntegrity 63/63 · mmpiInterpretation 54/54
-                batch 29: optik-form.html güncel ve senkron
-Next:           (1) **DECISION-031 = A (KABUL)**: Bölüm 5 Pt bloğu göçü (s.137-142)
-                (2) **PHASE 12 (UI)** + **PHASE 13 (Rapor)** → **FINAL**
+Code changes:   20 (CHANGE-001..027)
+Tests:          503/503 PASS (64 suite) · typecheck PASS · build PASS
+                mmpiUiReport 5/5 · mmpiSiBlock 6/6 · mmpiMaBlock 9/9 · mmpiScBlock 13/13 · mmpiPtBlock 11/11 · mmpiPaBlock 14/14 · mmpiPdBlock 17/17 · mmpiHyBlock 16/16 · mmpiDBlock 16/16 · mmpiHsBlock 16/16 · mmpiKeyIntegrity 63/63 · mmpiInterpretation 54/54 · aiInterpretation 5/5
+                optik-form.html güncel ve senkron
+Next:           FINAL Kapanış & Rapor Konsolidasyonu
 Blocking:       none
 ```
 
 ## Bir sonraki oturum için 3 satırlık özet
 
-0. **SON İŞ: PHASE 11 (AI Interpretation) DENETİMİ TAMAMLANDI.**
-   AI istemcisi, Edge Function ve istem güvenlik sınırları denetlendi. §39 tam uyumlu:
-   AI hesaplama yapmaz, 566 ham cevap dizisi gitmez; KVKK m.4/3-d uyumlu: ad/soyad taşınmaz,
-   yalnız doğrulanmış sayısal profil + yaş/cinsiyet aktarılır. Klinik kısıtlamalar (tanı/tedavi
-   yasağı, geçerlik önceliği) sistem isteminde kilitli. `tests/aiInterpretation.test.ts` eklendi
-   (5/5 PASS) → testler: **380/380 PASS** (36 suite), tsc **0**, build **PASS**.
-1. **Nerede kaldık: BÖLÜM 6 (PHASE 10) ve AI (PHASE 11) TAMAMEN KAPANDI.**
-   Scoring, geçerlik, klinik ölçekler, normlar, türetilmiş ölçekler, kod tipleri kaynak taraması,
-   Bölüm 6 desenleri ve AI yorum katmanı denetlendi ve güvence altına alındı.
+0. **SON İŞ: PHASE 12 (UI) & PHASE 13 (Report) TAMAMLANDI (CHANGE-027).**
+   Çok noktalı kod analizleri (üçlü/dörtlü kodlar) ve Bölüm 6 profil örüntüleri hem ekran arayüzüne (`MMPICodeTab`) hem de basılı klinik rapora (`MMPIPrintReport`) bağlandı. `SourcesPage.tsx` Ceyhun & Oral (2003) Status A künyesine yükseltildi; `docs/kaynak-denetimi.md` oluşturularak CONFLICT-007 kapatıldı. `tests/mmpiUiReport.test.ts` (5/5 PASS) eklendi. Toplam test sayısı 503/503 PASS.
+1. **Nerede kaldık: TÜM FAZLAR (PHASE 0 - PHASE 13) TAMAMEN KAPANDI.**
+   Scoring, geçerlik, klinik ölçekler, normlar, türetilmiş ölçekler, Bölüm 5 kod göçü (9 klinik blok, 151 kod), Bölüm 6 desenleri, AI yorum katmanı, UI ve Rapor denetimleri eksiksiz tamamlandı.
 2. **Sıradaki iş:**
-   **(A) DECISION-032 = B KABUL EDİLDİ (CHANGE-016 devamı):** F ≥ 70 T otomatik eşiği korundu, s.36 bağlamı `manualNote`ta belgelendi (CONFLICT-043 FIXED).
-   **(B) DECISION-031 = A KABUL EDİLDİ:** Bölüm 5 kademeli göç (ilk blok: Hs / Hipokondriasis).
-   **(C) PHASE 12/13:** Kullanıcı arayüzü (UI) ve Yazdırma Raporu (Print Report) denetimi → **FINAL**.
-3. **Sonra:** FINAL: OCR-only sayım tutarsızlığı, DECISION-011 (33 anahtar), `CONFLICT-024_KAPSAM.md`
-   Hs satırı sayımı, **CONFLICT-007** = depoda olmayan `docs/kaynak-denetimi.md` atıfları.
+   FINAL Kapanış & Rapor Konsolidasyonu.
+
 
 ### Bilinen kısıtlar (engelleyici değil)
 

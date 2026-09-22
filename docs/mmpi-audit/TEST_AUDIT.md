@@ -1050,3 +1050,16 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-si-batch33.ts` → **SONUÇ: 0 FARK · Si BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiMaBlock` → **9/9** · `mmpiSiBlock` → **6/6** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 12 & 13 batch 34 — CHANGE-027 · UI ve Yazdırma Raporu Denetimi (CONFLICT-007 FIXED)
+
+**Amaç:** PHASE 12 (UI) ve PHASE 13 (Report) kapsamında, çok noktalı kod analizlerinin (`123/213`, `278/728`, `782/872` vb.) ekranda ve raporda basılması, Bölüm 6 profil örüntülerinin basılı rapora aktarılması, SourcesPage Ceyhun & Oral (2003) Status A künyesine yükseltilmesi ve `docs/kaynak-denetimi.md` oluşturularak CONFLICT-007'nin kapatılması.
+
+**Eklenen testler (5):** `tests/mmpiUiReport.test.ts` → **5/5 PASS**
+1. `MMPICodeTab`: 123 üçlü kodu eşleştiğinde hem 12/21 ana kodunu hem 123 genişletilmiş analizini gösterir.
+2. `MMPICodeTab`: 278 intihar riski üçlü kodu eşleştiğinde 278 gövdesi basılır.
+3. `MMPIPrintReport`: Çok noktalı kod analizi ve Bölüm 6 profil örüntüleri basılı rapora aktarılır.
+4. `SourcesPage`: Ceyhun & Oral (2003) Status A olarak künyelenmiştir ve `docs/kaynak-denetimi.md` atfı vardır.
+5. `CONFLICT-007`: `docs/kaynak-denetimi.md` dosyası depoda mevcuttur ve temel eşleştirme tablosunu içerir.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `tests/mmpiUiReport.test.ts` → **5/5 PASS** · tüm blok testleri + bütünlük + yorum + AI → **245/245 PASS** (53 suite) · `npm test` → **503/503 PASS** (64 suite) · `npm run build` → **PASS** · `git diff --check` temiz.

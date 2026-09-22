@@ -23,6 +23,26 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
     .filter(s => s !== undefined);
   const third = thirdHighestClinical(profile, codeDigits.map(digit => idByDigit[digit] ?? ''));
 
+  const digitById: Record<string, string> = {
+    Hs: '1', D: '2', Hy: '3', Pd: '4', Mf: '5', Pa: '6', Pt: '7', Sc: '8', Ma: '9', Si: '0',
+  };
+  const thirdDigit = third ? digitById[third.id] : undefined;
+  const triadCandidate = code && thirdDigit ? `${code}${thirdDigit}` : undefined;
+  const triadResolved = triadCandidate ? codeInterpretationForProfile(triadCandidate, profile) : undefined;
+
+  let multiResolved = triadResolved;
+  if (!multiResolved && code && thirdDigit) {
+    const fourth = profile.clinical
+      .filter(s => !codeDigits.map(d => idByDigit[d]).concat(third?.id ?? '').includes(s.id))
+      .sort((a, b) => b.tScore - a.tScore)[0];
+    const fourthDigit = fourth ? digitById[fourth.id] : undefined;
+    if (fourthDigit) {
+      const quadCandidate = `${code}${thirdDigit}${fourthDigit}`;
+      const quadResolved = codeInterpretationForProfile(quadCandidate, profile);
+      if (quadResolved) multiResolved = quadResolved;
+    }
+  }
+
   return (
     <div role="tabpanel" className="mmpi-tab-panel">
       <div className="mmpi-code-grid">
@@ -44,7 +64,13 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
               <b>
                 {index + 1}. {scale.fullName} — T {scale.tScore.toFixed(1)}
               </b>
-              <span>{index === 0 ? 'Kodun birinci (en yüksek) ölçeği' : 'Kodun ikinci ölçeği'}</span>
+              <span>
+                {index === 0
+                  ? 'Kodun birinci (en yüksek) ölçeği'
+                  : index === 1
+                    ? 'Kodun ikinci ölçeği'
+                    : `${index + 1}. ölçek`}
+              </span>
             </div>
           ))}
           {third && (
@@ -100,6 +126,44 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+              {multiResolved && multiResolved.entry.code !== entry.code && (
+                <div className="mmpi-box info" style={{ marginTop: '0.75rem' }}>
+                  <b>Genişletilmiş Çok Noktalı Kod Analizi: {multiResolved.entry.code}</b>
+                  <p className="clin-signal" style={{ marginTop: '0.35rem' }}>{multiResolved.entry.text}</p>
+                  {multiResolved.entry.diagnosis && multiResolved.entry.diagnosis.length > 0 && (
+                    <div style={{ marginTop: '0.35rem' }}>
+                      <b>Olası Tanı ({multiResolved.entry.code}):</b>
+                      <ul>
+                        {multiResolved.entry.diagnosis.map((d, i) => (
+                          <li key={i}>
+                            <Icon name="info" size={12} />
+                            {d}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {multiResolved.entry.seeAlso && (
+                    <p className="mmpi-summary-note" style={{ marginTop: '0.35rem' }}>
+                      {multiResolved.entry.seeAlso}
+                    </p>
+                  )}
+                  {multiResolved.activeConditions.length > 0 && (
+                    <div style={{ marginTop: '0.35rem' }}>
+                      <b>Koşullu ek yorum:</b>
+                      <ul>
+                        {multiResolved.activeConditions.map((c, i) => (
+                          <li key={i}>
+                            <Icon name="info" size={12} />
+                            {c.quote}
+                            <span className="mmpi-code-name"> ({c.source})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
             </>

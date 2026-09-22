@@ -250,9 +250,7 @@ Kaynakça sayfası, kullanıcıya "künye–bileşen eşleştirme tabloları dep
 iddiası kanıtlanamaz.
 
 Status:
-**CONFIRMED** — bu denetim klasörü (`docs/mmpi-audit/`) doğru içeriği
-üretiyor; PHASE 12/13 (UI/report) sonunda ya dosya oluşturulacak ya da
-UI metni düzeltilecek. **Karar bekliyor → DECISIONS.md DECISION-005.**
+**FIXED** — PHASE 13 kapsamında `docs/kaynak-denetimi.md` ana bileşen–kaynak eşleştirme tablosu ve dürüstlük kaydıyla oluşturuldu; `SourcesPage.tsx` metni güncellendi (CHANGE-027, 2026-09-22). DECISION-005 uygulandı.
 
 ---
 
@@ -1382,8 +1380,8 @@ tanı/terim değildir; kaynağın kastettiği **vegetatif (bitkisel) belirtiler*
 işlevsel bir ayrım yapıyor → yanlış terim yorumu saptırır (P2 — yorum katmanı,
 sayısal değer değil).
 
-Status: **OPEN** — düzeltme tek kelime (kod değişikliği), DECISION gerektirir.
-Not: Kaynak cümlesinin geri kalanı birebir; sapma **yalnız bu kelimede**.
+Status: **FIXED** — CHANGE-012 ile "vegetatif" olarak düzeltildi (2026-09-22).
+Not: Kaynak cümlesinin geri kalanı birebir; sapma giderildi.
 
 ---
 

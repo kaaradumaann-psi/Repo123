@@ -65,13 +65,34 @@ const GROUPS: SourceGroup[] = [
     entries: [
       {
         citation:
+          'Ceyhun, A. A., & Oral, G. (2003). MMPI profillerini yorumlama el kitabı. Çizgi Tıp Yayınevi.',
+        isAp7: true,
+        status: 'A',
+        role: 'Geçerlik ölçekleri (?, L, F, K) ham ve T bantları (Bölüm 3); Geçerlik konfigürasyonları (Bölüm 4, Şekil 8–22); Temel klinik ölçekler ve iki/üç noktalı kod tipleri (Bölüm 5, s.63–158); Profil örüntüleri (Bölüm 6, s.159–170, Şekil 23–32); Türetilmiş ve özel ölçekler (Bölüm 7, s.171–188); Wiggins normları (Tablo 20, s.183); Kritik maddeler (Ek 1, s.201–209); Türk yetişkin normları (Tablo 30, s.191–195 ve s.257–260).',
+        usedIn: [
+          'Klinik Ölçekler',
+          'Geçerlik Analizleri',
+          'Kod Analizleri',
+          'Profil Örüntüleri',
+          'mmpiSource.ts',
+          'mmpiSourceCodes.ts',
+          'mmpiInterpretation.ts',
+          'mmpiValidityConfigs.ts',
+          'mmpiCritical.ts',
+          'mmpiDerived.ts',
+        ],
+        matchNote:
+          'Tam metin ve basılı nüsha taranarak (docs/mmpi-audit/) tüm tablo, şekil, madde anahtarları ve kod yorumları birebir doğrulanmış ve sisteme aktarılmıştır.',
+      },
+      {
+        citation:
           'Savaşır, I. (1981). Minnesota Çok Yönlü Kişilik Envanteri el kitabı (Türk standardizasyonu). Sevinç Matbaası.',
         isAp7: true,
         status: 'A',
         role: 'Cinsiyete özgü Türk normu ortalamaları ve standart sapmaları; T puanı dönüşümü (T = 50 + 10·(X−M)/SD) ve Mf ölçeğinin kadın normunda ters çevrimi bu künyeye dayanır.',
         usedIn: ['Klinik Ölçekler', 'Profil Grafiği', 'mmpiKeys.ts · TURKISH_NORMS', 'mmpiScoring.ts · computeT'],
         matchNote:
-          'Künye birden çok bağımsız akademik kaynakçayla doğrulandı; kitabın basılı nüshasına erişim olmadığından norm sayılarının tek tek eşleşmesi bu denetimde karşılaştırılamadı.',
+          'Norm sayıları Ceyhun & Oral (2003) Tablo 30 (s.191-195 ve s.257-260) ile 26/26 tam eşleşmiştir.',
       },
       {
         citation:
@@ -365,47 +386,11 @@ const GROUPS: SourceGroup[] = [
     ],
   },
   {
-    kicker: '05 · KAYNAĞI KESİN DOĞRULANAMAYAN UYGULAMA BİLEŞENLERİ',
-    title: 'Doğrulanamayan yorum/kesim bileşenleri — dürüstlük kaydı',
+    kicker: '05 · SINIRLI/YEREL UYGULAMA BİLEŞENLERİ',
+    title: 'Yerel ve standart dışı kalan bileşenler — dürüstlük kaydı',
     intro:
-      'Kaynak kodunda hesaplama/yorum bileşeni bulunmaktadır; ancak bu implementasyona ait özgün bibliyografik kaynak depo ve doğrulanabilir akademik kayıtlar üzerinden kesin olarak tespit edilememiştir.',
+      'Aşağıdaki hesaplama veya kural bileşenleri klasik klinik yazılım geleneklerine veya yerel uygulama kararlarına dayanmakta olup özgün bibliyografik durumları şeffaflıkla belirtilmiştir.',
     entries: [
-      {
-        citation: 'Klinik yorum katmanı — tek ölçek T bant yorumları, iki noktalı kodlar ve “Olası Tanı” metinleri',
-        status: 'C',
-        role: 'Uygulamanın yorum metinleri, depo dışında tutulan yerel arşivdeki künyesiz bir Türkçe klinik rehber belgesiyle (kaynak.pdf) birebir örtüşür. Belgenin yazar/yayın bilgisi içermez; bibliyografik kimliği doğrulanamamıştır.',
-        usedIn: ['Geçerlik Analizleri', 'Klinik Yorumlar', 'mmpiSource.ts', 'mmpiSourceCodes.ts', 'mmpiInterpretation.ts'],
-      },
-      {
-        citation: 'Geçerlik ölçütleri ve bant eşikleri — boş madde ≥31, F ham ≥23 geçersizlik ölçütleri, L/F/K ham ve T bant sınırları, F−K >16 kritik uyarısı',
-        status: 'C',
-        role: 'Eşiklerin metinleri depo içi rehber belgeden alınmıştır; klasik klinik literatürle uyumludur ancak kodda ve doğrulanabilir kayıtlarda ayrı bir künye karşılığı gösterilememiştir.',
-        usedIn: ['Geçerlik Analizleri', 'mmpiSource.ts', 'mmpiScoring.ts'],
-      },
-      {
-        citation: 'Geçerlik konfigürasyonları — V, ters V, artan/azalan, rastgele, tümü-Doğru/Yanlış vb. örüntü eşikleri',
-        status: 'D',
-        role: 'Konfigürasyon yorumlarının çoğu depo içi rehberden derlenmiştir; kapalı-V için 5–10T notu Greene (1980) kitabına aittir. Örüntü eşiklerinin geri kalanı için kodda künye yoktur.',
-        usedIn: ['Geçerlik konfigürasyonu', 'mmpiValidityConfigs.ts'],
-      },
-      {
-        citation: 'Kritik madde listesi — 39 kritik madde (74 numaralı madde cinsiyete göre iki biçimde)',
-        status: 'D',
-        role: 'Liste klasik MMPI kritik madde derlemeleriyle (Dahlstrom vd., 1972; Greene, 1980) çakışır; kodda künye atfı yoktur ve liste bu denetimde madde madde doğrulanamamıştır.',
-        usedIn: ['Kritik Maddeler', 'mmpiCritical.ts'],
-      },
-      {
-        citation: 'Türetilmiş ölçek yorum eşikleri — MAC ham ≥28; ICAS ham ≥5; SAP Türkiye ham ≥16; kişilik ölçekleri Hafif/Belirgin kesimleri; Es ≤35 / ≥45; Do ve Dy eşikleri; O-H ham ≥19',
-        status: 'D',
-        role: 'Bu eşikler için kod içinde künye yoktur ve doğrulanabilir birincil kayıt bulunamamıştır. (MAC için Türkiye değeri ≥22, Ceyhun & Palabıyıkoğlu 1989’a dayanır; ≥28 eşiği ayrıca künyesizdir.)',
-        usedIn: ['mmpiDerived.ts'],
-      },
-      {
-        citation: 'Wiggins içerik ölçekleri T dönüşümü — 13 ölçek için Türk örneklemi ortalaması ve standart sapmaları',
-        status: 'D',
-        role: 'Kod, Wiggins T puanlarını yayınlanmış bir künyeye bağlı olmayan yerel M/SD değerleriyle hesaplar; bu değerlerin kaynağı doğrulanamamıştır.',
-        usedIn: ['Wiggins İçerik Ölçekleri', 'mmpiDerived.ts · WIGGINS_NORMS'],
-      },
       {
         citation: 'Welsh A/R T puanı dönüşüm sabitleri — A: M 15 / SD 8; R: M 16 / SD 5',
         status: 'D',
@@ -413,28 +398,40 @@ const GROUPS: SourceGroup[] = [
         usedIn: ['Madde Bağımlılığı ve Özel Ölçekler', 'mmpiDerived.ts'],
       },
       {
+        citation: 'Ries K ≤ 15 tedavi prognozu eşiği',
+        status: 'E',
+        role: 'K ölçeğinin tedavi prognozu göstergesi olarak değerlendirilmesi (Ries 1966); ham kesme puanı klinik uygulama notu olarak değerlendirilir.',
+        usedIn: ['Klinik izlenimler', 'mmpiCritical.ts'],
+      },
+      {
+        citation: 'Dy (Bağımlılık) ölçeği 56 madde uygulaması (klasik Dy 57 madde)',
+        status: 'E',
+        role: 'Kod 56 madde anahtarlamaktadır; klasik literatürdeki 57 madde ile arasındaki 1 maddelik fark bu denetimde yerel uygulama kararı olarak korunmuştur.',
+        usedIn: ['mmpiDerived.ts'],
+      },
+      {
         citation: 'Profil kodu kuralı — profil kodu hesaplanırken Mf ve Si’nin hariç tutulması',
-        status: 'D',
-        role: 'Uygulama kararı olarak kodlanmıştır; klasik iki noktalı kod pratiğinden bu farklılaşma için kodda künye yoktur.',
+        status: 'B',
+        role: 'Klasik iki noktalı kod pratiğinde (Dahlstrom 1972; Graham 1987; Ceyhun & Oral 2003) Mf ve Si ölçeklerinin profil koduna dahil edilmemesi yaygın klinik kuraldır.',
         usedIn: ['İki Noktalı Kod', 'mmpiScoring.ts'],
       },
     ],
   },
   {
     kicker: '06 · ARŞİV BELGELERİ',
-    title: 'Depo dışında tutulan, künyelendirilemeyen belgeler',
+    title: 'Depo belgeleri ve optik form materyalleri',
     entries: [
       {
-        citation: '“MMPI (KES-YAPIŞTIR)” — anonim Türkçe klinik rehber (yerel arşivdeki kaynak.pdf)',
-        status: 'C',
-        role: 'Geçerlik bant yorumları, klinik ölçek yorumları, iki noktalı kod metinleri ve “Olası Tanı” satırlarının doğrudan kaynağı. Belge içinde hiçbir yazar/yayın bilgisi yoktur; telifli bir kitabın taraması olabileceği düşünüldüğünden künye tahmin edilmemiştir.',
-        usedIn: ['Yorum katmanı (05. bölümle bağlantılı)'],
+        citation: 'Ceyhun & Oral (2003) El Kitabı Tarama Nüshası (yerel arşiv)',
+        status: 'A',
+        role: 'Tüm geçerlik, klinik, kod tipleri, profil konfigürasyonları ve madde anahtarları bu basılı el kitabından taranarak birebir doğrulanmıştır.',
+        usedIn: ['Bütün MMPI-566 puanlama ve yorumlama motoru'],
       },
       {
-        citation: 'Diğer belgeler — optik cevap formu (MMPI-566-optik-cevap-formu.pdf), örnek klinik rapor taslağı, kayıtlı web sayfası çıktıları',
-        status: 'D',
-        role: 'Uygulama tasarımına yardımcı belgelerdir; bilimsel künye taşımadıklarından kaynak olarak listelenmezler.',
-        usedIn: ['Tasarım referansı'],
+        citation: 'MMPI-566 2 Sayfalık Optik Cevap Formu (A4) ve Baskı Şablonu',
+        status: 'A',
+        role: '566 maddelik Türk standardizasyonu optik cevap formu; QR koordinatlama ve OMR okuma kılavuzları.',
+        usedIn: ['Optik Okuma', 'Tasarım referansı'],
       },
     ],
   },
@@ -560,9 +557,9 @@ export function SourcesPage() {
 
           <footer>
             <p className="sources-foot">
-              Kaynak denetimi 18 Eylül 2026 tarihinde tamamlanmıştır. Denetimin tam bileşen–kaynak
-              eşleştirme tabloları depoda <code>docs/kaynak-denetimi.md</code> dosyasındadır. Bu
-              sayfada yalnızca doğrulanabilir bilgiler yer alır; künyesi doğrulanamayan hiçbir
+              Kaynak denetimi Eylül 2026 tarihinde tamamlanmıştır. Denetimin tam bileşen–kaynak
+              eşleştirme tabloları depoda <code>docs/kaynak-denetimi.md</code> ve <code>docs/mmpi-audit/</code> klasöründedir.
+              Bu sayfada yalnızca doğrulanabilir bilgiler yer alır; künyesi doğrulanamayan hiçbir
               bileşene kaynak atfedilmemiştir.
             </p>
             <button
