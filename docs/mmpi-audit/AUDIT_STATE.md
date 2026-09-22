@@ -748,6 +748,8 @@ FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 01
 
 ## Last update
 
+2026-09-22 — Oturum 8 (devam 10): **PHASE 10 batch 28 — ledger mutabakatı ÖLÇÜLDÜ (belge-only)** — DECISION-031 sizing notunun “ilk iş satır satır yeniden sınıflandırma” adımı ayrıştırıcıya dokunmadan ölçüldü: satır-etiketi evreni **148** (VAR 61 + YOK 87, kapalı) ↔ araç anahtarı **152** (grup genişlemesi +4); defter “fark 2”sinin tek kaynağı **Pd satırı** (7 kafalık ↔ 9 kayıt kalemi). Conflict açılmadı; sayaçlar aynı (FIXED 17 · REJECTED 9 · 16 açık). Sıradaki kapılar: **DECISION-031** (yalnız gövde göçü kaldı) · **DECISION-032**.
+
 2026-09-22 — Oturum 8 (devam 9): **PHASE 10 batch 27 — CONFLICT-044 sayfa okumasıyla KAPANDI (belge-only)** — s.132–s.135 (p074 L/R + p075 L/R · 300 dpi) kaynakta okundu: `68/86 Kodu` başlığı ve gövdesi **s.132**’de VAR; s.133/s.134’te ayrıksı `68/86` başlığı yok — KAPSAM:385, `698/968` gövdesindeki koşullu geçiş cümlesinin (“Eğer 8 alt testi, 6’dan 5 T puanı aşağıda ise 68/86 koduna bakın.”) kural-satırıdır. Sayaç: **44 kayıt · FIXED 17 · REJECTED 9 · 16 açık (2 P3)**; `src/`, testler ve `optik-form.html` **değişmedi**; `final-count.ts` çıktısı birebir aynı (HATA 0 · NOT 7). Sıradaki kapılar: **DECISION-031 · DECISION-032**.
 
 2026-09-22 — Oturum 8 (devam 8): **PHASE 10 batch 26 — belge-only sayım düzeltmesi** — DECISION-011’in “33 anahtar” sayısı ölçümle güncellendi (**O 32 · V 14 · satır 46**); `src/`, testler ve `optik-form.html` **değişmedi**; araç bulguları aynı (HATA 0 · NOT 7). DECISION-030/A onayı **tükenmiştir** (CHANGE-015 + CHANGE-016); sıradaki kapı **DECISION-031**.
@@ -989,6 +991,7 @@ Blocking:       none
 - ~~`WIGGINS_NORMS` (13 ölçek) için kaynak kanıtı yok → PHASE 8~~ → **KAPANDI** (Tablo 20, 26/26 MATCH)
 - Türkçe OCR modeli yok → tüm sayısal fact'ler görsel doğrulamalı
 - OCR-only sayım tutarsızlığı (32 O / 9 V ↔ "33"): FINAL öncesi sayılacak
+  → batch 28 mutabakatı: ledger satır-kümesi **148** (VAR 61 + YOK 87 → kapalı) ↔ araç anahtarı **152** (net +4 = grup genişlemesi, kalem farkı); defterde yalnız **Pd satırı** kapalı değil (20 ≠ 22; +2 = 7-kafalık ↔ 9-kayıt kalemi, dosyanın kendi ⚠️ notu). Eski satırlar yazılmadı.
   → ✅ **ÖLÇÜLDÜ (batch 25)** — tablo: **O 32 (iddia ✓) · V 14 (“9 V” bayat) · 46 satır**;
   anlatıdaki **“33”** hiçbir sayıyla eşleşmiyor (O+V = 46) → FINAL’da yazılacak düzeltme
   **“V 14 / O 32”**. Kanıt: `npx tsx scripts/mmpi-audit/final-count.ts` → **(A)**.

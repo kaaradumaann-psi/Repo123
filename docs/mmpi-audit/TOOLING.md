@@ -91,3 +91,7 @@ araç hiçbir dosyayı yazmaz.
 > (KAPSAM’daki “Ek örüntüler — kod başlığı değil” tablosundan); kaynak sayfası okunarak
 > gerekçelendi ve **CONFLICT-044 → FIXED (belge-only)**. Araç davranışı bilinçli olarak
 > değiştirilmedi: bulgu satırları ölçüm olarak basılmaya devam eder, yorum belgededir.
+> **Batch 28 ek-ölçümü:** ayrıştırıcıya dokunmadan, **geçici kopya** üzerinden aynı
+> satır evreninde sayım: eşsiz satır-etiketi **148** (VAR 61 + YOK 87 → kapalı) · araç
+> anahtarı **152** (net +4 = çok-kodlu satır grupları) — fark **kalem tanımıdır**; NOT satırları
+> bu nedenle sabit kalır (beklenen çıktı budur).

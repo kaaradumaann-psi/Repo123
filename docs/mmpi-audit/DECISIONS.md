@@ -993,6 +993,8 @@ gelirse ilk iş **satır satır yeniden sınıflandırma**, sonra gövde göçü
 > `68/86 Kodu` başlığı ve gövdesi s.132’dedir. İş kümesi sayısı **44 DEĞİŞMEDİ**; ilk iş
 > artık yalnız 148↔152/150 defter NOT’larının gerekçe düzeltmesi + gövde göçüdür
 > (onay kapısı aynıdır).
+>
+> **Mutabakat ölçümü (batch 28 · belge-only):** “satır satır yeniden sınıflandırma” adımı ÖLÇÜLDÜ ve **gerekmediği** belirlendi — satır-etiketi evreni **148** ile kapalı (VAR 61 + YOK 87); 152 ↔ 148 farkı araç anahtarının **grup genişlemesi**, 150 ↔ 148 farkı **Pd satırının kayıt-kalemi**dir (7 kafalık ↔ 9 kayıt; dosyanın kendi notu). DECISION-031’den tek kalan işlem **44 gövdenin göçüdür** ve **açık “DECISION-031 = A” onayına** tabiidir.
 
 
 ---

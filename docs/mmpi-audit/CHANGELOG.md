@@ -1707,3 +1707,21 @@ DECISIONS.md (DECISION-031 güncellemesi) · AUDIT_STATE.md (bulgu satırı + sa
 **Doğrulama:** `npx tsx scripts/mmpi-audit/final-count.ts` → **HATA 0 · NOT 7**, NOT/HATA
 satırları batch 26 çıktısıyla **birebir aynı** (diff boş) · `npx tsc --noEmit` **0** ·
 `npm test` **375/375** (36 suite) · belge-only olduğu için build/UI delta yok.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 28 — Ledger mutabakatı: fark 4 / fark 2 ölçüldü ve kapatıldı (yalnız BELGE; `src/` ve araç değişmedi)
+
+**Amaç:** DECISION-031 sizing notunun “onay gelirse ilk iş satır satır yeniden sınıflandırma” adımı ile batch 18 FINAL notunun (“satırdan yeniden sayılacak”) vaadi, kod onayı gerektirmediği için bu turda ölçüldü. `final-count.ts`’a dokunulmadı; ölçüm, araç mantığının **geçici kopyasıyla** (import yolu düzeltilmiş) aynı 164 satır evreninde yapıldı; kopya tur sonunda silindi.
+
+**Ölçülen:**
+- Eşsiz **satır-etiketi = 148** · son-satır durumlarıyla **VAR 61 + YOK 87 = 148 → kapalı** (ledger iddiası satır-kümesinde doğrulandı).
+- Eşsiz **araç anahtarı = 152** · kompozisyon: 29 satır-etiketi grup adlarına taşındı, 33 yeni grup anahtarı üretildi (148 − 29 + 33) → net **+4 = çok-kodlu satır grupları** (örn. D “231/321, 234/324, 237/327” → 3 grup). **Kalem tanımı farkıdır; satırlar yeniden sınıflandırmayı gerektirmez.**
+- Kümülatif tabloda her blok satırı “VAR + YOK = Başlık”ı kapatır; tek istisna **Pd** (20 ≠ 22 → **+2**): birleşik özet “VAR 7 → kod kaydı olarak 9 kayıt” + ⚠️ notu “VAR/YOK kümülatif önceki satırdan taşınır”. Başlık sütunu **kafalık**, VAR/YOK sütunları **kayıt** sayıyor → TOPLAM’da +2 kalıntı; **eski satır yazılmadı**, ölçüm notu eklendi.
+- Araç kopyasında görülen kenar durum: “8726/Yüksek 9”-tipi ve (s.NNN) sayfa etiketleri ek grup üretir; araç bunları olduğu gibi basar — **bu turda değiştirilmedi**, davranış kalemi DECISION-031 kapısıyla aynı seviyede ele alındı.
+
+**Sonuç:** DECISION-031’in ön koşulu kapandı — tek kalan işlem **44 gövdenin göçü**dür; açık “DECISION-031 = A” onayı bekleniyor. Conflict açılmadı; sayaçlar değişmedi (44 kayıt · FIXED 17 · REJECTED 9 · 16 açık).
+
+**İşlenen kayıtlar (append-only):** KAPSAM (FINAL bloğu altına mutabakat oku + hüküm) · AUDIT_STATE (OCR-satırı altına ölçüm oku + Last update “devam 10”) · DECISIONS (031 güncellemesi) · TOOLING (ek-ölçüm) · TEST_AUDIT (mutabakat bloğu) · CHANGELOG (bu girdi).
+
+**Doğrulama:** `final-count.ts` (repo hâli) → **HATA 0 · NOT 7**, NOT/HATA satırları batch 27 ile **birebir aynı** (diff boş) · `npm test` **375/375** (36 suite) · belge-only → `src/`, `optik-form.html`, araç dosyaları değişmedi.

@@ -904,3 +904,8 @@ blok-yerel gövde mi kastediliyor, kaynak sayfasıyla (s.130-135 Pa bloğu) netl
 (36 suite) · `npm run build` **PASS** (`src/` değişmedi → `optik-form.html` **aynı**) ·
 `git diff --check` temiz. Test **sayısı değişmedi** (araç salt-okunur; test dosyalarına
 dokunulmadı).
+
+**Mutabakat (batch 28 · belge-only ölçüm; test değişikliği YOK):** satır-etiketi evreni
+**148** (VAR 61 + YOK 87 → kapalı) ↔ araç anahtarı **152** (net +4 = grup genişlemesi,
+kalem farkı) · defter fark-2’sinin tek kaynağı **Pd** satırı (7 kafalık ↔ 9 kayıt). Araç
+diff’i boş; `npm test` **375/375** (36 suite).
