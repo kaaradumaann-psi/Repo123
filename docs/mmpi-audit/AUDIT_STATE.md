@@ -613,6 +613,8 @@ yok; `70/07` gövdesinde 3 kesim eksik → CONFLICT-025). Sc kod bloğu I
 
 Bilinen kısıtlar:
 - 33 anahtar yalnızca OCR doğrulamalı → `OCR-CONFIRMED` (`DECISION-011`)
+  → **yeniden ölçüldü (batch 26, `final-count.ts`):** `Doğrulama: O` satırları **32**, `V`
+  satırları **14**, toplam **46** — kural aynı; sayı düzeltmesi FINAL raporuna yazılacak.
 - **Wiggins SOC yorum yönü** kaynakla çelişiyor → CONFLICT-022 (P2, PHASE 10)
 - **Dönük tablo kuralı:** sayısal tablolarda önce deskew + sütun doğrulaması
   (`OCR_ISSUES.md` ROTATED-TABLE)
@@ -741,6 +743,8 @@ FIXED: 11 (008-012, 015, 017, 019, 020-kısmi, 023, 035) · REJECTED: 7 (001, 00
 FIXED: 10 (008-012, 015, 017, 019, 020-kısmi, 023) · REJECTED: 7 (001, 002, 013, 014, 016, 018, 021).
 
 ## Last update
+
+2026-09-22 — Oturum 8 (devam 8): **PHASE 10 batch 26 — belge-only sayım düzeltmesi** — DECISION-011’in “33 anahtar” sayısı ölçümle güncellendi (**O 32 · V 14 · satır 46**); `src/`, testler ve `optik-form.html` **değişmedi**; araç bulguları aynı (HATA 0 · NOT 7). DECISION-030/A onayı **tükenmiştir** (CHANGE-015 + CHANGE-016); sıradaki kapı **DECISION-031**.
 
 2026-09-22 — Oturum 8 (devam 7): **PHASE 10 batch 25 — FINAL SAYIM ARACI (`final-count.ts`)** —
 `src/` **değişmedi**; yalnız salt-okunur araç + belge anotasyonları (test sayısı aynı). Üç FINAL

@@ -1654,3 +1654,20 @@ yalnız **not olarak** yazıldı, satırlar yeniden yazılmadı).
 
 **Doğrulama:** tsc **0** · `final-count.ts` → **HATA 0 · NOT 7** (exit 0) · `mmpiInterpretation`
 **54/54** · `npm test` **375/375** (36 suite) · `npm run build` **PASS** · `git diff --check` temiz.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 26 — DECISION-011 sayım düzeltmesi (yalnız BELGE; `src/` değişmedi)
+
+`final-count.ts` (batch 25) üç FINAL sayımını ölçtükten sonra, ölçüme rağmen belgede duran
+tek bayat sayı kapatıldı: **DECISION-011’in “33 anahtar yalnızca OCR” sayısı**. Ek 9
+tablolarının gerçek dağılımı **O = 32 · V = 14 · satır = 46** (V + O = satır, belirsiz 0).
+
+**Yöntem:** eski satırlar **yeniden yazılmadı** — `DECISIONS.md` DECISION-011 bloğuna
+“Sayım güncellemesi” notu, `AUDIT_STATE.md` “Bilinen kısıtlar” maddesinin aynı satırına
+ölçüm oku eklendi; kural (`OCR-CONFIRMED`, `VERIFIED` sayılmaz) **değişmedi**.
+
+**Doğrulama:** `npx tsx scripts/mmpi-audit/final-count.ts` → **HATA 0 · NOT 7** (bulgu kümesi
+batch 25 ile **birebir aynı**, diff alındı) · `cmp-b6-batch23/24.ts` → **0 FARK** · tsc **0** ·
+`npm test` **375/375** (36 suite) · `npm run build` **PASS** (`src/` dokunulmadı →
+`optik-form.html` **değişmedi**) · `git diff --check` temiz.

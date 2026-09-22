@@ -248,7 +248,13 @@ Action:
 korunur. FINAL raporunda:
 `SOURCE-ALIGNED-WITH-UNVERIFIED` (bkz. §47).
 
-Status: **APPROVED**
+**Sayım güncellemesi (batch 26 · `scripts/mmpi-audit/final-count.ts`, 2026-09-22):** kararın
+**kuralı değişmedi**; yalnız anahtar sayısı yeniden ölçüldü — Ek 9 tablolarında **OCR-only
+(`Doğrulama: O`) = 32 satır**, görsel doğrulanmış (`V`) = 14 satır, toplam satır = 46
+(V + O = satır; belirsiz satır 0). Yukarıdaki “33” sayısı karar anındaki kalem sayısıdır ve
+**olduğu gibi korundu** (tarihsî satır yeniden yazılmaz); FINAL raporunda **32 / 14** yazılacak.
+
+Status: **APPROVED** (kural) · sayım **ölçüldü** (yukarıdaki not)
 
 ---
 
