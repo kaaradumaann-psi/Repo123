@@ -333,6 +333,15 @@ nedeniyle başka bir metne** düşüyor.
 | 6 | **`564/654`** | **YOK** ❌ | `'564'` → `56/65` (kırpma) |
 | 7 | `57/75` | **VAR** ✅ | |
 
+> ⚠️ **Satır 6 bulgusu (batch 29 · `MIGRATION_STAGING.md` · 600 dpi kadraj `v_b29_s125_mf.png`):**
+> kaynak s.125’te **`564/654` ayrıksı bir başlık DEĞİLDİR** — yalnız `56/65 Kodu` gövdesinin
+> ikinci paragrafındaki parantez örneğidir (“…T puanının 70’in üzerinde olduğu başka bir test
+> varsa 5 dışlanır ve diğer 2 test değerlendirilir (örneğin, 564/654 kodu. 46/64
+> değerlendirilmeli ve test 5’te yükselme olduğu söylenmelidir).”). Bu tablo satırı **olduğu gibi
+> durur** (tarihsî kayıt); DECISION-031 (A) göçünde kalem **gövde değil koşul-notu** olarak
+> işlenir ve gövde sayacı için ±1 yeniden-sınıflandırma adayıdır — karar onayda, sessiz
+> değişiklik yok (DECISION-028).
+
 ## Pd (4) kod bloğu III (s.118-121) — **2 VAR / 6 YOK** — **Pd BLOĞU KAPANDI**
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |

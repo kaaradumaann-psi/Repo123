@@ -95,3 +95,6 @@ araç hiçbir dosyayı yazmaz.
 > satır evreninde sayım: eşsiz satır-etiketi **148** (VAR 61 + YOK 87 → kapalı) · araç
 > anahtarı **152** (net +4 = çok-kodlu satır grupları) — fark **kalem tanımıdır**; NOT satırları
 > bu nedenle sabit kalır (beklenen çıktı budur).
+> **Batch 29 sayı-kontrolü (staging):** tam-sayfa 300 dpi render’ın yanı sıra
+> `pymupdf get_pixmap(clip=…, matrix=600/72)` ile **odak kadrajı** üretilir (`.audit/pages/v_*.png`);
+> sayı/tırnak yalnız kadrajdan okunur (TABLO-NUMBERS). Staging hedefi: `MIGRATION_STAGING.md`.

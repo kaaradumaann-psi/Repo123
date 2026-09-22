@@ -1725,3 +1725,30 @@ satırları batch 26 çıktısıyla **birebir aynı** (diff boş) · `npx tsc --
 **İşlenen kayıtlar (append-only):** KAPSAM (FINAL bloğu altına mutabakat oku + hüküm) · AUDIT_STATE (OCR-satırı altına ölçüm oku + Last update “devam 10”) · DECISIONS (031 güncellemesi) · TOOLING (ek-ölçüm) · TEST_AUDIT (mutabakat bloğu) · CHANGELOG (bu girdi).
 
 **Doğrulama:** `final-count.ts` (repo hâli) → **HATA 0 · NOT 7**, NOT/HATA satırları batch 27 ile **birebir aynı** (diff boş) · `npm test` **375/375** (36 suite) · belge-only → `src/`, `optik-form.html`, araç dosyaları değişmedi.
+
+---
+
+## 2026-09-22 — PHASE 10 · batch 29 — DECISION-031 öncesine staging: Pa 6/6 + Mf bulgusu (yalnız BELGE; `src/` ve araç değişmedi)
+
+**Amaç:** “devam et” yetkisi `src/` göçünü kapsamadığından DECISION-031 (A)’nın **onay-gerektirmeyen (i)–(ii) adımları** başlatıldı: blok seçimi + görsel kaynak okuması. Yeni
+`docs/mmpi-audit/MIGRATION_STAGING.md` yazıldı; göç onayı gelirse staged birebir metinlerle
+doğrulanabilir ilerleyecek.
+
+**Okumalar (300 dpi tam-sayfa + 600 dpi odak kadraj; sayılar yalnız kadrajdan):**
+- **Pa 6/6:** `648 Kodu` (s.131, ayrıksı başlık, “Olası tanı” yok) · `678/876 Kodları`
+  (s.131–132 kırılımı; koşul “6 ve 8, 7’den yüksek ise” — sayısız) · `679 Kodu` (s.132) ·
+  `680/860 Kodları` (s.133) · `694/964 Kodları` (s.133–134 kırılımı) · `698/968 Kodları`
+  (s.134 + “Olası tanı: Şizofreni paranoid tip”; sayılı koşul: “8, 6’dan **5 T puanı**
+  aşağıda ise 68/86” — batch 27 CONFLICT-044 kapanışının cümlesiyle birebir aynı kaynak metni).
+- **Mf bulgusu:** s.125 kadrajında `564/654` **ayrıksı başlık yok** — `56/65 Kodu` gövdesinin
+  parantez örneği (“…5 dışlanır ve diğer 2 test değerlendirilir (örneğin, 564/654 kodu. 46/64
+  değerlendirilmeli ve test 5’te yükselme olduğu söylenmelidir).”). KAPSAM tablo satırı olduğu
+  gibi durur; ⚠️ notu eklendi; göçte **koşul-notu** adayı + ±1 yeniden-sınıflandırma notu.
+- Tarama-dışı teyitler: `65/56 Kodu (Bakınız 56/65 Kodu)` ve `61/16 · 62/26 · 63/36` listesi
+  çapraz-referanstır (gövde beklenmez) — KAPSAM UYUMLU satırlarıyla aynı sonuç.
+
+**Sayaç:** staged **7/44** · bekleyen 37 (D 18 · Pd 13 · Pt 2 · Sc 2 · Ma 2) · conflict açılmadı · sayaçlar aynı (44 kayıt · FIXED 17 · REJECTED 9 · 16 açık).
+
+**Kayıtlar (append-only):** `MIGRATION_STAGING.md` (yeni) · KAPSAM (Mf ⚠️ notu) · DECISIONS (031 staging pointer) · AUDIT_STATE (Last update “devam 11”) · TOOLING (kadraj tekniği) · CHANGELOG (bu girdi).
+
+**Doğrulama:** belge-only · `final-count.ts` → **HATA 0 · NOT 7** (exit 0); bulgu/hüküm kümesi batch 27 ile birebir aynı — tek fark aracın **dinamik satır-numarası** referansı: Mf ⚠️ notu tablonun altına eklendiği için `68/86` NOT’u “satır 385” yerine “satır 394” olarak basılıyor (+9 kayma; yeni tablo satırı yok, hüküm aynı) · `npm test` **375/375** (36 suite) · `git diff --check` temiz.
