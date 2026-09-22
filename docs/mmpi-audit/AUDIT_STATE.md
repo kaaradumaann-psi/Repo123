@@ -42,7 +42,10 @@ Sayfa eşleme:
 | 11 | AI interpretation | ✅ **DONE** — §39 uyumu (AI hesaplama yapmaz), KVKK sahte isimlendirme (isim/soyad iletilmez), klinik sınırlar (tanı/tedavi yasağı) ve yetkilendirme doğrulandı; 8 test PASS. |
 | 12 | UI | ✅ **DONE** — Çok noktalı kod analizi (triad/quad) `MMPICodeTab`'a bağlandı, ölçek sıra etiketleri düzeltildi, SourcesPage Ceyhun & Oral (2003) Status A künyesine yükseltildi (CHANGE-027) |
 | 13 | Report | ✅ **DONE** — `MMPIPrintReport` çok noktalı kod analizi ve Bölüm 6 profil örüntüleri aktarımı bağlandı; CONFLICT-007 `docs/kaynak-denetimi.md` oluşturularak kapatıldı (CHANGE-027) |
-| 14 | Tests | ✅ **DONE** — `mmpiUiReport` **5/5 PASS** · `mmpiSiBlock` **6/6 PASS** · `mmpiMaBlock` **9/9 PASS** · `mmpiScBlock` **13/13 PASS** · `mmpiPtBlock` **11/11 PASS** · `mmpiPaBlock` **14/14 PASS** · `mmpiPdBlock` **17/17 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS (toplam 245 test / 53 suite) |
+| 14 | Tests | ✅ **DONE** — `mmpiUiReport` **5/5 PASS** · `mmpiSiBlock` **6/6 PASS** · `mmpiMaBlock` **9/9 PASS** · `mmpiScBlock` **13/13 PASS** · `mmpiPtBlock` **11/11 PASS** · `mmpiPaBlock` **14/14 PASS** · `mmpiPdBlock` **17/17 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **55/55 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS |
+| 15 | Audit State Konsolidasyonu | ✅ **DONE** — `state.mjs`, `STATE_METRICS.md`, `status.json`, `PROTOCOL.md`, `tests/auditDocsConsistency.test.ts` (12/12 PASS) |
+| 16 | K+ Profili & K-İlişkili Örüntüler | ✅ **DONE** — `k-plus` (Mark & Seeman 1963, s.57 · Şekil 16 · `MISSING-KPLUS-001`), `detectKPlus` ve K-ilişkili blok kodları (`Ma:9_highK`, `Ma:9_lowK`, s.152-153 · `CONFLICT-039`) |
+| 17 | Eşik ve Bant Doğrulamaları | ✅ **DONE** — `L_T_BANDS` (s.33, `CONFLICT-003`), `VALIDITY_CUTOFFS` & `F_RAW_BANDS` (`CONFLICT-004`), `L_RAW_BANDS`/`K_RAW_BANDS` korundu, `Wiggins SOC` 27 madde (`CONFLICT-021` · `DECISION-024`), `tests/mmpiKPlusAndPatterns.test.ts` (12/12 PASS) |
 
 ## Current position
 

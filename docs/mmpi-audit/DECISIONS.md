@@ -1012,3 +1012,38 @@ alanında ve test kilitlerinde açıkça belgelendi.
 - `manualNote`: 'Kaynak bu maddeye sayısal bir eşik vermez; “F ≥ 70” eşiği kod tarafındadır. Liste kitabın “80 ve üstü T puanı” başlığı altındadır (s.36-37, SOURCE-VALIDITY-F-005) — DECISION-032 (B) kararı uyarınca F ≥ 70 T otomatik eşiği korunmuş, 80 T bandı kaynak bağlamı olarak taşınmıştır (CONFLICT-043 FIXED).'
 - Testler: `tests/mmpiInterpretation.test.ts` güncellendi (`DECISION-032 (B): F ≥ 70 otomatik eşiği korundu`).
 - CONFLICT-043 → **FIXED** (kapanış kanıtı `cmp-b6-batch24.ts` ve test suite).
+
+---
+
+## DECISION-033 — K+ Profili ve K-İlişkili Örüntüler (PHASE 16 · MISSING-KPLUS-001 · CONFLICT-039)
+**Tarih:** 2026-09-22 · **Durum:** **KABUL (UYGULANDI)**
+
+**K+ Profili (MISSING-KPLUS-001):**
+- **Kaynak:** Ceyhun & Oral (2003), s.57 (PDF p36 R, Mark & Seeman 1963, Şekil 16).
+- **Ölçütler:**
+  1. Hiçbir klinik test 70 T puanının üstünde değildir (`every clinical T < 70`).
+  2. 6 ya da daha çok klinik test 60 T puanı ya da altındadır (`count(clinical T <= 60) >= 6`).
+  3. K ve L alt testleri F'den yüksektir (`K > F && L > F`).
+  4. K alt testi, F alt testinin en az 5 T puanı üstündedir (`K - F >= 5`).
+- **Uygulama:** `detectPatterns` fonksiyonuna `k-plus` örüntüsü ve `detectKPlus` tespit fonksiyonu eklendi (`src/scoring/mmpiInterpretation.ts`).
+- **Test:** `tests/mmpiKPlusAndPatterns.test.ts` ve `tests/mmpiInterpretation.test.ts` ile pozitif ve negatif sınır (K-F=4, klinik≥70, 5 klinik≤60) testleri kilitlendi.
+
+**K-İlişkili Örüntüler (CONFLICT-039):**
+- **Kaynak:** Ceyhun & Oral (2003), s.152-153 (PDF p84 L-R, "Ma alt testinin diğer alt testlerle ilişkisi").
+- **Uygulama:** `Ma:9_highK` (`Yüksek 9 / Yüksek K`) ve `Ma:9_lowK` (`Yüksek 9 / Düşük K`) kod gövdeleri ve koşulları (`D < 50`, `K > 70`, kadınlarda `Mf < 40`) `BLOCK_CODES` ve `parseCode` üzerinden doğrulandı.
+
+---
+
+## DECISION-034 — L ve F Eşik Sınırları, Ham Bantlar ve Wiggins SOC Doğrulaması (PHASE 17 · CONFLICT-003 · CONFLICT-004 · CONFLICT-021)
+**Tarih:** 2026-09-22 · **Durum:** **KABUL (UYGULANDI)**
+
+1. **L T Bantları (CONFLICT-003):**
+   - Kaynak kitap s.33 başlıkları: 69+, 64-68, 59-63, 36-55, ≤35.
+   - Kod `L_T_BANDS` 56-63 min: 56 sürekli aralık eşlemesini korur; kaynak başlığı ve T 56-58 süreklilik aralığı belgelendi.
+2. **F Ham Bantları ve Kesmeleri (CONFLICT-004):**
+   - Kaynak kitap s.34-36 (Graham 1987 / Hathaway & McKinley 1967).
+   - `VALIDITY_CUTOFFS` (`fSuspect: 16`, `fInvalid: 23`) ve `F_RAW_BANDS` (0-2, 3-7, 8-15, 16-22, 23+) Türkiye klinik standartlarında muhafaza edildi.
+3. **L_RAW_BANDS ve K_RAW_BANDS:**
+   - Üretim skorlamasında (`evaluateValidity`) klinik uyarıların üretilmesinde (L≥8, K≥21, K≤4) doğrudan kullanıldığı doğrulandı ve korundu.
+4. **Wiggins SOC (CONFLICT-021 · DECISION-024):**
+   - Ek 9c'deki 27 maddelik liste (13 Doğru, 14 Yanlış) `WIGGINS_KEYS.SOC` olarak teyit edildi.

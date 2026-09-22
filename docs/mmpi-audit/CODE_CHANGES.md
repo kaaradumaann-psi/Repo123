@@ -1087,3 +1087,28 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpi*Block.test.ts tests/mmpiKeyIntegrity.test.ts tests/mmpiInterpretation.test.ts tests/aiInterpretation.test.ts tests/mmpiUiReport.test.ts` → **245/245 PASS** (53 suite)
 - `npm test` → **503/503 PASS** (64 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-028 — PHASE 15, 16 & 17: Audit State Konsolidasyonu, K+ Profili ve Eşik Doğrulama
+
+**Area:** `src/scoring/mmpiInterpretation.ts` · `scripts/mmpi-audit/state.mjs` · `docs/mmpi-audit/` (`status.json`, `STATE_METRICS.md`, `PROTOCOL.md`, `DECISIONS.md`, `AUDIT_STATE.md`) · `tests/auditDocsConsistency.test.ts` · `tests/mmpiKPlusAndPatterns.test.ts` · `tests/mmpiInterpretation.test.ts` · `docs/kaynak-denetimi.md` · `src/components/SourcesPage.tsx`.
+
+**Amaç:** PHASE 15 (State Konsolidasyonu), PHASE 16 (K+ Profili ve K-İlişkili Örüntüler) ve PHASE 17 (Eşik Sınırları ve Doğrulama) denetim adımlarının eksiksiz uygulanması.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiInterpretation.ts`:
+   - `detectKPlus(profile: MMPIProfile)` fonksiyonu ve `detectPatterns` içine `k-plus` örüntüsü eklendi (`MISSING-KPLUS-001`, Mark & Seeman 1963, s.57 · Şekil 16: K>F, L>F, K-F≥5, tüm klinik <70, ≥6 klinik ≤60).
+2. `scripts/mmpi-audit/state.mjs`:
+   - Repository audit metriklerini doğrudan kod ve dosya yapısından dinamik ölçen ve `status.json` ile `STATE_METRICS.md` dosyalarını üreten CLI aracı geliştirildi.
+3. `tests/auditDocsConsistency.test.ts`:
+   - State doğruluğu, test sayaçları, conflict/decision mükerrerlik denetimi, sahte kaynak izolasyonu ve SOURCE_INDEX sayfa eşleme tutarlılığını denetleyen CI testi eklendi (12/12 PASS).
+4. `tests/mmpiKPlusAndPatterns.test.ts`:
+   - K+ pozitif ve negatif sınır testleri, K-ilişkili `Ma:9_highK`/`Ma:9_lowK` koşulları, L/F/K bant ve Wiggins SOC doğrulaması (12/12 PASS).
+5. `docs/kaynak-denetimi.md` ve `src/components/SourcesPage.tsx`:
+   - Doğrulanmış Ek 1 (s.215-233) ve Tablo 30 (s.195) sayfa izi güncellendi.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata (PASS)**
+- `npm test` → **528/528 PASS (76 suite)**
+- `npm run build` → **PASS**
