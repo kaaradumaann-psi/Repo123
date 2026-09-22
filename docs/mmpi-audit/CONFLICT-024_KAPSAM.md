@@ -91,7 +91,38 @@ Hy bloğu mutabakatı: `scripts/mmpi-audit/cmp-hy-batch27.ts` → **0 FARK** (10
 
 ---
 
-## 4. Pd (4) alt testi kod bloğu (s.107-121) — SIRADAKİ BLOK
+## 4. Pd (4) alt testi kod bloğu (s.107-121) — TAMAMLANDI (batch 28 · CHANGE-021)
+
+| Kod | Kaynak | Kodda | Durum / Not |
+|---|---|---|---|
+| `41` | s.108 | ✅ `14/41` | "(Bakınız 14/41 Kodu)" |
+| `42` | s.108 | ✅ `24/42` | "(Bakınız 24/42 Kodu)" |
+| `43` | s.111 | ✅ `34/43` | "(Bakınız 34/43 Kodu)" |
+| `Yüksek 4 / Düşük 5` | s.111-112 | ✅ VAR | `BLOCK_CODES['Pd:4_low5']` eklendi; Mf < 50 (erkek/kadın), kadın Pa ≥ 70, kadın Hy ≥ 70 koşulları bağlı |
+| `45/54` | s.112-113 | ✅ VAR | Erkek Mf ≥ 70, kadın Mf < 50, Pd > Mf koşulları bağlı |
+| `456` | s.113 | ✅ VAR | `BLOCK_CODES['Pd:456']` eklendi; Scarlett O'Hara atfı, pasif-agresif ve bağımlı tanıları |
+| `46/64` | s.113-114 | ✅ VAR | 4 > 6, 6 > 4, kadın Sc ≥ 70 ∧ K < 50 koşulları bağlı |
+| `462/642` | s.114-115 | ✅ VAR | `BLOCK_CODES['Pd:462']` + aliases `Pd:642`, `Pa:642` eklendi; intihar tehditleri |
+| `463/643` | s.115 | ✅ VAR | `BLOCK_CODES['Pd:463']` + aliases `Pd:643`, `Pa:643` eklendi; sevgi gereksinimi |
+| `468/648` | s.115 | ✅ VAR | `BLOCK_CODES['Pd:468']` + aliases `Pd:648`, `Pa:648` eklendi; K < 50 T ve 5 T puanı alanı koşulları bağlı |
+| `469` | s.115 | ✅ VAR | `BLOCK_CODES['Pd:469']` eklendi; Ma ≥ 70 T öfke patlaması koşulu bağlı |
+| `47/74` | s.115-116 | ✅ VAR | Tanı ve gövde tam |
+| `48/84` | s.116-117 | ✅ VAR | Tanılar (şizoid, şizofreni, dissosiyatif) tam |
+| `48 / Yüksek F` | s.117 | ✅ VAR | `BLOCK_CODES['Pd:48_highF_low2']` eklendi; F ≥ 70 ∧ D < 50, K ≥ 70 koşulları bağlı |
+| `482/842/824` | s.117-118 | ✅ VAR | `BLOCK_CODES['Pd:482']` + aliases `Pd:842`, `Pd:824`, `Sc:842`, `Sc:824` eklendi; intihar girişimi |
+| `489/849` | s.118 | ✅ VAR | `BLOCK_CODES['Pd:489']` + aliases `Pd:849`, `Sc:849` eklendi; Ma ≥ 70 T şiddet riski koşulu bağlı |
+| `49/94` | s.118-119 | ✅ VAR | Tanılar (antisosyal, mani, şizofreni) tam |
+| `493/943` | s.119 | ✅ VAR | `BLOCK_CODES['Pd:493']` + aliases `Pd:943`, `Ma:943` eklendi; Hy ve Pd ≤ 5 T koşulu bağlı |
+| `495/945` | s.119-120 | ✅ VAR | `BLOCK_CODES['Pd:495']` + aliases `Pd:945`, `Ma:945` eklendi; Pt ≥ 70 T suçluluk döngüsü koşulu bağlı |
+| `496/946` | s.120 | ✅ VAR | `BLOCK_CODES['Pd:496']` + aliases `Pd:946`, `Ma:946` eklendi; Sc ≥ 70 T homisidal risk ve K < 50 T koşulları bağlı |
+| `498/948` | s.120 | ✅ VAR | `BLOCK_CODES['Pd:498']` + aliases `Pd:948`, `Ma:948` eklendi; ergenlik isyanı ve saldırganlık |
+| `40/04` | s.120 | ✅ `04/40` | "(Bakınız 04/40 Kodu)" |
+
+Pd bloğu mutabakatı: `scripts/mmpi-audit/cmp-pd-batch28.ts` → **0 FARK** (10 koşullu kural seti, 13 yeni kod gövdesi, 18 çapraz takma ad, 17 test tam).
+
+---
+
+## 5. Pa (Paranoya / 6) alt testi kod bloğu (s.125-131) — SIRADAKİ BLOK
 
 
 ---

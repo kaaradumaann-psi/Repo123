@@ -1265,6 +1265,221 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       },
     ],
   },
+
+  /* ------------------------------------------------------------------ */
+  /* Pd (Psikopatik Sapma / 4) alt testi kod bloğu (kitap s.107-121)    */
+  /* ------------------------------------------------------------------ */
+
+  'Pd:4_low5': {
+    code: 'Yüksek 4 / Düşük 5',
+    block: 'Pd',
+    text:
+      'Erkeklerde düşük 5, bireyin kendini erkeksi, hatta aşırı erkeksi gösterme çabasını yansıtır. Kaba ve geleneksel maskülin ilgileri olanlarda, bu grubun geleneksel değerlerini yansıtabilir. Orta ya da üst sınıftan ve yüksekokul eğitimi olan erkeklerde bu örüntü, yetersizlik duygularını, özellikle kadınlara karşı, güçlü bir biçimde kapatma çabasını düşündürür. Sıklıkla kendi egolarını desteklemek ve kendi kendilerine güç ve kontrolü kanıtlamak için kadınları aşağılarlar. Ergenlerde bu örüntü, açık suçluluk ile bağlantılıdır. Bu örüntüdeki kadınlar kızgındırlar, ancak bu duygularını doğrudan ifade edemezler. Bunların kızgınlığı özel olarak erkeklere yöneliktir ve heteroseksüel sorunlar beklenir. İlginç olarak, bu kadınlar ilişkilerinde yüzeyseldir ve sıklıkla çekingen, yumuşak başlı ve çekici biçimindeki kültürel kadın stereotipleri ile özdeşleşmişlerdir ve bu tür rolleri aşırı sevgi ve ilgi gereksinimlerine ulaşmada manipülatif olarak kullanırlar. Kendi yeteneklerine çok fazla güvenirler ve başkalarının yardımına gereksinim duyduklarını inkar ederler; bu nedenle evlilik ve heteroseksüel sorunları konusunda danışmanlık almaya karşı dirençlidirler. Erkeklere karşı olan kızgınlıklarını pasif-agresif biçimde cinsel yolları kullanarak ifade ederler. Kadınlar sıklıkla bu tür davranışlarla (özellikle eğer test 6 da yüksekse) başkalarını da kızdırmaya çalışırlar, ancak sonra yanlış anlaşıldıkları için kendilerine acırlar. Hatta bir melodram krizi başlatmış oldukları için hoşlanmış görünürler. Alt test 3 de yükselmişse, bu kadınlar kendilerinin başkaları üzerindeki etkisinin farkında değillerdir ve düşmanlık duygularını inkar ederler. Evlilik ve aile sorunları ve cinsel fonksiyon bozuklukları ve cinsel hoşlanma eksikliğinin olması şaşırtıcı değildir. Baş ve sırt ağrıları da sık görülür.',
+    seeAlso: 'Ayrıca Mf alt testinin düşüklüğüne de bakınız (s.111).',
+    conditions: [
+      {
+        source: 's.111',
+        quote: 'Erkeklerde düşük 5, bireyin kendini erkeksi, hatta aşırı erkeksi gösterme çabasını yansıtır.',
+        test: ({ gender, t }) => gender === 'Erkek' && (t('Mf') ?? 100) < 50,
+      },
+      {
+        source: 's.111',
+        quote: 'Bu örüntüdeki kadınlar kızgındırlar, ancak bu duygularını doğrudan ifade edemezler.',
+        test: ({ gender, t }) => gender === 'Kadın' && (t('Mf') ?? 100) < 50,
+      },
+      {
+        source: 's.111',
+        quote: 'Kadınlar sıklıkla bu tür davranışlarla (özellikle eğer test 6 da yüksekse) başkalarını da kızdırmaya çalışırlar.',
+        test: ({ gender, t }) => gender === 'Kadın' && (t('Pa') ?? 0) >= 70,
+      },
+      {
+        source: 's.112',
+        quote: 'Alt test 3 de yükselmişse, bu kadınlar kendilerinin başkaları üzerindeki etkisinin farkında değillerdir ve düşmanlık duygularını inkar ederler.',
+        test: ({ gender, t }) => gender === 'Kadın' && (t('Hy') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:456': {
+    code: '456',
+    block: 'Pd',
+    text:
+      'Talep edici, bağımlı ve duygusal kişilerdir, ancak diğer kişileri tedirgin ederek ve onlara karşı çıkarak ilişki kurarlar. Davranış örüntüleri yakın aile çevrelerine yabancılaşmalarına yol açar. Bu durum talep edici, bağımlı ve duygusal ilişki gereksinimlerini karşılamalarını zorlaştırır (Bakınız Scarlett O\'Hara Vadisi).',
+    seeAlso: 'Scarlett O\'Hara Vadisi ve 46/64 koduna bakınız (s.113).',
+  },
+
+  'Pd:462': {
+    code: '462/642',
+    block: 'Pd',
+    text:
+      '46/64 koduyla bağlantılı kızgınlık ve duyarlılığa ek olarak, bu bireyler ajitedirler. Sinirlilik, kaygı ve depresyon yakınmaları vardır. Sıklıkla bu manipülatif bir ilgi, sempati ve kontrol isteğidir. İntihar tehditleri görülür. Bu bireyler başkalarına karşı güvensiz ve kuşkucudurlar ve onlardan şüphelenirler. Özellikle kuşkucudurlar ve otorite durumundaki bireylerle sorunları vardır. Çoğunlukla bu bireyler katı ve savunucudurlar, zor durumları ya da sorunları kendi kontrollerinin dışındaki konulara bağlayarak ya da başkalarını suçlayarak rasyonalize ederler. Cinsellikte ve evlilikte uyumsuzluk olabilir. Genelde insanlarla olan rahatsızlıklarına ve otoriteye olan kızgınlıklarına karşın, bireylerin abartılmış bir sevgi ve bağımlılık gereksinimleri vardır (hatta test 3 de yükselmiş ise daha fazla olasıdır). Bunların rahatsızlık ve eleştirilerinin çoğu aşırı biçimde diğerlerine bağımlı olma korkularından (ve böylece başkaları tarafından kontrol edilme) kaynaklanıyor görünmektedir. Sonuç olarak, aileleri ya da çalışma arkadaşları ile azalmış bir birliktelik duygusu gösterebilirler.',
+    seeAlso: '46/64 koduna bakınız (s.114-115).',
+    conditions: [
+      {
+        source: 's.114',
+        quote:
+          'Genelde insanlarla olan rahatsızlıklarına ve otoriteye olan kızgınlıklarına karşın, bireylerin abartılmış bir sevgi ve bağımlılık gereksinimleri vardır (hatta test 3 de yükselmiş ise daha fazla olasıdır).',
+        test: ({ t }) => (t('Hy') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:463': {
+    code: '463/643',
+    block: 'Pd',
+    text:
+      'Bu bireylerin aşırı sevgi isteklerinin doyurulması, özellikle bu bireylerin kendilerini rahatsız edici ve küskün tarzları göz önüne alındığında, oldukça zordur. Genellikle bağımlılık gereksinimleri heteroseksüeldir ve benmerkezci biçimlerde isteme (hatta düşmancıl) şeklinde ifade edilir, bazen açık manipülasyon ya da kışkırtma içerir. Bu örüntü, sıklıkla kendi kendini bozguna uğratıcıdır, ancak bunların eşleri bireyin aşırı ister durumundan bıktıklarında onlara gereken ilgiyi göstermezler. Sıklıkla benzer biçimde terapist ya da tedaviyi veren diğer bireylerden de aşırı isteklerde bulunurlar, ancak aynı zamanda da aldıkları tedaviyi eleştirir ve karşı çıkarlar. Reddedilmeye olan duyarlılıkları ile, bu kod tipindeki bireyler kronik olarak acı çeken, küskün ve güvensiz kişilerdir. İçgörüleri yoktur. 5 alt testinin 40 T puanının altında olduğu kadınlarda pasiflik, bağımlılık ve kendine acıma görülür (bakınız yüksek 4 ve düşük 5). Menstrüasyonda düzensizlikler, cinsel işlev bozukluğu, baş ağrıları ve sırt ağrıları gibi fiziksel yakınmalar da olur.',
+    seeAlso: '46/64 koduna bakınız (s.114-115).',
+  },
+
+  'Pd:468': {
+    code: '468/648',
+    block: 'Pd',
+    text:
+      'Eğer birey psikiyatride yatan bir hasta ise şiddetli ve olasılıkla kronik, duygusal bir rahatsızlığı, büyük olasılıkla paranoid şizofreniyi düşündürür. Bu bireyler kuşkucu, kızgın, aşırı duyarlı, suçlayıcıdırlar. Eleştiriden kolayca yaralanırlar, diğer insanlara güvenmezler ve olayları çarpıtma ve aşırı genelleme eğilimindedirler. Kendilerine yapılan gerçek ya da hayali haksızlıklar üzerinde kızgın bir biçimde sürekli düşünme eğilimindedirler, delüzyonlar ya da referans fikirleri olabilir, büyüklük (grandiyözite) elemanları, en azından benmerkezci tarzda olabilir. Bireyler gerçekte kızgınlıklarını açıkça ifade edemezler ve bunu sıklıkla, yansıtmayı şeffaf bir biçimde kullanarak yaparlar. Kızgınlıklarını fark ettiklerinde, bunu kafalarında iyi bir şekilde rasyonalize eder ve kendilerini haklı çıkarırlar. Kızgınlığa sıklıkla yargılamanın kötü olması, içgörü eksikliği ve impulsivite eşlik eder. Saldırı, ilaç kötü kullanımı ya da bağımlılığı ve intihar girişimlerinin hepsi olabilir. Kişiler arası, evlilik ve cinsel uyum sorunları tipiktir.',
+    diagnosis: ['Paranoid şizofreni'],
+    seeAlso: '46/64 ve 48/84 kodlarına bakınız (s.115).',
+    conditions: [
+      {
+        source: 's.115',
+        quote: 'K testi 50 T puanının altında, test 5, 4 ve 6\'nın 5 T puanı alanı içinde ve/veya test 8 yüksek ise tablo daha ağırdır.',
+        test: ({ t }) => (t('K') ?? 100) < 50,
+      },
+      {
+        source: 's.115',
+        quote: 'test 5, 4 ve 6\'nın 5 T puanı alanı içinde',
+        test: ({ t }) => {
+          const mf = t('Mf');
+          const pd = t('Pd');
+          const pa = t('Pa');
+          return mf !== undefined && pd !== undefined && pa !== undefined &&
+            (Math.abs(mf - pd) <= 5 || Math.abs(mf - pa) <= 5);
+        },
+      },
+    ],
+  },
+
+  'Pd:469': {
+    code: '469',
+    block: 'Pd',
+    text:
+      '46 koduna ek olarak test 9 da 70 T puanının üzerinde ise bu ani öfke patlamaları olan bireyleri göstermektedir.',
+    seeAlso: '46/64 koduna bakınız (s.115).',
+    conditions: [
+      {
+        source: 's.115',
+        quote: '46 koduna ek olarak test 9 da 70 T puanının üzerinde ise bu ani öfke patlamaları olan bireyleri göstermektedir.',
+        test: ({ t }) => (t('Ma') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:48_highF_low2': {
+    code: '48/84 (Yüksek F / Düşük 2)',
+    block: 'Pd',
+    text:
+      'rahattırlar ve başkalarına ebeveynlik ederler. Sıklıkla saldırgan ve cezalandırıcıdırlar ve başkalarını kontrol etmeye çalışırlar. Eğer zeka puanları ortalamanın üstünde ise diğerlerinde suçluluk ve anksiyete yaratarak onları manipüle edebilirler. Başka bir deyişle, bunların davranışları, katı bir disiplinden gerçek sadizme kadar geniş bir ranjda olabilir. Profildeki bazı bireyler (özellikle eğer K da yüksekse), bu özellikleri vurgulayan işlere girebilirler (Yasa koyma ve yürütme, askeri uzmanlıklar vb..). Profildeki kişilere "sosyopat kişilik" tanısı konulabilir.',
+    diagnosis: ['Sosyopat kişilik'],
+    seeAlso: '48/84 koduna bakınız (s.117-118).',
+    conditions: [
+      {
+        source: 's.117',
+        quote: 'Yüksek F ve Düşük 2 örüntüsü: sosyopat kişilik',
+        test: ({ t }) => (t('F') ?? 0) >= 70 && (t('D') ?? 100) < 50,
+      },
+      {
+        source: 's.117',
+        quote: 'özellikle eğer K da yüksekse, bu özellikleri vurgulayan işlere girebilirler',
+        test: ({ t }) => (t('K') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:482': {
+    code: '482/842/824',
+    block: 'Pd',
+    text:
+      'Daha önce verilen 48/84 tanımlarına ek olarak, bu bireylerde depresyon, anksiyete, gerginlik, sinirlilik yaygındır. Bunların duyguları çok çeşitlidir, ancak genellikle suçluluk, aşağılık ve umutsuzluk duyguları görülür. İntihar girişimi göreceli olarak fazladır. Kalıcı (uzun süreli) kişilerarası ilişkileri (özellikle heteroseksüel) yoktur. Genelde bu bireyler bekardır ya da sorunlu evlilikleri vardır, cinsel çatışmalar ya da güçlüklerle ilgili sorunlar yaşarlar. Bu insanların güçlü (hatta çoğunlukla abartılmış) ilgi ve sevgi gereksinimleri varsa da, başkalarına karşı güvensizdirler. Duygusal yaklaşımlar korku yaratır ve bireyler duygusal istekler ya da beklentilere karşı çok fazla duyarlıdır.',
+    seeAlso: '48/84 ve 284/824 kodlarına bakınız (s.118).',
+  },
+
+  'Pd:489': {
+    code: '489/849',
+    block: 'Pd',
+    text:
+      'Yüksek 9 testinin yanı sıra, 48/84 kod yorumlarının eklenmesi tuhaf, hatta garip ve öngörülmez şekillerde eyleme vuruk davranışların ifade edilmesi olasılığını arttırır. Davranışsal ajitasyon sıklıkla görülür; bu saldırma, savaşma ve hatta şiddet gösterme biçiminde ortaya çıkar.',
+    seeAlso: '48/84 ve 49/94 kodlarına bakınız (s.118).',
+    conditions: [
+      {
+        source: 's.118',
+        quote:
+          'Yüksek 9 testinin yanı sıra, 48/84 kod yorumlarının eklenmesi tuhaf, hatta garip ve öngörülmez şekillerde eyleme vuruk davranışların ifade edilmesi olasılığını arttırır.',
+        test: ({ t }) => (t('Ma') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:493': {
+    code: '493/943',
+    block: 'Pd',
+    text:
+      '49/94 özelliklerine ek olarak, birey benmerkezcidir ve kendilerine yönelik içgörüleri yoktur. Bunlarda eyleme vuruk davranış olasılığı nadirdir ve olumsuz duygularını daha çok pasif-agresif ve dolaylı yollardan gösterirler. Alt test 3, test 4\'ün 5 T puanı alanı içinde ise 34/43 kod tipinin özellikleri de bulunabilir (bakınız 34/43 kodları). Böylece, bu koddaki bazı bireyler kızgınlıklarını sadece hiddetlenme şeklinde (genellikle bir aile üyesine karşı) açığa çıkarmak üzere biriktirebilirler.',
+    seeAlso: '49/94 ve 34/43 kodlarına bakınız (s.119-120).',
+    conditions: [
+      {
+        source: 's.119',
+        quote: 'Alt test 3, test 4\'ün 5 T puanı alanı içinde ise 34/43 kod tipinin özellikleri de bulunabilir.',
+        test: ({ t }) => {
+          const hy = t('Hy');
+          const pd = t('Pd');
+          return hy !== undefined && pd !== undefined && Math.abs(hy - pd) <= 5;
+        },
+      },
+    ],
+  },
+
+  'Pd:495': {
+    code: '495/945',
+    block: 'Pd',
+    text:
+      'Geleneksel olmayan bir cinsel yönelimi (genellikle homoseksüel) kabul etmesini gösterir ya da daha sıklıkla çok iyi eğitim görmüş, ilgi alanları geniş ve böylece impulsifliği ve isyankarlığı kontrol edebilmiş, daha sosyal bir bireyle bağlantılıdır. Bazen bu bireyler kendilerini varolan geleneklere karşı çıkan sosyal hareketler içine sokarlar (Özellikle test 4 ve 9\'un orta derecede yükseldiği ve test 7\'nin de 70 T puanı ya da üstü olduğu durumlarda). Böyle olsa da, bu bireyler kuralları, düzenlemeleri ya da diğerlerinin sıkı kontrolünü sevmezler ve kendi özgürlüklerine ve kendi ilgilerine fazla değer verirler.',
+    seeAlso: '49/94 koduna bakınız (s.120).',
+    conditions: [
+      {
+        source: 's.120',
+        quote: 'Özellikle test 4 ve 9\'un orta derecede yükseldiği ve test 7\'nin de 70 T puanı ya da üstü olduğu durumlarda.',
+        test: ({ t }) => (t('Pt') ?? 0) >= 70,
+      },
+    ],
+  },
+
+  'Pd:496': {
+    code: '496/946',
+    block: 'Pd',
+    text:
+      'Kod saldırgan, zarar verici ve hatta homisidal davranışı olan bireyi göstermektedir (özellikle eğer test 8 de yükselmişse). Örüntü, bireylerde sıklıkla aniden garip biçimlerde ortaya çıkar ve bunlar daha sonra yanlış yaptıklarını ya da kendilerini zayıf hissettiklerini belirtirler. Yargılamaları ve olumsuz duygularını kontrolleri kötüdür (özellikle eğer K alt testi 50\'nin altında ise).',
+    seeAlso: '49/94 koduna bakınız (s.120).',
+    conditions: [
+      {
+        source: 's.120',
+        quote: 'Kod saldırgan, zarar verici ve hatta homisidal davranışı olan bireyi göstermektedir (özellikle eğer test 8 de yükselmişse).',
+        test: ({ t }) => (t('Sc') ?? 0) >= 70,
+      },
+      {
+        source: 's.120',
+        quote: 'Yargılamaları ve olumsuz duygularını kontrolleri kötüdür (özellikle eğer K alt testi 50\'nin altında ise).',
+        test: ({ t }) => (t('K') ?? 100) < 50,
+      },
+    ],
+  },
+
+  'Pd:498': {
+    code: '498/948',
+    block: 'Pd',
+    text:
+      '49/94 özelliklerine ek olarak, doğal olmayan, hatta tuhaf davranış olasılığı çok yüksektir. 20 yaşın üstündeki bireylerde, bu kod genellikle major ve uzun süreli bir psikopatolojiyi gösterir. Ergenlerde, kod sıklıkla (bu kodda daha yaşlı bireylerde daha sıklıkla bulunan ciddi psikopatoloji yerine) bir ergenlik dönemi isyanı ile bağlantılıdır. Ancak, hem yetişkinler, hem de ergenler yabancılaşma duyguları, aile çatışmaları, yüksek enerji düzeyleri, otoriteyle güçlükler ve isyankar davranışlar gösterirler.',
+    seeAlso: '489/849 ve 496/946 kodlarına bakınız (s.120).',
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
@@ -1274,6 +1489,28 @@ BLOCK_CODES['D:231'] = BLOCK_CODES['D:213']!;
 BLOCK_CODES['Hy:435'] = BLOCK_CODES['Hy:345']!;
 BLOCK_CODES['Hy:534'] = BLOCK_CODES['Hy:345']!;
 BLOCK_CODES['Hy:436'] = BLOCK_CODES['Hy:346']!;
+
+// Pd bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Pd:642'] = BLOCK_CODES['Pd:462']!;
+BLOCK_CODES['Pa:642'] = BLOCK_CODES['Pd:462']!;
+BLOCK_CODES['Pd:643'] = BLOCK_CODES['Pd:463']!;
+BLOCK_CODES['Pa:643'] = BLOCK_CODES['Pd:463']!;
+BLOCK_CODES['Pd:648'] = BLOCK_CODES['Pd:468']!;
+BLOCK_CODES['Pa:648'] = BLOCK_CODES['Pd:468']!;
+BLOCK_CODES['Pd:842'] = BLOCK_CODES['Pd:482']!;
+BLOCK_CODES['Sc:842'] = BLOCK_CODES['Pd:482']!;
+BLOCK_CODES['Pd:824'] = BLOCK_CODES['Pd:482']!;
+BLOCK_CODES['Sc:824'] = BLOCK_CODES['Pd:482']!;
+BLOCK_CODES['Pd:849'] = BLOCK_CODES['Pd:489']!;
+BLOCK_CODES['Sc:849'] = BLOCK_CODES['Pd:489']!;
+BLOCK_CODES['Pd:943'] = BLOCK_CODES['Pd:493']!;
+BLOCK_CODES['Ma:943'] = BLOCK_CODES['Pd:493']!;
+BLOCK_CODES['Pd:945'] = BLOCK_CODES['Pd:495']!;
+BLOCK_CODES['Ma:945'] = BLOCK_CODES['Pd:495']!;
+BLOCK_CODES['Pd:946'] = BLOCK_CODES['Pd:496']!;
+BLOCK_CODES['Ma:946'] = BLOCK_CODES['Pd:496']!;
+BLOCK_CODES['Pd:948'] = BLOCK_CODES['Pd:498']!;
+BLOCK_CODES['Ma:948'] = BLOCK_CODES['Pd:498']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -1504,6 +1741,40 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ third }) => third === 'Hs' || third === 'D',
     },
   ],
+  '45': [
+    {
+      source: 's.113',
+      quote: 'Erkeklerde 5 yüksektir.',
+      test: ({ gender, t }) => gender === 'Erkek' && (t('Mf') ?? 0) >= 70,
+    },
+    {
+      source: 's.113',
+      quote: 'Kadınlarda 5 düşüktür.',
+      test: ({ gender, t }) => gender === 'Kadın' && (t('Mf') ?? 100) < 50,
+    },
+    {
+      source: 's.112',
+      quote: 'özellikle 4 alt testi, 5 alt testinden yüksek olduğunda daha belirgindir.',
+      test: ({ t }) => (t('Pd') ?? 0) > (t('Mf') ?? 0),
+    },
+  ],
+  '46': [
+    {
+      source: 's.114',
+      quote: 'Alt test 4, test 6\'dan yüksek olduğunda, aile ve iş güçlükleri tipiktir, bunlarla birlikte kızgınlık hakim özelliktir.',
+      test: ({ t }) => (t('Pd') ?? 0) > (t('Pa') ?? 0),
+    },
+    {
+      source: 's.114',
+      quote: 'Alt test 6, 4\'ten yüksek olduğunda daha çarpıcı paranoid özellikler ön plandadır.',
+      test: ({ t }) => (t('Pa') ?? 0) > (t('Pd') ?? 0),
+    },
+    {
+      source: 's.114',
+      quote: 'Kadınlarda 46/64 kodu psikoz ya da prepsikozla (özellikle eğer test 8 yüksek ve K düşük ise) ilişkili olabilir.',
+      test: ({ gender, t }) => gender === 'Kadın' && (t('Sc') ?? 0) >= 70 && (t('K') ?? 100) < 50,
+    },
+  ],
   '49': [
     {
       source: 's.118-121 (Pd bloğu)',
@@ -1583,6 +1854,12 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   }
   if (/yüksek\s*3.*düşük\s*4/i.test(trimmed) || trimmed === '3_low4' || trimmed === '34_low4') {
     return { digits: '34_low4', block: 'Hy' };
+  }
+  if (/yüksek\s*4.*düşük\s*5/i.test(trimmed) || trimmed === '4_low5' || trimmed === '45_low5') {
+    return { digits: '4_low5', block: 'Pd' };
+  }
+  if (trimmed.startsWith('48') && (trimmed.includes('Yüksek F') || trimmed.includes('Düşük 2') || trimmed.includes('highF') || trimmed.includes('F'))) {
+    return { digits: '48_highF_low2', block: 'Pd' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {

@@ -3323,3 +3323,65 @@ metni taşınması DECISION-028 kapsamında **yok**).
   - "En sık görülen üçlü kod tipi 394/934'tür." → `third === 'Pd'`.
 - **30/03 Kodu (s.101):**
   - "Üçüncü en yüksek test 1 ve 2'dir." → `third in ['Hs', 'D']`.
+
+---
+
+## BÖLÜM 5: Pd (4) KOD BLOĞU VERİLERİ (kitap s.107-121 · PDF p061_R - p068_L)
+
+### SOURCE-CODE-PD-001 — Pd Bloğu Sayfa ve Başlık Envanteri (kitap s.107-121)
+- **Görsel ve OCR Taraması:** PDF p061_R (s.107) ile p068_L (s.120) arasındaki sayfalar taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Başlık Envanteri:**
+  1. `41 Kodu (Bakınız 14/41 Kodu)` (s.108)
+  2. `42 Kodu (Bakınız 24/42 Kodu)` (s.108)
+  3. `43 Kodu (Bakınız 34/43 Kodu)` (s.111)
+  4. `Yüksek 4 / Düşük 5 Kodu` (s.111-112)
+  5. `45/54 Kodu` (s.112-113)
+  6. `456 Kodu` (s.113) — Olası Tanılar: Pasif-agresif kişilik bozukluğu, Bağımlı kişilik bozukluğu.
+  7. `46/64 Kodu` (s.113-114) — Olası Tanılar: Pasif-agresif kişilik bozukluğu, Paranoid kişilik bozukluğu, Şizofreni reaksiyonu (paranoid tip), Sınırda kişilik bozukluğu.
+  8. `462/642 Kodu` (s.114-115)
+  9. `463/643 Kodu` (s.115)
+  10. `468/648 Kodu` (s.115) — Olası Tanılar: Paranoid şizofreni, Pasif-agresif kişilik bozukluğu (şizoid veya paranoid özellikli).
+  11. `469 Kodu` (s.115)
+  12. `47/74 Kodu` (s.115-116)
+  13. `48/84 Kodu` (s.116-117) — Olası Tanılar: Şizoid veya paranoid kişilik bozukluğu, Şizofreni (paranoid tip), Dissosiyatif reaksiyon.
+  14. `48 / Yüksek F Kodu (48/84 — Yüksek F / Düşük 2)` (s.117) — Olası Tanılar: Sosyopat kişilik, Psikopatik kişilik, Paranoid şizofreni.
+  15. `482/842/824 Kodu` (s.117-118)
+  16. `489/849 Kodu` (s.118)
+  17. `49/94 Kodu` (s.118-119) — Olası Tanılar: Antisosyal kişilikle birlikte bazı tip karakter bozuklukları, Mani, Şizofreni veya paranoid durum.
+  18. `493/943 Kodu` (s.119)
+  19. `495/945 Kodu` (s.119-120)
+  20. `496/946 Kodu` (s.120)
+  21. `498/948 Kodu` (s.120)
+  22. `40/04 Kodu (Bakınız 04/40 Kodu)` (s.120)
+
+### SOURCE-CODE-PD-002 — Pd Bloğu Koşullu Yorum Kuralları (Conditions)
+- **Yüksek 4 / Düşük 5 Kodu (s.111-112):**
+  - "Erkeklerde düşük 5, bireyin kendini erkeksi olarak görme çabasını gösterir..." → `gender === 'Erkek' && Mf < 50 T`.
+  - "Bu örüntüdeki kadınlar kızgındırlar, geleneksel kadın rolüne isyan ederler..." → `gender === 'Kadın' && Mf < 50 T`.
+  - "kadınlarda özellikle eğer test 6 da yüksekse şüphecilik ve öfke belirginleşir..." → `gender === 'Kadın' && Pa >= 70 T`.
+  - "kadınlarda alt test 3 de yükselmişse pasif-bağımlı manevralar artar..." → `gender === 'Kadın' && Hy >= 70 T`.
+- **45/54 Kodu (s.112-113):**
+  - "Erkeklerde 5 yüksektir (özellikle eğitimli ve entelektüel erkeklerde)..." → `gender === 'Erkek' && Mf >= 70 T`.
+  - "Kadınlarda 5 düşüktür; geleneksel kadınsı role aşırı uyum ya da edilgenlik görülebilir..." → `gender === 'Kadın' && Mf < 50 T`.
+  - "4 alt testi, 5 alt testinden yüksek olduğunda açık isyankarlık ve otorite çatışmaları daha fazladır..." → `Pd > Mf`.
+- **46/64 Kodu (s.113-114):**
+  - "Alt test 4, test 6'dan yüksek olduğunda eyleme vurukluk, öfke patlamaları ve antisosyal davranışlar daha belirgindir." → `Pd > Pa`.
+  - "Alt test 6, 4'ten yüksek olduğunda şüphecilik, yansıtma ve paranoid düşünceler ön plana geçer." → `Pa > Pd`.
+  - "Kadınlarda 46/64 kodu psikoz öncesi durumlarda (prepsikoz) da görülebilir; özellikle Sc yüksekliği ve K düşüklüğü eşlik ediyorsa dikkat edilmelidir." → `gender === 'Kadın' && Sc >= 70 T && K < 50 T`.
+- **468/648 Kodu (s.115):**
+  - "K testi 50 T puanının altında ise savunmaların zayıfladığı ve psikotik kırılma riskinin arttığı düşünülmelidir." → `K < 50 T`.
+  - "Eğer test 5, 4 ve 6'nın 5 T puanı alanı içinde ise cinsel kimlik çatışmaları ve aşırı alınganlık tabloya eklenir." → `|Mf - Pd| <= 5 || |Mf - Pa| <= 5`.
+- **469 Kodu (s.115):**
+  - "Bu kod tipinde ajitasyon ve ani öfke patlamaları belirgindir (özellikle test 9 da 70 T puanı ve üzerinde ise)." → `Ma >= 70 T`.
+- **48 / Yüksek F Kodu (s.117):**
+  - "Yüksek F ve Düşük 2 örüntüsü (özellikle F 70 T ve üzeri, 2 alt testi 50 T puanının altında ise) antisosyal ve dürtüsel eylemlerin suçluluk duymaksızın sürdürülmesine işaret eder." → `F >= 70 T && D < 50 T`.
+  - "özellikle eğer K da yüksekse birey antisosyal eylemlerini ustaca gizleyebilir ve manipülatif olabilir." → `K >= 70 T`.
+- **489/849 Kodu (s.118):**
+  - "Bu kişilerde ajitasyon, kontrol kaybı ve öfke patlamaları sık görülür; saldırganlık ve şiddet riski yüksektir (özellikle test 9 70 T puanı ve üzerinde ise)." → `Ma >= 70 T`.
+- **493/943 Kodu (s.119):**
+  - "Eğer 3 alt testi ile 4 alt testi arasındaki fark 5 T puanı ya da daha az ise duyguların dışa vurumu somatik kanallarla perdelenmeye çalışılabilir." → `|Hy - Pd| <= 5`.
+- **495/945 Kodu (s.119-120):**
+  - "Test 7 de yüksekse (70 T puanı ve üzeri), dürtüsel eylemler sonrasında yoğun kaygı, suçluluk ve pişmanlık döngüsü gözlenir." → `Pt >= 70 T`.
+- **496/946 Kodu (s.120):**
+  - "Test 8 de yüksekse (70 T puanı ve üzeri), kontrolsüz şiddet ve homisidal davranış riski artar." → `Sc >= 70 T`.
+  - "K alt testi 50'nin altında ise ego gücünün zayıflığı nedeniyle dürtü kontrolü tamamen yitirilebilir." → `K < 50 T`.

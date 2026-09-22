@@ -784,3 +784,49 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
 - `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **170/170 PASS** (34 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-021 — DECISION-031 (A): Bölüm 5 Pd (4) Bloğu Kod Göçü ve Koşullu Yorumlar (s.107-121)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiPdBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-pd-batch28.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan dördüncü blok: **Pd (Psikopatik Sapma / 4) bloğu (s.107-121)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `parseCode()`: `Yüksek 4 / Düşük 5` (`4_low5`) ve `48 / Yüksek F` (`48_highF_low2`) ayrıştırma desteği eklendi.
+   - `BLOCK_CODES`: Pd bloğundaki 13 yeni kod tanımı ve 18 çapraz ölçek takma adı eklendi:
+     `Pd:4_low5` (Yüksek 4 / Düşük 5), `Pd:456` (456, Scarlett O'Hara Vadisi atfı), `Pd:462` (462/642), `Pd:463` (463/643), `Pd:468` (468/648), `Pd:469` (469), `Pd:48_highF_low2` (48/84 Yüksek F / Düşük 2), `Pd:482` (482/842/824), `Pd:489` (489/849), `Pd:493` (493/943), `Pd:495` (495/945), `Pd:496` (496/946), `Pd:498` (498/948).
+     Ayrıca çift yönlü ve çapraz blok çözünürlüğü için `Pd:642`, `Pa:642`, `Pd:643`, `Pa:643`, `Pd:648`, `Pa:648`, `Pd:842`, `Sc:842`, `Pd:824`, `Sc:824`, `Pd:849`, `Sc:849`, `Pd:943`, `Ma:943`, `Pd:945`, `Ma:945`, `Pd:946`, `Ma:946`, `Pd:948`, `Ma:948` takma adları tanımlandı.
+   - `CODE_CONDITIONS`: Pd bloğuna ait 10 kod için koşullu kurallar makinece değerlendirilebilir testlerle bağlandı:
+     - `Pd:4_low5`: Erkek Mf < 50 T; Kadın Mf < 50 T; Kadın Pa ≥ 70 T; Kadın Hy ≥ 70 T (s.111-112).
+     - `45/54`: Erkek Mf ≥ 70 T; Kadın Mf < 50 T; Pd > Mf (s.112-113).
+     - `46/64`: Pd > Pa açık isyankarlık; Pa > Pd şüphecilik; Kadın Sc ≥ 70 ∧ K < 50 T prepsikoz (s.114).
+     - `Pd:468`: K < 50 T savunma zayıflığı; Mf ile 4/6 farkı ≤ 5 T cinsel kimlik çatışması (s.115).
+     - `Pd:469`: Ma ≥ 70 T ajitasyon ve öfke patlaması (s.115).
+     - `Pd:48_highF_low2`: F ≥ 70 ∧ D < 50 antisosyal eylemler; K ≥ 70 manipülatif gizleme (s.117).
+     - `Pd:489`: Ma ≥ 70 T saldırganlık ve şiddet riski (s.118).
+     - `Pd:493`: Hy ve Pd farkı ≤ 5 T somatik perdeleme (s.119).
+     - `Pd:495`: Pt ≥ 70 T eylem sonrası kaygı ve suçluluk döngüsü (s.119-120).
+     - `Pd:496`: Sc ≥ 70 T kontrolsüz şiddet/homisidal risk; K < 50 T ego gücü yetersizliği (s.120).
+2. `tests/mmpiPdBlock.test.ts`:
+   - 17 yeni test ile Pd bloğunun kod çözme doğruluğu, tanı sadakati ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Pd bloğundaki 31 anahtar eklenerek toplam kayıt 81 blok koduna ulaştırıldı.
+4. `scripts/mmpi-audit/cmp-pd-batch28.ts`:
+   - Pd bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-pd-batch28.ts` → **SONUÇ: 0 FARK · Pd BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **187/187 PASS** (35 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

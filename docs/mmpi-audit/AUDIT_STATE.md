@@ -37,17 +37,17 @@ Sayfa eşleme:
 | 6 | Norms (kitap s.191-195, 257-260) | **DONE** (Tablo 30 → 26/26 MATCH) |
 | 7 | Subscales | **N/A** — Kaynak kitap (Ceyhun & Oral 2003) MMPI-1 standardıdır, Harris-Lingoes alt ölçekleri içermez; projenin türetilmiş ölçekleri (kişilik bozuklukları, Wiggins, özel ölçekler) Bölüm 7 kapsamında **PHASE 8**'de doğrulandı. |
 | 8 | Derived scales (Bölüm 7, kitap s.171-188) | ✅ **DONE** — anahtarlar + `WIGGINS_NORMS` **26/26 MATCH** (DECISION-025) |
-| 9 | Code types (Bölüm 5) | 🔄 **BLOK-BLOK GÖÇ (DECISION-031 = A · batch 27)** — **Hs (1)**, **D (2)** ve **Hy (3)** blokları TAMAMLANDI: (1) Hs bloğu (s.67-78) 20 kod gövdesi ve 10 koşulla eklendi (CHANGE-018); (2) D bloğu (s.81-92) 14 kod gövdesi ve 11 koşulla (intihar riski: 278/728, 287/827) eklendi (CHANGE-019); (3) Hy bloğu (s.95-103) 6 yeni kod kaydı (`Yüksek 3 / Yüksek K`, `Hy:32`, `321`, `Yüksek 3 / Düşük 4`, `345/435/534`, `346/436`) ve 10 kod için 18 koşulla (34/43 cinsiyet/yükseklik, 35/53, 36/63, 37/73, 39/93, 30/03, 345/435/534, 346/436) eklendi (CHANGE-020); mutabakat `cmp-hy-batch27.ts` 0 FARK · `tests/mmpiHyBlock.test.ts` 16/16 PASS. Sıradaki blok: **Pd (Psikopatik Sapma / 4) bloğu (s.107-121)**. |
+| 9 | Code types (Bölüm 5) | 🔄 **BLOK-BLOK GÖÇ (DECISION-031 = A · batch 28)** — **Hs (1)**, **D (2)**, **Hy (3)** ve **Pd (4)** blokları TAMAMLANDI: (1) Hs bloğu (s.67-78) 20 kod gövdesi ve 10 koşulla eklendi (CHANGE-018); (2) D bloğu (s.81-92) 14 kod gövdesi ve 11 koşulla (intihar riski: 278/728, 287/827) eklendi (CHANGE-019); (3) Hy bloğu (s.95-103) 6 yeni kod kaydı (`Yüksek 3 / Yüksek K`, `Hy:32`, `321`, `Yüksek 3 / Düşük 4`, `345/435/534`, `346/436`) ve 10 kod için 18 koşulla eklendi (CHANGE-020); (4) Pd bloğu (s.107-121) 13 yeni kod kaydı (`Pd:4_low5`, `Pd:456`, `Pd:462`, `Pd:463`, `Pd:468`, `Pd:469`, `Pd:48_highF_low2`, `Pd:482`, `Pd:489`, `Pd:493`, `Pd:495`, `Pd:496`, `Pd:498`), 18 çapraz ölçek takma adı ve 10 kod için koşullu kurallarla (Scarlett O'Hara atfı, pasif-agresif ve bağımlı tanıları, intihar tehdidi/girişimi, şiddet ve homisidal risk koşulları) eklendi (CHANGE-021); mutabakat `cmp-pd-batch28.ts` 0 FARK · `tests/mmpiPdBlock.test.ts` 17/17 PASS. Sıradaki blok: **Pa (Paranoya / 6) bloğu (s.125-131)**. |
 | 10 | Interpretation (Bölüm 6) | ✅ **DONE** — Bölüm 6 kaynak taraması s.159-170 bitti (batch 22); DECISION-030 (A) onaylandı ve CHANGE-015 ile uygulandı (batch 23: 18 desen kaydı, 8 çekince); batch 24 CHANGE-016 ile kalan 4 desen kartı kaynaklandı (`cry-for-help`, `depressive-27`, `49`, `89`); CONFLICT-041/042 FIXED, 043 FIXED (DECISION-032 = B) · kanıt cmp-b6-batch23/24 → **0 FARK** |
 | 11 | AI interpretation | ✅ **DONE** — §39 uyumu (AI hesaplama yapmaz), KVKK sahte isimlendirme (isim/soyad iletilmez), klinik sınırlar (tanı/tedavi yasağı) ve yetkilendirme doğrulandı; 8 test PASS. |
 | 12 | UI | NOT_STARTED |
 | 13 | Report | NOT_STARTED |
-| 14 | Tests | **IN_PROGRESS** · `mmpiHsBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS |
+| 14 | Tests | **IN_PROGRESS** · `mmpiPdBlock` **17/17 PASS** · `mmpiHyBlock` **16/16 PASS** · `mmpiDBlock` **16/16 PASS** · `mmpiHsBlock` **16/16 PASS** · `mmpiKeyIntegrity` **63/63 PASS** · `mmpiInterpretation` **54/54 PASS** · `aiInterpretation` **5/5 PASS** · `npm test` **445/445 PASS** · `verify:pdf` PASS · `tsc` 0 · `build` PASS |
 
 ## Current position
 
 Current book page:
-**s.95-103 (Hy Bloğu Göçü TAMAMLANDI)** · Sıradaki: **s.107-121 (Pd Bloğu)**
+**s.107-121 (Pd Bloğu Göçü TAMAMLANDI)** · Sıradaki: **s.125-131 (Pa Bloğu)**
 - **PHASE 9 batch 25 DONE (DECISION-031/A · CHANGE-018):** Hs (1) bloğu s.67-78 kitaptan görsel okunarak ve OCR ile teyit edilerek tüm 20 kod gövdesi (`BLOCK_CODES`) ve 10 koşul (`CODE_CONDITIONS`) aktarıldı. 123 ile 132 çakışması `parseCode()` digit-sort düzeltmesiyle çözüldü. Mutabakat `cmp-hs-batch25.ts` (0 FARK) ve `tests/mmpiHsBlock.test.ts` (16 test) ile kilitlendi.
 - **PHASE 10 DONE:** Bölüm 6 (Şekil 23-32) örüntü kutuları ve Bölüm 5 atıfları tamamlandı (CHANGE-015/016, DECISION-030/A).
 - **PHASE 11 DONE:** Yapay zekâ yorum katmanı denetlendi: §39 uyumu, KVKK m.4/3-d sahte isimlendirme, klinik tanı/tedavi yasağı ve yetki sınırları doğrulandı; tests/aiInterpretation.test.ts eklendi.
@@ -835,11 +835,11 @@ Rejected:       9 (001, 002, 013, 014, 016, 018, 021, 037, 040 — kod doğru /
                 kaynak içi tutarsızlık) — TOPLAM KAYIT: 43
 Fixed (Ek 1):   CONFLICT-023 → 14 kritik madde etiketi kaynak metniyle hizalandı (CHANGE-011)
 Ek 1 (PHASE 2/5): madde 1-566 bütünlük ✓ · 39 kritik madde görsel doğrulandı · CONFLICT-023 açıldı
-Code changes:   17 (CHANGE-001..017; CHANGE-016: 4 kart atfı; CHANGE-017: DECISION-032/B cry-for-help)
-Tests:          380/380 PASS (36 suite) · typecheck PASS · build PASS
-                mmpiKeyIntegrity 63/63 · mmpiInterpretation 54/54
-                batch 24: optik-form.html güncel ve senkron
-Next:           (1) **DECISION-031 = A (KABUL)**: Bölüm 5 Hs bloğu göçü (CONFLICT-024 / 027)
+Code changes:   18 (CHANGE-001..017, CHANGE-018 Hs bloğu, CHANGE-019 D bloğu, CHANGE-020 Hy bloğu, CHANGE-021 Pd bloğu)
+Tests:          445/445 PASS (48 suite) · typecheck PASS · build PASS
+                mmpiPdBlock 17/17 · mmpiHyBlock 16/16 · mmpiDBlock 16/16 · mmpiHsBlock 16/16 · mmpiKeyIntegrity 63/63 · mmpiInterpretation 54/54
+                batch 28: optik-form.html güncel ve senkron
+Next:           (1) **DECISION-031 = A (KABUL)**: Bölüm 5 Pa bloğu göçü (s.125-131)
                 (2) **PHASE 12 (UI)** + **PHASE 13 (Rapor)** → **FINAL**
 Blocking:       none
 ```

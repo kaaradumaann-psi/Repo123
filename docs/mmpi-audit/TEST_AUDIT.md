@@ -909,3 +909,29 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-hy-batch27.ts` → **SONUÇ: 0 FARK · Hy BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 28 — CHANGE-021 · Pd (4) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Pd (4) bloğundaki çok haneli ve eksik kodların (`Yüksek 4 / Düşük 5`, `456`,
+`462/642`, `463/643`, `468/648`, `469`, `48 / Yüksek F`, `482/842/824`, `489/849`,
+`493/943`, `495/945`, `496/946`, `498/948`) `BLOCK_CODES`'a taşınması ve ilgili 10 kod için koşulların bağlanması.
+
+**Eklenen testler (17):** `tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati: Yüksek 4 / Düşük 5 (erkek/kadın ayrımı), 456 (Scarlett O'Hara Vadisi atfı), 462/642, 463/643, 468/648, 469, 48 / Yüksek F, 482/842/824, 489/849, 493/943, 495/945, 496/946, 498/948, 45, 46, 47, 48, 49, 04.
+2. Koşul testleri:
+   - Pd:4_low5 (erkek/kadın Mf < 50, kadın Pa ≥ 70, kadın Hy ≥ 70),
+   - 45/54 (erkek Mf ≥ 70, kadın Mf < 50, Pd > Mf),
+   - 46/64 (Pd > Pa açık isyankarlık, Pa > Pd şüphecilik, kadın Sc ≥ 70 ∧ K < 50 prepsikoz),
+   - 468/648 (K < 50 T savunma zayıflığı, 5 T puanı alanı),
+   - 469 (Ma ≥ 70 T öfke patlaması),
+   - 48 / Yüksek F (F ≥ 70 ∧ D < 50, K ≥ 70 manipülatif gizleme),
+   - 489/849 (Ma ≥ 70 T şiddet riski),
+   - 493/943 (Hy ve Pd farkı ≤ 5 T),
+   - 495/945 (Pt ≥ 70 T eylem sonrası suçluluk döngüsü),
+   - 496/946 (Sc ≥ 70 T homisidal risk ve K < 50 T ego gücü yetersizliği).
+
+**Güncellenen testler:** `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`KNOWN_BLOCK_CODES` listesine Pd bloğundaki 31 anahtar eklendi, toplam 81 blok kodu).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-pd-batch28.ts` → **SONUÇ: 0 FARK · Pd BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
