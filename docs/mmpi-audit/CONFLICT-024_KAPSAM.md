@@ -389,8 +389,9 @@ eksik + yanlış metin dönüyor).
 | Mf (s.121-126) | 10 | 9 | 1 |
 | Pa (s.130-135) | 15 | 15 | 0 |
 | Pt (s.137-142) | 15 | 15 | 0 |
-| **Sc (s.143-148)** | **10** | **10** | **0** |
-| **TOPLAM** | **140** | **108** | **32** |
+| Sc (s.143-148) | 10 | 10 | 0 |
+| **Ma (s.149-153)** | **4** | **4** | **0** |
+| **TOPLAM** | **144** | **112** | **32** |
 
 ## Pt (7) kod bloğu (s.140-142) — **15 VAR / 0 YOK** (CHANGE-023 ile TAMAMLANDI)
 
@@ -426,31 +427,21 @@ eksik + yanlış metin dönüyor).
 
 **Sc Bloğu Özeti (s.143-148):** 10 başlığın tamamı VAR, 0 YOK. CHANGE-024 ile Sc bloğu göçü tamamlandı.
 
-## Ma (9) bloğu + Si (0) girişi (s.149-156) — batch 20 sayımı
+## Ma (9) bloğu (s.149-153) — **4 VAR / 0 YOK** (CHANGE-025 ile TAMAMLANDI)
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |
 |---|---|---|---|---|
 | — | '9. Hipomani (Ma) Alt Testi' girişi + **Tablo 16** + Graham listeleri | s.149-150 | (kod tipi değil) | Tablo 16 P0 ✅ MATCH (batch 19); listeler CONFLICT-026 |
-| 1 | **Yüksek 9/Yüksek K Kodu** | s.152 | **YOK** ❌ | 4 sayısal koşul → CONFLICT-039 + 027 (+4) |
-| 2 | **Yüksek 9/Düşük K Kodu** | s.153 | **YOK** ❌ | CONFLICT-039 |
-| 3 | **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** | s.153 | **VAR** ✅ *(CHANGE-014 sonrası)* | eski kayıt: kanonik `'19'` = s.77 Hs gövdesiydi → **CONFLICT-036 vaka 2 KAPANDI** (`Ma:19` ayrık kaydı) |
-| — | `92/29 · 93/39 · 94/49 · 95/59 · 96/69 · 97/79 · 98/89` **(Bakınız)** | s.153 | ✅ UYUMLU | 7 çapraz ref, hedefler mevcut → başlık sayılmaz |
-| — | not: 'Eyleme vuruk davranış ile ilgilidir' | s.153 | **YOK** ❌ | CONFLICT-025 (+1) — başlık değil |
-| 4 | **90/09 Kodu** | s.153 | **VAR** ✅ | gövde 5/5 sadık |
+| 1 | **Yüksek 9/Yüksek K Kodu** | s.152 | **VAR** ✅ | `Ma:9_highK` eklendi, D<50, K>70, Mf<40 koşulları bağlandı (CHANGE-025) |
+| 2 | **Yüksek 9/Düşük K Kodu** | s.153 | **VAR** ✅ | `Ma:9_lowK` eklendi, kadın eksibisyonizm koşulu bağlandı (CHANGE-025) |
+| 3 | **91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)** | s.153 | **VAR** ✅ | `Ma:19` bloğa özel ayrık kaydı (CHANGE-014) |
+| — | `92/29 · 93/39 · 94/49 · 95/59 · 96/69 · 97/79 · 98/89` **(Bakınız)** | s.153 | ✅ UYUMLU | 7 çapraz ref, hedefler mevcut; 94/49 eyleme vurukluk notu seeAlso alanına eklendi |
+| 4 | **90/09 Kodu** | s.153 | **VAR** ✅ | gövde 5/5 sadık; erkeklerde nadirlik koşulu bağlandı (CHANGE-025) |
 | — | Si girişi + **Tablo 17** + Si listeleri | s.154-156 | (kod tipi değil) | **s.154 BOŞ SAYFA**; Tablo 17 P0 ✅ MATCH → CONFLICT-026 (listeler) |
 
-**Batch 20 deltası: +4 başlık → 1 VAR / 3 YOK.**
+**Ma Bloğu Özeti (s.149-153):** 4 başlığın tamamı VAR, 0 YOK. CHANGE-025 ile Ma bloğu göçü tamamlandı.
 
-| | Başlık | VAR | YOK |
-|---|---|---|---|
-| **Kümülatif (batch 20 sonrası)** | **146** | **103** | **45** |
-
-> ⚠️ **TOPLAM satırlarında tarihî tutarsızlık** (VAR + YOK ≠ Başlık; kök neden: Hs
-> satırının 31|31|0 kaydı ile anlatının '9 VAR / 22 YOK' demesi). Batch deltaları
-> kesindir; **kesin toplam FINAL'da `SOURCE_INDEX` üzerinden yeniden sayılacak**
-> (sessizce 'düzeltme' yapılmıyor).
-
-## Si (0) bloğu kapanışı (s.157-158) — **0 VAR / 2 YOK** · **BÖLÜM 5 TARAMASI BİTTİ**
+## Si (0) bloğu kapanışı (s.157-158) — **2 VAR / 0 YOK** (CHANGE-014 sonrası) · **BÖLÜM 5 TARAMASI BİTTİ**
 
 | # | Kaynak başlığı | Sayfa | Kodda | Not |
 |---|---|---|---|---|

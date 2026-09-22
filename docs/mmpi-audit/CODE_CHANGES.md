@@ -968,3 +968,50 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
 - `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-025 — DECISION-031 (A): Bölüm 5 Ma (9) Bloğu Kod Göçü ve Koşullu Yorumlar (s.149-153)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiMaBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-ma-batch32.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan sekizinci blok: **Ma (Hipomani / 9) bloğu (s.149-153)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `BLOCK_CODES`: Ma bloğundaki 2 yeni kod tanımı ve 3 çapraz ölçek takma adı eklendi:
+     `Ma:9_highK` (Yüksek 9 / Yüksek K gövdesi: "Eğer 9 ve K alt testlerinde puanlar 70 T puanında...", s.152).
+     `Ma:9_lowK` (Yüksek 9 / Düşük K gövdesi ve tanısı: "Narsisistik kişilerdir. Kadınlar, eksibisyonist bir biçimde...", tanı: Narsisistik kişilik, s.153).
+     Çapraz takma adlar: `Ma:9K`, `Ma:high9_highK`, `Ma:high9_lowK`.
+   - `CODE_CONDITIONS`:
+     - `Ma:9_highK`: D < 50 T, K > 70 T, Kadın Mf < 40 T koşulları (s.152).
+     - `Ma:9_lowK`: Kadın eksibisyonizm kuralı (s.153).
+     - `09`: Erkeklerde nadirlik uyarısı (s.153).
+     - `49`: `CODES['49'].seeAlso` alanına s.153 eyleme vurukluk atfı eklendi.
+   - `parseCode`: `Yüksek 9 / Yüksek K` ve `Yüksek 9 / Düşük K` kalıplarını Ma bloğuna yönlendiren çözümleme mantığı eklendi.
+2. `tests/mmpiMaBlock.test.ts`:
+   - 9 yeni test ile Ma bloğunun kod çözme doğruluğu, tanı sadakati, 91 vs 19 blok ayrımı ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Ma bloğundaki 5 yeni anahtar eklenerek toplam kayıt 145 blok koduna ulaştırıldı.
+   - Ortak iki-haneli koşul simetrisi listesine `'09'` eklendi.
+4. `scripts/mmpi-audit/cmp-ma-batch32.ts`:
+   - Ma bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-ma-batch32.ts` → **SONUÇ: 0 FARK · Ma BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiMaBlock.test.ts` → **9/9 PASS**
+- `npx tsx --test tests/mmpiScBlock.test.ts` → **13/13 PASS**
+- `npx tsx --test tests/mmpiPtBlock.test.ts` → **11/11 PASS**
+- `npx tsx --test tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiInterpretation.test.ts` → **54/54 PASS**
+- `npx tsx --test tests/aiInterpretation.test.ts` → **5/5 PASS**
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

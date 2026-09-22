@@ -3504,3 +3504,36 @@ metni taşınması DECISION-028 kapsamında **yok**).
   - "...üçüncü yükselen alt test 4, 7 ya da 6'dır." → `third in ['Pd', 'Pt', 'Pa']`.
 - **80/08 Kodu (s.148):**
   - "Bu kod tipindeki 7 ve 2 alt testleri en yüksek üçüncü testtir." → `third === 'Pt' || third === 'D'`.
+
+---
+
+## BÖLÜM 5: Ma (9) KOD BLOĞU VERİLERİ (kitap s.149-153 · PDF p082_L - p083_R)
+
+### SOURCE-CODE-MA-001 — Ma Bloğu Sayfa ve Başlık Envanteri (kitap s.149-153)
+- **Görsel ve OCR Taraması:** PDF p082_L (s.149) ile p083_R (s.153) arasındaki sayfalar RapidOCR ve pymupdf ile taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Doğrulanan Başlıklar:**
+  1. `Tablo 16` (s.150) — Hipomani alt testi: Madde numaraları ve puanlama yönü (35 Doğru + 11 Yanlış = 46 madde, P0 MATCH).
+  2. `T Bantları` (s.151-152) — 85+ T / 70-84 T / 60-69 T / 45-59 T / 21-44 T (5 bant MATCH).
+  3. `Yüksek 9 / Yüksek K Kodu` (s.152) — 9 ve K >= 70 T (2 alt testi T: 50'nin altında ise), enerjik, organize, iyi yönetici, yarışmacı. K > 70 T başkalarını organize etme çabası. Kadınlar Mf < 40 T fiziksel çekicilik konusunda teşhirci.
+  4. `Yüksek 9 / Düşük K Kodu` (s.153) — Olası Tanı: Narsisistik kişilik. Narsisistik kişilerdir. Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri üstlerine çekerler.
+  5. `91/19 Kodu (Ayrıca 19/91 Koduna da Bakınız)` (s.153) — Ender görülür. Hipomanik, gergin, yerinde duramaz, ihtiraslı, başarısızlıkla engellenmiş.
+  6. `92/29 Kodu` (s.153) — Bakınız 29/92 Kodu.
+  7. `93/39 Kodu` (s.153) — Bakınız 39/93 Kodu.
+  8. `94/49 Kodu` (s.153) — Bakınız 49/94 Kodu ("Eyleme vuruk davranış ile ilgilidir" klinik notu).
+  9. `95/59 Kodu` (s.153) — Bakınız 59/95 Kodu.
+  10. `96/69 Kodu` (s.153) — Bakınız 69/96 Kodu.
+  11. `97/79 Kodu` (s.153) — Bakınız 79/97 Kodu.
+  12. `98/89 Kodu` (s.153) — Bakınız 89/98 Kodu.
+  13. `90/09 Kodu` (s.153) — Kod oldukça nadirdir, özellikle erkeklerde çok az görülür. Enerjik, ajite, yalnız. Si yükselmesi bırakılarak diğer iki alt test ile yorum yapılmalıdır.
+
+### SOURCE-CODE-MA-002 — Ma Bloğu Koşullu Yorum Kuralları (Conditions)
+- **Yüksek 9 / Yüksek K Kodu (s.152):**
+  - "2 alt testi T: 50'nin altında ise" → `D < 50 T`.
+  - "K alt testi 70 T puanının üzerine çıkarsa..." → `K > 70 T`.
+  - "Kadınlar fiziksel çekicilik konusunda teşhircidirler (eğer 5 alt testinde T:40'ın altında ise)..." → `gender === 'Kadın' && Mf < 40 T`.
+- **Yüksek 9 / Düşük K Kodu (s.153):**
+  - "Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine çekerler." → `gender === 'Kadın'`.
+- **90/09 Kodu (s.153):**
+  - "Kod oldukça nadirdir, özellikle erkeklerde çok az görülür." → `gender === 'Erkek'`.
+- **94/49 Kodu (s.153):**
+  - "Eyleme vuruk davranış ile ilgilidir." → klinik atıf.

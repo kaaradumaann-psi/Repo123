@@ -877,7 +877,7 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
       'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
       'Hy:435', 'Hy:436', 'Hy:534',
       'Ma:19', 'Ma:694', 'Ma:698', 'Ma:789', 'Ma:794', 'Ma:8726', 'Ma:879', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
-      'Ma:964', 'Ma:968', 'Ma:974',
+      'Ma:964', 'Ma:968', 'Ma:974', 'Ma:9K', 'Ma:9_highK', 'Ma:9_lowK', 'Ma:high9_highK', 'Ma:high9_lowK',
       'Pa:456_scarlett', 'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648', 'Pa:678',
       'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:86', 'Pa:860', 'Pa:876', 'Pa:964',
       'Pa:968', 'Pa:paranoid_valley', 'Pa:psychotic_v',
@@ -955,7 +955,7 @@ describe('CHANGE-014 (DECISION-029/A) — blok kimliği, kırpmasız çözümlem
   });
 
   it('koşul tablosunda ölü anahtar yoktur: ortak iki haneli kayıtlar her iki sıralamadan koşul taşır', () => {
-    const kosullu = ['12', '13', '26', '27', '49', '07', '89', '08'];
+    const kosullu = ['12', '13', '26', '27', '49', '07', '89', '08', '09'];
     for (const k of kosullu) {
       assert.ok(resolveCodeInterpretation(k)?.conditions?.length, `${k} koşullu kayıt taşımalı`);
       const ters = [...k].reverse().join('');

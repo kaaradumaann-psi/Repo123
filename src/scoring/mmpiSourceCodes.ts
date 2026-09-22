@@ -246,6 +246,9 @@ const CODES: Record<string, CodeInterpretation> = {
       'Antisosyal kişilikle birlikte bazı tip karakter bozuklukları',
       'Pasif-agresif kişilik bozukluğu, agresif tip',
     ],
+    seeAlso:
+      '94/49 kodu Ma bloğunda ayrıca "Eyleme vuruk davranış ile ilgilidir" notunu taşır (s.153). ' +
+      '493/943, 495/945, 496/946 kodlarına bakınız.',
   },
   '04': {
     code: '40/04',
@@ -1721,6 +1724,52 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       },
     ],
   },
+
+  // --- Ma (Hipomani / 9) Bloğu (s.149-153) · DECISION-031/A ---
+  'Ma:9_highK': {
+    code: 'Yüksek 9 / Yüksek K',
+    block: 'Ma',
+    rawCode: 'Yüksek 9 / Yüksek K',
+    text:
+      'Eğer 9 ve K alt testlerinde puanlar 70 T puanında (2 alt testi T: 50\'nin altında ise) ise bu kişiler enerjik, organize, diğerlerinin kendileri üzerinde otorite kurmasını istemeyen kişilerdir. Genellikle çok iyi yöneticidirler. Güç yönelimli bireylerdir, bunlar için belirsizlik, fikir üretmeme ya da çelişkili durumlar tahammül edilemez şeylerdir. Kendilerinin kontrol edemediği durumlarda ve bilgi verilmeyen, yapılanmamış durumlarda rahatsız olurlar.\n' +
+      'Bu bireylerin çoğu yarışmacıdır. K alt testi 70 T puanının üzerine çıkarsa, kendi yaşamlarını ve çevrelerindeki diğer kişilerin yaşamlarını organize etme çabaları vardır. Kendilerini rahatsız ya da tehdit eden durumlarda bağımlı, itaatkar, duygusal ve kontrolü kaybeden kişiler olabilirler. Bireyler diğerleri üzerinde kontrol koyarak onları kendilerine itaat ettirirler. Aslında temelde kendilerine güvensizdirler, rollerine, görünümlerine sıkı sıkıya bağlıdırlar.\n' +
+      'Kadınlar fiziksel çekicilik konusunda teşhircidirler (eğer 5 alt testinde T:40\'ın altında ise), böylece kendilerini kabul ettirir ve diğerlerini kontrol ettiklerini düşünürler.',
+    seeAlso: 'Ma alt testinin diğer alt testlerle ilişkisi (s.152).',
+    conditions: [
+      {
+        source: 's.152 (Ma bloğu)',
+        quote: '2 alt testi T: 50\'nin altında ise',
+        test: ({ t }) => (t('D') ?? 100) < 50,
+      },
+      {
+        source: 's.152 (Ma bloğu)',
+        quote: 'K alt testi 70 T puanının üzerine çıkarsa, kendi yaşamlarını ve çevrelerindeki diğer kişilerin yaşamlarını organize etme çabaları vardır.',
+        test: ({ t }) => (t('K') ?? 0) > 70,
+      },
+      {
+        source: 's.152 (Ma bloğu)',
+        quote: 'Kadınlar fiziksel çekicilik konusunda teşhircidirler (eğer 5 alt testinde T:40\'ın altında ise)',
+        test: ({ gender, t }) => gender === 'Kadın' && (t('Mf') ?? 100) < 40,
+      },
+    ],
+  },
+
+  'Ma:9_lowK': {
+    code: 'Yüksek 9 / Düşük K',
+    block: 'Ma',
+    rawCode: 'Yüksek 9 / Düşük K',
+    text:
+      'Narsisistik kişilerdir. Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine çekerler.',
+    diagnosis: ['Narsisistik kişilik'],
+    seeAlso: 'Ma alt testinin diğer alt testlerle ilişkisi (s.153).',
+    conditions: [
+      {
+        source: 's.153 (Ma bloğu)',
+        quote: 'Kadınlar, eksibisyonist bir biçimde kendilerini sergileyerek dikkatleri bu şekilde üstlerine çekerler.',
+        test: ({ gender }) => gender === 'Kadın',
+      },
+    ],
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
@@ -1800,6 +1849,11 @@ BLOCK_CODES['Ma:8726'] = BLOCK_CODES['Sc:8726']!;
 BLOCK_CODES['Sc:psychotic_v'] = BLOCK_CODES['Sc:paranoid_valley']!;
 BLOCK_CODES['Pa:paranoid_valley'] = BLOCK_CODES['Sc:paranoid_valley']!;
 BLOCK_CODES['Pa:psychotic_v'] = BLOCK_CODES['Sc:paranoid_valley']!;
+
+// Ma bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Ma:9K'] = BLOCK_CODES['Ma:9_highK']!;
+BLOCK_CODES['Ma:high9_highK'] = BLOCK_CODES['Ma:9_highK']!;
+BLOCK_CODES['Ma:high9_lowK'] = BLOCK_CODES['Ma:9_lowK']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -2227,6 +2281,13 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ third }) => third === 'Pt' || third === 'D',
     },
   ],
+  '09': [
+    {
+      source: 's.153 (Ma bloğu)',
+      quote: 'Kod oldukça nadirdir, özellikle erkeklerde çok az görülür.',
+      test: ({ gender }) => gender === 'Erkek',
+    },
+  ],
 };
 
 /* ------------------------------------------------------------------ */
@@ -2272,6 +2333,12 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   }
   if (/paranoid\s*vadi|psikotik\s*v/i.test(trimmed) || trimmed === 'paranoid_valley' || trimmed === 'psychotic_v') {
     return { digits: 'paranoid_valley', block: 'Sc' };
+  }
+  if (/yüksek\s*9.*yüksek\s*k/i.test(trimmed) || trimmed === '9_highK' || trimmed === '9K' || trimmed === 'high9_highK') {
+    return { digits: '9_highK', block: 'Ma' };
+  }
+  if (/yüksek\s*9.*düşük\s*k/i.test(trimmed) || trimmed === '9_lowK' || trimmed === 'high9_lowK') {
+    return { digits: '9_lowK', block: 'Ma' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {

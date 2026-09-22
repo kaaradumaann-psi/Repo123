@@ -1005,3 +1005,27 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-sc-batch31.ts` → **SONUÇ: 0 FARK · Sc BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 32 — CHANGE-025 · Ma (9) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Ma (9) bloğundaki kod gövdelerinin (`Ma:9_highK`, `Ma:9_lowK`), tanı ve çapraz takma adlarının `BLOCK_CODES`'a taşınması ve ilgili 4 kod grubu için koşulların bağlanması (`Ma:9_highK`, `Ma:9_lowK`, `90/09`, `49/94`).
+
+**Eklenen testler (9):** `tests/mmpiMaBlock.test.ts` → **9/9 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati:
+   - `Ma:9_highK` / `Yüksek 9 / Yüksek K` bloğa özel gövdesi (enerjik, organize, otorite istemez, iyi yönetici, yarışmacı, kadın teşhirciliği) (s.152),
+   - `Ma:9_lowK` / `Yüksek 9 / Düşük K` bloğa özel gövdesi ve tanısı (Narsisistik kişilik, kadın eksibisyonizmi) (s.153),
+   - `Ma:19` / `91/19` bloğa özel gövdesi ve 19/91 ayrımı (ender görülür, hipomanik, gergin, başarısızlıkla engellenmiş) (s.153),
+   - `90/09` kodu gövde sadakatiyle çözümlenmesi (s.153),
+   - İki haneli Ma kodları ve Bakınız yönlendirmeleri (92, 93, 94, 95, 96, 97, 98, 90).
+2. Koşul testleri:
+   - Ma:9_highK (D < 50 T, K > 70 T, Kadın Mf < 40 T),
+   - Ma:9_lowK (Kadın eksibisyonizm kuralı),
+   - 90/09 (erkeklerde nadirlik uyarısı),
+   - 49/94 s.153 eyleme vurukluk klinik notu.
+
+**Güncellenen testler:**
+- `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`KNOWN_BLOCK_CODES` listesine Ma bloğundaki 5 anahtar eklendi, toplam 145 blok kodu; `kosullu` dizisine `'09'` eklendi).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-ma-batch32.ts` → **SONUÇ: 0 FARK · Ma BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiPtBlock` → **11/11** · `mmpiScBlock` → **13/13** · `mmpiMaBlock` → **9/9** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

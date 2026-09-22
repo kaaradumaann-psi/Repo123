@@ -1721,3 +1721,17 @@ bağlandı (`Sc:86`, `Sc:87`, `8726`, `paranoid_valley`, `89`, `08`). `parseCode
 **Doğrulama:** tsc **0** · `cmp-sc-batch31.ts` **0 FARK** · `tests/mmpiScBlock.test.ts` **13/13 PASS** ·
 `tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `tests/mmpiInterpretation.test.ts` **54/54 PASS** ·
 `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
+
+---
+
+## 2026-09-22 — PHASE 9/10 · batch 32 — CHANGE-025: Ma (9) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Kapsam:** DECISION-031 = A kapsamında sekizinci blok olan Ma (9) bloğu (s.149-153) tamamlandı.
+2 yeni kod kaydı kitaptaki tanı ve yönlendirmeleriyle `BLOCK_CODES`'a eklendi (`Ma:9_highK`,
+`Ma:9_lowK`), 3 çapraz ölçek takma adı bağlandı (`Ma:9K`, `Ma:high9_highK`, `Ma:high9_lowK`).
+Koşullu yorumlar katmanına `Ma:9_highK` (D < 50, K > 70, Kadın Mf < 40), `Ma:9_lowK` (Kadın
+eksibisyonizm kuralı), `90/09` (erkeklerde nadirlik kuralı) ve `49/94` s.153 eyleme vurukluk
+notu bağlandı. `parseCode()` motoruna Yüksek 9 kalıpları eklendi.
+
+**Doğrulama:** tsc **0** · `cmp-ma-batch32.ts` **0 FARK** · `tests/mmpiMaBlock.test.ts` **9/9 PASS** ·
+`tests/mmpiKeyIntegrity.test.ts` **63/63 PASS** · `npm run build` **PASS** (`optik-form.html` güncellendi ve senkron).
