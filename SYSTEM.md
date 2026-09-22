@@ -2,7 +2,12 @@
 
 **Belgenin amacı:** Bu dosya, depo kodundan türetilmiş güncel mimari ve üretim işletim sözleşmesidir. Yeni bir özellik tasarımı değildir; uygulamanın gerçekten yaptığı şeyleri, güvenlik sınırlarını, doğrulanmış kontrolleri ve doğrulanamayan üretim bağımlılıklarını ayırır.
 
-**Denetim snapshot'ı:** 21 Eylül 2026 · teslim branch'i · yerel doğrulama: `npm ci`, `npm run typecheck`, `npm test` **285/285**, `npm run verify:pdf`, `npm run build`, `npm audit --audit-level=high` ve `git diff --check`.
+**Denetim snapshot'ı:** 22 Eylül 2026 · teslim branch'i · yerel doğrulama: `npm run typecheck`, `npm test` **375/375** (36 suite), `npm run verify:pdf`, `npm run build`, `git diff --check`.
+
+> Önceki snapshot (21 Eylül 2026): `npm ci` + `npm test` **285/285** + `npm audit
+> --audit-level=high`. Sayı, MMPI denetim testi kilitleriyle birlikte büyüdü
+> (`docs/mmpi-audit/TEST_AUDIT.md`); 285 → 375 arası **yorum katmanı** testleridir (22 Eylül
+> ara snapshot’ı 368/368 idi); puanlama/OMR matematiği değişmedi.
 
 Durum etiketleri:
 
@@ -435,7 +440,7 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 | --- | --- | --- |
 | `npm ci` | lockfile ile temiz bağımlılık kurulumu | **DOĞRULANDI** — 74 paket, 0 vulnerability |
 | `npm run typecheck` | `tsc --noEmit`, strict/noUnused | **DOĞRULANDI** |
-| `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print, router, kayıt/Edge Function hata çevirisi ve teşhis betiği sözleşmesi | **285/285 DOĞRULANDI** |
+| `npm test` | `tsx --test tests/*.test.ts`; OMR/scanner, draft, result safety, PDF, build, print, router, kayıt/Edge Function hata çevirisi, MMPI puanlama/yorum denetim kilitleri ve teşhis betiği sözleşmesi | **375/375 DOĞRULANDI** (36 suite; 21 Eylül snapshot'ında 285/285 idi) |
 | `npm run diagnose:supabase` | canlı proje teşhisi (migration/RLS/grant/trigger + iki Edge Function CORS); yazma testi yalnız `--allow-destructive` ile | **DOĞRULANMADI** — bu ortamdan canlı projeye erişim yok (betiğin kendisi ve sözleşmesi `tests/diagnostics.test.ts` ile doğrulanır) |
 | `npm run verify:pdf` | hazır/üretilmiş form PDF byte/geometri/QR doğrulaması | **DOĞRULANDI** — 4 A4, 566 madde, 1.132 bubble |
 | `npm run build` | typecheck + standalone `dist/index.html`, tracked `optik-form.html` üretimi (`dist/_redirects` yalnızca `PAGES_REDIRECTS=1` ile; `dist/_headers` HTTP güvenlik başlıkları her derlemede) | **DOĞRULANDI** |
@@ -597,7 +602,7 @@ Bu liste “PASS” yerine gerçek kanıt gerektirir:
 ### Kod ve artifact
 
 - [x] `npm run typecheck`.
-- [x] `npm test` 285/285.
+- [x] `npm test` 375/375 (36 suite).
 - [x] `npm ci` ile lockfile kurulumu: 74 paket, 0 vulnerability.
 - [x] `npm run verify:pdf`: 4 A4, 566 madde ve 1.132 bubble doğrulandı.
 - [x] `npm run build`: `dist/index.html` ve `optik-form.html` üretildi; standalone build testleri başarılı (SPA fallback Workers'ta `wrangler.jsonc`, Pages/Netlify'da `PAGES_REDIRECTS=1` + `_redirects`).
@@ -639,7 +644,7 @@ Canlı Supabase projesinin migration geçmişi, Edge Function sürümü ve `ALLO
 Doğrulama kanıtları (yerel):
 
 - **TypeScript:** `npm run typecheck` temiz.
-- **Test:** `npm test` **285/285 PASS**.
+- **Test:** `npm test` **375/375 PASS** (36 suite).
 - **Canlı ortam arızaları:** `TROUBLESHOOTING.md` belirti → kök neden → komut tablosunu, ilk Admin bootstrap'ını ve hata kodu
   eşlemesini içerir; `npm run diagnose:supabase` aynı kontrolleri canlı projede tek komutla yapar (migration geçmişi, kolonlar,
   RLS politikaları, grant'lar, trigger'lar, `audit_logs` sözleşmesi ve iki Edge Function'ın CORS davranışı).

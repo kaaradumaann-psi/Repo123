@@ -1,6 +1,12 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
-import { clinicalBandFor, codePointInterpretation, tColor } from '../../scoring/mmpiInterpretation';
+import {
+  clinicalBandFor,
+  codeInterpretationForProfile,
+  detectPatterns,
+  tColor,
+  thirdHighestClinical,
+} from '../../scoring/mmpiInterpretation';
 import { MMPIScoreChart } from './MMPIScoreChart';
 
 export type PrintReportMeta = {
@@ -47,7 +53,36 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
   const { validityAnalysis, profileCode, clinical, itemLevel } = profile;
   const fk = validityAnalysis.fkAnalysis;
   const config = validityAnalysis.validityConfig;
-  const codeEntry = codePointInterpretation(profileCode);
+  const codeResolved = codeInterpretationForProfile(profileCode, profile);
+  const codeEntry = codeResolved?.entry;
+
+  const codeDigits = (profileCode ?? '').split('');
+  const idByDigit: Record<string, string> = {
+    '1': 'Hs', '2': 'D', '3': 'Hy', '4': 'Pd', '5': 'Mf', '6': 'Pa', '7': 'Pt', '8': 'Sc', '9': 'Ma', '0': 'Si',
+  };
+  const digitById: Record<string, string> = {
+    Hs: '1', D: '2', Hy: '3', Pd: '4', Mf: '5', Pa: '6', Pt: '7', Sc: '8', Ma: '9', Si: '0',
+  };
+  const third = thirdHighestClinical(profile, codeDigits.map(digit => idByDigit[digit] ?? ''));
+  const thirdDigit = third ? digitById[third.id] : undefined;
+  const triadCandidate = profileCode && thirdDigit ? `${profileCode}${thirdDigit}` : undefined;
+  const triadResolved = triadCandidate ? codeInterpretationForProfile(triadCandidate, profile) : undefined;
+
+  let multiResolved = triadResolved;
+  if (!multiResolved && profileCode && thirdDigit) {
+    const fourth = profile.clinical
+      .filter(s => !codeDigits.map(d => idByDigit[d]).concat(third?.id ?? '').includes(s.id))
+      .sort((a, b) => b.tScore - a.tScore)[0];
+    const fourthDigit = fourth ? digitById[fourth.id] : undefined;
+    if (fourthDigit) {
+      const quadCandidate = `${profileCode}${thirdDigit}${fourthDigit}`;
+      const quadResolved = codeInterpretationForProfile(quadCandidate, profile);
+      if (quadResolved) multiResolved = quadResolved;
+    }
+  }
+
+  const patterns = detectPatterns(profile);
+  const hitPatterns = patterns.filter(p => p.hit && !p.manual);
 
   const notableDerived = (itemLevel?.derivedScales ?? []).filter(s => s.tone !== 'ok');
   const notableWiggins = (itemLevel?.derivedScales ?? []).filter(s => s.category === 'wiggins' && s.tone !== 'ok');
@@ -195,9 +230,51 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
             {codeEntry?.diagnosis && codeEntry.diagnosis.length > 0 && (
               <p className="pr-context">Olası tanılar: {codeEntry.diagnosis.join(', ')}.</p>
             )}
+            {codeResolved && codeResolved.activeConditions.length > 0 && (
+              <p className="pr-context">
+                Koşullu ek yorum: {codeResolved.activeConditions.map(c => `${c.quote} (${c.source})`).join(' ')}
+              </p>
+            )}
+            {multiResolved && multiResolved.entry.code !== codeEntry?.code && (
+              <>
+                <div className="pr-note" style={{ marginTop: '0.5rem' }}>
+                  <b>Çok Noktalı Kod Analizi ({multiResolved.entry.code}): </b>
+                  {multiResolved.entry.text}
+                </div>
+                {multiResolved.entry.diagnosis && multiResolved.entry.diagnosis.length > 0 && (
+                  <p className="pr-context">Olası tanılar: {multiResolved.entry.diagnosis.join(', ')}.</p>
+                )}
+                {multiResolved.activeConditions.length > 0 && (
+                  <p className="pr-context">
+                    Koşullu ek yorum: {multiResolved.activeConditions.map(c => `${c.quote} (${c.source})`).join(' ')}
+                  </p>
+                )}
+              </>
+            )}
           </>
         )}
       </section>
+
+      {hitPatterns.length > 0 && (
+        <section className="pr-block" aria-label="Profil örüntüleri">
+          <h2>Profil Örüntüleri &amp; Konfigürasyonları (Bölüm 6)</h2>
+          {hitPatterns.map(pattern => (
+            <div className="pr-note" key={pattern.id}>
+              <b>
+                {pattern.name} ({pattern.rule}):{' '}
+              </b>
+              {pattern.detail}
+              {pattern.quote && <span> “{pattern.quote}”</span>}
+              {pattern.source && <span className="pr-context"> (Kaynak: {pattern.source})</span>}
+              {pattern.caveat && (
+                <p className="pr-context" style={{ color: '#96660a', marginTop: '0.25rem' }}>
+                  Kaynak çekincesi: {pattern.caveat}
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
 
       <section className="pr-block" aria-label="Geçerlik analizi">
         <h2>Geçerlik Analizi</h2>

@@ -1,6 +1,6 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ScaleId } from '../../scoring/mmpiKeys';
-import { SCALE_MEANINGS, clinicalBandFor, detectPatterns, detectSingleElevations } from '../../scoring/mmpiInterpretation';
+import { MMPI_PATTERN_CAVEATS, SCALE_MEANINGS, clinicalBandFor, detectPatterns, detectSingleElevations } from '../../scoring/mmpiInterpretation';
 import { DisclosureCard } from './Disclosure';
 import { Icon } from '../Icon';
 
@@ -10,12 +10,18 @@ const GLOSSARY_ORDER: ScaleId[] = ['?', 'L', 'F', 'K', 'Hs', 'D', 'Hy', 'Pd', 'M
  * Ek Ölçekler & Kritikler sekmesi — T puanı band yorumlarıyla klinik eşiği
  * aşan ölçekler, profil konfigürasyonları ve tek ölçek yükselmeleri, ayrıca
  * tüm ölçeklerin sözlüğü.
+ *
+ * DECISION-030/A (CHANGE-015): desen kartları **kaynak referansı + birebir alıntı +
+ * kaynak çekincesi** gösterir; kaynağın nicel eşiği olmayan örüntüleri ayrı bir
+ * “elle değerlendirilir” listesindedir ve sekmenin altında BÖLÜM 6’nın genel
+ * yorum direktifleri basılır.
  */
 export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
   const critical = profile.clinical.filter(s => s.tScore >= 70);
   const patterns = detectPatterns(profile);
-  const hitPatterns = patterns.filter(pattern => pattern.hit);
-  const missPatterns = patterns.filter(pattern => !pattern.hit);
+  const manualPatterns = patterns.filter(pattern => pattern.manual);
+  const hitPatterns = patterns.filter(pattern => pattern.hit && !pattern.manual);
+  const missPatterns = patterns.filter(pattern => !pattern.hit && !pattern.manual);
   const singles = detectSingleElevations(profile);
 
   return (
@@ -87,7 +93,26 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
                 <div className="mmpi-pattern-main">
                   <b>{pattern.name}</b>
                   <span>{pattern.rule}</span>
+                  {pattern.source && (
+                    <span className="mmpi-pattern-source">Kaynak: {pattern.source}</span>
+                  )}
                   <p>{pattern.detail}</p>
+                  {pattern.quote && (
+                    <p className="mmpi-pattern-quote">“{pattern.quote}”</p>
+                  )}
+                  {pattern.manualNote && (
+                    <p className="mmpi-pattern-note">
+                      <Icon name="info" size={12} /> Elle doğrulanacak: {pattern.manualNote}
+                    </p>
+                  )}
+                  {pattern.caveat && (
+                    <div className="mmpi-box warn">
+                      <Icon name="alert" size={14} />
+                      <span>
+                        <b>Kaynak çekincesi:</b> {pattern.caveat}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <span className="pattern-pill hit">Görüldü</span>
               </div>
@@ -106,6 +131,9 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
                   <div className="mmpi-pattern-main">
                     <b>{pattern.name}</b>
                     <span>{pattern.rule}</span>
+                    {pattern.source && (
+                      <span className="mmpi-pattern-source">Kaynak: {pattern.source}</span>
+                    )}
                   </div>
                   <span className="pattern-pill miss">Görülmedi</span>
                 </div>
@@ -113,6 +141,59 @@ export function MMPIExtraTab({ profile }: { profile: MMPIProfile }) {
             </div>
           </DisclosureCard>
         )}
+        {manualPatterns.length > 0 && (
+          <div className="mmpi-pattern-list mmpi-pattern-manual">
+            {manualPatterns.map(pattern => (
+              <div className="mmpi-pattern-row" key={pattern.id}>
+                <div className="mmpi-pattern-main">
+                  <b>{pattern.name}</b>
+                  <span>{pattern.rule}</span>
+                  {pattern.source && (
+                    <span className="mmpi-pattern-source">Kaynak: {pattern.source}</span>
+                  )}
+                  <p>{pattern.detail}</p>
+                  {pattern.quote && <p className="mmpi-pattern-quote">“{pattern.quote}”</p>}
+                  {pattern.manualNote && (
+                    <p className="mmpi-pattern-note">
+                      <Icon name="info" size={12} /> {pattern.manualNote}
+                    </p>
+                  )}
+                  {pattern.caveat && (
+                    <div className="mmpi-box warn">
+                      <Icon name="alert" size={14} />
+                      <span>
+                        <b>Kaynak çekincesi:</b> {pattern.caveat}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="pattern-pill miss">Elle değerlendirilir</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h4 className="mmpi-section-title">Yorum Çekinceleri (BÖLÜM 6)</h4>
+        <div className="mmpi-box info">
+          <Icon name="alert" size={14} />
+          <span>
+            Aşağıdaki satırlar yorum rehberinin kendi cümleleridir; desen eşiklerinden bağımsız
+            olarak her profil için geçerlidir ve hiçbir bulgu tek başına tanı yerine geçmez.
+          </span>
+        </div>
+        <div className="mmpi-crit-list">
+          {MMPI_PATTERN_CAVEATS.map(caveat => (
+            <div className="mmpi-crit-item" key={caveat.source + caveat.text.slice(0, 16)}>
+              <span className="mmpi-crit-dot" />
+              <div>
+                <b>{caveat.source}</b>
+                <p>{caveat.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <DisclosureCard

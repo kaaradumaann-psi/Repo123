@@ -410,7 +410,7 @@ export const SC_T_BANDS: Band[] = [
   },
   {
     min: 0, max: 44, rangeLabel: 'T 21-44', label: 'Düşük', tone: 'ok',
-    text: 'Pratik ve gelenekseldirler; davranışları ve yaşama bakışları konservatiftir. Genellikle bireyler uyumlu, sorumlu, bağımlı ve temkinlidir; ancak hayal güçleri yoktur ve oldukça katıdırlar. İlişkilerinde çekingen, derin duygusal ilişkilerden kaçınan, temkinli, tutucu, rekabet etmek istemeyen kişilerdir.',
+    text: 'Pratik ve gelenekseldirler; davranışları ve yaşama bakış açıları konformaldir. Genellikle bireyler uyumlu, sorumlu, bağımlı ve temkinlidir; ancak hayal güçleri yoktur ve oldukça katıdırlar. İlişkilerinde çekingen, derin duygusal ilişkilerden kaçınan, temkinli, tutucu, rekabet etmek istemeyen kişilerdir.',
   },
 ];
 

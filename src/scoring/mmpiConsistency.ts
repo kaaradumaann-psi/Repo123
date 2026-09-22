@@ -2,8 +2,10 @@
  * Yanıt tutarlılığı göstergeleri — madde düzeyinde cevap verisiyle hesaplanır.
  *
  * - TR Endeksi: 566 maddelik formda 16 çift tekrarlanmış madde vardır; çiftler
- *   arasındaki tutarsız (farklı) yanıtlar sayılır. 3 ve altı tutarlı kabul
- *   edilir (Gravitz & Gerton 1976; Dahlstrom 1972).
+ *   arasındaki tutarsız (farklı) yanıtlar sayılır. Kaynak kitap (s.59):
+ *   "TR endeksi üzerinde 3 puan ya da daha fazla bir puanın, geçersiz profil
+ *   olasılığını arttırdığı ileri sürülmüştür (Dahlstrom 1972)." → 3 ve üzeri
+ *   puan geçersizlik riski taşır; yalnızca 0-2 tutarlı sayılır.
  * - Dikkatsizlik Endeksi: benzer/karşıt içerikli 12 madde çifti üzerinde
  *   beklenen yanıt örüntüsünden sapmalar sayılır; 4 ve üzeri dikkatsizlik /
  *   rastgele işaretleme kuşkusu doğurur (Greene 1980).
@@ -56,14 +58,17 @@ export function trIndex(responses: ResponseMap): TrIndexResult {
       mismatches.push([a, b]);
     }
   }
-  const consistent = score <= 3;
+  // Kaynak kitap s.59: "3 puan ya da daha fazla bir puanın, geçersiz profil
+  // olasılığını arttırdığı ileri sürülmüştür (Dahlstrom 1972)."
+  // → 3 puan DAHİL geçersizlik riski; tutarlılık yalnızca 0-2 için geçerlidir.
+  const consistent = score <= 2;
   return {
     score,
     evaluated,
     level: consistent ? 'Tutarlı Yanıt Örüntüsü' : 'Tutarsız Yanıt Örüntüsü',
     interpretation: consistent
-      ? 'TR endeksinin 3 puan ya da daha az olması, yanıtların tutarlı olduğunu gösterir. Normal bireyler tekrarlanan maddelerin yalnızca üç-dördüne değişik yanıt verir. Bu seviyedeki düşük tutarsızlıklar genellikle dikkatsizlik kaynaklıdır.'
-      : 'TR endeksinde 3 puanın üzerindeki değerler geçersiz profil olasılığını artırır. Bu durum bireyin işbirliği içinde olmadığını, test almaya karşı dirençli olduğunu veya maddeleri okumadan/rastgele işaretlediğini (dikkatsizlik, yorgunluk vb.) gösterebilir.',
+      ? 'TR endeksi 3 puanın altındadır; yanıtlar tutarlı kabul edilir. Bu seviyedeki düşük tutarsızlıklar genellikle dikkatsizlik kaynaklıdır.'
+      : 'TR endeksi 3 puan ya da daha fazladır. Kaynak kitaba göre bu düzey, geçersiz profil olasılığını artırır (Dahlstrom 1972). Bireyin işbirliği içinde olmadığını, test almaya karşı dirençli olduğunu veya maddeleri okumadan/rastgele işaretlediğini gösterebilir.',
     isWarning: !consistent,
     tone: consistent ? 'ok' : 'alert',
     mismatches,
