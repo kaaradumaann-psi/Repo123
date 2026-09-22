@@ -3385,3 +3385,50 @@ metni taşınması DECISION-028 kapsamında **yok**).
 - **496/946 Kodu (s.120):**
   - "Test 8 de yüksekse (70 T puanı ve üzeri), kontrolsüz şiddet ve homisidal davranış riski artar." → `Sc >= 70 T`.
   - "K alt testi 50'nin altında ise ego gücünün zayıflığı nedeniyle dürtü kontrolü tamamen yitirilebilir." → `K < 50 T`.
+
+---
+
+## BÖLÜM 5: Pa (6) KOD BLOĞU VERİLERİ (kitap s.127-135 · PDF p071_R - p075_R)
+
+### SOURCE-CODE-PA-001 — Pa Bloğu Sayfa ve Başlık Envanteri (kitap s.127-135)
+- **Görsel ve OCR Taraması:** PDF p071_R (s.127) ile p075_R (s.135) arasındaki sayfalar taranarak tüm başlıklar, olası tanılar ve koşullar çıkarıldı.
+- **Başlık Envanteri:**
+  1. `61/16 Kodu (Bakınız 16/61 Kodu)` (s.130)
+  2. `62/26 Kodu (Bakınız 26/62 Kodu)` (s.130)
+  3. `63/36 Kodu (Bakınız 36/63 Kodu)` (s.130)
+  4. `64/46 Kodu (Ayrıca 46/64, 462/642, 463/643 kodlarına ve 468/648 kodlarına bakınız)` (s.130-131)
+  5. `648 Kodu` (s.131) — Kronik profil, intihar girişimleri, ilaç kullanımı.
+  6. `65/56 Kodu (Bakınız 56/65 Kodu)` (s.131)
+  7. `67/76 Kodu` (s.131) — Olası Tanı: Dekompanze obsesif kompulsif bozukluk, şizofreniye geçiş.
+  8. `678/876 Kodları` (s.131-132) — Olası Tanı: Paranoid tip şizofreni (Psikotik Vadi).
+  9. `679 Kodu` (s.132) — Dürtüsel dönemler, dönemsel suçluluk ve öfke patlamaları.
+  10. `68/86 Kodu (Ayrıca 468/648, 486/846, 489/849 kodlarına bakınız)` (s.132-133) — Olası Tanılar: Paranoid durum, Paranoid şizofreni (6 ve 8 alt testleri 75 T üstünde ise), Şizoid kişilik.
+  11. `680/860 Kodları` (s.133) — Olası Tanı: Paranoid şizofreni.
+  12. `69/96 Kodu (Ayrıca 698/968 kodlarına bakınız)` (s.133-134) — Olası Tanılar: Manik bozukluğun bazı tipleri, Akut psikotik epizod, F ve Sc yüksekse paranoid şizofreni.
+  13. `694/964 Kodları` (s.133-134) — ⚠️ **Kritik Şiddet / Cinayet Uyarısı:** "Saldırma, mücadele etme ve hatta cinayet potansiyeli değerlendirilmelidir."
+  14. `698/968 Kodları` (s.134) — Olası Tanı: Şizofreni paranoid tip.
+  15. `60/06 Kodu` (s.134) — Kadınlarda özellikle 30 yaşından sonra.
+  16. `456 Alt Testlerinin Örüntüsü (Scarlett O'Hara Vadisi)` (s.134-135, Şekil 21) — 4 ve 6 > 65 T, 5 = 35 T.
+
+### SOURCE-CODE-PA-002 — Pa Bloğu Koşullu Yorum Kuralları (Conditions)
+- **67/76 Kodu (s.131):**
+  - "Oldukça nadir görülür. 2 ya da 8 alt testleri yükselen üçüncü alt testtir." → `third in ['D', 'Sc']`.
+  - "Eğer 6 alt testi 7'den daha yüksekse ya da ikisi aynı düzeydeyse, obsesif-kompulsif bozukluktan psikotik döneme bir geçiş olabileceği dikkate alınmalıdır." → `Pa >= Pt`.
+- **678/876 Kodları (s.131-132):**
+  - "6 ve 8, 7'den yüksek ise bu psikotik vadiyi oluşturur." → `Pa > Pt && Sc > Pt`.
+- **68/86 Kodu (s.132-133):**
+  - "Pd ve Pt alt testleri, en yüksek üçüncü testtir." → `third in ['Pd', 'Pt']`.
+  - "Paranoid vadide 6 ve 8 alt testleri 70 T puanı civarındadır ve 7 alt testi 10 T puanı aşağıdadır." → `Pa >= 70 && Sc >= 70 && Pt <= Pa - 10 && Pt <= Sc - 10`.
+  - "Ergenlerde genellikle saldırganlık nöbetleri (eğer K 50 T puanının altında ise)" → `K < 50 T`.
+  - "6 ve 8 alt testleri 75 T puanının üstünde ise paranoid şizofreni düşünülmelidir." → `Pa >= 75 && Sc >= 75`.
+- **69/96 Kodu (s.133-134):**
+  - "4 ve 8 alt testi, en çok yükselen üçüncü alt testtir." → `third in ['Pd', 'Sc']`.
+  - "Alt test F ve Sc yüksekse paranoid şizofreni." → `F >= 70 && Sc >= 70`.
+  - "Kod daha çok kadınlarda görülmektedir; daldan dala atlayan, küçük durumlara aşırı tepki veren kişilerdir." → `gender === 'Kadın'`.
+- **698/968 Kodları (s.134):**
+  - "Eğer 8 alt testi, 6'dan 5 T puanı aşağıda ise 68/86 koduna bakın." → `Pa - Sc >= 5`.
+- **60/06 Kodu (s.134):**
+  - "Erkeklerde çok az görülür, kadınlarda özellikle 30 yaşından sonra rastlanır." → `gender === 'Kadın'`.
+  - "2, 4 ve 3 yükselen diğer alt testlerdir." → `third in ['D', 'Pd', 'Hy']`.
+- **456 Alt Testlerinin Örüntüsü / Scarlett O'Hara Vadisi (s.134-135):**
+  - "Bu örüntüye alt test 3'ün yükselmesi eşlik ediyorsa..." → `Hy >= 70 T`.

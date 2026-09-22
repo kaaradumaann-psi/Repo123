@@ -1480,6 +1480,91 @@ const BLOCK_CODES: Record<string, CodeInterpretation> = {
       '49/94 özelliklerine ek olarak, doğal olmayan, hatta tuhaf davranış olasılığı çok yüksektir. 20 yaşın üstündeki bireylerde, bu kod genellikle major ve uzun süreli bir psikopatolojiyi gösterir. Ergenlerde, kod sıklıkla (bu kodda daha yaşlı bireylerde daha sıklıkla bulunan ciddi psikopatoloji yerine) bir ergenlik dönemi isyanı ile bağlantılıdır. Ancak, hem yetişkinler, hem de ergenler yabancılaşma duyguları, aile çatışmaları, yüksek enerji düzeyleri, otoriteyle güçlükler ve isyankar davranışlar gösterirler.',
     seeAlso: '489/849 ve 496/946 kodlarına bakınız (s.120).',
   },
+
+  /* ------------------------------------------------------------------ */
+  /* Pa (Paranoya / 6) alt testi kod bloğu (kitap s.127-135)           */
+  /* ------------------------------------------------------------------ */
+
+  'Pa:678': {
+    code: '678/876',
+    block: 'Pa',
+    text:
+      '6 ve 8, 7\'den yüksek ise bu psikotik vadiyi oluşturur. Ciddi psikopatolojileri vardır. Şizofrenik bozukluklardan paranoid tip tanısı konulabilir. Hallüsinasyonlar, delüzyonlar ve aşırı şüphelerle birlikte görülür. Affektleri donuktur. Bunlar ürkek, içedönük, sosyal ilişkilerde çekingen ama alkol aldıklarında agresif olan kişilerdir. Bellek ve konsantre olmada sorunları olabilir. Fantezi ve hayal aleminde yaşarlar. Geçmiş ya da hayali hatalar üzerinde ruminatif biçimde düşünürler.',
+    diagnosis: ['Paranoid tip şizofreni'],
+    seeAlso: 'Psikotik V / Psikotik Vadi (6 ve 8 > 7, s.131-132).',
+    conditions: [
+      {
+        source: 's.131',
+        quote: '6 ve 8, 7\'den yüksek ise bu psikotik vadiyi oluşturur.',
+        test: ({ t }) => {
+          const pa = t('Pa');
+          const sc = t('Sc');
+          const pt = t('Pt');
+          return pa !== undefined && sc !== undefined && pt !== undefined && pa > pt && sc > pt;
+        },
+      },
+    ],
+  },
+
+  'Pa:679': {
+    code: '679',
+    block: 'Pa',
+    text:
+      'Aşırı duyarlı ve katıdırlar. Sosyal ve iş yaşamlarında kendilerini bastırılmış hissederler; şüphecidirler ve güvensizlik duyarlar, çabuk gücenirler ve öfke patlamaları vardır. İmpulsif dönemlerini, dönemsel suçluluk ve kendine yönelme izlemektedir.',
+    seeAlso: 's.132.',
+  },
+
+  'Pa:680': {
+    code: '680/860',
+    block: 'Pa',
+    text:
+      'Hastalarda paranoid şizofrenide görülen paranoid özellikler ve düşünce bozukluğu vardır. Sistemli hezeyanlar görülebilir. Hastalar gerginlik, kaygı, depresyon yakınmaları ile kişisel sıkıntılarını ifade ederler. Sosyal olarak izole ve çekiniktirler. Sosyal ilişkilerde düşmanlık ve şüphe hakimdir. Davranışlar genellikle sosyal açıdan uygun değildir ve önceden tahmin edilemez.',
+    diagnosis: ['Paranoid şizofreni'],
+    seeAlso: '68/86 ve 80/08 kodlarına bakınız (s.133).',
+  },
+
+  'Pa:694': {
+    code: '694/964',
+    block: 'Pa',
+    text:
+      'Hastaların sosyal, aile ve iş yaşamları hostilitelerine, yargılamalarının bozukluğuna ve duygularını kontrol edememelerine bağlı olarak bozuktur. İçgörüleri yoktur ve suçu diğerlerinin üstüne atma tipiktir. Saldırma, mücadele etme ve hatta cinayet potansiyeli değerlendirilmelidir.',
+    seeAlso: '69/96 ve 49/94 kodlarına bakınız (s.133-134).',
+  },
+
+  'Pa:698': {
+    code: '698/968',
+    block: 'Pa',
+    text:
+      '69/96 kodunda tanımlanan birey tipine ek olarak bu bireylerde ruhsal karışıklık, konfüzyon, düşünce ve dikkat toplamada güçlük vardır. Ayrıca delüzyonlar, paranoid şüphe ve hallüsinasyon da vardır. Eğer 8 alt testi, 6\'dan 5 T puanı aşağıda ise 68/86 koduna bakın.',
+    diagnosis: ['Şizofreni paranoid tip'],
+    seeAlso: '69/96 ve 68/86 kodlarına bakınız (s.134).',
+    conditions: [
+      {
+        source: 's.134',
+        quote: 'Eğer 8 alt testi, 6\'dan 5 T puanı aşağıda ise 68/86 koduna bakın.',
+        test: ({ t }) => {
+          const pa = t('Pa');
+          const sc = t('Sc');
+          return pa !== undefined && sc !== undefined && pa - sc >= 5;
+        },
+      },
+    ],
+  },
+
+  'Pa:456_scarlett': {
+    code: '456 (Scarlett O\'Hara Vadisi)',
+    block: 'Pa',
+    text:
+      'Genellikle kadınlarda görülen bir örüntüdür. 4 ve 6 alt testleri T puanı olarak 65\'in üzerinde, 5 alt testi T puanı olarak 35\'tedir. 4 ve 6 alt testlerinin profilde en yüksek noktalar olması gerekli değildir. Yüzeysel bir sosyallik, diğerlerine yönelik düşmanlık duygularının inkârı söz konusu olabilir; diğerlerini kontrol ve manipüle etme davranış kalıbını yansıtır. Birey psikolojik yardıma dirençlidir. Bu örüntü, düşmanlık ve kızgınlık duygularını doğrudan ifade edemeyen, bağımlı, daima sevgi isteyen ve düzensiz duygulanım içindeki kadınlarda görülür. Diğerlerini öfkelendirecek davranışları vardır. Böylece diğerlerini kendilerinden uzaklaştırır ve sonra da kendilerine ne kadar kötü davranıldığını düşünürler; aile, evlilik ve cinsel konularda sorunları vardır. Bu tür kadınlar terapisti kızdırarak terapötik müdahaleyi güçleştirirler.',
+    seeAlso: 'Şekil 21 (s.134-135) ve Pd:456 (s.113).',
+    conditions: [
+      {
+        source: 's.134',
+        quote: 'Bu örüntüye alt test 3\'ün yükselmesi eşlik ediyorsa...',
+        test: ({ t }) => (t('Hy') ?? 0) >= 70,
+      },
+    ],
+  },
 };
 
 // 213/231 karşılıklı kod eşleşmesi (D:231 -> D:213)
@@ -1511,6 +1596,24 @@ BLOCK_CODES['Pd:946'] = BLOCK_CODES['Pd:496']!;
 BLOCK_CODES['Ma:946'] = BLOCK_CODES['Pd:496']!;
 BLOCK_CODES['Pd:948'] = BLOCK_CODES['Pd:498']!;
 BLOCK_CODES['Ma:948'] = BLOCK_CODES['Pd:498']!;
+
+// Pa bloğu çok-haneli ve çapraz kod eşleşmeleri
+BLOCK_CODES['Pa:876'] = BLOCK_CODES['Pa:678']!;
+BLOCK_CODES['Sc:678'] = BLOCK_CODES['Pa:678']!;
+BLOCK_CODES['Sc:876'] = BLOCK_CODES['Pa:678']!;
+BLOCK_CODES['Pa:860'] = BLOCK_CODES['Pa:680']!;
+BLOCK_CODES['Sc:680'] = BLOCK_CODES['Pa:680']!;
+BLOCK_CODES['Sc:860'] = BLOCK_CODES['Pa:680']!;
+BLOCK_CODES['Si:068'] = BLOCK_CODES['Pa:680']!;
+BLOCK_CODES['Si:086'] = BLOCK_CODES['Pa:680']!;
+BLOCK_CODES['Pa:964'] = BLOCK_CODES['Pa:694']!;
+BLOCK_CODES['Ma:694'] = BLOCK_CODES['Pa:694']!;
+BLOCK_CODES['Ma:964'] = BLOCK_CODES['Pa:694']!;
+BLOCK_CODES['Pa:968'] = BLOCK_CODES['Pa:698']!;
+BLOCK_CODES['Ma:698'] = BLOCK_CODES['Pa:698']!;
+BLOCK_CODES['Ma:968'] = BLOCK_CODES['Pa:698']!;
+BLOCK_CODES['Sc:698'] = BLOCK_CODES['Pa:698']!;
+BLOCK_CODES['Sc:968'] = BLOCK_CODES['Pa:698']!;
 
 /** Blok-yerel kayıtların anahtarları (test ve doğrulama için). */
 export const KNOWN_BLOCK_CODES = Object.keys(BLOCK_CODES);
@@ -1789,8 +1892,20 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ t }) => (t('Si') ?? 100) < 50,
     },
   ],
-  // '70/07' ve '86/68' kayıtları CODES'ta kanonik SIRALI anahtarda durur;
+  // '70/07', '86/68' ve '06/60' kayıtları CODES'ta kanonik SIRALI anahtarda durur;
   // koşul tablosu da aynı anahtarı taşımak zorundadır (çözümleyici sorted digits ile arar).
+  '06': [
+    {
+      source: 's.134 (Pa bloğu)',
+      quote: 'Erkeklerde çok az görülür, kadınlarda özellikle 30 yaşından sonra rastlanır.',
+      test: ({ gender }) => gender === 'Kadın',
+    },
+    {
+      source: 's.134 (Pa bloğu)',
+      quote: '2, 4 ve 3 yükselen diğer alt testlerdir.',
+      test: ({ third }) => third === 'D' || third === 'Pd' || third === 'Hy',
+    },
+  ],
   '07': [
     {
       source: 's.142 (Pt bloğu)',
@@ -1798,11 +1913,69 @@ const CODE_CONDITIONS: Record<string, CodeCondition[]> = {
       test: ({ t }) => (t('Mf') ?? 100) < 40,
     },
   ],
+  '67': [
+    {
+      source: 's.131 (Pa bloğu)',
+      quote: 'Oldukça nadir görülür. 2 ya da 8 alt testleri yükselen üçüncü alt testtir.',
+      test: ({ third }) => third === 'D' || third === 'Sc',
+    },
+    {
+      source: 's.131 (Pa bloğu)',
+      quote: 'Eğer 6 alt testi 7\'den daha yüksekse ya da ikisi aynı düzeydeyse, obsesif-kompulsif bozukluktan psikotik döneme bir geçiş olabileceği dikkate alınmalıdır.',
+      test: ({ t }) => {
+        const pa = t('Pa');
+        const pt = t('Pt');
+        return pa !== undefined && pt !== undefined && pa >= pt;
+      },
+    },
+  ],
   '68': [
+    {
+      source: 's.132 (Pa bloğu)',
+      quote: 'Pd ve Pt alt testleri, en yüksek üçüncü testtir.',
+      test: ({ third }) => third === 'Pd' || third === 'Pt',
+    },
+    {
+      source: 's.132 (Pa bloğu)',
+      quote: 'Paranoid vadide 6 ve 8 alt testleri 70 T puanı civarındadır ve 7 alt testi 10 T puanı aşağıdadır.',
+      test: ({ t }) => {
+        const pa = t('Pa') ?? 0;
+        const sc = t('Sc') ?? 0;
+        const pt = t('Pt') ?? 0;
+        return pa >= 70 && sc >= 70 && pt <= pa - 10 && pt <= sc - 10;
+      },
+    },
+    {
+      source: 's.132-133 (Pa bloğu)',
+      quote: 'Ergenlerde genellikle saldırganlık nöbetleri (eğer K 50 T puanının altında ise)',
+      test: ({ t }) => (t('K') ?? 100) < 50,
+    },
+    {
+      source: 's.133 (Pa bloğu)',
+      quote: '6 ve 8 alt testleri 75 T puanının üstünde ise paranoid şizofreni düşünülmelidir.',
+      test: ({ t }) => (t('Pa') ?? 0) >= 75 && (t('Sc') ?? 0) >= 75,
+    },
     {
       source: 's.146 (Sc bloğu)',
       quote: '86/68 kodunda 7 de 70 T puanındadır.',
       test: ({ t }) => (t('Pt') ?? 0) >= 70,
+    },
+  ],
+  '69': [
+    {
+      source: 's.133 (Pa bloğu)',
+      quote: '4 ve 8 alt testi, en çok yükselen üçüncü alt testtir.',
+      test: ({ third }) => third === 'Pd' || third === 'Sc',
+    },
+    {
+      source: 's.133 (Pa bloğu)',
+      quote: 'Alt test F ve Sc yüksekse paranoid şizofreni.',
+      test: ({ t }) => (t('F') ?? 0) >= 70 && (t('Sc') ?? 0) >= 70,
+    },
+    {
+      source: 's.133 (Pa bloğu)',
+      quote: 'Kod daha çok kadınlarda görülmektedir; daldan dala atlayan, küçük durumlara aşırı tepki veren kişilerdir.',
+      test: ({ gender }) => gender === 'Kadın',
     },
   ],
   '89': [
@@ -1860,6 +2033,9 @@ export function parseCode(code: string | undefined): CodeRef | undefined {
   }
   if (trimmed.startsWith('48') && (trimmed.includes('Yüksek F') || trimmed.includes('Düşük 2') || trimmed.includes('highF') || trimmed.includes('F'))) {
     return { digits: '48_highF_low2', block: 'Pd' };
+  }
+  if (/scarlett/i.test(trimmed) || trimmed === '456_scarlett' || trimmed === 'scarlett_valley') {
+    return { digits: '456_scarlett', block: 'Pa' };
   }
   const colonMatch = trimmed.match(/^([A-Z][a-z]?):(\w+)(?:\s*\((\d)\))?/);
   if (colonMatch && colonMatch[2]) {

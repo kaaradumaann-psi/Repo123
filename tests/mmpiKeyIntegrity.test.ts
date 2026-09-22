@@ -872,14 +872,18 @@ describe('PHASE 9/10 batch 21 — Si (0) T bantları + Bakınız listesi + 049/0
       'Hs:138', 'Hs:1382', 'Hs:139', 'Hs:146', 'Hs:1469', 'Hs:14_low4',
       'Hy:32', 'Hy:321', 'Hy:345', 'Hy:346', 'Hy:34_low4', 'Hy:3_highK',
       'Hy:435', 'Hy:436', 'Hy:534',
-      'Ma:19', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
-      'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648',
+      'Ma:19', 'Ma:694', 'Ma:698', 'Ma:943', 'Ma:945', 'Ma:946', 'Ma:948',
+      'Ma:964', 'Ma:968',
+      'Pa:456_scarlett', 'Pa:46', 'Pa:642', 'Pa:643', 'Pa:648', 'Pa:678',
+      'Pa:679', 'Pa:680', 'Pa:694', 'Pa:698', 'Pa:860', 'Pa:876', 'Pa:964',
+      'Pa:968',
       'Pd:456', 'Pd:462', 'Pd:463', 'Pd:468', 'Pd:469', 'Pd:482', 'Pd:489',
       'Pd:48_highF_low2', 'Pd:493', 'Pd:495', 'Pd:496', 'Pd:498', 'Pd:4_low5',
       'Pd:642', 'Pd:643', 'Pd:648', 'Pd:824', 'Pd:842', 'Pd:849', 'Pd:943',
       'Pd:945', 'Pd:946', 'Pd:948',
-      'Sc:824', 'Sc:842', 'Sc:849',
-      'Si:027', 'Si:049',
+      'Sc:678', 'Sc:680', 'Sc:698', 'Sc:824', 'Sc:842', 'Sc:849', 'Sc:860',
+      'Sc:876', 'Sc:968',
+      'Si:027', 'Si:049', 'Si:068', 'Si:086',
     ].sort();
     assert.deepEqual([...KNOWN_BLOCK_CODES].sort(), expectedBlockCodes);
   });

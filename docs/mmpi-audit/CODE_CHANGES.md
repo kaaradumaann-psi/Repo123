@@ -830,3 +830,47 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
 - `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **187/187 PASS** (35 suite)
 - `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)
+
+---
+
+## CHANGE-022 — DECISION-031 (A): Bölüm 5 Pa (6) Bloğu Kod Göçü ve Koşullu Yorumlar (s.127-135)
+
+**Area:** `src/scoring/mmpiSourceCodes.ts` · `tests/mmpiPaBlock.test.ts` · `tests/mmpiKeyIntegrity.test.ts` · `scripts/mmpi-audit/cmp-pa-batch29.ts`.
+
+**Decision:** DECISION-031 = (A) Kullanıcı onayı:
+- Bölüm 5 kod analizleri blok-blok, kitaptan görsel okunarak ve SOURCE_FACTS ile doğrulanarak sisteme aktarılmaktadır.
+- Tamamlanan beşinci blok: **Pa (Paranoya / 6) bloğu (s.127-135)**.
+- Uydurma sayı veya tanı üretilmemiştir; metinler kitap sayfalarıyla birebir uyumludur.
+
+**Değişiklikler:**
+1. `src/scoring/mmpiSourceCodes.ts`:
+   - `parseCode()`: `Scarlett O'Hara Vadisi` (`456_scarlett`) ayrıştırma desteği eklendi.
+   - `BLOCK_CODES`: Pa bloğundaki 6 yeni kod tanımı ve 16 çapraz ölçek takma adı eklendi:
+     `Pa:678` (678/876, Psikotik Vadi atfı ve şizofreni tanısı), `Pa:679` (679), `Pa:680` (680/860, paranoid şizofreni tanısı), `Pa:694` (694/964, cinayet potansiyeli uyarısı), `Pa:698` (698/968, paranoid şizofreni tanısı ve 68/86 yönlendirmesi), `Pa:456_scarlett` (456 Scarlett O'Hara Vadisi, s.134-135 Şekil 21).
+     Ayrıca çift yönlü ve çok-haneli çapraz blok çözünürlüğü için `Pa:876`, `Sc:678`, `Sc:876`, `Pa:860`, `Sc:680`, `Sc:860`, `Si:068`, `Si:086`, `Pa:964`, `Ma:694`, `Ma:964`, `Pa:968`, `Ma:698`, `Ma:968`, `Sc:698`, `Sc:968` takma adları tanımlandı.
+   - `CODE_CONDITIONS`: Pa bloğuna ait kodlar için koşullu kurallar makinece değerlendirilebilir testlerle bağlandı:
+     - `67/76`: 3. test D/Sc; Pa ≥ Pt şizofreniye geçiş riski (s.131).
+     - `Pa:678`: 6 ve 8 > 7 Psikotik Vadi (s.131).
+     - `68/86`: 3. test Pd/Pt; Pa ve Sc ≥ 70 ∧ Pt ≤ -10 T Paranoid Vadi; K < 50 T saldırganlık; 75+ T şizofreni (s.132-133).
+     - `69/96`: 3. test Pd/Sc; F ve Sc ≥ 70 paranoid şizofreni; Kadın gerginliği (s.133).
+     - `Pa:698`: 8 alt testi 6'dan 5 T aşağıda ise 68/86 bak (s.134).
+     - `60/06`: Kadın 30+ yaş; 3. test D/Pd/Hy (s.134).
+     - `Pa:456_scarlett`: Hy ≥ 70 T manipülatif sosyallik (s.134).
+2. `tests/mmpiPaBlock.test.ts`:
+   - 14 yeni test ile Pa bloğunun kod çözme doğruluğu, tanı sadakati ve tüm koşulların T-skoru tetiklenme mantığı kilitlendi.
+3. `tests/mmpiKeyIntegrity.test.ts`:
+   - `KNOWN_BLOCK_CODES` listesine Pa bloğundaki 22 anahtar eklenerek toplam kayıt 103 blok koduna ulaştırıldı.
+4. `scripts/mmpi-audit/cmp-pa-batch29.ts`:
+   - Pa bloğu mutabakat denetçisi eklendi; tüm çözümler, tanılar ve koşul bağları 0 FARK ile onaylandı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata**
+- `npx tsx scripts/mmpi-audit/cmp-pa-batch29.ts` → **SONUÇ: 0 FARK · Pa BLOĞU KOD GÖÇÜ TAMAMLANDI**
+- `npx tsx --test tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+- `npx tsx --test tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS**
+- `npx tsx --test tests/mmpiPdBlock.test.ts` → **17/17 PASS**
+- `npx tsx --test tests/mmpiHyBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiDBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpiHsBlock.test.ts` → **16/16 PASS**
+- `npx tsx --test tests/mmpi*.test.ts tests/aiInterpretation.test.ts` → **201/201 PASS** (36 suite)
+- `npm run build` → **PASS** (`optik-form.html` güncellendi ve senkron)

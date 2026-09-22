@@ -935,3 +935,25 @@ ilgili 10 kod için 18 koşulun bağlanması.
 **Kanıt aracı:** `scripts/mmpi-audit/cmp-pd-batch28.ts` → **SONUÇ: 0 FARK · Pd BLOĞU KOD GÖÇÜ TAMAMLANDI**.
 
 **Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.
+
+## PHASE 9/10 batch 29 — CHANGE-022 · Pa (6) bloğu kod göçü ve koşullu yorumlar (DECISION-031/A)
+
+**Amaç:** Bölüm 5 Pa (6) bloğundaki çok haneli ve eksik kodların (`678/876`, `679`,
+`680/860`, `694/964`, `698/968`, `456 (Scarlett O'Hara Vadisi)`) `BLOCK_CODES`'a taşınması ve ilgili 7 kod için koşulların bağlanması.
+
+**Eklenen testler (14):** `tests/mmpiPaBlock.test.ts` → **14/14 PASS**
+1. Kod çözme doğruluğu ve tanı sadakati: 678/876 (Psikotik V atfı, paranoid tip şizofreni tanısı), 679, 680/860 (paranoid şizofreni tanısı), 694/964 (cinayet potansiyeli uyarısı), 698/968 (şizofreni paranoid tip tanısı ve 68/86 yönlendirmesi), Scarlett O'Hara Vadisi (456 kadın örüntüsü), 67, 68, 69, 60, 64.
+2. Koşul testleri:
+   - 67/76 (3. test D/Sc, Pa ≥ Pt şizofreniye geçiş),
+   - 678/876 (6 ve 8 > 7 Psikotik Vadi),
+   - 68/86 (3. test Pd/Pt, Paranoid Vadi, K < 50 T saldırganlık, 75+ T şizofreni),
+   - 69/96 (3. test Pd/Sc, F ve Sc yüksekliği, kadın gerginliği),
+   - 698/968 (8 alt testi 6'dan 5 T aşağıda ise 68/86 bak),
+   - 60/06 (kadın 30+ yaş, 3. test D/Pd/Hy),
+   - Pa:456_scarlett (Hy ≥ 70 T manipülatif sosyallik).
+
+**Güncellenen testler:** `tests/mmpiKeyIntegrity.test.ts` → **63/63 PASS** (`KNOWN_BLOCK_CODES` listesine Pa bloğundaki 22 anahtar eklendi, toplam 103 blok kodu).
+
+**Kanıt aracı:** `scripts/mmpi-audit/cmp-pa-batch29.ts` → **SONUÇ: 0 FARK · Pa BLOĞU KOD GÖÇÜ TAMAMLANDI**.
+
+**Çalıştırılanlar:** `npx tsc --noEmit` → **0** · `mmpiHsBlock` → **16/16** · `mmpiDBlock` → **16/16** · `mmpiHyBlock` → **16/16** · `mmpiPdBlock` → **17/17** · `mmpiPaBlock` → **14/14** · `mmpiKeyIntegrity` → **63/63** · `mmpiInterpretation` → **54/54** · `aiInterpretation` → **5/5** · `npm run build` → **PASS** · `git diff --check` temiz.

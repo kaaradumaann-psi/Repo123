@@ -122,7 +122,32 @@ Pd bloğu mutabakatı: `scripts/mmpi-audit/cmp-pd-batch28.ts` → **0 FARK** (10
 
 ---
 
-## 5. Pa (Paranoya / 6) alt testi kod bloğu (s.125-131) — SIRADAKİ BLOK
+## 5. Pa (Paranoya / 6) alt testi kod bloğu (s.127-135) — TAMAMLANDI (batch 29 · CHANGE-022)
+
+| Kod | Kaynak | Kodda | Durum / Not |
+|---|---|---|---|
+| `61` | s.130 | ✅ `16/61` | "(Bakınız 16/61 Kodu)" |
+| `62` | s.130 | ✅ `26/62` | "(Bakınız 26/62 Kodu)" |
+| `63` | s.130 | ✅ `36/63` | "(Bakınız 36/63 Kodu)" |
+| `64/46` | s.130-131 | ✅ VAR | `Pa:46` gövdesi tam; 8 alt testi yükselmişse kötü süreç koşulu bağlı (CHANGE-014) |
+| `648` | s.131 | ✅ VAR | `BLOCK_CODES['Pd:468']` + alias `Pa:648` tam; intihar ve ilaç uyarısı |
+| `65` | s.131 | ✅ `56/65` | "(Bakınız 56/65 Kodu)" |
+| `67/76` | s.131 | ✅ VAR | 3. test D/Sc ve Pa ≥ Pt şizofreniye geçiş koşulları bağlı |
+| `678/876` | s.131-132 | ✅ VAR | `BLOCK_CODES['Pa:678']` (+ aliases `Pa:876`, `Sc:678`, `Sc:876`) eklendi; Psikotik V ve 6/8 > 7 koşulu |
+| `679` | s.132 | ✅ VAR | `BLOCK_CODES['Pa:679']` eklendi; impulsif patlamalar ve suçluluk |
+| `68/86` | s.132-133 | ✅ VAR | 3. test Pd/Pt, paranoid vadi, K < 50 saldırganlık ve 75+ T şizofreni koşulları bağlı |
+| `680/860` | s.133 | ✅ VAR | `BLOCK_CODES['Pa:680']` (+ aliases `Pa:860`, `Sc:680`, `Sc:860`, `Si:068`, `Si:086`) eklendi; paranoid şizofreni |
+| `69/96` | s.133-134 | ✅ VAR | 3. test Pd/Sc, F & Sc yüksekliği ve kadın gerginliği koşulları bağlı |
+| `694/964` | s.133-134 | ✅ VAR | `BLOCK_CODES['Pa:694']` (+ aliases `Pa:964`, `Ma:694`, `Ma:964`) eklendi; ⚠️ cinayet potansiyeli uyarısı |
+| `698/968` | s.134 | ✅ VAR | `BLOCK_CODES['Pa:698']` (+ aliases `Pa:968`, `Ma:698`, `Ma:968`, `Sc:698`, `Sc:968`) eklendi; 8 alt testi ≤ 6-5 T koşulu |
+| `60/06` | s.134 | ✅ VAR | Kadın (30+ yaş) ve 3. test D/Pd/Hy koşulları bağlı |
+| `456 (Scarlett O'Hara)` | s.134-135 | ✅ VAR | `BLOCK_CODES['Pa:456_scarlett']` eklendi; Hy ≥ 70 T manipülatif sosyallik koşulu |
+
+Pa bloğu mutabakatı: `scripts/mmpi-audit/cmp-pa-batch29.ts` → **0 FARK** (7 koşullu kural seti, 6 yeni kod gövdesi, 16 çapraz takma ad, 14 test tam).
+
+---
+
+## 6. Pt (Psikasteni / 7) alt testi kod bloğu (s.137-142) — SIRADAKİ BLOK
 
 
 ---
