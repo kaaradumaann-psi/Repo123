@@ -244,25 +244,23 @@ export function RecordDetailPage({
             <Icon name="left" size={15} />
             <span>Listeye dön</span>
           </button>
-          <div className="record-page-topbar-title">
-            <span className="section-badge badge-primary">Kayıt İnceleme</span>
-            <span className="mono-sub">ID: {record.id}</span>
-          </div>
-          {canEditRecord && (
-            <button
-              type="button"
-              className="btn-secondary btn-sm"
-              onClick={() => navigate(`/islem?duzenle=${record.id}`)}
-              title="Kaydı düzenle: form, bu kaydın bir kopyasıyla dolar. Düzeltmeleriniz orijinal kaydı silmez; ona bağlı yeni bir revizyon kaydı oluşturur."
-            >
-              <Icon name="edit" size={15} />
-              <span>Kaydı Düzenle</span>
+          <div className="record-page-actions">
+            {canEditRecord && (
+              <button
+                type="button"
+                className="btn-secondary btn-sm"
+                onClick={() => navigate(`/islem?duzenle=${record.id}`)}
+                title="Kaydı düzenle: form, bu kaydın bir kopyasıyla dolar. Düzeltmeleriniz orijinal kaydı silmez; ona bağlı yeni bir revizyon kaydı oluşturur."
+              >
+                <Icon name="edit" size={15} />
+                <span>Kaydı Düzenle</span>
+              </button>
+            )}
+            <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
+              <Icon name="sheet" size={15} />
+              <span>Yazdır / PDF</span>
             </button>
-          )}
-          <button type="button" className="btn-secondary btn-sm" onClick={() => window.print()}>
-            <Icon name="sheet" size={15} />
-            <span>Yazdır / PDF</span>
-          </button>
+          </div>
         </div>
 
         <header className="record-page-header">
@@ -273,6 +271,9 @@ export function RecordDetailPage({
               {parsed.method ? ` · ${methodLabel(parsed.method)}` : ''}
               {parsed.testDuration ? ` · ${parsed.testDuration}` : ''}
               {record.psychologistName ? ` · ${record.psychologistName}` : ''}
+              <span className="record-page-id-chip mono-sub" title="Kayıt ID">
+                #{record.id.slice(0, 8)}
+              </span>
             </p>
           </div>
           {profile && (
@@ -318,10 +319,8 @@ export function RecordDetailPage({
             <div className="status-banner info-banner no-print" role="status">
               <Icon name="scan" size={16} />
               <span style={{ flex: 1 }}>
-                Optik formun son hali bu kayıtta korunuyor: set <code className="mono-sub">{batchId ?? '—'}</code> ·
-                4/4 sayfa · {reviewedCount} manuel düzeltme · {historyCount} denetim olayı.
-                Kaydı düzenleseniz bile bu optik detaylar aynen burada kalır; düzeltmeleriniz ayrı bir
-                revizyon kaydı olarak yazılır.
+                Optik set <code className="mono-sub">{batchId ?? '—'}</code> · 4/4 sayfa · {reviewedCount} manuel
+                düzeltme · {historyCount} denetim olayı — optik detaylar bu kayıtta korunur.
               </span>
             </div>
           );

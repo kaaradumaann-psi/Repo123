@@ -347,12 +347,23 @@ describe('rapor sekmeleri kaynak metinlerini uçtan uca render eder', () => {
     assert.match(validity, /L \/ F \/ K Konfigürasyonu/);
 
     const clinical = renderToStaticMarkup(createElement(MMPIClinicalTab, { profile: p }));
+    // Ölçek Bazlı Detaylı Klinik Rapor (Graham 1987) kartları
+    assert.match(clinical, /T-skoru 70 ve üzeri veya 40 ve altı olan ölçekler klinik olarak anlamlı kabul edilir/);
     assert.match(clinical, /Hipokondriazis/);
-    assert.match(clinical, /K düzeltmesi yalnızca Hs, Pd, Pt, Sc ve Ma ölçeklerine uygulanır/);
-    // Açılır satırlar: klinik eşiği aşan ölçekler açık, diğerleri kapalı gelir.
-    assert.match(clinical, /5 ölçek klinik eşiğin üzerinde \(T ≥ 70\) — açık gelir\./);
-    assert.match(clinical, /aria-expanded="true"/);
-    assert.match(clinical, /aria-expanded="false"/);
+    assert.match(clinical, /KLİNİK YÜKSEKLİK/);
+    assert.match(clinical, /KLİNİK AÇIKLAMA VE ANALİZ/);
+    assert.match(clinical, /\(GRAHAM 1987\)/);
+    assert.match(clinical, /Demografik ve Klinik Notlar/);
+    assert.match(clinical, /EK KLİNİK BİLGİLER/);
+    assert.match(clinical, /Tablo 8:/);
+    assert.match(clinical, /K Eklemeli bir alt testtir\./);
+    assert.match(clinical, /\(Savaşır, 1981\)/);
+    assert.match(clinical, /Kaynak: Graham \(1987\)/);
+    // Satır içi sayfa referansı yok; kaynak yalnız kart altlığında (footer'da sayfa aralığı serbest)
+    const clinicalBody = clinical.replace(/<footer class="dossier-source">[\s\S]*?<\/footer>/g, '');
+    assert.doesNotMatch(clinicalBody, /s\.\d/);
+    // Eski satır-bazlı açılır liste arayüzü kalktı
+    assert.doesNotMatch(clinical, /aria-expanded/);
 
     const code = renderToStaticMarkup(createElement(MMPICodeTab, { profile: p }));
     // Arayüzde dosya adı (kaynak.pdf) asla görünmez; başlık yalnızca kod yorumunu anar.
@@ -514,7 +525,8 @@ describe('CHANGE-014 (DECISION-029/A) — kod sekmesi blok-yerel gövdeyi ve ko�
     const html = renderToStaticMarkup(createElement(MMPICodeTab, { profile: codeProfile({ Pd: 38, Sc: 48 }) }));
     assert.match(html, /Ko\u015fullu ek yorum/);
     assert.match(html, /8 alt testi de yükselmişse süreç daha kötü olur/);
-    assert.match(html, /s\.131/);
+    // Metin içinde sayfa referansı gösterilmez (kullanıcı kuralı); kaynak veri katmanında kalır
+    assert.doesNotMatch(html, /s\.\d/);
   });
 
   it('yazdırma raporu da blok-yerel kaydı kullanır', async () => {

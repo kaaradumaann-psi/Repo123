@@ -203,7 +203,7 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
 
       <p className="mmpi-info-foot">
         * T puanları cinsiyete özgü Türk normları ve klasik K düzeltme oranları (Hs, Pd, Pt, Sc, Ma) kullanılarak
-        hesaplanır. Kesme puanları tanı koymaz, yalnızca uzmana yol gösterir; klinik karar uygulayıcı uzmana aittir.
+        hesaplanır.
       </p>
     </div>
   );
