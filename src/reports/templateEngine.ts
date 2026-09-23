@@ -35,6 +35,15 @@ export const EMPTY_LETTERHEAD: Letterhead = {
 export type ReportDocument = { schemaVersion: 1; blocks: ReportBlock[]; letterhead?: Letterhead };
 export const SYSTEM_TEMPLATE_ID = '00000000-0000-4000-8000-000000000001';
 export const SYSTEM_TEMPLATE_NAME = 'Standart MMPI Psikolog Raporu';
+export const BRIEF_TEMPLATE_ID = '00000000-0000-4000-8000-000000000002';
+export const BRIEF_TEMPLATE_NAME = 'Özet MMPI Bilgi Notu (tek sayfa)';
+export const FOLLOWUP_TEMPLATE_ID = '00000000-0000-4000-8000-000000000003';
+export const FOLLOWUP_TEMPLATE_NAME = 'İzlem Karşılaştırma Raporu';
+export const TEMPLATE_CATALOG = [
+  { id: SYSTEM_TEMPLATE_ID, name: SYSTEM_TEMPLATE_NAME },
+  { id: BRIEF_TEMPLATE_ID, name: BRIEF_TEMPLATE_NAME },
+  { id: FOLLOWUP_TEMPLATE_ID, name: FOLLOWUP_TEMPLATE_NAME },
+] as const;
 export function fieldValue(source: ReportSourceData, path: string): DataValue | undefined {
   let current: DataValue | undefined = source.fields;
   for (const part of path.split('.')) {
@@ -208,6 +217,52 @@ export function standardTemplate(): ReportDocument {
   heading('10. Notlar');
   para('');
   return { schemaVersion: 1, blocks };
+}
+
+export function briefTemplate(): ReportDocument {
+  // Tek sayfa — kimlik + özet tablo + genel yorum + en belirgin 3 ölçek + öneriler
+  const blocks: ReportBlock[] = [];
+  const heading = (text: string, when?: string) => blocks.push({ ...newBlock('heading2', text), when });
+  const para = (template: string, when?: string) =>
+    blocks.push({ ...newBlock('paragraph', template), sourceTemplate: template, when });
+  const data = (path: string, label: string) =>
+    blocks.push({ ...newBlock('dataField'), path, label, when: path });
+  const table = (path: string) => blocks.push({ ...newBlock('dataTable'), path, when: `tables.${path}` });
+  data('patient.fullName', 'Ad – Soyad');
+  data('patient.age', 'Yaş');
+  data('patient.gender', 'Cinsiyet');
+  data('test.date', 'Testin Uygulanma Tarihi');
+  data('test.psychologist', 'Testi Uygulayan');
+  para('{{summary}}', 'summary');
+  table('validity');
+  table('clinical');
+  heading('Öne çıkan bulgular');
+  para('{{code.interpretation}}', 'code.interpretation');
+  heading('Öneriler');
+  para('');
+  heading('Uzman Notu');
+  para('{{expertNotes}}', 'expertNotes');
+  return { schemaVersion: 1, blocks };
+}
+
+export function followUpTemplate(): ReportDocument {
+  // İzlem — önceki ve mevcut ölçümü yan yana yorumlama alanı (nötr, sayısal fark yok)
+  const base = standardTemplate();
+  // Başa izlem bağlamı ekle
+  const intro: ReportBlock[] = [
+    { ...newBlock('heading1', 'İzlem Karşılaştırma — MMPI'), when: undefined },
+    { ...newBlock('paragraph', 'Bu rapor, aynı danışana ait iki ayrı uygulama tarihinin nötr karşılaştırmasıdır; klinik değişim yorumu uzmanın sorumluluğundadır.'), when: undefined },
+    { ...newBlock('dataField'), path: 'test.date', label: 'Mevcut Test Tarihi', when: 'test.date' },
+    { ...newBlock('dataField'), path: 'test.followUp', label: 'İzlem', when: 'test.followUp' },
+  ];
+  return { schemaVersion: 1, blocks: [...intro, ...base.blocks] };
+}
+
+export function templateById(id: string): ReportDocument | null {
+  if (id === SYSTEM_TEMPLATE_ID) return standardTemplate();
+  if (id === BRIEF_TEMPLATE_ID) return briefTemplate();
+  if (id === FOLLOWUP_TEMPLATE_ID) return followUpTemplate();
+  return null;
 }
 /** Only presentation classification: no score calculation. Numeric placeholders and profile codes stay locked. */
 export function containsProtectedField(text: string, source: ReportSourceData): boolean {

@@ -324,3 +324,39 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Stage 9 — mobil ManualReview polish: 44px dokunma alanı + büyütme */
+@media (max-width: 720px) {
+  .item-select-chip {
+    min-height: 44px;
+    padding: 10px 4px;
+  }
+  .choice-action-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 14px;
+  }
+  .review-filters-bar .filter-group select,
+  .review-filters-bar .filter-group input {
+    min-height: 44px;
+  }
+  .scan-crop-image canvas {
+    touch-action: pinch-zoom;
+  }
+}
+/* Büyütme: kırpıntı üzerine dokununca yakınlaştırma (CSS-only hover/active) */
+.scan-crop-image canvas {
+  transition: transform 180ms ease;
+  transform-origin: center center;
+}
+@media (hover: hover) {
+  .scan-crop-image:hover canvas {
+    transform: scale(1.6);
+    cursor: zoom-in;
+  }
+}
+@media (max-width: 720px) {
+  .scan-crop-image:active canvas {
+    transform: scale(1.8);
+  }
+}

@@ -5,6 +5,7 @@ import type { AuthFlowOrigin } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
 import { CaseWorkspace } from './components/CaseWorkspace';
+import { Dashboard } from './components/Dashboard';
 import { ConnectivityBanner } from './components/ConnectivityBanner';
 import { FaqPage } from './components/FaqPage';
 import { FormKit } from './components/FormKit';
@@ -286,6 +287,11 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
               aria-labelledby="tab-case"
               className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
             >
+              {user.role === 'PSYCHOLOG' && route.page === 'home' && (
+                <div style={{ maxWidth: 980, margin: '0 auto', padding: '0.75rem 1rem 0' }}>
+                  <Dashboard user={user} />
+                </div>
+              )}
               <CaseWorkspace
                 key={route.page === 'home' ? 'clean-landing' : 'case-workspace'}
                 definition={formDefinition}

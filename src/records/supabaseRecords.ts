@@ -68,12 +68,37 @@ export type RecordInput = {
 export const RAW_PAYLOAD_MAX_BYTES = 8 * 1024 * 1024;
 
 /**
- * Liste üst sınırları. Bilinçli olarak sabittir (sayfalama yok) ve arayüzler
- * bu sınıra ulaşıldığında bunu görünür biçimde bildirir: sessiz kırpma, uzmanın
- * eski bir kaydı "yok" saymasına yol açabilir.
+ * Liste üst sınırları. Sunucu-taraflı sayfalama ile birlikte; arayüzler
+ * `hasMore`/`count` ile sınırı görünür kılar — sessiz kırpma yok.
+ * `OWN/ALL_LIMIT` hâlâ geriye dönük uyumluluk için korunur.
  */
 export const OWN_RECORDS_LIMIT = 100;
 export const ALL_RECORDS_LIMIT = 200;
+export const DEFAULT_PAGE_SIZE = 50;
+export const MAX_PAGE_SIZE = 100;
+
+export type RecordsQuery = {
+  search?: string;
+  dateFrom?: string; // YYYY-MM-DD
+  dateTo?: string; // YYYY-MM-DD
+  gender?: Gender | '';
+  ageMin?: number;
+  ageMax?: number;
+  page?: number; // 0-indexed
+  pageSize?: number;
+};
+
+export type PagedRecords = {
+  records: RecordSummary[];
+  count: number | null;
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+};
+
+function sanitizeIlike(value: string): string {
+  return value.replace(/[%_,]/g, '').trim().slice(0, 80);
+}
 
 function text(value: string, label: string, max = 120): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
@@ -258,48 +283,112 @@ export async function createDataRecord(
   return upsertRecord(normalizeClient(input.client), actor, idempotencyKey, payload);
 }
 
-export async function listOwnRecords(): Promise<RecordSummary[]> {
-  const { data, error } = await requireSupabase()
+function mapSummaryRow(row: unknown): RecordSummary {
+  const value = row as {
+    id?: unknown;
+    client_first_name?: unknown;
+    client_last_name?: unknown;
+    application_date?: unknown;
+    created_at?: unknown;
+    gender?: unknown;
+    age?: unknown;
+    occupation?: unknown;
+    education?: unknown;
+    requested_by?: unknown;
+  };
+  if (
+    typeof value.id !== 'string' ||
+    typeof value.client_first_name !== 'string' ||
+    typeof value.client_last_name !== 'string' ||
+    typeof value.application_date !== 'string' ||
+    typeof value.created_at !== 'string'
+  ) {
+    throw new Error('Kayıt listesi geçersiz.');
+  }
+  return {
+    id: value.id,
+    firstName: value.client_first_name,
+    lastName: value.client_last_name,
+    applicationDate: value.application_date,
+    createdAt: value.created_at,
+    gender: value.gender as Gender,
+    age: typeof value.age === 'number' ? value.age : undefined,
+    occupation: typeof value.occupation === 'string' ? value.occupation : undefined,
+    education: typeof value.education === 'string' ? value.education : undefined,
+    requestedBy: typeof value.requested_by === 'string' ? value.requested_by : undefined,
+  };
+}
+
+export async function listOwnRecordsPaged(query: RecordsQuery = {}): Promise<PagedRecords> {
+  const page = Math.max(0, Math.floor(query.page ?? 0));
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(query.pageSize ?? DEFAULT_PAGE_SIZE)));
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  let q = requireSupabase()
     .from('mmpi_records')
-    .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by')
+    .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(OWN_RECORDS_LIMIT);
+    .range(from, to);
+  const search = query.search ? sanitizeIlike(query.search) : '';
+  if (search) {
+    // Ad veya soyad ilike — sunucu tarafı filtre, RLS bypass yok.
+    q = q.or(`client_first_name.ilike.%${search}%,client_last_name.ilike.%${search}%`);
+  }
+  if (query.dateFrom && isValidDateOnly(query.dateFrom)) q = q.gte('application_date', query.dateFrom);
+  if (query.dateTo && isValidDateOnly(query.dateTo)) q = q.lte('application_date', query.dateTo);
+  if (query.gender) q = q.eq('gender', query.gender);
+  if (typeof query.ageMin === 'number' && Number.isFinite(query.ageMin)) q = q.gte('age', Math.floor(query.ageMin));
+  if (typeof query.ageMax === 'number' && Number.isFinite(query.ageMax)) q = q.lte('age', Math.floor(query.ageMax));
+  const { data, error, count } = await q;
   if (error) throw new Error(describeMutationError(error, 'Test kayıtlarınız alınamadı.'));
-  return (data ?? []).map(row => {
-    const value = row as {
-      id?: unknown;
-      client_first_name?: unknown;
-      client_last_name?: unknown;
-      application_date?: unknown;
-      created_at?: unknown;
-      gender?: unknown;
-      age?: unknown;
-      occupation?: unknown;
-      education?: unknown;
-      requested_by?: unknown;
-    };
-    if (
-      typeof value.id !== 'string' ||
-      typeof value.client_first_name !== 'string' ||
-      typeof value.client_last_name !== 'string' ||
-      typeof value.application_date !== 'string' ||
-      typeof value.created_at !== 'string'
-    ) {
-      throw new Error('Kayıt listesi geçersiz.');
-    }
+  const records = (data ?? []).map(mapSummaryRow);
+  // Supabase count exact döner; hasMore, count biliniyorsa count üzerinden, yoksa sayfa doluluğuna göre.
+  const hasMore = count != null ? from + records.length < count : records.length === pageSize;
+  return { records, count: count ?? null, hasMore, page, pageSize };
+}
+
+export async function listOwnRecords(): Promise<RecordSummary[]> {
+  const { records } = await listOwnRecordsPaged({ page: 0, pageSize: OWN_RECORDS_LIMIT });
+  return records;
+}
+
+export async function listAllRecordsPaged(query: RecordsQuery = {}): Promise<PagedRecords> {
+  const page = Math.max(0, Math.floor(query.page ?? 0));
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(query.pageSize ?? DEFAULT_PAGE_SIZE)));
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  let q = requireSupabase()
+    .from('mmpi_records')
+    .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by,created_by', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
+  const search = query.search ? sanitizeIlike(query.search) : '';
+  if (search) q = q.or(`client_first_name.ilike.%${search}%,client_last_name.ilike.%${search}%`);
+  if (query.dateFrom && isValidDateOnly(query.dateFrom)) q = q.gte('application_date', query.dateFrom);
+  if (query.dateTo && isValidDateOnly(query.dateTo)) q = q.lte('application_date', query.dateTo);
+  if (query.gender) q = q.eq('gender', query.gender);
+  if (typeof query.ageMin === 'number' && Number.isFinite(query.ageMin)) q = q.gte('age', Math.floor(query.ageMin));
+  if (typeof query.ageMax === 'number' && Number.isFinite(query.ageMax)) q = q.lte('age', Math.floor(query.ageMax));
+  const { data, error, count } = await q;
+  if (error) throw new Error(describeMutationError(error, 'Tüm test kayıtları alınamadı.'));
+  const records = (data ?? []).map(row => {
+    const v = row as Record<string, unknown>;
     return {
-      id: value.id,
-      firstName: value.client_first_name,
-      lastName: value.client_last_name,
-      applicationDate: value.application_date,
-      createdAt: value.created_at,
-      gender: value.gender as Gender,
-      age: typeof value.age === 'number' ? value.age : undefined,
-      occupation: typeof value.occupation === 'string' ? value.occupation : undefined,
-      education: typeof value.education === 'string' ? value.education : undefined,
-      requestedBy: typeof value.requested_by === 'string' ? value.requested_by : undefined,
-    };
+      id: String(v.id),
+      firstName: String(v.client_first_name),
+      lastName: String(v.client_last_name),
+      applicationDate: String(v.application_date),
+      createdAt: String(v.created_at),
+      gender: v.gender as Gender,
+      age: typeof v.age === 'number' ? v.age : undefined,
+      occupation: typeof v.occupation === 'string' ? v.occupation : undefined,
+      education: typeof v.education === 'string' ? v.education : undefined,
+      requestedBy: typeof v.requested_by === 'string' ? v.requested_by : undefined,
+      createdBy: typeof v.created_by === 'string' ? v.created_by : undefined,
+    } as RecordSummary;
   });
+  const hasMore = count != null ? from + records.length < count : records.length === pageSize;
+  return { records, count: count ?? null, hasMore, page, pageSize };
 }
 
 export async function listAllRecords(): Promise<RecordSummary[]> {
