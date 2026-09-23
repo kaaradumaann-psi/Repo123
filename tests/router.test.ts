@@ -28,3 +28,10 @@ test('pathname router preserves a record identifier and rejects extra path segme
   assert.deepEqual(parseRoute('/kayitlar/one/two'), { page: 'bulunamadi' });
   assert.deepEqual(parseRoute('/not-a-route'), { page: 'bulunamadi' });
 });
+
+test('report list and editor routes preserve existing record routes and reject extra segments', () => {
+  assert.deepEqual(parseRoute('/kayitlar/one/raporlar'), { page: 'raporlar', id: 'one' });
+  assert.deepEqual(parseRoute('/kayitlar/one/raporlar/two/'), { page: 'raporlar', id: 'one', reportId: 'two' });
+  assert.deepEqual(parseRoute('/kayitlar/one/raporlar/two/extra'), { page: 'bulunamadi' });
+  assert.deepEqual(parseRoute('/kayitlar/one/two'), { page: 'bulunamadi' });
+});

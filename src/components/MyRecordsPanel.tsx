@@ -230,6 +230,7 @@ export function MyRecordsPanel() {
                           <Icon name="eye" size={15} />
                           <span>Testi İncele</span>
                         </a>
+                        <a className="action-btn-secondary" href={`/kayitlar/${record.id}/raporlar`}>Raporlar</a>
                         <button
                           type="button"
                           className="action-btn-secondary"
