@@ -59,7 +59,7 @@ export function ReportsSummary({ recordId }: { recordId: string }) {
         </a>
       </div>
       {error ? (
-        <p role="alert">Raporlar yüklenemedi. {error}</p>
+        <p className="status-banner error-banner" role="alert">Raporlar yüklenemedi. {error}</p>
       ) : !reports ? (
         <p>Yükleniyor…</p>
       ) : !reports.length ? (

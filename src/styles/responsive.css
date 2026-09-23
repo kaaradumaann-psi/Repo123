@@ -237,6 +237,30 @@
   textarea {
     line-height: 1.35;
   }
+
+  /* Legibility floor for the small labels that carry meaning on a phone. These
+     were 9-10px (badge/flag/eyebrow type) and are hard to read at arm's length;
+     they are bumped here only, so desktop and print keep their scale. */
+  .user-role-badge,
+  .brand-subtitle,
+  .btn-multiline small,
+  .ws-method-flag,
+  .level-badge,
+  .mv-band,
+  .qe-cell,
+  .item-select-chip .item-ans,
+  .site-footer-sep,
+  .site-footer-disclaimer,
+  .site-footer-credit {
+    font-size: 11px;
+  }
+
+  /* The 1-60 item chips were ~36px tall: below the documented 44px target and
+     the primary way a wrong OMR reading is corrected. */
+  .item-select-chip {
+    min-height: 44px;
+    justify-content: center;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -422,6 +446,29 @@
    07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 430px) {
+  /* Footer strings were `white-space: nowrap`: at 320px the copyright/meta line
+     ran under the viewport edge instead of wrapping to a second centred row. */
+  .site-footer-copyright,
+  .site-footer-meta,
+  .site-footer-disclaimer,
+  .site-footer-credit {
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Dossier score chips (`T 68 . 88` + condition labels) wrap instead of
+     spilling out of the card. */
+  .scale-dossier-stats,
+  .dossier-stats {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .dossier-stat,
+  .dossier-fact dd {
+    white-space: normal;
+  }
+
   /* Gutter: 14px sides consumed 8% of a 320px screen; 12px returns usable width
      to the tables, cards and the answer grid without touching desktop. */
   .app-main {

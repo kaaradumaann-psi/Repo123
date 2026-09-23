@@ -385,3 +385,38 @@ test('OMR inceleme yüzeyleri mobilde yeniden dolgulanır', () => {
   assert.match(selectorDeclarations('.item-inspection-box', 720), /padding:\s*14px/);
   assert.match(selectorDeclarations('.scanner-metrics-strip > *', 720), /min-height:\s*44px/);
 });
+
+/* --------------------------------------------------------------------------
+   Phase 7 — UX tutarlılığı, okunabilirlik ve erişilebilirlik cilası
+   -------------------------------------------------------------------------- */
+
+test('onay kutuları ve radyo düğmeleri klavye odağını görünür gösterir', () => {
+  const theme = readFileSync(`${STYLE_DIR}/theme.css`, 'utf8');
+  const rule = /input\[type='checkbox'\]:focus-visible,\s*input\[type='radio'\]:focus-visible\s*\{([^}]*)\}/.exec(theme);
+  assert.ok(rule, 'checkbox/radio için focus-visible kuralı yok');
+  assert.match(rule[1]!, /outline:\s*2px solid var\(--text\)/);
+});
+
+test('mobilde küçük etiketler 11px tabanına yükselir', () => {
+  const declarations = selectorDeclarations('.user-role-badge', 720);
+  assert.match(declarations, /font-size:\s*11px/);
+  assert.match(selectorDeclarations('.site-footer-disclaimer', 720), /font-size:\s*11px/);
+  assert.match(selectorDeclarations('.item-select-chip .item-ans', 720), /font-size:\s*11px/);
+});
+
+test('madde seçim çipleri dokunma hedefi kadar yüksek', () => {
+  assert.match(selectorDeclarations('.item-select-chip', 720), /min-height:\s*44px/);
+});
+
+test('dar ekranda alt bilgi ve skor çipleri taşmak yerine sarar', () => {
+  assert.match(selectorDeclarations('.site-footer-copyright', 430), /white-space:\s*normal/);
+  assert.match(selectorDeclarations('.site-footer-meta', 430), /white-space:\s*normal/);
+  assert.match(selectorDeclarations('.scale-dossier-stats', 430), /flex-wrap:\s*wrap/);
+  assert.match(selectorDeclarations('.dossier-stat', 430), /white-space:\s*normal/);
+});
+
+test('hata durumları tasarım sisteminin banner sınıfını kullanır', () => {
+  const reports = readFileSync('src/reports/ReportsPage.tsx', 'utf8');
+  assert.ok(!/<p role="alert">/.test(reports), 'stilsiz <p role="alert"> kalmamalı');
+  assert.match(reports, /className="status-banner error-banner" role="alert"/);
+});

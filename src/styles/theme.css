@@ -617,6 +617,15 @@
     outline-offset: 1px;
   }
 
+  /* Checkboxes and radios were excluded from the rule above (a native browser
+     ring was assumed) but the reset in this file removes it, so keyboard users
+     had no focus indicator on grouped/acceptance toggles. */
+  input[type='checkbox']:focus-visible,
+  input[type='radio']:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+
   input::placeholder,
   textarea::placeholder {
     color: var(--muted);
