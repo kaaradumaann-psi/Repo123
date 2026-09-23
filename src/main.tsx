@@ -14,6 +14,10 @@ import './styles/site.css';
 // Mobile overrides (≤720px) — imported last so they win at narrow widths; desktop is untouched.
 import './styles/mobile.css';
 import './styles/reports.css';
+// Responsive foundation (viewport height units, safe areas, ≥44px touch targets,
+// 16px form controls, ≤430px small-phone tier) — imported LAST so it refines every
+// layer above without touching the printable A4 sheet (all rules are @media screen).
+import './styles/responsive.css';
 
 // Intercept same-origin <a> clicks for SPA navigation.
 installLinkInterceptor();

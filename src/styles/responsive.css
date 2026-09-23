@@ -1,0 +1,229 @@
+/* ==========================================================================
+   Responsive Foundation — global viewport fit + touch ergonomics
+   --------------------------------------------------------------------------
+   main.tsx imports this file LAST, after mobile.css and reports.css, so it can
+   refine every screen layer without fighting the cascade. It owns exactly four
+   things; screen-specific layout stays in the files that already own it:
+
+     01 · Viewport height units (mobile URL bar) + iOS safe areas
+     02 · Nothing may force horizontal page overflow (min-width safety net)
+     03 · ≤720px touch ergonomics: 16px form controls (iOS focus zoom) and
+          ≥44px touch targets for compact controls
+     04 · ≤430px small-phone tier (320–430px) for gutters and filters
+
+   Rules:
+     • Every declaration is inside `@media screen` — the printable A4 sheet
+       (form.css / print.css / @media print blocks) never receives a single
+       declaration from this file.
+     • No `!important`, no new component, no rewritten design: only foundation.
+     • Desktop (>1024px) is intentionally untouched.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   01 · Viewport height & safe areas
+   -------------------------------------------------------------------------- */
+@media screen {
+  /* 100vh is the *large* viewport on mobile browsers: as the URL bar hides and
+     shows, a 100vh column jumps and can push the footer under the browser
+     chrome. dvh tracks the visible viewport; vh stays as the fallback for
+     browsers that do not support it yet. */
+  .portal-layout,
+  .auth-page,
+  .auth-shell,
+  .info-shell,
+  .report-workspace {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* A modal taller than the *visible* viewport scrolls internally instead of
+     letting the last action button sit under the browser chrome. */
+  .modal-container {
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  .report-preview-pane {
+    max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
+  }
+
+  /* Notch / home-indicator insets. `env()` resolves to 0px where unsupported. */
+  .app-header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .site-footer-inner {
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+
+  /* --------------------------------------------------------------------------
+     02 · Horizontal overflow safety net
+     -------------------------------------------------------------------------- */
+  /* Flex/grid children default to `min-width: auto`, which is the single most
+     common cause of a "table/card is wider than the phone" bug. Containers that
+     host scrollable tables already own their own `overflow-x: auto`. */
+  .app-main,
+  .app-main > *,
+  .reports-page,
+  .report-workspace,
+  .ws-panel,
+  .ws-flow,
+  .dashboard-section,
+  .card-elevated,
+  .report-section {
+    min-width: 0;
+  }
+
+  /* Unbreakable identifiers (UUID, e-posta, dosya adı, batch kodu) must wrap
+     instead of widening the layout. */
+  .record-ref-code,
+  .record-page-id,
+  .mono-sub,
+  .batch-code,
+  input[type='search'],
+  .form-kit-file strong,
+  .ws-edit-panel-id {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   03 · ≤720px — touch ergonomics
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* iOS Safari zooms the whole page when a form control smaller than 16px takes
+     focus, then leaves the user zoomed in. Two layers guard against it:
+       (a) a catch-all for controls the design system does not style itself
+           (browser default is 13.33px), and
+       (b) explicit overrides for every styled control that declares a smaller
+           size — these must out-rank the rule they correct, so they carry the
+           same or higher specificity and come later in the cascade.
+     The APA title field is the single intentional exception (display type). */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .field input,
+  .field textarea,
+  .search-input-wrapper input,
+  .date-filter-field input,
+  .date-filter-field select,
+  .filter-group input,
+  .filter-group select,
+  .raw-field input,
+  .expert-notes-input,
+  .ws-form textarea,
+  .report-edit-pane textarea,
+  .report-settings-grid input,
+  .report-template-save input,
+  .report-toolbar select,
+  .admin-creation-form input,
+  .reports-page input:not([type='file']):not([type='checkbox']):not([type='radio']),
+  .reports-page select,
+  .reports-page textarea {
+    font-size: 16px;
+  }
+
+  /* Exception: the APA report title is a display-sized field on purpose. */
+  .reports-page .report-title-input input,
+  .report-edit-pane .report-title-input input {
+    font-size: clamp(19px, 5.2vw, 24px);
+  }
+
+  /* 44px is the documented target of this project's mobile layer. Compact
+     controls (btn-sm, table row actions, filter fields, close buttons, pills)
+     were 28–36px tall on a phone. */
+  .btn-sm,
+  .action-btn-primary,
+  .action-btn-secondary,
+  .action-btn-danger,
+  .icon-close-btn,
+  .portal-tab,
+  .subnav-tab,
+  .mode-tab,
+  .mmpi-tab,
+  .quicknav-chip,
+  .report-toolbar button,
+  .report-preview-actions button,
+  .scan-comparison-toggle button,
+  .close-banner-btn,
+  .site-footer-link,
+  .btn-logout {
+    min-height: 44px;
+  }
+
+  .icon-close-btn,
+  .close-banner-btn {
+    min-width: 44px;
+  }
+
+  .date-filter-field input,
+  .date-filter-field select,
+  .raw-field input {
+    height: 44px;
+  }
+
+  /* Inputs must never be narrower than a comfortable thumb target either. */
+  .date-filter-field {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .date-filter-field input,
+  .date-filter-field select {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   04 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 430px) {
+  /* Gutter: 14px sides consumed 8% of a 320px screen; 12px returns usable width
+     to the tables, cards and the answer grid without touching desktop. */
+  .app-main {
+    padding: 16px 12px 40px;
+  }
+
+  .header-inner {
+    padding: 10px 12px;
+  }
+
+  .connectivity-banner {
+    width: calc(100% - 24px);
+  }
+
+  /* Filters stack instead of squeezing two dated fields side by side. */
+  .date-range-filter {
+    gap: 8px;
+  }
+
+  .date-range-filter > .date-filter-field {
+    flex: 1 1 140px;
+  }
+
+  .search-filter-box .search-input-wrapper input {
+    padding-left: 40px;
+  }
+
+  /* Card and section padding: 20–24px reads as "empty" on a 320px screen.
+     Only surfaces that own their padding are listed — the table card must stay
+     full-bleed so `.table-responsive` keeps its edge-to-edge scroll. */
+  .card-elevated,
+  .report-section,
+  .mmpi-list-card {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .modal-backdrop {
+    padding: 12px;
+  }
+}
