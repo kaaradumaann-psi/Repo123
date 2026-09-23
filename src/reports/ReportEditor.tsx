@@ -388,41 +388,61 @@ export function ReportEditor({
                   className={`report-edit-block ${selected === b.id ? 'is-selected' : ''} ${b.type.startsWith('data') ? 'is-locked' : ''}`}
                   onClick={() => setSelected(b.id)}
                 >
-                  <div className="report-block-controls">
-                    <small>
-                      {b.type.startsWith('data')
-                        ? 'Kilitli · MMPI verisi'
-                        : `${index + 1} · ${({ heading1: 'Başlık 1', heading2: 'Başlık 2', paragraph: 'Paragraf', bulletList: 'Madde listesi', numberedList: 'Numaralı liste', table: 'Tablo' } as Record<string, string>)[b.type] || b.type}`}{' '}
-                    </small>
-                    <button
-                      title="Bloğu yukarı taşı"
-                      disabled={index === 0}
-                      onClick={() => {
-                        const blocks = [...doc.blocks];
-                        [blocks[index - 1], blocks[index]] = [blocks[index]!, blocks[index - 1]!];
-                        edit({ ...doc, blocks });
-                      }}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      title="Bloğu aşağı taşı"
-                      disabled={index === doc.blocks.length - 1}
-                      onClick={() => {
-                        const blocks = [...doc.blocks];
-                        [blocks[index + 1], blocks[index]] = [blocks[index]!, blocks[index + 1]!];
-                        edit({ ...doc, blocks });
-                      }}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      title="Bloğu sil"
-                      onClick={() => edit({ ...doc, blocks: doc.blocks.filter((x) => x.id !== b.id) })}
-                    >
-                      Sil
-                    </button>
-                  </div>
+                  {b.type.startsWith('data') ? (
+                    <div className="report-block-controls report-block-controls--locked">
+                      <small className="report-locked-chip" title="Bu alan doğrulanmış MMPI verisinden otomatik doldurulur; düzenlenemez">
+                        🔒 MMPI
+                      </small>
+                      <button
+                        title="Bloğu yukarı taşı"
+                        disabled={index === 0}
+                        onClick={() => {
+                          const blocks = [...doc.blocks];
+                          [blocks[index - 1], blocks[index]] = [blocks[index]!, blocks[index - 1]!];
+                          edit({ ...doc, blocks });
+                        }}
+                      >↑</button>
+                      <button
+                        title="Bloğu aşağı taşı"
+                        disabled={index === doc.blocks.length - 1}
+                        onClick={() => {
+                          const blocks = [...doc.blocks];
+                          [blocks[index + 1], blocks[index]] = [blocks[index]!, blocks[index + 1]!];
+                          edit({ ...doc, blocks });
+                        }}
+                      >↓</button>
+                      <button
+                        title="Bloğu sil"
+                        onClick={() => edit({ ...doc, blocks: doc.blocks.filter((x) => x.id !== b.id) })}
+                      >Sil</button>
+                    </div>
+                  ) : (
+                    <div className="report-block-controls">
+                      <small>{`${index + 1} · ${({ heading1: 'Başlık 1', heading2: 'Başlık 2', paragraph: 'Paragraf', bulletList: 'Madde listesi', numberedList: 'Numaralı liste', table: 'Tablo' } as Record<string, string>)[b.type] || b.type}`}</small>
+                      <button
+                        title="Bloğu yukarı taşı"
+                        disabled={index === 0}
+                        onClick={() => {
+                          const blocks = [...doc.blocks];
+                          [blocks[index - 1], blocks[index]] = [blocks[index]!, blocks[index - 1]!];
+                          edit({ ...doc, blocks });
+                        }}
+                      >↑</button>
+                      <button
+                        title="Bloğu aşağı taşı"
+                        disabled={index === doc.blocks.length - 1}
+                        onClick={() => {
+                          const blocks = [...doc.blocks];
+                          [blocks[index + 1], blocks[index]] = [blocks[index]!, blocks[index + 1]!];
+                          edit({ ...doc, blocks });
+                        }}
+                      >↓</button>
+                      <button
+                        title="Bloğu sil"
+                        onClick={() => edit({ ...doc, blocks: doc.blocks.filter((x) => x.id !== b.id) })}
+                      >Sil</button>
+                    </div>
+                  )}
                   {b.type.startsWith('data') ? (
                     <ReportBlockView block={b} source={source} />
                   ) : b.type === 'table' ? (

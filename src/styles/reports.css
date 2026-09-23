@@ -320,8 +320,29 @@
     box-shadow: 0 0 0 3px rgba(10,132,255,.08);
   }
   .report-edit-block.is-locked {
-    background: #f8fbff;
+    background: #f0f7ff;
     border-color: var(--primary-border);
+    padding: 6px 10px 8px;
+  }
+  /* Locked dataField: compact chip instead of verbose label */
+  .report-block-controls--locked {
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  .report-locked-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: auto;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent-ink);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-full);
+    padding: 2px 8px;
+    cursor: default;
   }
 
   .report-block-controls {
@@ -372,6 +393,51 @@
   .report-edit-block [contenteditable]:empty::before {
     content: 'Yazmak için tıklayın…';
     color: var(--muted);
+  }
+  /* Compact dataField inside editor — smaller label, inline layout */
+  .report-edit-block .psych-field {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    padding: 3px 0;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .report-edit-block .psych-field-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .report-edit-block .psych-field-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  /* Compact table inside editor — strip APA figure wrapper */
+  .report-edit-block .apa-table {
+    margin: 0;
+  }
+  .report-edit-block .apa-table-number {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .report-edit-block .apa-table-title {
+    font-size: 10px;
+    font-style: italic;
+    color: var(--soft);
+    margin-bottom: 4px;
+  }
+  .report-edit-block .apa-table-note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
   }
   .report-edit-block [data-kind='heading1'] {
     font-family: var(--font-display);
