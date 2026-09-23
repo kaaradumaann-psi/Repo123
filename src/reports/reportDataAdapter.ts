@@ -27,15 +27,28 @@ export function snapshotHash(value: unknown): string {
   for (const c of JSON.stringify(value)) hash = Math.imul(hash ^ c.charCodeAt(0), 16777619);
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
+function formatTrDateOnly(iso?: string | null): string | null {
+  if (!iso) return null;
+  // Beklenen giriş: YYYY-MM-DD; DD/MM/YYYY üret
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  // Zaten DD/MM/YYYY ise olduğu gibi bırak
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(iso.trim())) return iso.trim();
+  return iso;
+}
 export function reportDataAdapter(
   record: FullRecordDetail,
   parsed: ParsedRecordPayload,
   profile: MMPIProfile | null,
 ): ReportSourceData {
   const c = parsed.client;
+  // Doğum tarihi kayıt modelinde ayrı alan olarak yok; yaş ve test tarihinden
+  // yaklaşık yıl hesaplanamaz (gün/ay uydurulamaz). Bu yüzden alan null bırakılır;
+  // editörde ihtiyaç olursa psikolog kendisi doldurur — sayı uydurulmaz.
   const fields: Record<string, DataValue> = {
     patient: {
       fullName: `${c?.firstName || record.firstName} ${c?.lastName || record.lastName}`.trim(),
+      birthDate: null,
       age: c?.age ?? record.age ?? null,
       gender: c?.gender ?? record.gender ?? null,
       occupation: c?.occupation || record.occupation || null,
@@ -43,7 +56,7 @@ export function reportDataAdapter(
       maritalStatus: parsed.maritalStatus || null,
     },
     test: {
-      date: c?.testDate || record.applicationDate,
+      date: formatTrDateOnly(c?.testDate || record.applicationDate) || c?.testDate || record.applicationDate,
       psychologist: record.psychologistName || null,
       method: parsed.method ? (parsed.method === 'quick' ? 'Klinik Görüşme Eşliğinde' : parsed.method === 'raw' ? 'Ham Puan Değerlendirmesi' : 'Optik Form (OMR)') : null,
       duration: parsed.testDuration || null,
@@ -73,6 +86,8 @@ export function reportDataAdapter(
         band: f.band,
         comment: f.comment,
         tDetail: f.tDetail || null,
+        tRange: f.tRange || null,
+        rawRange: f.rawRange || null,
       };
     tables.validity = {
       label: 'Geçerlik ölçekleri',
@@ -91,6 +106,7 @@ export function reportDataAdapter(
           kAdded: s.kAdded ?? null,
           T: s.tScore,
           band: band?.label || null,
+          rangeLabel: band?.rangeLabel || null,
           comment: band?.text || null,
         };
         return [

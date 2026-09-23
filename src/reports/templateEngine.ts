@@ -67,8 +67,9 @@ export function dataCatalog(source: ReportSourceData): { path: string; label: st
   const push = (path: string, label: string, group: CatalogGroup, table?: boolean) => {
     if (hasData(source, path) || table) out.push({ path, label, group, table });
   };
-  // Danışan — yalnızca hastane için anlamlı olanlar
-  push('patient.fullName', 'Ad Soyad', 'Danışan');
+  // Danışan — yalnızca hastane için anlamlı olanlar (Türkçe etiket, ham teknik kod yok)
+  push('patient.fullName', 'Ad – Soyad', 'Danışan');
+  push('patient.birthDate', 'Doğum Tarihi', 'Danışan');
   push('patient.age', 'Yaş', 'Danışan');
   push('patient.gender', 'Cinsiyet', 'Danışan');
   push('patient.education', 'Eğitim', 'Danışan');
@@ -76,34 +77,35 @@ export function dataCatalog(source: ReportSourceData): { path: string; label: st
   push('patient.maritalStatus', 'Medeni Durum', 'Danışan');
 
   // Değerlendirme bilgileri
-  push('test.date', 'Uygulama Tarihi', 'Değerlendirme');
-  push('test.psychologist', 'Değerlendirmeyi Yapan', 'Değerlendirme');
+  push('test.date', 'Testin Uygulanma Tarihi', 'Değerlendirme');
+  push('test.psychologist', 'Testi Uygulayan', 'Değerlendirme');
   push('test.method', 'Uygulama Biçimi', 'Değerlendirme');
   push('test.reason', 'Başvuru / Sevk Nedeni', 'Değerlendirme');
   push('test.clinicalContext', 'Klinik Bağlam', 'Değerlendirme');
   push('test.followUp', 'İzlem', 'Değerlendirme');
 
-  // Geçerlik — yalnızca yorum ve tablo, ham sayılar tablo içinde
+  // Geçerlik — T yorumu (örnek rapordaki gibi “T 36-55: …”); ham sayılar tabloda
   push('summary', 'Genel Geçerlik Yorumu', 'Geçerlik');
   push('validity.status', 'Geçerlik Durumu', 'Geçerlik');
   if (source.tables.validity?.rows.length) out.push({ path: 'validity', label: 'Geçerlik Ölçekleri Tablosu', group: 'Geçerlik', table: true });
-  push('validity.L.comment', 'L — Yalan Ölçeği Yorumu', 'Geçerlik');
-  push('validity.F.comment', 'F — Sıklık Ölçeği Yorumu', 'Geçerlik');
-  push('validity.K.comment', 'K — Savunma Ölçeği Yorumu', 'Geçerlik');
+  // Örnek raporda L/F/K T aralığı + T yorumu birlikte: tRange + tDetail
+  push('validity.L.tDetail', 'L (LİE) — Yalan (T) Yorumu', 'Geçerlik');
+  push('validity.F.tDetail', 'F — Sıklık (T) Yorumu', 'Geçerlik');
+  push('validity.K.tDetail', 'K — Düzeltme (T) Yorumu', 'Geçerlik');
   push('validity.?.comment', '? — Yanıtsız Madde Yorumu', 'Geçerlik');
   push('validity.FKComment', 'F–K Farkı Yorumu', 'Geçerlik');
   push('validity.warnings', 'Geçerlik Uyarıları', 'Geçerlik');
   push('validity.TR.comment', 'Yanıt Tutarlılığı (TR) Yorumu', 'Geçerlik');
   push('validity.carelessness.comment', 'Dikkatsizlik Yorumu', 'Geçerlik');
 
-  // Klinik — tablo + her ölçek yorumu (ham/K+ sayıları tablo içinde, picker’da ayrı değil)
+  // Klinik — her ölçek T yorumu (örnek: “60–74 T puanı: …”); ham/K+ sayıları tabloda
   if (source.tables.clinical?.rows.length) out.push({ path: 'clinical', label: 'Klinik Ölçekler Tablosu', group: 'Klinik', table: true });
   const klinik: [string, string][] = [
     ['Hs', 'Hs — Hipokondriyazis'],
     ['D', 'D — Depresyon'],
     ['Hy', 'Hy — Histeri'],
     ['Pd', 'Pd — Psikopatik Sapma'],
-    ['Mf', 'Mf — Maskülenite/Femininitie'],
+    ['Mf', 'Mf — Maskülenite/Feminite'],
     ['Pa', 'Pa — Paranoya'],
     ['Pt', 'Pt — Psikasteni'],
     ['Sc', 'Sc — Şizofreni'],
@@ -132,56 +134,60 @@ export function newBlock(type: ReportBlock['type'], text = ''): ReportBlock {
   return { id: crypto.randomUUID(), type, runs: [{ text }] };
 }
 export function standardTemplate(): ReportDocument {
-  // APA 7 — minimal öntanımlı: yalnızca Geçerlik + Klinik; diğer ölçekler +MMPI Verisi ile eklenir.
+  // APA 7 — Rapor Şablonu 1'e sadık varsayılan: başlık ortalı, kimlik alanları sade,
+  // her geçerlik/klinik ölçeği ayrı Alt Testi başlığı + “T …: yorum” paragrafı.
+  // Tablo ve profil/derived ölçekler öntanımda YOK — +MMPI Verisi ile eklenir.
   const blocks: ReportBlock[] = [];
   const heading = (text: string, when?: string) => blocks.push({ ...newBlock('heading2', text), when });
-  const title = (text: string) => blocks.push({ ...newBlock('heading1', text) });
   const para = (template: string, when?: string) =>
     blocks.push({ ...newBlock('paragraph', template), sourceTemplate: template, when });
   const data = (path: string, label: string) =>
     blocks.push({ ...newBlock('dataField'), path, label, when: path });
-  const table = (path: string) => blocks.push({ ...newBlock('dataTable'), path, when: `tables.${path}` });
 
-  // Kapak / başlık — APA 7: ortalanmış, kalın
-  title('Psikolojik Değerlendirme Raporu');
-
-  // 1 — Kimlik (APA Tablo 1 stili, tek aralıklı)
-  heading('Danışan Bilgileri');
-  data('patient.fullName', 'Ad Soyad');
+  // Kimlik — örnek rapordaki 6 alan (Doğum Tarihi yoksa gizlenir, sayı uydurulmaz)
+  // Not: Kapak başlığı zaten ReportPreview'da ortalı apa-cover-title olarak
+  // gösterilir (rapor adı + tarih); burada tekrar başlık eklemiyoruz — şablon
+  // doğrudan kimlik alanlarıyla başlar, örnekle birebir.
+  data('patient.fullName', 'Ad – Soyad');
+  data('patient.birthDate', 'Doğum Tarihi');
   data('patient.age', 'Yaş');
   data('patient.gender', 'Cinsiyet');
-  data('patient.education', 'Eğitim');
-  data('patient.occupation', 'Meslek');
+  data('test.psychologist', 'Testi Uygulayan');
+  data('test.date', 'Testin Uygulanma Tarihi');
 
-  // 2 — Değerlendirme bağlamı
-  heading('Değerlendirme Bilgileri');
-  data('test.date', 'Test tarihi');
-  data('test.psychologist', 'Değerlendirmeyi yapan');
-  data('test.method', 'Uygulama yöntemi');
-  data('test.duration', 'Süre');
-  para('{{test.reason}}', 'test.reason');
-  para('{{test.clinicalContext}}', 'test.clinicalContext');
-
-  // 3 — Geçerlik (APA 7: ham ve T ayrı sütun, düzey etiketi, dipnotta yorum)
-  heading('Geçerlik Değerlendirmesi', 'validity');
-  data('validity.status', 'Genel geçerlik');
+  // APA tablo — ham/K+/T özet (örnekte yok ama APA7 gereği ve test bekler)
+  // Kullanıcı istemezse editörden silebilir; picker'dan yeniden eklenebilir.
+  const table = (path: string) => blocks.push({ ...newBlock('dataTable'), path, when: `tables.${path}` });
   table('validity');
-  for (const s of ['?', 'L', 'F', 'K']) para(`{{validity.${s}.comment}}`, `validity.${s}.comment`);
-  data('validity.FK', 'F – K');
-  para('{{validity.FKComment}}', 'validity.FKComment');
-  // TR ve dikkatsizlik yalnızca madde düzeyi varsa görünür
-  data('validity.TR.score', 'TR Tutarlılık');
-  para('{{validity.TR.comment}}', 'validity.TR.comment');
-  data('validity.carelessness.score', 'Dikkatsizlik');
-  para('{{validity.carelessness.comment}}', 'validity.carelessness.comment');
-  para('{{validity.warnings}}', 'validity.warnings');
-  para('{{summary}}', 'summary');
-
-  // 4 — Klinik (APA Tablo 2)
-  heading('Klinik Ölçekler', 'tables.clinical');
   table('clinical');
-  for (const s of ['Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'])
-    para(`${s}: {{clinical.${s}.comment}}`, `clinical.${s}.comment`);
+
+  // Geçerlik — örnekteki gibi her ölçek ayrı Alt Testi başlığı
+  // L (ham Yalan değil, T yorumu: “35 ve altı T puanı: …”)
+  heading('L (LİE) Alt Testi (Yalan)', 'validity.L.tDetail');
+  para('{{validity.L.tRange}}: {{validity.L.tDetail}}', 'validity.L.tDetail');
+  heading('F Alt Testi', 'validity.F.tDetail');
+  para('{{validity.F.tRange}}: {{validity.F.tDetail}}', 'validity.F.tDetail');
+  heading('K Alt Testi (Düzeltme)', 'validity.K.tDetail');
+  para('{{validity.K.tRange}}: {{validity.K.tDetail}}', 'validity.K.tDetail');
+
+  // Klinik — örnekteki sıra ve adlandırma ile birebir
+  const klinikHeadings: [string, string, string][] = [
+    ['Hs', 'Hipokondriazis (Hs) Alt Testi', 'clinical.Hs.comment'],
+    ['D', 'Depresyon (D) Alt Testi', 'clinical.D.comment'],
+    ['Hy', 'Histeri (Hy) Alt Testi', 'clinical.Hy.comment'],
+    ['Pd', 'Psikopatik Sapma (Pd) Alt Testi', 'clinical.Pd.comment'],
+    ['Mf', 'Kadınlık-Erkeklik (Mf) Alt Testi', 'clinical.Mf.comment'],
+    ['Pa', 'Paranoya (Pa) Alt Testi', 'clinical.Pa.comment'],
+    ['Pt', 'Psikasteni (Pt) Alt Testi', 'clinical.Pt.comment'],
+    ['Sc', 'Şizofreni (Sc) Alt Testi', 'clinical.Sc.comment'],
+    ['Ma', 'Hipomania (Ma) Alt Testi', 'clinical.Ma.comment'],
+    ['Si', 'Sosyal İçedönüklük (Si) Alt Testi', 'clinical.Si.comment'],
+  ];
+  for (const [id, h, when] of klinikHeadings) {
+    heading(h, when);
+    // Örnek: “60–74 T puanı: Bu puanlar sıklıkla …”
+    para(`{{clinical.${id}.rangeLabel}}: {{clinical.${id}.comment}}`, when);
+  }
 
   // 5 — Yorum (serbest metin — uzmanın sorumluluğunda, hastane akışı)
   heading('Klinik Gözlem ve Test Davranışı');
