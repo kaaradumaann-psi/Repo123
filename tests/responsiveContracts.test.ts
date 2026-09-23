@@ -256,3 +256,22 @@ test('rapor editörü araç çubuğu mobilde sabit kalmaz, hücre alanları büy
   assert.match(selectorDeclarations('.report-toolbar', 720), /position:\s*static/);
   assert.match(selectorDeclarations('.report-edit-table textarea', 720), /min-height:\s*44px/);
 });
+
+/* --------------------------------------------------------------------------
+   Phase 4 — tablolar, listeler, kartlar
+   -------------------------------------------------------------------------- */
+
+test('kayıt tabloları mobilde sıkışmak yerine kendi içinde kaydırılır', () => {
+  const table = selectorDeclarations('.modern-data-table', 720);
+  assert.match(table, /min-width:\s*640px/, 'tablo doğal kolon genişliğini korumalı');
+  const cells = selectorDeclarations('.modern-data-table td:first-child', 720);
+  assert.match(cells, /position:\s*sticky/, 'kimlik kolonu yatay kaydırmada sabit kalmalı');
+  assert.match(cells, /background:/, 'sticky hücrenin arka planı olmalı (aksi hâlde metin üst üste biner)');
+  const scroller = selectorDeclarations('.table-responsive', 720);
+  assert.match(scroller, /overflow-x:\s*auto/);
+});
+
+test('küçük telefonlarda liste/kart ayakları ve filtre satırı sarar', () => {
+  assert.match(selectorDeclarations('.review-pagination-bar', 430), /flex-wrap:\s*wrap/);
+  assert.match(selectorDeclarations('.search-filter-box > div', 430), /flex-wrap:\s*wrap/);
+});

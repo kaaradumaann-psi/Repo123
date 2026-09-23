@@ -10,7 +10,7 @@
      02 · ≤1100px — tablet header guards
      03 · ≤720px — touch ergonomics (16px controls, ≥44px targets)
      04 · ≤720px — navigation strips and page shells
-     05 · ≤720px — modal chrome and editor controls
+     05 · ≤720px — data tables stay readable, never squeezed
      06 · ≤560px — two/three-column form grids collapse
      07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
 
@@ -328,6 +328,55 @@
 }
 
 /* --------------------------------------------------------------------------
+   05 · ≤720px — data tables stay readable, never squeezed
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* A 5–6 column record table squeezed into 320–430px broke every cell into
+     3–4 wrapped lines: the data was all there but unusable. Below this width
+     the table keeps its natural column widths and scrolls horizontally inside
+     its own card, so columns stay aligned and rows stay scannable. */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .modern-data-table {
+    min-width: 640px;
+  }
+
+  /* The first column carries the patient identity and stays visible while the
+     rest of the row scrolls. `position: sticky` inside a scroll container works
+     because the cell has a background of its own. */
+  .modern-data-table th:first-child,
+  .modern-data-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--white);
+    box-shadow: inset -1px 0 0 var(--border);
+  }
+
+  .modern-data-table th:first-child {
+    background: var(--slate-50);
+    z-index: 2;
+  }
+
+  .modern-data-table tbody tr:hover td:first-child {
+    background: #f8fafc;
+  }
+
+  .modern-data-table td,
+  .modern-data-table th {
+    padding: 12px 14px;
+  }
+
+  .table-row-actions {
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
    06 · ≤560px — form layouts that still assume a wide column
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 560px) {
@@ -434,4 +483,24 @@
     flex-wrap: wrap;
   }
 
+  /* One notch narrower than the ≤720px table: the sticky identity column keeps
+     the row identifiable, 600px leaves the actions room without pushing the
+     date/psychologist columns out of sight. */
+  .modern-data-table {
+    min-width: 600px;
+  }
+
+  /* Filter row: `Sayfa boyutu`, grouping and clear buttons stack instead of
+     collapsing into each other. */
+  .search-filter-box > div {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  /* List/card footers (pagination) keep the counter on its own line. */
+  .review-pagination-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
 }
