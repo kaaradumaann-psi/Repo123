@@ -233,3 +233,26 @@ test('mobil sayfa kabukları daraltılmış gutter kullanır', () => {
   assert.match(selectorDeclarations('.reports-page', 720), /padding:\s*20px 16px 36px/);
   assert.match(selectorDeclarations('.app-main', 430), /padding:\s*16px 12px 40px/);
 });
+
+/* --------------------------------------------------------------------------
+   Phase 3 — formlar ve etkileşim bileşenleri
+   -------------------------------------------------------------------------- */
+
+test('mobilde onay modalı içeriği ekran genişliğini kullanır', () => {
+  assert.match(selectorDeclarations('.modal-header', 720), /padding:\s*16px 16px 14px/);
+  assert.match(selectorDeclarations('.modal-body', 720), /padding:\s*16px/);
+  const footer = selectorDeclarations('.modal-footer', 720);
+  assert.match(footer, /padding:\s*12px 16px/);
+  assert.match(footer, /flex-wrap:\s*wrap/);
+  assert.match(selectorDeclarations('.modal-backdrop', 430), /padding:\s*12px/);
+});
+
+test('mobilde dar form ızgaraları tek kolona iner', () => {
+  assert.match(selectorDeclarations('.form-grid-2col', 560), /grid-template-columns:\s*1fr/);
+  assert.match(selectorDeclarations('.form-grid-3col', 560), /grid-template-columns:\s*1fr/);
+});
+
+test('rapor editörü araç çubuğu mobilde sabit kalmaz, hücre alanları büyür', () => {
+  assert.match(selectorDeclarations('.report-toolbar', 720), /position:\s*static/);
+  assert.match(selectorDeclarations('.report-edit-table textarea', 720), /min-height:\s*44px/);
+});

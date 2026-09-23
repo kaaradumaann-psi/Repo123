@@ -10,7 +10,9 @@
      02 · ≤1100px — tablet header guards
      03 · ≤720px — touch ergonomics (16px controls, ≥44px targets)
      04 · ≤720px — navigation strips and page shells
-     05 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+     05 · ≤720px — modal chrome and editor controls
+     06 · ≤560px — two/three-column form grids collapse
+     07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
 
    Ordering rule: media blocks are written widest-first so that a narrower
    breakpoint always wins when both apply.
@@ -272,6 +274,91 @@
     padding: 18px 14px 40px;
   }
 
+  /* Modal chrome: 24px of padding on every side leaves 224px of usable width on
+     a 320px phone. */
+  .modal-header {
+    padding: 16px 16px 14px;
+  }
+
+  .modal-body {
+    padding: 16px;
+    gap: 18px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer > .btn-primary,
+  .modal-footer > .btn-secondary,
+  .modal-footer > .btn-danger {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* Status banners carry long Turkish sentences: they need to breathe and their
+     dismiss button needs a real target. */
+  .status-banner {
+    align-items: flex-start;
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .empty-state-card {
+    padding: 32px 18px;
+  }
+
+  .loading-state-card {
+    padding: 32px 16px;
+  }
+
+  /* Report editor — the formatting toolbar is ~14 controls. Sticky, it stacked
+     into four rows and covered most of a phone screen while typing; in a
+     phone-width editor it scrolls with the document instead. */
+  .report-toolbar {
+    position: static;
+  }
+
+  /* Table cells inside the editor: a 36px cell is too small to tap and edit. */
+  .report-edit-table textarea {
+    min-height: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   06 · ≤560px — form layouts that still assume a wide column
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 560px) {
+  /* The admin "new psychologist" form and the record intake form are two/three
+     column grids; below this width a column is narrower than the field's own
+     minimum comfortable touch width. */
+  .form-grid-2col,
+  .form-grid-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .form-col-span-2 {
+    grid-column: span 1;
+  }
+
+  /* Action rows: 44px targets side by side leave two ~100px buttons on a 320px
+     screen, so they wrap and share the row instead. */
+  .section-header-actions,
+  .form-actions-bar,
+  .report-settings-actions,
+  .report-edit-table-actions,
+  .ws-restore-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .report-settings-actions > .btn-primary,
+  .report-settings-actions > .btn-secondary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }
 
 /* --------------------------------------------------------------------------
