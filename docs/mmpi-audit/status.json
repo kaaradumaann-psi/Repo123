@@ -13,12 +13,12 @@
     "ocrOnlyConditionalRules": "UNCHANGED (conditions intact)",
     "scoringEngineVersion": "2.1.0"
   },
-  "generatedAt": "2026-09-22T23:48:09.888Z",
+  "generatedAt": "2026-09-23T00:06:07.064Z",
   "tests": {
     "suites": 106,
-    "passed": 608,
+    "passed": 610,
     "failed": 0,
-    "total": 608
+    "total": 610
   },
   "codes": {
     "canonical": 45,

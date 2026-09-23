@@ -342,13 +342,43 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
     assert.match(narrow!.declarations, /columns:\s*1/);
   });
 
-  it('kâğıtta Graham 1987 ölçek dosyası basılır', () => {
+  it('kâğıtta ölçek dosyası çıktı özeti olarak basılır; madde listesi kuralı kalkar', () => {
     const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
-    for (const selector of ['.pr-dossier', '.pr-graham', '.pr-dossier-source', '.pr-dossier-facts']) {
+    for (const selector of [
+      '.pr-dossier',
+      '.pr-block .pr-dossier-head',
+      '.pr-dossier-notes',
+      '.pr-dossier-cond',
+      '.pr-dossier-facts',
+      '.pr-dossier-source',
+    ]) {
       assert.ok(printRules.some(r => r.selector === selector), `${selector} kâğıt kuralı olmalı`);
     }
-    const graham = printRules.find(r => r.selector === '.pr-graham')!;
-    assert.match(graham.declarations, /columns:\s*2/, 'kâğıtta uzun liste iki sütuna dağılmalı');
+    // Kaynak enumerasyonu kâğıda basılmadığı için onun kâğıt kuralı da yoktur.
+    assert.ok(
+      !printRules.some(r => r.selector.startsWith('.pr-graham')),
+      'kâğıtta Graham madde listesi kuralı kalmamalı',
+    );
+    const head = printRules.find(r => r.selector === '.pr-block .pr-dossier-head')!;
+    // .pr-block h3 büyük harf tanımlar; başlık satırı bunu bastırmalı.
+    assert.match(head.declarations, /display:\s*flex/);
+    assert.match(head.declarations, /text-transform:\s*none/);
+  });
+
+  it('kâğıtta düz yazı blokları yapılandırılır (salt metin yığını değil)', () => {
+    const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
+    const note = printRules.find(r => r.selector === '.pr-note')!;
+    assert.match(note.declarations, /border-left/, 'not blokları sol çizgiyle ayrılmalı');
+    assert.match(note.declarations, /break-inside:\s*avoid/);
+    for (const selector of ['.pr-note-head', '.pr-note-body', '.pr-note-band']) {
+      assert.ok(printRules.some(r => r.selector === selector), `${selector} kâğıt kuralı olmalı`);
+    }
+    const zebra = printRules.find(r => r.selector === '.pr-table tbody tr:nth-child(even)');
+    assert.ok(zebra, 'tablolarda satır ayracı olmalı');
+    const thead = printRules.find(r => r.selector === '.pr-table thead');
+    assert.match(thead!.declarations, /table-header-group/, 'uzun tabloda başlık sayfada tekrarlanmalı');
+    const widow = printRules.find(r => r.selector === '.pr-report p');
+    assert.match(widow!.declarations, /widows:\s*2/);
   });
 
   it('kâğıtta katlanmış hiçbir bölüm eksik basılmaz', () => {
@@ -395,26 +425,59 @@ describe('Yazdırma raporu (PDF) kaynak içeriği eksiksiz taşır', () => {
     }),
   );
 
-  it('klinik olarak anlamlı her ölçek için Graham (1987) listesi basılır', () => {
-    assert.match(html, /Ölçek Bazlı Detaylı Klinik Yorum \(Graham 1987\)/);
-    // `class="pr-dossier"` (tırnak dahil) yalnız blok kökünde geçer; -lead/-notes
+  /** Kâğıt çıktısında adı geçen ölçeğin `pr-dossier` bloğunu ayıklar. */
+  function chunksFor(source: string, fullName: string): string | undefined {
+    return source.split('class="pr-dossier"').slice(1).find(chunk => chunk.includes(fullName));
+  }
+
+  it('kâğıtta ölçek başına çıktı özeti basılır; Graham madde listeleri basılmaz', () => {
+    assert.match(html, /Ölçek Bazlı Klinik Yorum \(Graham 1987\)/);
+    // `class="pr-dossier"` (tırnak dahil) yalnız blok kökünde geçer; -notes/-cond
     // gibi türetilmiş sınıflarla karışmaz.
     const chunks = html.split('class="pr-dossier"').slice(1);
-    assert.equal(chunks.length, flaggedOf(profile).length, 'belirgin ölçek sayısı kadar dosya bloğu basılmalı');
+    assert.equal(chunks.length, flaggedOf(profile).length, 'belirgin ölçek sayısı kadar blok basılmalı');
     for (const scale of flaggedOf(profile)) {
-      const block = chunks.find(chunk => chunk.includes(`>${scale.fullName} (${scale.shortName}) —`));
-      assert.ok(block, `${scale.id} dosya bloğu başlığı basılmalı`);
-      assert.match(block!, /alt testinde (yüksek|düşük) puan alan bireyin özellikleri/);
-      // Kaynaktaki liste kâğıda da aktarılır (kapalı bölüm kalmaz).
-      const items = grahamListsFor(scale.id as ClinicalScaleId, scale.tScore, scale.tScore >= 70 ? 'high' : 'low')
-        .lists.flatMap(l => l.items);
+      const block = chunks.find(chunk => chunk.includes(`>${scale.fullName} (${scale.shortName})</span>`));
+      assert.ok(block, `${scale.id} blok başlığı basılmalı`);
+      assert.match(block!, /KLİNİK (YÜKSEKLİK|DÜŞÜKLÜK)/, 'düzey rozeti basılmalı');
+      assert.match(block!, new RegExp(`T ${scale.tScore.toFixed(1)}`), 'T skoru basılmalı');
+      assert.match(block!, /Tablo \d+: \d+ madde \(\d+ doğru \/ \d+ yanlış\)/, 'Tablo özeti basılmalı');
+      assert.match(block!, /Kaynak: Graham \(1987\)/, 'kâğıtta kaynak künyesi olmalı');
+
+      // Kaynak enumerasyonu kâğıda taşınmaz: her hastada aynı 20-45 maddelik
+      // liste sayfa yükü yaratır; ekran raporundaki katlanabilir kartta kalır.
+      const items = grahamListsFor(
+        scale.id as ClinicalScaleId,
+        scale.tScore,
+        scale.tScore >= 70 ? 'high' : 'low',
+      ).lists.flatMap(l => l.items);
       assert.ok(items.length > 0);
       const first = items[0]!;
       assert.ok(
-        block!.includes(escapeHtml(typeof first === 'string' ? first : first.text)),
-        `${scale.id} Graham listesi kâğıda aktarılmalı`,
+        !block!.includes(escapeHtml(typeof first === 'string' ? first : first.text)),
+        `${scale.id} Graham madde listesi kâğıda basılmamalı`,
       );
-      assert.match(block!, new RegExp(`Kaynak: Graham \\(1987\\)`), 'kâğıtta kaynak künyesi olmalı');
+      assert.ok(!block!.includes('pr-graham'), `${scale.id} blokunda madde listesi kalmamalı`);
+    }
+    // Okur ayrıntının nerede olduğunu bilmeli.
+    assert.match(
+      html,
+      /Graham \(1987\) madde listelerinin tamamı ekran raporundaki ölçek\s+kartlarındadır/,
+    );
+  });
+
+  it('kâğıtta aynı demografik not başlığı ardışık notlarda yinelenmez', () => {
+    // Hs'nin iki başlıksız notu vardır; etiket bir kez basılmalı, metin eksilmemeli.
+    const hs = chunksFor(html, 'Hipokondriazis');
+    assert.ok(hs, 'Hipokondriazis bloğu basılmalı');
+    const labels = hs!.match(/Demografik ve klinik notlar: /g) ?? [];
+    assert.equal(labels.length, 1, 'etiket yalnız bir kez basılmalı');
+    for (const fragment of [
+      '40 yaşın üzerindekilerde daha çok yükseldiği',
+      'Ciddi bedensel hastalığı olan bireylerde de bu alt testte yükselme vardır',
+      'sık sık doktor doktor gezerler',
+    ]) {
+      assert.ok(hs!.includes(fragment), `kaynak metni eksiksiz taşınmalı: ${fragment}`);
     }
   });
 
