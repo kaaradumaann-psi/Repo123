@@ -261,6 +261,18 @@
     min-height: 44px;
     justify-content: center;
   }
+
+  /* Image-enhancement mode pills in the scan review were ~29px tall (padding
+     6px + 12.5px type) — measured in a real browser at 390px. */
+  .scan-enhancer-pill {
+    min-height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .scan-enhancer-pills {
+    flex-wrap: wrap;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -608,6 +620,67 @@
   .report-examples-body .report-sample-frame {
     max-height: 60vh;
     max-height: 60dvh;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08b · ≤720px — Kaynakça (sources) entries
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Ölçüldü: `.sources-citation` bir flex öğesi (`.sources-entry-head`) ve
+     içindeki DOI/adres tek kelime; `min-width: auto` yüzünden öğe içeriğinden
+     daha dar olamıyordu ve 320–414px'te sayfanın tamamı yatay kayıyordu
+     (scrollWidth 425 > clientWidth 320). */
+  .sources-citation {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .sources-entry-head {
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08c · Dokunmatik işaretçi (≤1024px) — yatay telefonlar ve tabletler
+   --------------------------------------------------------------------------
+   Ölçüldü: 844×390 yatay telefonda (genişlik > 720px) düğmeler 34px'e düşüyordu;
+   genişlik tabanlı bantlar yatay telefonu masaüstü sayıyor. İmleç kaba ise
+   (parmak) aynı 44px hedefi geçerlidir. ≥1280px masaüstü bu bandın dışında
+   kalır, dokunmatik dizüstülerde masaüstü yoğunluğu bozulmaz.
+   -------------------------------------------------------------------------- */
+@media screen and (pointer: coarse) and (max-width: 1024px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-sm,
+  .action-btn-primary,
+  .action-btn-secondary,
+  .action-btn-danger,
+  .icon-close-btn,
+  .portal-tab,
+  .subnav-tab,
+  .mode-tab,
+  .mmpi-tab,
+  .quicknav-chip,
+  .report-toolbar button,
+  .report-preview-actions button,
+  .report-mobile-tabs button,
+  .close-banner-btn,
+  .site-footer-link,
+  .btn-logout,
+  .ws-choice-row label,
+  .item-select-chip,
+  .scan-enhancer-pill,
+  .scan-actions > button,
+  .preview-switch-btn,
+  .admin-subnav-tabs button {
+    min-height: 44px;
+  }
+
+  .dropzone-label,
+  .scanner-input-card button {
+    min-height: 44px;
   }
 }
 

@@ -420,3 +420,49 @@ test('hata durumları tasarım sisteminin banner sınıfını kullanır', () => 
   assert.ok(!/<p role="alert">/.test(reports), 'stilsiz <p role="alert"> kalmamalı');
   assert.match(reports, /className="status-banner error-banner" role="alert"/);
 });
+
+/* --------------------------------------------------------------------------
+   Phase 9 — gerçek tarayıcı QA bulgularının regresyon kilitleri
+   -------------------------------------------------------------------------- */
+
+test('Kaynakça kaydı telefon genişliğinde sayfayı taşırmaz', () => {
+  // Ölçüm: 320–414px'te scrollWidth 425 idi; sebep, DOI içeren flex öğesinin
+  // min-width: auto ile içeriğinden dar olamaması.
+  const citation = selectorDeclarations('.sources-citation', 720);
+  assert.match(citation, /min-width:\s*0/);
+  assert.match(citation, /overflow-wrap:\s*anywhere/);
+  assert.match(selectorDeclarations('.sources-entry-head', 720), /min-width:\s*0/);
+});
+
+test('tarayıcı geliştirme pilleri mobilde ≥44px', () => {
+  const pill = selectorDeclarations('.scan-enhancer-pill', 720);
+  assert.match(pill, /min-height:\s*44px/);
+  assert.match(selectorDeclarations('.scan-enhancer-pills', 720), /flex-wrap:\s*wrap/);
+});
+
+test('onay diyaloğu odak tuzağı ve arka plan kaydırma kilidi içerir', () => {
+  const dialog = readFileSync('src/components/ConfirmDialog.tsx', 'utf8');
+  // Odak tuzağı: Tab/Shift+Tab diyalog içinde döner.
+  assert.match(dialog, /event\.key !== 'Tab'/, 'Tab tuşu ele alınmalı');
+  assert.match(dialog, /dialogRef\.current\?\.contains/, 'odak diyalog içinde mi diye bakılmalı');
+  // Arka plan kaydırması kilitlenir ve kaydırma çubuğu telafi edilir.
+  assert.match(dialog, /body\.style\.overflow = 'hidden'/, 'gövde kaydırması kilitlenmeli');
+  assert.match(dialog, /body\.style\.paddingRight = `\$\{scrollbar\}px`/, 'kaydırma çubuğu telafisi olmalı');
+  // Kapanınca odak tetikleyiciye döner.
+  assert.match(dialog, /previouslyFocused\?\.focus\(\)/, 'odak tetikleyiciye geri verilmeli');
+  // Mevcut davranışlar korunur.
+  assert.match(dialog, /event\.key === 'Escape'/);
+  assert.match(dialog, /aria-modal="true"/);
+});
+
+test('yatay telefon ve tablette (kaba imleç) hedefler 44px kalır', () => {
+  const css = readFileSync(`${STYLE_DIR}/responsive.css`, 'utf8');
+  // Ölçüm: 844×390'da (genişlik > 720px) düğmeler 34px'e düşüyordu.
+  const block = /@media screen and \(pointer: coarse\) and \(max-width: 1024px\)\s*\{([\s\S]*?)\n\}/.exec(css);
+  assert.ok(block, 'kaba imleç bandı yok');
+  assert.match(block[1]!, /min-height:\s*44px/);
+  assert.match(block[1]!, /\.scan-actions > button/);
+  assert.match(block[1]!, /\.scanner-input-card button/);
+  // Masaüstü yoğunluğu korunmalı: bant 1280px'i kapsamaz.
+  assert.match(css, /pointer: coarse\) and \(max-width: 1024px\)/);
+});
