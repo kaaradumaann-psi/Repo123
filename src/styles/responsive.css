@@ -621,6 +621,56 @@
     max-height: 60vh;
     max-height: 60dvh;
   }
+
+  /* Kâğıdın 11mm (≈41px) yan dolgusu 320–430px'lik bir telefonda içeriğe yer
+     bırakmaz; ekran önizlemesinde aynı sayfa px dolguyla gösterilir (baskı
+     dolgusu değişmez — önizleme `.screen-only` içinde, kâğıt `.print-only`). */
+  .report-full-preview-body {
+    padding: 12px;
+  }
+
+  .report-full-preview-body .pr-report {
+    padding: 16px 14px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08d · ≤480px — TAM RAPOR önizlemesi: kâğıt içi geniş tablolar
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 480px) {
+  /* Ekran önizlemesinde kâğıt tipografisi 12.5px tabana çıkarıldığı için
+     5 sütunlu "Geçerlik Ölçekleri" / "Klinik Ölçekler" tablolarının minimum
+     içerik genişliği (≈347px) 320–430px'lik telefonlarda kâğıt kenarını
+     aşıyordu: tablo kâğıttan taşıyor ve önizleme yatay kayıyordu. Tablo artık
+     kendi içinde yatay kaydırılır (projedeki `.report-table-scroll` deseninin
+     aynısı): kâğıt kenarı bozulmaz, önizleme/sayfa yatay kaymaz.
+     Kural yalnız ekrandadır; baskı `.print-only` kopyasından üretilir. */
+  .report-full-preview-body .pr-table {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  /* Aynı sebeple etiket/değer satırları (Meslek / Eğitim, Uygulayan Uzman, …)
+     dar kâğıtta taşmasın: değer gerektiğinde alt satıra iner. */
+  .report-full-preview-body .pr-client-grid > div {
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+
+  /* Başlık telefonda yan yana sıkışınca tarih "2026-09-" / "20" diye ortadan
+     kırılıyordu; başlık ve künye alt alta, sola hizalı akar. */
+  .report-full-preview-body .pr-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .report-full-preview-body .pr-head-meta {
+    text-align: left;
+    align-items: flex-start;
+  }
 }
 
 /* --------------------------------------------------------------------------

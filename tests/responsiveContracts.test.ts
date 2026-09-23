@@ -474,3 +474,68 @@ test('rapor blok denetimleri dokunmatikte ≥44px', () => {
   assert.match(block[1]!, /\.report-block-controls > button/);
   assert.match(block[1]!, /min-width:\s*44px/);
 });
+
+test('TAM RAPOR önizlemesinin .pr-* sunumu ekran medyasında kalır (baskı bloğuna hapsolmaz)', () => {
+  const rules = parseCss(readFileSync(`${STYLE_DIR}/workspace.css`, 'utf8'));
+  // `.pr-*` ağacının ekranda göründüğü TEK yer TAM RAPOR önizlemesidir. Kurallar
+  // `@media print` içinde kalırsa önizleme stilsiz (düz metin, çerçevesiz tablo)
+  // görünür — bu regresyon 2026-09-24'te düzeltildi, tekrarına izin verilmez.
+  const presentation = rules.filter(
+    rule => !rule.atRules.some(at => at.startsWith('@media print')) && /\.pr-/.test(rule.selector),
+  );
+  assert.ok(
+    presentation.length >= 50,
+    `ekran medyasında yeterli .pr-* sunum kuralı yok: ${presentation.length}`,
+  );
+  // Baskı bloğunda yalnızca sayfa bağlaması kalır; sunum bildirimi taşımaz.
+  const inPrint = rules.filter(
+    rule => rule.atRules.some(at => at.startsWith('@media print')) && /\.pr-/.test(rule.selector),
+  );
+  const styleLeaks = inPrint
+    .filter(rule => /font-size|border|padding|background|margin/.test(rule.declarations))
+    .map(rule => rule.selector);
+  assert.deepEqual(styleLeaks, [], 'baskı bloğunda .pr-* sunum bildirimi kalmamalı');
+  assert.ok(
+    inPrint.some(rule => /page:\s*mmpi-report/.test(rule.declarations)),
+    '.pr-report sayfa bağlaması (@page mmpi-report) korunmalı',
+  );
+});
+
+test('TAM RAPOR kâğıdı örnek önizlemeyle aynı çerçeveyi kullanır; okunabilirlik ölçeği yalnız ekranda', () => {
+  const rules = parseCss(readFileSync(`${STYLE_DIR}/reports.css`, 'utf8'));
+  const declsOf = (selector: string): string =>
+    rules
+      .filter(rule => rule.selector.split(',').some(part => part.trim() === selector))
+      .map(rule => rule.declarations)
+      .join('\n');
+  const paper = declsOf('.psych-paper');
+  const fullPaper = declsOf('.report-full-preview-body .pr-report');
+  assert.ok(paper.length > 0 && fullPaper.length > 0, 'kâğıt kuralları bulunamadı');
+  // İki önizleme aynı sayfada alt alta durur: genişlik/kenar/köşe/gölge aynı olmalı.
+  assert.match(paper, /max-width:\s*760px/, 'örnek önizleme kâğıdı 760px olmalı');
+  assert.match(fullPaper, /max-width:\s*760px/, 'tam rapor kâğıdı da 760px olmalı');
+  assert.match(fullPaper, /border:\s*1px solid #e6e8eb/);
+  assert.match(fullPaper, /box-shadow:\s*0 12px 32px rgba\(13,\s*13,\s*13,\.12\)/);
+  // Ekran okunabilirlik ölçeği (10.5px → 12.5px) yalnız ekran medyasındadır;
+  // baskı/PDF çıktısı ayrı `.print-only` kopyasından üretilir.
+  const screenScale = rules.find(
+    rule =>
+      rule.selector.split(',').some(part => part.trim() === '.report-full-preview-body .pr-report') &&
+      rule.atRules.some(at => at.startsWith('@media screen')) &&
+      /font-size:\s*12\.5px/.test(rule.declarations),
+  );
+  assert.ok(screenScale, 'ekran okunabilirlik ölçeği @media screen içinde olmalı');
+  const printLeaks = rules
+    .filter(rule => rule.atRules.some(at => at.startsWith('@media print')) && /\.report-full-preview-body/.test(rule.selector))
+    .map(rule => rule.selector);
+  assert.deepEqual(printLeaks, [], 'önizleme ölçeği baskı medyasına sızmamalı');
+});
+
+test('TAM RAPOR önizlemesinde geniş tablolar ≤480px kendi içinde kaydırılır', () => {
+  // Ölçüm: 5 sütunlu ölçek tablolarının min-content genişliği ≈347px; 320–430px'lik
+  // telefonlarda kâğıt kenarını aşıyor ve önizlemeyi yatay kaydırıyordu.
+  const block = /@media screen and \(max-width: 480px\)\s*\{([\s\S]*?)\n\}/.exec(responsiveCss);
+  assert.ok(block, '≤480px kâğıt içi tablo katmanı yok');
+  assert.match(block[1]!, /\.report-full-preview-body \.pr-table\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(block[1]!, /\.report-full-preview-body \.pr-client-grid > div\s*\{[^}]*flex-wrap:\s*wrap/);
+});

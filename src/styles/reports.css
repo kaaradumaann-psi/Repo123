@@ -832,8 +832,81 @@
   }
   .report-full-preview-head h2 { margin: 6px 0 4px; font-size: 15.5px; font-weight: 600; letter-spacing: -0.02em; }
   .report-full-preview-head p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.6; }
-  .report-full-preview-body { padding: 18px; overflow: auto; max-height: 78vh; background: #f8fafc; }
-  .report-full-preview-body .pr-report { background: white; border: 1px solid #e6e8eb; border-radius: 2px; box-shadow: 0 12px 32px rgba(13,13,13,.08); padding: 0; }
+  /* TAM RAPOR önizlemesi, 'Örnek raporlar ve şablonlar' çerçevesiyle aynı dili
+     kullanır: aynı gri zemin, ortalanmış beyaz kâğıt, aynı gölge/köşe. Kâğıt
+     A4 genişliğindedir ve raporun kendi baskı dolgusu (12mm × 11mm) korunur,
+     böylece ekranda görünen sayfa yazdırılan sayfayla birebir aynıdır. */
+  .report-full-preview-body {
+    padding: 16px; overflow: auto; max-height: 78vh; background: #eef2f6;
+    scrollbar-width: thin; overscroll-behavior: contain;
+  }
+  /* Kâğıt çerçevesi, 'Örnek raporlar ve şablonlar' kâğıdı (.psych-paper) ile
+     birebir aynı ölçülerdedir: 760px genişlik, 1px #e6e8eb kenar, 2px köşe ve
+     aynı gölge. İki önizleme aynı sayfada alt alta durduğu için aynı dili
+     konuşmaları gerekir. */
+  .report-full-preview-body .pr-report {
+    box-sizing: border-box;
+    width: 100%; max-width: 760px; margin: 0 auto;
+    background: var(--white); border: 1px solid #e6e8eb; border-radius: 2px;
+    box-shadow: 0 12px 32px rgba(13,13,13,.12), 0 1px 3px rgba(13,13,13,.08);
+  }
+
+/* ==========================================================================
+   TAM RAPOR — ekran okunabilirlik ölçeği (yalnız ekran)
+   --------------------------------------------------------------------------
+   .pr-* tipografisi A4 kâğıda göre ayarlanmıştır (taban 10.5px); tarayıcı
+   önizlemesinde bu ölçek okunamayacak kadar küçük kalıyordu. Aşağıdaki blok
+   yalnızca EKRAN önizlemesini 10.5px → 12.5px tabanına taşır ve tüm alt
+   boyutları aynı oranla (×1.19) büyütür; böylece başlık/gövde hiyerarşisi ve
+   satır aralıkları kâğıttaki oranıyla aynı kalır.
+
+   Yazdırma/PDF çıktısı bu bloktan ETKİLENMEZ: baskı, ayrı `.print-only`
+   kopyasından üretilir (bu seçici yalnızca ekran önizleme kapsayıcısını
+   hedefler) ve tüm kurallar `@media screen` içindedir.
+   ========================================================================== */
+@media screen {
+  .report-full-preview-body .pr-report { font-size: 12.5px; line-height: 1.6; }
+
+  .report-full-preview-body .pr-revision { font-size: 12px; padding: 6px 10px; }
+  .report-full-preview-body .pr-head h1 { font-size: 25px; }
+  .report-full-preview-body .pr-head span,
+  .report-full-preview-body .pr-head-meta { font-size: 11.5px; }
+  .report-full-preview-body .pr-block h2 { font-size: 15px; padding: 0 0 5px 9px; }
+  .report-full-preview-body .pr-block h3 { font-size: 12px; }
+  .report-full-preview-body .pr-context { font-size: 11px; }
+
+  .report-full-preview-body .pr-table th { font-size: 10.5px; padding: 5px 8px; }
+  .report-full-preview-body .pr-table td { font-size: 11.5px; padding: 6px 9px; }
+
+  .report-full-preview-body .pr-note { font-size: 11.5px; padding: 10px 12px; }
+  .report-full-preview-body .pr-note-head { font-size: 10.5px; }
+  .report-full-preview-body .pr-note-band { font-size: 10px; padding: 1px 5px; }
+  .report-full-preview-body .pr-note-body { font-size: 11.5px; }
+
+  .report-full-preview-body .pr-dossier-name,
+  .report-full-preview-body .pr-dossier-t { font-size: 12px; }
+  .report-full-preview-body .pr-dossier-pill { font-size: 10px; padding: 2px 6px; }
+  .report-full-preview-body .pr-dossier-no,
+  .report-full-preview-body .pr-dossier-facts { font-size: 10.5px; }
+  .report-full-preview-body .pr-dossier-notes,
+  .report-full-preview-body .pr-dossier-cond,
+  .report-full-preview-body .pr-dossier-empty { font-size: 11px; }
+  .report-full-preview-body .pr-dossier-source { font-size: 10px; }
+
+  .report-full-preview-body .pr-report .mmpi-chart-legend { font-size: 10.5px; }
+
+  .report-full-preview-body .pr-sign span,
+  .report-full-preview-body .pr-sign i { font-size: 11px; }
+  .report-full-preview-body .pr-sign b { font-size: 13px; }
+
+  .report-full-preview-body .pr-foot { font-size: 10.5px; padding: 10px 12px; }
+
+  /* Ekranda sistem yazı tipiyle 800 ağırlık sahte kalın üretir; belge
+     hiyerarşisi 700 ile aynı kalır (kâğıt kopyası 800'de basılmaya devam eder). */
+  .report-full-preview-body .pr-block h2,
+  .report-full-preview-body .pr-dossier-name { font-weight: 700; }
+  .report-full-preview-body .pr-notes { font-size: 12px; padding: 10px 12px; }
+}
 
   /* Legacy fallbacks kept for older selectors */
   .report-sample { max-width: none; }
