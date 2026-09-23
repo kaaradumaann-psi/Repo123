@@ -7,7 +7,7 @@ import {
   validityStatusDisplay,
 } from '../scoring/mmpiInterpretation';
 import { SCORING_ENGINE_VERSION } from '../scoring/version';
-import { methodLabel, type ParsedRecordPayload } from '../workspace/caseTypes';
+import type { ParsedRecordPayload } from '../workspace/caseTypes';
 
 export type DataValue = string | number | null | { [key: string]: DataValue };
 export type SourceTable = { label: string; columns: string[]; rows: string[][] };
@@ -45,7 +45,7 @@ export function reportDataAdapter(
     test: {
       date: c?.testDate || record.applicationDate,
       psychologist: record.psychologistName || null,
-      method: parsed.method ? methodLabel(parsed.method) : null,
+      method: parsed.method ? (parsed.method === 'quick' ? 'Klinik Görüşme Eşliğinde' : parsed.method === 'raw' ? 'Ham Puan Değerlendirmesi' : 'Optik Form (OMR)') : null,
       duration: parsed.testDuration || null,
       reason: parsed.applicationReason || record.requestedBy || null,
       followUp: parsed.followUp || null,

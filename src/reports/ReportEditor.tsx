@@ -313,8 +313,25 @@ export function ReportEditor({
             </div>
             <span className="report-toolbar-sep" aria-hidden />
             <div className="report-toolbar-group" role="group" aria-label="Ekle">
-              <select aria-label="MMPI verisi ekle" value="" onChange={e => { const entry = catalog[Number(e.target.value)]; if (entry) add({ ...newBlock(entry.table ? 'dataTable' : 'dataField'), path: entry.path, label: entry.label }); }}>
-                <option value="">+ MMPI Verisi</option>{catalog.map((c, i) => <option key={`${c.table ? 't' : 'f'}-${c.path}`} value={i}>{c.label}</option>)}
+              <select aria-label="MMPI verisi ekle" value="" onChange={e => {
+                const idx = Number(e.target.value);
+                const entry = catalog[idx];
+                if (entry) add({ ...newBlock(entry.table ? 'dataTable' : 'dataField'), path: entry.path, label: entry.label });
+                e.currentTarget.selectedIndex = 0;
+              }}>
+                <option value="">+ MMPI Verisi ekle</option>
+                {Array.from(new Set(catalog.map(c => c.group))).map(g => (
+                  <optgroup key={g} label={g}>
+                    {catalog
+                      .map((c, i) => ({ c, i }))
+                      .filter(({ c }) => c.group === g)
+                      .map(({ c, i }) => (
+                        <option key={`${c.group}-${c.path}`} value={i}>
+                          {c.label}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
               </select>
               <button onClick={() => add(newBlock('paragraph'))}>+ Paragraf</button>
             </div>

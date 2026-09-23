@@ -61,43 +61,71 @@ export function hasData(source: ReportSourceData, path?: string): boolean {
   const v = fieldValue(source, path);
   return v != null && v !== '' && (typeof v !== 'number' || Number.isFinite(v));
 }
-export function dataCatalog(source: ReportSourceData): { path: string; label: string; table?: boolean }[] {
-  const out: { path: string; label: string; table?: boolean }[] = [];
-  const labels: Record<string, string> = {
-    patient: 'Danışan',
-    fullName: 'Ad Soyad',
-    age: 'Yaş',
-    gender: 'Cinsiyet',
-    test: 'Test',
-    date: 'Tarih',
-    psychologist: 'Uygulayan',
-    validity: 'Geçerlik',
-    clinical: 'Klinik',
-    raw: 'Ham',
-    kAdded: 'K+',
-    code: 'Kod',
-    critical: 'Kritik bulgular',
-    comment: 'Yorum',
-    expertNotes: 'Uzman notları',
+export type CatalogGroup = 'Danışan' | 'Değerlendirme' | 'Geçerlik' | 'Klinik' | 'Profil' | 'İzlenimler' | 'Uzman';
+export function dataCatalog(source: ReportSourceData): { path: string; label: string; group: string; table?: boolean }[] {
+  const out: { path: string; label: string; group: string; table?: boolean }[] = [];
+  const push = (path: string, label: string, group: CatalogGroup, table?: boolean) => {
+    if (hasData(source, path) || table) out.push({ path, label, group, table });
   };
-  function walk(object: Record<string, DataValue>, prefix = '') {
-    for (const [k, v] of Object.entries(object)) {
-      const path = prefix ? `${prefix}.${k}` : k;
-      if (v && typeof v === 'object') walk(v, path);
-      else if (hasData(source, path))
-        out.push({
-          path,
-          label: path
-            .split('.')
-            .map((p) => labels[p] || p)
-            .join(' · '),
-        });
-    }
-  }
-  walk(source.fields);
-  Object.entries(source.tables).forEach(([path, t]) => {
-    if (t.rows.length) out.push({ path, label: t.label, table: true });
-  });
+  // Danışan — yalnızca hastane için anlamlı olanlar
+  push('patient.fullName', 'Ad Soyad', 'Danışan');
+  push('patient.age', 'Yaş', 'Danışan');
+  push('patient.gender', 'Cinsiyet', 'Danışan');
+  push('patient.education', 'Eğitim', 'Danışan');
+  push('patient.occupation', 'Meslek', 'Danışan');
+  push('patient.maritalStatus', 'Medeni Durum', 'Danışan');
+
+  // Değerlendirme bilgileri
+  push('test.date', 'Uygulama Tarihi', 'Değerlendirme');
+  push('test.psychologist', 'Değerlendirmeyi Yapan', 'Değerlendirme');
+  push('test.method', 'Uygulama Biçimi', 'Değerlendirme');
+  push('test.reason', 'Başvuru / Sevk Nedeni', 'Değerlendirme');
+  push('test.clinicalContext', 'Klinik Bağlam', 'Değerlendirme');
+  push('test.followUp', 'İzlem', 'Değerlendirme');
+
+  // Geçerlik — yalnızca yorum ve tablo, ham sayılar tablo içinde
+  push('summary', 'Genel Geçerlik Yorumu', 'Geçerlik');
+  push('validity.status', 'Geçerlik Durumu', 'Geçerlik');
+  if (source.tables.validity?.rows.length) out.push({ path: 'validity', label: 'Geçerlik Ölçekleri Tablosu', group: 'Geçerlik', table: true });
+  push('validity.L.comment', 'L — Yalan Ölçeği Yorumu', 'Geçerlik');
+  push('validity.F.comment', 'F — Sıklık Ölçeği Yorumu', 'Geçerlik');
+  push('validity.K.comment', 'K — Savunma Ölçeği Yorumu', 'Geçerlik');
+  push('validity.?.comment', '? — Yanıtsız Madde Yorumu', 'Geçerlik');
+  push('validity.FKComment', 'F–K Farkı Yorumu', 'Geçerlik');
+  push('validity.warnings', 'Geçerlik Uyarıları', 'Geçerlik');
+  push('validity.TR.comment', 'Yanıt Tutarlılığı (TR) Yorumu', 'Geçerlik');
+  push('validity.carelessness.comment', 'Dikkatsizlik Yorumu', 'Geçerlik');
+
+  // Klinik — tablo + her ölçek yorumu (ham/K+ sayıları tablo içinde, picker’da ayrı değil)
+  if (source.tables.clinical?.rows.length) out.push({ path: 'clinical', label: 'Klinik Ölçekler Tablosu', group: 'Klinik', table: true });
+  const klinik: [string, string][] = [
+    ['Hs', 'Hs — Hipokondriyazis'],
+    ['D', 'D — Depresyon'],
+    ['Hy', 'Hy — Histeri'],
+    ['Pd', 'Pd — Psikopatik Sapma'],
+    ['Mf', 'Mf — Maskülenite/Femininitie'],
+    ['Pa', 'Pa — Paranoya'],
+    ['Pt', 'Pt — Psikasteni'],
+    ['Sc', 'Sc — Şizofreni'],
+    ['Ma', 'Ma — Hipomani'],
+    ['Si', 'Si — Sosyal İçe Dönüklük'],
+  ];
+  for (const [id, label] of klinik) push(`clinical.${id}.comment`, `${label} Yorumu`, 'Klinik');
+
+  // Profil / Kod — isteğe bağlı
+  push('code.value', 'Profil Kodu', 'Profil');
+  push('code.interpretation', 'Kod Yorumu', 'Profil');
+  push('code.conditions', 'Koşullu Ek Yorumlar', 'Profil');
+
+  // Kritik / İzlenimler — yalnızca madde düzeyi varsa
+  push('critical', 'Kritik Maddeler', 'İzlenimler');
+  push('impressions', 'Klinik İzlenimler', 'İzlenimler');
+  if (source.tables.derived?.rows.length) out.push({ path: 'derived', label: 'Türetilmiş Ölçekler Tablosu', group: 'İzlenimler', table: true });
+  if (source.tables.indexes?.rows.length) out.push({ path: 'indexes', label: 'Endeksler Tablosu', group: 'İzlenimler', table: true });
+
+  // Uzman
+  push('expertNotes', 'Uzman Notu (kayıttaki)', 'Uzman');
+
   return out;
 }
 export function newBlock(type: ReportBlock['type'], text = ''): ReportBlock {
@@ -155,14 +183,20 @@ export function standardTemplate(): ReportDocument {
   for (const s of ['Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'])
     para(`${s}: {{clinical.${s}.comment}}`, `clinical.${s}.comment`);
 
-  // 5 — Yorum (serbest metin — uzmanın sorumluluğunda)
+  // 5 — Yorum (serbest metin — uzmanın sorumluluğunda, hastane akışı)
+  heading('Klinik Gözlem ve Test Davranışı');
+  para('');
   heading('Klinik Değerlendirme');
   para('{{expertNotes}}', 'expertNotes');
   para('');
+  heading('Bütünleştirici Yorum');
+  para('');
+  heading('Öneriler');
+  para('');
 
-  // Kod, kritik, türetilmiş vb. öntanımlıda YOK — kişi isterse +MMPI Verisi ile ekler.
+  // Kod, kritik, türetilmiş vb. öntanımlıda YOK — kişi isterse +MMPI Verisi ile ekler (Profil/Kritik gruplarından).
 
-  // APA 7 kapanış
+  // APA 7 kapanış — test uyumu için başlık metni korunur
   heading('9. Sonuç');
   para('');
   heading('10. Notlar');
