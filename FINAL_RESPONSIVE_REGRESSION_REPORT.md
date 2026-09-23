@@ -1,129 +1,111 @@
-# Final Responsive Regression Report
+# Final Responsive Regression Report — Faz 10
 
-**Tarih:** 2026-09-24
-**Dal:** `arena/01a0d039-repo123`
-**Başlangıç commit'i:** `30045d19ac04f57d46192e7ef37b58f36922dabb` (main)
-**Bitiş commit'i:** `2c32d1b` (`docs: phase 7 report`)
+**Tarih:** 2026-09-24 · **Dal:** `arena/01a0d039-repo123`
+**Taban:** `30045d19ac04f57d46192e7ef37b58f36922dabb` (main) → **HEAD:** `dc5004a`
+**Kapsam:** Faz 0–10 (responsive dönüşüm + gerçek tarayıcı QA)
 
 ---
 
-## 1. Regresyon kapıları (nihai ölçüm)
+## 1. Regresyon kapıları (Faz 10 son ölçüm)
 
 | Kapı | Komut | Sonuç |
 | --- | --- | --- |
-| Tip kontrolü | `npm run typecheck` | **çıkış 0** — hata yok |
-| Testler | `npm test` | **675 test / 675 geçti / 0 başarısız**, 108 suite, ~112 s |
-| Derleme | `npm run build` | **PASS** — `dist/index.html` + `optik-form.html`, 4584.3 KB |
-| Diff hijyeni | `git diff --check` | temiz (her fazda doğrulandı) |
-| Çalışma ağacı | `git status --short` | temiz |
+| Tip kontrolü | `npm run typecheck` | **çıkış 0** |
+| Testler | `npm test` | **680 / 680 geçti · 0 başarısız** · 108 suite · ~123 s |
+| Derleme | `npm run build` | **PASS** · `dist/index.html` + `optik-form.html` · **4585.98 KB** |
+| Dist içerik denetimi | 15 kontrol | **15/15 PASS** (dvh, viewport-fit, safe-area, 44px, 16px, 430px, 1240px, `pointer:coarse`, kaynakça sarma, grafik ipucu, 3×`@page`, CSP, odak halkası) |
+| Diff hijyeni | `git diff --check` | temiz |
+| Çalışma ağacı | `git status` | **CLEAN** |
+| Test dosyası | 65 → 65 | **silinen test yok** |
 
-**Test sayısı seyri (başlangıç → bitiş):** 644 → 652 → 655 → 658 → 660 → 666 → 670 → 675
-(Başlangıç değeri `30045d1` üzerinde ölçülen 295 test / 644 alt testtir. Faz 1–7 boyunca
-**hiç test silinmedi**; `tests/*.test.ts` dosya sayısı 65 → 65, silinen dosya 0.)
+**Test seyri:** 644 → 652 → 655 → 658 → 660 → 666 → 670 → 675 → 679 → **680**
+(başlangıç: `30045d1`'de 295 test / 644 alt test).
 
 ---
 
-## 2. Değişiklik kapsamı (gerçek diff)
+## 2. Gerçek tarayıcı regresyonu (bu fazın ayırt edici kanıtı)
+
+| Ölçüm | 1. tur (düzeltme öncesi) | 2. tur (düzeltme sonrası) |
+| --- | --- | --- |
+| Rota × viewport kombinasyonu | 72 | 72 |
+| Sayfa düzeyinde yatay taşma | **5** (`/kaynaklar` 320–414) | **0** |
+| Konsol/kalıcı JS hatası | 0 | 0 |
+| `fixed / worse / unchanged` | — | **5 / 0 / 67** |
+
+Ek tarama: `/form`, `/gizlilik`, `/kullanim` × 12 viewport (36 kombinasyon) → **0 taşma, 0 hata**.
+Kimlik doğrulamalı ekranlar (yerel sahte API ile) 320–1440px arası ölçüldü: kayıt tablosu,
+admin alt sekmeleri, rapor editörü, tarayıcı/kamera, inceleme paneli, modal — hepsinde
+`scrollWidth == clientWidth`.
+
+---
+
+## 3. Functional integrity (iş mantığı değişmedi)
+
+`git diff 30045d1..HEAD` ile doğrulandı — aşağıdaki dizinlerde **tek satır değişiklik yok**:
 
 ```
-git diff --stat 30045d1..HEAD
-18 dosya değişti, +2281 / −50
+src/omr/            (OMR + QR okuma)          src/scoring/     (MMPI puanlama)
+src/auth/           (Supabase istemci/auth)   src/records/     (veri erişimi/RLS tüketicisi)
+src/print/ + src/form/ (PDF/A4 üretimi)       src/ai/          (AI yorum istemcisi)
+src/validation/     (doğrulayıcılar)          src/workspace/   (vaka tipleri/kuralları)
+src/reports/reportDataAdapter.ts · reportsApi.ts (rapor verisi + API)
 ```
 
-| Grup | Dosyalar |
+Değişen `src/` dosyaları **yalnızca sunum/erişilebilirlik** katmanındadır ve hepsi denetlendi:
+
+| Dosya | Değişikliğin niteliği |
 | --- | --- |
-| Yeni responsive katmanı | `src/styles/responsive.css` (+678 satır, main.tsx'te **en son** import edilir) |
-| Mevcut stil dosyası düzeltmeleri | `src/styles/reports.css` (13), `src/styles/theme.css` (+9) |
-| Bileşen düzeltmeleri | `src/components/CameraCapture.tsx` (6), `src/components/results/MMPIResultsPanel.tsx` (+3), `src/reports/ReportsPage.tsx` (±1) |
-| Kabuk | `index.html` (viewport-fit), `src/main.tsx` (import sırası) |
-| Test | `tests/responsiveContracts.test.ts` (+422 satır, 31 test) |
-| Raporlar | `RESPONSIVE_AUDIT_PHASE_0.md` … `UX_UI_PHASE_7_REPORT.md` (8 dosya) |
-| Üretilen çıktı | `optik-form.html` (her `npm run build` ile yeniden üretilir, kodla birlikte commit edildi) |
-
-**Dokunulmayan alanlar (doğrulandı):** Supabase istemcisi, Auth/RLS/rol mantığı, OMR
-boru hattı (`src/omr/*`), puanlama (`src/scoring/*`), rapor veri akışı (`src/reports/*.ts`),
-PDF üretimi (`src/print/formPdf.ts`, `scripts/generate-pdf.ts`), veri katmanı. Bu
-dosyalarda tek satır değişiklik yok — `git diff --stat` listesinde görünmüyorlar.
+| `src/components/CameraCapture.tsx` | **Yalnızca `className`** (`scan-primary` → `btn-primary`/`btn-secondary`). `onClick`, `disabled`, izin akışı, OMR çağrısı aynı. |
+| `src/reports/ReportsPage.tsx` | **Yalnızca `className`** eklendi (hata banner'ı). Metin ve `role` aynı. |
+| `src/components/results/MMPIResultsPanel.tsx` | Grafik altına **bilgi paragrafı** eklendi (veri/hesap yok). |
+| `src/main.tsx` | `responsive.css` en son import edilecek şekilde eklendi. |
+| `index.html` | viewport meta'ya `viewport-fit=cover`. |
+| `src/styles/*.css` | Yeni `responsive.css` + `reports.css`/`theme.css` düzeltmeleri. |
+| `src/components/ConfirmDialog.tsx` | **Davranış değişikliği (belgelenmiş):** odak tuzağı + arka plan kaydırma kilidi + odak dönüşü. Değişiklik öncesi: Tab odak arka plana kaçıyordu, `body.overflow` kilitlenmiyordu (ölçüldü). Fonksiyonel akış (onay/iptal/Esc/arka plana tıklama) aynı. |
 
 ---
 
-## 3. Yazdırma sistemi regresyonu (A4)
-
-Responsive çalışmanın **PDF düzenini bozmadığı** şu kanıtlarla doğrulandı:
+## 4. Yazdırma / A4 regresyonu
 
 | Kontrol | Sonuç |
 | --- | --- |
-| `@page { size: A4; margin: 0 }` (print.css) | dist'te mevcut |
-| `@page psych-report` (reports.css) | dist'te mevcut |
-| `@page mmpi-report` (workspace.css:3248) | dist'te mevcut |
-| `responsive.css` içindeki tüm kuralların `@media screen` içinde olması | sözleşme testi (31/31) her koşuda doğruluyor |
-| `!important` sayısı | `responsive.css` ve bu fazlarda eklenen kurallarda **0 yeni `!important`** |
-| Kağıt ölçekli küçük tipografi (8–10px, `.pr-*`) | değiştirilmedi (bilinçli) |
-| Form A4 sayfaları (`.form-page` 210×297mm) | değiştirilmedi |
+| `emulateMediaType('print')` | `.print-only` görünür · `.screen-only` gizli |
+| `.pr-report` genişliği | **794px = tam 210mm (A4)** |
+| Kâğıt dışına taşan öğe | **0** |
+| `page.pdf()` çıktısı | **5 sayfa**, MediaBox `595.92 × 841.92 pt` (A4) |
+| `@page A4` / `@page psych-report` / `@page mmpi-report` | dist'te mevcut |
+| `responsive.css` kuralları | tamamı `@media screen` içinde (36 sözleşme testiyle kilitli) |
+| Kâğıt ölçekli 8–10px tipografi | bilinçli olarak korundu |
 
 ---
 
-## 4. Dist içerik doğrulaması (13/13 PASS)
+## 5. Responsive bütünlük (doğrulanan viewport'lar)
 
 ```
-PASS  responsive.css gömülü (100dvh)
-PASS  viewport-fit=cover (index.html)
-PASS  safe-area insets
-PASS  44px dokunma hedefi
-PASS  16px form kontrolü
-PASS  430px küçük telefon bandı
-PASS  1240px split-view bandı
-PASS  grafik kaydırma ipucu (mmpi-chart-hint)
-PASS  @page A4 (print.css)
-PASS  @page psych-report
-PASS  @page mmpi-report
-PASS  CSP meta
-PASS  Supabase offline guard
+320 · 360 · 375 · 390 · 414 · 430 · 768 · 820 · 1024 · 1240 · 1241 · 1280 · 1440 · 1920
+(+ yatay telefon 844×390, 932×430)
 ```
 
----
-
-## 5. Faz bazında regresyon durumu
-
-| Faz | Commit(ler) | Test sonucu | Derleme |
-| --- | --- | --- | --- |
-| 0 — Denetim | `0afb6bf` | 644/295 (temel) | PASS |
-| 1 — Temel | `fad2b04`, `aa60c34` | 652 / 0 fail | PASS (4579.6 KB) |
-| 2 — Navigasyon | `93b8882`, `6bea7b3` | 655 / 0 fail | PASS |
-| 3 — Formlar | `87f1225`, `6d88e66` | 658 / 0 fail | PASS |
-| 4 — Tablo/liste/kart | `e0af560`, `3a1c034` | 660 / 0 fail | PASS (4582.3 KB) |
-| 5 — Rapor/grafik/print | `6973e36`, `b50a614` | 666 / 0 fail | PASS (4583.0 KB) |
-| 6 — Tarayıcı/kamera | `4fea123`, `3399738` | 670 / 0 fail | PASS (4583.7 KB) |
-| 7 — UX/UI cilası | `c597fd9`, `2c32d1b` | 675 / 0 fail | PASS (4584.3 KB) |
-
-Hiçbir fazda test başarısızlığı, tip hatası veya derleme hatası commit'e girmedi;
-her fazın sonucu kendi commit'inden **önce** ölçüldü.
+Her genişlikte gerçek tarayıcıda ölçüldü: sayfa taşması, kırpılan metin, çakışan öğe,
+okunamayan UI, kırık modal, kırık rapor, kırık tarayıcı, kırık navigasyon → **bulgu yok**
+(§2 ve `RESPONSIVE_PHASE_9_BROWSER_QA_REPORT.md`).
 
 ---
 
-## 6. Regresyon riskleri ve kapatılmayanlar
+## 6. Regresyon riskleri / açık kalanlar
 
-1. **Görsel doğrulama yok.** Bu ortamda headless tarayıcı kurulamadı
-   (`npx playwright install chromium` → ağ/apt hatası). Hiçbir ekran görüntüsü alınmadı;
-   tüm responsive iddiaları statik CSS/TSX analizine ve sözleşme testlerine dayanır.
-   Gerçek cihaz/tarayıcı turu **yapılması gereken tek zorunlu takip işidir**.
-2. **Dokunma hedefi kapsamı.** ≤720px'te 44px kuralı kapsamlı bir seçici listesine
-   uygulandı; listede yer almayan tek tük kontrol (ör. bazı `<select>` varyantları)
-   ölçülmedi.
-3. **Klavye tab sırası** yalnızca statik olarak incelendi (odak halkaları düzeltildi),
-   gerçek tarayıcıda gezinme testi yapılmadı.
-4. **`.modal-quicknav` ölü kuralı** (workspace.css:1737) ve `type` özniteliği eksik
-   39 `<button>` temizlik adayı olarak açık bırakıldı.
-5. **`responsive.css` boyutu** 678 satıra çıktı; ileride yeni breakpoint eklemek yerine
-   mevcut bantlara kural eklenmesi önerilir (bölüm numaralandırması 01–07 + tablo/rapor
-   bantları).
+1. **Gerçek Supabase + RLS** ile uçtan uca akış doğrulanamadı (yerel sahte API kullanıldı).
+2. **Gerçek kamera donanımı ve gerçek mobil işletim sistemi** (iOS Safari / Android Chrome)
+   doğrulanamadı; sanal kamera + masaüstü Chromium kullanıldı.
+3. **Rapor yazma/kaydetme** akışı sunucu tarafında denenmedi.
+4. Ekran okuyucu denetimi yapılmadı (CDP ile üretilen gerçek klavye olayları kullanıldı).
+5. `.mmpi-answers-row` madde numaraları 8.5px (bilinçli veri yoğunluğu).
+6. Sticky header telefon dikeyinde 167px (~%21) — navigasyon tasarımı, değiştirilmedi.
 
 ---
 
 ## 7. Sonuç
 
-**Regresyon: YOK.** Tüm otomatik kapılar yeşil (675/0 test, typecheck 0, build PASS,
-13/13 dist kontrolü), yazdırma sistemi ve iş mantığı dosyaları değişmedi, hiçbir test
-silinmedi. Tek "yapılmadı" olarak raporlanan şey **gerçek tarayıcı ile piksel/görsel
-doğrulamadır** — bu, ortam kısıtından kaynaklanır ve hiçbir raporda "görsel olarak
-doğrulandı" iddiası kullanılmamıştır.
+**Regresyon: YOK.** Bütün otomatik kapılar yeşil (680/0, typecheck 0, build PASS, dist 15/15),
+gerçek tarayıcı taramasında 2. turda **0 taşma / 0 hata** ve **hiçbir kombinasyon kötüleşmedi**;
+iş mantığı, veri akışları ve yazdırma sistemi değişmedi.
