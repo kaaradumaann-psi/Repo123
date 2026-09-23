@@ -100,6 +100,36 @@ function sanitizeIlike(value: string): string {
   return value.replace(/[%_,]/g, '').trim().slice(0, 80);
 }
 
+function toPagedRange(query: RecordsQuery): { page: number; pageSize: number; from: number; to: number } {
+  const page = Math.max(0, Math.floor(query.page ?? 0));
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(query.pageSize ?? DEFAULT_PAGE_SIZE)));
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  return { page, pageSize, from, to };
+}
+
+function applyCommonFilters<T>(q: T, query: RecordsQuery): T {
+  // PostgREST builder is chainable and returns the same type; cast via unknown for generic helper
+  let builder = q as unknown as {
+    or: (s: string) => unknown;
+    gte: (c: string, v: string | number) => unknown;
+    lte: (c: string, v: string | number) => unknown;
+    eq: (c: string, v: string) => unknown;
+  };
+  const search = query.search ? sanitizeIlike(query.search) : '';
+  if (search) builder = builder.or(`client_first_name.ilike.%${search}%,client_last_name.ilike.%${search}%`) as typeof builder;
+  if (query.dateFrom && isValidDateOnly(query.dateFrom)) builder = builder.gte('application_date', query.dateFrom) as typeof builder;
+  if (query.dateTo && isValidDateOnly(query.dateTo)) builder = builder.lte('application_date', query.dateTo) as typeof builder;
+  if (query.gender) builder = builder.eq('gender', query.gender) as typeof builder;
+  if (typeof query.ageMin === 'number' && Number.isFinite(query.ageMin)) builder = builder.gte('age', Math.floor(query.ageMin)) as typeof builder;
+  if (typeof query.ageMax === 'number' && Number.isFinite(query.ageMax)) builder = builder.lte('age', Math.floor(query.ageMax)) as typeof builder;
+  return builder as unknown as T;
+}
+
+function hasMoreFromCount(count: number | null, from: number, returned: number, pageSize: number): boolean {
+  return count != null ? from + returned < count : returned === pageSize;
+}
+
 function text(value: string, label: string, max = 120): string {
   const normalized = value.trim().replace(/\s+/g, ' ');
   if (!normalized || normalized.length > max || /[\u0000-\u001f\u007f]/.test(normalized)) {
@@ -320,31 +350,17 @@ function mapSummaryRow(row: unknown): RecordSummary {
 }
 
 export async function listOwnRecordsPaged(query: RecordsQuery = {}): Promise<PagedRecords> {
-  const page = Math.max(0, Math.floor(query.page ?? 0));
-  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(query.pageSize ?? DEFAULT_PAGE_SIZE)));
-  const from = page * pageSize;
-  const to = from + pageSize - 1;
+  const { page, pageSize, from, to } = toPagedRange(query);
   let q = requireSupabase()
     .from('mmpi_records')
     .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
-  const search = query.search ? sanitizeIlike(query.search) : '';
-  if (search) {
-    // Ad veya soyad ilike — sunucu tarafı filtre, RLS bypass yok.
-    q = q.or(`client_first_name.ilike.%${search}%,client_last_name.ilike.%${search}%`);
-  }
-  if (query.dateFrom && isValidDateOnly(query.dateFrom)) q = q.gte('application_date', query.dateFrom);
-  if (query.dateTo && isValidDateOnly(query.dateTo)) q = q.lte('application_date', query.dateTo);
-  if (query.gender) q = q.eq('gender', query.gender);
-  if (typeof query.ageMin === 'number' && Number.isFinite(query.ageMin)) q = q.gte('age', Math.floor(query.ageMin));
-  if (typeof query.ageMax === 'number' && Number.isFinite(query.ageMax)) q = q.lte('age', Math.floor(query.ageMax));
+  q = applyCommonFilters(q, query);
   const { data, error, count } = await q;
   if (error) throw new Error(describeMutationError(error, 'Test kayıtlarınız alınamadı.'));
   const records = (data ?? []).map(mapSummaryRow);
-  // Supabase count exact döner; hasMore, count biliniyorsa count üzerinden, yoksa sayfa doluluğuna göre.
-  const hasMore = count != null ? from + records.length < count : records.length === pageSize;
-  return { records, count: count ?? null, hasMore, page, pageSize };
+  return { records, count: count ?? null, hasMore: hasMoreFromCount(count ?? null, from, records.length, pageSize), page, pageSize };
 }
 
 export async function listOwnRecords(): Promise<RecordSummary[]> {
@@ -353,22 +369,13 @@ export async function listOwnRecords(): Promise<RecordSummary[]> {
 }
 
 export async function listAllRecordsPaged(query: RecordsQuery = {}): Promise<PagedRecords> {
-  const page = Math.max(0, Math.floor(query.page ?? 0));
-  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(query.pageSize ?? DEFAULT_PAGE_SIZE)));
-  const from = page * pageSize;
-  const to = from + pageSize - 1;
+  const { page, pageSize, from, to } = toPagedRange(query);
   let q = requireSupabase()
     .from('mmpi_records')
     .select('id,client_first_name,client_last_name,application_date,created_at,gender,age,occupation,education,requested_by,created_by', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
-  const search = query.search ? sanitizeIlike(query.search) : '';
-  if (search) q = q.or(`client_first_name.ilike.%${search}%,client_last_name.ilike.%${search}%`);
-  if (query.dateFrom && isValidDateOnly(query.dateFrom)) q = q.gte('application_date', query.dateFrom);
-  if (query.dateTo && isValidDateOnly(query.dateTo)) q = q.lte('application_date', query.dateTo);
-  if (query.gender) q = q.eq('gender', query.gender);
-  if (typeof query.ageMin === 'number' && Number.isFinite(query.ageMin)) q = q.gte('age', Math.floor(query.ageMin));
-  if (typeof query.ageMax === 'number' && Number.isFinite(query.ageMax)) q = q.lte('age', Math.floor(query.ageMax));
+  q = applyCommonFilters(q, query);
   const { data, error, count } = await q;
   if (error) throw new Error(describeMutationError(error, 'Tüm test kayıtları alınamadı.'));
   const records = (data ?? []).map(row => {
@@ -387,8 +394,7 @@ export async function listAllRecordsPaged(query: RecordsQuery = {}): Promise<Pag
       createdBy: typeof v.created_by === 'string' ? v.created_by : undefined,
     } as RecordSummary;
   });
-  const hasMore = count != null ? from + records.length < count : records.length === pageSize;
-  return { records, count: count ?? null, hasMore, page, pageSize };
+  return { records, count: count ?? null, hasMore: hasMoreFromCount(count ?? null, from, records.length, pageSize), page, pageSize };
 }
 
 export async function listAllRecords(): Promise<RecordSummary[]> {

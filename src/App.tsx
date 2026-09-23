@@ -288,7 +288,7 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
               className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
             >
               {user.role === 'PSYCHOLOG' && route.page === 'home' && (
-                <div style={{ maxWidth: 980, margin: '0 auto', padding: '0.75rem 1rem 0' }}>
+                <div className="dashboard-wrapper">
                   <Dashboard user={user} />
                 </div>
               )}

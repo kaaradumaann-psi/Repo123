@@ -5,6 +5,7 @@ import type { AuthenticatedUser } from '../auth/authTypes';
 import { todayIsoDate } from '../workspace/caseTypes';
 import { Icon } from './Icon';
 import { navigate } from '../router';
+import '../styles/dashboard.css';
 
 type Props = { user: AuthenticatedUser };
 
@@ -46,8 +47,8 @@ export function Dashboard({ user }: Props) {
 
   if (loading) {
     return (
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
-        <div className="loading-state-card" style={{ padding: '0.75rem' }}><div className="spinner" /></div>
+      <div className="dashboard-grid dashboard-container">
+        <div className="loading-state-card dashboard-loading"><div className="spinner" /></div>
       </div>
     );
   }
@@ -75,25 +76,25 @@ export function Dashboard({ user }: Props) {
   ];
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+    <div className="dashboard-container">
+      <div className="dashboard-grid">
         {cards.map(card => (
-          <div key={card.label} className="modern-table-card" style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div key={card.label} className="modern-table-card dashboard-card">
+            <div className="dashboard-card-head">
               <Icon name={card.icon} size={16} />
-              <span className="text-muted-sm" style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>{card.label}</span>
+              <span className="text-muted-sm dashboard-card-label">{card.label}</span>
             </div>
-            <strong style={{ fontSize: 18, lineHeight: 1 }}>{card.value}</strong>
-            <span className="text-muted-sm" style={{ fontSize: 11 }}>{card.hint}</span>
+            <strong className="dashboard-card-value">{card.value}</strong>
+            <span className="text-muted-sm dashboard-card-hint">{card.hint}</span>
             {card.action && (
-              <button type="button" className="btn-secondary btn-sm" style={{ marginTop: '0.35rem', alignSelf: 'flex-start' }} onClick={card.action}>
+              <button type="button" className="btn-secondary btn-sm dashboard-card-action" onClick={card.action}>
                 Devam et
               </button>
             )}
           </div>
         ))}
       </div>
-      <div style={{ marginTop: '0.6rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div className="dashboard-actions">
         <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/islem')}>+ Yeni MMPI başlat</button>
         <button type="button" className="btn-secondary btn-sm" onClick={() => navigate('/kayitlar')}>Kayıtlara git</button>
       </div>
