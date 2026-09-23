@@ -139,7 +139,6 @@ export function ReportPreview({
   let tableCounter = 0;
   const d = new Date(date);
   const trDate = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const shortDate = d.toLocaleDateString('tr-TR');
   return (
     <article className={`psych-paper apa-paper ${isDraft ? 'is-draft' : 'is-final'}`} aria-label="APA 7 psikolog raporu">
       {/* watermark for draft — behind content */}
@@ -150,14 +149,12 @@ export function ReportPreview({
       )}
 
       <header className="apa-running-head">
-        <span className="apa-running-title">MMPI PSİKOLOJİK DEĞERLENDİRME RAPORU</span>
-        <span className="apa-page-no">{shortDate}</span>
+        <span className="apa-running-title">MMPI RAPOR</span>
       </header>
 
       {isDraft && (
         <div className="psych-draft-banner" role="note" aria-label="Taslak uyarısı">
-          <strong>TASLAK</strong> — Klinik onayı beklenmektedir. Bu nüsha resmi kayıt sayılmaz, yalnızca iç
-          gözden geçirme içindir.
+          — TASLAK — Klinik onayı beklenmektedir
         </div>
       )}
 
@@ -180,10 +177,7 @@ export function ReportPreview({
 
       <div className="apa-title-block">
         <h1 className="apa-cover-title">{title}</h1>
-        <p className="apa-subtitle">Minnesota Çok Yönlü Kişilik Envanteri (MMPI) — Klinik Yorum</p>
-        <p className="apa-cover-meta">
-          {isDraft ? 'Taslak nüsha' : 'Nihai nüsha'} · {trDate}
-        </p>
+        <p className="apa-cover-meta">{trDate} · {isDraft ? 'Taslak' : 'Nihai'}</p>
       </div>
 
       {blocks.map((b) => {
