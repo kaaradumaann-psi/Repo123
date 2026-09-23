@@ -1806,3 +1806,14 @@ eksiksiz tamamlanarak kilitlendi.
 - **Denetim aracı:** `cmp-tablo12.ts` Mf'nin cinsiyete özel anahtarına uyarlandı (betik `TypeError` ile çöküyordu, Tablo 12 denetlenmiyordu) → **0 FARK**.
 - **Kaynak doğrulaması:** Tablo 9-17 madde sayıları, K oranları ve 26 norm hücresi; Tablo 15/16/30 OCR metninden (p80 L, p83 L, p105) doğrudan okundu.
 - **Testler:** `auditScripts.test.ts` (7) + `recordDetailUi.test.ts` (4) yeni; `mmpiClinicalReportUi.test.ts` 24. Toplam **608/608 PASS** (106 suite) · tsc **0** · build **PASS**.
+
+---
+
+## 2026-09-23 — CHANGE-032: PDF'te sayfa yükü azaltıldı, kâğıt tipografisi yapılandırıldı
+
+**Kapsam:**
+- **PDF (`MMPIPrintReport.tsx`):** "Ölçek Bazlı Klinik Yorum (Graham 1987)" bölümü artık kâğıda **çıktı** basıyor: düzey rozeti, demografik/klinik notlar, bu profilde sağlanan koşullu yorumlar, Tablo özeti ve künye. 20-45 maddelik **kaynak enumerasyonu kâğıttan kaldırıldı** — ekran raporundaki katlanabilir kartlarda eksiksiz duruyor; bölüm açıklaması okuru oraya yönlendiriyor.
+- **Ölçüm:** aynı profilde bölüm 9 647 → **3 118 karakter**, 194 → **43 satır** (%68 küçülme; ~2 sayfa → yarım sayfa).
+- **Bulgu verisine dokunulmadı** (`src/scoring/**` değişmedi); hiçbir klinik cümle silinmedi ya da yeniden yazılmadı.
+- **Kâğıt tasarımı:** `.pr-note` sol çizgi + başlık/gövde ayrımı (Klinik Ölçek Yorumları artık ad · renkli T · düzey rozeti ile yapılandırılmış), `.pr-table`'da sayfa başında tekrarlanan başlık + zebra + tabular rakam, `.pr-block h2` vurgu çubuğu, `widows/orphans: 2`.
+- **Testler:** `mmpiClinicalReportUi.test.ts` 24 → **26**; Graham testi tersine çevrildi (madde listesi kâğıtta **basılmamalı**). Toplam **610/610 PASS** (106 suite) · tsc **0** · build **PASS**.

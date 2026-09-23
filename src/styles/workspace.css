@@ -3041,11 +3041,12 @@
   .pr-block.pr-avoid { break-inside: avoid; }
   .pr-block h2 {
     margin: 0 0 8px;
-    font-size: 13px;
+    padding: 0 0 4px 7px;
+    font-size: 12.5px;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.015em;
     border-bottom: 1px solid #c9cdd4;
-    padding-bottom: 4px;
+    border-left: 3px solid #9aa1ab;
     break-after: avoid;
   }
   .pr-block h3 {
@@ -3069,9 +3070,20 @@
   .pr-client-grid > div { display: flex; justify-content: space-between; gap: 10px; }
   .pr-client-grid span { color: #5c6470; }
   .pr-client-grid b { text-align: right; }
-  .pr-context { margin: 8px 0 0; font-size: 9.5px; color: #40485a; }
+  /* Sayfa sonunda tek satırın kalmasını (widow) engelle: paragraflar en az iki
+     satırla bölünür. */
+  .pr-report p { widows: 2; orphans: 2; }
 
-  .pr-table { width: 100%; border-collapse: collapse; margin: 4px 0 8px; }
+  .pr-context { margin: 8px 0 0; font-size: 9px; line-height: 1.5; color: #40485a; }
+
+  .pr-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Uzun tabloda başlık her sayfada tekrarlanır. */
+  .pr-table thead { display: table-header-group; }
   .pr-table th {
     text-align: left;
     font-size: 8.5px;
@@ -3084,48 +3096,103 @@
   .pr-table td {
     border-bottom: 1px solid #e2e5ea;
     padding: 4px 6px;
+    font-size: 9.5px;
     vertical-align: top;
   }
+  .pr-table tbody tr:nth-child(even) { background: #f4f6f8; }
   .pr-table tr { break-inside: avoid; }
 
-  .pr-note { margin: 0 0 6px; break-inside: avoid; }
+  /* Düz yazı blokları: kâğıtta "salt metin" yığını gibi durmasın diye sol
+     çizgi + başlık/gövde ayrımı. İçeriğe dokunulmaz, yalnız sunum değişir. */
+  .pr-note {
+    margin: 0 0 6px;
+    padding-left: 8px;
+    border-left: 2px solid #d5d9e0;
+    font-size: 9.5px;
+    line-height: 1.5;
+    break-inside: avoid;
+  }
   .pr-note b { color: #14181f; }
+  .pr-note-stack { display: flex; flex-direction: column; gap: 6px; }
+  .pr-note-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0 0 2px;
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #5c6470;
+  }
+  .pr-note-name { font-weight: 700; color: #14181f; }
+  .pr-note-t { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
+  .pr-note-band {
+    padding: 0 4px;
+    border: 1px solid #d5d9e0;
+    border-radius: 3px;
+    font-size: 8px;
+  }
+  .pr-note-body { margin: 0; font-size: 9.5px; line-height: 1.5; }
 
-  /* Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987) — ekran kartının kâğıt hâli.
-     İki sütun: kâğıtta 30-40 maddelik liste tek sütunda sayfalarca uzamasın. */
+  /* Ölçek Bazlı Klinik Yorum (Graham 1987) — kâğıda ÇIKTI basılır, kaynak
+     enumerasyonu değil. 20-45 maddelik Graham listeleri her hastada aynıdır ve
+     kâğıtta sayfa yükü yaratır; onlar ekran raporundaki katlanabilir kartta
+     kalır. Kâğıtta düzey, kaynak notları ve bu profilde sağlanan koşullu
+     yorumlar yer alır. */
   .pr-dossier {
-    margin: 0 0 12px;
-    padding: 8px 12px;
+    margin: 0 0 9px;
+    padding: 7px 10px 8px;
     border: 1px solid #c9cdd4;
-    border-radius: 6px;
+    border-radius: 5px;
     break-inside: avoid-page;
   }
-  .pr-dossier h3 { margin-top: 0; }
-  .pr-dossier-lead { margin: 0 0 4px; font-size: 9.5px; font-weight: 700; color: #14181f; }
-  .pr-graham {
-    margin: 0 0 6px;
-    padding-left: 16px;
-    columns: 2;
-    column-gap: 18px;
-    column-rule: 1px solid #e2e5ea;
-    font-size: 9px;
-    line-height: 1.45;
+  /* .pr-block h3 (0,1,1) büyük harf/renk tanımlar; başlık satırını bastırmak
+     için daha yüksek özgüllük gerekir. */
+  .pr-block .pr-dossier-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0 0 5px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e2e5ea;
+    text-transform: none;
+    letter-spacing: 0;
+    color: #14181f;
   }
-  .pr-graham > li { break-inside: avoid; margin-bottom: 2px; }
-  .pr-graham-sub { margin: 1px 0 2px; padding-left: 11px; list-style: none; font-size: 8.5px; color: #40485a; }
-  .pr-dossier-notes,
+  .pr-dossier-name { font-size: 10px; font-weight: 800; letter-spacing: 0.02em; }
+  .pr-dossier-t { font-size: 10px; font-weight: 700; color: #40485a; font-variant-numeric: tabular-nums; }
+  .pr-dossier-pill {
+    padding: 1px 5px;
+    border: 1px solid #9aa1ab;
+    border-radius: 3px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: #40485a;
+  }
+  .pr-dossier-pill.is-high { color: #a02c22; border-color: #d9a9a4; background: #fbf2f1; }
+  .pr-dossier-pill.is-low { color: #1a5ea8; border-color: #a9c6e4; background: #f1f6fc; }
+  .pr-dossier-no { margin-left: auto; font-size: 8.5px; font-weight: 400; color: #5c6470; }
+  .pr-dossier-notes { margin: 0 0 5px; font-size: 9px; line-height: 1.45; }
+  .pr-dossier-notes p { margin: 0 0 3px; break-inside: avoid; }
+  .pr-dossier-notes p:last-child { margin-bottom: 0; }
   .pr-dossier-cond {
     margin: 0 0 5px;
+    padding-left: 8px;
+    border-left: 2px solid #9aa1ab;
     font-size: 9px;
     line-height: 1.45;
     break-inside: avoid;
   }
-  .pr-dossier-cond { border-left: 2px solid #9aa1ab; padding-left: 8px; }
+  .pr-dossier-empty { margin: 0 0 5px; font-size: 9px; color: #5c6470; }
   .pr-dossier-facts {
     margin: 6px 0 0;
     padding-top: 5px;
     border-top: 1px solid #e2e5ea;
     font-size: 8.5px;
+    line-height: 1.45;
     color: #40485a;
     font-variant-numeric: tabular-nums;
   }

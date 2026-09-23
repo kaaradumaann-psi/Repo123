@@ -1234,3 +1234,48 @@ cümlelerinin kendisidir (tırnak içinde birebir), `caveat`/`quote` alanları
 - `npm test` → **608/608 PASS (106 suite)**
 - `npm run build` → **PASS**
 - `cmp-tablo9/10/11/12/13/14.ts` → **6/6 BİREBİR MATCH, 0 FARK**
+
+---
+
+## CHANGE-032 — PDF Raporunda Sayfa Yükü: Graham Listeleri Kâğıttan Çıktı Özetine İndirildi, Kâğıt Tipografisi Yapılandırıldı
+
+**Area:** `src/components/results/MMPIPrintReport.tsx` · `src/styles/workspace.css` · `tests/mmpiClinicalReportUi.test.ts`.
+
+**Amaç (kullanıcı geri bildirimi):** CHANGE-031 ile PDF'e aktarılan "Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987)" bölümü her belirgin ölçek için 20-45 maddelik kaynak listesini tek tek basıyordu; gereksiz sayfa yükü oluşturuyordu. Kâğıtta **çıktı** istendi, kaynak enumerasyonu değil. Ayrıca raporun geri kalanı "salt yazı" yığını görünümündeydi.
+
+**Bulgu verisine dokunulmadı:** `src/scoring/**` hiç değişmedi; tek bir klinik cümle silinmedi ya da yeniden yazılmadı. Değişen yalnız kâğıda neyin basıldığı ve nasıl dizildiği.
+
+**Ölçülen etki** (kullanıcının yapıştırdığı profile eşdeğer 5 belirgin ölçekli profil, aynı girdiyle ESKİ/YENİ bileşen yan yana render edildi):
+
+| | Graham bölümü metni | satır | tüm rapor HTML |
+|---|---|---|---|
+| ESKİ (CHANGE-031) | 9 647 karakter | 194 | 34 191 karakter |
+| YENİ | **3 118 karakter** | **43** | 28 718 karakter |
+
+Bölüm %68 küçüldü; kâğıtta yaklaşık 2 sayfadan yarım sayfaya indi.
+
+**Değişiklikler:**
+1. `PrintScaleDossier` yeniden yazıldı — kâğıtta artık:
+   - başlık satırı: ölçek adı · T skoru · KLİNİK YÜKSEKLİK/DÜŞÜKLÜK rozeti · alt test numarası;
+   - **demografik/klinik notlar** (aynen);
+   - **bu profilde sağlanan koşullu ek yorumlar** (aynen) — asıl "çıktı" bunlar;
+   - Tablo özeti (madde sayısı + D/Y + K oranı + Tablo 30 normları) ve kaynak künyesi.
+   - Kaldırılan tek şey `<ol class="pr-graham">` kaynak enumerasyonu. Okurun ayrıntıyı nerede bulacağı bölüm açıklamasında yazılı: *"Graham (1987) madde listelerinin tamamı ekran raporundaki ölçek kartlarındadır."* Ekran kartları eksiksiz kalmaya devam ediyor.
+   - Not başlığı ardışık notlarda **yinelenmiyor** (Hs'nin iki başlıksız notunda "Demografik ve klinik notlar:" eskiden iki kez basılıyordu); kaynak metnin kendisi eksilmeden.
+   - Hiç notu/koşulu olmayan ölçekte (Hy, Pa, Pt, Sc) "Bu düzey için kaynakta ayrıca demografik not ya da koşullu yorum tanımlı değildir." satırı basılıyor; boş blok kalmıyor.
+2. Kâğıt tipografisi (`@media print`):
+   - `.pr-note` → sol çizgi + `break-inside: avoid`; **Klinik Ölçek Yorumları** düz cümle yığını olmaktan çıkıp `.pr-note-head` (ad · renkli T · düzey rozeti) + `.pr-note-body` yapısına geçti.
+   - `.pr-block h2` → sol vurgu çubuğu + alt çizgi; `.pr-context` 9px/1.5.
+   - `.pr-table` → `thead { display: table-header-group }` (uzun tabloda başlık her sayfada), zebra satır, `tabular-nums`, 9.5px gövde.
+   - `.pr-report p { widows: 2; orphans: 2 }` → sayfa sonunda tek satır kalmıyor.
+   - `.pr-graham*` kuralları kaldırıldı (artık basılmıyor).
+   - `.pr-block .pr-dossier-head` özgüllüğü `.pr-block h3`'ün `text-transform: uppercase` kuralını bilinçli olarak bastırır; ölçek adları kâğıtta büyük harf yığını yerine kaynak yazımıyla basılıyor.
+3. **Testler** (`tests/mmpiClinicalReportUi.test.ts`, 24 → **26**):
+   - Graham bölümü testi tersine çevrildi: artık her belirgin ölçek için blok başlığı, düzey rozeti, T skoru, Tablo özeti ve künye **basılmalı**, kaynak maddesi ise **basılmamalı** (ilk madde metninin kâğıtta geçmediği doğrulanıyor).
+   - Kâğıt CSS sözleşmesi: `.pr-dossier*` kuralları var, `.pr-graham*` yok; `.pr-note` sol çizgili; `.pr-table thead` tekrarlanıyor; `widows: 2`.
+   - Yeni: Hs bloğunda "Demografik ve klinik notlar:" etiketinin **bir kez** basıldığı ve üç kaynak parçasının eksiksiz taşındığı.
+
+**Doğrulama:**
+- `npx tsc --noEmit` → **0 hata (PASS)**
+- `npm test` → **610/610 PASS (106 suite)**
+- `npm run build` → **PASS**

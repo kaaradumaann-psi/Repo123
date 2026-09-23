@@ -12,11 +12,9 @@ import {
 import {
   SCALE_DOSSIERS,
   dossierSourceLine,
-  grahamListsFor,
   stripPageRefs,
   tabloDetail,
   type ClinicalScaleId,
-  type GrahamItem,
 } from '../../scoring/mmpiScaleDossiers';
 import { MMPIScoreChart } from './MMPIScoreChart';
 
@@ -49,35 +47,21 @@ export type PrintReportMeta = {
 const toneColor = (tone: 'ok' | 'watch' | 'alert'): string =>
   tone === 'alert' ? '#c2372c' : tone === 'watch' ? '#96660a' : '#0c8a5c';
 
-/** Graham (1987) maddesi — alt maddeler (a., b., …) girintili basılır. */
-function PrintGrahamItem({ item }: { item: GrahamItem }) {
-  if (typeof item === 'string') return <li>{item}</li>;
-  return (
-    <li>
-      {item.text}
-      {item.sub.length > 0 && (
-        <ul className="pr-graham-sub">
-          {item.sub.map((sub, index) => (
-            <li key={index}>{sub}</li>
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-}
-
 /**
  * Yazdırma raporu için ölçek dosyası bloğu — ekrandaki kartın kâğıt karşılığı.
- * Yalnız klinik olarak anlamlı ölçekler (T ≥ 70 ya da T ≤ 40) için üretilir ve
- * kaynaktaki bölümleri aynı sırayla taşır: Graham (1987) listesi → demografik
- * notlar → bu profilde sağlanan koşullu yorumlar → kaynak künyesi.
+ * Yalnız klinik olarak anlamlı ölçekler (T ≥ 70 ya da T ≤ 40) için üretilir.
+ *
+ * Kâğıda **çıktı** basılır, kaynak enumerasyonu değil: Graham (1987) madde
+ * listeleri her hastada aynı 20-45 maddelik referans metnidir ve kâğıtta
+ * 3-4 sayfa yer kaplar; bunlar ekran raporundaki katlanabilir kartta kalır.
+ * Kâğıtta ölçeğin düzeyi, demografik/klinik notlar, **bu profilde sağlanan**
+ * koşullu yorumlar ve Tablo özeti yer alır.
  */
 function PrintScaleDossier({ profile, scale }: { profile: MMPIProfile; scale: ScaleResult }) {
   const id = scale.id as ClinicalScaleId;
   const dossier = SCALE_DOSSIERS[id];
   const high = scale.tScore >= 70;
   const tMap = Object.fromEntries(profile.clinical.map(s => [s.id, s.tScore])) as Record<ScaleId, number>;
-  const { range, lists } = grahamListsFor(id, scale.tScore, high ? 'high' : 'low');
   const notes = dossier.notes ?? [];
   const tab = tabloDetail(id, profile.gender);
   const kRatio = K_CORRECTION[id];
@@ -91,31 +75,36 @@ function PrintScaleDossier({ profile, scale }: { profile: MMPIProfile; scale: Sc
   ];
 
   return (
-    <div className="pr-dossier">
-      <h3>
-        {scale.fullName} ({scale.shortName}) — T {scale.tScore.toFixed(1)} ·{' '}
-        {high ? 'Klinik Yükseklik' : 'Klinik Düşüklük'}
+    <article className="pr-dossier">
+      <h3 className="pr-dossier-head">
+        <span className="pr-dossier-name">
+          {scale.fullName} ({scale.shortName})
+        </span>
+        <span className="pr-dossier-t">T {scale.tScore.toFixed(1)}</span>
+        <span className={`pr-dossier-pill ${high ? 'is-high' : 'is-low'}`}>
+          {high ? 'KLİNİK YÜKSEKLİK' : 'KLİNİK DÜŞÜKLÜK'}
+        </span>
+        <span className="pr-dossier-no">Alt test {dossier.number}</span>
       </h3>
-      <p className="pr-dossier-lead">
-        {scale.shortName} ({dossier.number}) alt testinde {high ? 'yüksek' : 'düşük'} puan alan bireyin özellikleri
-        (Graham 1987):
-      </p>
-      {range && <p className="pr-context">Kaynakta bu düzey için verilen liste: {range}.</p>}
-      <ol className="pr-graham">
-        {lists.flatMap(list => list.items).map((item, index) => (
-          <PrintGrahamItem key={index} item={item} />
-        ))}
-      </ol>
 
-      {notes.map((note, index) => (
-        <div className="pr-dossier-notes" key={index}>
-          <b>{note.title ? `${note.title}: ` : 'Demografik ve klinik notlar: '}</b>
-          {note.paragraphs?.map((paragraph, j) => (
-            <span key={j}>{paragraph} </span>
-          ))}
-          {note.list && <span>{note.list.join(' ')}</span>}
+      {notes.length > 0 && (
+        <div className="pr-dossier-notes">
+          {notes.map((note, index) => {
+            // Aynı başlığı ardışık notlarda yineleme (kaynak metne dokunmadan).
+            const label = note.title ?? 'Demografik ve klinik notlar';
+            const previous = index > 0 ? (notes[index - 1]!.title ?? 'Demografik ve klinik notlar') : null;
+            return (
+              <p key={index}>
+                {label !== previous && <b>{label}: </b>}
+                {note.paragraphs?.map((paragraph, j) => (
+                  <span key={j}>{paragraph} </span>
+                ))}
+                {note.list && <span>{note.list.join(' ')}</span>}
+              </p>
+            );
+          })}
         </div>
-      ))}
+      )}
 
       {conditions.map((condition, index) => (
         <div className="pr-dossier-cond" key={index}>
@@ -124,16 +113,19 @@ function PrintScaleDossier({ profile, scale }: { profile: MMPIProfile; scale: Sc
         </div>
       ))}
 
+      {notes.length === 0 && conditions.length === 0 && (
+        <p className="pr-dossier-empty">
+          Bu düzey için kaynakta ayrıca demografik not ya da koşullu yorum tanımlı değildir.
+        </p>
+      )}
+
       <p className="pr-dossier-facts">
         Tablo {tab.no}: {tab.count} madde ({tab.dogru.length} doğru / {tab.yanlis.length} yanlış) ·{' '}
-        {tab.kEkleli
-          ? `K Eklemeli bir alt testtir (+${kRatio}K).`
-          : 'K düzeltmesi uygulanmaz.'}{' '}
-        Erkeklerde ortalama {tab.normMale.toFixed(2)}, kadınlarda {tab.normFemale.toFixed(2)} (Savaşır, 1981 —
-        Tablo 30).
+        {tab.kEkleli ? `K Eklemeli bir alt testtir (+${kRatio}K).` : 'K düzeltmesi uygulanmaz.'} Erkeklerde
+        ortalama {tab.normMale.toFixed(2)}, kadınlarda {tab.normFemale.toFixed(2)} (Savaşır, 1981 — Tablo 30).
       </p>
       <p className="pr-dossier-source">{dossierSourceLine(id)}</p>
-    </div>
+    </article>
   );
 }
 
@@ -312,18 +304,26 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
         </p>
 
         <h3>Klinik Ölçek Yorumları</h3>
-        {clinical.map(scale => {
-          const band = clinicalBandFor(scale.id as ScaleId, profile.gender, scale.tScore);
-          if (!band) return null;
-          return (
-            <div className="pr-note" key={scale.id}>
-              <b>
-                {scale.fullName} ({scale.shortName}) — T {scale.tScore.toFixed(1)}, {band.label}:
-              </b>{' '}
-              {band.text}
-            </div>
-          );
-        })}
+        <div className="pr-note-stack">
+          {clinical.map(scale => {
+            const band = clinicalBandFor(scale.id as ScaleId, profile.gender, scale.tScore);
+            if (!band) return null;
+            return (
+              <article className="pr-note" key={scale.id}>
+                <p className="pr-note-head">
+                  <span className="pr-note-name">
+                    {scale.fullName} ({scale.shortName})
+                  </span>
+                  <span className="pr-note-t" style={{ color: tColor(scale.tScore) }}>
+                    T {scale.tScore.toFixed(1)}
+                  </span>
+                  <span className="pr-note-band">{band.label}</span>
+                </p>
+                <p className="pr-note-body">{band.text}</p>
+              </article>
+            );
+          })}
+        </div>
 
         {profileCode && (
           <>
@@ -363,11 +363,13 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
       </section>
 
       {flaggedClinical.length > 0 && (
-        <section className="pr-block" aria-label="Ölçek bazlı detaylı klinik yorum">
-          <h2>Ölçek Bazlı Detaylı Klinik Yorum (Graham 1987)</h2>
+        <section className="pr-block" aria-label="Ölçek bazlı klinik yorum">
+          <h2>Ölçek Bazlı Klinik Yorum (Graham 1987)</h2>
           <p className="pr-context">
-            Yalnız T ≥ 70 (klinik yükseklik) veya T ≤ 40 (klinik düşüklük) olan ölçekler listelenir; diğer
-            ölçekler normal aralıktadır.
+            Yalnız T ≥ 70 (klinik yükseklik) veya T ≤ 40 (klinik düşüklük) olan ölçekler yer alır; diğer
+            ölçekler normal aralıktadır. Kâğıtta her ölçek için düzey, kaynak notları ve bu profilde sağlanan
+            koşullu yorumlar özetlenir; Graham (1987) madde listelerinin tamamı ekran raporundaki ölçek
+            kartlarındadır.
           </p>
           {flaggedClinical.map(scale => (
             <PrintScaleDossier key={scale.id} profile={profile} scale={scale} />
