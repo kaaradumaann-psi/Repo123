@@ -190,7 +190,7 @@ export function ReportPreview({
       <footer className="psych-disclaimer">
         Gizli ve kişiye özeldir. Bu rapor yalnızca yetkin ruh sağlığı uzmanı tarafından klinik görüşme ve diğer
         bulgularla birlikte değerlendirilmelidir. APA 7. baskı raporlama ilkelerine uygun olarak hazırlanmıştır.
-        {isDraft && ' — TASLAK nüsha, resmi arşiv sayılmaz.'}
+        {isDraft && <span className="psych-disclaimer-draft"> — TASLAK nüsha, resmi arşiv sayılmaz.</span>}
       </footer>
     </article>
   );

@@ -267,51 +267,87 @@ export function ReportsPage({
           </section>
         </div>
         {fullOpen && profile && (
-          <section className="report-full-preview">
-            <h2>Tam Rapor Önizleme</h2>
-            <button onClick={() => setFullOpen(false)}>Kapat</button>
-            <MMPIPrintReport profile={profile} meta={fullMeta} />
+          <section className="report-full-preview-card" aria-label="Tam rapor önizleme">
+            <div className="report-full-preview-head">
+              <div>
+                <span className="section-badge">TAM RAPOR · SALT OKUNUR</span>
+                <h2>Tam rapor — MMPI Klinik Raporu</h2>
+                <p>APA 7 uyumlu ham çıktı; grafik ve yorumlar salt okunur. Düzenlenemez. Yazdır/PDF için tarayıcı Yazdır işlevini kullanın.</p>
+              </div>
+              <button className="btn-secondary" onClick={() => setFullOpen(false)}>Kapat</button>
+            </div>
+            <div className="report-full-preview-body">
+              <MMPIPrintReport profile={profile} meta={fullMeta} />
+            </div>
           </section>
         )}
-        <details
-          className="report-examples"
-          open={sampleOpen}
-          onToggle={(e) => setSampleOpen(e.currentTarget.open)}
-        >
-          <summary>Örnek Raporlar ve Şablonlar</summary>
-          <p>
-            Seçili şablonun bu kaydın gerçek verileriyle önizlemesi. Yeni klinik yorum üretilmez. Sistem
-            şablonu salt okunurdur.
-          </p>
-          <button
-            disabled={busy || !templateDocument}
-            onClick={() =>
-              void run(async () => {
-                if (!templateDocument) return;
-                const id = await createTemplate(
-                  `${selectedTemplate?.name || 'Yeni Şablon'} — Kopya`.slice(0, 180),
-                  templateDocument,
-                  viewer.id,
-                );
-                setTemplates(await listTemplates());
-                setTemplateId(id);
-              })
-            }
-          >
-            Yeni Şablon · Kopyasını Oluştur
-          </button>
-          {sampleOpen && templateDocument && (
-            <div className="report-sample">
-              <ReportPreview
-                title={title || SYSTEM_TEMPLATE_NAME}
-                content={instantiateTemplate(templateDocument, source)}
-                source={source}
-                date={new Date().toISOString()}
-                status="draft"
-              />
+        <section className="report-examples-card" aria-label="Örnek raporlar ve şablonlar">
+          <div className="report-examples-head">
+            <div>
+              <span className="section-badge badge-primary">ŞABLON · ÖNİZLEME</span>
+              <h2>Örnek raporlar ve şablonlar</h2>
+              <p>
+                Seçili şablonun bu kaydın <strong>gerçek MMPI verileriyle</strong> canlı önizlemesi. Yeni klinik yorum
+                üretilmez; Sistem şablonu salt okunurdur. Kopyasını oluşturarak kendi şablonunuzu türetebilirsiniz.
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
+              <button
+                className="btn-secondary"
+                disabled={busy || !templateDocument}
+                onClick={() =>
+                  void run(async () => {
+                    if (!templateDocument) return;
+                    const id = await createTemplate(
+                      `${selectedTemplate?.name || 'Yeni Şablon'} — Kopya`.slice(0, 180),
+                      templateDocument,
+                      viewer.id,
+                    );
+                    setTemplates(await listTemplates());
+                    setTemplateId(id);
+                    setSampleOpen(true);
+                  })
+                }
+              >
+                Kopyasını oluştur
+              </button>
+              <button
+                className="btn-secondary"
+                style={{ fontSize: 12 }}
+                onClick={() => setSampleOpen((v) => !v)}
+                aria-expanded={sampleOpen}
+              >
+                {sampleOpen ? 'Önizlemeyi gizle' : 'Önizlemeyi göster'}
+              </button>
+            </div>
+          </div>
+          {sampleOpen && templateDocument ? (
+            <div className="report-examples-body">
+              <div className="report-sample-frame">
+                <ReportPreview
+                  title={title || SYSTEM_TEMPLATE_NAME}
+                  content={instantiateTemplate(templateDocument, source)}
+                  source={source}
+                  date={new Date().toISOString()}
+                  status="draft"
+                />
+              </div>
+              <p className="report-examples-footnote">
+                Önizleme yalnızca iskeleti gösterir; antet/imza ayarlarınız dahil edilir. Taslak filigranı ekranda
+                görünür, basılı PDF’te görünmez.
+              </p>
+            </div>
+          ) : (
+            <div className="report-examples-body">
+              <div className="report-examples-empty">
+                <p style={{ margin: 0, color: 'var(--soft)', fontSize: 13, lineHeight: 1.6 }}>
+                  Önizleme gizli. “Önizlemeyi göster” ile A4 APA önizlemeyi açın — gerçek verilerle, yazdırımla
+                  birebir.
+                </p>
+              </div>
             </div>
           )}
-        </details>
+        </section>
         <ReportSettings userId={viewer.id} initial={settings} onSaved={setSettings} />
         <section className="modern-table-card">
           <div className="section-heading">

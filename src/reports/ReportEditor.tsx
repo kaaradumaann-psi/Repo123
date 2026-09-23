@@ -8,8 +8,10 @@ import type { ReportSourceData } from './reportDataAdapter';
 import { createTemplate, listVersions, type ReportVersion, type SavedReport } from './reportsApi';
 import {
   dataCatalog,
+  instantiateTemplate,
   newBlock,
   refreshDocumentData,
+  standardTemplate,
   templateFromDocument,
   type Inline,
   type Letterhead,
@@ -128,7 +130,7 @@ export function ReportEditor({
   const [generatedAt, setGeneratedAt] = useState(initial.generated_at);
   const [selected, setSelected] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState(previewInitially ? 'preview' : 'editor');
-  const [confirm, setConfirm] = useState<'refresh' | 'complete' | 'restore' | null>(null);
+  const [confirm, setConfirm] = useState<'refresh' | 'complete' | 'restore' | 'reset' | null>(null);
   const [versions, setVersions] = useState<ReportVersion[] | null>(null);
   const [restoreVersion, setRestoreVersion] = useState<ReportVersion | null>(null);
   const [notice, setNotice] = useState('');
@@ -295,6 +297,9 @@ export function ReportEditor({
           </button>
           <button className="btn-secondary" disabled={autosave.busy} onClick={() => setConfirm('refresh')}>
             Verileri Güncelle
+          </button>
+          <button className="btn-secondary" disabled={autosave.busy} onClick={() => setConfirm('reset')}>
+            Raporu Sıfırla
           </button>
         </div>
         {autosave.error && (
@@ -633,14 +638,18 @@ export function ReportEditor({
                 ? 'Raporu tamamla'
                 : confirm === 'restore'
                   ? 'Sürümü geri yükle'
-                  : 'Kaynak verileri güncelle'
+                  : confirm === 'reset'
+                    ? 'Raporu sıfırla'
+                    : 'Kaynak verileri güncelle'
             }
             description={
               confirm === 'complete'
                 ? 'Rapor tamamlandı olarak kaydedilecek. Daha sonra düzenlemeye devam edebilirsiniz.'
                 : confirm === 'restore'
                   ? 'Mevcut metin ve kaynak anlık görüntüsü seçilen sürümle değişir. Önce mevcut haliniz kaydedilir; geri yükleme de yeni bir sürümdür.'
-                  : 'Kilitli alanlar ve henüz düzenlemediğiniz otomatik yorumlar güncellenir. Elle düzenlediğiniz metinler korunur; yeni verilerle uyumunu kontrol etmelisiniz. Önce mevcut haliniz sürümlenir.'
+                  : confirm === 'reset'
+                    ? 'Düzenlediğiniz metinler silinecek ve rapor mevcut sistem şablonunun (Minnesota… başlıklı APA iskelet) güncel MMPI verileriyle doldurulmuş haline dönecek. Antet korunur, imza ve sürüm geçmişi silinmez. Önce mevcut haliniz sürümlenir.'
+                    : 'Kilitli alanlar ve henüz düzenlemediğiniz otomatik yorumlar güncellenir. Elle düzenlediğiniz metinler korunur; yeni verilerle uyumunu kontrol etmelisiniz. Önce mevcut haliniz sürümlenir.'
             }
             confirmLabel="Onayla"
             tone="neutral"
@@ -650,6 +659,21 @@ export function ReportEditor({
               if (confirm === 'complete') {
                 setStatus('completed');
                 setPendingSave('complete');
+                setConfirm(null);
+                return;
+              }
+              if (confirm === 'reset') {
+                if (!(await autosave.save('manual'))) return;
+                try {
+                  const freshTpl = instantiateTemplate(standardTemplate(), source);
+                  // Preserve current letterhead (antet) inside the report document
+                  const next = { ...freshTpl, letterhead: doc.letterhead } as typeof doc;
+                  edit(next);
+                  setPendingSave('refresh');
+                  setNotice('Rapor sıfırlandı — sistem şablonuna dönüldü. Kaydediliyor…');
+                } catch (e) {
+                  setNotice(e instanceof Error ? e.message : 'Rapor sıfırlanamadı.');
+                }
                 setConfirm(null);
                 return;
               }

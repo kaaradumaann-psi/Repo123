@@ -777,6 +777,67 @@
   .report-history > div { padding: 12px 0; border-bottom: 1px solid var(--hairline); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .report-history > div strong { font-variant-numeric: tabular-nums; }
 
+  /* Antet help — inline explain for non-clinical users */
+  .report-settings summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .report-settings-antet-help {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); background: var(--bg-soft); border: 1px solid var(--hairline);
+    border-radius: var(--radius-full); padding: 4px 10px;
+  }
+  .report-settings-antet-help svg { width: 12px; height: 12px; color: var(--muted); }
+  .report-settings-explain {
+    margin: 12px 0 14px; padding: 12px 14px;
+    background: #fcfcfd; border: 1px solid var(--hairline); border-left: 3px solid var(--hairline);
+    border-radius: 10px; color: #374151; font-size: 13px; line-height: 1.6;
+  }
+  .report-settings-explain strong { color: #111827; }
+  .report-settings-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  .report-settings-upload { display: grid; gap: 6px; padding: 12px; background: var(--bg-soft); border: 1px solid var(--hairline); border-radius: var(--radius-md); }
+  .report-settings-upload strong { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+
+  /* Örnek raporlar ve şablonlar — redesigned card, system language */
+  .report-examples-card {
+    background: var(--white); border: 1px solid var(--hairline); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); overflow: clip; margin-bottom: 18px;
+  }
+  .report-examples-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    padding: 20px 22px; border-bottom: 1px solid var(--hairline); background: #fcfcfd;
+  }
+  .report-examples-head h2 {
+    margin: 6px 0 6px; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; color: var(--text);
+  }
+  .report-examples-head p { margin: 0; color: var(--soft); font-size: 13.5px; line-height: 1.6; max-width: 62ch; }
+  .report-examples-head .btn-secondary { flex-shrink: 0; white-space: nowrap; }
+  .report-examples-body { padding: 16px 16px 18px; background: #eef2f6; }
+  .report-examples-body .report-sample-frame {
+    max-width: 760px; max-height: 620px; overflow: auto; margin: 0 auto;
+    border: 1px solid var(--hairline); border-radius: var(--radius-md); background: var(--white);
+    box-shadow: 0 8px 24px rgba(13,13,13,.06);
+  }
+  .report-examples-footnote {
+    max-width: 760px; margin: 12px auto 0; font-size: 11.5px; color: var(--muted); line-height: 1.5; text-align: center;
+  }
+  .report-examples-empty { padding: 24px; text-align: center; color: var(--soft); }
+
+  /* Tam rapor önizleme — same card language, scrollable report */
+  .report-full-preview-card {
+    background: var(--white); border: 1px solid var(--hairline); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); overflow: clip; margin-bottom: 18px;
+  }
+  .report-full-preview-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    padding: 18px 20px; border-bottom: 1px solid var(--hairline); background: #fcfcfd;
+  }
+  .report-full-preview-head h2 { margin: 6px 0 4px; font-size: 15.5px; font-weight: 600; letter-spacing: -0.02em; }
+  .report-full-preview-head p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.6; }
+  .report-full-preview-body { padding: 18px; overflow: auto; max-height: 78vh; background: #f8fafc; }
+  .report-full-preview-body .pr-report { background: white; border: 1px solid #e6e8eb; border-radius: 2px; box-shadow: 0 12px 32px rgba(13,13,13,.08); padding: 0; }
+
+  /* Legacy fallbacks kept for older selectors */
+  .report-sample { max-width: none; }
+
 
 
 @media screen and (max-width: 980px) {
@@ -812,20 +873,14 @@
     font-size: 8pt;
     color: #6b7280;
   }
-  @top-right {
-    content: 'MMPI · Psikolog Raporu';
-    font-family: ui-sans-serif, system-ui, -apple-system, Arial, sans-serif;
-    font-size: 7.5pt;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: #9aa0a6;
-  }
 }
 @media print {
   html, body { background: white !important; }
   body:has(.psych-print), body:has(.psych-print) #root, body:has(.psych-print) .app-main { width: auto !important; background: white !important; }
   .report-workspace { padding: 0; margin: 0; max-width: none; background: white !important; }
   .psych-print { page: psych-report; display: block; background: white; padding: 0; }
+  /* Taslak uyarısı/filigranı yalnızca ekranda; PDF/kağıt nüshada görünmez (kullanıcı isteği). */
+  .psych-draft-banner, .psych-draft-watermark, .psych-disclaimer-draft { display: none !important; }
   /* Paper — print'te ekranla birebir aynı tipografi, sadece kart gölgesi yok */
   .psych-paper {
     position: relative;
