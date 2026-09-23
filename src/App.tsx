@@ -11,6 +11,7 @@ import { FormKit } from './components/FormKit';
 import { InfoPageShell } from './components/InfoPageShell';
 import { MyRecordsPanel } from './components/MyRecordsPanel';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
+import { ReportsPage } from './reports/ReportsPage';
 import { RecordDetailPage } from './components/RecordDetailPage';
 import { SourcesPage } from './components/SourcesPage';
 import { SiteFooter } from './components/SiteFooter';
@@ -269,7 +270,9 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
       <ConnectivityBanner />
 
       <main className="app-main" id="main">
-        {route.page === 'kayit' ? (
+        {route.page === 'raporlar' ? (
+          <ReportsPage key={`${route.id}/${route.reportId || ''}`} recordId={route.id} reportId={route.reportId} viewer={user} />
+        ) : route.page === 'kayit' ? (
           <RecordDetailPage
             recordId={route.id}
             viewer={user}

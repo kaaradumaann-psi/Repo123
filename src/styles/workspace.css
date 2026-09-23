@@ -2779,13 +2779,16 @@
   }
 }
 
-/* Yazdırma: yalnızca rapor sayfası içeriği basılır. */
+/* Yazdırma: yalnızca rapor sayfası içeriği basılır — diğer tüm ekran kromu gizlenir. */
 @media print {
-  .app-header, .site-footer, .no-print { display: none !important; }
+  .app-header, .site-footer, .no-print,
+  .record-page-topbar, .record-page-header, .client-info-details,
+  .expert-notes-details, .mmpi-results-panel, .report-quicknav {
+    display: none !important;
+  }
   .app-main { padding: 0 !important; }
   .record-page { max-width: none; gap: 10px; }
-  .report-quicknav { display: none !important; }
-  .report-section, .record-page-header, .client-info-section {
+  .report-section {
     box-shadow: none !important;
     break-inside: avoid-page;
   }

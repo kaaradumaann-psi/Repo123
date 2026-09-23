@@ -1,3 +1,4 @@
+import { ReportsSummary } from '../reports/ReportsPage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EXPERT_NOTES_MAX, getRecordDetail, updateExpertNotes } from '../records/supabaseRecords';
 import type { FullRecordDetail } from '../records/supabaseRecords';
@@ -510,9 +511,12 @@ export function RecordDetailPage({
           </div>
         </details>
 
+        <ReportsSummary recordId={recordId} />
+
         {profile ? (
           <MMPIResultsPanel
             embedded
+            reportsContent={<ReportsSummary recordId={recordId} />}
             profile={profile}
             answers={answers ?? undefined}
             /* "Yapay Zekâ Yorumu" (son sekme): kayıt modunda kayıt sahipliği

@@ -10,6 +10,7 @@ export type AppRoute =
   | { page: 'form' }
   | { page: 'kayitlar' }
   | { page: 'kayit'; id: string }
+  | { page: 'raporlar'; id: string; reportId?: string }
   | { page: 'yonetim' }
   | { page: 'sss' }
   | { page: 'gizlilik' }
@@ -35,6 +36,8 @@ export function parseRoute(pathname: string): AppRoute {
   if (path === '/kullanim') return { page: 'kullanim' };
   if (path === '/kaynaklar') return { page: 'kaynaklar' };
   if (path === '/onizleme') return { page: 'onizleme' };
+  const reportMatch = /^\/kayitlar\/([^/]+)\/raporlar(?:\/([^/]+))?$/.exec(path);
+  if (reportMatch) return { page: 'raporlar', id: reportMatch[1]!, ...(reportMatch[2] ? { reportId: reportMatch[2] } : {}) };
   const kayitMatch = /^\/kayitlar\/([^/]+)$/.exec(path);
   if (kayitMatch) return { page: 'kayit', id: kayitMatch[1]! };
   return { page: 'bulunamadi' };
@@ -51,7 +54,14 @@ function notify(): void {
   for (const fn of listeners) fn();
 }
 
+const navigationGuards = new Set<() => boolean>();
+/** Only active editors register a guard; all other routes keep their existing behavior. */
+export function registerNavigationGuard(guard: () => boolean): () => void {
+  navigationGuards.add(guard);
+  return () => { navigationGuards.delete(guard); };
+}
 export function navigate(to: string, options?: { replace?: boolean }): void {
+  if ([...navigationGuards].some(guard => !guard())) return;
   if (options?.replace) {
     window.history.replaceState(null, '', to);
   } else {

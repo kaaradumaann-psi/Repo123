@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import type { ItemAnswer } from '../../workspace/caseTypes';
@@ -23,6 +24,7 @@ export type MmpiResultsTab =
   | 'extra'
   | 'critical'
   | 'answers'
+  | 'reports'
   | 'ai';
 
 const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
@@ -34,6 +36,7 @@ const TABS: { id: MmpiResultsTab; label: string; icon: IconName }[] = [
   { id: 'extra', label: 'Desenler & Sözlük', icon: 'file' },
   { id: 'critical', label: 'Kritik Bulgular', icon: 'alert' },
   { id: 'answers', label: 'Soru Yanıtları', icon: 'sheet' },
+  { id: 'reports', label: 'Raporlar', icon: 'file' },
   // Sözleşme: "Yapay Zekâ Yorumu" her zaman EN SON sekmedir.
   { id: 'ai', label: 'Yapay Zekâ Yorumu', icon: 'sparkles' },
 ];
@@ -64,6 +67,7 @@ type Props = {
    * görünür ama içerik yerine bilgi kutusu gösterilir.
    */
   aiContext?: MmpiAiContext;
+  reportsContent?: ReactNode;
 };
 
 function formatT(t: number): string {
@@ -77,7 +81,7 @@ function formatT(t: number): string {
  * Türetilmiş Ölçekler & Endeksler, Desenler & Sözlük, Kritik Bulgular,
  * Soru Yanıtları ve en sonda Yapay Zekâ Yorumu.
  */
-export function MMPIResultsPanel({ profile, clientName, answers, embedded = false, aiContext }: Props) {
+export function MMPIResultsPanel({ profile, clientName, answers, embedded = false, aiContext, reportsContent }: Props) {
   const [tab, setTab] = useState<MmpiResultsTab>('overview');
   const { validityAnalysis, profileCode } = profile;
   const clinical = profile.clinical;
@@ -188,6 +192,7 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
       {tab === 'extra' && <MMPIExtraTab profile={profile} />}
       {tab === 'critical' && <MMPICriticalSection profile={profile} />}
       {tab === 'answers' && <MMPIAnswersTab answers={answers} />}
+      {tab === 'reports' && <div role="tabpanel" className="mmpi-tab-panel">{reportsContent || <p>Psikolog raporu oluşturmak için testi kaydedin ve kayıt detayındaki Raporlar alanını açın.</p>}</div>}
       {tab === 'ai' && (
         aiContext ? (
           <AiInterpretationPanel profile={profile} {...aiContext} />

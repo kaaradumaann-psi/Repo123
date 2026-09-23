@@ -13,6 +13,7 @@ import './styles/theme.css';
 import './styles/site.css';
 // Mobile overrides (≤720px) — imported last so they win at narrow widths; desktop is untouched.
 import './styles/mobile.css';
+import './styles/reports.css';
 
 // Intercept same-origin <a> clicks for SPA navigation.
 installLinkInterceptor();

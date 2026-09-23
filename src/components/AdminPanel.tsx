@@ -545,6 +545,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                               <Icon name="eye" size={15} />
                               <span>Testi İncele</span>
                             </a>
+                        <a className="action-btn-secondary" href={`/kayitlar/${rec.id}/raporlar`}>Raporlar</a>
                             <button
                               type="button"
                               className="action-btn-danger"

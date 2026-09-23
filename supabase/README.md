@@ -55,6 +55,10 @@ Migration'lar şunları oluşturur:
 - `audit_logs`: sunucu taraflı denetim izi — `mmpi_records` üzerindeki her
   insert/update/delete, security-definer trigger ile (aktör, eylem, hedef, zaman)
   olarak yazılır; istemciden yazılamaz/silinemez, yalnızca Admin okuyabilir.
+- `mmpi_reports`: psikolog raporunun JSON belgesi, durumu, kaynak MMPI anlık görüntüsü, veri sürümü ve revizyon numarası.
+- `mmpi_report_versions`: sunucu trigger'ıyla atomik oluşturulan, istemciden değiştirilemeyen sürüm geçmişi.
+- `mmpi_report_templates`: salt okunur sistem şablonu kaydı ve kullanıcı şablonları.
+- `psychologist_report_settings`: isteğe bağlı antet, logo ve imza (PNG/JPEG/WebP data URL).
 - Auth kullanıcı trigger'ı.
 - Psikoloğun yalnızca kendi kayıtlarını, Admin'in tüm kayıtları görebildiği RLS.
 - Aktif olmayan kullanıcının kayıt okuyup yazmasını engelleyen RLS fonksiyonları.
@@ -163,3 +167,22 @@ supabase secrets set AI_API_KEY=sk-... AI_PROVIDER=openai \
   (sahip veya Admin) doğrulanmadan yorum üretilmez (IDOR koruması).
 - `ALLOWED_ORIGINS` `admin-users` ile **aynı değeri** taşır; boş bırakılırsa
   yalnız localhost dev origin'leri izinli olur.
+
+## Psikolog raporları (2026-09-23)
+
+`20260923000000_psychologist_reports.sql` migration'ını `supabase db push` ile uygulayın.
+Mevcut `profiles`, Auth ve `mmpi_records` politikaları değiştirilmez. Yeni rapor tabloları
+anon erişimine kapalıdır. Aktif psikolog kendi kaydına bağlı kendi raporlarına erişir;
+aktif Admin tüm raporları denetleyebilir. Sistem şablonu Admin dahil istemcilerce değiştirilemez.
+Rapor sahibi/kaynak kayıt sonradan değiştirilemez. Rapor silinince sürümleri; test kaydı
+silinince bağlı raporlar silinir. Rapor silmek test kaydını silmez.
+
+Sürümleme transaction içindeki trigger ile yapılır: oluşturma, elle kaydetme,
+tamamlama, veri yenileme, geri yükleme ve son sürümden 10 dakika sonraki ilk otomatik kayıt.
+Diğer otomatik kayıtlar belgeyi günceller ama yeni sürüm oluşturmaz. `revision` koşulu
+aynı raporu açan iki oturumun sessizce birbirinin değişikliklerini ezmesini önler.
+
+Logo ve imza Storage bucket gerektirmez; ayarlar ve rapor belgesi içine kopyalanır.
+Antet güncellemeleri eski raporları kendiliğinden değiştirmez. Rapor belgeleri/sürümleri
+kişisel sağlık verisi içerebilir: mevcut yedekleme, saklama ve yetkilendirme süreçlerine dahil edin.
+Detaylı uygulama ve test notları: [docs/raporlar.md](../docs/raporlar.md).
