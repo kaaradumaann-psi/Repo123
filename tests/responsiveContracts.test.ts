@@ -275,3 +275,79 @@ test('küçük telefonlarda liste/kart ayakları ve filtre satırı sarar', () =
   assert.match(selectorDeclarations('.review-pagination-bar', 430), /flex-wrap:\s*wrap/);
   assert.match(selectorDeclarations('.search-filter-box > div', 430), /flex-wrap:\s*wrap/);
 });
+
+/* --------------------------------------------------------------------------
+   Phase 5 — raporlar, grafikler, yazdırma
+   -------------------------------------------------------------------------- */
+
+test('rapor bölünmüş görünümü 1240px altında tek kolona iner (editör daralmasın)', () => {
+  const reports = readFileSync(`${STYLE_DIR}/reports.css`, 'utf8');
+  const rules = parseCss(reports);
+  const split = rules.filter(rule =>
+    rule.selector.split(',').some(s => s.trim() === '.report-split') &&
+    rule.declarations.includes('grid-template-columns'),
+  );
+  // Geniş ekran: sabit 760px önizleme kolonu ile iki kolon.
+  assert.ok(split.some(rule => /minmax\(0, 1\.1fr\) 760px/.test(rule.declarations)), 'masaüstü iki kolon korunmalı');
+  // Dar ekran: tek kolon + sekme geçişi 1240px'e kadar geçerli olmalı.
+  const band = rules.find(rule => rule.atRules.some(at => /max-width:\s*1240px/.test(at)) &&
+    rule.selector.split(',').some(s => s.trim() === '.report-split'));
+  assert.ok(band, '≤1240px bandı için .report-split kuralı olmalı');
+  assert.match(band!.declarations, /grid-template-columns:\s*minmax\(0, 1fr\)/);
+  const tabs = rules.find(rule => rule.atRules.some(at => /max-width:\s*1240px/.test(at)) &&
+    rule.selector.split(',').some(s => s.trim() === '.report-mobile-tabs'));
+  assert.ok(tabs, '≤1240px bandında editör/önizleme sekmeleri görünür olmalı');
+  assert.match(tabs!.declarations, /display:\s*flex/);
+});
+
+test('önizleme paneli yükseklik sınırı yalnızca iki kolonlu görünümde uygulanır', () => {
+  const scoped = responsiveRules.filter(rule =>
+    rule.selector.split(',').some(s => s.trim() === '.report-preview-pane') &&
+    rule.declarations.includes('max-height'),
+  );
+  assert.ok(scoped.length > 0, 'önizleme paneli dvh kuralı olmalı');
+  for (const rule of scoped) {
+    assert.ok(
+      rule.atRules.some(at => /min-width:\s*1241px/.test(at)),
+      'önizleme paneli yükseklik sınırı yalnızca >1240px için tanımlanmalı',
+    );
+  }
+});
+
+test('mobilde grafik ve geniş tablolar kaydırma affordance’ı taşır', () => {
+  const chart = selectorDeclarations('.mmpi-chart-card', 720);
+  assert.match(chart, /scrollbar-width:\s*thin/);
+  assert.match(chart, /overscroll-behavior-x:\s*contain/);
+  const hint = parseCss(responsiveCss).find(rule => rule.selector.trim() === '.mmpi-chart-hint');
+  assert.ok(hint, 'grafik ipucu sınıfı tanımlı olmalı');
+  assert.match(hint!.declarations, /display:\s*none/, 'ipucu masaüstünde gizli olmalı');
+  assert.match(selectorDeclarations('.mmpi-chart-hint', 720), /display:\s*block/);
+  for (const surface of ['.mmpi-summary-table-wrap', '.mmpi-answers-grid']) {
+    assert.match(selectorDeclarations(surface, 720), /scrollbar-width:\s*thin/);
+  }
+});
+
+test('grafik ipucu metni sonuç panelinde gerçekten basılır', () => {
+  const panel = readFileSync('src/components/results/MMPIResultsPanel.tsx', 'utf8');
+  assert.match(panel, /className="mmpi-chart-hint"/, 'ipucu DOM’da bulunmalı');
+  assert.match(panel, /yatay kaydırılabilir/, 'ipucu metni kullanıcıya ne yapacağını söylemeli');
+});
+
+test('mobilde katlanmış kağıt önizlemeleri görünür viewport yüksekliğini aşmaz', () => {
+  assert.match(selectorDeclarations('.report-full-preview-body', 720), /max-height:\s*70dvh/);
+  assert.match(selectorDeclarations('.report-examples-body .report-sample-frame', 720), /max-height:\s*60dvh/);
+});
+
+test('yazdırma hattı responsive katmandan etkilenmez (tüm @page ve @media print korunur)', () => {
+  const printCss = readFileSync(`${STYLE_DIR}/print.css`, 'utf8');
+  assert.match(printCss, /@page\s*\{\s*size:\s*A4 portrait/);
+  assert.match(printCss, /\.form-page\s*\{[\s\S]*210mm/);
+  const reportsCss = readFileSync(`${STYLE_DIR}/reports.css`, 'utf8');
+  assert.match(reportsCss, /@page psych-report/, 'isimli @page korunmalı');
+  const workspaceCss = readFileSync(`${STYLE_DIR}/workspace.css`, 'utf8');
+  assert.match(workspaceCss, /@page mmpi-report/, 'isimli @page korunmalı');
+  // responsive.css yazdırma katmanına hiçbir kural eklemez (yorumlar hariç).
+  const withoutComments = responsiveCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.ok(!/@media\s+print/.test(withoutComments));
+  assert.ok(!/@page/.test(withoutComments), 'responsive.css @page tanımlamamalı');
+});

@@ -840,8 +840,13 @@
 
 
 
-@media screen and (max-width: 980px) {
-    .report-choice-grid, .report-split { grid-template-columns: 1fr; }
+/* Split view needs ~1180px before BOTH panes are usable: the preview pane owns a
+   fixed 760px column, so between 981px and ~1240px the editor was squeezed to
+   ~200px (unusable). Below 1240px the editor and the A4 preview therefore share a
+   single column and are switched with the tabs below — the same pattern the phone
+   layout already uses — so the editor keeps the full width instead of collapsing. */
+@media screen and (max-width: 1240px) {
+    .report-split { grid-template-columns: minmax(0, 1fr); }
     .report-mobile-tabs { display: flex; gap: 10px; margin: 16px 0; }
     .report-mobile-tabs button {
       flex: 1;
@@ -854,6 +859,10 @@
     .report-mobile-tabs [aria-pressed='true'] { background: var(--text); color: var(--white); border-color: var(--text); }
     .show-editor .report-preview-pane, .show-preview .report-edit-pane { display: none; }
     .report-preview-pane { position: static; max-height: none; padding: 12px; }
+}
+
+@media screen and (max-width: 980px) {
+    .report-choice-grid { grid-template-columns: 1fr; }
     .psych-paper { font-size: 11pt; }
     .psych-paper .apa-level-1, .psych-paper .apa-level-2, .psych-paper .apa-paragraph, .psych-paper .psych-field, .apa-table, .apa-running-head, .psych-draft-banner, .psych-letterhead, .psych-disclaimer, .psych-signature { margin-left: 22px; margin-right: 22px; }
     .apa-title-block { padding-left: 22px; padding-right: 22px; }

@@ -49,9 +49,14 @@
     max-height: 90dvh;
   }
 
-  .report-preview-pane {
-    max-height: calc(100vh - 96px);
-    max-height: calc(100dvh - 96px);
+  /* The preview pane is sticky and height-capped only in the two-column split;
+     below 1241px reports.css turns it into a static, full-height pane, so this
+     rule must not leak into that range. */
+  @media screen and (min-width: 1241px) {
+    .report-preview-pane {
+      max-height: calc(100vh - 96px);
+      max-height: calc(100dvh - 96px);
+    }
   }
 
   /* Notch / home-indicator insets. `env()` resolves to 0px where unsupported. */
@@ -502,5 +507,56 @@
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
+  }
+}
+
+@media screen {
+  /* The hint is a phone-only affordance; on wider screens the chart is wide
+     enough that nothing needs to be explained. */
+  .mmpi-chart-hint {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08 · ≤720px — reports, charts and paper previews
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* The T-score profile is an SVG with a fixed 1400×470 viewBox: at full phone
+     width its 12–13px labels would render at ~6px. The chart therefore keeps a
+     readable minimum width and scrolls inside its card, with the exact numbers
+     available in the summary table and the scale list (both already present).
+     A hint line in the card tells the user it scrolls. */
+  .mmpi-chart-card {
+    padding: 12px 10px 8px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .mmpi-chart-hint {
+    display: block;
+  }
+
+  /* Same treatment for every other wide, scrollable surface in the result and
+     report views: a thin, contained scrollbar instead of the page jumping. */
+  .mmpi-summary-table-wrap,
+  .mmpi-answers-grid,
+  .report-table-scroll,
+  .table-responsive {
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Folded paper previews inside the reports page must not claim more height
+     than the *visible* viewport on a phone. */
+  .report-full-preview-body {
+    max-height: 70vh;
+    max-height: 70dvh;
+  }
+
+  .report-examples-body .report-sample-frame {
+    max-height: 60vh;
+    max-height: 60dvh;
   }
 }
