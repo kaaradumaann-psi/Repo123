@@ -351,3 +351,37 @@ test('yazdırma hattı responsive katmandan etkilenmez (tüm @page ve @media pri
   assert.ok(!/@media\s+print/.test(withoutComments));
   assert.ok(!/@page/.test(withoutComments), 'responsive.css @page tanımlamamalı');
 });
+
+/* --------------------------------------------------------------------------
+   Phase 6 — tarayıcı, kamera ve OMR akışı
+   -------------------------------------------------------------------------- */
+
+test('kamera eylem düğmeleri tasarım sisteminin düğmelerini kullanır', () => {
+  const camera = readFileSync('src/components/CameraCapture.tsx', 'utf8');
+  assert.ok(!/className="scan-primary"/.test(camera), 'stilsiz .scan-primary kullanılmamalı');
+  assert.match(camera, /className="btn-primary"/, 'birincil kamera eylemi btn-primary olmalı');
+  assert.match(camera, /className="btn-secondary"/, 'ikincil kamera eylemi btn-secondary olmalı');
+  // Sınıfın CSS karşılığı olmadığı için stil sessizce kayboluyordu; kural burada kilitlenir.
+  const css = ['scanner.css', 'theme.css', 'screen.css', 'workspace.css']
+    .map(f => readFileSync(`${STYLE_DIR}/${f}`, 'utf8')).join('\n');
+  assert.ok(!/\.scan-primary\b/.test(css), '.scan-primary için CSS tanımı yok — kullanılmamalı');
+});
+
+test('birincil/ikincil düğmeler mobilde ≥44px dokunma hedefi', () => {
+  const declarations = selectorDeclarations('.btn-primary', 720);
+  assert.match(declarations, /min-height:\s*44px/);
+  assert.match(selectorDeclarations('.btn-secondary', 720), /min-height:\s*44px/);
+});
+
+test('kamera sahnesi ve manuel köşe önizlemesi telefonda taşmaz', () => {
+  assert.match(selectorDeclarations('.scan-camera-stage', 720), /max-width:\s*100%/);
+  const canvas = selectorDeclarations('.manual-corner-preview-canvas', 720);
+  assert.match(canvas, /width:\s*100%/);
+  assert.match(canvas, /max-width:\s*280px/);
+  assert.match(selectorDeclarations('.scan-actions', 720), /flex-wrap:\s*wrap/);
+});
+
+test('OMR inceleme yüzeyleri mobilde yeniden dolgulanır', () => {
+  assert.match(selectorDeclarations('.item-inspection-box', 720), /padding:\s*14px/);
+  assert.match(selectorDeclarations('.scanner-metrics-strip > *', 720), /min-height:\s*44px/);
+});

@@ -176,6 +176,9 @@
   /* 44px is the documented target of this project's mobile layer. Compact
      controls (btn-sm, table row actions, filter fields, close buttons, pills)
      were 28–36px tall on a phone. */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
   .btn-sm,
   .action-btn-primary,
   .action-btn-secondary,
@@ -558,5 +561,71 @@
   .report-examples-body .report-sample-frame {
     max-height: 60vh;
     max-height: 60dvh;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   09 · ≤720px — scanner, camera and review workflow
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* The camera stage is the viewfinder: on a phone it owns the full column
+     (mobile.css already lifts the 520px cap; this keeps the radius and adds
+     smooth video behaviour). */
+  .scan-camera-stage {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  /* Camera actions wrap instead of squeezing; the shutter is the primary action
+     and never shares a row with "stop" when the row is too narrow. */
+  .scan-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .scan-actions > button {
+    flex: 1 1 auto;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  /* Review workflow surfaces that were sized in plain pixels. */
+  .item-inspection-box {
+    padding: 14px;
+  }
+
+  /* The item crop is the evidence the clinician judges: give it room and keep
+     the zoom gesture inside the figure. */
+  .scan-crop-figure {
+    padding: 10px;
+  }
+
+  .scan-crop-image {
+    overflow: hidden;
+  }
+
+  /* Manual corner editor: the drag surface and the warped preview stack, and
+     the preview can use the full column instead of a fixed 280px canvas. */
+  .manual-corner-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .manual-corner-preview-canvas {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+  }
+
+  .manual-corner-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* OMR result strip: the per-page status cells stay tappable. */
+  .scanner-metrics-strip > * {
+    min-height: 44px;
   }
 }
