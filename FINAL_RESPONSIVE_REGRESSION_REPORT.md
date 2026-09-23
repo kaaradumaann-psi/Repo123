@@ -109,3 +109,45 @@ okunamayan UI, kırık modal, kırık rapor, kırık tarayıcı, kırık navigas
 **Regresyon: YOK.** Bütün otomatik kapılar yeşil (680/0, typecheck 0, build PASS, dist 15/15),
 gerçek tarayıcı taramasında 2. turda **0 taşma / 0 hata** ve **hiçbir kombinasyon kötüleşmedi**;
 iş mantığı, veri akışları ve yazdırma sistemi değişmedi.
+
+---
+
+## 8. Takip düzeltmesi — "TAM RAPOR · SALT OKUNUR" önizlemesi (2026-09-24 · `5dccadf`)
+
+Kullanıcı bildirimi: kayıt sayfasındaki **TAM RAPOR** önizlemesi ekranda stilsiz, dağınık düz
+metin gibi görünüyordu; "Örnek raporlar ve şablonlar" önizlemesiyle aynı görünmesi istendi
+(**tüm cihazlar için**, yalnız telefon değil).
+
+**Kök neden (ölçümle kanıtlandı):** Rapor tipografisinin tamamı (`.pr-*` ailesi, 57 kural) yalnızca
+`@media print` içinde tanımlıydı. Ekranda `.pr-*` ağacının göründüğü TEK yer bu önizlemedir; bu
+yüzden önizleme çıplak HTML olarak render ediliyordu (ölçüm: tablo `border-collapse: separate`,
+hücre alt kenarlığı 0px, kâğıt dolgusu 0px, gövde metni 14px DM Sans).
+
+**Düzeltme (kapsam: yalnız sunum, iş mantığı dosyasına dokunulmadı):**
+
+* `src/styles/workspace.css` — blok `@media screen, print` içine alındı: ekran önizlemesi ve kâğıt
+  kopyası aynı sınıfları paylaşır. Yazdırma/PDF yine **ayrı `.print-only` kopyasından** üretilir.
+* `src/styles/reports.css` — önizleme kâğıdı örnek önizlemeyle aynı çerçeveye getirildi
+  (760px, 1px `#e6e8eb`, 2px köşe, aynı gölge) + yalnız ekrana ait okunabilirlik ölçeği
+  (taban 10.5px → 12.5px, en küçük boyut 10px, ekranda başlıklar 700).
+* `src/styles/responsive.css` — §08d ≤480px: geniş ölçek tabloları kâğıt **içinde** kaydırılır
+  (kenardan taşma yok), etiket/değer satırları sarar, telefon başlığı alt alta akar.
+* Testler — `responsiveContracts.test.ts` +3 test (39), `mmpiClinicalReportUi.test.ts` süzgeçleri
+  paylaşımlı belge tipografisini ayırt eder.
+
+| Ölçüm | Önce (1440px) | Sonra (1440px) | Örnek önizleme (referans) |
+| --- | --- | --- | --- |
+| Kâğıt genişliği | 1074px | 760px | 758px |
+| Gövde tipografisi | 14px DM Sans | 12.5px / 1.6 | 16px Times / 2.0 |
+| Tablo | `separate`, kenarlık yok | `collapse`, 1px hücre kenarı | APA kenarları |
+| Kâğıt dolgusu | 0 | 12mm × 11mm (telefonda 16/14px) | 48px iç boşluk |
+| Çerçeve | yok | 1px `#e6e8eb` + 2px köşe + örnek gölge | aynı |
+| Taşma | — | 0 (768 / 1024 / 1440) | 0 |
+| Telefon 320/390/430 | tablolar kâğıttan taşıyordu (~347px) | kâğıt içi kaydırma, `bleedCount 0`, sayfa yatay kaymıyor | — |
+
+**Bu commit'in kapıları:** `npm test` **683/683** · `npm run build` PASS · `git diff --check` temiz.
+**Yazdırma regresyonu (gerçek tarayıcı, print medya):** 794px = 210mm, 10.5px tipografi,
+70 çerçeveli hücre, `.screen-only` → `display: none`, `page.pdf` A4 = **3 sayfa**. Sabit.
+
+§6'daki açık kalanlar listesi bu düzeltmeyle değişmez (ortam kısıtları sürüyor).
+

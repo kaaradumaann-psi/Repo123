@@ -112,6 +112,10 @@ kütüphaneleriyle aşıldı; bu **gerçek tarayıcı motorudur**, emülasyon de
 
 ## 7. Kalan Sorunlar (öncelik sırasıyla)
 
+> Not (2026-09-24): Aşağıdaki liste **Faz 10 sonundaki** durumdur. Faz 10'dan sonra kullanıcı
+> bildirimiyle **TAM RAPOR önizlemesinin ekranda stilsiz görünmesi** düzeltildi ve gerçek
+> tarayıcıda doğrulandı — bkz. **EK-A** (§10).
+
 | Önem | Sorun | Durum |
 | --- | --- | --- |
 | Orta | Gerçek Supabase/RLS ve rapor yazma akışı doğrulanmadı (N1, N2) | Ortam kısıtı; kod değişmedi |
@@ -154,3 +158,34 @@ Latest commit:    dc5004a (docs: phase 9 browser qa report) + bu rapor commit'i
 Working tree:     CLEAN
 Browser visual verification: VERIFIED (masaüstü Chromium; gerçek mobil cihaz/OS doğrulanmadı)
 ```
+
+---
+
+## 10. EK-A — TAM RAPOR önizleme düzeltmesi (2026-09-24 · `5dccadf`)
+
+**Bulgu (kullanıcı):** "TAM RAPOR · SALT OKUNUR" kartındaki tam rapor önizlemesi ekranda tasarımız
+düz metin gibi görünüyordu; "Örnek raporlar ve şablonlar" önizlemesiyle aynı olması istendi
+(**tüm cihazlar**, yalnız mobil değil).
+
+**Kök neden:** `.pr-*` tipografi/sunum kurallarının tamamı `@media print` içindeydi; ekranda bu
+ağacın göründüğü tek yer TAM RAPOR önizlemesi olduğu için önizleme çıplak HTML olarak çiziliyordu.
+
+**Yapılan:** blok `@media screen, print`'e alındı (ekran + kâğıt aynı sınıflar); önizleme kâğıdı
+örnek önizleme çerçevesiyle hizalandı (760px, aynı kenar/köşe/gölge, aynı gri zemin); yalnız ekrana
+ait okunabilirlik ölçeği eklendi (10.5px → 12.5px taban, 10px taban sınırı, ekranda 700 ağırlık);
+≤480px'te tablolar kâğıt içinde kaydırılır, etiket/değer satırları sarar, başlık alt alta akar.
+
+**VERIFIED (gerçek tarayıcı, Chromium 153):**
+
+* 1440px — kâğıt 760×4518px, 12.5px/20px, `border-radius 2px`, `1px rgb(230,232,235)`,
+  gölge `rgba(13,13,13,.12) 0 12px 32px` → **örnek önizleme kâğıdıyla birebir** (758px, aynı kenar/gölge).
+* 1024 / 768px — taşma 0; kâğıt 760 / 646px.
+* 430 / 390 / 320px — `bleedCount 0`, sayfa ve önizleme yatay kaymıyor; geniş ölçek tabloları
+  kâğıt içinde kaydırılıyor (354px → 326/286/216px), başlıkta tarih ortadan kırılmıyor.
+* Yazdırma (print medya) **değişmedi**: 794px = 210mm, 10.5px, 70 çerçeveli hücre, `page.pdf` = 3 sayfa.
+* `npm test` **683/683** (3 yeni sözleşme testi), `npm run build` PASS, `git diff --check` temiz.
+* Commit `5dccadf` — `arena/01a0d039-repo123` (remote ile eşit), çalışma ağacı temiz.
+
+**NOT VERIFIED:** Gerçek mobil işletim sistemi/tarayıcı (iOS Safari / Android Chrome) yine
+doğrulanmadı; ölçümler masaüstü Chromium'un cihaz emülasyonuyladır.
+

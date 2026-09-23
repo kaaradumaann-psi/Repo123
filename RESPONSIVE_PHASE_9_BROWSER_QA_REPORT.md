@@ -199,6 +199,10 @@ başlığı alanı `clamp(19px,5.2vw,24px)`; `.mmpi-answers-row` madde numaralar
 
 ## 16. Remaining Issues
 
+> Ek (2026-09-24): Faz 10 sonrası takip düzeltmesiyle **TAM RAPOR önizlemesinin ekranda
+> stilsiz görünmesi** giderildi (`5dccadf`; ayrıntı: `FINAL_RESPONSIVE_REGRESSION_REPORT.md` §8
+> ve `FINAL_RESPONSIVE_UI_UX_REPORT.md` EK-A). Aşağıdaki liste Faz 9 sonundaki durumdur.
+
 | # | Sorun | Önem | Durum |
 | --- | --- | --- | --- |
 | R1 | Gerçek Supabase + RLS ile uçtan uca akış doğrulanamadı (yerel sahte API kullanıldı) | Orta | Ortam kısıtı; kod değişmedi |
