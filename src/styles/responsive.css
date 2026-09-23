@@ -682,6 +682,13 @@
   .scanner-input-card button {
     min-height: 44px;
   }
+
+  /* Rapor editöründeki blok denetimleri (yukarı/aşağı/sil) 28px ölçüldü: dokunmatik
+     cihazda blok seçildiğinde çıkan tek sıralama/silme yoludur. */
+  .report-block-controls > button {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* --------------------------------------------------------------------------

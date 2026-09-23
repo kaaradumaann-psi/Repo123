@@ -466,3 +466,11 @@ test('yatay telefon ve tablette (kaba imleç) hedefler 44px kalır', () => {
   // Masaüstü yoğunluğu korunmalı: bant 1280px'i kapsamaz.
   assert.match(css, /pointer: coarse\) and \(max-width: 1024px\)/);
 });
+
+test('rapor blok denetimleri dokunmatikte ≥44px', () => {
+  const css = readFileSync(`${STYLE_DIR}/responsive.css`, 'utf8');
+  const block = /@media screen and \(pointer: coarse\) and \(max-width: 1024px\)\s*\{([\s\S]*?)\n\}/.exec(css);
+  assert.ok(block, 'kaba imleç bandı yok');
+  assert.match(block[1]!, /\.report-block-controls > button/);
+  assert.match(block[1]!, /min-width:\s*44px/);
+});
