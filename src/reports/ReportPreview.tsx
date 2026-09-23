@@ -121,8 +121,8 @@ export function safeReportImage(value?: string): string | undefined {
 export function ReportPreview({
   content,
   source,
-  title,
-  date,
+  title: _title,
+  date: _date,
   status,
 }: {
   content: ReportDocument;
@@ -137,8 +137,6 @@ export function ReportPreview({
   const blocks = visibleBlocks(content, source);
   // Number dataTables sequentially for APA Table 1, 2...
   let tableCounter = 0;
-  const d = new Date(date);
-  const trDate = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
   return (
     <article className={`psych-paper apa-paper ${isDraft ? 'is-draft' : 'is-final'}`} aria-label="APA 7 psikolog raporu">
       {/* watermark for draft — behind content */}
@@ -147,10 +145,6 @@ export function ReportPreview({
           TASLAK
         </div>
       )}
-
-      <header className="apa-running-head">
-        <span className="apa-running-title">MMPI RAPOR</span>
-      </header>
 
       {isDraft && (
         <div className="psych-draft-banner" role="note" aria-label="Taslak uyarısı">
@@ -176,8 +170,7 @@ export function ReportPreview({
       ) : null}
 
       <div className="apa-title-block">
-        <h1 className="apa-cover-title">{title}</h1>
-        <p className="apa-cover-meta">{trDate} · {isDraft ? 'Taslak' : 'Nihai'}</p>
+        <h1 className="apa-cover-title">Minnesota Çok Yönlü Kişilik Envanteri (MMPI) Raporu</h1>
       </div>
 
       {blocks.map((b) => {

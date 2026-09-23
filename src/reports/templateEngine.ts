@@ -144,14 +144,14 @@ export function standardTemplate(): ReportDocument {
   const data = (path: string, label: string) =>
     blocks.push({ ...newBlock('dataField'), path, label, when: path });
 
-  // Kimlik — örnek rapordaki 6 alan (Doğum Tarihi yoksa gizlenir, sayı uydurulmaz)
-  // Not: Kapak başlığı zaten ReportPreview'da ortalı apa-cover-title olarak
-  // gösterilir (rapor adı + tarih); burada tekrar başlık eklemiyoruz — şablon
-  // doğrudan kimlik alanlarıyla başlar, örnekle birebir.
+  // Kimlik — örnek + hastane pratiği (Doğum Tarihi/ Meslek yoksa gizlenir, sayı uydurulmaz)
+  // Kapak başlığı ReportPreview'da tek ve ortalı Minnesota... olarak gösterilir;
+  // şablon doğrudan kimlik alanlarıyla başlar.
   data('patient.fullName', 'Ad – Soyad');
   data('patient.birthDate', 'Doğum Tarihi');
   data('patient.age', 'Yaş');
   data('patient.gender', 'Cinsiyet');
+  data('patient.occupation', 'Meslek');
   data('test.psychologist', 'Testi Uygulayan');
   data('test.date', 'Testin Uygulanma Tarihi');
 
