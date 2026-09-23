@@ -308,8 +308,8 @@
     position: relative;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin: 8px 0 14px;
+    padding: 8px 10px;
+    margin: 4px 0;
     overflow-wrap: anywhere;
     transition: border-color .15s, background .15s, box-shadow .15s;
   }
@@ -322,65 +322,54 @@
   .report-edit-block.is-locked {
     background: #f0f7ff;
     border-color: var(--primary-border);
-    padding: 6px 10px 8px;
   }
-  /* Locked dataField: compact chip instead of verbose label */
-  .report-block-controls--locked {
-    gap: 4px !important;
-    margin-bottom: 4px !important;
-  }
-  .report-locked-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-right: auto;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--accent-ink);
-    background: var(--primary-tint);
-    border: 1px solid var(--primary-border);
-    border-radius: var(--radius-full);
-    padding: 2px 8px;
-    cursor: default;
-  }
+  /* Locked blocks: subtle indicator */
+  .report-block-controls--locked small { color: var(--accent-ink); }
 
   .report-block-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 2px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
     color: var(--muted);
     opacity: 0;
     transition: opacity .15s;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    padding: 2px 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    z-index: 2;
   }
   .report-edit-block:hover .report-block-controls,
   .report-edit-block.is-selected .report-block-controls { opacity: 1; }
   .report-block-controls small {
-    margin-right: auto;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
+    font-size: 9px;
+    font-weight: 700;
     color: var(--muted);
-    background: var(--bg-soft);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-full);
-    padding: 3px 8px;
+    padding: 0 4px;
+    min-width: 14px;
+    text-align: center;
   }
   .report-block-controls button {
-    min-width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid var(--hairline);
-    background: var(--white);
+    min-width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
     border-radius: var(--radius-full);
-    padding: 0 8px;
-    font-size: 12px;
-    color: var(--slate-600);
+    padding: 0 4px;
+    font-size: 11px;
+    color: var(--slate-500);
+    cursor: pointer;
   }
-  .report-block-controls button:has(+ button) { padding: 0; width: 28px; }
-  .report-block-controls button:hover { border-color: var(--slate-300); color: var(--text); }
-  .report-block-controls button:disabled { opacity: .35; }
+  .report-block-controls button:hover { background: var(--bg-soft); color: var(--text); }
+  .report-block-controls button:disabled { opacity: .3; cursor: default; }
+  .report-block-controls button:disabled:hover { background: transparent; }
 
   .report-edit-block [contenteditable] {
     white-space: pre-wrap;
