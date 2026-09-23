@@ -1,26 +1,30 @@
 /* ==========================================================================
-   Responsive Foundation — global viewport fit + touch ergonomics
+   Responsive Foundation — viewport fit, navigation shell, touch ergonomics
    --------------------------------------------------------------------------
    main.tsx imports this file LAST, after mobile.css and reports.css, so it can
-   refine every screen layer without fighting the cascade. It owns exactly four
-   things; screen-specific layout stays in the files that already own it:
+   refine every screen layer without fighting the cascade. It owns the shared
+   foundation only; screen-specific layout stays in the files that already own
+   it (workspace.css, reports.css, scanner.css, …).
 
-     01 · Viewport height units (mobile URL bar) + iOS safe areas
-     02 · Nothing may force horizontal page overflow (min-width safety net)
-     03 · ≤720px touch ergonomics: 16px form controls (iOS focus zoom) and
-          ≥44px touch targets for compact controls
-     04 · ≤430px small-phone tier (320–430px) for gutters and filters
+     01 · Global viewport units, safe areas and the horizontal-overflow net
+     02 · ≤1100px — tablet header guards
+     03 · ≤720px — touch ergonomics (16px controls, ≥44px targets)
+     04 · ≤720px — navigation strips and page shells
+     05 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+
+   Ordering rule: media blocks are written widest-first so that a narrower
+   breakpoint always wins when both apply.
 
    Rules:
      • Every declaration is inside `@media screen` — the printable A4 sheet
        (form.css / print.css / @media print blocks) never receives a single
        declaration from this file.
-     • No `!important`, no new component, no rewritten design: only foundation.
-     • Desktop (>1024px) is intentionally untouched.
+     • No `!important`, no new component, no rewritten design: foundation only.
+     • Desktop (>1100px) is intentionally untouched.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   01 · Viewport height & safe areas
+   01 · Global viewport units, safe areas, overflow net
    -------------------------------------------------------------------------- */
 @media screen {
   /* 100vh is the *large* viewport on mobile browsers: as the URL bar hides and
@@ -57,9 +61,6 @@
     padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   }
 
-  /* --------------------------------------------------------------------------
-     02 · Horizontal overflow safety net
-     -------------------------------------------------------------------------- */
   /* Flex/grid children default to `min-width: auto`, which is the single most
      common cause of a "table/card is wider than the phone" bug. Containers that
      host scrollable tables already own their own `overflow-x: auto`. */
@@ -85,6 +86,35 @@
   .form-kit-file strong,
   .ws-edit-panel-id {
     overflow-wrap: anywhere;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   02 · ≤1100px — tablet header guards
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1100px) {
+  /* Between 901px and ~1100px the header is still a single 72px row: brand +
+     workspace tabs + site link + user + logout. A long account name must not
+     push the row wider than the viewport. */
+  .header-left,
+  .header-user,
+  .user-profile-summary,
+  .user-info-text {
+    min-width: 0;
+  }
+
+  .user-full-name {
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-site-link span {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -154,7 +184,9 @@
   .scan-comparison-toggle button,
   .close-banner-btn,
   .site-footer-link,
-  .btn-logout {
+  .btn-logout,
+  .ws-choice-row label,
+  .report-mobile-tabs button {
     min-height: 44px;
   }
 
@@ -180,10 +212,70 @@
     width: 100%;
     min-width: 0;
   }
+
+  /* Checkboxes/radios that are not wrapped in a pill label still need a real
+     hit area next to their text. */
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Tabular figures in date filters must not reflow between platforms. */
+  input,
+  select,
+  textarea {
+    line-height: 1.35;
+  }
 }
 
 /* --------------------------------------------------------------------------
-   04 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+   04 · ≤720px — navigation strips and page shells
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Admin sub-tabs were a non-wrapping flex row: on a 320–430px screen the third
+     tab ("+ Yeni Psikolog") sat outside the viewport and dragged the whole page
+     into a horizontal scroll. The strip now scrolls inside the header instead;
+     keyboard focus still scrolls the active tab into view natively. */
+  .admin-subnav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .admin-subnav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .subnav-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-margin-inline: 12px;
+  }
+
+  /* The workspace switcher keeps its own scrollable row (theme.css) — keep the
+     swipe gesture smooth and let a half-cut tab hint that it scrolls. */
+  .workspace-tabs {
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 12px;
+  }
+
+  /* Page shells: the desktop 24–28px gutter is a luxury on a phone. */
+  .reports-page,
+  .report-workspace {
+    padding: 20px 16px 36px;
+  }
+
+  .app-main {
+    padding: 18px 14px 40px;
+  }
+
+}
+
+/* --------------------------------------------------------------------------
+   07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 430px) {
   /* Gutter: 14px sides consumed 8% of a 320px screen; 12px returns usable width
@@ -192,8 +284,23 @@
     padding: 16px 12px 40px;
   }
 
+  .reports-page,
+  .report-workspace {
+    padding: 16px 12px 32px;
+  }
+
   .header-inner {
     padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .header-left,
+  .header-user {
+    gap: 8px;
+  }
+
+  .portal-tab {
+    padding: 8px 11px;
   }
 
   .connectivity-banner {
@@ -226,4 +333,18 @@
   .modal-backdrop {
     padding: 12px;
   }
+
+  /* Footer: centered stack instead of a cramped two-column row. */
+  .site-footer-inner {
+    justify-content: center;
+    text-align: center;
+    gap: 6px 12px;
+  }
+
+  .site-footer-left,
+  .site-footer-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
 }

@@ -76,6 +76,14 @@ function rulesWithin(maxWidth: number): CssRule[] {
   );
 }
 
+/** Belirli bir üst sınırın altındaki katmanda bir seçiciye yazılan tüm bildirimler. */
+function selectorDeclarations(selector: string, maxWidth: number): string {
+  return rulesWithin(maxWidth)
+    .filter(rule => rule.selector.split(',').some(s => s.trim() === selector))
+    .map(rule => rule.declarations)
+    .join('\n');
+}
+
 /** `input`, `select`, `textarea` öğelerini hedefleyen seçiciler (sınıf adı içindeki eşleşmeler hariç). */
 function isControlSelector(selector: string): boolean {
   return /(?:^|[\s,>+~])(?:input|select|textarea)(?![\w-])/.test(selector);
@@ -198,4 +206,30 @@ test('temel CSS’te kalan her <16px kontrol responsive.css mobil katmanında d�
     }
   }
   assert.deepEqual(offenders, [], `Mobil düzeltmesi olmayan küçük kontrol boyutları: ${offenders.join(' | ')}`);
+});
+
+/* --------------------------------------------------------------------------
+   Phase 2 — navigasyon ve sayfa kabuğu
+   -------------------------------------------------------------------------- */
+
+test('yönetim alt sekmeleri ≤720px’te taşma yerine kendi içinde kaydırılır', () => {
+  const declarations = selectorDeclarations('.admin-subnav-tabs', 720);
+  assert.match(declarations, /flex-wrap:\s*nowrap/);
+  assert.match(declarations, /overflow-x:\s*auto/);
+  const tabDeclarations = selectorDeclarations('.subnav-tab', 720);
+  assert.match(tabDeclarations, /flex:\s*0 0 auto/);
+  assert.match(tabDeclarations, /white-space:\s*nowrap/);
+});
+
+test('tablet başlığı (≤1100px) uzun kullanıcı adını kırpar, satırı genişletmez', () => {
+  const header = responsiveRules.filter(rule => rule.atRules.some(at => /max-width:\s*1100px/.test(at)));
+  assert.ok(header.length > 0, '≤1100px tablet katmanı olmalı');
+  const declarations = selectorDeclarations('.user-full-name', 1100);
+  assert.match(declarations, /text-overflow:\s*ellipsis/);
+  assert.match(declarations, /overflow:\s*hidden/);
+});
+
+test('mobil sayfa kabukları daraltılmış gutter kullanır', () => {
+  assert.match(selectorDeclarations('.reports-page', 720), /padding:\s*20px 16px 36px/);
+  assert.match(selectorDeclarations('.app-main', 430), /padding:\s*16px 12px 40px/);
 });
