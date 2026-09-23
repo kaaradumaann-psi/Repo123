@@ -27,7 +27,9 @@ export type IconName =
   | 'list'
   | 'trend'
   | 'layers'
-  | 'edit';
+  | 'edit'
+  | 'chevronDown'
+  | 'chevronUp';
 
 const paths: Record<IconName, string> = {
   print: 'M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01',
@@ -54,6 +56,8 @@ const paths: Record<IconName, string> = {
   sparkles:
     'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0zM20 3v4M22 5h-4M4 17v2M5 18H3',
   edit: 'M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z',
+  chevronDown: 'm6 9 6 6 6-6',
+  chevronUp: 'm18 15-6-6-6 6',
   external: 'M7 17 17 7M9 7h8v8',
   pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
