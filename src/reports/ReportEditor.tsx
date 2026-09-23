@@ -256,13 +256,6 @@ export function ReportEditor({
           )}
           <button
             className="btn-secondary"
-            disabled={autosave.busy || !title.trim()}
-            onClick={() => void print()}
-          >
-            PDF / Yazdır
-          </button>
-          <button
-            className="btn-secondary"
             disabled={autosave.busy}
             onClick={async () => {
               try {
@@ -278,10 +271,6 @@ export function ReportEditor({
             Verileri Güncelle
           </button>
         </div>
-        <p className="ws-muted">
-          PDF: Yazdır penceresinde “PDF olarak kaydet” seçin; A4, ölçek %100, tarayıcı üst/alt bilgileri
-          kapalı. Tamamlanan raporlar düzenlenebilir.
-        </p>
         {autosave.error && (
           <p className="status-banner error-banner" role="alert">
             {autosave.error} <button onClick={() => void autosave.save('manual')}>Yeniden Dene</button>
@@ -309,88 +298,33 @@ export function ReportEditor({
         </div>
         <div className={`report-split show-${mobileView}`}>
           <section className="report-edit-pane" aria-label="Psikolog raporu editörü">
-            <div className="report-toolbar" role="toolbar" aria-label="Metin biçimlendirme">
-              {(['bold', 'italic', 'underline'] as const).map((cmd, i) => (
-                <button
-                  key={cmd}
-                  title={['Kalın', 'İtalik', 'Altı çizili'][i]}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    const active = document.activeElement;
-                    if (active instanceof HTMLElement && active.isContentEditable) {
-                      document.execCommand(cmd);
-                      active.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                  }}
-                >
-                  {['B', 'I', 'U'][i]}
-                </button>
-              ))}
-              {(['heading1', 'heading2', 'paragraph', 'bulletList', 'numberedList'] as TextKind[]).map(
-                (kind, i) => (
-                  <button
-                    key={kind}
-                    onClick={() => {
-                      const b = doc.blocks.find((b) => b.id === selected);
-                      if (b && !['dataField', 'dataTable', 'table'].includes(b.type))
-                        updateBlock(b.id, { type: kind });
-                      else add(newBlock(kind));
-                    }}
-                  >
-                    {['H1', 'H2', 'Paragraf', '• Liste', '1. Liste'][i]}
-                  </button>
-                ),
-              )}
-              <button
-                onClick={() =>
-                  add({
-                    ...newBlock('table'),
-                    rows: [
-                      ['Başlık', 'Başlık'],
-                      ['', ''],
-                      ['', ''],
-                    ],
-                  })
-                }
-              >
-                Tablo
-              </button>
-              <button
-                disabled={!undo.current.length}
-                data-history={historyTick}
-                onClick={() => history('undo')}
-              >
-                Geri Al
-              </button>
-              <button disabled={!redo.current.length} onClick={() => history('redo')}>
-                Yinele
-              </button>
-              <select
-                aria-label="MMPI verisi ekle"
-                value=""
-                onChange={(e) => {
-                  const entry = catalog[Number(e.target.value)];
-                  if (entry)
-                    add({
-                      ...newBlock(entry.table ? 'dataTable' : 'dataField'),
-                      path: entry.path,
-                      label: entry.label,
-                    });
-                }}
-              >
-                <option value="">+ MMPI Verisi</option>
-                {catalog.map((c, i) => (
-                  <option key={`${c.table ? 't' : 'f'}-${c.path}`} value={i}>
-                    {c.label}
-                  </option>
-                ))}
+                      <div className="report-toolbar" role="toolbar" aria-label="Metin biçimlendirme">
+            <div className="report-toolbar-group" role="group" aria-label="Biçim">
+              {(['bold', 'italic', 'underline'] as const).map((cmd, i) => <button key={cmd} title={['Kalın', 'İtalik', 'Altı çizili'][i]} aria-label={['Kalın', 'İtalik', 'Altı çizili'][i]} onMouseDown={e => e.preventDefault()} onClick={() => {
+                const active = document.activeElement; if (active instanceof HTMLElement && active.isContentEditable) { document.execCommand(cmd); active.dispatchEvent(new Event('input', { bubbles: true })); }
+              }}><span style={{ fontWeight: cmd==='bold'?700:400, fontStyle: cmd==='italic'?'italic':'normal', textDecoration: cmd==='underline'?'underline':'none' }}>{['B', 'I', 'U'][i]}</span></button>)}
+            </div>
+            <span className="report-toolbar-sep" aria-hidden />
+            <div className="report-toolbar-group" role="group" aria-label="Yapı">
+              {(['heading1', 'heading2', 'paragraph', 'bulletList', 'numberedList'] as TextKind[]).map((kind, i) => <button key={kind} title={['Başlık 1', 'Başlık 2', 'Paragraf', 'Madde listesi', 'Numaralı liste'][i]} onClick={() => {
+                const b = doc.blocks.find(b => b.id === selected); if (b && !['dataField', 'dataTable', 'table'].includes(b.type)) updateBlock(b.id, { type: kind }); else add(newBlock(kind));
+              }}>{['H1', 'H2', 'Paragraf', '• Liste', '1. Liste'][i]}</button>)}
+              <button title="Tablo ekle" onClick={() => add({ ...newBlock('table'), rows: [['Başlık', 'Başlık'], ['', ''], ['', '']] })}>Tablo</button>
+            </div>
+            <span className="report-toolbar-sep" aria-hidden />
+            <div className="report-toolbar-group" role="group" aria-label="Ekle">
+              <select aria-label="MMPI verisi ekle" value="" onChange={e => { const entry = catalog[Number(e.target.value)]; if (entry) add({ ...newBlock(entry.table ? 'dataTable' : 'dataField'), path: entry.path, label: entry.label }); }}>
+                <option value="">+ MMPI Verisi</option>{catalog.map((c, i) => <option key={`${c.table ? 't' : 'f'}-${c.path}`} value={i}>{c.label}</option>)}
               </select>
               <button onClick={() => add(newBlock('paragraph'))}>+ Paragraf</button>
             </div>
-            <p className="ws-muted report-editor-hint">
-              Metni seçerek biçimlendirin. Kilitli MMPI alanları puanlama çıktısıdır; düzenlenemez. Liste
-              öğelerini yeni satıra yazın.
-            </p>
+            <span className="report-toolbar-sep" aria-hidden />
+            <div className="report-toolbar-group" role="group" aria-label="Geçmiş">
+              <button disabled={!undo.current.length} data-history={historyTick} onClick={() => history('undo')} title="Geri al (Ctrl+Z)">Geri Al</button>
+              <button disabled={!redo.current.length} onClick={() => history('redo')} title="Yinele (Ctrl+Shift+Z)">Yinele</button>
+            </div>
+          </div>
+          <p className="report-editor-hint">Metni seçip biçimlendirin. Mavi çerçeveli alanlar doğrulanmış MMPI çıktısıdır — salt okunur. Listelerde her satır bir madde.</p>
             <div
               className="report-blocks"
               onKeyDown={(e) => {
@@ -552,7 +486,7 @@ export function ReportEditor({
                   }
                 }}
               >
-                {aiBusy ? 'AI yorumu alınıyor…' : 'AI yorumunu rapora ekle'}
+                {aiBusy ? 'AI yorumu alınıyor…' : 'AI yorumunu ekle (düzenlenebilir)'}
               </button>
             </div>
             <details className="report-template-save">
@@ -589,7 +523,10 @@ export function ReportEditor({
           </section>
           <section className="report-preview-pane" aria-label="Canlı önizleme">
             <div className="report-preview-label">
-              CANLI ÖNİZLEME · A4 <span>Sayfa sonları yazdırma sırasında hesaplanır</span>
+              <span>CANLI ÖNİZLEME · A4 <span style={{fontWeight:400, textTransform:'none', letterSpacing:0, marginLeft:6, color:'var(--soft)'}}>APA 7 · 1 inç kenar · çift aralıklı</span></span>
+              <span className="report-preview-actions">
+                <button type="button" disabled={autosave.busy || !title.trim()} onClick={() => void print()} title="Yazdır / PDF olarak kaydet (tarayıcı)">Yazdır / PDF</button>
+              </span>
             </div>
             <ReportPreview content={doc} source={source} title={title} status={status} date={generatedAt} />
           </section>

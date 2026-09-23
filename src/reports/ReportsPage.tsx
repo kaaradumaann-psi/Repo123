@@ -209,7 +209,7 @@ export function ReportsPage({
           <section className="report-choice-card">
             <span className="section-badge">01 · TAM RAPOR</span>
             <h2>Tüm MMPI sonuçları</h2>
-            <p>Mevcut kapsamlı rapor; grafik, analiz ve uzman notlarıyla. İçeriği değiştirilmez.</p>
+            <p>APA 7 uyumlu ham çıktı — grafik ve yorumlar salt okunur. Düzenleme gerektirmez.</p>
             <div className="report-actions">
               <a className="btn-secondary" href={`/kayitlar/${recordId}`}>
                 Aç
@@ -217,18 +217,7 @@ export function ReportsPage({
               <button className="btn-secondary" disabled={!profile} onClick={() => setFullOpen((v) => !v)}>
                 Önizle
               </button>
-              <button
-                className="btn-secondary"
-                disabled={!profile}
-                onClick={() => {
-                  const previous = document.title;
-                  document.title = `MMPI_Klinik_Raporu_${record.firstName}_${record.lastName}_${record.applicationDate}`;
-                  window.print();
-                  document.title = previous;
-                }}
-              >
-                Yazdır / PDF
-              </button>
+
             </div>
           </section>
           <section className="report-choice-card">

@@ -104,58 +104,69 @@ export function newBlock(type: ReportBlock['type'], text = ''): ReportBlock {
   return { id: crypto.randomUUID(), type, runs: [{ text }] };
 }
 export function standardTemplate(): ReportDocument {
+  // APA 7 — minimal öntanımlı: yalnızca Geçerlik + Klinik; diğer ölçekler +MMPI Verisi ile eklenir.
   const blocks: ReportBlock[] = [];
   const heading = (text: string, when?: string) => blocks.push({ ...newBlock('heading2', text), when });
-  const text = (template: string, when?: string) =>
+  const title = (text: string) => blocks.push({ ...newBlock('heading1', text) });
+  const para = (template: string, when?: string) =>
     blocks.push({ ...newBlock('paragraph', template), sourceTemplate: template, when });
   const data = (path: string, label: string) =>
     blocks.push({ ...newBlock('dataField'), path, label, when: path });
   const table = (path: string) => blocks.push({ ...newBlock('dataTable'), path, when: `tables.${path}` });
-  heading('1. Danışan Bilgileri');
+
+  // Kapak / başlık — APA 7: ortalanmış, kalın
+  title('Psikolojik Değerlendirme Raporu');
+
+  // 1 — Kimlik (APA Tablo 1 stili, tek aralıklı)
+  heading('Danışan Bilgileri');
   data('patient.fullName', 'Ad Soyad');
   data('patient.age', 'Yaş');
   data('patient.gender', 'Cinsiyet');
-  heading('2. Uygulama Bilgileri');
+  data('patient.education', 'Eğitim');
+  data('patient.occupation', 'Meslek');
+
+  // 2 — Değerlendirme bağlamı
+  heading('Değerlendirme Bilgileri');
   data('test.date', 'Test tarihi');
-  data('test.psychologist', 'Uygulayan');
-  data('test.method', 'Yöntem');
+  data('test.psychologist', 'Değerlendirmeyi yapan');
+  data('test.method', 'Uygulama yöntemi');
   data('test.duration', 'Süre');
-  text('{{test.reason}}', 'test.reason');
-  heading('3. Değerlendirme Özeti', 'summary');
-  text('{{summary}}', 'summary');
-  heading('4. Geçerlik Değerlendirmesi', 'validity');
-  data('validity.status', 'Geçerlik');
+  para('{{test.reason}}', 'test.reason');
+  para('{{test.clinicalContext}}', 'test.clinicalContext');
+
+  // 3 — Geçerlik (APA 7: ham ve T ayrı sütun, düzey etiketi, dipnotta yorum)
+  heading('Geçerlik Değerlendirmesi', 'validity');
+  data('validity.status', 'Genel geçerlik');
   table('validity');
-  for (const s of ['?', 'L', 'F', 'K']) text(`{{validity.${s}.comment}}`, `validity.${s}.comment`);
-  data('validity.FK', 'F-K');
-  text('{{validity.FKComment}}', 'validity.FKComment');
-  data('validity.TR.score', 'TR');
-  text('{{validity.TR.comment}}', 'validity.TR.comment');
+  for (const s of ['?', 'L', 'F', 'K']) para(`{{validity.${s}.comment}}`, `validity.${s}.comment`);
+  data('validity.FK', 'F – K');
+  para('{{validity.FKComment}}', 'validity.FKComment');
+  // TR ve dikkatsizlik yalnızca madde düzeyi varsa görünür
+  data('validity.TR.score', 'TR Tutarlılık');
+  para('{{validity.TR.comment}}', 'validity.TR.comment');
   data('validity.carelessness.score', 'Dikkatsizlik');
-  text('{{validity.carelessness.comment}}', 'validity.carelessness.comment');
-  text('{{validity.warnings}}', 'validity.warnings');
-  heading('5. Klinik Ölçekler', 'tables.clinical');
+  para('{{validity.carelessness.comment}}', 'validity.carelessness.comment');
+  para('{{validity.warnings}}', 'validity.warnings');
+  para('{{summary}}', 'summary');
+
+  // 4 — Klinik (APA Tablo 2)
+  heading('Klinik Ölçekler', 'tables.clinical');
   table('clinical');
   for (const s of ['Hs', 'D', 'Hy', 'Pd', 'Mf', 'Pa', 'Pt', 'Sc', 'Ma', 'Si'])
-    text(`${s}: {{clinical.${s}.comment}}`, `clinical.${s}.comment`);
-  heading('6. Kod/Profil Analizi', 'code.value');
-  data('code.value', 'Profil kodu');
-  text('{{code.interpretation}}', 'code.interpretation');
-  text('{{code.conditions}}', 'code.conditions');
-  heading('7. Kritik Bulgular', 'critical|impressions');
-  data('critical', 'Kritik maddeler');
-  text('{{impressions}}', 'impressions');
-  heading('Türetilmiş Ölçekler', 'tables.derived');
-  table('derived');
-  heading('Endeksler', 'tables.indexes');
-  table('indexes');
-  heading('8. Psikolog Değerlendirmesi');
-  text('{{expertNotes}}', 'expertNotes');
-  text('');
+    para(`${s}: {{clinical.${s}.comment}}`, `clinical.${s}.comment`);
+
+  // 5 — Yorum (serbest metin — uzmanın sorumluluğunda)
+  heading('Klinik Değerlendirme');
+  para('{{expertNotes}}', 'expertNotes');
+  para('');
+
+  // Kod, kritik, türetilmiş vb. öntanımlıda YOK — kişi isterse +MMPI Verisi ile ekler.
+
+  // APA 7 kapanış
   heading('9. Sonuç');
-  text('');
+  para('');
   heading('10. Notlar');
-  text('');
+  para('');
   return { schemaVersion: 1, blocks };
 }
 /** Only presentation classification: no score calculation. Numeric placeholders and profile codes stay locked. */

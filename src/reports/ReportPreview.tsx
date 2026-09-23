@@ -9,6 +9,7 @@ import {
   type ReportBlock,
   type ReportDocument,
 } from './templateEngine';
+
 export function InlineText({ runs }: { runs: Inline[] }) {
   return (
     <>
@@ -27,6 +28,7 @@ export function InlineText({ runs }: { runs: Inline[] }) {
     </>
   );
 }
+
 export function ReportBlockView({ block: b, source }: { block: ReportBlock; source: ReportSourceData }) {
   if (!hasData(source, b.when)) return null;
   const text = <InlineText runs={b.runs || []} />;
@@ -48,25 +50,32 @@ export function ReportBlockView({ block: b, source }: { block: ReportBlock; sour
             rows: (b.rows?.slice(1) || []).map((r) => r.map((c) => resolvePlaceholders(c, source))),
           };
     if (!t?.rows.length) return null;
+    const caption = (t as { label?: string }).label ? `Tablo ${(t as { label?: string }).label}` : undefined;
     return (
-      <table>
-        <thead>
-          <tr>
-            {t.columns.map((c, i) => (
-              <th key={i}>{c}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {t.rows.map((row, i) => (
-            <tr key={i}>
-              {row.map((c, j) => (
-                <td key={j}>{c}</td>
+      <>
+        {caption && <p className="apa-table-note" style={{ fontWeight: 600, marginBottom: 4 }}>{caption}</p>}
+        <table>
+          <thead>
+            <tr>
+              {t.columns.map((c, i) => (
+                <th key={i}>{c}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {t.rows.map((row, i) => (
+              <tr key={i}>
+                {row.map((c, j) => (
+                  <td key={j}>{c}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="apa-table-note">
+          Not. T puanları Türk normlarına göre hesaplanmıştır. K düzeltmesi uygulanmış değerler K+ sütunundadır.
+        </p>
+      </>
     );
   }
   if (b.type === 'bulletList' || b.type === 'numberedList') {
@@ -83,11 +92,13 @@ export function ReportBlockView({ block: b, source }: { block: ReportBlock; sour
   }
   return blockText(b, source).trim() ? <p>{text}</p> : null;
 }
+
 export function safeReportImage(value?: string): string | undefined {
   return value && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value) && value.length < 1000000
     ? value
     : undefined;
 }
+
 export function ReportPreview({
   content,
   source,
@@ -102,32 +113,53 @@ export function ReportPreview({
   status: string;
 }) {
   const h = content.letterhead;
+  const hasLetterhead = Boolean(h?.institution || h?.name || safeReportImage(h?.logo));
   return (
-    <article className="psych-paper" aria-label="A4 psikolog raporu">
-      <header className="psych-letterhead">
-        {safeReportImage(h?.logo) && <img src={safeReportImage(h?.logo)} alt="Kurum logosu" />}
-        <div>
-          <strong>{h?.institution || 'MMPI · Psikolog Raporu'}</strong>
-          <p>{[h?.name, h?.title].filter(Boolean).join(' · ')}</p>
-          <small>{[h?.phone, h?.email, h?.address].filter(Boolean).join(' · ')}</small>
-        </div>
-      </header>
-      <h1 className="psych-title">{title}</h1>
+    <article className="psych-paper apa-paper" aria-label="APA 7 psikolog raporu">
+      <div className="apa-header">
+        <span>MMPI PSİKOLOJİK DEĞERLENDİRME RAPORU</span>
+        <span>{new Date(date).toLocaleDateString('tr-TR')}</span>
+      </div>
+
+      {hasLetterhead ? (
+        <header className="psych-letterhead">
+          {safeReportImage(h?.logo) && <img src={safeReportImage(h?.logo)} alt="Kurum logosu" />}
+          <div>
+            <strong>{h?.institution || 'Psikolojik Değerlendirme Birimi'}</strong>
+            <p>{[h?.name, h?.title].filter(Boolean).join(' · ')}</p>
+            <small>{[h?.phone, h?.email, h?.address].filter(Boolean).join(' · ')}</small>
+          </div>
+        </header>
+      ) : null}
+
+      <div className="apa-title-block">
+        <h1 className="psych-title" style={{ margin: 0 }}>{title}</h1>
+        <p className="apa-subtitle">
+          Minnesota Çok Yönlü Kişilik Envanteri (MMPI) — Klinik Yorum ·{' '}
+          {status === 'completed' ? 'Tamamlandı' : 'Taslak'}
+        </p>
+      </div>
+
       <p className="psych-date">
-        {new Date(date).toLocaleDateString('tr-TR')} · {status === 'completed' ? 'Tamamlandı' : 'Taslak'}
+        Rapor tarihi: {new Date(date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} · Durum:{' '}
+        {status === 'completed' ? 'Tamamlandı' : 'Taslak'}
       </p>
+
       {visibleBlocks(content, source).map((b) => (
         <ReportBlockView key={b.id} block={b} source={source} />
       ))}
+
       {safeReportImage(h?.signature) && (
         <footer className="psych-signature">
           <img src={safeReportImage(h?.signature)} alt="İmza" />
-          <p>{h?.name}</p>
+          <p style={{ margin: 0, fontWeight: 600 }}>{h?.name}</p>
+          {h?.title && <p style={{ margin: 0, color: 'var(--soft)', fontSize: 11 }}>{h?.title}</p>}
         </footer>
       )}
+
       <footer className="psych-disclaimer">
-        Gizli · Klinik değerlendirme belgesi. MMPI bulguları uzman değerlendirmesiyle birlikte ele
-        alınmalıdır.
+        Gizli ve kişiye özeldir. Bu rapor yalnızca yetkin ruh sağlığı uzmanı tarafından klinik görüşme ve diğer
+        bulgularla birlikte değerlendirilmelidir. APA 7. baskı raporlama ilkelerine uygun olarak hazırlanmıştır.
       </footer>
     </article>
   );
