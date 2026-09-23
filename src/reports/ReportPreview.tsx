@@ -29,16 +29,24 @@ export function InlineText({ runs }: { runs: Inline[] }) {
   );
 }
 
-export function ReportBlockView({ block: b, source }: { block: ReportBlock; source: ReportSourceData }) {
+export function ReportBlockView({
+  block: b,
+  source,
+  tableNumber,
+}: {
+  block: ReportBlock;
+  source: ReportSourceData;
+  tableNumber?: number;
+}) {
   if (!hasData(source, b.when)) return null;
   const text = <InlineText runs={b.runs || []} />;
-  if (b.type === 'heading1') return <h1>{text}</h1>;
-  if (b.type === 'heading2') return <h2>{text}</h2>;
+  if (b.type === 'heading1') return <h1 className="apa-level-1">{text}</h1>;
+  if (b.type === 'heading2') return <h2 className="apa-level-2">{text}</h2>;
   if (b.type === 'dataField')
     return (
-      <p>
-        {(b.label || b.path) && <strong>{b.label || b.path}: </strong>}
-        {blockText(b, source)}
+      <p className="psych-field">
+        <span className="psych-field-label">{b.label || b.path}:</span>
+        <span className="psych-field-value">{blockText(b, source)}</span>
       </p>
     );
   if (b.type === 'dataTable' || b.type === 'table') {
@@ -50,10 +58,14 @@ export function ReportBlockView({ block: b, source }: { block: ReportBlock; sour
             rows: (b.rows?.slice(1) || []).map((r) => r.map((c) => resolvePlaceholders(c, source))),
           };
     if (!t?.rows.length) return null;
-    const caption = (t as { label?: string }).label ? `Tablo ${(t as { label?: string }).label}` : undefined;
+    const baseLabel = (t as { label?: string }).label || b.label || '';
+    // APA 7: Table n on own line bold, then title italic on next line
+    const tableNumLabel = tableNumber ? `Tablo ${tableNumber}` : undefined;
+    const tableTitle = baseLabel ? baseLabel.charAt(0).toUpperCase() + baseLabel.slice(1) : undefined;
     return (
-      <>
-        {caption && <p className="apa-table-note" style={{ fontWeight: 600, marginBottom: 4 }}>{caption}</p>}
+      <figure className="apa-table">
+        {tableNumLabel && <figcaption className="apa-table-number">{tableNumLabel}</figcaption>}
+        {tableTitle && <figcaption className="apa-table-title">{tableTitle}</figcaption>}
         <table>
           <thead>
             <tr>
@@ -72,16 +84,17 @@ export function ReportBlockView({ block: b, source }: { block: ReportBlock; sour
             ))}
           </tbody>
         </table>
-        <p className="apa-table-note">
-          Not. T puanları Türk normlarına göre hesaplanmıştır. K düzeltmesi uygulanmış değerler K+ sütunundadır.
-        </p>
-      </>
+        <figcaption className="apa-table-note">
+          Not. T puanları Türk normlarına göre hesaplanmıştır. Ham = ham puan, K+ = K düzeltmesi eklenmiş
+          değer, Düzey = klinik aralık etiketi. Boş hücreler “Veri mevcut değil” olarak bırakılmıştır.
+        </figcaption>
+      </figure>
     );
   }
   if (b.type === 'bulletList' || b.type === 'numberedList') {
     const Tag = b.type === 'bulletList' ? 'ul' : 'ol';
     return (
-      <Tag>
+      <Tag className="apa-list">
         {inlineLines(b.runs || []).map((line, i) => (
           <li key={i}>
             <InlineText runs={line} />
@@ -90,7 +103,13 @@ export function ReportBlockView({ block: b, source }: { block: ReportBlock; sour
       </Tag>
     );
   }
-  return blockText(b, source).trim() ? <p>{text}</p> : null;
+  const body = blockText(b, source).trim();
+  if (!body) return null;
+  return (
+    <p className="apa-paragraph">
+      <InlineText runs={b.runs || []} />
+    </p>
+  );
 }
 
 export function safeReportImage(value?: string): string | undefined {
@@ -114,52 +133,77 @@ export function ReportPreview({
 }) {
   const h = content.letterhead;
   const hasLetterhead = Boolean(h?.institution || h?.name || safeReportImage(h?.logo));
+  const isDraft = status === 'draft';
+  const blocks = visibleBlocks(content, source);
+  // Number dataTables sequentially for APA Table 1, 2...
+  let tableCounter = 0;
+  const d = new Date(date);
+  const trDate = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const shortDate = d.toLocaleDateString('tr-TR');
   return (
-    <article className="psych-paper apa-paper" aria-label="APA 7 psikolog raporu">
-      <div className="apa-header">
-        <span>MMPI PSİKOLOJİK DEĞERLENDİRME RAPORU</span>
-        <span>{new Date(date).toLocaleDateString('tr-TR')}</span>
-      </div>
+    <article className={`psych-paper apa-paper ${isDraft ? 'is-draft' : 'is-final'}`} aria-label="APA 7 psikolog raporu">
+      {/* watermark for draft — behind content */}
+      {isDraft && (
+        <div className="psych-draft-watermark" aria-hidden="true">
+          TASLAK
+        </div>
+      )}
+
+      <header className="apa-running-head">
+        <span className="apa-running-title">MMPI PSİKOLOJİK DEĞERLENDİRME RAPORU</span>
+        <span className="apa-page-no">{shortDate}</span>
+      </header>
+
+      {isDraft && (
+        <div className="psych-draft-banner" role="note" aria-label="Taslak uyarısı">
+          <strong>TASLAK</strong> — Klinik onayı beklenmektedir. Bu nüsha resmi kayıt sayılmaz, yalnızca iç
+          gözden geçirme içindir.
+        </div>
+      )}
 
       {hasLetterhead ? (
-        <header className="psych-letterhead">
+        <div className="psych-letterhead">
           {safeReportImage(h?.logo) && <img src={safeReportImage(h?.logo)} alt="Kurum logosu" />}
-          <div>
-            <strong>{h?.institution || 'Psikolojik Değerlendirme Birimi'}</strong>
-            <p>{[h?.name, h?.title].filter(Boolean).join(' · ')}</p>
-            <small>{[h?.phone, h?.email, h?.address].filter(Boolean).join(' · ')}</small>
+          <div className="psych-letterhead-text">
+            <div className="psych-letterhead-institution">{h?.institution || 'Psikolojik Değerlendirme Birimi'}</div>
+            {(h?.name || h?.title) && (
+              <div className="psych-letterhead-person">{[h?.name, h?.title].filter(Boolean).join(' · ')}</div>
+            )}
+            {(h?.phone || h?.email || h?.address) && (
+              <div className="psych-letterhead-contact">
+                {[h?.phone, h?.email, h?.address].filter(Boolean).join(' · ')}
+              </div>
+            )}
           </div>
-        </header>
+        </div>
       ) : null}
 
       <div className="apa-title-block">
-        <h1 className="psych-title" style={{ margin: 0 }}>{title}</h1>
-        <p className="apa-subtitle">
-          Minnesota Çok Yönlü Kişilik Envanteri (MMPI) — Klinik Yorum ·{' '}
-          {status === 'completed' ? 'Tamamlandı' : 'Taslak'}
+        <h1 className="apa-cover-title">{title}</h1>
+        <p className="apa-subtitle">Minnesota Çok Yönlü Kişilik Envanteri (MMPI) — Klinik Yorum</p>
+        <p className="apa-cover-meta">
+          {isDraft ? 'Taslak nüsha' : 'Nihai nüsha'} · {trDate}
         </p>
       </div>
 
-      <p className="psych-date">
-        Rapor tarihi: {new Date(date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} · Durum:{' '}
-        {status === 'completed' ? 'Tamamlandı' : 'Taslak'}
-      </p>
-
-      {visibleBlocks(content, source).map((b) => (
-        <ReportBlockView key={b.id} block={b} source={source} />
-      ))}
+      {blocks.map((b) => {
+        const isTable = b.type === 'dataTable' || b.type === 'table';
+        const num = isTable ? ++tableCounter : undefined;
+        return <ReportBlockView key={b.id} block={b} source={source} tableNumber={num} />;
+      })}
 
       {safeReportImage(h?.signature) && (
         <footer className="psych-signature">
           <img src={safeReportImage(h?.signature)} alt="İmza" />
-          <p style={{ margin: 0, fontWeight: 600 }}>{h?.name}</p>
-          {h?.title && <p style={{ margin: 0, color: 'var(--soft)', fontSize: 11 }}>{h?.title}</p>}
+          <p className="psych-signature-name">{h?.name}</p>
+          {h?.title && <p className="psych-signature-title">{h?.title}</p>}
         </footer>
       )}
 
       <footer className="psych-disclaimer">
         Gizli ve kişiye özeldir. Bu rapor yalnızca yetkin ruh sağlığı uzmanı tarafından klinik görüşme ve diğer
         bulgularla birlikte değerlendirilmelidir. APA 7. baskı raporlama ilkelerine uygun olarak hazırlanmıştır.
+        {isDraft && ' — TASLAK nüsha, resmi arşiv sayılmaz.'}
       </footer>
     </article>
   );

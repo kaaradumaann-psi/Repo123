@@ -220,15 +220,41 @@ export function ReportEditor({
     <div className="report-workspace">
       <div className="screen-only">
         <div className="report-editor-top">
-          <a href={`/kayitlar/${initial.mmpi_record_id}/raporlar`}>← Raporlar</a>
-          <span className="section-badge badge-primary">{status === 'draft' ? 'Taslak' : 'Tamamlandı'}</span>
-          <span role="status">
-            {autosave.busy
-              ? 'Kaydediliyor…'
-              : autosave.dirty && !autosave.error
-                ? 'Değişiklikler kaydedilecek…'
-                : autosave.message}
-          </span>
+          <div className="report-editor-top-main">
+            <a className="report-back-link" href={`/kayitlar/${initial.mmpi_record_id}/raporlar`}>
+              ← Raporlar
+            </a>
+            <span className={`status-pill ${status === 'draft' ? 'status-draft' : 'status-completed'}`}>
+              <span className="status-dot" aria-hidden="true" />
+              {status === 'draft' ? 'Taslak' : 'Tamamlandı'}
+            </span>
+            <span
+              role="status"
+              className={`report-save-status ${autosave.busy ? 'is-saving' : autosave.error ? 'is-error' : ''}`}
+            >
+              {autosave.busy
+                ? 'Kaydediliyor…'
+                : autosave.dirty && !autosave.error
+                  ? 'Değişiklikler kaydedilecek…'
+                  : autosave.error
+                    ? autosave.error
+                    : autosave.message || (status === 'draft' ? 'Taslak otomatik kaydedilir' : 'Kaydedildi')}
+            </span>
+          </div>
+          {status === 'draft' ? (
+            <div className="draft-explain">
+              <strong>Taslak modunda</strong> — Bu rapor henüz tamamlanmadı. Önizlemede ve baskıda{' '}
+              <strong>TASLAK</strong> filigranı görünür. Otomatik kaydedilir; hazır olduğunuzda{' '}
+              <em>Raporu Tamamla</em> ile nihai nüshaya geçebilirsiniz — tamamlamak kilitlemez, düzenlemeye devam
+              edebilirsiniz.
+            </div>
+          ) : (
+            <div className="draft-explain draft-explain--completed">
+              <strong>Tamamlandı</strong> — Klinik onay verildi. Önizleme ve baskı “nihai nüsha” olarak görünür.
+              Düzenlemeye devam edebilirsiniz; her değişiklik sürümlenir ve “Taslağa Çevir” ile tekrar taslağa
+              alabilirsiniz.
+            </div>
+          )}
         </div>
         <label className="report-title-input">
           Rapor adı
@@ -540,9 +566,36 @@ export function ReportEditor({
           </section>
           <section className="report-preview-pane" aria-label="Canlı önizleme">
             <div className="report-preview-label">
-              <span>CANLI ÖNİZLEME · A4 <span style={{fontWeight:400, textTransform:'none', letterSpacing:0, marginLeft:6, color:'var(--soft)'}}>APA 7 · 1 inç kenar · çift aralıklı</span></span>
+              <span>
+                CANLI ÖNİZLEME · A4{' '}
+                <span
+                  style={{
+                    fontWeight: 400,
+                    textTransform: 'none',
+                    letterSpacing: 0,
+                    marginLeft: 6,
+                    color: 'var(--soft)',
+                  }}
+                >
+                  APA 7 · 1 inç kenar · çift aralıklı
+                </span>{' '}
+                <span
+                  className={`status-pill ${status === 'draft' ? 'status-draft' : 'status-completed'}`}
+                  style={{ marginLeft: 8, fontSize: 9, padding: '3px 8px', verticalAlign: 'middle' }}
+                >
+                  <span className="status-dot" aria-hidden="true" />
+                  {status === 'draft' ? 'TASLAK' : 'NİHAİ'}
+                </span>
+              </span>
               <span className="report-preview-actions">
-                <button type="button" disabled={autosave.busy || !title.trim()} onClick={() => void print()} title="Yazdır / PDF olarak kaydet (tarayıcı)">Yazdır / PDF</button>
+                <button
+                  type="button"
+                  disabled={autosave.busy || !title.trim()}
+                  onClick={() => void print()}
+                  title="Yazdır / PDF olarak kaydet (tarayıcı)"
+                >
+                  Yazdır / PDF
+                </button>
               </span>
             </div>
             <ReportPreview content={doc} source={source} title={title} status={status} date={generatedAt} />

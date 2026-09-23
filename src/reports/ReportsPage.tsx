@@ -66,10 +66,13 @@ export function ReportsSummary({ recordId }: { recordId: string }) {
         <p>Henüz psikolog raporu yok. Tam Raporu açabilir veya yeni rapor oluşturabilirsiniz.</p>
       ) : (
         reports.slice(0, 3).map((r) => (
-          <p key={r.id}>
-            <a href={`/kayitlar/${recordId}/raporlar/${r.id}`}>{r.title}</a> ·{' '}
-            {r.status === 'draft' ? 'Taslak' : 'Tamamlandı'} ·{' '}
-            {new Date(r.updated_at).toLocaleDateString('tr-TR')}
+          <p key={r.id} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <a href={`/kayitlar/${recordId}/raporlar/${r.id}`}>{r.title}</a>
+            <span className={`status-pill ${r.status === 'draft' ? 'status-draft' : 'status-completed'}`} style={{ fontSize: 10, padding: '2px 8px' }}>
+              <span className="status-dot" aria-hidden="true" />
+              {r.status === 'draft' ? 'Taslak' : 'Tamamlandı'}
+            </span>
+            <span style={{ color: 'var(--soft)', fontSize: 12 }}>{new Date(r.updated_at).toLocaleDateString('tr-TR')}</span>
           </p>
         ))
       )}
@@ -338,7 +341,12 @@ export function ReportsPage({
                     <tr key={r.id}>
                       <td>{r.title}</td>
                       <td>{r.template_name}</td>
-                      <td>{r.status === 'draft' ? 'Taslak' : 'Tamamlandı'}</td>
+                      <td>
+                        <span className={`status-pill ${r.status === 'draft' ? 'status-draft' : 'status-completed'}`} style={{ fontSize: 10, padding: '3px 8px' }}>
+                          <span className="status-dot" aria-hidden="true" />
+                          {r.status === 'draft' ? 'Taslak' : 'Tamamlandı'}
+                        </span>
+                      </td>
                       <td>{new Date(r.created_at).toLocaleDateString('tr-TR')}</td>
                       <td>{new Date(r.updated_at).toLocaleString('tr-TR')}</td>
                       <td>
