@@ -1101,3 +1101,37 @@
     letter-spacing: .02em;
   }
 }
+
+/* K6 chrome-leak fix: Rapor sayfalarında Yazdır/PDF'te sadece kağıt basılır — üstteki siyah başlık, choice grid, TAM RAPOR kartı, antet ayarı, örnek kopyaları tamamen gizlenir. */
+@media print {
+  .reports-page .screen-only,
+  .report-workspace .screen-only,
+  .report-workspace > .screen-only,
+  .reports-page > .screen-only,
+  .reports-heading,
+  .report-choice-grid,
+  .report-examples-card,
+  .report-full-preview-card,
+  .report-settings,
+  .report-history,
+  .report-summary-card,
+  .report-editor-top,
+  .report-title-input,
+  .report-edit-pane,
+  .report-preview-pane,
+  .report-mobile-tabs,
+  .report-actions,
+  .report-split,
+  .report-template-save,
+  .report-toolbar {
+    display: none !important;
+  }
+  .reports-page,
+  .report-workspace {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    background: white !important;
+  }
+  .print-only, .psych-print { display: block !important; }
+}
