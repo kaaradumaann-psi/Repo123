@@ -107,13 +107,11 @@ type CaseWorkspaceProps = {
   onSaved?: () => void;
   /**
    * Oturumun bu yüklemede nasıl kurulduğu. Yeni bir girişte ('signin') persisted
-   * taslak otomatik geri yüklenmez ve 'home' adımına yönlenilmez — landing üzerinde,
-   * kullanıcı isterse 'Devam et/kaldığın yerden devam' ile kendisi açar. Aynı oturumda
-   * F5 ('session') mevcut davranışı korur ve kaldığı yerden devam eder.
+   * taslak otomatik geri yüklenmez ve 'home' adımına yönlenilmez — ekrandaki
+   * "Devam edilebilecek çalışma" kartından kullanıcı isterse kendisi açar. Aynı
+   * oturumda F5 ('session') mevcut davranışı korur ve kaldığı yerden devam eder.
    */
   flowOrigin: 'session' | 'signin';
-  /** / rotası temiz landing görünümüdür; eski taslak otomatik açılmaz. */
-  landing?: boolean;
 };
 
 function formatDate(value: string): string {
@@ -144,19 +142,18 @@ function releaseScanPreviewUrls(scan: ScanSet | null): void {
   }
 }
 
-export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing = false }: CaseWorkspaceProps) {
+export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWorkspaceProps) {
   /**
    * Taslak geri yükleme (F5 dayanıklılığı): /islem doğrudan açıldığında bu
    * uzmanın kayıtlı taslağı varsa state ondan beslenir. Boş/bozuk/süresi dolmuş
    * taslak yok sayılır; uygulama yine tertemiz açılır.
    *
-   * / (landing) ve yeni girişte ('signin') taslak OKUNMAZ ve otomatik geri
-   * yüklenmez. Böylece SSS, gizlilik, kaynakça veya üst geri düğmesinden ana
-   * sayfaya dönmek her zaman temiz başlangıç gösterir. Kullanıcı daha sonra
-   * İşlem sekmesine geçip taslağı kendi isteğiyle açabilir.
+   * Yeni girişte ('signin') taslak OKUNMAZ ve otomatik geri yüklenmez; kullanıcı
+   * "Devam edilebilecek çalışma" kartından isterse kendisi açar. Böylece yeni
+   * giriş her zaman temiz bir başlangıç gösterir.
    */
   const [boot] = useState(() => {
-    if (landing || flowOrigin === 'signin') return null;
+    if (flowOrigin === 'signin') return null;
     const draft = loadDraft(actor.id);
     if (!draft || !isDraftNonEmpty(draft)) {
       // Kaydedilmiş başarı ekranı da korunur (F5 sonrası "kaydedildi" kaybolmaz).
@@ -205,14 +202,12 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
   const stepIndex = STEPS.findIndex(item => item.id === step);
 
   // Yeni girişte ('signin') persisted taslak state'e otomatik yüklenmez (bkz. `boot`).
-  // Yine de kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur
-  // bir anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o
-  // kalıntıya dokunulmaz; başlayınca temizlenir (bkz. autosave effect + startNew).
-  // Yeni girişte persisted taslak state'e otomatik yüklenmez (bkz. `boot`). Yine de
-  // kullanıcı landing'den "kaldığın yerden devam" diyebilsin diye salt-okunur bir
-  // anlık görüntü tutulur. Kullanıcı gerçekten yeni/yarım işe başlayana kadar o kalıntıya
-  // dokunulmaz. `liveDraftRef`, pending-resume (snapshot bekleyen) durumu belirtir: o
-  // durumda beforeunload boş state yazmaz ki henüz geri yüklenmemiş çalışma ezilmesin.
+  // Yine de kullanıcı "Devam edilebilecek çalışma" kartından kaldığı yerden devam
+  // edebilsin diye salt-okunur bir anlık görüntü tutulur. Kullanıcı gerçekten yeni/
+  // yarım işe başlayana kadar o kalıntıya dokunulmaz; başlayınca temizlenir
+  // (bkz. autosave effect + startNew). `liveDraftRef`, pending-resume (snapshot
+  // bekleyen) durumu belirtir: o durumda beforeunload boş state yazmaz ki henüz
+  // geri yüklenmemiş çalışma ezilmesin.
   const liveDraftRef = useRef<CaseDraftV1 | null>(null);
   const [draftSnapshot, setDraftSnapshot] = useState<CaseDraftV1 | null>(() => {
     if (flowOrigin !== 'signin') return null;
@@ -258,9 +253,9 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
   /* ---------------- Taslak otomatik kayıt (debounced) ---------------- */
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      // Yeni girişte veya gerçek landing'de kullanıcı henüz bir işe başlamadıysa
-      // autosave ÇALIŞMAZ: boş state yazmak korunmuş taslağı ezebilir.
-      if ((flowOrigin === 'signin' || landing) && boot == null && step === 'home' && !hasAnyData) return;
+      // Yeni girişte kullanıcı henüz bir işe başlamadıysa autosave ÇALIŞMAZ:
+      // boş state yazmak korunmuş taslağı ezebilir.
+      if (flowOrigin === 'signin' && boot == null && step === 'home' && !hasAnyData) return;
       // Kullanıcı gerçekten yeni veri girdiği an salt-okunur kalıntı snapshot'ı bu
       // ekrandaki gerçek iş tarafından devralınır.
       setDraftSnapshot(null);
@@ -287,7 +282,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, landing, hasAnyData, revisionOf, revisionReason]);
+  }, [actor.id, step, client, method, answers, currentItem, raw, scan, saved, flowOrigin, hasAnyData, revisionOf, revisionReason]);
 
   /* Sekme kapanmadan önce son senkron yazım + yarım iş uyarısı. */
   const liveRef = useRef({ step, client, method, answers, currentItem, raw, scan, saved, revisionOf, revisionReason });
@@ -321,8 +316,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
         live.client.applicationReason.trim() !== '' ||
         live.client.clinicalContext.trim() !== '';
       const hasDraftData = hasIntake || live.method !== null || entered > 0 || rawCount > 0 || scanCount > 0;
-      const isCleanLanding = landing && live.step === 'home' && !live.saved && !hasDraftData;
-      if (!isPendingResume && !isCleanLanding) {
+      if (!isPendingResume) {
         try {
           saveDraft(actor.id, {
             step: live.step,
@@ -346,7 +340,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [actor.id, flowOrigin, landing]);
+  }, [actor.id, flowOrigin]);
 
   /* ---------------- Çevrimdışı kuyruk (outbox) ---------------- */
 
@@ -579,7 +573,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     setConfirmNew(true);
   }
 
-  /** Landing'in birincil "Yeni MMPI işlemi" eylemi — resumable taslak varsa onay ister. */
+  /** "Yeni MMPI işlemi" eylemi — resumable taslak varsa onay ister. */
   function requestNewEntry() {
     if (draftSnapshot && isDraftNonEmpty(draftSnapshot)) {
       setConfirmNew(true);
@@ -588,7 +582,7 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin, landing 
     startNew();
   }
 
-  /** Landing'den "Kaldığın yerden devam et" — salt-okunur kalıntıyı gerçek state'e açar. */
+  /** "Kaldığın yerden devam et" — salt-okunur kalıntıyı gerçek state'e açar. */
   function openDraftSnapshot() {
     if (!draftSnapshot) return;
     releaseScanPreviewUrls(scan);
