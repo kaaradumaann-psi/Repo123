@@ -192,7 +192,7 @@ export function MobileNav({ items, user, onLogout }: MobileNavProps) {
                   <div className="user-info-text">
                     <strong className="user-full-name">{displayName(user)}</strong>
                     <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
-                      {user.role === 'ADMIN' ? 'Yönetici' : 'Uzman psikolog'}
+                      {user.role === 'ADMIN' ? 'Yönetici' : 'Psikolog'}
                     </span>
                   </div>
                 </div>

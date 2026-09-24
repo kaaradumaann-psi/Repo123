@@ -34,6 +34,7 @@ import {
   updateOutboxEntry,
 } from '../workspace/draftStorage';
 import type { CaseDraftV1, OutboxEntry } from '../workspace/draftStorage';
+import { recordDeviceAudit } from '../settings/auditTrail';
 import {
   EDUCATION_OPTIONS,
   FOLLOW_UP_OPTIONS,
@@ -151,9 +152,15 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
    * Yeni girişte ('signin') taslak OKUNMAZ ve otomatik geri yüklenmez; kullanıcı
    * "Devam edilebilecek çalışma" kartından isterse kendisi açar. Böylece yeni
    * giriş her zaman temiz bir başlangıç gösterir.
+   *
+   * Tek istisna `?taslak=devam`: panodaki "Devam et" düğmesi bu parametreyle
+   * gelir ve kayıtlı taslak yeni girişte bile doğrudan açılır — kullanıcı
+   * hazırlık ekranında durmaz. Parametre mount anında bir kez okunur ve URL'den
+   * temizlenir ki F5 aynı isteği tekrar tetiklemesin.
    */
+  const resumeRequested = useRef(new URLSearchParams(window.location.search).get('taslak') === 'devam').current;
   const [boot] = useState(() => {
-    if (flowOrigin === 'signin') return null;
+    if (flowOrigin === 'signin' && !resumeRequested) return null;
     const draft = loadDraft(actor.id);
     if (!draft || !isDraftNonEmpty(draft)) {
       // Kaydedilmiş başarı ekranı da korunur (F5 sonrası "kaydedildi" kaybolmaz).
@@ -189,7 +196,9 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
   const [revisionNote, setRevisionNote] = useState<string | null>(null);
   const [editLoadError, setEditLoadError] = useState('');
   const [restoredAt, setRestoredAt] = useState<string | null>(() => (boot && isDraftNonEmpty(boot) ? boot.updatedAt : null));
-  const [restoreDismissed, setRestoreDismissed] = useState(false);
+  // Doğrudan taslağa gelen kullanıcıya "Yarım kalan işlem bulundu" bandı tekrar
+  // gösterilmez; kaldığı adıma zaten yerleşti.
+  const [restoreDismissed, setRestoreDismissed] = useState(() => resumeRequested);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(() => boot?.updatedAt ?? null);
   const [storageWarning, setStorageWarning] = useState('');
   const [confirmNew, setConfirmNew] = useState(false);
@@ -342,6 +351,12 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
     return () => window.removeEventListener('beforeunload', handler);
   }, [actor.id, flowOrigin]);
 
+  /* Doğrudan taslak isteği işlendi: parametreyi adres çubuğundan temizle ki
+     F5/yeniden yükleme aynı isteği tekrar tetiklemesin. */
+  useEffect(() => {
+    if (resumeRequested) window.history.replaceState(null, '', window.location.pathname);
+  }, [resumeRequested]);
+
   /* ---------------- Çevrimdışı kuyruk (outbox) ---------------- */
 
   async function flushEntries(entries: OutboxEntry[]): Promise<void> {
@@ -366,6 +381,12 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
           record = await createRecord(input, sortedPages(restored), definition, actor, entry.idempotencyKey, [meta]);
         }
         removeOutboxEntry(actor.id, entry.idempotencyKey);
+        recordDeviceAudit(actor.id, {
+          action: 'save',
+          entity: 'record',
+          entityId: record.id,
+          summary: 'Kuyrukta bekleyen kayıt gönderildi',
+        });
         // Kuyruktaki kayıt bu ekrandaki işlemse başarı ekranına geç.
         if (entry.idempotencyKey === submissionKey.current && !saved) {
           setSaved(record);
@@ -507,6 +528,14 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
     };
     const queued = enqueueOutbox(actor.id, entry);
     setOutbox(loadOutbox(actor.id));
+    if (queued) {
+      recordDeviceAudit(actor.id, {
+        action: 'queue',
+        entity: 'record',
+        entityId: submissionKey.current,
+        summary: 'Çevrimdışı kuyruğa alındı',
+      });
+    }
     if (queued) {
       setSaveError('');
       setFlushNote(
@@ -719,6 +748,12 @@ export function CaseWorkspace({ definition, actor, onSaved, flowOrigin }: CaseWo
       setSaved(record);
       removeOutboxEntry(actor.id, submissionKey.current);
       setOutbox(loadOutbox(actor.id));
+      recordDeviceAudit(actor.id, {
+        action: revisionOf ? 'update' : 'save',
+        entity: 'record',
+        entityId: record.id,
+        summary: revisionOf ? 'Kayıt yeni revizyon olarak kaydedildi' : 'Test kaydı oluşturuldu',
+      });
       onSaved?.();
     } catch (cause) {
       if (isNetworkError(cause)) enqueueCurrent(cause instanceof Error ? cause.message : 'Ağ hatası.');

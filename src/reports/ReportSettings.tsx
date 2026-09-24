@@ -51,7 +51,8 @@ export function ReportSettings({
         ekleyebilirsiniz). İmza/kaşe görseli de yalnızca raporun sonuna eklenir.
       </div>
       <p style={{ fontSize: 13, color: 'var(--soft)', margin: '0 0 10px' }}>
-        Yeni raporlara eklenir. Eski raporların anteti kendiliğinden değişmez.
+        Yeni raporlara eklenir. Eski raporların anteti kendiliğinden değişmez. Aynı bilgiler, yedekleme ve denetim
+        iziyle birlikte <a href="/ayarlar">Ayarlar</a> sayfasından da düzenlenebilir.
       </p>
       <div className="report-settings-grid">
         {(['name', 'title', 'institution', 'phone', 'email', 'address'] as const).map((k, i) => (

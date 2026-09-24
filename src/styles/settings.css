@@ -1,0 +1,461 @@
+/* Ayarlar, denetim kaydı ve yedekleme ekranlarının katmanı.
+   Kabuk ritmi (workspace.css) ve bileşen dili (coherence/theme) korunur; bu
+   dosya yalnızca yeni ekranların kendi düzenini tanımlar. Kuralların tamamı
+   `@media screen` içindedir ve `!important` kullanmaz; responsive.css en son
+   yüklenerek mobil ölçeklemeyi devralır. */
+
+@media screen {
+  .settings-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .settings-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .settings-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    max-width: 72ch;
+  }
+
+  .settings-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .settings-kicker-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .settings-head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(30px, 4vw, 40px);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text);
+  }
+
+  .settings-head p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--soft);
+  }
+
+  .settings-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .settings-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+  }
+
+  .settings-card-head h2 {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .settings-card-head p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--soft);
+  }
+
+  .settings-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .settings-field input,
+  .settings-field select,
+  .settings-field textarea {
+    width: 100%;
+  }
+
+  .settings-hint {
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .settings-assets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .settings-asset {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px dashed var(--hairline);
+    border-radius: 14px;
+    background: var(--canvas);
+    min-width: 0;
+  }
+
+  .settings-asset strong {
+    font-size: 12.5px;
+    color: var(--text);
+  }
+
+  .settings-asset input[type='file'] {
+    font-size: 12px;
+  }
+
+  .settings-asset-preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .settings-asset-preview img {
+    max-height: 54px;
+    max-width: 190px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+  }
+
+  .settings-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    min-width: 0;
+  }
+
+  .settings-preview img {
+    max-height: 52px;
+    max-width: 160px;
+  }
+
+  .settings-preview-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .settings-preview-text strong {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .settings-preview-text span {
+    font-size: 12.5px;
+    color: var(--soft);
+    overflow-wrap: anywhere;
+  }
+
+  .settings-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .settings-message {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .settings-message.is-success {
+    color: var(--success);
+  }
+
+  .settings-message.is-error {
+    color: var(--danger-ink);
+  }
+
+  .settings-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--soft);
+  }
+
+  .settings-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 4px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .settings-accounts-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .settings-accounts-head h3 {
+    margin: 0 0 3px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .settings-accounts-head p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--soft);
+    max-width: 70ch;
+  }
+
+  .settings-account-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+
+  .settings-account-actions {
+    display: flex;
+    align-items: flex-end;
+    grid-column: 1 / -1;
+  }
+
+  .settings-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+  }
+
+  .settings-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .settings-table-caption {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .settings-table th {
+    padding: 9px 12px;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--bg-soft);
+  }
+
+  .settings-table td {
+    padding: 11px 12px;
+    color: var(--text);
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .settings-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .settings-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--primary-tint);
+    border: 1px solid var(--primary-border);
+    color: var(--primary);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  .settings-chip.is-passive {
+    background: var(--bg-soft);
+    border-color: var(--hairline);
+    color: var(--muted);
+  }
+
+  /* ---------------- Yedekleme penceresi ---------------- */
+
+  .modal-container.backup-dialog {
+    max-width: 720px;
+  }
+
+  .backup-body {
+    gap: 14px;
+  }
+
+  .backup-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 12px 14px;
+    border: 1px solid var(--warning-border);
+    background: var(--warning-tint);
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  .backup-note svg {
+    flex: none;
+    color: var(--warning);
+  }
+
+  .backup-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+  }
+
+  .backup-block.is-warning {
+    border-color: var(--danger-border);
+    background: var(--danger-tint);
+  }
+
+  .backup-block-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    max-width: 62ch;
+  }
+
+  .backup-block-text strong {
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  .backup-block-text span {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .backup-file {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  .backup-block-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .backup-file-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .backup-file-label input[type='file'] {
+    display: none;
+  }
+
+  .backup-progress {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--soft);
+  }
+
+  @media (max-width: 720px) {
+    .settings-grid-2,
+    .settings-assets {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .settings-footer {
+      justify-content: stretch;
+    }
+
+    .settings-footer .btn-primary {
+      width: 100%;
+    }
+
+    .settings-card {
+      padding: 16px;
+    }
+  }
+}

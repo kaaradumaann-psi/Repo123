@@ -20,6 +20,13 @@ const SHORTCUTS: { icon: IconName; title: string; detail: string; path: string }
 
 const TIME_ZONE = 'Europe/Istanbul';
 
+/**
+ * Devam eden taslağı doğrudan düzenlemeye açan adres. CaseWorkspace bu
+ * parametreyi görünce kayıtlı taslağı (yeni girişte bile) anında yükler ve
+ * adresi temizler; bkz. `resumeRequested`.
+ */
+const DRAFT_RESUME_PATH = '/islem?taslak=devam';
+
 function clientName(firstName: string, lastName: string, fallback: string): string {
   const full = `${firstName} ${lastName}`.trim();
   return full === '' ? fallback : full;
@@ -115,7 +122,8 @@ export function Dashboard({ user }: Props) {
   const isEmpty = (totalCount ?? 0) === 0 && !draftExists && outbox.length === 0;
   const summary: { icon: IconName; label: string; value: number | null; path: string; alert?: boolean }[] = [
     { icon: 'calendar', label: 'Bugünkü kayıt', value: todayCount, path: '/kayitlar' },
-    { icon: 'clipboard', label: 'Taslak', value: draftExists ? 1 : 0, path: '/islem' },
+    // "Taslak" döşemesi doğrudan kaldığı adıma açılır (hazırlık ekranı atlanır).
+    { icon: 'clipboard', label: 'Taslak', value: draftExists ? 1 : 0, path: DRAFT_RESUME_PATH },
     { icon: 'alert', label: 'Bekleyen kuyruk', value: outbox.length, path: '/islem', alert: outbox.length > 0 },
     { icon: 'database', label: 'Toplam kayıt', value: totalCount, path: '/kayitlar' },
   ];
@@ -153,7 +161,11 @@ export function Dashboard({ user }: Props) {
               <strong>{clientName(draft.client.firstName, draft.client.lastName, 'İsimsiz taslak')}</strong>
               <span className="desk-now-name">{draft.method ? methodLabel(draft.method) : 'Yöntem seçilmedi'}</span>
               <span className="desk-now-detail">Son düzenleme {formatDate(draft.updatedAt)} · {formatTime(draft.updatedAt)}</span>
-              <button type="button" onClick={() => navigate('/islem')}>
+              <button
+                type="button"
+                onClick={() => navigate(DRAFT_RESUME_PATH)}
+                aria-label="Devam eden taslağı kaldığı yerden aç"
+              >
                 Devam et <Icon name="arrowRight" size={16} />
               </button>
             </>

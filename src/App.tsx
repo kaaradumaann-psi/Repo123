@@ -15,6 +15,8 @@ import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { ReportsPage } from './reports/ReportsPage';
 import { RecordDetailPage } from './components/RecordDetailPage';
 import { SourcesPage } from './components/SourcesPage';
+import { SettingsPage } from './settings/SettingsPage';
+import { AuditPage } from './settings/AuditPage';
 import { SiteFooter } from './components/SiteFooter';
 import { MobileNav } from './components/MobileNav';
 import { TermsPage } from './components/TermsPage';
@@ -27,7 +29,7 @@ import { displayName } from './auth/userDisplay';
 import { navigate, useRoute } from './router';
 import type { AppRoute } from './router';
 
-type Workspace = 'home' | 'case' | 'form' | 'records' | 'admin';
+type Workspace = 'home' | 'case' | 'form' | 'records' | 'admin' | 'ayarlar';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void; flowOrigin: AuthFlowOrigin };
 
@@ -50,12 +52,18 @@ function buildNavGroups(role: UserRole): { label: string; items: NavItem[] }[] {
   if (role === 'ADMIN') {
     groups.push({
       label: 'Yönetim',
-      items: [{ id: 'admin', label: 'Yönetim', icon: 'shield', path: '/yonetim' }],
+      items: [
+        { id: 'admin', label: 'Yönetim', icon: 'shield', path: '/yonetim' },
+        { id: 'ayarlar', label: 'Ayarlar', icon: 'settings', path: '/ayarlar' },
+      ],
     });
   } else {
     groups.push({
       label: 'Kayıtlar',
-      items: [{ id: 'records', label: 'Kayıtlarım', icon: 'file', path: '/kayitlar' }],
+      items: [
+        { id: 'records', label: 'Kayıtlarım', icon: 'file', path: '/kayitlar' },
+        { id: 'ayarlar', label: 'Ayarlar', icon: 'settings', path: '/ayarlar' },
+      ],
     });
   }
   return groups;
@@ -87,6 +95,10 @@ function resolveWorkspace(route: AppRoute, role: UserRole): Workspace | null {
       return role === 'ADMIN' ? 'admin' : 'records';
     case 'yonetim':
       return 'admin';
+    // Denetim kaydı Ayarlar'ın alt sayfasıdır: yan gezinmede "Ayarlar" işaretli kalır.
+    case 'ayarlar':
+    case 'denetim':
+      return 'ayarlar';
     default:
       return null;
   }
@@ -186,7 +198,7 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
   const workspace = resolveWorkspace(route, user.role) ?? 'home';
   const activeItem = navGroups.flatMap(group => group.items).find(item => item.id === workspace);
   const canAdmin = user.role === 'ADMIN';
-  const roleLabel = canAdmin ? 'Yönetici' : 'Uzman psikolog';
+  const roleLabel = canAdmin ? 'Yönetici' : 'Psikolog';
   const recordsPath = canAdmin ? '/yonetim' : '/kayitlar';
   const recordsLabel = canAdmin ? 'Yönetimi aç' : 'Kayıtları aç';
 
@@ -223,9 +235,24 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
         <div className="sidebar-bottom">
           <div className="sidebar-privacy">
             <span className="sidebar-privacy-icon"><Icon name="shield" size={18} /></span>
-            <strong>Bulut hesabı açık</strong>
+            <button
+              type="button"
+              className="sidebar-privacy-title"
+              onClick={() => navigate('/ayarlar')}
+              title="Bulut durumu ve hesap ayarlarını aç"
+            >
+              <strong>Bulut hesabı açık</strong>
+              <Icon name="arrowRight" size={14} />
+            </button>
             <p>Kayıtlar bulutta tutulur; taslak ve çevrimdışı kuyruk bu tarayıcıda saklanır.</p>
-            <a href={recordsPath}>{recordsLabel} <Icon name="arrowRight" size={14} /></a>
+            <span className="sidebar-privacy-actions">
+              <button type="button" className="sidebar-privacy-action" onClick={() => navigate(recordsPath)}>
+                {recordsLabel} <Icon name="arrowRight" size={14} />
+              </button>
+              <button type="button" className="sidebar-privacy-action" onClick={() => navigate('/ayarlar')}>
+                Ayarları aç <Icon name="arrowRight" size={14} />
+              </button>
+            </span>
           </div>
           <span className="sidebar-version">MMPI-566 · UZMAN ÇALIŞMA ALANI</span>
         </div>
@@ -291,11 +318,13 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
           )}
           {route.page === 'form' && <FormKit />}
           {user.role === 'PSYCHOLOG' && route.page === 'kayitlar' && (
-            <MyRecordsPanel key={recordsTick} />
+            <MyRecordsPanel key={recordsTick} viewer={user} />
           )}
           {user.role === 'ADMIN' && route.page === 'yonetim' && (
             <AdminPanel admin={user} />
           )}
+          {route.page === 'ayarlar' && <SettingsPage user={user} />}
+          {route.page === 'denetim' && <AuditPage viewer={user} />}
           {route.page === 'kayit' && (
             <RecordDetailPage
               recordId={route.id}
