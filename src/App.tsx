@@ -199,8 +199,6 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
   const activeItem = navGroups.flatMap(group => group.items).find(item => item.id === workspace);
   const canAdmin = user.role === 'ADMIN';
   const roleLabel = canAdmin ? 'Yönetici' : 'Psikolog';
-  const recordsPath = canAdmin ? '/yonetim' : '/kayitlar';
-  const recordsLabel = canAdmin ? 'Yönetimi aç' : 'Kayıtları aç';
 
   return (
     <div className="portal-layout">
@@ -235,24 +233,11 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
         <div className="sidebar-bottom">
           <div className="sidebar-privacy">
             <span className="sidebar-privacy-icon"><Icon name="shield" size={18} /></span>
-            <button
-              type="button"
-              className="sidebar-privacy-title"
-              onClick={() => navigate('/ayarlar')}
-              title="Bulut durumu ve hesap ayarlarını aç"
-            >
-              <strong>Bulut hesabı açık</strong>
-              <Icon name="arrowRight" size={14} />
-            </button>
+            <strong>Bulut hesabı açık</strong>
             <p>Kayıtlar bulutta tutulur; taslak ve çevrimdışı kuyruk bu tarayıcıda saklanır.</p>
-            <span className="sidebar-privacy-actions">
-              <button type="button" className="sidebar-privacy-action" onClick={() => navigate(recordsPath)}>
-                {recordsLabel} <Icon name="arrowRight" size={14} />
-              </button>
-              <button type="button" className="sidebar-privacy-action" onClick={() => navigate('/ayarlar')}>
-                Ayarları aç <Icon name="arrowRight" size={14} />
-              </button>
-            </span>
+            {/* Yönetici satırı yok: panodaki "Yönetim" sekmesi zaten erişilebilir. */}
+            {!canAdmin && <a href="/kayitlar">Kayıtları aç <Icon name="arrowRight" size={14} /></a>}
+            <a href="/ayarlar">Ayarları aç <Icon name="arrowRight" size={14} /></a>
           </div>
           <span className="sidebar-version">MMPI-566 · UZMAN ÇALIŞMA ALANI</span>
         </div>

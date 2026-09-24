@@ -170,14 +170,7 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
         <div className="modal-container backup-dialog" role="document">
           <header className="modal-header">
             <div>
-              <span className="settings-kicker">
-                <span className="settings-kicker-dot" aria-hidden="true" />
-                <span>Yedek</span>
-              </span>
-              <h2 id="backup-dialog-title">Yedekle ve geri yükle</h2>
-              <p className="modal-subtitle">
-                Kayıtlar bulutta tutulur; yedek dosyası bu cihaza iner. Dosya danışan kimliği ve klinik metin içerir.
-              </p>
+              <h2 id="backup-dialog-title">Yedek ve silme</h2>
             </div>
             <button
               ref={closeRef}
@@ -192,35 +185,33 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
           </header>
 
           <div className="modal-body backup-body">
-            <div className="backup-note">
-              <Icon name="info" size={16} />
-              <span>
-                Yedek dosyasını kimseyle paylaşmayın ve bu cihazın dışında da saklayın. Geri yükleme, bulutta aynı
-                anahtarla duran kayıtları <strong>değiştirmez</strong>; yalnızca eksik kayıtları ekler.
-              </span>
-            </div>
+            <p className="backup-note">
+              Kayıtlar bulutta tutulur; yedek dosyası bu cihaza iner. Dosya danışan kimliği ve klinik metin içerir;
+              kimseyle paylaşmayın ve bu cihazın dışında da saklayın. Geri yükleme, aynı anahtarla bulunan kayıtları
+              değiştirmez; yalnızca eksik olanları ekler.
+            </p>
 
-            <div className="backup-block">
+            <div className="modern-table-card backup-block">
               <div className="backup-block-text">
                 <strong>Yedek indir</strong>
-                <span>Bu hesabın erişebildiği kayıtlar, uzman notları, rapor metinleri ve antet ayarları (JSON).</span>
+                <span>Bu hesabın erişebildiği kayıtlar, uzman notları, rapor metinleri ve antet ayarları.</span>
               </div>
               <button type="button" className="btn-primary btn-sm" onClick={() => void handleDownload()} disabled={downloading}>
                 {downloading ? 'Hazırlanıyor…' : 'İndir'}
               </button>
             </div>
 
-            <div className="backup-block">
+            <div className="modern-table-card backup-block">
               <div className="backup-block-text">
                 <strong>Yedekten yükle</strong>
                 <span>
                   Mevcut kayıtlar korunur; aynı anahtarla bulunan kayıtlar atlanır. En fazla{' '}
                   {Math.round(MAX_BACKUP_BYTES / (1024 * 1024))} MB JSON.
                 </span>
-                {pendingName !== '' && pending && (
+                {pendingName !== '' && (
                   <span className="backup-file">
-                    {pendingName} · {pending.counts.records} kayıt · {pending.counts.reports} rapor ·{' '}
-                    {new Date(pending.exportedAt).toLocaleDateString('tr-TR')}
+                    {pendingName} · {pending?.counts.records ?? 0} kayıt · {pending?.counts.reports ?? 0} rapor ·{' '}
+                    {pending ? new Date(pending.exportedAt).toLocaleDateString('tr-TR') : ''}
                   </span>
                 )}
               </div>
@@ -245,7 +236,7 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
               </div>
             </div>
 
-            <div className="backup-block is-warning">
+            <div className="modern-table-card backup-block">
               <div className="backup-block-text">
                 <strong>Bu cihazdaki taslağı sil</strong>
                 <span>Yarım kalan çalışma ve çevrimdışı kuyruk temizlenir. Bulut kayıtları silinmez.</span>
@@ -261,10 +252,10 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
                 {progress}
               </p>
             )}
-            {downloadSummary !== '' && <p className="settings-message is-success" role="status">{downloadSummary}</p>}
-            {restoreResult !== '' && <p className="settings-message is-success" role="status">{restoreResult}</p>}
-            {wipeDone && <p className="settings-message is-success" role="status">Bu cihazdaki taslak ve kuyruk silindi.</p>}
-            {error !== '' && <p className="settings-message is-error" role="alert">{error}</p>}
+            {downloadSummary !== '' && <p className="formulation-saved" role="status">{downloadSummary}</p>}
+            {restoreResult !== '' && <p className="formulation-saved" role="status">{restoreResult}</p>}
+            {wipeDone && <p className="formulation-saved" role="status">Bu cihazdaki taslak ve kuyruk silindi.</p>}
+            {error !== '' && <p className="safety-callout" role="alert">{error}</p>}
           </div>
 
           <footer className="modal-footer">

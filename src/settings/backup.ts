@@ -161,6 +161,7 @@ export function sanitizeLetterhead(value: unknown): Letterhead {
     phone: asText(raw.phone, 40),
     email: asText(raw.email, 120),
     address: asText(raw.address, 240),
+    letterhead: asText(raw.letterhead, 800),
     // Görseller yalnızca gömülü veri URI'si olarak taşınır: yedeğe uzak bir
     // bağlantı ya da başka bir şema sokulamaz.
     logo: asSafeImage(raw.logo),

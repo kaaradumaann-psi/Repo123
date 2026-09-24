@@ -15,24 +15,12 @@ import type { DeviceAuditEvent } from './auditTrail';
 import { SERVER_AUDIT_LIMIT, listServerAudit } from './serverAudit';
 import type { ServerAuditEvent } from './serverAudit';
 
-function formatServerTime(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString('tr-TR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 /**
  * Denetim kaydı.
  *
- * Sunucu tarafı `audit_logs` (trigger yazar, RLS yalnızca yöneticiye açık) ve
- * bu cihazdaki işlem izi yan yana gösterilir; psikolog reposundaki
- * "Denetim kaydı" ekranının bulut karşılığı budur.
+ * psikolog reposundaki "Denetim kaydı" ekranı: bu cihazdaki son kaydetme ve
+ * silme işlemleri, düz bir tablo hâlinde. Bulut açıksa yönetici ayrıca sunucu
+ * tarafındaki `audit_logs` kaydını görür (RLS).
  */
 export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
   const canAdmin = viewer.role === 'ADMIN';
@@ -64,143 +52,100 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
   }, [viewer.id]);
 
   return (
-    <div className="settings-page">
-      <header className="settings-head">
-        <div className="settings-head-text">
-          <span className="settings-kicker">
-            <span className="settings-kicker-dot" aria-hidden="true" />
-            <span>Kayıt izi</span>
-          </span>
-          <h1 id="audit-title">Denetim kaydı</h1>
+    <div className="clinical-container settings-page">
+      <div className="clinical-header">
+        <div className="clinical-title-wrap">
+          <div className="clinical-kicker"><span className="clinical-kicker-dot" /><span>Kayıt izi</span></div>
+          <h1>Denetim kaydı</h1>
           <p>Bu cihazdaki son kaydetme ve silme işlemleri. Bulut açıksa sunucu kendi kaydını ayrıca tutar.</p>
         </div>
-        <div className="settings-actions">
-          <button type="button" className="btn-secondary btn-sm" onClick={() => navigate('/ayarlar')}>
-            <Icon name="left" size={15} />
+        <div className="clinical-actions">
+          <button type="button" className="btn-secondary" onClick={() => navigate('/ayarlar')}>
+            <Icon name="left" size={16} />
             <span>Ayarlara dön</span>
           </button>
           {canAdmin && configured && (
-            <button type="button" className="btn-secondary btn-sm" onClick={() => void loadServer()} disabled={loadingServer}>
-              <Icon name="refresh" size={15} />
+            <button type="button" className="btn-secondary" onClick={() => void loadServer()} disabled={loadingServer}>
+              <Icon name="refresh" size={16} />
               <span>Yenile</span>
             </button>
           )}
         </div>
-      </header>
+      </div>
 
-      <section className="settings-card" aria-labelledby="audit-server-title">
-        <div className="settings-card-head">
-          <h2 id="audit-server-title">Sunucu denetim izi</h2>
-          <p>
+      {canAdmin && configured && (
+        <section className="modern-table-card settings-audit">
+          <h2>Sunucu denetim izi</h2>
+          <p className="settings-note">
             <code>audit_logs</code> tablosu test kayıtları üzerindeki her ekleme, güncelleme ve silmede otomatik
-            yazılır (en yeni {SERVER_AUDIT_LIMIT} kayıt).
+            yazılır; en yeni {SERVER_AUDIT_LIMIT} kayıt gösterilir.
           </p>
-        </div>
-
-        {!configured ? (
-          <div className="status-banner info-banner" role="status">
-            <Icon name="info" size={16} />
-            <span style={{ flex: 1 }}>Supabase bağlı değil; sunucu denetim izi bu kurulumda kapalı.</span>
-          </div>
-        ) : !canAdmin ? (
-          <div className="status-banner info-banner" role="status">
-            <Icon name="info" size={16} />
-            <span style={{ flex: 1 }}>
-              Sunucu denetim izi RLS gereği yalnızca yönetici hesabında görünür. Kendi işlemleriniz aşağıdaki cihaz
-              kaydında listelenir.
-            </span>
-          </div>
-        ) : loadingServer ? (
-          <div className="settings-loading">
-            <div className="spinner" />
-            <span>Denetim izi yükleniyor…</span>
-          </div>
-        ) : serverError !== '' ? (
-          <div className="status-banner error-banner" role="alert">
-            <Icon name="alert" size={18} />
-            <span style={{ flex: 1 }}>{serverError}</span>
-            <button type="button" className="btn-secondary btn-sm" onClick={() => void loadServer()}>
-              Tekrar dene
-            </button>
-          </div>
-        ) : serverEvents.length === 0 ? (
-          <div className="empty-state-card">
-            <div className="empty-state-icon">
-              <Icon name="list" size={30} />
-            </div>
-            <h4>Kayıt yok</h4>
-            <p>Test kaydı eklenip güncellendikçe sunucu denetim izi burada listelenir.</p>
-          </div>
-        ) : (
-          <div className="settings-table-wrapper">
-            <table className="settings-table">
-              <caption className="settings-table-caption">Sunucu tarafında tutulan değişmez kayıtlar.</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Zaman</th>
-                  <th scope="col">İşlem</th>
-                  <th scope="col">Varlık</th>
-                  <th scope="col">Kayıt</th>
-                  <th scope="col">Aktör</th>
-                </tr>
-              </thead>
-              <tbody>
-                {serverEvents.map(event => (
-                  <tr key={event.id}>
-                    <td data-label="Zaman">{formatServerTime(event.createdAt)}</td>
-                    <td data-label="İşlem">{event.actionLabel}</td>
-                    <td data-label="Varlık">{event.targetLabel}</td>
-                    <td data-label="Kayıt" className="mono-sub">
-                      {event.targetId ? `${event.targetId.slice(0, 8)}…` : '—'}
-                    </td>
-                    <td data-label="Aktör">{event.actorName}</td>
+          {loadingServer ? (
+            <p className="settings-note">Denetim izi yükleniyor…</p>
+          ) : serverError !== '' ? (
+            <p className="settings-error">{serverError}</p>
+          ) : serverEvents.length === 0 ? (
+            <p className="settings-note">Kayıt yok. Test kaydı eklenip güncellendikçe burası dolar.</p>
+          ) : (
+            <div className="client-table-wrap">
+              <table className="client-table">
+                <thead>
+                  <tr>
+                    <th>Zaman</th>
+                    <th>İşlem</th>
+                    <th>Varlık</th>
+                    <th>Kayıt</th>
+                    <th>Aktör</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {serverEvents.map(event => (
+                    <tr key={event.id}>
+                      <td>{formatDeviceAuditTime(event.createdAt)}</td>
+                      <td>{event.actionLabel}</td>
+                      <td>{event.targetLabel}</td>
+                      <td className="mono-sub">{shortEntityId(event.targetId ?? '')}</td>
+                      <td>{event.actorName}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
 
-      <section className="settings-card" aria-labelledby="audit-device-title">
-        <div className="settings-card-head">
-          <h2 id="audit-device-title">Bu cihazdaki işlemler</h2>
-          <p>
-            Bu tarayıcıda yapılan kaydetme, silme ve yedekleme adımları. Danışan adı yerine kayıt kimliği tutulur;
-            kayıtlar cihazda saklanır ve en fazla 200 satır gösterilir.
-          </p>
-        </div>
+      <section className="modern-table-card settings-audit">
+        <h2>Bu cihazdaki işlemler</h2>
+        <p className="settings-note">
+          Kaydetme, silme, not ve yedekleme adımları. Danışan adı yerine kayıt kimliği tutulur; kayıtlar bu tarayıcıda
+          saklanır.
+        </p>
         {deviceEvents.length === 0 ? (
           <div className="empty-state-card">
-            <div className="empty-state-icon">
-              <Icon name="list" size={30} />
-            </div>
             <h4>Kayıt yok</h4>
             <p>Kaydetme ve silme işlemleri burada görünür.</p>
           </div>
         ) : (
-          <div className="settings-table-wrapper">
-            <table className="settings-table">
-              <caption className="settings-table-caption">Cihaz kaydı yalnızca bu tarayıcıda tutulur.</caption>
+          <div className="client-table-wrap">
+            <table className="client-table">
               <thead>
                 <tr>
-                  <th scope="col">Zaman</th>
-                  <th scope="col">İşlem</th>
-                  <th scope="col">Varlık</th>
-                  <th scope="col">Kayıt</th>
-                  <th scope="col">Özet</th>
+                  <th>Zaman</th>
+                  <th>İşlem</th>
+                  <th>Varlık</th>
+                  <th>Kayıt</th>
+                  <th>Özet</th>
                 </tr>
               </thead>
               <tbody>
                 {deviceEvents.map(event => (
                   <tr key={event.id}>
-                    <td data-label="Zaman">{formatDeviceAuditTime(event.at)}</td>
-                    <td data-label="İşlem">{deviceAuditActionLabel(event.action)}</td>
-                    <td data-label="Varlık">{deviceAuditEntityLabel(event.entity)}</td>
-                    <td data-label="Kayıt" className="mono-sub">
-                      {shortEntityId(event.entityId)}
-                    </td>
-                    <td data-label="Özet">{event.summary}</td>
+                    <td>{formatDeviceAuditTime(event.at)}</td>
+                    <td>{deviceAuditActionLabel(event.action)}</td>
+                    <td>{deviceAuditEntityLabel(event.entity)}</td>
+                    <td className="mono-sub">{shortEntityId(event.entityId)}</td>
+                    <td>{event.summary}</td>
                   </tr>
                 ))}
               </tbody>

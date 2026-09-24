@@ -1,60 +1,61 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { AuthenticatedUser } from '../auth/authTypes';
 import { createPsychologist } from '../auth/adminApi';
-import { displayName } from '../auth/userDisplay';
-import { Icon } from '../components/Icon';
-import { navigate } from '../router';
-import { cloudProfileCreatedAt, cloudRoleLabel, listCloudProfiles } from './cloudAccounts';
+import { listCloudProfiles } from './cloudAccounts';
 import type { CloudProfile } from './cloudAccounts';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Ayarlar → "Psikolog hesabı" (psikolog reposundaki `CloudAdminPanel` karşılığı).
+ *
  * Halka açık kayıt yoktur: hesap yalnızca bu formdan, `admin-users` Edge
- * Function'ı ile açılır. Durum değiştirme ve silme Yönetim panelindedir.
+ * Function'ı ile açılır. Liste düz bir satır listesidir:
+ * `Ad Soyad · e-posta · ROL · aktif`.
  */
-export function CloudAccountsPanel({ admin }: { admin: AuthenticatedUser }) {
+export function CloudAccountsPanel() {
   const [profiles, setProfiles] = useState<CloudProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
 
-  async function refresh() {
-    setLoading(true);
-    try {
-      setProfiles(await listCloudProfiles());
-      setError('');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Hesap listesi alınamadı.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+    listCloudProfiles()
+      .then(rows => {
+        if (!cancelled) {
+          setProfiles(rows);
+          setError('');
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : 'Hesap listesi alınamadı.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setMessage(null);
+    setError('');
     const firstName = form.firstName.trim();
     const lastName = form.lastName.trim();
     const email = form.email.trim().toLowerCase();
     if (firstName.length < 2 || lastName.length < 2) {
-      setMessage({ kind: 'error', text: 'Ad ve soyad en az 2 karakter olmalı.' });
+      setError('Ad ve soyad en az 2 karakter olmalı.');
       return;
     }
     if (!EMAIL_PATTERN.test(email)) {
-      setMessage({ kind: 'error', text: 'Geçerli bir e-posta adresi girin.' });
+      setError('Geçerli bir e-posta adresi girin.');
       return;
     }
     if (form.password.length < 10) {
-      setMessage({ kind: 'error', text: 'Geçici parola en az 10 karakter olmalı.' });
+      setError('Geçici parola en az 10 karakter olmalı.');
       return;
     }
     setBusy(true);
@@ -73,12 +74,8 @@ export function CloudAccountsPanel({ admin }: { admin: AuthenticatedUser }) {
         },
       ]);
       setForm({ firstName: '', lastName: '', email: '', password: '' });
-      setMessage({ kind: 'success', text: `${displayName(created)} hesabı açıldı. Geçici parolayı güvenli bir kanalla iletin.` });
     } catch (cause) {
-      setMessage({
-        kind: 'error',
-        text: cause instanceof Error ? cause.message : 'Hesap oluşturulamadı.',
-      });
+      setError(cause instanceof Error ? cause.message : 'Hesap oluşturulamadı.');
     } finally {
       setBusy(false);
     }
@@ -86,127 +83,75 @@ export function CloudAccountsPanel({ admin }: { admin: AuthenticatedUser }) {
 
   return (
     <div className="settings-accounts">
-      <div className="settings-accounts-head">
-        <div>
-          <h3>Psikolog hesabı</h3>
-          <p>Halka açık kayıt kapalıdır. Hesap yalnızca bu yönetim formundan, Edge Function ile açılır.</p>
-        </div>
-        <button type="button" className="btn-secondary btn-sm" onClick={() => navigate('/yonetim')}>
-          <Icon name="shield" size={15} />
-          <span>Yönetim paneli</span>
-        </button>
-      </div>
+      <h3>Psikolog hesabı</h3>
+      <p>Halka açık kayıt kapalıdır. Hesap yalnızca bu yönetim formundan, Edge Function ile açılır.</p>
 
-      <form className="settings-account-form" onSubmit={onSubmit}>
-        <label className="settings-field">
-          <span>Ad</span>
+      <form onSubmit={onSubmit} className="settings-account-form">
+        <label className="form-group">
+          Ad
           <input
             value={form.firstName}
             onChange={event => setForm({ ...form, firstName: event.target.value })}
+            required
             minLength={2}
             maxLength={80}
-            required
             autoComplete="off"
           />
         </label>
-        <label className="settings-field">
-          <span>Soyad</span>
+        <label className="form-group">
+          Soyad
           <input
             value={form.lastName}
             onChange={event => setForm({ ...form, lastName: event.target.value })}
+            required
             minLength={2}
             maxLength={80}
-            required
             autoComplete="off"
           />
         </label>
-        <label className="settings-field">
-          <span>E-posta</span>
+        <label className="form-group">
+          E-posta
           <input
             type="email"
             value={form.email}
             onChange={event => setForm({ ...form, email: event.target.value })}
-            maxLength={254}
             required
+            maxLength={254}
             autoComplete="off"
           />
         </label>
-        <label className="settings-field">
-          <span>Geçici parola</span>
+        <label className="form-group">
+          Geçici parola
           <input
             type="password"
             value={form.password}
             onChange={event => setForm({ ...form, password: event.target.value })}
-            minLength={10}
             required
+            minLength={10}
             autoComplete="new-password"
           />
           <span className="settings-hint">En az 10 karakter; uzman ilk girişte değiştirmeli.</span>
         </label>
-        <div className="settings-account-actions">
-          <button type="submit" className="btn-primary btn-sm" disabled={busy}>
-            {busy ? 'Oluşturuluyor…' : 'Hesap oluştur'}
-          </button>
-        </div>
+        <button type="submit" className="btn-primary btn-sm" disabled={busy}>
+          {busy ? 'Oluşturuluyor…' : 'Hesap oluştur'}
+        </button>
       </form>
 
-      {message && (
-        <p className={`settings-message ${message.kind === 'success' ? 'is-success' : 'is-error'}`} role="status">
-          {message.text}
-        </p>
-      )}
-      {error !== '' && (
-        <p className="settings-message is-error" role="alert">
-          {error}
-        </p>
-      )}
+      {error !== '' && <p className="settings-error">{error}</p>}
 
       {loading ? (
-        <div className="settings-loading">
-          <div className="spinner" />
-          <span>Hesaplar yükleniyor…</span>
-        </div>
+        <p className="settings-note">Hesaplar yükleniyor…</p>
       ) : profiles.length === 0 ? (
-        <div className="empty-state-card">
-          <h4>Hesap bulunamadı</h4>
-          <p>İlk psikolog hesabını yukarıdaki formdan açın.</p>
-        </div>
+        <p className="settings-note">Henüz hesap yok. İlk psikolog hesabını yukarıdaki formdan açın.</p>
       ) : (
-        <div className="settings-table-wrapper">
-          <table className="settings-table">
-            <caption className="settings-table-caption">
-              Bu çalışma alanındaki hesaplar. Toplam {profiles.length} hesap ·{' '}
-              {profiles.filter(profile => profile.active).length} aktif.
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Ad Soyad</th>
-                <th scope="col">E-posta</th>
-                <th scope="col">Rol</th>
-                <th scope="col">Durum</th>
-                <th scope="col">Açılış</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profiles.map(profile => (
-                <tr key={profile.id}>
-                  <td data-label="Ad Soyad">
-                    <strong>{`${profile.firstName} ${profile.lastName}`.trim() || '—'}</strong>
-                    {profile.id === admin.id && <span className="settings-chip">bu hesap</span>}
-                  </td>
-                  <td data-label="E-posta">{profile.email || '—'}</td>
-                  <td data-label="Rol">{cloudRoleLabel(profile.role)}</td>
-                  <td data-label="Durum">
-                    <span className={`settings-chip ${profile.active ? '' : 'is-passive'}`}>
-                      {profile.active ? 'aktif' : 'pasif'}
-                    </span>
-                  </td>
-                  <td data-label="Açılış">{cloudProfileCreatedAt(profile)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ul className="settings-account-list">
+          {profiles.map(profile => (
+            <li key={profile.id}>
+              {`${profile.firstName} ${profile.lastName}`.trim() || '—'} · {profile.email || '—'} · {profile.role} ·{' '}
+              {profile.active ? 'aktif' : 'pasif'}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

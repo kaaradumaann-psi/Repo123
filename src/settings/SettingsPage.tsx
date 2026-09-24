@@ -12,7 +12,10 @@ import { recordDeviceAudit } from './auditTrail';
 import { BackupDialog } from './BackupDialog';
 import { CloudAccountsPanel } from './CloudAccountsPanel';
 
-/** Antet görselleri için tek sınır: rapor ayarlarıyla aynı kural (PNG/JPEG/WebP, ≤600 KB). */
+/**
+ * Logo ve imza sınırı: yalnızca PNG/JPEG/WebP ve tek bir boyut sınırı.
+ * (psikolog reposundaki `MAX_BRAND_ASSET_BYTES` kuralının karşılığı.)
+ */
 const MAX_ASSET_BYTES = 600_000;
 const ASSET_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,6 +39,13 @@ function readAsset(file: File, onDone: (dataUrl: string) => void, onError: (mess
   reader.readAsDataURL(file);
 }
 
+/**
+ * Ayarlar.
+ *
+ * psikolog reposundaki Ayarlar ekranının birebir karşılığı: uzman/klinik
+ * bilgileri, antet metni, logo ve imza; üstte "Denetim izi" ve "Yedekle"
+ * eylemleri, altta Bulut bölümü. Yeni raporlar buradaki uzman adını kullanır.
+ */
 export function SettingsPage({ user }: { user: AuthenticatedUser }) {
   const canAdmin = user.role === 'ADMIN';
   const [letterhead, setLetterhead] = useState<Letterhead>(EMPTY_LETTERHEAD);
@@ -92,6 +102,7 @@ export function SettingsPage({ user }: { user: AuthenticatedUser }) {
       phone: letterhead.phone.trim().slice(0, 40),
       email,
       address: letterhead.address.trim().slice(0, 240),
+      letterhead: letterhead.letterhead.replace(/\r\n/g, '\n').trim().slice(0, 800),
       logo: safeReportImage(letterhead.logo) ?? '',
       signature: safeReportImage(letterhead.signature) ?? '',
     };
@@ -105,9 +116,9 @@ export function SettingsPage({ user }: { user: AuthenticatedUser }) {
         entityId: 'settings',
         summary: 'Antet ve imza ayarları güncellendi',
       });
-      setMessage({ kind: 'success', text: 'Ayarlar kaydedildi.' });
+      setMessage({ kind: 'success', text: 'Kaydedildi' });
       if (savedTimer.current !== null) window.clearTimeout(savedTimer.current);
-      savedTimer.current = window.setTimeout(() => setMessage(null), 3200);
+      savedTimer.current = window.setTimeout(() => setMessage(null), 2400);
     } catch (cause) {
       setMessage({
         kind: 'error',
@@ -118,212 +129,168 @@ export function SettingsPage({ user }: { user: AuthenticatedUser }) {
     }
   }
 
-  const previewName = [letterhead.name, letterhead.title].filter(Boolean).join(' · ');
-
   return (
-    <div className="settings-page">
-      <header className="settings-head">
-        <div className="settings-head-text">
-          <span className="settings-kicker">
-            <span className="settings-kicker-dot" aria-hidden="true" />
-            <span>Uygulama</span>
-          </span>
-          <h1 id="settings-title">Ayarlar</h1>
+    <div className="clinical-container settings-page">
+      <div className="clinical-header">
+        <div className="clinical-title-wrap">
+          <div className="clinical-kicker"><span className="clinical-kicker-dot" /><span>Uygulama</span></div>
+          <h1>Ayarlar</h1>
           <p>Antet, imza ve yedek. Yeni raporlar buradaki uzman adını kullanır.</p>
         </div>
-        <div className="settings-actions">
-          <button type="button" className="btn-secondary btn-sm" onClick={() => navigate('/denetim')}>
-            <Icon name="list" size={15} />
+        <div className="clinical-actions">
+          <button type="button" className="btn-secondary" onClick={() => navigate('/denetim')}>
+            <Icon name="list" size={16} />
             <span>Denetim izi</span>
           </button>
-          <button type="button" className="btn-secondary btn-sm" onClick={() => setBackupOpen(true)}>
-            <Icon name="database" size={15} />
+          <button type="button" className="btn-secondary" onClick={() => setBackupOpen(true)}>
+            <Icon name="database" size={16} />
             <span>Yedekle</span>
           </button>
         </div>
-      </header>
+      </div>
 
-      {loadError !== '' && (
-        <div className="status-banner error-banner" role="alert">
-          <Icon name="alert" size={18} />
-          <span style={{ flex: 1 }}>{loadError}</span>
-          <button type="button" className="btn-secondary btn-sm" onClick={() => window.location.reload()}>
-            Yeniden dene
+      <form onSubmit={onSubmit} className="modern-table-card settings-form">
+        <div className="form-row-2">
+          <label className="form-group">
+            Uzman adı
+            <input
+              value={letterhead.name}
+              onChange={event => update('name', event.target.value)}
+              maxLength={120}
+              autoComplete="name"
+            />
+          </label>
+          <label className="form-group">
+            Ünvan
+            <input value={letterhead.title} onChange={event => update('title', event.target.value)} maxLength={120} />
+          </label>
+        </div>
+
+        <label className="form-group">
+          Klinik adı
+          <input
+            value={letterhead.institution}
+            onChange={event => update('institution', event.target.value)}
+            maxLength={180}
+          />
+        </label>
+
+        <div className="form-row-2">
+          <label className="form-group">
+            Telefon
+            <input
+              value={letterhead.phone}
+              onChange={event => update('phone', event.target.value)}
+              maxLength={40}
+              inputMode="tel"
+              autoComplete="tel"
+            />
+          </label>
+          <label className="form-group">
+            E-posta
+            <input
+              type="email"
+              value={letterhead.email}
+              onChange={event => update('email', event.target.value)}
+              maxLength={120}
+              autoComplete="email"
+            />
+          </label>
+        </div>
+
+        <label className="form-group">
+          Adres
+          <input
+            value={letterhead.address}
+            onChange={event => update('address', event.target.value)}
+            maxLength={240}
+            autoComplete="street-address"
+          />
+        </label>
+
+        <label className="form-group">
+          Antet metni
+          <textarea
+            value={letterhead.letterhead}
+            onChange={event => update('letterhead', event.target.value)}
+            maxLength={800}
+            rows={3}
+          />
+        </label>
+
+        <div className="form-row-2">
+          <label className="form-group">
+            Logo
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={event => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                if (!file) return;
+                readAsset(file, dataUrl => update('logo', dataUrl), error => setMessage({ kind: 'error', text: error }));
+              }}
+            />
+          </label>
+          <label className="form-group">
+            İmza
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={event => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                if (!file) return;
+                readAsset(file, dataUrl => update('signature', dataUrl), error => setMessage({ kind: 'error', text: error }));
+              }}
+            />
+          </label>
+        </div>
+
+        {(safeReportImage(letterhead.logo) || safeReportImage(letterhead.signature)) && (
+          <div className="settings-assets">
+            {safeReportImage(letterhead.logo) && (
+              <span className="settings-asset">
+                <img src={safeReportImage(letterhead.logo)} alt="Logo önizleme" />
+                <button type="button" className="btn-secondary btn-sm" onClick={() => update('logo', '')}>
+                  Kaldır
+                </button>
+              </span>
+            )}
+            {safeReportImage(letterhead.signature) && (
+              <span className="settings-asset">
+                <img src={safeReportImage(letterhead.signature)} alt="İmza önizleme" />
+                <button type="button" className="btn-secondary btn-sm" onClick={() => update('signature', '')}>
+                  Kaldır
+                </button>
+              </span>
+            )}
+          </div>
+        )}
+
+        {loading && <p className="settings-note">Ayarlar yükleniyor…</p>}
+        {loadError !== '' && <p className="settings-error">{loadError}</p>}
+        {message?.kind === 'error' && <p className="settings-error">{message.text}</p>}
+
+        <div className="settings-form-actions">
+          {message?.kind === 'success' && <span className="settings-saved">{message.text}</span>}
+          <button type="submit" className="btn-primary" disabled={saving || loading}>
+            {saving ? 'Kaydediliyor…' : 'Ayarları kaydet'}
           </button>
         </div>
-      )}
-
-      <form className="settings-card" onSubmit={onSubmit} aria-labelledby="settings-antet-title">
-        <div className="settings-card-head">
-          <h2 id="settings-antet-title">Antet ve imza</h2>
-          <p>
-            Bu bilgiler <strong>yalnızca yeni oluşturulan raporlara</strong> eklenir; daha önce oluşturulmuş raporların
-            anteti kendiliğinden değişmez. Antet, raporun en üstünde kurum bilgisi olarak basılır.
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="settings-loading">
-            <div className="spinner" />
-            <span>Ayarlar yükleniyor…</span>
-          </div>
-        ) : (
-          <>
-            <div className="settings-grid-2">
-              <label className="settings-field">
-                <span>Uzman adı</span>
-                <input
-                  value={letterhead.name}
-                  onChange={event => update('name', event.target.value)}
-                  maxLength={120}
-                  autoComplete="name"
-                  placeholder="Uzm. Psk. Halil Karaduman"
-                />
-              </label>
-              <label className="settings-field">
-                <span>Ünvan</span>
-                <input
-                  value={letterhead.title}
-                  onChange={event => update('title', event.target.value)}
-                  maxLength={120}
-                  placeholder="Klinik Psikolog"
-                />
-              </label>
-            </div>
-
-            <label className="settings-field">
-              <span>Klinik adı</span>
-              <input
-                value={letterhead.institution}
-                onChange={event => update('institution', event.target.value)}
-                maxLength={180}
-                placeholder="Halil Karaduman Psikoloji"
-              />
-            </label>
-
-            <div className="settings-grid-2">
-              <label className="settings-field">
-                <span>Telefon</span>
-                <input
-                  value={letterhead.phone}
-                  onChange={event => update('phone', event.target.value)}
-                  maxLength={40}
-                  inputMode="tel"
-                  autoComplete="tel"
-                />
-              </label>
-              <label className="settings-field">
-                <span>E-posta</span>
-                <input
-                  type="email"
-                  value={letterhead.email}
-                  onChange={event => update('email', event.target.value)}
-                  maxLength={120}
-                  autoComplete="email"
-                />
-              </label>
-            </div>
-
-            <label className="settings-field">
-              <span>Adres</span>
-              <input
-                value={letterhead.address}
-                onChange={event => update('address', event.target.value)}
-                maxLength={240}
-                autoComplete="street-address"
-              />
-            </label>
-
-            <div className="settings-assets">
-              {(['logo', 'signature'] as const).map(field => (
-                <div className="settings-asset" key={field}>
-                  <strong>{field === 'logo' ? 'Logo (antette, üstte)' : 'İmza / kaşe (rapor sonu)'}</strong>
-                  <span className="settings-hint">PNG, JPEG veya WebP · en fazla 600 KB.</span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    aria-label={field === 'logo' ? 'Logo yükle' : 'İmza yükle'}
-                    onChange={event => {
-                      const file = event.target.files?.[0];
-                      event.target.value = '';
-                      if (!file) return;
-                      readAsset(
-                        file,
-                        dataUrl => {
-                          update(field, dataUrl);
-                          setMessage(null);
-                        },
-                        error => setMessage({ kind: 'error', text: error }),
-                      );
-                    }}
-                  />
-                  {safeReportImage(letterhead[field]) && (
-                    <span className="settings-asset-preview">
-                      <img
-                        src={safeReportImage(letterhead[field])}
-                        alt={field === 'logo' ? 'Logo önizleme' : 'İmza önizleme'}
-                      />
-                      <button type="button" className="btn-secondary btn-sm" onClick={() => update(field, '')}>
-                        Kaldır
-                      </button>
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="settings-preview" aria-label="Antet önizleme">
-              {safeReportImage(letterhead.logo) && <img src={safeReportImage(letterhead.logo)} alt="" />}
-              <div className="settings-preview-text">
-                <strong>{letterhead.institution || 'Klinik adı'}</strong>
-                <span>{previewName || 'Uzman adı · Ünvan'}</span>
-                <span className="settings-hint">
-                  {[letterhead.phone, letterhead.email, letterhead.address].filter(Boolean).join(' · ') ||
-                    'Telefon · E-posta · Adres'}
-                </span>
-              </div>
-            </div>
-
-            <div className="settings-footer">
-              {message && (
-                <span
-                  className={`settings-message ${message.kind === 'success' ? 'is-success' : 'is-error'}`}
-                  role="status"
-                >
-                  {message.text}
-                </span>
-              )}
-              <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? 'Kaydediliyor…' : 'Ayarları kaydet'}
-              </button>
-            </div>
-          </>
-        )}
       </form>
 
-      <section className="settings-card" aria-labelledby="settings-cloud-title">
-        <div className="settings-card-head">
-          <h2 id="settings-cloud-title">Bulut</h2>
-          {supabaseConfig.configured ? (
-            <>
-              <p>
-                Supabase bağlı. Kurum verisi RLS ile ayrılır. Yerel dosya yine bu cihazda kalır; bulut danışanları
-                ayrı şemadadır.
-              </p>
-              <p>
-                Bu uygulamada test kayıtları ve psikolog raporları bulutta tutulur; taslak ve çevrimdışı kuyruk
-                yalnızca bu tarayıcıda saklanır. Antet ayarları hesabınıza bağlı tek satırda durur ve bu satır RLS ile
-                korunur.
-              </p>
-            </>
-          ) : (
-            <p>
-              Supabase tanımlı değil — uygulama çevrimdışı modda açılır, oturum ve kayıt çalışmaz. Kurulum için{' '}
-              <code>.env</code> dosyasına yalnızca anon anahtar yazılır; hizmet rolü anahtarı tarayıcıya girmez.
-            </p>
-          )}
-        </div>
-        {canAdmin && supabaseConfig.configured && <CloudAccountsPanel admin={user} />}
+      <section className="modern-table-card settings-cloud">
+        <h2>Bulut</h2>
+        {supabaseConfig.configured ? (
+          <p>Supabase bağlı. Kurum verisi RLS ile ayrılır. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır.</p>
+        ) : (
+          <p>
+            Supabase tanımlı değil — uygulama çevrimdışı modda açılır, oturum ve kayıt çalışmaz. Kurulum için{' '}
+            <code>.env</code> dosyasına yalnızca anon anahtar yazılır; hizmet rolü anahtarı tarayıcıya girmez.
+          </p>
+        )}
+        {canAdmin && supabaseConfig.configured && <CloudAccountsPanel />}
       </section>
 
       {backupOpen && <BackupDialog user={user} onClose={() => setBackupOpen(false)} />}

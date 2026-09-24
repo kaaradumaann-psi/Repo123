@@ -91,17 +91,13 @@ test('rol etiketi "Psikolog"; "Uzman Psikolog" ifadesi kaynakta kalmaz', () => {
   }
 });
 
-test('"Kayıtları aç" ve "Bulut hesabı açık" gerçek eylemdir (bağlantı değil düğme)', () => {
-  const app = read('src/App.tsx');
-  assert.match(app, /className="sidebar-privacy-title"[\s\S]{0,120}navigate\('\/ayarlar'\)/,
-    'Bulut durumu başlığı Ayarlar\'ı açmalı');
-  assert.match(app, /className="sidebar-privacy-action"[\s\S]{0,120}navigate\(recordsPath\)/,
-    '"Kayıtları aç" düğmesi kayıt çalışma alanına gitmeli');
-  assert.match(app, /const recordsPath = canAdmin \? '\/yonetim' : '\/kayitlar';/);
-  assert.ok(!/sidebar-privacy[\s\S]{0,200}<a href=\{recordsPath\}/.test(app), 'gizlilik kartındaki eski bağlantı kalmamalı');
+test('yan gezinme kartı yalnızca Ayarlar ve (psikologda) kayıt bağlantısını taşır', () => {
+  const app = flat('src/App.tsx');
+  assert.ok(app.includes('<a href="/ayarlar">Ayarları aç'), '"Ayarları aç" bağlantısı bulunmalı');
+  assert.ok(app.includes('{!canAdmin && <a href="/kayitlar">Kayıtları aç'), 'psikologda "Kayıtları aç" kalmalı');
+  assert.ok(!app.includes('Yönetimi aç'), 'yönetici satırındaki "Yönetimi aç" kaldırılmalı');
   const css = read('src/styles/workspace.css');
-  assert.match(css, /\.sidebar-privacy-action\s*\{[\s\S]{0,400}cursor: pointer/, 'eylem düğmesi tıklanabilir görünmeli');
-  assert.match(css, /\.sidebar-privacy-title\s*\{[\s\S]{0,400}cursor: pointer/);
+  assert.match(css, /\.sidebar-privacy a \+ a/, 'iki bağlantı yan yana okunabilir aralıkla durmalı');
 });
 
 test('taslak kartı doğrudan düzenlemeye gider (?taslak=devam)', () => {
@@ -124,17 +120,39 @@ test('taslak kartı doğrudan düzenlemeye gider (?taslak=devam)', () => {
 
 test('Ayarlar ekranı psikolog reposundaki alanları ve başlık eylemlerini taşır', () => {
   const page = flat('src/settings/SettingsPage.tsx');
-  for (const label of ['Uzman adı', 'Ünvan', 'Klinik adı', 'Telefon', 'E-posta', 'Adres']) {
-    assert.ok(page.includes(`>${label}</span>`) || page.includes(label), `"${label}" alanı bulunmalı`);
+  // psikolog reposundaki alan sırası: Uzman adı, Ünvan, Klinik adı, Telefon,
+  // E-posta, Adres, Antet metni, Logo, İmza — ücret alanı yok.
+  const order = ['Uzman adı', 'Ünvan', 'Klinik adı', 'Telefon', 'E-posta', 'Adres', 'Antet metni', 'Logo', 'İmza'];
+  let cursor = -1;
+  for (const label of order) {
+    const at = page.indexOf(label, cursor + 1);
+    assert.ok(at > cursor, `"${label}" alanı beklenen sırada bulunmalı`);
+    cursor = at;
   }
-  assert.ok(page.includes('Logo (antette, üstte)'), 'Logo alanı bulunmalı');
-  assert.ok(page.includes('İmza / kaşe (rapor sonu)'), 'İmza alanı bulunmalı');
+  assert.ok(!page.includes('seans ücreti'), 'ücret alanı bulunmamalı');
   assert.ok(page.includes('Ayarları kaydet'), '"Ayarları kaydet" düğmesi bulunmalı');
   assert.ok(page.includes('Denetim izi'), '"Denetim izi" başlık düğmesi bulunmalı');
   assert.ok(page.includes('Yedekle'), '"Yedekle" başlık düğmesi bulunmalı');
   assert.match(page, /navigate\('\/denetim'\)/, 'Denetim izi düğmesi /denetim sayfasını açmalı');
   assert.match(page, /setBackupOpen\(true\)/, 'Yedekle düğmesi yedekleme penceresini açmalı');
   assert.ok(page.includes('Yeni raporlar buradaki uzman adını kullanır.'), 'kicker açıklaması korunmalı');
+  // psikolog kabuğu: clinical-container + clinical-header + düz kart
+  assert.match(read('src/settings/SettingsPage.tsx'), /className="clinical-container settings-page"/);
+  assert.ok(page.includes('className="modern-table-card settings-form"'), 'form düz kart içinde olmalı');
+  for (const row of ['form-row-2', 'form-group']) {
+    assert.ok(page.includes(row), `psikolog form düzeni sınıfı kullanılmalı: ${row}`);
+  }
+});
+
+test('Antet metni rapora basılır ve yedeğe taşınır', () => {
+  const engine = read('src/reports/templateEngine.ts');
+  assert.match(engine, /letterhead: string;/, 'Letterhead tipi antet metnini taşımalı');
+  assert.match(engine, /letterhead: '',/, 'boş antet varsayılan olmalı');
+  const preview = read('src/reports/ReportPreview.tsx');
+  assert.match(preview, /psych-letterhead-note/, 'antet metni raporda basılmalı');
+  assert.match(read('src/settings/backup.ts'), /letterhead: asText\(raw\.letterhead, 800\)/,
+    'antet metni yedeğe/geri yüklemeye taşınmalı');
+  assert.match(flat('src/settings/SettingsPage.tsx'), /Antet metni <textarea/, 'Ayarlar\'da düzenlenebilmeli');
 });
 
 test('Bulut bölümü istenen metni birebir taşır', () => {
@@ -143,7 +161,7 @@ test('Bulut bölümü istenen metni birebir taşır', () => {
     page.includes('Supabase bağlı. Kurum verisi RLS ile ayrılır. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır.'),
     'Bulut açıklaması birebir yazılmalı',
   );
-  assert.match(read('src/settings/SettingsPage.tsx'), /canAdmin && supabaseConfig\.configured && <CloudAccountsPanel admin=\{user\} \/>/,
+  assert.match(read('src/settings/SettingsPage.tsx'), /canAdmin && supabaseConfig\.configured && <CloudAccountsPanel \/>/,
     'hesap yönetimi yalnızca yöneticiye ve bağlı Supabase ile görünmeli');
 });
 
@@ -154,14 +172,15 @@ test('"Psikolog hesabı" bloğu halka açık kaydın kapalı olduğunu söyler v
     'hesap bloğu açıklaması birebir olmalı',
   );
   for (const label of ['Ad', 'Soyad', 'E-posta', 'Geçici parola']) {
-    assert.ok(panel.includes(`<span>${label}</span>`), `"${label}" alanı bulunmalı`);
+    assert.ok(panel.includes(label), `"${label}" alanı bulunmalı`);
   }
   assert.ok(panel.includes('Hesap oluştur'), '"Hesap oluştur" düğmesi bulunmalı');
   assert.match(panel, /createPsychologist\(/, 'hesap açma Edge Function istemcisinden geçmeli');
-  for (const column of ['Ad Soyad', 'E-posta', 'Rol', 'Durum', 'Açılış']) {
-    assert.ok(panel.includes(`>${column}</th>`), `"${column}" sütunu bulunmalı`);
-  }
-  assert.match(panel, /settings-chip[\s\S]{0,80}aktif|'aktif'/, 'liste aktif/pasif durumunu göstermeli');
+  // psikolog reposundaki gibi düz satır listesi: Ad Soyad · e-posta · ROL · aktif
+  assert.match(panel, /<ul className="settings-account-list">/, 'hesap listesi düz liste olmalı');
+  assert.match(panel, /profile\.role\} ·\{' '\}/, 'rol ham hâliyle (ADMIN/PSYCHOLOG) yazılmalı');
+  assert.ok(panel.includes("profile.active ? 'aktif' : 'pasif'"), 'durum aktif/pasif olarak yazılmalı');
+  assert.ok(!/settings-table|Yönetim paneli/.test(panel), 'tablo ve yönetim paneli düğmesi kaldırılmalı');
 });
 
 /* ------------------------------------------------------------------ */
@@ -380,7 +399,8 @@ test('settings.css ekran katmanıdır: !important yok, yazdırma hattına dokunm
   assert.ok(!/!important/.test(css), 'settings.css !important içermemeli');
   assert.ok(!/@media\s+print/.test(css), 'settings.css yazdırma hattına dokunmamalı');
   assert.match(css, /@media screen \{/, 'kurallar ekran medya sorgusu içinde olmalı');
-  for (const selector of ['.settings-page', '.settings-card', '.settings-field', '.settings-accounts', '.settings-table', '.backup-dialog']) {
+  assert.ok(!/^\s*\.form-group/m.test(css), 'form kuralları .settings-page altında kapsanmalı');
+  for (const selector of ['.settings-page', '.settings-form', '.form-row-2', '.settings-accounts', '.settings-audit', '.backup-dialog']) {
     assert.ok(css.includes(selector), `${selector} kuralı bulunmalı`);
   }
 });
