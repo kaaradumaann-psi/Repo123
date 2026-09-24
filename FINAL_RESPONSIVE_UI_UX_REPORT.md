@@ -172,8 +172,13 @@ ağacın göründüğü tek yer TAM RAPOR önizlemesi olduğu için önizleme ç
 
 **Yapılan:** blok `@media screen, print`'e alındı (ekran + kâğıt aynı sınıflar); önizleme kâğıdı
 örnek önizleme çerçevesiyle hizalandı (760px, aynı kenar/köşe/gölge, aynı gri zemin); yalnız ekrana
-ait okunabilirlik ölçeği eklendi (10.5px → 12.5px taban, 10px taban sınırı, ekranda 700 ağırlık);
+ait okunabilirlik ölçeği eklendi (10.5px → 13.5px taban, 10px taban sınırı, ekranda 700 ağırlık);
 ≤480px'te tablolar kâğıt içinde kaydırılır, etiket/değer satırları sarar, başlık alt alta akar.
+
+**Tipografi eşitliği (kullanıcı isteği — "aynı olmasını tercih ederim"):** ekran önizlemesi artık
+örnek şablon kâğıdıyla **aynı yazı ailesini** kullanır (Times New Roman serif; örnek 16px/2.0,
+tam rapor yoğunluk için 13.5px/1.8). Künye değerleri ortadan kırılmaz (`white-space: nowrap`).
+Baskı/PDF bu bloklardan etkilenmez. Sözleşme testi bu eşitliği kilitler (39 test).
 
 **VERIFIED (gerçek tarayıcı, Chromium 153):**
 
@@ -184,7 +189,9 @@ ait okunabilirlik ölçeği eklendi (10.5px → 12.5px taban, 10px taban sınır
   kâğıt içinde kaydırılıyor (354px → 326/286/216px), başlıkta tarih ortadan kırılmıyor.
 * Yazdırma (print medya) **değişmedi**: 794px = 210mm, 10.5px, 70 çerçeveli hücre, `page.pdf` = 3 sayfa.
 * `npm test` **683/683** (3 yeni sözleşme testi), `npm run build` PASS, `git diff --check` temiz.
-* Commit `5dccadf` — `arena/01a0d039-repo123` (remote ile eşit), çalışma ağacı temiz.
+* Commit'ler: `5dccadf` (önizleme düzeltmesi) + `855fc8b` (tipografi eşitliği) — `arena/01a0d039-repo123`
+  (remote ile eşit), çalışma ağacı temiz. Tipografi sonrası yeniden ölçüm: 1440/1024/768 taşma 0,
+  430/390/320 `bleedCount 0`, yazdırma 794px = 210mm / 10.5px / 3 sayfa PDF (değişmedi).
 
 **NOT VERIFIED:** Gerçek mobil işletim sistemi/tarayıcı (iOS Safari / Android Chrome) yine
 doğrulanmadı; ölçümler masaüstü Chromium'un cihaz emülasyonuyladır.

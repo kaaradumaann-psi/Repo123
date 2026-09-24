@@ -129,7 +129,8 @@ hücre alt kenarlığı 0px, kâğıt dolgusu 0px, gövde metni 14px DM Sans).
   kopyası aynı sınıfları paylaşır. Yazdırma/PDF yine **ayrı `.print-only` kopyasından** üretilir.
 * `src/styles/reports.css` — önizleme kâğıdı örnek önizlemeyle aynı çerçeveye getirildi
   (760px, 1px `#e6e8eb`, 2px köşe, aynı gölge) + yalnız ekrana ait okunabilirlik ölçeği
-  (taban 10.5px → 12.5px, en küçük boyut 10px, ekranda başlıklar 700).
+  (taban 10.5px → 13.5px, en küçük boyut 10px, ekranda başlıklar 700) ve **örnekle aynı yazı
+  ailesi** (Times serif, satır aralığı 1.8). Künye değerleri ortadan kırılmaz (`white-space: nowrap`).
 * `src/styles/responsive.css` — §08d ≤480px: geniş ölçek tabloları kâğıt **içinde** kaydırılır
   (kenardan taşma yok), etiket/değer satırları sarar, telefon başlığı alt alta akar.
 * Testler — `responsiveContracts.test.ts` +3 test (39), `mmpiClinicalReportUi.test.ts` süzgeçleri
@@ -138,7 +139,7 @@ hücre alt kenarlığı 0px, kâğıt dolgusu 0px, gövde metni 14px DM Sans).
 | Ölçüm | Önce (1440px) | Sonra (1440px) | Örnek önizleme (referans) |
 | --- | --- | --- | --- |
 | Kâğıt genişliği | 1074px | 760px | 758px |
-| Gövde tipografisi | 14px DM Sans | 12.5px / 1.6 | 16px Times / 2.0 |
+| Gövde tipografisi | 14px DM Sans | **13.5px Times serif / 1.8** | 16px Times / 2.0 |
 | Tablo | `separate`, kenarlık yok | `collapse`, 1px hücre kenarı | APA kenarları |
 | Kâğıt dolgusu | 0 | 12mm × 11mm (telefonda 16/14px) | 48px iç boşluk |
 | Çerçeve | yok | 1px `#e6e8eb` + 2px köşe + örnek gölge | aynı |
