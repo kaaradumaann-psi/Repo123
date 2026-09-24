@@ -10,7 +10,8 @@
   }
   .app-header, .form-prep-hero, .form-sidebar-panel, .print-guide-card,
   .preview-toolbar, .preview-bottom, .document-meta-strip, .print-status-note,
-  .workspace-tabs, .scanner-layout-container, .hero-cta-group, .is-screen-hidden {
+  .workspace-tabs, .workspace-sidebar, .mobile-nav-panel, .mobile-nav-backdrop,
+  .scanner-layout-container, .hero-cta-group, .is-screen-hidden {
     display: none !important;
   }
   .app-main, .form-workspace-grid, .form-preview-column, .preview-panel, .paper-stage,

@@ -17,29 +17,31 @@ export type MobileNavItem = {
 };
 
 type MobileNavProps = {
-  /** Çalışma alanı sekmeleri (İşlem / Form / Kayıtlar / Yönetim). */
   items: MobileNavItem[];
   user: AuthenticatedUser;
   onLogout: () => void;
 };
 
 /**
- * Mobil tam ekran gezinme katmanı (full-screen navigation overlay).
+ * Başlığın altında açılan kompakt gezinme paneli.
  *
- * ≤900px'te başlıktaki sekme şeridi, kullanıcı özeti ve dış site bağlantısı
- * başlıkta yer kaplamak yerine sağ üstteki tek bir düğmeden açılan tam ekran
- * menüye taşınır. Masaüstünde (≥901px) bileşen yalnızca gizli düğmeyi üretir;
- * görünürlük tamamen CSS medya sorgularına bırakılmıştır.
+ * Geniş ekranda kalıcı yan gezinme vardır. Dar ekranda sağ üstteki düğme
+ * menüyü açar. Panel, ekranın tamamını kaplayan katmanın yerine geçti: başlığın
+ * hemen altına yaslanan, kenarlarından sayfanın görünür kaldığı yüzen bir
+ * menüdür. Yüksekliği ekranı asla aşmaz; uzun liste panel içinde kayar,
+ * kullanıcı + çıkış şeridi panelin altında yapışık kalır.
  *
- * Erişilebilirlik: `role="dialog"` + `aria-modal`, Escape ile kapanma, açılışta
- * odak kapatma düğmesine gider, kapanışta odak tetikleyiciye döner; menü
- * açıkken arka plan kaydırması kilitlenir. Her rota değişiminde kendiliğinden
+ * Erişilebilirlik: `role="dialog"` + `aria-modal`, Escape ve arka plana
+ * tıklama ile kapanma, açılışta odak kapatma düğmesine gider, Tab panel
+ * içinde döngüde kalır, kapanışta odak tetikleyiciye döner; menü açıkken
+ * arka plan kaydırması kilitlenir. Her rota değişiminde kendiliğinden
  * kapanır (SPA gezinmesinde açık kalan menü bırakılmaz).
  */
 export function MobileNav({ items, user, onLogout }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const route = useRoute();
 
   // Rota değiştiğinde menüyü kapat (SPA navigasyonu dahil).
@@ -47,7 +49,7 @@ export function MobileNav({ items, user, onLogout }: MobileNavProps) {
     setOpen(false);
   }, [route]);
 
-  // Arka plan kaydırma kilidi + Escape + odak yönetimi.
+  // Arka plan kaydırma kilidi + Escape + Tab döngüsü + odak yönetimi.
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
@@ -57,6 +59,21 @@ export function MobileNav({ items, user, onLogout }: MobileNavProps) {
       if (event.key === 'Escape') {
         event.preventDefault();
         setOpen(false);
+        return;
+      }
+      if (event.key === 'Tab') {
+        const focusables = panelRef.current?.querySelectorAll<HTMLElement>('button, a[href]');
+        if (!focusables || focusables.length < 2) return;
+        const first = focusables[0] as HTMLElement;
+        const last = focusables[focusables.length - 1] as HTMLElement;
+        const active = document.activeElement;
+        if (event.shiftKey && (active === first || !(active instanceof HTMLElement) || !panelRef.current?.contains(active))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     }
     document.addEventListener('keydown', onKeyDown);
@@ -74,7 +91,7 @@ export function MobileNav({ items, user, onLogout }: MobileNavProps) {
         ref={toggleRef}
         className="nav-toggle"
         aria-expanded={open}
-        aria-controls="mobile-nav-overlay"
+        aria-controls="mobile-nav-panel"
         aria-label="Menüyü aç"
         onClick={() => setOpen(true)}
       >
@@ -83,121 +100,115 @@ export function MobileNav({ items, user, onLogout }: MobileNavProps) {
 
       {open &&
         createPortal(
-          <div
-            className="mobile-nav-overlay"
-            id="mobile-nav-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Gezinme menüsü"
-          >
-          <div className="mobile-nav-head">
-            <span className="mobile-nav-brand">
-              <span className="brand-mark" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
-                  <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
-                  <circle cx="10" cy="10" r="1.8" fill="currentColor" />
-                  <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="16" cy="16" r="1.8" fill="currentColor" />
-                </svg>
-              </span>
-              <span className="mobile-nav-brand-text">
-                <strong>MMPI-566</strong>
-                <small>Çalışma alanı</small>
-              </span>
-            </span>
-            <button
-              type="button"
-              ref={closeRef}
-              className="nav-close"
-              aria-label="Menüyü kapat"
+          <>
+            <div
+              className="mobile-nav-backdrop"
+              aria-hidden="true"
               onClick={() => setOpen(false)}
+            />
+            <div
+              ref={panelRef}
+              className="mobile-nav-panel"
+              id="mobile-nav-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Gezinme menüsü"
             >
-              <Icon name="close" size={22} />
-            </button>
-          </div>
-
-          <nav className="mobile-nav-body" aria-label="Çalışma alanı ve site sayfaları">
-            <span className="mobile-nav-kicker" id="mobile-nav-group-workspace">
-              Çalışma alanı
-            </span>
-            <div className="mobile-nav-group" role="group" aria-labelledby="mobile-nav-group-workspace">
-              {items.map(item => (
+              <div className="mobile-nav-head">
+                <span className="mobile-nav-title">Menü</span>
                 <button
                   type="button"
-                  key={item.id}
-                  className={`mobile-nav-link ${item.active ? 'active' : ''}`}
-                  aria-current={item.active ? 'page' : undefined}
+                  ref={closeRef}
+                  className="nav-close"
+                  aria-label="Menüyü kapat"
+                  onClick={() => setOpen(false)}
+                >
+                  <Icon name="close" size={20} />
+                </button>
+              </div>
+
+              <nav className="mobile-nav-body" aria-label="Çalışma alanı ve site sayfaları">
+                <span className="mobile-nav-kicker" id="mobile-nav-group-workspace">
+                  Çalışma alanı
+                </span>
+                <div className="mobile-nav-group" role="group" aria-labelledby="mobile-nav-group-workspace">
+                  {items.map(item => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      className={`mobile-nav-link ${item.active ? 'active' : ''}`}
+                      aria-current={item.active ? 'page' : undefined}
+                      onClick={() => {
+                        setOpen(false);
+                        item.onSelect();
+                      }}
+                    >
+                      <Icon name={item.icon} size={18} />
+                      <span>{item.label}</span>
+                      {item.active && <span className="mobile-nav-current">Açık</span>}
+                    </button>
+                  ))}
+                </div>
+
+                <span className="mobile-nav-kicker" id="mobile-nav-group-site">
+                  Site
+                </span>
+                <div className="mobile-nav-group" role="group" aria-labelledby="mobile-nav-group-site">
+                  <a
+                    className="mobile-nav-link mobile-nav-link-wide"
+                    href={SITE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Icon name="external" size={18} />
+                    <span>halilkaraduman.com.tr</span>
+                  </a>
+                  <a className="mobile-nav-link" href={INFO_ROUTES.sss} onClick={() => setOpen(false)}>
+                    <Icon name="info" size={18} />
+                    <span>SSS</span>
+                  </a>
+                  <a className="mobile-nav-link" href={INFO_ROUTES.gizlilik} onClick={() => setOpen(false)}>
+                    <Icon name="shield" size={18} />
+                    <span>Gizlilik &amp; KVKK</span>
+                  </a>
+                  <a className="mobile-nav-link" href={INFO_ROUTES.kullanim} onClick={() => setOpen(false)}>
+                    <Icon name="file" size={18} />
+                    <span>Kullanım Koşulları</span>
+                  </a>
+                  <a className="mobile-nav-link" href={INFO_ROUTES.kaynaklar} onClick={() => setOpen(false)}>
+                    <Icon name="list" size={18} />
+                    <span>Kaynakça</span>
+                  </a>
+                </div>
+              </nav>
+
+              <div className="mobile-nav-foot">
+                <div className="user-profile-summary">
+                  <div className="user-avatar-circle">
+                    {user.firstName.charAt(0)}
+                    {user.lastName.charAt(0)}
+                  </div>
+                  <div className="user-info-text">
+                    <strong className="user-full-name">{displayName(user)}</strong>
+                    <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
+                      {user.role === 'ADMIN' ? 'Yönetici' : 'Uzman psikolog'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-logout"
                   onClick={() => {
                     setOpen(false);
-                    item.onSelect();
+                    onLogout();
                   }}
                 >
-                  <Icon name={item.icon} size={18} />
-                  <span>{item.label}</span>
-                  {item.active && <span className="mobile-nav-current">Açık</span>}
+                  <span>Çıkış</span>
                 </button>
-              ))}
-            </div>
-
-            <span className="mobile-nav-kicker" id="mobile-nav-group-site">
-              Site
-            </span>
-            <div className="mobile-nav-group" role="group" aria-labelledby="mobile-nav-group-site">
-              <a
-                className="mobile-nav-link"
-                href={SITE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setOpen(false)}
-              >
-                <Icon name="external" size={18} />
-                <span>halilkaraduman.com.tr</span>
-              </a>
-              <a className="mobile-nav-link" href={INFO_ROUTES.sss} onClick={() => setOpen(false)}>
-                <Icon name="info" size={18} />
-                <span>SSS</span>
-              </a>
-              <a className="mobile-nav-link" href={INFO_ROUTES.gizlilik} onClick={() => setOpen(false)}>
-                <Icon name="shield" size={18} />
-                <span>Gizlilik &amp; KVKK</span>
-              </a>
-              <a className="mobile-nav-link" href={INFO_ROUTES.kullanim} onClick={() => setOpen(false)}>
-                <Icon name="file" size={18} />
-                <span>Kullanım Koşulları</span>
-              </a>
-              <a className="mobile-nav-link" href={INFO_ROUTES.kaynaklar} onClick={() => setOpen(false)}>
-                <Icon name="list" size={18} />
-                <span>Kaynakça</span>
-              </a>
-            </div>
-          </nav>
-
-          <div className="mobile-nav-foot">
-            <div className="user-profile-summary">
-              <div className="user-avatar-circle">
-                {user.firstName.charAt(0)}
-                {user.lastName.charAt(0)}
-              </div>
-              <div className="user-info-text">
-                <strong className="user-full-name">{displayName(user)}</strong>
-                <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
-                  {user.role === 'ADMIN' ? 'Yönetici' : 'Psikolog'}
-                </span>
               </div>
             </div>
-            <button
-              type="button"
-              className="btn-logout"
-              onClick={() => {
-                setOpen(false);
-                onLogout();
-              }}
-            >
-              <span>Çıkış</span>
-            </button>
-          </div>
-          </div>,
+          </>,
           document.body,
         )}
     </>

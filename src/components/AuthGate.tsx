@@ -234,8 +234,14 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
 
   return (
     <main className="auth-shell">
-      <div className="auth-card-wrapper">
-        <section className="auth-card" aria-labelledby="auth-title">
+      <div className="auth-layout">
+        <div className="auth-intro">
+          <span className="auth-intro-kicker">UZMANLAR İÇİN ÇALIŞMA ALANI</span>
+          <h2>Her teste<br /><em>hazır başlayın.</em></h2>
+          <p>MMPI-566 optik form tarama, puanlama ve kayıt izlemi; günlük akışınız için tek bir çalışma alanında.</p>
+          <span className="auth-intro-foot"><Icon name="shield" size={17} /> Yalnızca yetkili hesaplarla erişim</span>
+        </div>
+        <form className="auth-card" onSubmit={submit} aria-labelledby="auth-title">
           <div className="auth-brand">
             <span className="auth-brand-mark" aria-hidden="true">
               <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
@@ -253,63 +259,57 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
           </div>
 
           <div className="auth-heading">
-            <h1 id="auth-title">Giriş</h1>
-            <p>Yetkili uzman hesabı.</p>
+            <h1 id="auth-title">Hoş geldiniz.</h1>
+            <p>Çalışma alanınıza devam etmek için hesabınızla giriş yapın.</p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="auth-email">E-posta</label>
+            <input
+              id="auth-email"
+              name="email"
+              required
+              type="email"
+              placeholder="uzman@kurum.com"
+              value={email}
+              onChange={event => setEmail(event.target.value)}
+              autoComplete="username"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="auth-password">Parola</label>
+            <input
+              id="auth-password"
+              name="password"
+              required
+              type="password"
+              placeholder="••••••••••••"
+              value={password}
+              onChange={event => setPassword(event.target.value)}
+              autoComplete="current-password"
+            />
           </div>
 
           {(error || externalError) && (
-            <div className="status-banner error-banner" role="alert">
-              <Icon name="alert" size={18} />
-              <span>{error || externalError}</span>
-            </div>
+            <p className="form-error" role="alert">{error || externalError}</p>
           )}
 
-          <form className="auth-form" onSubmit={submit}>
-            <div className="form-group">
-              <label>E-posta Adresi</label>
-              <input
-                required
-                type="email"
-                placeholder="uzman@kurum.com"
-                value={email}
-                onChange={event => setEmail(event.target.value)}
-                autoComplete="username"
-              />
-            </div>
+          <button className="btn-primary auth-submit-btn" type="submit" disabled={busy}>
+            {busy ? (
+              <>
+                <div className="spinner-inline" />
+                <span>Giriş yapılıyor…</span>
+              </>
+            ) : (
+              <>
+                <span>Giriş yap</span>
+                <Icon name="arrowRight" size={16} />
+              </>
+            )}
+          </button>
 
-            <div className="form-group">
-              <label>Şifre</label>
-              <input
-                required
-                type="password"
-                placeholder="••••••••••••"
-                value={password}
-                onChange={event => setPassword(event.target.value)}
-                autoComplete="current-password"
-              />
-            </div>
-
-            <button className="btn-primary auth-submit-btn" type="submit" disabled={busy}>
-              {busy ? (
-                <>
-                  <div className="spinner-inline" />
-                  <span>Giriş Yapılıyor...</span>
-                </>
-              ) : (
-                <>
-                  <span>Giriş Yap</span>
-                  <Icon name="arrowRight" size={16} />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="auth-footer-help">
-            <Icon name="shield" size={16} />
-            <p>
-              Hesabınız yoksa veya şifrenizi unuttuysanız lütfen kurum yöneticiniz (Admin) ile iletişime geçiniz.
-            </p>
-          </div>
+          <p className="auth-card-note">Halka açık kayıt yoktur. Hesabınız yönetici tarafından açılır.</p>
 
           <a
             className="auth-site-return"
@@ -321,7 +321,7 @@ function AuthScreen({ onSignIn, error: externalError }: AuthScreenProps) {
             <Icon name="external" size={14} />
             <span>Ana siteye dön: {SITE_LABEL}</span>
           </a>
-        </section>
+        </form>
       </div>
     </main>
   );
