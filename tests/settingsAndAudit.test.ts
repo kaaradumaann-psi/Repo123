@@ -171,8 +171,10 @@ test('Ayarlar hesap açma formu taşımaz; hesap işlemleri Yönetim panelindedi
   assert.ok(!/CloudAccountsPanel/.test(page), 'hesap paneli bağlanmamalı');
   assert.ok(page.includes('Psikolog hesabı açma, rol verme ve hesabı kapatma <strong>Yönetim</strong> panelindedir.'),
     'hesap işlemleri için Yönetim paneline yönlendirme olmalı');
-  assert.match(page, /Supabase bağlı\. Kurum verisi RLS ile ayrılır\. Yerel dosya yine bu cihazda kalır; bulut danışmanları|Supabase bağlı\. Kurum verisi RLS ile ayrılır\. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır\./,
-    'Bulut durum metni korunmalı');
+  assert.ok(
+    page.includes('Supabase bağlı. Kurum verisi RLS ile ayrılır. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır.'),
+    'Bulut durum metni korunmalı',
+  );
   assert.equal(existsSync('src/settings/CloudAccountsPanel.tsx'), false, 'hesap paneli dosyası silinmiş olmalı');
   assert.equal(existsSync('src/settings/cloudAccounts.ts'), false, 'profil listesi modülü silinmiş olmalı');
 });
@@ -449,4 +451,75 @@ test('Ayarlar ve Denetim ekranları telefonda okunur kalır (≤720px sözleşme
 
   const settings = read('src/settings/SettingsPage.tsx');
   assert.match(settings, /className="clinical-container settings-page"/, 'sayfa kabuğu tek sarmalayıcı olmalı');
+});
+
+test('denetim izi kişisel veri taşımaz; özetler sabit metindir', () => {
+  const files = [
+    'src/components/MyRecordsPanel.tsx',
+    'src/components/CaseWorkspace.tsx',
+    'src/components/RecordDetailPage.tsx',
+    'src/components/AdminPanel.tsx',
+    'src/settings/BackupDialog.tsx',
+    'src/settings/SettingsPage.tsx',
+  ];
+  for (const file of files) {
+    const source = read(file);
+    // recordDeviceAudit çağrılarındaki summary alanı danışan adını/hesabını taşımamalı.
+    for (const match of source.matchAll(/recordDeviceAudit\([\s\S]{0,400}?summary:\s*(`[^`]*`|'[^']*')/g)) {
+      const summary = match[1]!;
+      assert.ok(
+        !/firstName|lastName|\.client\b|expertNotes|email/.test(summary),
+        `${file} denetim özeti kişisel veri taşımamalı: ${summary}`,
+      );
+    }
+  }
+  const trail = read('src/settings/auditTrail.ts');
+  assert.match(trail, /entityId: input\.entityId\.replace/, 'kimlik alanı temizlenmeli');
+  assert.match(trail, /slice\(0, 200\)/, 'özet uzunluğu sınırlanmalı');
+});
+
+test('yedeği geri yükleme kuralları kaynak kodda kilitli', () => {
+  const restore = read('src/settings/backupRestore.ts');
+  assert.match(restore, /recordsAllowed: actor\.role === 'PSYCHOLOG' && actor\.active === true/,
+    'klinik kayıt yalnızca aktif psikolog hesabında geri yüklenebilmeli (RLS)');
+  assert.match(restore, /const plan = planRestore\(file, new Set\(existing\.keys\(\)\)\)/,
+    'mevcut anahtarlar sunucudan okunmalı (yerel varsayım yok)');
+  assert.match(restore, /error\b[\s\S]{0,200}durduruldu/, 'anahtar okunamazsa geri yükleme durmalı');
+  assert.match(restore, /sanitizeLetterhead\(file\.letterhead\)/, 'geri yüklenen antet temizlenmeli');
+  const dialog = read('src/settings/BackupDialog.tsx');
+  assert.match(dialog, /if \(file\.size > MAX_BACKUP_BYTES\)/, 'dosya boyutu dosya okunmadan önce sınırlanmalı');
+  assert.match(dialog, /parseBackupFile\(await file\.text\(\)\)/, 'dosya ayrıştırıcıdan geçmeli');
+  assert.match(dialog, /tone="neutral"/, 'geri yükleme onayı yıkıcı olmayan tonda sorulmalı');
+});
+
+test('yedekleme penceresi modal sözleşmesine uyar (odak tuzağı, Esc, kaydırma kilidi)', () => {
+  const dialog = read('src/settings/BackupDialog.tsx');
+  assert.match(dialog, /role="dialog"/);
+  assert.match(dialog, /aria-modal="true"/);
+  assert.match(dialog, /aria-labelledby="backup-dialog-title"/);
+  assert.match(dialog, /event\.key === 'Escape'/, 'Esc pencereyi kapatmalı');
+  assert.match(dialog, /event\.key !== 'Tab'/, 'Tab pencere içinde dönmeli');
+  assert.match(dialog, /previouslyFocused/, 'odak pencereyi açan düğmeye dönmeli');
+  assert.match(dialog, /body\.style\.overflow = 'hidden'/, 'arka plan kaydırması kilitlenmeli');
+  assert.match(dialog, /!downloading && !restoring/, 'işlem sürerken kapanma engellenmeli');
+});
+
+test('ayarlar yüzeyi yeni sekme/açık pencere ya da HTML enjeksiyonu açmaz', () => {
+  for (const file of [
+    'src/settings/SettingsPage.tsx',
+    'src/settings/BackupDialog.tsx',
+    'src/settings/AuditPage.tsx',
+    'src/settings/auditTrail.ts',
+    'src/settings/backup.ts',
+    'src/settings/backupRestore.ts',
+    'src/settings/serverAudit.ts',
+  ]) {
+    const source = read(file);
+    assert.ok(!/dangerouslySetInnerHTML|innerHTML|document\.write|eval\(|new Function/.test(source), `${file} HTML enjeksiyonu içermemeli`);
+    assert.ok(!/target="_blank"/.test(source), `${file} yeni sekme açmamalı`);
+  }
+  const page = read('src/settings/SettingsPage.tsx');
+  // Antet görselleri yalnızca doğrulanmış data-URI ile basılır.
+  assert.match(page, /safeReportImage\(letterhead\.logo\)/, 'logo doğrulanarak basılmalı');
+  assert.match(page, /safeReportImage\(letterhead\.signature\)/, 'imza doğrulanarak basılmalı');
 });

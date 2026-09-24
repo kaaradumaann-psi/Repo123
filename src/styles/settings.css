@@ -121,13 +121,6 @@
     color: var(--danger-ink);
   }
 
-  .settings-page .settings-hint,
-  .settings-page .form-group .settings-hint {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--soft);
-  }
-
   /* ------------------------------------------------------------------ */
   /*  Form: psikolog reposundaki düz alan ölçüleri                       */
   /* ------------------------------------------------------------------ */

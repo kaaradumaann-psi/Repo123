@@ -36,11 +36,41 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [wipeDone, setWipeDone] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Pencere davranışı (repo standardı: ConfirmDialog / MobileNav):
+   * odak içeri alınır ve Tab pencere içinde döner, Esc ve arka plan kapatır,
+   * arka plan kaydırması kilitlenir. İşlem sürerken (indirme/geri yükleme)
+   * kapanma engellenir ki yarım kalan bir yazma sessizce kesilmesin.
+   */
   useEffect(() => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     closeRef.current?.focus();
+    const focusables = (): HTMLElement[] => {
+      const container = dialogRef.current;
+      if (!container) return [];
+      const selector = 'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      return [...container.querySelectorAll<HTMLElement>(selector)].filter(element => element.offsetParent !== null);
+    };
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !downloading && !restoring) onClose();
+      if (event.key === 'Escape') {
+        if (!downloading && !restoring) onClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !items.includes(active as HTMLElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !items.includes(active as HTMLElement))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     const body = document.body;
@@ -49,6 +79,8 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
     return () => {
       window.removeEventListener('keydown', onKey);
       body.style.overflow = previousOverflow;
+      // Odak, pencereyi açan düğmeye döner (klavye kullanıcısı kaybolmaz).
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
   }, [onClose, downloading, restoring]);
 
@@ -167,7 +199,7 @@ export function BackupDialog({ user, onClose }: { user: AuthenticatedUser; onClo
           if (event.target === event.currentTarget && !downloading && !restoring) onClose();
         }}
       >
-        <div className="modal-container backup-dialog" role="document">
+        <div className="modal-container backup-dialog" role="document" ref={dialogRef}>
           <header className="modal-header">
             <div>
               <h2 id="backup-dialog-title">Yedek ve silme</h2>
