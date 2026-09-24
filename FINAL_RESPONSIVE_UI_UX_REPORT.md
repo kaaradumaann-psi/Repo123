@@ -196,3 +196,46 @@ Baskı/PDF bu bloklardan etkilenmez. Sözleşme testi bu eşitliği kilitler (39
 **NOT VERIFIED:** Gerçek mobil işletim sistemi/tarayıcı (iOS Safari / Android Chrome) yine
 doğrulanmadı; ölçümler masaüstü Chromium'un cihaz emülasyonuyladır.
 
+## 11. EK-B — Düzeltmenin `main`'e teslimi ve paralel çalışma (2026-09-24 · PR #57 · `0888d4a9`)
+
+**Bulgu (kullanıcı, 4. kez):** Düzeltme `arena/01a0d039-repo123` dalında commit'liydi (`5dccadf`,
+`855fc8b`) ve remote ile eşitti; ancak kullanıcı **canlı sitede eski görünümü** görüyordu. Kök neden
+kod hatası değil **teslim yoluydu**: yayın `main`'den yapılıyor (`npm run deploy` = `npm run build &&
+npx wrangler deploy`), düzeltme ise `main`'e hiç girmemişti.
+
+**Paralel çalışma:** `main`, başka bir oturumun PR #56 (`9429526`) ile eklediği **ayrı bir
+`@media screen` sans override katmanını** taşıyordu (`.report-full-preview-body .pr-report
+{ font-family: var(--font-sans); font-size: 13px; line-height: 1.6; }`) + editör sıkıştırma
+commit'leri (`68c83ab`, `4690ca2`). Dal, `main`'in 24 commit gerisindeydi.
+
+**Yapılan** (merge `ee3f4b4` → `main` `0888d4a9`):
+
+* `origin/main` dala alındı; editör tarafındaki değişiklikler aynen korundu.
+* Tek çakışma `src/styles/reports.css` içindeydi. **İki paralel uygulama yerine tek uygulama**
+  bırakıldı: bu dalın paylaşımlı blok + serif ekran ölçeği sürümü korundu, `main`'in sans override
+  katmanı **düşürüldü** (yinelenen/çelişen CSS katmanı oluşmasın diye).
+* Birleşik ağaçta tüm kapılar yeşil: `typecheck` 0, `npm test` **683/683**, `verify:pdf` PASS
+  (4 A4 sayfa, 144/144 madde no), `build` PASS, `git diff --check` temiz; `optik-form.html`
+  yeniden derlenip commit'lendi (CI sözleşmesi).
+* Birleşik hâl gerçek tarayıcıda (Chromium 153) yeniden ölçüldü: 1440/1024 → 760px, 768 → 646px,
+  430/390/320 → 356/316/246px; tüm genişliklerde yazı ailesi örnek kâğıtla **aynı (Times New Roman
+  serif)**; gövde yatay kayması yok; yazdırma **değişmedi** (794px = 210mm, 10.5px, 3 sayfa PDF).
+
+**Teslim:** PR **#57** (`arena/01a0d039-repo123` → `main`) CI `verify` **PASS** (2m31s) → merge
+edildi; `origin/main` = `0888d4a9e5277c6811ea4bb86c9e322fa5cc34c6` (`git ls-remote` ile doğrulandı).
+`main` push CI çalışması **SUCCESS** (`35937429804`).
+
+**Yan bulgu (CI):** PR #56'nın `main` push CI çalışması `Run git diff --exit-code -- optik-form.html`
+adımında **başarısız** olmuş (bayat `optik-form.html`). Bu birleşmeyle `optik-form.html` build
+çıktısıyla byte-özdeş hâle geldi ve `main` CI yeşile döndü. → **Kural: merge öncesi `npm run build`
+çalıştırıp `optik-form.html`'i stage etmek zorunlu.**
+
+**NOT VERIFIED:**
+
+1. Canlı sitenin (`mmpi.halilkaraduman.com.tr`) CSS'i bu ortamdan doğrulanamadı — sandbox'tan dış
+   HTTPS erişimi yok; deploy sonrası doğrulama kullanıcının tarayıcısında yapılmalı.
+2. Depoda deploy workflow'u yok ve ortamda Cloudflare kimlik bilgisi bulunmuyor →
+   `npm run deploy` buradan çalıştırılamaz; yayın Cloudflare Git entegrasyonu ile otomatik
+   ya da elle yapılır.
+3. Gerçek mobil işletim sistemi/tarayıcı (iOS Safari / Android Chrome) doğrulanmadı.
+
