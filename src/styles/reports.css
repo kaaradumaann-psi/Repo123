@@ -308,8 +308,8 @@
     position: relative;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin: 8px 0 14px;
+    padding: 8px 10px;
+    margin: 4px 0;
     overflow-wrap: anywhere;
     transition: border-color .15s, background .15s, box-shadow .15s;
   }
@@ -320,46 +320,56 @@
     box-shadow: 0 0 0 3px rgba(10,132,255,.08);
   }
   .report-edit-block.is-locked {
-    background: #f8fbff;
+    background: #f0f7ff;
     border-color: var(--primary-border);
   }
+  /* Locked blocks: subtle indicator */
+  .report-block-controls--locked small { color: var(--accent-ink); }
 
   .report-block-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 2px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
     color: var(--muted);
     opacity: 0;
     transition: opacity .15s;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-full);
+    padding: 2px 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    z-index: 2;
   }
   .report-edit-block:hover .report-block-controls,
   .report-edit-block.is-selected .report-block-controls { opacity: 1; }
   .report-block-controls small {
-    margin-right: auto;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
+    font-size: 9px;
+    font-weight: 700;
     color: var(--muted);
-    background: var(--bg-soft);
-    border: 1px solid var(--hairline);
-    border-radius: var(--radius-full);
-    padding: 3px 8px;
+    padding: 0 4px;
+    min-width: 14px;
+    text-align: center;
   }
   .report-block-controls button {
-    min-width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid var(--hairline);
-    background: var(--white);
+    min-width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
     border-radius: var(--radius-full);
-    padding: 0 8px;
-    font-size: 12px;
-    color: var(--slate-600);
+    padding: 0 4px;
+    font-size: 11px;
+    color: var(--slate-500);
+    cursor: pointer;
   }
-  .report-block-controls button:has(+ button) { padding: 0; width: 28px; }
-  .report-block-controls button:hover { border-color: var(--slate-300); color: var(--text); }
-  .report-block-controls button:disabled { opacity: .35; }
+  .report-block-controls button:hover { background: var(--bg-soft); color: var(--text); }
+  .report-block-controls button:disabled { opacity: .3; cursor: default; }
+  .report-block-controls button:disabled:hover { background: transparent; }
 
   .report-edit-block [contenteditable] {
     white-space: pre-wrap;
@@ -372,6 +382,51 @@
   .report-edit-block [contenteditable]:empty::before {
     content: 'Yazmak için tıklayın…';
     color: var(--muted);
+  }
+  /* Compact dataField inside editor — smaller label, inline layout */
+  .report-edit-block .psych-field {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    padding: 3px 0;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .report-edit-block .psych-field-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .report-edit-block .psych-field-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  /* Compact table inside editor — strip APA figure wrapper */
+  .report-edit-block .apa-table {
+    margin: 0;
+  }
+  .report-edit-block .apa-table-number {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .report-edit-block .apa-table-title {
+    font-size: 10px;
+    font-style: italic;
+    color: var(--soft);
+    margin-bottom: 4px;
+  }
+  .report-edit-block .apa-table-note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
   }
   .report-edit-block [data-kind='heading1'] {
     font-family: var(--font-display);
@@ -954,7 +1009,32 @@
     .psych-draft-watermark { font-size: 84px; }
     .psych-field-label { flex-basis: 128px; max-width: 128px; }
     .report-settings-grid { grid-template-columns: 1fr; }
+    /* Tam rapor — responsive */
+    .report-full-preview-body .pr-report .pr-block { padding: 0 20px; }
+    .report-full-preview-body .pr-report .pr-head { padding: 18px 20px 12px; }
+    .report-full-preview-body .pr-report .pr-sign { margin-left: 20px; margin-right: 20px; }
+    .report-full-preview-body .pr-report .pr-foot { margin-left: 20px; margin-right: 20px; }
+    .report-full-preview-body .pr-report .pr-revision { margin-left: 20px; margin-right: 20px; }
+    .report-full-preview-body .pr-report .pr-client-grid { grid-template-columns: 1fr; gap: 4px; }
+    .report-full-preview-body .pr-report .pr-table { font-size: 11px; }
+    .report-full-preview-body .pr-report .pr-table th { font-size: 9px; }
+    .report-full-preview-body .pr-report .pr-table td { font-size: 11px; padding: 6px 8px; }
   }
+}
+@media screen and (max-width: 560px) {
+    .report-full-preview-body .pr-report { font-size: 12px; }
+    .report-full-preview-body .pr-report .pr-head h1 { font-size: 18px; }
+    .report-full-preview-body .pr-report .pr-block { padding: 0 14px; }
+    .report-full-preview-body .pr-report .pr-head { padding: 14px 14px 10px; }
+    .report-full-preview-body .pr-report .pr-sign { margin-left: 14px; margin-right: 14px; }
+    .report-full-preview-body .pr-report .pr-foot { margin-left: 14px; margin-right: 14px; }
+    .report-full-preview-body .pr-report .pr-revision { margin-left: 14px; margin-right: 14px; }
+    .report-full-preview-body .pr-report .pr-block h2 { font-size: 14px; }
+    .report-full-preview-body .pr-report .pr-note { font-size: 11.5px; padding: 8px 10px; }
+    .report-full-preview-body .pr-report .pr-dossier { padding: 10px 12px; }
+    .report-full-preview-body .pr-report .pr-dossier-name { font-size: 12px; }
+    .report-full-preview-body .pr-report .pr-sign div { width: 100%; }
+    .report-full-preview-body { padding: 10px; }
 }
 
 @page psych-report {
