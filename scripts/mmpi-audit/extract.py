@@ -34,7 +34,7 @@ import os
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PDF = os.path.join(REPO, "docs", "MMPI Kitap (1) (1).pdf")
+PDF = os.path.join(REPO, "docs", "sources", "mmpi-kitap.pdf")
 OUT = os.path.join(REPO, ".audit")
 
 

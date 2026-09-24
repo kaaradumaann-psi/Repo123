@@ -51,4 +51,4 @@ Sentetik raster ve depo PDF raster dışında **gerçek baskı + gerçek kalem +
 
 ## Sonraki Adım
 
-Saha testi koşulduğunda bu dosyanın altına `## Sonuçlar` ekle ve `KAPSAMLI_DEGERLENDIRME_2026-09-23.md`’deki OMR bölümünü güncelle.
+Saha testi koşulduğunda bu dosyanın altına `## Sonuçlar` ekle ve `docs/reports/KAPSAMLI_DEGERLENDIRME_2026-09-23.md`’deki OMR bölümünü güncelle.

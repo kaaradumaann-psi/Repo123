@@ -3,7 +3,7 @@
  *
  * Kaynak (hepsi görsel olarak teyit edilmiştir):
  *   Ceyhun & Oral, "Minnesota Çok Yönlü Kişilik Envanteri Klinik Testlerin
- *   Değerlendirilmesi" (kaynak PDF: docs/yeni/mmpiKaynak2 (AsılKaynak) with ocr.pdf)
+ *   Değerlendirilmesi" (kaynak PDF: docs/sources/mmpi-kaynak-2-ocr.pdf)
  *   — Graham (1987) listeleri, Tablo 8-17, T puanı bantları ve demografik notlar.
  *   Normlar: TURKISH_NORMS (Tablo 30 / Savaşır, 1981) — dipnot ortalamaları
  *   yerine Tablo 30 değerleri kullanılır (audit: CONFLICT-028/037/040 REJECTED).

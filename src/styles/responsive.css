@@ -368,9 +368,76 @@
 
   /* Report editor — the formatting toolbar is ~14 controls. Sticky, it stacked
      into four rows and covered most of a phone screen while typing; in a
-     phone-width editor it scrolls with the document instead. */
+     phone-width editor it scrolls with the document instead.
+     The structure group (H1 … Tablo) is a nowrap pill: on a 320–430px screen
+     “Tablo” sat past the viewport and dragged the page sideways. Groups wrap
+     inside the editor width; nothing in the toolbar may widen the page. */
   .report-toolbar {
     position: static;
+    max-width: 100%;
+    align-items: flex-start;
+    overflow-x: clip;
+  }
+
+  .report-toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-width: 0;
+    border-radius: 14px;
+  }
+
+  .report-toolbar-group[aria-label='Yapı'],
+  .report-toolbar-group[aria-label='Ekle'] {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .report-toolbar-group[aria-label='Ekle'] select {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .report-toolbar-sep {
+    display: none;
+  }
+
+  .report-toolbar button {
+    white-space: nowrap;
+  }
+
+  .report-toolbar select {
+    flex: 1 1 140px;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .report-edit-pane,
+  .report-blocks,
+  .report-edit-block,
+  .report-edit-table {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Editor tables: two textareas at their intrinsic min-width (~200px each)
+     pushed the page sideways. Fixed layout shares the row; the block itself
+     may scroll, the page may not. */
+  .report-edit-block table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .report-edit-table {
+    overflow-x: auto;
+  }
+
+  .report-edit-table textarea {
+    max-width: 100%;
   }
 
   /* Table cells inside the editor: a 36px cell is too small to tap and edit. */
@@ -589,23 +656,64 @@
 }
 
 /* --------------------------------------------------------------------------
-   08 · ≤720px — reports, charts and paper previews
+   08 · ≤1024px / ≤720px — reports, charts and paper previews
    -------------------------------------------------------------------------- */
-@media screen and (max-width: 720px) {
-  /* The T-score profile is an SVG with a fixed 1400×470 viewBox: at full phone
-     width its 12–13px labels would render at ~6px. The chart therefore keeps a
-     readable minimum width and scrolls inside its card, with the exact numbers
-     available in the summary table and the scale list (both already present).
-     A hint line in the card tells the user it scrolls. */
-  .mmpi-chart-card {
-    padding: 12px 10px 8px;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
+@media screen and (max-width: 1024px) {
+  /* The T-score profile is an SVG with a fixed 1400×470 viewBox. Shrinking it
+     to a phone (or a landscape phone / small tablet) renders 12px labels at
+     3–8px. Below this width the analysis card swaps in the HTML profile
+     (real 12–13px type, T score under each scale). The wide SVG stays for
+     print and for the A4 paper preview, which is not inside .mmpi-chart-card. */
+  .mmpi-chart-card .mmpi-chart-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mmpi-chart-card .mmpi-chart-desktop {
+    display: none;
+  }
+
+  .mmpi-chart-card .mmpi-chart-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .mmpi-chart-card .mmpi-chart-legend {
+    justify-content: flex-start;
+    gap: 8px 12px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: none;
   }
 
   .mmpi-chart-hint {
     display: block;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  /* Summary tables still scroll inside their own card. The profile chart no
+     longer does — it is redrawn at a readable size (see the 1024px block). */
+  .mmpi-chart-card {
+    padding: 12px 8px 8px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    max-width: 100%;
+  }
+
+  .mmpi-chart-hint {
+    display: block;
+  }
+
+  .mmpi-results-panel {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   /* Same treatment for every other wide, scrollable surface in the result and
@@ -635,6 +743,31 @@
      dolgusu değişmez — önizleme `.screen-only` içinde, kâğıt `.print-only`). */
   .report-full-preview-body {
     padding: 12px;
+  }
+}
+
+/* 320px: 10 klinik etiket + 3 haneli T skoru aynı satırda çakışmasın. */
+@media screen and (max-width: 360px) {
+  .mmpi-results-panel {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .mmpi-chart-card {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .mmpi-mini-x {
+    gap: 0;
+  }
+
+  .mmpi-mini-x b {
+    font-size: 12px;
+  }
+
+  .mmpi-mini-x small {
+    font-size: 11px;
   }
 }
 
@@ -1230,6 +1363,70 @@
   /* Kalite raporu satırları ve ölçüm listesi uzun değerleri sarmalasın. */
   .q-metric,
   .scan-row-location {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13b · ≤1200px — uzun görsel dosya adı sayfayı sağa kaydırmasın
+   --------------------------------------------------------------------------
+   Telefon galerisi adları boşluksuz tek jeton olabilir
+   (IMG_20260924_…jpg, WhatsApp Image…). Durum şeridi ve “Kaynak dosya”
+   satırı flex öğesidir; min-width: auto yüzünden ad, ekrandan geniş bir
+   kutu üretir ve sayfa yatay kayar. Ad kırılır, şerit ve inceleme başlığı
+   ekran genişliğinde kalır.
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1200px) {
+  .scanner-layout-container,
+  .scanner-input-card,
+  .scanner-status-strip,
+  .scanner-alerts-list,
+  .scan-review-panel,
+  .status-live-indicator,
+  .status-live-text,
+  .status-banner,
+  .status-banner strong,
+  .scan-alert,
+  .scan-review-panel .section-header-row,
+  .scan-review-panel .section-header-row > div,
+  .scan-review-panel .section-subtext,
+  .scan-source-name {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .scanner-status-strip {
+    overflow-x: clip;
+  }
+
+  .status-live-indicator {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .status-live-text {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .live-dot {
+    flex: none;
+  }
+
+  .scan-review-panel .section-header-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .scan-review-panel .section-header-row > div:first-child {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  .status-banner > span,
+  .status-banner > div {
+    min-width: 0;
     overflow-wrap: anywhere;
   }
 }

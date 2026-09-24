@@ -9,7 +9,7 @@ sürebilmektir.
 
 | Alan | Değer |
 |---|---|
-| Dosya | `docs/MMPI Kitap (1) (1).pdf` |
+| Dosya | `docs/sources/mmpi-kitap.pdf` |
 | Kitap | Minnesota Çok Yönlü Kişilik Envanteri — **Değerlendirme Kitabı** |
 | Baskı | 2. Baskı, Ankara 2003 |
 | Yazarlar | Prof. Dr. Birsen CEYHUN, Uz. Psk. Nursen ORAL |

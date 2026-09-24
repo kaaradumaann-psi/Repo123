@@ -11,7 +11,7 @@ Durum değerleri: `VERIFIED` · `OCR-UNCERTAIN` · `NEEDS_REVIEW`
 
 ### SOURCE-VERSION-001
 
-Source: `docs/MMPI Kitap (1) (1).pdf`
+Source: `docs/sources/mmpi-kitap.pdf`
 Page: PDF p8 R (kitap s.1) — Bölüm 1 "Tanım"
 OCR: "550 maddeden oluşan (kitap formunda 16 madde tekrarlanmaktadır, böylece 566 maddedir.)"
 Visual: CONFIRMED

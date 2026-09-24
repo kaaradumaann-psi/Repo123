@@ -388,6 +388,9 @@ değiştirilebilir); uygulamanın FormKit akışı bu doğrulanmış sabit set k
 | `scripts/diagnose-supabase.mjs` | Canlı Supabase teşhisi (`npm run diagnose:supabase`): migration geçmişi, şema, RLS politikaları, grant'lar, trigger'lar, `audit_logs` sözleşmesi, `admin-users` + `ai-interpretation` CORS'u; yazma/silme testi yalnız `--allow-destructive` ile. Harici bağımlılık yok. |
 | `TROUBLESHOOTING.md` | Canlı ortam hata kümesinin (400 / silme yetkisi / hesap silme) kök neden tablosu, `supabase db push` + `functions deploy` + `secrets set` çözüm sırası ve hata kodu → neden eşlemesi. |
 | `docs/kaynak-denetimi.md` | Puanlama/yorum bileşenlerinin kaynak denetimi: künye–bileşen eşleştirme tabloları ve doğrulanamayan kesimlerin dürüstlük kaydı. |
+| `docs/sources/` | Kaynak PDF’leri. Makine-güvenli adlar; eski dosya adlarının eşlemesi `docs/sources/README.md` içindedir. |
+| `docs/reports/` | Tarihsel faz ve değerlendirme raporları. Kökte tutulmaz. |
+| `docs/mmpi-audit/` | Kaynak kitabına karşı denetimin kalıcı kaydı. |
 
 Form tanımı, görsel tasarım ve PDF üreticisi aynı `FormDefinition` örneğini
 paylaşır; koordinat kaynağı tektir.

@@ -1,6 +1,6 @@
 # Source Index
 
-Kaynak: `docs/MMPI Kitap (1) (1).pdf` — *Minnesota Çok Yönlü Kişilik Envanteri,
+Kaynak: `docs/sources/mmpi-kitap.pdf` — *Minnesota Çok Yönlü Kişilik Envanteri,
 Değerlendirme Kitabı*, 2. Baskı, Ankara 2003, Ceyhun & Oral.
 Ölçek sürümü: **MMPI (orijinal / MMPI-1), 566 maddelik kitap formu.**
 

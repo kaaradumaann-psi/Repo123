@@ -1,9 +1,9 @@
 # OCR PDF FULL AUDIT — Yeni OCR ile Yeniden Doğrulama (2026-09-22)
 
-> **Primary verification source (NEW):** `docs/yeni/mmpiKaynak2 (AsılKaynak) with ocr.pdf` — 38,136,769 bytes (38.1 MB), 139 pages, PDF 1.7, Creator `OCRmyPDF 17.12.1 / OCRmyPDF fpdf2 + Tesseract OCR 5.5.3.20260724`, Producer `pikepdf 10.13.0.post1`, Creation `2026-09-21`, Text layer searchable, ISBN `975-92384-4-6` (p3).
-> **Twin (image-only):** `docs/yeni/mmpiKaynak2 (AsılKaynak) without ocr.pdf` — 76,214,611 bytes, 139 pages, image-only, same book copy as old.
-> **Old source (HISTORICAL):** `docs/MMPI Kitap (1) (1).pdf` — 76,214,611 bytes, 139 pages, image-only, jsPDF 4.2.1, len 0 text.
-> **Secondary (ÇokDikkateAlma):** `docs/yeni/mmpiKaynak1 (ÇokDikkateAlma).pdf` — 195,323 bytes, 52 pages, LibreOffice 7.5, KES-YAPIŞTIR band özetleri.
+> **Primary verification source (NEW):** `docs/sources/mmpi-kaynak-2-ocr.pdf` — 38,136,769 bytes (38.1 MB), 139 pages, PDF 1.7, Creator `OCRmyPDF 17.12.1 / OCRmyPDF fpdf2 + Tesseract OCR 5.5.3.20260724`, Producer `pikepdf 10.13.0.post1`, Creation `2026-09-21`, Text layer searchable, ISBN `975-92384-4-6` (p3).
+> **Twin (image-only):** `docs/sources/mmpi-kaynak-2.pdf` — 76,214,611 bytes, 139 pages, image-only, same book copy as old.
+> **Old source (HISTORICAL):** `docs/sources/mmpi-kitap.pdf` — 76,214,611 bytes, 139 pages, image-only, jsPDF 4.2.1, len 0 text.
+> **Secondary (ÇokDikkateAlma):** `docs/sources/mmpi-kaynak-1.pdf` — 195,323 bytes, 52 pages, LibreOffice 7.5, KES-YAPIŞTIR band özetleri.
 > **Audit ground truth:** `SOURCE_INDEX.md`, `SOURCE_FACTS.md` (240K, 500+ facts), `VERIFIED_DATA.md`, `UNVERIFIED_DATA.md`, `CONFLICTS.md` (43 records, 16 FIXED/9 REJECTED), `DECISIONS.md` (DECISION-031/A, 030/A, 032/B), `CONFLICT-024_KAPSAM.md`, `AUDIT_STATE.md`, `CODE_CHANGES.md` (CHANGE-018…027).
 > **Current implementation:** `src/scoring/mmpiSourceCodes.ts` — `BLOCK_CODES` 151 distinct keys (74 direct defs + 77 aliases), `CODES` 45 canonical two-point, `CODE_CONDITIONS` 73 rule-sets / 123 conditions, `KNOWN_BLOCK_CODES` 151; `mmpiInterpretation.ts` — `detectPatterns()` 18 patterns (10 Bölüm 6 + 8 destek), `mmpiKeys.ts` — 46/46 keys MATCH, `TURKISH_NORMS` 26/26 MATCH.
 > **Rule:** DOĞRULUK > KAPSAM > KOD — never invent T, means, SD, cutoffs, item numbers; OCR error ≠ CONFLICT; mark OCR-UNCERTAIN when visual needed; first tour report only, no code change.
@@ -161,10 +161,10 @@
 
 | File | Location | Bytes | Pages | Format | Creator | Producer | Text Layer | Verdict |
 |---|---|---|---|---|---|---|---|---|
-| Old source | `docs/MMPI Kitap (1) (1).pdf` | 76,214,611 | 139 | PDF 1.3 | jsPDF 4.2.1 | jsPDF 4.2.1 | len 0 per page (image-only) — verified via fitz `len==0` | **MATCH** — historical primary |
-| New OCR (primary for this audit) | `docs/yeni/mmpiKaynak2 (AsılKaynak) with ocr.pdf` | 38,136,769 (38.1 MB) | 139 | PDF 1.7 | `OCRmyPDF 17.12.1 / OCRmyPDF fpdf2 + Tesseract OCR 5.5.3.20260724` | `pikepdf 10.13.0.post1` | len >0, p1 49 chars “Minnesota Çok Yönlü Değerlendirme Kitabı”, p23 3105, p105 ~2000 | **MATCH** — same pagination, OCR layer present |
-| Twin (image-only) | `docs/yeni/mmpiKaynak2 (AsılKaynak) without ocr.pdf` | 76,214,611 | 139 | PDF 1.3 | jsPDF? | jsPDF | len 0 | **MATCH** — identical size to old, same book copy |
-| Secondary | `docs/yeni/mmpiKaynak1 (ÇokDikkateAlma).pdf` | 195,323 | 52 | PDF 1.6 | LibreOffice 7.5 | LibreOffice 7.5 | len >0, L/F/K bands KES-YAPIŞTIR | **SECONDARY** — marked not to heavily consider |
+| Old source | `docs/sources/mmpi-kitap.pdf` | 76,214,611 | 139 | PDF 1.3 | jsPDF 4.2.1 | jsPDF 4.2.1 | len 0 per page (image-only) — verified via fitz `len==0` | **MATCH** — historical primary |
+| New OCR (primary for this audit) | `docs/sources/mmpi-kaynak-2-ocr.pdf` | 38,136,769 (38.1 MB) | 139 | PDF 1.7 | `OCRmyPDF 17.12.1 / OCRmyPDF fpdf2 + Tesseract OCR 5.5.3.20260724` | `pikepdf 10.13.0.post1` | len >0, p1 49 chars “Minnesota Çok Yönlü Değerlendirme Kitabı”, p23 3105, p105 ~2000 | **MATCH** — same pagination, OCR layer present |
+| Twin (image-only) | `docs/sources/mmpi-kaynak-2.pdf` | 76,214,611 | 139 | PDF 1.3 | jsPDF? | jsPDF | len 0 | **MATCH** — identical size to old, same book copy |
+| Secondary | `docs/sources/mmpi-kaynak-1.pdf` | 195,323 | 52 | PDF 1.6 | LibreOffice 7.5 | LibreOffice 7.5 | len >0, L/F/K bands KES-YAPIŞTIR | **SECONDARY** — marked not to heavily consider |
 
 - **ISBN:** New OCR p3 shows `ISBN 975-92384-4-6` — matches old audit künye and `SourcesPage.tsx` Status A.
 - **Pagination formula preserved:** `leaf = kitap_sayfası + 15`, `PDF sayfası = ceil(leaf/2)`, `yarı = R if leaf even else L` — verified: s1=PDF p8 R, s34=p25 L, s244=p130 L, s257=p136 R. New OCR PDF also 139 pages → formula still valid.
@@ -615,7 +615,7 @@
 
 **OLD PDF vs NEW OCR PDF comparison (per prompt requirement):**
 
-| Aspect | OLD PDF `docs/MMPI Kitap (1) (1).pdf` | NEW OCR PDF `docs/yeni/mmpiKaynak2 (AsılKaynak) with ocr.pdf` | Page | Difference | OCR Confidence | Image Check | Final Status |
+| Aspect | OLD PDF `docs/sources/mmpi-kitap.pdf` | NEW OCR PDF `docs/sources/mmpi-kaynak-2-ocr.pdf` | Page | Difference | OCR Confidence | Image Check | Final Status |
 |---|---|---|---|---|---|---|---|
 | File size | 76,214,611 bytes | 38,136,769 bytes | — | 50% smaller (OCRmyPDF compressed) | High | Same 139 pages, twin 73M identical size | **MATCH** — same book |
 | Pages | 139 | 139 | All | 0 diff | High | Same pagination leaf+15 | **MATCH** |
@@ -700,9 +700,9 @@
 
 ## References
 
-- New OCR PDF: `docs/yeni/mmpiKaynak2 (AsılKaynak) with ocr.pdf` — 38,136,769 bytes, 139 pages, PDF 1.7, OCRmyPDF 17.12.1, Tesseract 5.5.3.20260724, pikepdf 10.13.0.post1, ISBN 975-92384-4-6 p3, text layer searchable.
-- Old PDF: `docs/MMPI Kitap (1) (1).pdf` — 76,214,611 bytes, 139 pages, image-only.
-- Twin: `docs/yeni/mmpiKaynak2 (AsılKaynak) without ocr.pdf` — 76,214,611 bytes, identical to old.
+- New OCR PDF: `docs/sources/mmpi-kaynak-2-ocr.pdf` — 38,136,769 bytes, 139 pages, PDF 1.7, OCRmyPDF 17.12.1, Tesseract 5.5.3.20260724, pikepdf 10.13.0.post1, ISBN 975-92384-4-6 p3, text layer searchable.
+- Old PDF: `docs/sources/mmpi-kitap.pdf` — 76,214,611 bytes, 139 pages, image-only.
+- Twin: `docs/sources/mmpi-kaynak-2.pdf` — 76,214,611 bytes, identical to old.
 - Audit ground truth: `docs/mmpi-audit/SOURCE_INDEX.md` (leaf=book+15), `SOURCE_FACTS.md` (240K), `VERIFIED_DATA.md` (26/26, 46/46, 10/10), `CONFLICTS.md` (43 records, 16 FIXED, 9 REJECTED), `DECISIONS.md` (031/A 151 codes, 030/A 70/10 80/80/70, 032/B cry-for-help F≥70 +80T manualNote), `CONFLICT-024_KAPSAM.md` (148→148 VAR /0 YOK, 151 block), `AUDIT_STATE.md` (PHASE 0-13 DONE, 503 PASS), `CODE_CHANGES.md` (CHANGE-018…027), `OCR_ISSUES.md` (SPINE-CLIP, ROTATED-TABLE 2.87°, DIGIT-6-9, TABLE-ROW-SHIFT, SENTENCE-SKIP, ASCII-FOLD, BLANK-PAGE, INVENTORY-DOUBLE-COUNT, BAND-HEAD-DROP, TABLO-NUMBERS, LOWCONF-GAP).
 - Code: `src/scoring/mmpiKeys.ts` (SCORING_KEYS, TURKISH_NORMS, K_CORRECTION, K_ADDITION_TABLE), `mmpiSource.ts` (bands, SINGLE_*), `mmpiSourceCodes.ts` (CODES 45, BLOCK_CODES 151, CODE_CONDITIONS 73/123, KNOWN_BLOCK_CODES 151), `mmpiInterpretation.ts` (detectPatterns 18, MMPI_PATTERN_CAVEATS 8, detectSingleElevations), `mmpiValidityConfigs.ts` (15 configs), `mmpiConsistency.ts` (TR 16, carelessness 12, F-K), `mmpiCritical.ts` (39 critical, 14 fixed), `mmpiDerived.ts` (Wiggins 26/26 etc.), `src/ai/aiInterpretation.ts` (no calc, KVKK), `src/components/results/MMPICodeTab.tsx`, `MMPIPrintReport.tsx`, `SourcesPage.tsx`, `docs/kaynak-denetimi.md`.
 - Tests: 503/503 PASS (64 suite) — mmpiHsBlock 16/16, mmpiDBlock 16/16, mmpiHyBlock 16/16, mmpiPdBlock 17/17, mmpiPaBlock 14/14, mmpiPtBlock 11/11, mmpiScBlock 13/13, mmpiMaBlock 9/9, mmpiSiBlock 6/6, mmpiKeyIntegrity 63/63, mmpiInterpretation 54/54, aiInterpretation 5/5, mmpiUiReport 5/5, etc., tsc 0, build PASS, optik-form.html sync.

@@ -468,7 +468,7 @@ function ScannerSession({
         <div className="scanner-status-strip">
           <div className="status-live-indicator">
             {busy ? <div className="spinner-sm" /> : <div className="live-dot" />}
-            <span role="status" aria-live="polite">
+            <span role="status" aria-live="polite" className="status-live-text" title={status}>
               {status}
             </span>
           </div>

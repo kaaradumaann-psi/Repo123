@@ -6,7 +6,7 @@
 ## Source
 
 Source file:
-`docs/MMPI Kitap (1) (1).pdf`
+`docs/sources/mmpi-kitap.pdf`
 
 Book:
 Minnesota Çok Yönlü Kişilik Envanteri — Değerlendirme Kitabı (2. Baskı, Ankara 2003)

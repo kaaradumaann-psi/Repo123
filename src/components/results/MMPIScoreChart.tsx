@@ -25,6 +25,116 @@ const Y_MIN = 24;
 const Y_MAX = 122;
 const Y_TICKS = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
 
+/** 0 = tepe (T 122), 100 = taban (T 24). HTML ve SVG aynı yüzdeyi kullanır. */
+function yPercent(t: number): number {
+  const clamped = Math.max(Y_MIN, Math.min(Y_MAX, t));
+  return ((Y_MAX - clamped) / (Y_MAX - Y_MIN)) * 100;
+}
+
+function pointTitle(s: ScaleResult): string {
+  return s.id === '?'
+    ? `? — Boş bırakılan madde sayısı: ${s.rawScore} (T skoru değildir)`
+    : `${s.shortName}: T ${s.tScore.toFixed(1)}`;
+}
+
+function pointFill(s: ScaleResult): string {
+  if (s.id === '?') {
+    if (s.rawScore >= 30) return COLOR_HIGH;
+    if (s.rawScore >= 11) return '#b4770b';
+    return COLOR_CANNOT;
+  }
+  if (s.tScore >= 70) return COLOR_HIGH;
+  return s.group === 'validity' ? COLOR_VALIDITY : COLOR_CLINICAL;
+}
+
+/**
+ * Dar ekran profili. Yazılar SVG user-unit değil, gerçek CSS puntolarıdır;
+ * 320px telefonda da 12px'in altına düşmez. Noktalar etiket sütunlarıyla
+ * aynı yüzdeyi paylaşır: (i + 0.5) / n.
+ */
+function MobileProfile({
+  title,
+  note,
+  scales,
+  lineIds,
+  stroke,
+}: {
+  title: string;
+  note: string;
+  scales: ScaleResult[];
+  /** null ise paneldeki bütün noktalar birleşir; aksi halde yalnızca bu kimlikler. */
+  lineIds: Set<string> | null;
+  stroke: string;
+}) {
+  if (scales.length === 0) return null;
+  const n = scales.length;
+  const xPercent = (index: number) => ((index + 0.5) / n) * 100;
+  const linked = scales
+    .map((s, i) => ({ s, i }))
+    .filter(p => (lineIds ? lineIds.has(p.s.id) : true));
+  const poly = linked.map(p => `${xPercent(p.i).toFixed(2)},${yPercent(p.s.tScore).toFixed(2)}`).join(' ');
+
+  return (
+    <figure className="mmpi-mini">
+      <figcaption className="mmpi-mini-title">
+        <strong>{title}</strong>
+        <span>{note}</span>
+      </figcaption>
+      <div className="mmpi-mini-row">
+        <div className="mmpi-mini-y" aria-hidden="true">
+          {Y_TICKS.map(t => (
+            <span key={t} className={t === 70 ? 'is-limit' : t === 50 ? 'is-mean' : undefined} style={{ top: `${yPercent(t)}%` }}>
+              {t}
+            </span>
+          ))}
+        </div>
+        <div className="mmpi-mini-plot" aria-hidden="true">
+          {Y_TICKS.map(t => (
+            <span
+              key={t}
+              className={`mmpi-mini-grid${t === 70 ? ' is-limit' : t === 50 ? ' is-mean' : t === 30 ? ' is-base' : ''}`}
+              style={{ top: `${yPercent(t)}%` }}
+            />
+          ))}
+          {linked.length >= 2 && (
+            <svg className="mmpi-mini-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <polyline
+                points={poly}
+                fill="none"
+                stroke={stroke}
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          )}
+          {scales.map((s, i) => (
+            <span
+              key={s.id}
+              className="mmpi-mini-dot"
+              style={{ left: `${xPercent(i)}%`, top: `${yPercent(s.tScore)}%`, background: pointFill(s) }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mmpi-mini-x" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+        {scales.map(s => (
+          <span
+            key={s.id}
+            title={pointTitle(s)}
+            aria-label={pointTitle(s)}
+            className={s.id !== '?' && s.tScore >= 70 ? 'is-high' : undefined}
+          >
+            <b>{s.shortName}</b>
+            <small>{s.id === '?' ? s.rawScore : s.tScore.toFixed(0)}</small>
+          </span>
+        ))}
+      </div>
+    </figure>
+  );
+}
+
 /**
  * MMPI profil grafiği — T skorları.
  * Tek, sade profil çizgisi: geçerlik (L-F-K) ile klinik (Hs-Si) bölümleri
@@ -53,25 +163,20 @@ export function MMPIScoreChart({ scales }: Props) {
       ? ''
       : points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${xPos(p.i).toFixed(2)} ${yPos(p.s.tScore).toFixed(2)}`).join(' ');
 
-  const pointFill = (s: ScaleResult): string => {
-    if (s.id === '?') {
-      if (s.rawScore >= 30) return COLOR_HIGH;
-      if (s.rawScore >= 11) return '#b4770b';
-      return COLOR_CANNOT;
-    }
-    if (s.tScore >= 70) return COLOR_HIGH;
-    return s.group === 'validity' ? COLOR_VALIDITY : COLOR_CLINICAL;
-  };
-
   const separatorX = xPos(3) + xStep / 2;
+
+  const validityScales = ordered.filter(s => s.id === '?' || validityIds.has(s.id));
+  const clinicalScales = ordered.filter(s => !validityIds.has(s.id) && s.id !== '?');
 
   return (
     <div className="mmpi-chart-wrap">
+      {/* Geniş ekran: tek profil. Dar ekranda kart içindeki CSS bunu gizler;
+          yerine alttaki okunabilir paneller gelir. Baskı bu SVG'yi kullanır. */}
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
         aria-label="MMPI Profil Grafiği: geçerlik ve klinik ölçek T skorları"
-        className="mmpi-chart-svg"
+        className="mmpi-chart-svg mmpi-chart-desktop"
       >
         {/* Yatay ızgara + T etiketleri */}
         {Y_TICKS.map(t => (
@@ -173,6 +278,28 @@ export function MMPIScoreChart({ scales }: Props) {
           </text>
         ))}
       </svg>
+
+      {/* Telefon / dar ekran: 1400px viewBox küçültülmez (etiketler 3–6px'e düşerdi).
+          İki panel, gerçek CSS puntoları (≥12px) ve her ölçeğin altında T skoru. */}
+      <div className="mmpi-chart-mobile">
+        <p className="mmpi-mini-note">
+          Kırmızı kesik çizgi T=70 klinik sınır, gri kesik çizgi T=50 ortalamadır. Adın altındaki sayı T skorudur.
+        </p>
+        <MobileProfile
+          title="Geçerlik ölçekleri"
+          note="?, L, F, K — ? boş madde sayısıdır, T skoru değildir."
+          scales={validityScales}
+          lineIds={validityIds}
+          stroke={COLOR_VALIDITY}
+        />
+        <MobileProfile
+          title="Klinik ölçekler"
+          note="Hs–Si. Yüksek T skorları kırmızıyla işaretlidir."
+          scales={clinicalScales}
+          lineIds={null}
+          stroke={COLOR_CLINICAL}
+        />
+      </div>
 
       <div className="mmpi-chart-legend" aria-hidden="true">
         <span className="legend-item">

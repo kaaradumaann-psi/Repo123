@@ -1296,6 +1296,124 @@
   .legend-item { display: inline-flex; align-items: center; gap: 6px; }
   .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
+  /* Dar ekran profili — responsive.css ≤1024px'te kart içinde açılır.
+     Yazılar SVG birimi değil, gerçek CSS puntolarıdır. */
+  .mmpi-chart-mobile { display: none; }
+  .mmpi-mini-note {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--slate-600);
+  }
+  .mmpi-mini {
+    margin: 0;
+    padding: 10px 4px 8px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+  }
+  .mmpi-mini-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0 0 8px;
+  }
+  .mmpi-mini-title strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .mmpi-mini-title span {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--soft);
+  }
+  .mmpi-mini-row {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .mmpi-mini-y {
+    position: relative;
+    height: 240px;
+  }
+  .mmpi-mini-y span {
+    position: absolute;
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--soft);
+  }
+  .mmpi-mini-y span.is-limit { color: #d2453a; font-weight: 800; }
+  .mmpi-mini-y span.is-mean { color: var(--slate-700); }
+  .mmpi-mini-plot {
+    position: relative;
+    height: 240px;
+    min-width: 0;
+  }
+  .mmpi-mini-grid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed #e9e9eb;
+    pointer-events: none;
+  }
+  .mmpi-mini-grid.is-base { border-top: 1px solid #c9c9ce; }
+  .mmpi-mini-grid.is-mean { border-top: 1px dashed #c9c9ce; }
+  .mmpi-mini-grid.is-limit { border-top: 1.5px dashed #d2453a; }
+  .mmpi-mini-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .mmpi-mini-dot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 1px rgba(13, 13, 13, 0.08);
+    z-index: 1;
+  }
+  .mmpi-mini-x {
+    display: grid;
+    gap: 2px;
+    margin: 8px 0 0 30px;
+    min-width: 0;
+  }
+  .mmpi-mini-x > span {
+    min-width: 0;
+    text-align: center;
+    line-height: 1.15;
+  }
+  .mmpi-mini-x b {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .mmpi-mini-x small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    color: var(--slate-600);
+  }
+  .mmpi-mini-x > span.is-high b,
+  .mmpi-mini-x > span.is-high small { color: #d2453a; }
+
   /* Genel Bakış özet tablosu */
   .mmpi-summary-card {
     border: 1px solid var(--hairline);
@@ -2783,7 +2901,8 @@
 @media print {
   .app-header, .site-footer, .no-print,
   .record-page-topbar, .record-page-header, .client-info-details,
-  .expert-notes-details, .mmpi-results-panel, .report-quicknav {
+  .expert-notes-details, .mmpi-results-panel, .report-quicknav,
+  .mmpi-chart-mobile {
     display: none !important;
   }
   .app-main { padding: 0 !important; }
