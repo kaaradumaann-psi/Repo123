@@ -1194,7 +1194,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 @media print {
-  .app-header, .workspace-tabs, .site-footer, .form-sidebar-panel, .form-prep-hero,
+  .app-header, .workspace-tabs, .workspace-sidebar, .mobile-nav-panel, .mobile-nav-backdrop,
+  .site-footer, .form-sidebar-panel, .form-prep-hero,
   .preview-toolbar, .preview-bottom, .document-meta-strip {
     display: none !important;
   }

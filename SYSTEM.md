@@ -91,7 +91,7 @@ Production'da pathname rotalarının doğrudan açılabilmesi için hosting tara
 | Tests/diagnostics | `tests/*.test.ts`, `tests/fixtures/omrSynthetic.ts` |
 | Backend/deployment | `supabase/migrations/*`, `supabase/functions/admin-users/index.ts`, `scripts/build.mjs`, `wrangler.jsonc`, `.github/workflows/ci.yml` |
 
-`src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form sekmesinin ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur.
+`src/components/FormPage.tsx` ve ilgili HTML form bileşenleri runtime Form bölümünün ana yolu değildir; HTML/PDF geometri eşdeğerliğini test etmek için korunur.
 
 ---
 

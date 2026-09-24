@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthGate } from './components/AuthGate';
 import type { AuthFlowOrigin } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
@@ -19,37 +18,72 @@ import { SiteFooter } from './components/SiteFooter';
 import { MobileNav } from './components/MobileNav';
 import { TermsPage } from './components/TermsPage';
 import { Icon } from './components/Icon';
+import type { IconName } from './components/Icon';
 import { formDefinition } from './form/layout';
-import { SITE_URL } from './form/attribution';
-import type { AuthenticatedUser } from './auth/authTypes';
+import type { AuthenticatedUser, UserRole } from './auth/authTypes';
 import { supabaseConfig } from './auth/supabaseClient';
 import { displayName } from './auth/userDisplay';
 import { navigate, useRoute } from './router';
 import type { AppRoute } from './router';
 
-type Workspace = 'case' | 'form' | 'records' | 'admin';
+type Workspace = 'home' | 'case' | 'form' | 'records' | 'admin';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void; flowOrigin: AuthFlowOrigin };
 
-const TAB_PATH: Record<Workspace, string> = {
-  case: '/islem',
-  form: '/form',
-  records: '/kayitlar',
-  admin: '/yonetim',
-};
-
-/** Uygulama kökü: yol '/' ise Landing (İşlem sekmesinin 'home' adımı) açılır. */
+/** Uygulama kökü: yol '/' ise Landing (gün panosu + işlem girişi) açılır. */
 const LANDING_PATHS = new Set(['/', '/index.html', '/optik-form.html']);
 
-function resolveWorkspace(route: AppRoute): Workspace | null {
+type NavItem = { id: Workspace; label: string; icon: IconName; path: string };
+
+function buildNavGroups(role: UserRole): { label: string; items: NavItem[] }[] {
+  const groups: { label: string; items: NavItem[] }[] = [
+    {
+      label: 'Çalışma alanı',
+      items: [
+        { id: 'home', label: 'Genel bakış', icon: 'layers', path: '/' },
+        { id: 'case', label: 'İşlem', icon: 'scan', path: '/islem' },
+        { id: 'form', label: 'Form', icon: 'sheet', path: '/form' },
+      ],
+    },
+  ];
+  if (role === 'ADMIN') {
+    groups.push({
+      label: 'Yönetim',
+      items: [{ id: 'admin', label: 'Yönetim', icon: 'shield', path: '/yonetim' }],
+    });
+  } else {
+    groups.push({
+      label: 'Kayıtlar',
+      items: [{ id: 'records', label: 'Kayıtlarım', icon: 'file', path: '/kayitlar' }],
+    });
+  }
+  return groups;
+}
+
+function BrandMark() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+      <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="10" cy="10" r="1.8" fill="currentColor" />
+      <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="16" cy="16" r="1.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function resolveWorkspace(route: AppRoute, role: UserRole): Workspace | null {
   switch (route.page) {
     case 'home':
+      return 'home';
     case 'islem':
       return 'case';
     case 'form':
       return 'form';
     case 'kayitlar':
-      return 'records';
+    case 'kayit':
+    case 'raporlar':
+      return role === 'ADMIN' ? 'admin' : 'records';
     case 'yonetim':
       return 'admin';
     default:
@@ -104,13 +138,11 @@ export default function App() {
       <div className="auth-page">
         <main className="auth-shell">
           <div className="empty-state-card">
-            <div className="empty-state-icon">
-              <Icon name="alert" size={32} />
-            </div>
-            <h4>Sayfa Bulunamadı</h4>
-            <p>Aradığınız sayfa mevcut değil veya taşınmış olabilir.</p>
+            <Icon name="alert" size={28} />
+            <h4>Sayfa bulunamadı</h4>
+            <p>Adres bu çalışma alanında yok.</p>
             <button type="button" className="btn-primary btn-sm" onClick={() => navigate('/')}>
-              Ana Sayfaya Dön
+              Ana sayfa
             </button>
           </div>
         </main>
@@ -148,160 +180,97 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
     }
   }, [route.page, user.role]);
 
-  const workspace = resolveWorkspace(route);
   const [recordsTick, setRecordsTick] = useState(0);
-  const tabs: Workspace[] =
-    user.role === 'ADMIN'
-      ? ['case', 'form', 'admin']
-      : ['case', 'form', 'records'];
-  const tabRefs = useRef<Partial<Record<Workspace, HTMLButtonElement | null>>>({});
-
-  function activateTab(next: Workspace) {
-    navigate(TAB_PATH[next]);
-    tabRefs.current[next]?.focus();
-  }
-
-  function onTablistKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const current = Math.max(0, tabs.indexOf(workspace ?? 'case'));
-    const nextIndex =
-      event.key === 'Home'
-        ? 0
-        : event.key === 'End'
-          ? tabs.length - 1
-          : event.key === 'ArrowRight' || event.key === 'ArrowDown'
-            ? (current + 1) % tabs.length
-            : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-              ? (current - 1 + tabs.length) % tabs.length
-              : -1;
-    if (nextIndex < 0) return;
-    event.preventDefault();
-    activateTab(tabs[nextIndex]!);
-  }
-
-  const tabLabel: Record<Workspace, string> = {
-    case: 'İşlem',
-    form: 'Form',
-    records: 'Kayıtlar',
-    admin: 'Yönetim',
-  };
-  const tabIcon: Record<Workspace, 'scan' | 'sheet' | 'file' | 'shield'> = {
-    case: 'scan',
-    form: 'sheet',
-    records: 'file',
-    admin: 'shield',
-  };
-
-  const activeWorkspace = workspace;
+  const navGroups = buildNavGroups(user.role);
+  const workspace = resolveWorkspace(route, user.role) ?? 'home';
+  const activeItem = navGroups.flatMap(group => group.items).find(item => item.id === workspace);
+  const canAdmin = user.role === 'ADMIN';
+  const roleLabel = canAdmin ? 'Yönetici' : 'Uzman psikolog';
+  const recordsPath = canAdmin ? '/yonetim' : '/kayitlar';
+  const recordsLabel = canAdmin ? 'Yönetimi aç' : 'Kayıtları aç';
 
   return (
     <div className="portal-layout">
-      <header className="app-header">
-        <div className="header-inner">
-          <div className="header-left">
-            {/* Marka bağlantısı her zaman temiz ana sayfaya (/) gider; History API
-                yönlendirmesi installLinkInterceptor ile SPA olarak yakalanır.
-                Eski `#main` demiri aynı sayfada kalıyordu ve ana sayfaya gitmiyordu. */}
-            <a className="brand" href="/" aria-label="MMPI-566 çalışma alanı — ana sayfa">
-              <span className="brand-mark">
-                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-                  <path d="M9 3H3v6M17 3h6v6M23 17v6h-6M9 23H3v-6" stroke="currentColor" strokeWidth="2.2" />
-                  <circle cx="10" cy="10" r="1.8" fill="currentColor" />
-                  <circle cx="16" cy="10" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="10" cy="16" r="1.8" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="16" cy="16" r="1.8" fill="currentColor" />
-                </svg>
-              </span>
-              <div className="brand-text">
-                <strong className="brand-title">MMPI-566</strong>
-                <span className="brand-subtitle">Çalışma alanı</span>
-              </div>
-            </a>
-
-            <nav className="workspace-tabs" role="tablist" aria-label="Çalışma alanı" onKeyDown={onTablistKeyDown}>
-              {tabs.map(tab => (
-                <button
-                  type="button"
-                  role="tab"
-                  key={tab}
-                  id={`tab-${tab}`}
-                  ref={element => {
-                    tabRefs.current[tab] = element;
-                  }}
-                  aria-selected={activeWorkspace === tab}
-                  aria-controls={`panel-${tab}`}
-                  tabIndex={activeWorkspace === tab ? 0 : -1}
-                  onClick={() => activateTab(tab)}
-                  className={`portal-tab ${activeWorkspace === tab ? 'active' : ''}`}
+      <a className="skip-link" href="#main">Ana içeriğe atla</a>
+      <aside className="workspace-sidebar" aria-label="Çalışma alanı gezinmesi">
+        <a className="brand sidebar-brand" href="/" aria-label="MMPI-566 ana sayfa">
+          <span className="brand-mark" aria-hidden="true"><BrandMark /></span>
+          <span className="brand-text">
+            <strong className="brand-title">MMPI-566</strong>
+            <span className="brand-subtitle">Uzman çalışma alanı</span>
+          </span>
+        </a>
+        <div className="sidebar-nav-wrap">
+          {navGroups.map(group => (
+            <nav className="sidebar-nav" aria-label={group.label} key={group.label}>
+              <span className="sidebar-label">{group.label}</span>
+              {group.items.map(item => (
+                <a
+                  key={item.id}
+                  href={item.path}
+                  className={`sidebar-link${workspace === item.id ? ' is-current' : ''}`}
+                  aria-current={workspace === item.id ? 'page' : undefined}
                 >
-                  <Icon name={tabIcon[tab]} size={16} />
-                  <span>{tabLabel[tab]}</span>
-                </button>
+                  <Icon name={item.icon} size={19} />
+                  <span>{item.label}</span>
+                  {workspace === item.id && <span className="sidebar-current-dot" aria-hidden="true" />}
+                </a>
               ))}
             </nav>
-          </div>
-
-          <div className="header-user">
-            <a
-              className="home-site-link"
-              href={SITE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Ana site: halilkaraduman.com.tr"
-            >
-              <span>halilkaraduman.com.tr</span>
-              <Icon name="external" size={13} />
-            </a>
-            <div className="user-profile-summary">
-              <div className="user-avatar-circle">
-                {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-              </div>
-              <div className="user-info-text">
-                <strong className="user-full-name">{displayName(user)}</strong>
-                <span className={`user-role-badge ${user.role === 'ADMIN' ? 'badge-admin' : 'badge-psy'}`}>
-                  {user.role === 'ADMIN' ? 'Yönetici' : 'Psikolog'}
-                </span>
-              </div>
-            </div>
-            <button type="button" className="btn-logout" onClick={onLogout} title="Oturumu Kapat">
-              <span>Çıkış</span>
-            </button>
-          </div>
-
-          {/* ≤900px: sekme şeridi / kullanıcı alanı / site bağlantısı başlıkta yer
-              kaplamaz; sağ üstteki düğme tam ekran gezinme katmanını açar. */}
-          <MobileNav
-            items={tabs.map(tab => ({
-              id: tab,
-              label: tabLabel[tab],
-              icon: tabIcon[tab],
-              active: activeWorkspace === tab,
-              onSelect: () => activateTab(tab),
-            }))}
-            user={user}
-            onLogout={onLogout}
-          />
+          ))}
         </div>
-      </header>
+        <div className="sidebar-bottom">
+          <div className="sidebar-privacy">
+            <span className="sidebar-privacy-icon"><Icon name="shield" size={18} /></span>
+            <strong>Bulut hesabı açık</strong>
+            <p>Kayıtlar bulutta tutulur; taslak ve çevrimdışı kuyruk bu tarayıcıda saklanır.</p>
+            <a href={recordsPath}>{recordsLabel} <Icon name="arrowRight" size={14} /></a>
+          </div>
+          <span className="sidebar-version">MMPI-566 · UZMAN ÇALIŞMA ALANI</span>
+        </div>
+      </aside>
 
-      <ConnectivityBanner />
-
-      <main className="app-main" id="main">
-        {route.page === 'raporlar' ? (
-          <ReportsPage key={`${route.id}/${route.reportId || ''}`} recordId={route.id} reportId={route.reportId} viewer={user} />
-        ) : route.page === 'kayit' ? (
-          <RecordDetailPage
-            recordId={route.id}
-            viewer={user}
-            onBack={() => navigate(user.role === 'ADMIN' ? '/yonetim' : '/kayitlar')}
-          />
-        ) : (
-          <>
-            <div
-              role="tabpanel"
-              id="panel-case"
-              aria-labelledby="tab-case"
-              className={workspace === 'case' ? 'tab-content-active' : 'is-screen-hidden'}
-            >
+      <div className="workspace-content">
+        <header className="app-header">
+          <div className="header-inner">
+            <a className="brand header-brand" href="/" aria-label="MMPI-566 ana sayfa">
+              <span className="brand-mark" aria-hidden="true"><BrandMark /></span>
+              <span className="brand-text">
+                <strong className="brand-title">MMPI-566</strong>
+                <span className="brand-subtitle">Uzman çalışma alanı</span>
+              </span>
+            </a>
+            <div className="header-current">
+              <span>Çalışma alanı <Icon name="right" size={13} /></span>
+              <strong>{activeItem?.label}</strong>
+            </div>
+            <div className="header-user">
+              <div className="user-profile-summary">
+                <div className="user-avatar-circle" aria-hidden="true">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</div>
+                <div className="user-info-text">
+                  <strong className="user-full-name">{displayName(user)}</strong>
+                  <span className={`user-role-badge ${canAdmin ? 'badge-admin' : 'badge-psy'}`}>{roleLabel}</span>
+                </div>
+              </div>
+              <button type="button" className="btn-logout" onClick={onLogout}>Çıkış</button>
+            </div>
+            <MobileNav
+              items={navGroups.flatMap(group => group.items).map(item => ({
+                id: item.id,
+                label: item.label,
+                icon: item.icon,
+                active: workspace === item.id,
+                onSelect: () => navigate(item.path),
+              }))}
+              user={user}
+              onLogout={onLogout}
+            />
+          </div>
+        </header>
+        <ConnectivityBanner />
+        <main className="app-main" id="main" tabIndex={-1}>
+          {(route.page === 'home' || route.page === 'islem') && (
+            <>
               {user.role === 'PSYCHOLOG' && route.page === 'home' && (
                 <div className="dashboard-wrapper">
                   <Dashboard user={user} />
@@ -315,47 +284,32 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
                 landing={route.page === 'home'}
                 onSaved={() => setRecordsTick(tick => tick + 1)}
               />
-            </div>
-
-            <div
-              role="tabpanel"
-              id="panel-form"
-              aria-labelledby="tab-form"
-              className={workspace === 'form' ? 'tab-content-active' : 'is-screen-hidden'}
-            >
-              <FormKit />
-            </div>
-
-            {user.role === 'PSYCHOLOG' && (
-              <div
-                role="tabpanel"
-                id="panel-records"
-                aria-labelledby="tab-records"
-                className={workspace === 'records' ? 'tab-content-active' : 'is-screen-hidden'}
-              >
-                <MyRecordsPanel key={recordsTick} />
-              </div>
-            )}
-
-            {user.role === 'ADMIN' && (
-              <div
-                role="tabpanel"
-                id="panel-admin"
-                aria-labelledby="tab-admin"
-                className={workspace === 'admin' ? 'tab-content-active' : 'is-screen-hidden'}
-              >
-                <AdminPanel admin={user} />
-              </div>
-            )}
-          </>
-        )}
-      </main>
-
-      <SiteFooter
-        onNewEntry={() => {
-          navigate('/islem');
-        }}
-      />
+            </>
+          )}
+          {route.page === 'form' && <FormKit />}
+          {user.role === 'PSYCHOLOG' && route.page === 'kayitlar' && (
+            <MyRecordsPanel key={recordsTick} />
+          )}
+          {user.role === 'ADMIN' && route.page === 'yonetim' && (
+            <AdminPanel admin={user} />
+          )}
+          {route.page === 'kayit' && (
+            <RecordDetailPage
+              recordId={route.id}
+              viewer={user}
+              onBack={() => navigate(user.role === 'ADMIN' ? '/yonetim' : '/kayitlar')}
+            />
+          )}
+          {route.page === 'raporlar' && (
+            <ReportsPage key={`${route.id}/${route.reportId || ''}`} recordId={route.id} reportId={route.reportId} viewer={user} />
+          )}
+        </main>
+        <SiteFooter
+          onNewEntry={() => {
+            navigate('/islem');
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -624,37 +624,69 @@ test('A4 kâğıt mobilde masaüstü düzeniyle ölçeklenir (PaperViewport)', (
 });
 
 /* --------------------------------------------------------------------------
-   Phase 11 — tam ekran mobil gezinme katmanı ve OMR metin sığdırma
+   Phase 11 — kalıcı yan gezinme + kompakt mobil panel ve OMR metin sığdırma
    -------------------------------------------------------------------------- */
 
-test('≤900px başlık tek satıra iner: sekmeler ve kullanıcı alanı menüye taşınır', () => {
-  const hidden = selectorDeclarations('.header-left .workspace-tabs', 900) +
+test('masaüstü kabuğu: kalıcı yan gezinme; ≤900px başlık tek satıra iner', () => {
+  // Dar ekran: sekme şeridi kalıntısı ve kullanıcı alanı başlıkta yer kaplamaz.
+  const hidden = selectorDeclarations('.workspace-tabs', 900) +
     selectorDeclarations('.header-user', 900);
   assert.match(hidden, /display:\s*none/, 'sekme şeridi ve kullanıcı alanı mobilde gizlenmeli');
   const row = selectorDeclarations('.header-inner', 900);
   assert.match(row, /flex-direction:\s*row/, 'başlık mobilde tek satır olmalı');
+  assert.match(row, /height:\s*60px/, 'mobil başlık yüksekliği sabit olmalı');
   const toggle = selectorDeclarations('.nav-toggle', 900);
   assert.match(toggle, /display:\s*inline-flex/, 'menü düğmesi mobilde görünür olmalı');
   assert.match(toggle, /width:\s*44px/, 'menü düğmesi dokunma hedefi olmalı');
-  const desktop = parseCss(responsiveCss).find(
-    rule => rule.selector.split(',').some(s => s.trim() === '.nav-toggle') &&
-      rule.atRules.some(at => /min-width:\s*901px/.test(at)),
+  // Masaüstü: menü düğmesi portal kabuğunda gizli, kalıcı yan gezinme devrede.
+  const shell = parseCss(readFileSync(`${STYLE_DIR}/workspace.css`, 'utf8'));
+  const shellDecls = (selector: string): string =>
+    shell
+      .filter(rule => rule.selector.split(',').some(s => s.trim() === selector))
+      .map(rule => rule.declarations)
+      .join('\n');
+  assert.match(shellDecls('.portal-layout .nav-toggle'), /display:\s*none/, 'masaüstünde düğme gizli olmalı');
+  assert.match(shellDecls('.workspace-sidebar'), /position:\s*sticky/, 'yan gezinme yapışık olmalı');
+  assert.match(shellDecls('.sidebar-link'), /min-height:\s*44px/, 'yan menü satırları dokunma hedefi olmalı');
+  assert.ok(
+    shell.some(rule => rule.selector.split(',').some(s => s.trim() === '.sidebar-link.is-current')),
+    'aktif bölüm görsel olarak belirgin olmalı',
   );
-  assert.ok(desktop && /display:\s*none/.test(desktop.declarations), 'masaüstünde düğme gizli olmalı');
+  const app = readFileSync('src/App.tsx', 'utf8');
+  assert.match(app, /workspace-sidebar/, 'kabuk yan gezinme içermeli');
+  assert.match(app, /skip-link/, 'ana içeriğe atlama bağlantısı olmalı');
+  assert.match(app, /aria-current/, 'aktif bölüm duyurulmalı');
+  assert.match(app, /<MobileNav/, 'başlık menü bileşenini bağlamalı');
 });
 
-test('tam ekran gezinme katmanı site bağlantısını ve çıkışı içerir', () => {
-  const overlay = selectorDeclarations('.mobile-nav-overlay', 900);
-  assert.match(overlay, /position:\s*fixed/, 'katman ekranı tamamen kaplamalı');
-  assert.match(overlay, /z-index:\s*90/, 'katman başlığın üstünde durmalı');
-  const link = selectorDeclarations('.mobile-nav-link', 900);
-  assert.match(link, /min-height:\s*52px/, 'menü satırları dokunma hedefi olmalı');
+test('kompakt gezinme paneli site bağlantısını ve çıkışı içerir', () => {
+  // Panel kuralları genişlikten bağımsız `@media screen` katmanındadır.
+  const decls = (selector: string): string =>
+    responsiveRules
+      .filter(rule => rule.selector.split(',').some(s => s.trim() === selector))
+      .map(rule => rule.declarations)
+      .join('\n');
+  const backdrop = decls('.mobile-nav-backdrop');
+  assert.match(backdrop, /position:\s*fixed/, 'kaplama ekranı kaplamalı');
+  assert.match(backdrop, /z-index:\s*90/, 'kaplama başlığın üstünde durmalı');
+  const panel = decls('.mobile-nav-panel');
+  assert.match(panel, /position:\s*fixed/, 'panel yüzen olmalı');
+  assert.match(panel, /z-index:\s*91/, 'panel kaplamanın üstünde durmalı');
+  assert.match(panel, /max-height:\s*calc\(\s*100dvh/, 'panel yüksekliği ekranı aşmamalı');
+  const link = decls('.mobile-nav-link');
+  assert.match(link, /min-height:\s*44px/, 'menü satırları dokunma hedefi olmalı');
+  const group = decls('.mobile-nav-group');
+  assert.match(group, /display:\s*grid/, 'bağlantılar ızgarada dizilmeli');
+  assert.match(responsiveCss, /@keyframes mobileNavPop/, 'panel açılış animasyonu tanımlı olmalı');
+  assert.ok(!/\.mobile-nav-overlay/.test(responsiveCss), 'tam ekran katman kalıntısı olmamalı');
   const nav = readFileSync('src/components/MobileNav.tsx', 'utf8');
   assert.match(nav, /SITE_URL/, 'halilkaraduman.com.tr bağlantısı menü içinde olmalı');
-  assert.match(nav, /aria-modal="true"/, 'katman modal olarak duyurulmalı');
-  assert.match(nav, /Escape/, 'Escape katmanı kapatmalı');
-  assert.match(nav, /createPortal/, 'katman header dışına (body) taşınmalı: backdrop-filter containing block');
-  assert.match(nav, /document\.body\.style\.overflow/, 'katman açıkken arka plan kaydırması kilitlenmeli');
+  assert.match(nav, /aria-modal="true"/, 'panel modal olarak duyurulmalı');
+  assert.match(nav, /Escape/, 'Escape paneli kapatmalı');
+  assert.match(nav, /createPortal/, 'panel header dışına (body) taşınmalı: backdrop-filter containing block');
+  assert.match(nav, /document\.body\.style\.overflow/, 'panel açıkken arka plan kaydırması kilitlenmeli');
+  assert.match(nav, /mobile-nav-backdrop/, 'arka plana tıklama paneli kapatmalı');
+  assert.match(nav, /key === 'Tab'/, 'odak panel içinde döngüde kalmalı');
   const app = readFileSync('src/App.tsx', 'utf8');
   assert.match(app, /<MobileNav/, 'başlık menü bileşenini bağlamalı');
 });
