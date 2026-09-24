@@ -518,13 +518,20 @@ test('TAM RAPOR kâğıdı örnek önizlemeyle aynı çerçeveyi kullanır; okun
   assert.match(fullPaper, /box-shadow:\s*0 12px 32px rgba\(13,\s*13,\s*13,\.12\)/);
   // Ekran okunabilirlik ölçeği (10.5px → 12.5px) yalnız ekran medyasındadır;
   // baskı/PDF çıktısı ayrı `.print-only` kopyasından üretilir.
-  const screenScale = rules.find(
+  const paperProof = rules.find(
     rule =>
       rule.selector.split(',').some(part => part.trim() === '.report-full-preview-body .pr-report') &&
       rule.atRules.some(at => at.startsWith('@media screen')) &&
-      /font-size:\s*12\.5px/.test(rule.declarations),
+      /font-size:\s*13\.5px/.test(rule.declarations),
   );
-  assert.ok(screenScale, 'ekran okunabilirlik ölçeği @media screen içinde olmalı');
+  assert.ok(paperProof, 'ekran önizleme ölçeği @media screen içinde olmalı');
+  // Değişmez: ekran önizlemesi örnek kâğıtla AYNI yazı ailesini kullanır.
+  const sampleFamily = /font-family:\s*([^;]+);/.exec(paper)?.[1]?.trim();
+  assert.ok(sampleFamily, 'örnek kâğıdın yazı ailesi bulunamadı');
+  assert.ok(
+    paperProof.declarations.includes(sampleFamily),
+    `tam rapor kâğıdı örnekle aynı yazı ailesini kullanmalı: ${sampleFamily}`,
+  );
   const printLeaks = rules
     .filter(rule => rule.atRules.some(at => at.startsWith('@media print')) && /\.report-full-preview-body/.test(rule.selector))
     .map(rule => rule.selector);

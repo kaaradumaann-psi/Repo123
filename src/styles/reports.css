@@ -865,12 +865,23 @@
    hedefler) ve tüm kurallar `@media screen` içindedir.
    ========================================================================== */
 @media screen {
-  .report-full-preview-body .pr-report { font-size: 12.5px; line-height: 1.6; }
+  /* Örnek önizleme kâğıdıyla (.psych-paper) aynı belge tipografisi: Times serif
+     ailesi, daha ferah satır aralığı. Ekran önizlemesi böylece şablon
+     önizlemesiyle aynı görünür; baskı/PDF bu bloktan etkilenmez. */
+  .report-full-preview-body .pr-report {
+    font-family: "Times New Roman", Times, Georgia, serif;
+    font-size: 13.5px;
+    line-height: 1.8;
+  }
 
   .report-full-preview-body .pr-revision { font-size: 12px; padding: 6px 10px; }
   .report-full-preview-body .pr-head h1 { font-size: 25px; }
   .report-full-preview-body .pr-head span,
   .report-full-preview-body .pr-head-meta { font-size: 11.5px; }
+  /* Künye değerleri (tarih, rapor tarihi) satır sonunda ortadan kırılırsa
+     "yazılar kaymış" görüntüsü doğar; değer tek parça kalır. */
+  .report-full-preview-body .pr-head-meta span,
+  .report-full-preview-body .pr-head-meta b { white-space: nowrap; }
   .report-full-preview-body .pr-block h2 { font-size: 15px; padding: 0 0 5px 9px; }
   .report-full-preview-body .pr-block h3 { font-size: 12px; }
   .report-full-preview-body .pr-context { font-size: 11px; }
