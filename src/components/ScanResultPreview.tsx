@@ -210,7 +210,7 @@ export function ScanResultPreview({ definition, page, onReview, onRemove }: Scan
             {page.pageNumber}. Sayfa Cevap Detayları
           </h3>
           <p className="section-subtext">
-            Kaynak dosya: <strong>{page.sourceName}</strong> · Şüpheli veya belirsiz okumaları doğrudan optik görsel üzerinden kontrol edin.
+            Kaynak dosya: <strong className="scan-source-name" title={page.sourceName}>{page.sourceName}</strong> · Şüpheli veya belirsiz okumaları doğrudan optik görsel üzerinden kontrol edin.
           </p>
         </div>
         <button type="button" className="btn-secondary btn-danger-soft btn-sm" onClick={onRemove}>

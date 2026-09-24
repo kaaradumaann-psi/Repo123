@@ -355,7 +355,39 @@ test('mobilde grafik ve geniş tablolar kaydırma affordance’ı taşır', () =
 test('grafik ipucu metni sonuç panelinde gerçekten basılır', () => {
   const panel = readFileSync('src/components/results/MMPIResultsPanel.tsx', 'utf8');
   assert.match(panel, /className="mmpi-chart-hint"/, 'ipucu DOM’da bulunmalı');
-  assert.match(panel, /yatay kaydırılabilir/, 'ipucu metni kullanıcıya ne yapacağını söylemeli');
+  assert.match(panel, /okunabilir boyutta/, 'ipucu metni grafiğin okunabilir boyutta olduğunu söylemeli');
+});
+
+test('dar ekranda MMPI profili okunabilir HTML panele döner, sayfa kaydırmaz', () => {
+  const mobile = selectorDeclarations('.mmpi-chart-card .mmpi-chart-mobile', 1024);
+  assert.match(mobile, /display:\s*flex/, 'analiz kartında mobil profil görünmeli');
+  const desktop = selectorDeclarations('.mmpi-chart-card .mmpi-chart-desktop', 1024);
+  assert.match(desktop, /display:\s*none/, 'küçültülmüş 1400px SVG analiz kartında gizlenmeli');
+  const wrap = selectorDeclarations('.mmpi-chart-card .mmpi-chart-wrap', 1024);
+  assert.match(wrap, /min-width:\s*0/, 'grafik sarmalayıcısı sayfayı genişletmemeli');
+  const chart = readFileSync('src/components/results/MMPIScoreChart.tsx', 'utf8');
+  assert.match(chart, /mmpi-chart-mobile/);
+  assert.match(chart, /mmpi-mini-x/, 'her ölçeğin altında okunabilir T skoru olmalı');
+  const workspaceCss = readFileSync(`${STYLE_DIR}/workspace.css`, 'utf8');
+  assert.match(workspaceCss, /\.mmpi-chart-mobile[\s\S]*display:\s*none !important/, 'baskıda mobil profil gizlenmeli');
+});
+
+test('rapor araç çubuğu mobilde sarar, Tablo düğmesi sayfayı kaydırmaz', () => {
+  const group = selectorDeclarations('.report-toolbar-group', 720);
+  assert.match(group, /flex-wrap:\s*wrap/);
+  assert.match(group, /max-width:\s*100%/);
+  const structure = selectorDeclarations(".report-toolbar-group[aria-label='Yapı']", 720);
+  assert.match(structure, /width:\s*100%/, 'H1–Tablo grubu editör genişliğine sığmalı');
+  assert.match(selectorDeclarations('.report-toolbar', 720), /overflow-x:\s*clip/);
+});
+
+test('OMR uzun dosya adı sayfayı genişletmeden kırılır', () => {
+  const live = selectorDeclarations('.status-live-text', 1200);
+  assert.match(live, /overflow-wrap:\s*anywhere/);
+  assert.match(live, /min-width:\s*0/);
+  const source = selectorDeclarations('.scan-source-name', 1200);
+  assert.match(source, /overflow-wrap:\s*anywhere/);
+  assert.match(selectorDeclarations('.scanner-status-strip', 1200), /overflow-x:\s*clip/);
 });
 
 test('mobilde katlanmış kağıt önizlemeleri görünür viewport yüksekliğini aşmaz', () => {
