@@ -14,6 +14,9 @@ import './styles/site.css';
 // Mobile overrides (≤720px) — imported last so they win at narrow widths; desktop is untouched.
 import './styles/mobile.css';
 import './styles/reports.css';
+// Psychologist site visual shell: same editorial palette and controls, with the
+// existing workspace navigation presented as a desktop left rail.
+import './styles/psychologist-shell.css';
 // Responsive foundation (viewport height units, safe areas, ≥44px touch targets,
 // 16px form controls, ≤430px small-phone tier) — imported LAST so it refines every
 // layer above without touching the printable A4 sheet (all rules are @media screen).
