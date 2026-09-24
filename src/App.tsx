@@ -3,6 +3,7 @@ import { AuthGate } from './components/AuthGate';
 import type { AuthFlowOrigin } from './components/AuthGate';
 import { DesignPreviewPage } from './components/DesignPreviewPage';
 import { AdminPanel } from './components/AdminPanel';
+import { AdminOverview } from './components/AdminOverview';
 import { CaseWorkspace } from './components/CaseWorkspace';
 import { Dashboard } from './components/Dashboard';
 import { ConnectivityBanner } from './components/ConnectivityBanner';
@@ -30,7 +31,7 @@ type Workspace = 'home' | 'case' | 'form' | 'records' | 'admin';
 
 type SignedInAppProps = { user: AuthenticatedUser; onLogout: () => void; flowOrigin: AuthFlowOrigin };
 
-/** Uygulama kökü: yol '/' ise Landing (gün panosu + işlem girişi) açılır. */
+/** Uygulama kökü: yol '/' ise gün panosu (psikolog) veya yönetim özeti (admin) açılır; işlem akışı /islem'de yaşar. */
 const LANDING_PATHS = new Set(['/', '/index.html', '/optik-form.html']);
 
 type NavItem = { id: Workspace; label: string; icon: IconName; path: string };
@@ -269,22 +270,24 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
         </header>
         <ConnectivityBanner />
         <main className="app-main" id="main" tabIndex={-1}>
-          {(route.page === 'home' || route.page === 'islem') && (
-            <>
-              {user.role === 'PSYCHOLOG' && route.page === 'home' && (
-                <div className="dashboard-wrapper">
-                  <Dashboard user={user} />
-                </div>
-              )}
-              <CaseWorkspace
-                key={route.page === 'home' ? 'clean-landing' : 'case-workspace'}
-                definition={formDefinition}
-                actor={user}
-                flowOrigin={flowOrigin}
-                landing={route.page === 'home'}
-                onSaved={() => setRecordsTick(tick => tick + 1)}
-              />
-            </>
+          {/* Genel bakış, rolün panosudur; "Yeni MMPI işlemi" hero'su yalnız /islem'de yaşar. */}
+          {route.page === 'home' && user.role === 'PSYCHOLOG' && (
+            <div className="dashboard-wrapper">
+              <Dashboard user={user} />
+            </div>
+          )}
+          {route.page === 'home' && user.role === 'ADMIN' && (
+            <div className="dashboard-wrapper">
+              <AdminOverview admin={user} />
+            </div>
+          )}
+          {route.page === 'islem' && (
+            <CaseWorkspace
+              definition={formDefinition}
+              actor={user}
+              flowOrigin={flowOrigin}
+              onSaved={() => setRecordsTick(tick => tick + 1)}
+            />
           )}
           {route.page === 'form' && <FormKit />}
           {user.role === 'PSYCHOLOG' && route.page === 'kayitlar' && (

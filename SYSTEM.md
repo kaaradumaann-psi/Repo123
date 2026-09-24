@@ -55,7 +55,7 @@ Router hash router değildir; `src/router.ts` `window.location.pathname` okuyup 
 
 | Rota | Davranış | Erişim |
 | --- | --- | --- |
-| `/` | Temiz landing (`home`); persisted taslağı otomatik açmaz | Oturum kapalıysa login/kurulum, açık ise workspace |
+| `/` | Rol panosu (`home`): psikolog gün panosu, admin yönetim özeti; workspace/hero içermez, persisted taslağa dokunmaz | Oturum kapalıysa login/kurulum, açık ise workspace |
 | `/index.html`, `/optik-form.html` | Landing alias'ı | Aynı |
 | `/islem` | Case workspace; mevcut taslak bu rotada session hydration ile açılabilir | Yetkili oturum |
 | `/form` | Doğrulanmış optik form PDF hazırlık ekranı | Yetkili oturum |
@@ -117,10 +117,10 @@ Production'da pathname rotalarının doğrudan açılabilmesi için hosting tara
 
 Admin'in kayıt ayrıntısında klinik cevap ve profil görmesi mevcut bilinçli yönetim tasarımıdır; RLS Admin'e tüm kayıtları seçme hakkı verir. Canlı ortamda bu kararın kurumun en az yetki ve KVKK politikasıyla ayrıca onaylanması gerekir.
 
-### 3.2 Yeni giriş, F5 ve landing ayrımı
+### 3.2 Yeni giriş, F5 ve pano/İşlem ayrımı
 
-- Yeni `signIn` tamamlandığında `flowOrigin='signin'` olur ve URL `/`e replace edilir. Landing boş başlar; kullanıcıya aynı hesap için localStorage'da bulunan taslak varsa **Devam et** seçeneği gösterilir. Taslak otomatik açılmaz.
-- F5 veya mevcut session hydration'ında `/islem` doğrudan açılırsa `CaseWorkspace` taslağı hydrate eder. `/` landing olarak açılırsa taslak state'e yüklenmez.
+- Yeni `signIn` tamamlandığında `flowOrigin='signin'` olur ve URL `/`e replace edilir. `/` yalnızca rol panosunu gösterir (psikolog: gün panosu, admin: yönetim özeti); workspace hero'su burada **yer almaz**. Kullanıcı aynı hesap için localStorage'da kayıtlı bir çalışma varsa bunu `/islem` ekranındaki **Kaldığın yerden devam et** kartıyla açar — taslak otomatik açılmaz.
+- F5 veya mevcut session hydration'ında `/islem` doğrudan açılırsa `CaseWorkspace` taslağı hydrate eder. `/` panosu workspace barındırmadığı için taslak state'e hiç yüklenmez.
 - Public SSS/gizlilik/kaynakça/üst geri akışı AuthGate'e girmeden `/`e döner; bu dönüş resume davranışını tetiklemez.
 - Admin `/yonetim`, psikolog `/kayitlar` rol korumasıyla engellenir.
 
@@ -453,7 +453,7 @@ veri işleme sözleşmesi kurum/uzman tarafından belirlenmelidir.
 - Identity/QR: fingerprint, batch/page/total parse, foreign/missing/duplicate page protections.
 - Geometry/OMR: homography/similarity, orientation 90/180/270, 17°/projective distortion, page isolation, alignment, bubble rings, peripheral isolation, blur/shadow/low-light, multiple/ambiguous/blank/reliable statuses.
 - Scanner: magic-byte file gate, dimensions/bytes, PDF worker allowlist/buffer/timeouts, camera advisor, enhancement, comparison, manual warp.
-- Lifecycle: user-key draft isolation, TTL/corrupt JSON, no image persistence, outbox shape/size/attempts, exact local date, landing/resume decisions at code level.
+- Lifecycle: user-key draft isolation, TTL/corrupt JSON, no image persistence, outbox shape/size/attempts, exact local date, resume decisions at code level.
 - Result boundary: unresolved OMR remains pending, measured blank is distinct, manual review/history/undo and record gate do not grant unearned clinical transfer.
 - Scoring/report: Turkish norms/K correction/validity/config/derived/critical/source labels, report rendering, print path separation.
 - **Raw-score round trip** (`tests/rawScoreRoundTrip.test.ts`): ham puan yönteminin uçtan uca regresyon testi. Elle hesaplanmış referans T puanları (yayınlanan Türk normları + K=3 düzeltme tablosu) üzerinden K düzeltmesi, T dönüşümü, Kadın Mf ters işareti, 20–120 sıkışması, profil kodu ve `RAW_SCORE_MAX`/`buildRawPayload` sınır doğrulaması kanıtlanır.
@@ -564,7 +564,7 @@ Bu bölüm, repository'deki güncel kod tabanı ile canlı Supabase ve frontend 
 
 8. **Run smoke tests:**
    Yayınlanan URL'ye tarayıcıdan gidin:
-   - `/` (temiz landing) yüklenmeli,
+   - `/` (rol panosu) yüklenmeli,
    - Public rotalar (`/sss`, `/gizlilik`, `/kullanim`, `/kaynaklar`) oturum açmadan açılmalı,
    - Bilinmeyen rota (`/rastgele`) 404 sayfasına düşmeli.
 
