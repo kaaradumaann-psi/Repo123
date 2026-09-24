@@ -13,6 +13,14 @@
      05 · ≤720px — data tables stay readable, never squeezed
      06 · ≤560px — two/three-column form grids collapse
      07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+     08 · ≤720px — reports, charts and paper previews
+     08b/08c · sources entries + coarse-pointer touch band
+     09 · ≤720px — scanner / camera surfaces
+     10 · ≤900px — full-screen mobile navigation overlay
+     11 · PaperViewport — A4 paper keeps the desktop composition everywhere
+     12 · ≤720px — data tables become cards (actions visible without scroll)
+     13 · ≤720px — OMR / scanner text-fit fixes
+     14 · ≤720px — small touch targets and remaining spills
 
    Ordering rule: media blocks are written widest-first so that a narrower
    breakpoint always wins when both apply.
@@ -49,13 +57,13 @@
     max-height: 90dvh;
   }
 
-  /* The preview pane is sticky and height-capped only in the two-column split;
-     below 1241px reports.css turns it into a static, full-height pane, so this
-     rule must not leak into that range. */
+  /* The A4 preview scroller is the PaperViewport frame (`.report-preview-paper`),
+     sticky and height-capped only in the two-column split; below 1241px
+     reports.css turns the pane static, so this rule must not leak there. */
   @media screen and (min-width: 1241px) {
-    .report-preview-pane {
-      max-height: calc(100vh - 96px);
-      max-height: calc(100dvh - 96px);
+    .report-preview-paper {
+      max-height: calc(100vh - 160px);
+      max-height: calc(100dvh - 160px);
     }
   }
 
@@ -385,15 +393,15 @@
     scrollbar-width: thin;
   }
 
-  .modern-data-table {
+  .modern-data-table:not([data-mobile-cards]) {
     min-width: 640px;
   }
 
   /* The first column carries the patient identity and stays visible while the
      rest of the row scrolls. `position: sticky` inside a scroll container works
      because the cell has a background of its own. */
-  .modern-data-table th:first-child,
-  .modern-data-table td:first-child {
+  .modern-data-table:not([data-mobile-cards]) th:first-child,
+  .modern-data-table:not([data-mobile-cards]) td:first-child {
     position: sticky;
     left: 0;
     z-index: 1;
@@ -401,12 +409,12 @@
     box-shadow: inset -1px 0 0 var(--border);
   }
 
-  .modern-data-table th:first-child {
+  .modern-data-table:not([data-mobile-cards]) th:first-child {
     background: var(--slate-50);
     z-index: 2;
   }
 
-  .modern-data-table tbody tr:hover td:first-child {
+  .modern-data-table:not([data-mobile-cards]) tbody tr:hover td:first-child {
     background: #f8fafc;
   }
 
@@ -553,7 +561,7 @@
   /* One notch narrower than the ≤720px table: the sticky identity column keeps
      the row identifiable, 600px leaves the actions room without pushing the
      date/psychologist columns out of sight. */
-  .modern-data-table {
+  .modern-data-table:not([data-mobile-cards]) {
     min-width: 600px;
   }
 
@@ -627,49 +635,6 @@
      dolgusu değişmez — önizleme `.screen-only` içinde, kâğıt `.print-only`). */
   .report-full-preview-body {
     padding: 12px;
-  }
-
-  .report-full-preview-body .pr-report {
-    padding: 16px 14px;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   08d · ≤480px — TAM RAPOR önizlemesi: kâğıt içi geniş tablolar
-   -------------------------------------------------------------------------- */
-@media screen and (max-width: 480px) {
-  /* Ekran önizlemesinde kâğıt tipografisi 12.5px tabana çıkarıldığı için
-     5 sütunlu "Geçerlik Ölçekleri" / "Klinik Ölçekler" tablolarının minimum
-     içerik genişliği (≈347px) 320–430px'lik telefonlarda kâğıt kenarını
-     aşıyordu: tablo kâğıttan taşıyor ve önizleme yatay kayıyordu. Tablo artık
-     kendi içinde yatay kaydırılır (projedeki `.report-table-scroll` deseninin
-     aynısı): kâğıt kenarı bozulmaz, önizleme/sayfa yatay kaymaz.
-     Kural yalnız ekrandadır; baskı `.print-only` kopyasından üretilir. */
-  .report-full-preview-body .pr-table {
-    display: block;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-  }
-
-  /* Aynı sebeple etiket/değer satırları (Meslek / Eğitim, Uygulayan Uzman, …)
-     dar kâğıtta taşmasın: değer gerektiğinde alt satıra iner. */
-  .report-full-preview-body .pr-client-grid > div {
-    flex-wrap: wrap;
-    gap: 0 10px;
-  }
-
-  /* Başlık telefonda yan yana sıkışınca tarih "2026-09-" / "20" diye ortadan
-     kırılıyordu; başlık ve künye alt alta, sola hizalı akar. */
-  .report-full-preview-body .pr-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .report-full-preview-body .pr-head-meta {
-    text-align: left;
-    align-items: flex-start;
   }
 }
 
@@ -804,5 +769,540 @@
   /* OMR result strip: the per-page status cells stay tappable. */
   .scanner-metrics-strip > * {
     min-height: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10 · ≤900px — full-screen mobile navigation overlay
+   --------------------------------------------------------------------------
+   Telefonda başlık üç satıra yayılıyordu (marka / sekmeler / kullanıcı+site
+   bağlantısı) ve değerli dikey alanı yiyordu. ≤900px'te sekme şeridi, kullanıcı
+   özeti, site bağlantısı ve çıkış düğmesi başlıktan çıkar; sağ üstteki tek
+   düğme tam ekran bir gezinme katmanı açar. Masaüstü (>900px) hiç değişmez:
+   bileşenin düğmesi ve katmanı orada display:none'dur.
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 901px) {
+  .nav-toggle,
+  .mobile-nav-overlay {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .header-left .workspace-tabs,
+  .header-user {
+    display: none;
+  }
+
+  /* Tek satırlık başlık: marka solda, menü düğmesi sağda. screen.css ≤900px
+     başlığı kolonlara ayırır; burada satır düzenine geri döndürülür. */
+  .header-inner {
+    height: 60px;
+    padding: 8px 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .header-left {
+    flex-wrap: nowrap;
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    margin-left: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--slate-700);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .mobile-nav-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    z-index: 1;
+  }
+
+  .mobile-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .mobile-nav-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .mobile-nav-brand-text strong {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--dark);
+  }
+
+  .mobile-nav-brand-text small {
+    font-size: 11px;
+    color: var(--slate-500);
+    font-weight: 500;
+  }
+
+  .nav-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    color: var(--slate-700);
+  }
+
+  .mobile-nav-body {
+    flex: 1 1 auto;
+    padding: 14px 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobile-nav-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    margin: 10px 2px 4px;
+  }
+
+  .mobile-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--slate-700);
+    text-decoration: none;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+
+  .mobile-nav-link.active {
+    background: var(--primary-tint);
+    border-color: var(--primary-border);
+    color: var(--primary);
+  }
+
+  .mobile-nav-link svg {
+    flex: none;
+    color: var(--slate-500);
+  }
+
+  .mobile-nav-link.active svg {
+    color: var(--primary);
+  }
+
+  .mobile-nav-link span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-nav-current {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: var(--white);
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius-full);
+    padding: 3px 9px;
+  }
+
+  .mobile-nav-foot {
+    border-top: 1px solid var(--border);
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--slate-50);
+  }
+
+  .mobile-nav-foot .user-full-name {
+    max-width: none;
+    font-size: 13.5px;
+  }
+
+  .mobile-nav-foot .btn-logout {
+    min-height: 44px;
+    padding: 10px 16px;
+    flex: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11 · PaperViewport — A4 kâğıdı her ekranda masaüstü düzeniyle
+   --------------------------------------------------------------------------
+   Kâğıt (TAM RAPOR / şablon önizleme / canlı önizleme) 760px masaüstü
+   kompozisyonuyla dizilir; dar ekranda transform:scale ile sığdırılır ya da
+   %100 modunda belge görüntüleyici gibi çerçeve içinde yatay kaydırılır.
+   Sayfa gövdesi hiçbir modda yatay kaymaz; kaydırma yalnız çerçevededir.
+   Baskı hattı (.print-only) bu katmandan etkilenmez.
+   -------------------------------------------------------------------------- */
+@media screen {
+  .paper-viewport {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .paper-viewport-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .paper-viewport-hint {
+    font-size: 11.5px;
+    color: var(--soft);
+    line-height: 1.45;
+    min-width: 0;
+  }
+
+  .paper-viewport-modes {
+    display: inline-flex;
+    gap: 4px;
+    background: var(--slate-100);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    flex: none;
+  }
+
+  .paper-viewport-modes button {
+    min-height: 34px;
+    padding: 4px 14px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate-600);
+    background: transparent;
+    border: 1px solid transparent;
+  }
+
+  .paper-viewport-modes button[aria-pressed='true'] {
+    background: var(--white);
+    color: var(--primary);
+    border-color: var(--primary-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .paper-viewport-scroll {
+    min-width: 0;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+  }
+
+  .paper-viewport-scale {
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .paper-viewport-sheet {
+    width: 760px;
+    transform-origin: top left;
+  }
+
+  /* %100 modunda kâğıt gerçek boyutundadır; çerçeve yatay kaydırır. */
+  .paper-viewport-scroll[data-paper-mode='full'] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .paper-viewport-scroll[data-paper-mode='full'] .paper-viewport-scale {
+    width: 760px;
+  }
+
+  .paper-viewport-scroll[data-paper-mode='full'] .paper-viewport-sheet {
+    transform: none;
+  }
+
+  /* Editör bölmesindeki çerçeve: tek kaydırıcı kâğıdın kendi çerçevesidir. */
+  .report-preview-paper {
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+}
+
+@media screen and (max-width: 720px) {
+  .paper-viewport-bar {
+    align-items: flex-start;
+  }
+
+  .paper-viewport-hint {
+    flex: 1 1 200px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   12 · ≤720px — veri tabloları kart olur: işlemler kaydırmasız görünür
+   --------------------------------------------------------------------------
+   Yatay kaydırmalı tablo, satır eylemlerini (İncele / Raporlar / Sil) gizliyordu;
+   kullanıcı eylemi görmek için tüm sayfayı kaydırıyordu. data-mobile-cards
+   işaretli tablolar telefonda karta dönüşür: her satır bir kart, her hücre
+   etiketiyle (data-label) alt alta, eylem satırı kartın altında tam genişlik.
+   Masaüstü ve yazdırma görünümü değişmez.
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  .table-responsive:has(.modern-data-table[data-mobile-cards]) {
+    overflow-x: visible;
+  }
+
+  .modern-data-table[data-mobile-cards] {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .modern-data-table[data-mobile-cards] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .modern-data-table[data-mobile-cards] tbody {
+    display: block;
+  }
+
+  .modern-data-table[data-mobile-cards] tbody tr {
+    display: block;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 14px;
+    margin: 0 0 12px;
+  }
+
+  .modern-data-table[data-mobile-cards] tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .modern-data-table[data-mobile-cards] td {
+    display: block;
+    width: 100%;
+    padding: 5px 0;
+    border: 0;
+    text-align: left;
+  }
+
+  .modern-data-table[data-mobile-cards] td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    margin-bottom: 2px;
+  }
+
+  .modern-data-table[data-mobile-cards] td[data-label=''] {
+    padding-top: 0;
+  }
+
+  .modern-data-table[data-mobile-cards] td[data-label='']::before {
+    content: none;
+  }
+
+  .modern-data-table[data-mobile-cards] td[data-label='İşlemler'] {
+    padding-top: 10px;
+    margin-top: 6px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .modern-data-table[data-mobile-cards] td[data-label='İşlemler']::before {
+    content: none;
+  }
+
+  .modern-data-table[data-mobile-cards] .table-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: stretch;
+  }
+
+  .modern-data-table[data-mobile-cards] .table-row-actions > * {
+    flex: 1 1 45%;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13 · OMR / tarayıcı yüzeyleri: metin taşması ve sarmalama düzeltmeleri
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* "inceleme bekleyen cevaplar" uyarısı: gövde metni daralıp taşıyordu;
+     satırı kendi başına sarmala, eylem düğmesi altına insin. */
+  .auto-resolve-banner .auto-resolve-body {
+    flex: 1 1 100%;
+    order: 2;
+  }
+
+  .auto-resolve-banner > svg {
+    order: 1;
+  }
+
+  .auto-resolve-banner > button {
+    order: 3;
+  }
+
+  /* Sayfa kartları 320-430px'te tek kolon: başlık ve durum metni kırılmasın. */
+  .scan-pages-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Metrik şeridi: 5 hücre 2 kolonda sıkışıyordu; telefonda tek kolon. */
+  .scanner-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .scanner-metrics-strip .stat-item {
+    padding: 12px 14px;
+  }
+
+  /* Kalite raporu satırları ve ölçüm listesi uzun değerleri sarmalasın. */
+  .q-metric,
+  .scan-row-location {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   14 · ≤720px — küçük dokunma hedefleri ve kalan sızıntılar
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Arama kutusundaki gruplama onay kutusu ve sayfa boyutu seçici 20-23px idi. */
+  .search-filter-box input[type='checkbox'] {
+    width: 22px;
+    height: 22px;
+    min-height: 22px;
+  }
+
+  .search-filter-box label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+  }
+
+  .search-filter-box select {
+    min-height: 44px;
+  }
+
+  /* Sayfa başı geri bağlantıları ve açılır bölüm başlıkları 34-42px idi. */
+  .reports-page > .screen-only > a,
+  .record-page-topbar > .btn-secondary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .client-info-details > summary,
+  .expert-notes-details > summary {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  /* Alt bilgi bağlantıları dar ekranda yatayda da büyüsün. */
+  .site-footer-link {
+    padding: 10px 8px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Bilgi sayfaları içindekiler listesi satırları 27-33px idi. */
+  .policy-toc-list a,
+  .faq-toc-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .info-brand {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Rapor ayarlarındaki logo/imza yükleme kutusu 373px sabit genişliydi ve
+     320-414px ekrandan taşıyordu; kutu kolon genişliğine uyum sağlar. */
+  .report-settings-upload {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .report-settings-upload input[type='file'] {
+    width: 100%;
+    max-width: 100%;
   }
 }

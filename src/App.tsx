@@ -16,6 +16,7 @@ import { ReportsPage } from './reports/ReportsPage';
 import { RecordDetailPage } from './components/RecordDetailPage';
 import { SourcesPage } from './components/SourcesPage';
 import { SiteFooter } from './components/SiteFooter';
+import { MobileNav } from './components/MobileNav';
 import { TermsPage } from './components/TermsPage';
 import { Icon } from './components/Icon';
 import { formDefinition } from './form/layout';
@@ -265,6 +266,20 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
               <span>Çıkış</span>
             </button>
           </div>
+
+          {/* ≤900px: sekme şeridi / kullanıcı alanı / site bağlantısı başlıkta yer
+              kaplamaz; sağ üstteki düğme tam ekran gezinme katmanını açar. */}
+          <MobileNav
+            items={tabs.map(tab => ({
+              id: tab,
+              label: tabLabel[tab],
+              icon: tabIcon[tab],
+              active: activeWorkspace === tab,
+              onSelect: () => activateTab(tab),
+            }))}
+            user={user}
+            onLogout={onLogout}
+          />
         </div>
       </header>
 

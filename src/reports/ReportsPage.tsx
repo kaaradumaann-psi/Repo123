@@ -31,6 +31,7 @@ import {
 import { ReportEditor } from './ReportEditor';
 import { ReportSettings } from './ReportSettings';
 import { ReportPreview } from './ReportPreview';
+import { PaperViewport } from '../components/PaperViewport';
 
 export function ReportsSummary({ recordId }: { recordId: string }) {
   const [reports, setReports] = useState<ReportSummary[] | null>(null);
@@ -276,9 +277,9 @@ export function ReportsPage({
               </div>
               <button className="btn-secondary" onClick={() => setFullOpen(false)}>Kapat</button>
             </div>
-            <div className="report-full-preview-body">
+            <PaperViewport frameClassName="report-full-preview-body" label="Tam rapor kâğıdı">
               <MMPIPrintReport profile={profile} meta={fullMeta} />
-            </div>
+            </PaperViewport>
           </section>
         )}
         <section className="report-examples-card" aria-label="Örnek raporlar ve şablonlar">
@@ -323,7 +324,7 @@ export function ReportsPage({
           </div>
           {sampleOpen && templateDocument ? (
             <div className="report-examples-body">
-              <div className="report-sample-frame">
+              <PaperViewport frameClassName="report-sample-frame" label="Şablon önizleme kâğıdı">
                 <ReportPreview
                   title={title || SYSTEM_TEMPLATE_NAME}
                   content={instantiateTemplate(templateDocument, source)}
@@ -331,7 +332,7 @@ export function ReportsPage({
                   date={new Date().toISOString()}
                   status="draft"
                 />
-              </div>
+              </PaperViewport>
               <p className="report-examples-footnote">
                 Önizleme yalnızca iskeleti gösterir; antet/imza ayarlarınız dahil edilir. Taslak filigranı ekranda
                 görünür, basılı PDF’te görünmez.
@@ -361,7 +362,7 @@ export function ReportsPage({
             </div>
           ) : (
             <div className="report-table-scroll">
-              <table className="modern-data-table">
+              <table className="modern-data-table" data-mobile-cards>
                 <thead>
                   <tr>
                     <th>Rapor adı</th>
@@ -375,17 +376,17 @@ export function ReportsPage({
                 <tbody>
                   {reports.map((r) => (
                     <tr key={r.id}>
-                      <td>{r.title}</td>
-                      <td>{r.template_name}</td>
-                      <td>
+                      <td data-label="Rapor adı">{r.title}</td>
+                      <td data-label="Şablon">{r.template_name}</td>
+                      <td data-label="Durum">
                         <span className={`status-pill ${r.status === 'draft' ? 'status-draft' : 'status-completed'}`} style={{ fontSize: 10, padding: '3px 8px' }}>
                           <span className="status-dot" aria-hidden="true" />
                           {r.status === 'draft' ? 'Taslak' : 'Tamamlandı'}
                         </span>
                       </td>
-                      <td>{new Date(r.created_at).toLocaleDateString('tr-TR')}</td>
-                      <td>{new Date(r.updated_at).toLocaleString('tr-TR')}</td>
-                      <td>
+                      <td data-label="Oluşturulma">{new Date(r.created_at).toLocaleDateString('tr-TR')}</td>
+                      <td data-label="Son düzenleme">{new Date(r.updated_at).toLocaleString('tr-TR')}</td>
+                      <td data-label="İşlemler">
                         <div className="table-row-actions">
                           <a href={`/kayitlar/${recordId}/raporlar/${r.id}`} className="action-btn-primary">
                             Aç / Düzenle

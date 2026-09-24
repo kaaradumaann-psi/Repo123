@@ -262,13 +262,38 @@ test('rapor editörü araç çubuğu mobilde sabit kalmaz, hücre alanları büy
    -------------------------------------------------------------------------- */
 
 test('kayıt tabloları mobilde sıkışmak yerine kendi içinde kaydırılır', () => {
-  const table = selectorDeclarations('.modern-data-table', 720);
+  // Kart moduna geçmeyen tablolar için yatay kaydırma katmanı korunur.
+  const table = selectorDeclarations('.modern-data-table:not([data-mobile-cards])', 720);
   assert.match(table, /min-width:\s*640px/, 'tablo doğal kolon genişliğini korumalı');
-  const cells = selectorDeclarations('.modern-data-table td:first-child', 720);
+  const cells = selectorDeclarations('.modern-data-table:not([data-mobile-cards]) td:first-child', 720);
   assert.match(cells, /position:\s*sticky/, 'kimlik kolonu yatay kaydırmada sabit kalmalı');
   assert.match(cells, /background:/, 'sticky hücrenin arka planı olmalı (aksi hâlde metin üst üste biner)');
   const scroller = selectorDeclarations('.table-responsive', 720);
   assert.match(scroller, /overflow-x:\s*auto/);
+});
+
+test('işlem sütunlu tablolar telefonda kart olur: eylemler kaydırmasız görünür', () => {
+  // Kullanıcı geri bildirimi: "Yönetim → Testler'de işlemleri görmek için sağa
+  // kaydırmak gerekiyor." data-mobile-cards işaretli tablolar ≤720px'te karta
+  // dönüşür; satır eylemleri kartın altında tam genişlik durur.
+  const cardTable = selectorDeclarations('.modern-data-table[data-mobile-cards]', 720);
+  assert.match(cardTable, /display:\s*block/, 'kart modunda tablo blok akışa geçmeli');
+  const rows = selectorDeclarations('.modern-data-table[data-mobile-cards] tbody tr', 720);
+  assert.match(rows, /display:\s*block/, 'her satır bir kart olmalı');
+  const cells = selectorDeclarations('.modern-data-table[data-mobile-cards] td', 720);
+  assert.match(cells, /display:\s*block/, 'hücreler alt alta akmalı');
+  const labels = selectorDeclarations('.modern-data-table[data-mobile-cards] td::before', 720);
+  assert.match(labels, /content:\s*attr\(data-label\)/, 'hücre etiketi data-label niteliğinden gelmeli');
+  const actions = selectorDeclarations('.modern-data-table[data-mobile-cards] .table-row-actions > *', 720);
+  assert.match(actions, /min-height:\s*44px/, 'kart eylemleri dokunma hedefi olmalı');
+  const wrap = selectorDeclarations('.table-responsive:has(.modern-data-table[data-mobile-cards])', 720);
+  assert.match(wrap, /overflow-x:\s*visible/, 'kart modunda yatay kaydırma kabı kalmamalı');
+  // Gerçek tablolar işaretlenmiş mi?
+  for (const file of ['src/components/AdminPanel.tsx', 'src/components/MyRecordsPanel.tsx', 'src/reports/ReportsPage.tsx']) {
+    const tsx = readFileSync(file, 'utf8');
+    assert.match(tsx, /data-mobile-cards/, `${file} tablosu kart modunu kullanmalı`);
+    assert.match(tsx, /data-label="İşlemler"/, `${file} işlem hücresi etiketli olmalı`);
+  }
 });
 
 test('küçük telefonlarda liste/kart ayakları ve filtre satırı sarar', () => {
@@ -302,7 +327,7 @@ test('rapor bölünmüş görünümü 1240px altında tek kolona iner (editör d
 
 test('önizleme paneli yükseklik sınırı yalnızca iki kolonlu görünümde uygulanır', () => {
   const scoped = responsiveRules.filter(rule =>
-    rule.selector.split(',').some(s => s.trim() === '.report-preview-pane') &&
+    rule.selector.split(',').some(s => s.trim() === '.report-preview-paper') &&
     rule.declarations.includes('max-height'),
   );
   assert.ok(scoped.length > 0, 'önizleme paneli dvh kuralı olmalı');
@@ -538,11 +563,86 @@ test('TAM RAPOR kâğıdı örnek önizlemeyle aynı çerçeveyi kullanır; okun
   assert.deepEqual(printLeaks, [], 'önizleme ölçeği baskı medyasına sızmamalı');
 });
 
-test('TAM RAPOR önizlemesinde geniş tablolar ≤480px kendi içinde kaydırılır', () => {
-  // Ölçüm: 5 sütunlu ölçek tablolarının min-content genişliği ≈347px; 320–430px'lik
-  // telefonlarda kâğıt kenarını aşıyor ve önizlemeyi yatay kaydırıyordu.
-  const block = /@media screen and \(max-width: 480px\)\s*\{([\s\S]*?)\n\}/.exec(responsiveCss);
-  assert.ok(block, '≤480px kâğıt içi tablo katmanı yok');
-  assert.match(block[1]!, /\.report-full-preview-body \.pr-table\s*\{[^}]*overflow-x:\s*auto/);
-  assert.match(block[1]!, /\.report-full-preview-body \.pr-client-grid > div\s*\{[^}]*flex-wrap:\s*wrap/);
+test('A4 kâğıt mobilde masaüstü düzeniyle ölçeklenir (PaperViewport)', () => {
+  // Kullanıcı geri bildirimi: "Tam rapor kısmı mobilde desktop tasarımında değil."
+  // Kâğıt artık dar ekranda yeniden dizilmez; 760px masaüstü kompozisyonu
+  // transform:scale ile sığdırılır, %100 modunda çerçeve içinde yatay kaydırılır.
+  const screenDecls = (selector: string): string =>
+    responsiveRules
+      .filter(rule => rule.selector.split(',').some(part => part.trim() === selector))
+      .map(rule => rule.declarations)
+      .join('\n');
+  const sheet = screenDecls('.paper-viewport-sheet');
+  assert.match(sheet, /width:\s*760px/, 'kâğıt her ekranda masaüstü genişliğinde dizilir');
+  assert.match(sheet, /transform-origin:\s*top left/, 'ölçekleme sol üstten yapılmalı');
+  const full = screenDecls(".paper-viewport-scroll[data-paper-mode='full']");
+  assert.match(full, /overflow-x:\s*auto/, '%100 modunda kaydırma yalnız çerçevede olmalı');
+  const component = readFileSync('src/components/PaperViewport.tsx', 'utf8');
+  assert.match(component, /transform = `scale\(/, 'sığdırma modu ölçek dönüşümü uygulamalı');
+  assert.match(component, /ResizeObserver/, 'çerçeve/kâğıt boyutu izlenmeli');
+  assert.match(component, /Sığdır/, 'kullanıcıya sığdır seçeneği sunulmalı');
+  assert.match(component, /%100/, 'kullanıcıya gerçek boyut seçeneği sunulmalı');
+  // Kâğıt içi yeniden dizim katmanları kaldırıldı: tablolar kâğıttan taşmaz,
+  // kâğıt ölçeklenir. Eski ≤480px iç-kaydırma bloğu geri gelmemeli.
+  assert.ok(!/report-full-preview-body \.pr-table\s*\{[^}]*overflow-x/.test(responsiveCss),
+    'kâğıt içi tablo kaydırma katmanı kaldırılmalı (kâğıt masaüstü düzeniyle ölçeklenir)');
+  // Ölçek yalnız ekranda: baskı katmanı bileşeni kullanmaz.
+  const reportsPage = readFileSync('src/reports/ReportsPage.tsx', 'utf8');
+  assert.match(reportsPage, /<PaperViewport/, 'raporlar sayfası kâğıdı PaperViewport içinde göstermeli');
+});
+
+/* --------------------------------------------------------------------------
+   Phase 11 — tam ekran mobil gezinme katmanı ve OMR metin sığdırma
+   -------------------------------------------------------------------------- */
+
+test('≤900px başlık tek satıra iner: sekmeler ve kullanıcı alanı menüye taşınır', () => {
+  const hidden = selectorDeclarations('.header-left .workspace-tabs', 900) +
+    selectorDeclarations('.header-user', 900);
+  assert.match(hidden, /display:\s*none/, 'sekme şeridi ve kullanıcı alanı mobilde gizlenmeli');
+  const row = selectorDeclarations('.header-inner', 900);
+  assert.match(row, /flex-direction:\s*row/, 'başlık mobilde tek satır olmalı');
+  const toggle = selectorDeclarations('.nav-toggle', 900);
+  assert.match(toggle, /display:\s*inline-flex/, 'menü düğmesi mobilde görünür olmalı');
+  assert.match(toggle, /width:\s*44px/, 'menü düğmesi dokunma hedefi olmalı');
+  const desktop = parseCss(responsiveCss).find(
+    rule => rule.selector.split(',').some(s => s.trim() === '.nav-toggle') &&
+      rule.atRules.some(at => /min-width:\s*901px/.test(at)),
+  );
+  assert.ok(desktop && /display:\s*none/.test(desktop.declarations), 'masaüstünde düğme gizli olmalı');
+});
+
+test('tam ekran gezinme katmanı site bağlantısını ve çıkışı içerir', () => {
+  const overlay = selectorDeclarations('.mobile-nav-overlay', 900);
+  assert.match(overlay, /position:\s*fixed/, 'katman ekranı tamamen kaplamalı');
+  assert.match(overlay, /z-index:\s*90/, 'katman başlığın üstünde durmalı');
+  const link = selectorDeclarations('.mobile-nav-link', 900);
+  assert.match(link, /min-height:\s*52px/, 'menü satırları dokunma hedefi olmalı');
+  const nav = readFileSync('src/components/MobileNav.tsx', 'utf8');
+  assert.match(nav, /SITE_URL/, 'halilkaraduman.com.tr bağlantısı menü içinde olmalı');
+  assert.match(nav, /aria-modal="true"/, 'katman modal olarak duyurulmalı');
+  assert.match(nav, /Escape/, 'Escape katmanı kapatmalı');
+  assert.match(nav, /createPortal/, 'katman header dışına (body) taşınmalı: backdrop-filter containing block');
+  assert.match(nav, /document\.body\.style\.overflow/, 'katman açıkken arka plan kaydırması kilitlenmeli');
+  const app = readFileSync('src/App.tsx', 'utf8');
+  assert.match(app, /<MobileNav/, 'başlık menü bileşenini bağlamalı');
+});
+
+test('OMR uyarı bandı metni dar ekranda taşmaz (inline flex kaldırıldı)', () => {
+  const tsx = readFileSync('src/components/ScannerWorkspace.tsx', 'utf8');
+  assert.ok(!/className="auto-resolve-body" style=\{\{ flex: 1 \}\}/.test(tsx),
+    'inline flex:1, medya sorgusu kurallarını ezdiği için kaldırılmalı');
+  const base = parseCss(readFileSync(`${STYLE_DIR}/scanner-enhancements.css`, 'utf8'))
+    .filter(rule => rule.selector.split(',').some(s => s.trim() === '.auto-resolve-body'))
+    .map(rule => rule.declarations)
+    .join('\\n');
+  assert.match(base, /flex:\s*1 1 240px/, 'gövde daralınca kendi satırına sarmalanmalı');
+  const mobile = selectorDeclarations('.auto-resolve-banner .auto-resolve-body', 720);
+  assert.match(mobile, /flex:\s*1 1 100%/, 'telefonda gövde tam satır olmalı');
+});
+
+test('OMR yüzeyleri telefonda tek/okunur kolona iner', () => {
+  assert.match(selectorDeclarations('.scan-pages-grid', 720), /grid-template-columns:\s*1fr/,
+    'sayfa kartları dar ekranda tek kolon olmalı');
+  assert.match(selectorDeclarations('.scanner-metrics-strip', 720), /grid-template-columns:\s*1fr/,
+    'metrik şeridi dar ekranda tek kolon olmalı');
 });
