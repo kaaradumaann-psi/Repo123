@@ -1,0 +1,808 @@
+/* ==========================================================================
+   Responsive Foundation — viewport fit, navigation shell, touch ergonomics
+   --------------------------------------------------------------------------
+   main.tsx imports this file LAST, after mobile.css and reports.css, so it can
+   refine every screen layer without fighting the cascade. It owns the shared
+   foundation only; screen-specific layout stays in the files that already own
+   it (workspace.css, reports.css, scanner.css, …).
+
+     01 · Global viewport units, safe areas and the horizontal-overflow net
+     02 · ≤1100px — tablet header guards
+     03 · ≤720px — touch ergonomics (16px controls, ≥44px targets)
+     04 · ≤720px — navigation strips and page shells
+     05 · ≤720px — data tables stay readable, never squeezed
+     06 · ≤560px — two/three-column form grids collapse
+     07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+
+   Ordering rule: media blocks are written widest-first so that a narrower
+   breakpoint always wins when both apply.
+
+   Rules:
+     • Every declaration is inside `@media screen` — the printable A4 sheet
+       (form.css / print.css / @media print blocks) never receives a single
+       declaration from this file.
+     • No `!important`, no new component, no rewritten design: foundation only.
+     • Desktop (>1100px) is intentionally untouched.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   01 · Global viewport units, safe areas, overflow net
+   -------------------------------------------------------------------------- */
+@media screen {
+  /* 100vh is the *large* viewport on mobile browsers: as the URL bar hides and
+     shows, a 100vh column jumps and can push the footer under the browser
+     chrome. dvh tracks the visible viewport; vh stays as the fallback for
+     browsers that do not support it yet. */
+  .portal-layout,
+  .auth-page,
+  .auth-shell,
+  .info-shell,
+  .report-workspace {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* A modal taller than the *visible* viewport scrolls internally instead of
+     letting the last action button sit under the browser chrome. */
+  .modal-container {
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  /* The preview pane is sticky and height-capped only in the two-column split;
+     below 1241px reports.css turns it into a static, full-height pane, so this
+     rule must not leak into that range. */
+  @media screen and (min-width: 1241px) {
+    .report-preview-pane {
+      max-height: calc(100vh - 96px);
+      max-height: calc(100dvh - 96px);
+    }
+  }
+
+  /* Notch / home-indicator insets. `env()` resolves to 0px where unsupported. */
+  .app-header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .site-footer-inner {
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Flex/grid children default to `min-width: auto`, which is the single most
+     common cause of a "table/card is wider than the phone" bug. Containers that
+     host scrollable tables already own their own `overflow-x: auto`. */
+  .app-main,
+  .app-main > *,
+  .reports-page,
+  .report-workspace,
+  .ws-panel,
+  .ws-flow,
+  .dashboard-section,
+  .card-elevated,
+  .report-section {
+    min-width: 0;
+  }
+
+  /* Unbreakable identifiers (UUID, e-posta, dosya adı, batch kodu) must wrap
+     instead of widening the layout. */
+  .record-ref-code,
+  .record-page-id,
+  .mono-sub,
+  .batch-code,
+  input[type='search'],
+  .form-kit-file strong,
+  .ws-edit-panel-id {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   02 · ≤1100px — tablet header guards
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 1100px) {
+  /* Between 901px and ~1100px the header is still a single 72px row: brand +
+     workspace tabs + site link + user + logout. A long account name must not
+     push the row wider than the viewport. */
+  .header-left,
+  .header-user,
+  .user-profile-summary,
+  .user-info-text {
+    min-width: 0;
+  }
+
+  .user-full-name {
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .home-site-link span {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   03 · ≤720px — touch ergonomics
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* iOS Safari zooms the whole page when a form control smaller than 16px takes
+     focus, then leaves the user zoomed in. Two layers guard against it:
+       (a) a catch-all for controls the design system does not style itself
+           (browser default is 13.33px), and
+       (b) explicit overrides for every styled control that declares a smaller
+           size — these must out-rank the rule they correct, so they carry the
+           same or higher specificity and come later in the cascade.
+     The APA title field is the single intentional exception (display type). */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .field input,
+  .field textarea,
+  .search-input-wrapper input,
+  .date-filter-field input,
+  .date-filter-field select,
+  .filter-group input,
+  .filter-group select,
+  .raw-field input,
+  .expert-notes-input,
+  .ws-form textarea,
+  .report-edit-pane textarea,
+  .report-settings-grid input,
+  .report-template-save input,
+  .report-toolbar select,
+  .admin-creation-form input,
+  .reports-page input:not([type='file']):not([type='checkbox']):not([type='radio']),
+  .reports-page select,
+  .reports-page textarea {
+    font-size: 16px;
+  }
+
+  /* Exception: the APA report title is a display-sized field on purpose. */
+  .reports-page .report-title-input input,
+  .report-edit-pane .report-title-input input {
+    font-size: clamp(19px, 5.2vw, 24px);
+  }
+
+  /* 44px is the documented target of this project's mobile layer. Compact
+     controls (btn-sm, table row actions, filter fields, close buttons, pills)
+     were 28–36px tall on a phone. */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-sm,
+  .action-btn-primary,
+  .action-btn-secondary,
+  .action-btn-danger,
+  .icon-close-btn,
+  .portal-tab,
+  .subnav-tab,
+  .mode-tab,
+  .mmpi-tab,
+  .quicknav-chip,
+  .report-toolbar button,
+  .report-preview-actions button,
+  .scan-comparison-toggle button,
+  .close-banner-btn,
+  .site-footer-link,
+  .btn-logout,
+  .ws-choice-row label,
+  .report-mobile-tabs button {
+    min-height: 44px;
+  }
+
+  .icon-close-btn,
+  .close-banner-btn {
+    min-width: 44px;
+  }
+
+  .date-filter-field input,
+  .date-filter-field select,
+  .raw-field input {
+    height: 44px;
+  }
+
+  /* Inputs must never be narrower than a comfortable thumb target either. */
+  .date-filter-field {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .date-filter-field input,
+  .date-filter-field select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Checkboxes/radios that are not wrapped in a pill label still need a real
+     hit area next to their text. */
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Tabular figures in date filters must not reflow between platforms. */
+  input,
+  select,
+  textarea {
+    line-height: 1.35;
+  }
+
+  /* Legibility floor for the small labels that carry meaning on a phone. These
+     were 9-10px (badge/flag/eyebrow type) and are hard to read at arm's length;
+     they are bumped here only, so desktop and print keep their scale. */
+  .user-role-badge,
+  .brand-subtitle,
+  .btn-multiline small,
+  .ws-method-flag,
+  .level-badge,
+  .mv-band,
+  .qe-cell,
+  .item-select-chip .item-ans,
+  .site-footer-sep,
+  .site-footer-disclaimer,
+  .site-footer-credit {
+    font-size: 11px;
+  }
+
+  /* The 1-60 item chips were ~36px tall: below the documented 44px target and
+     the primary way a wrong OMR reading is corrected. */
+  .item-select-chip {
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Image-enhancement mode pills in the scan review were ~29px tall (padding
+     6px + 12.5px type) — measured in a real browser at 390px. */
+  .scan-enhancer-pill {
+    min-height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .scan-enhancer-pills {
+    flex-wrap: wrap;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   04 · ≤720px — navigation strips and page shells
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Admin sub-tabs were a non-wrapping flex row: on a 320–430px screen the third
+     tab ("+ Yeni Psikolog") sat outside the viewport and dragged the whole page
+     into a horizontal scroll. The strip now scrolls inside the header instead;
+     keyboard focus still scrolls the active tab into view natively. */
+  .admin-subnav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .admin-subnav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .subnav-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-margin-inline: 12px;
+  }
+
+  /* The workspace switcher keeps its own scrollable row (theme.css) — keep the
+     swipe gesture smooth and let a half-cut tab hint that it scrolls. */
+  .workspace-tabs {
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 12px;
+  }
+
+  /* Page shells: the desktop 24–28px gutter is a luxury on a phone. */
+  .reports-page,
+  .report-workspace {
+    padding: 20px 16px 36px;
+  }
+
+  .app-main {
+    padding: 18px 14px 40px;
+  }
+
+  /* Modal chrome: 24px of padding on every side leaves 224px of usable width on
+     a 320px phone. */
+  .modal-header {
+    padding: 16px 16px 14px;
+  }
+
+  .modal-body {
+    padding: 16px;
+    gap: 18px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer > .btn-primary,
+  .modal-footer > .btn-secondary,
+  .modal-footer > .btn-danger {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* Status banners carry long Turkish sentences: they need to breathe and their
+     dismiss button needs a real target. */
+  .status-banner {
+    align-items: flex-start;
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .empty-state-card {
+    padding: 32px 18px;
+  }
+
+  .loading-state-card {
+    padding: 32px 16px;
+  }
+
+  /* Report editor — the formatting toolbar is ~14 controls. Sticky, it stacked
+     into four rows and covered most of a phone screen while typing; in a
+     phone-width editor it scrolls with the document instead. */
+  .report-toolbar {
+    position: static;
+  }
+
+  /* Table cells inside the editor: a 36px cell is too small to tap and edit. */
+  .report-edit-table textarea {
+    min-height: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   05 · ≤720px — data tables stay readable, never squeezed
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* A 5–6 column record table squeezed into 320–430px broke every cell into
+     3–4 wrapped lines: the data was all there but unusable. Below this width
+     the table keeps its natural column widths and scrolls horizontally inside
+     its own card, so columns stay aligned and rows stay scannable. */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .modern-data-table {
+    min-width: 640px;
+  }
+
+  /* The first column carries the patient identity and stays visible while the
+     rest of the row scrolls. `position: sticky` inside a scroll container works
+     because the cell has a background of its own. */
+  .modern-data-table th:first-child,
+  .modern-data-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--white);
+    box-shadow: inset -1px 0 0 var(--border);
+  }
+
+  .modern-data-table th:first-child {
+    background: var(--slate-50);
+    z-index: 2;
+  }
+
+  .modern-data-table tbody tr:hover td:first-child {
+    background: #f8fafc;
+  }
+
+  .modern-data-table td,
+  .modern-data-table th {
+    padding: 12px 14px;
+  }
+
+  .table-row-actions {
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   06 · ≤560px — form layouts that still assume a wide column
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 560px) {
+  /* The admin "new psychologist" form and the record intake form are two/three
+     column grids; below this width a column is narrower than the field's own
+     minimum comfortable touch width. */
+  .form-grid-2col,
+  .form-grid-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .form-col-span-2 {
+    grid-column: span 1;
+  }
+
+  /* Action rows: 44px targets side by side leave two ~100px buttons on a 320px
+     screen, so they wrap and share the row instead. */
+  .section-header-actions,
+  .form-actions-bar,
+  .report-settings-actions,
+  .report-edit-table-actions,
+  .ws-restore-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .report-settings-actions > .btn-primary,
+  .report-settings-actions > .btn-secondary {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   07 · ≤430px — small phones (320 / 360 / 375 / 390 / 414 / 430)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 430px) {
+  /* Footer strings were `white-space: nowrap`: at 320px the copyright/meta line
+     ran under the viewport edge instead of wrapping to a second centred row. */
+  .site-footer-copyright,
+  .site-footer-meta,
+  .site-footer-disclaimer,
+  .site-footer-credit {
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Dossier score chips (`T 68 . 88` + condition labels) wrap instead of
+     spilling out of the card. */
+  .scale-dossier-stats,
+  .dossier-stats {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .dossier-stat,
+  .dossier-fact dd {
+    white-space: normal;
+  }
+
+  /* Gutter: 14px sides consumed 8% of a 320px screen; 12px returns usable width
+     to the tables, cards and the answer grid without touching desktop. */
+  .app-main {
+    padding: 16px 12px 40px;
+  }
+
+  .reports-page,
+  .report-workspace {
+    padding: 16px 12px 32px;
+  }
+
+  .header-inner {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .header-left,
+  .header-user {
+    gap: 8px;
+  }
+
+  .portal-tab {
+    padding: 8px 11px;
+  }
+
+  .connectivity-banner {
+    width: calc(100% - 24px);
+  }
+
+  /* Filters stack instead of squeezing two dated fields side by side. */
+  .date-range-filter {
+    gap: 8px;
+  }
+
+  .date-range-filter > .date-filter-field {
+    flex: 1 1 140px;
+  }
+
+  .search-filter-box .search-input-wrapper input {
+    padding-left: 40px;
+  }
+
+  /* Card and section padding: 20–24px reads as "empty" on a 320px screen.
+     Only surfaces that own their padding are listed — the table card must stay
+     full-bleed so `.table-responsive` keeps its edge-to-edge scroll. */
+  .card-elevated,
+  .report-section,
+  .mmpi-list-card {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  /* Footer: centered stack instead of a cramped two-column row. */
+  .site-footer-inner {
+    justify-content: center;
+    text-align: center;
+    gap: 6px 12px;
+  }
+
+  .site-footer-left,
+  .site-footer-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* One notch narrower than the ≤720px table: the sticky identity column keeps
+     the row identifiable, 600px leaves the actions room without pushing the
+     date/psychologist columns out of sight. */
+  .modern-data-table {
+    min-width: 600px;
+  }
+
+  /* Filter row: `Sayfa boyutu`, grouping and clear buttons stack instead of
+     collapsing into each other. */
+  .search-filter-box > div {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  /* List/card footers (pagination) keep the counter on its own line. */
+  .review-pagination-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+}
+
+@media screen {
+  /* The hint is a phone-only affordance; on wider screens the chart is wide
+     enough that nothing needs to be explained. */
+  .mmpi-chart-hint {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08 · ≤720px — reports, charts and paper previews
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* The T-score profile is an SVG with a fixed 1400×470 viewBox: at full phone
+     width its 12–13px labels would render at ~6px. The chart therefore keeps a
+     readable minimum width and scrolls inside its card, with the exact numbers
+     available in the summary table and the scale list (both already present).
+     A hint line in the card tells the user it scrolls. */
+  .mmpi-chart-card {
+    padding: 12px 10px 8px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .mmpi-chart-hint {
+    display: block;
+  }
+
+  /* Same treatment for every other wide, scrollable surface in the result and
+     report views: a thin, contained scrollbar instead of the page jumping. */
+  .mmpi-summary-table-wrap,
+  .mmpi-answers-grid,
+  .report-table-scroll,
+  .table-responsive {
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Folded paper previews inside the reports page must not claim more height
+     than the *visible* viewport on a phone. */
+  .report-full-preview-body {
+    max-height: 70vh;
+    max-height: 70dvh;
+  }
+
+  .report-examples-body .report-sample-frame {
+    max-height: 60vh;
+    max-height: 60dvh;
+  }
+
+  /* Kâğıdın 11mm (≈41px) yan dolgusu 320–430px'lik bir telefonda içeriğe yer
+     bırakmaz; ekran önizlemesinde aynı sayfa px dolguyla gösterilir (baskı
+     dolgusu değişmez — önizleme `.screen-only` içinde, kâğıt `.print-only`). */
+  .report-full-preview-body {
+    padding: 12px;
+  }
+
+  .report-full-preview-body .pr-report {
+    padding: 16px 14px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08d · ≤480px — TAM RAPOR önizlemesi: kâğıt içi geniş tablolar
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 480px) {
+  /* Ekran önizlemesinde kâğıt tipografisi 12.5px tabana çıkarıldığı için
+     5 sütunlu "Geçerlik Ölçekleri" / "Klinik Ölçekler" tablolarının minimum
+     içerik genişliği (≈347px) 320–430px'lik telefonlarda kâğıt kenarını
+     aşıyordu: tablo kâğıttan taşıyor ve önizleme yatay kayıyordu. Tablo artık
+     kendi içinde yatay kaydırılır (projedeki `.report-table-scroll` deseninin
+     aynısı): kâğıt kenarı bozulmaz, önizleme/sayfa yatay kaymaz.
+     Kural yalnız ekrandadır; baskı `.print-only` kopyasından üretilir. */
+  .report-full-preview-body .pr-table {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  /* Aynı sebeple etiket/değer satırları (Meslek / Eğitim, Uygulayan Uzman, …)
+     dar kâğıtta taşmasın: değer gerektiğinde alt satıra iner. */
+  .report-full-preview-body .pr-client-grid > div {
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+
+  /* Başlık telefonda yan yana sıkışınca tarih "2026-09-" / "20" diye ortadan
+     kırılıyordu; başlık ve künye alt alta, sola hizalı akar. */
+  .report-full-preview-body .pr-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .report-full-preview-body .pr-head-meta {
+    text-align: left;
+    align-items: flex-start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08b · ≤720px — Kaynakça (sources) entries
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* Ölçüldü: `.sources-citation` bir flex öğesi (`.sources-entry-head`) ve
+     içindeki DOI/adres tek kelime; `min-width: auto` yüzünden öğe içeriğinden
+     daha dar olamıyordu ve 320–414px'te sayfanın tamamı yatay kayıyordu
+     (scrollWidth 425 > clientWidth 320). */
+  .sources-citation {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .sources-entry-head {
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   08c · Dokunmatik işaretçi (≤1024px) — yatay telefonlar ve tabletler
+   --------------------------------------------------------------------------
+   Ölçüldü: 844×390 yatay telefonda (genişlik > 720px) düğmeler 34px'e düşüyordu;
+   genişlik tabanlı bantlar yatay telefonu masaüstü sayıyor. İmleç kaba ise
+   (parmak) aynı 44px hedefi geçerlidir. ≥1280px masaüstü bu bandın dışında
+   kalır, dokunmatik dizüstülerde masaüstü yoğunluğu bozulmaz.
+   -------------------------------------------------------------------------- */
+@media screen and (pointer: coarse) and (max-width: 1024px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-sm,
+  .action-btn-primary,
+  .action-btn-secondary,
+  .action-btn-danger,
+  .icon-close-btn,
+  .portal-tab,
+  .subnav-tab,
+  .mode-tab,
+  .mmpi-tab,
+  .quicknav-chip,
+  .report-toolbar button,
+  .report-preview-actions button,
+  .report-mobile-tabs button,
+  .close-banner-btn,
+  .site-footer-link,
+  .btn-logout,
+  .ws-choice-row label,
+  .item-select-chip,
+  .scan-enhancer-pill,
+  .scan-actions > button,
+  .preview-switch-btn,
+  .admin-subnav-tabs button {
+    min-height: 44px;
+  }
+
+  .dropzone-label,
+  .scanner-input-card button {
+    min-height: 44px;
+  }
+
+  /* Rapor editöründeki blok denetimleri (yukarı/aşağı/sil) 28px ölçüldü: dokunmatik
+     cihazda blok seçildiğinde çıkan tek sıralama/silme yoludur. */
+  .report-block-controls > button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   09 · ≤720px — scanner, camera and review workflow
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 720px) {
+  /* The camera stage is the viewfinder: on a phone it owns the full column
+     (mobile.css already lifts the 520px cap; this keeps the radius and adds
+     smooth video behaviour). */
+  .scan-camera-stage {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  /* Camera actions wrap instead of squeezing; the shutter is the primary action
+     and never shares a row with "stop" when the row is too narrow. */
+  .scan-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .scan-actions > button {
+    flex: 1 1 auto;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  /* Review workflow surfaces that were sized in plain pixels. */
+  .item-inspection-box {
+    padding: 14px;
+  }
+
+  /* The item crop is the evidence the clinician judges: give it room and keep
+     the zoom gesture inside the figure. */
+  .scan-crop-figure {
+    padding: 10px;
+  }
+
+  .scan-crop-image {
+    overflow: hidden;
+  }
+
+  /* Manual corner editor: the drag surface and the warped preview stack, and
+     the preview can use the full column instead of a fixed 280px canvas. */
+  .manual-corner-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .manual-corner-preview-canvas {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+  }
+
+  .manual-corner-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* OMR result strip: the per-page status cells stay tappable. */
+  .scanner-metrics-strip > * {
+    min-height: 44px;
+  }
+}

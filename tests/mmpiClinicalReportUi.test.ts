@@ -263,6 +263,17 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
   const css = fs.readFileSync(path.join(process.cwd(), 'src/styles/workspace.css'), 'utf-8');
   const dossierRules = parseCssRules(css).filter(r => DOSSIER_MARKERS.some(m => r.selector.includes(m)));
 
+  /**
+   * Kâğıt kopyasında geçerli kurallar: medya sorgusuz (paylaşılan) ya da
+   * yazdırmayı kapsayan medya bloklarındaki kurallar. `.pr-*` sunumu
+   * 2026-09-24'ten beri `@media screen, print` içindedir: "TAM RAPOR"
+   * önizlemesi ve kâğıt aynı sınıfları paylaşır (ekranda stilsiz görünme
+   * hatası böyle düzeltildi), bu yüzden yalnız `@media print` aranmaz.
+   */
+  const appliesOnPaper = (rule: { atRules: string[] }): boolean =>
+    rule.atRules.length === 0 ||
+    rule.atRules.every(at => !at.startsWith('@media screen') || /print/.test(at));
+
   it('rapor kartına ait kurallar bulunur', () => {
     assert.ok(dossierRules.length >= 40, `beklenenden az kural: ${dossierRules.length}`);
   });
@@ -281,9 +292,14 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
     assert.ok(screenRules.length >= 35);
   });
 
-  // Tipografi sözleşmesi yalnız EKRAN kuralları için geçerlidir: kâğıt (A4)
-  // bloğu kendi ölçüsünü kullanır (.pr-* ailesi 8.5-9.5px ile basılır).
-  const screenDossierRules = dossierRules.filter(r => r.atRules.some(a => a.startsWith('@media screen')));
+  // Tipografi sözleşmesi yalnız siteye ait EKRAN (UI) kuralları için geçerlidir:
+  // kâğıt (A4) bloğu kendi ölçüsünü kullanır. `.pr-*` ailesi 2026-09-24'ten beri
+  // `@media screen, print` içinde paylaşılır (TAM RAPOR önizlemesi ekranda aynı
+  // sunumu gösterir) ve bir BELGE tipografisidir — UI kartı değil; bu yüzden
+  // ekran-ÖZEL kurallar süzülürken dışarıda kalır.
+  const isScreenOnly = (rule: { atRules: string[] }): boolean =>
+    rule.atRules.some(at => at.startsWith('@media screen') && !/print/.test(at));
+  const screenDossierRules = dossierRules.filter(isScreenOnly);
 
   it('kartın içinde serif (var(--font-display)) kullanılmaz', () => {
     assert.ok(screenDossierRules.length >= 35);
@@ -343,7 +359,7 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
   });
 
   it('kâğıtta ölçek dosyası çıktı özeti olarak basılır; madde listesi kuralı kalkar', () => {
-    const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
+    const printRules = parseCssRules(css).filter(appliesOnPaper);
     for (const selector of [
       '.pr-dossier',
       '.pr-block .pr-dossier-head',
@@ -366,7 +382,7 @@ describe('Klinik rapor CSS’i sitenin tasarım sözleşmesine uyar', () => {
   });
 
   it('kâğıtta düz yazı blokları yapılandırılır (salt metin yığını değil)', () => {
-    const printRules = parseCssRules(css).filter(r => r.atRules.includes('@media print'));
+    const printRules = parseCssRules(css).filter(appliesOnPaper);
     const note = printRules.find(r => r.selector === '.pr-note')!;
     assert.match(note.declarations, /border-left/, 'not blokları sol çizgiyle ayrılmalı');
     assert.match(note.declarations, /break-inside:\s*avoid/);

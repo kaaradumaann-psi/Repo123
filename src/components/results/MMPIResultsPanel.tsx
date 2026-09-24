@@ -132,6 +132,9 @@ export function MMPIResultsPanel({ profile, clientName, answers, embedded = fals
               MMPI Profil Grafiği (T-Skorları)
             </h4>
             <MMPIScoreChart scales={profile.scales} />
+            {/* Telefon genişliğinde grafik okunabilir kalması için yatay kaydırılır;
+                tam sayılar aşağıdaki özet tabloda ve ölçek listelerinde durur. */}
+            <p className="mmpi-chart-hint">Grafik yatay kaydırılabilir; T puanlarının tamamı özet tabloda.</p>
           </section>
 
           <section className="mmpi-summary-card">

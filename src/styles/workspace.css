@@ -2998,9 +2998,26 @@
    Yazdırma / PDF — profesyonel klinik rapor (yalnızca gerekli MMPI verisi)
    ========================================================================== */
 
-@media print {
-  .screen-only { display: none !important; }
-  .print-only { display: block !important; }
+/* ==========================================================================
+   Rapor tipografisi (`.pr-*`) — EKRAN ve KÂĞIT aynı belgeyi gösterir
+   --------------------------------------------------------------------------
+   Bu kurallar yıllarca yalnızca `@media print` içinde yaşadı; bu yüzden
+   "TAM RAPOR · SALT OKUNUR" önizlemesi ekranda stilsiz (dümdüz metin,
+   çerçevesiz tablo) görünüyordu. Ekranda `.pr-*` ağacının göründüğü TEK yer
+   bu önizlemedir: diğer tüm kullanımlar `.print-only` içindedir ve ekranda
+   gizlidir. Kâğıt çıktısı da yalnızca `.print-only` kopyasından üretilir
+   (ekran önizlemesi `.screen-only` içindedir ve baskıda gizlenir), dolayısıyla
+   bu taşıma PDF düzenini değiştirmez.
+
+   Blok bilinçli olarak `@media screen, print` içindedir: ekran önizlemesi ile
+   kâğıt aynı sunumu paylaşır ve workspace.css'teki diğer tüm kurallar gibi bir
+   medya bloğunda kalır (sözleşme testleri bunu kilitler). Yalnızca kâğıda ait
+   olanlar (ekran/kâğıt gizleme ve `page: mmpi-report` bağlaması) aşağıdaki
+   `@media print` bloğunda durur.
+   ========================================================================== */
+@media screen, print {
+
+
 
   .pr-report, .pr-report * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .pr-report {
@@ -3238,7 +3255,14 @@
     line-height: 1.55;
     white-space: pre-wrap;
   }
+}
 
+
+
+/* Yalnızca kâğıda ait kurallar: ekran/kâğıt ayrımı ve sayfa numarası. */
+@media print {
+  .screen-only { display: none !important; }
+  .print-only { display: block !important; }
   /* Rapor baskısında her sayfanın altına sayfa numarası (B6).
      İsimli @page + margin box; desteklemeyen tarayıcılarda sessizce yok sayılır
      ve dosya adı/başlık bilgisi tarayıcının kendi altbilgisinden gelir. */

@@ -887,165 +887,105 @@
   }
   .report-full-preview-head h2 { margin: 6px 0 4px; font-size: 15.5px; font-weight: 600; letter-spacing: -0.02em; }
   .report-full-preview-head p { margin: 0; color: var(--soft); font-size: 13px; line-height: 1.6; }
-  .report-full-preview-body { padding: 18px; overflow: auto; max-height: 78vh; background: #eef2f6; }
+  /* TAM RAPOR önizlemesi, 'Örnek raporlar ve şablonlar' çerçevesiyle aynı dili
+     kullanır: aynı gri zemin, ortalanmış beyaz kâğıt, aynı gölge/köşe. Kâğıt
+     A4 genişliğindedir ve raporun kendi baskı dolgusu (12mm × 11mm) korunur,
+     böylece ekranda görünen sayfa yazdırılan sayfayla birebir aynıdır. */
+  .report-full-preview-body {
+    padding: 16px; overflow: auto; max-height: 78vh; background: #eef2f6;
+    scrollbar-width: thin; overscroll-behavior: contain;
+  }
+  /* Kâğıt çerçevesi, 'Örnek raporlar ve şablonlar' kâğıdı (.psych-paper) ile
+     birebir aynı ölçülerdedir: 760px genişlik, 1px #e6e8eb kenar, 2px köşe ve
+     aynı gölge. İki önizleme aynı sayfada alt alta durduğu için aynı dili
+     konuşmaları gerekir. */
   .report-full-preview-body .pr-report {
-    position: relative;
     box-sizing: border-box;
-    max-width: 760px;
-    margin: 0 auto;
-    background: var(--white);
-    color: #111827;
+    width: 100%; max-width: 760px; margin: 0 auto;
+    background: var(--white); border: 1px solid #e6e8eb; border-radius: 2px;
     box-shadow: 0 12px 32px rgba(13,13,13,.12), 0 1px 3px rgba(13,13,13,.08);
-    border: 1px solid #e6e8eb;
-    border-radius: 2px;
-    padding: 0 0 24px;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.6;
-    overflow-wrap: anywhere;
   }
-  /* Header */
-  .report-full-preview-body .pr-report .pr-head {
-    display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap;
-    border-bottom: 2px solid #111827; padding: 24px 40px 14px; margin-bottom: 18px;
+
+/* ==========================================================================
+   TAM RAPOR — ekran okunabilirlik ölçeği (yalnız ekran)
+   --------------------------------------------------------------------------
+   .pr-* tipografisi A4 kâğıda göre ayarlanmıştır (taban 10.5px); tarayıcı
+   önizlemesinde bu ölçek okunamayacak kadar küçük kalıyordu. Aşağıdaki blok
+   yalnızca EKRAN önizlemesini 10.5px → 12.5px tabanına taşır ve tüm alt
+   boyutları aynı oranla (×1.19) büyütür; böylece başlık/gövde hiyerarşisi ve
+   satır aralıkları kâğıttaki oranıyla aynı kalır.
+
+   Yazdırma/PDF çıktısı bu bloktan ETKİLENMEZ: baskı, ayrı `.print-only`
+   kopyasından üretilir (bu seçici yalnızca ekran önizleme kapsayıcısını
+   hedefler) ve tüm kurallar `@media screen` içindedir.
+   ========================================================================== */
+@media screen {
+  /* Örnek önizleme kâğıdıyla (.psych-paper) aynı belge tipografisi: Times serif
+     ailesi, daha ferah satır aralığı. Ekran önizlemesi böylece şablon
+     önizlemesiyle aynı görünür; baskı/PDF bu bloktan etkilenmez. */
+  .report-full-preview-body .pr-report {
+    font-family: "Times New Roman", Times, Georgia, serif;
+    font-size: 13.5px;
+    line-height: 1.8;
   }
-  .report-full-preview-body .pr-report .pr-head h1 {
-    margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 24px; letter-spacing: -0.03em; line-height: 1.2;
-  }
-  .report-full-preview-body .pr-report .pr-head span { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; }
-  .report-full-preview-body .pr-report .pr-head-meta { text-align: right; font-size: 11px; color: #6b7280; display: flex; flex-direction: column; gap: 3px; }
-  .report-full-preview-body .pr-report .pr-head-meta b { color: #111827; }
-  /* Revision notice */
-  .report-full-preview-body .pr-report .pr-revision {
-    margin: 0 40px 14px; padding: 10px 14px; font-size: 12px; line-height: 1.5;
-    color: #374151; background: #f9fafb; border: 1px solid #e5e7eb;
-    border-left: 3px solid #9ca3af; border-radius: 8px; overflow-wrap: anywhere;
-  }
-  /* Sections */
-  .report-full-preview-body .pr-report .pr-block { margin: 0 0 20px; padding: 0 40px; }
-  .report-full-preview-body .pr-report .pr-block.pr-avoid { break-inside: avoid; }
-  .report-full-preview-body .pr-report .pr-block h2 {
-    margin: 0 0 12px; padding: 0 0 6px 12px; font-size: 16px; font-weight: 700;
-    letter-spacing: -0.01em; color: #111827;
-    border-bottom: 1px solid #e5e7eb; border-left: 3px solid var(--accent);
-  }
-  .report-full-preview-body .pr-report .pr-block h3 {
-    margin: 14px 0 10px; font-size: 12px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280;
-  }
-  /* Client grid */
-  .report-full-preview-body .pr-report .pr-client-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 32px;
-    border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 20px;
-  }
-  .report-full-preview-body .pr-report .pr-client-grid > div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
-  .report-full-preview-body .pr-report .pr-client-grid span { color: #6b7280; font-size: 12.5px; }
-  .report-full-preview-body .pr-report .pr-client-grid b { text-align: right; font-size: 13px; color: #111827; }
-  /* Context paragraph */
-  .report-full-preview-body .pr-report .pr-context { margin: 10px 0 0; font-size: 12px; line-height: 1.6; color: #6b7280; }
-  .report-full-preview-body .pr-report p { margin: 4px 0; }
-  /* Tables */
-  .report-full-preview-body .pr-report .pr-table {
-    width: 100%; border-collapse: collapse; margin: 8px 0 12px;
-    font-variant-numeric: tabular-nums; font-size: 12px;
-  }
-  .report-full-preview-body .pr-report .pr-table thead { display: table-header-group; }
-  .report-full-preview-body .pr-report .pr-table th {
-    text-align: left; font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.07em; color: #6b7280; font-weight: 700;
-    border-bottom: 2px solid #111827; padding: 8px 10px;
-  }
-  .report-full-preview-body .pr-report .pr-table td {
-    border-bottom: 1px solid #eef2f6; padding: 8px 10px;
-    font-size: 12.5px; vertical-align: top; color: #111827;
-  }
-  .report-full-preview-body .pr-report .pr-table tbody tr:nth-child(even) { background: #f9fafb; }
-  .report-full-preview-body .pr-report .pr-table tr { break-inside: avoid; }
-  /* Notes */
-  .report-full-preview-body .pr-report .pr-note {
-    margin: 0 0 10px; padding: 10px 14px; padding-left: 16px;
-    border-left: 3px solid #d1d5db; border-radius: 0 8px 8px 0;
-    background: #f9fafb; font-size: 12.5px; line-height: 1.6;
-  }
-  .report-full-preview-body .pr-report .pr-note b { color: #111827; }
-  .report-full-preview-body .pr-report .pr-note-stack { display: flex; flex-direction: column; gap: 10px; }
-  .report-full-preview-body .pr-report .pr-note-head {
-    display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 10px;
-    margin: 0 0 4px; font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.06em; color: #6b7280;
-  }
-  .report-full-preview-body .pr-report .pr-note-name { font-weight: 700; color: #111827; font-size: 11px; }
-  .report-full-preview-body .pr-report .pr-note-t { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; font-size: 12px; }
-  .report-full-preview-body .pr-report .pr-note-band {
-    display: inline-block; padding: 2px 8px; border: 1px solid #e5e7eb;
-    border-radius: var(--radius-full); font-size: 10px; font-weight: 600; color: #6b7280;
-  }
-  .report-full-preview-body .pr-report .pr-note-body { margin: 0; font-size: 12.5px; line-height: 1.6; }
-  /* Dossiers */
-  .report-full-preview-body .pr-report .pr-dossier {
-    margin: 0 0 14px; padding: 14px 18px;
-    border: 1px solid #e5e7eb; border-radius: 10px; background: #fcfcfd;
-  }
-  .report-full-preview-body .pr-report .pr-block .pr-dossier-head {
-    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
-    margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid #eef2f6;
-    text-transform: none; letter-spacing: 0; color: #111827;
-  }
-  .report-full-preview-body .pr-report .pr-dossier-name { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
-  .report-full-preview-body .pr-report .pr-dossier-t { font-size: 13px; font-weight: 700; color: #374151; font-variant-numeric: tabular-nums; }
-  .report-full-preview-body .pr-report .pr-dossier-pill {
-    display: inline-block; padding: 2px 10px; border: 1px solid #e5e7eb;
-    border-radius: var(--radius-full); font-size: 10px; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280;
-  }
-  .report-full-preview-body .pr-report .pr-dossier-pill.is-high { color: #991b1b; border-color: #fecaca; background: #fef2f2; }
-  .report-full-preview-body .pr-report .pr-dossier-pill.is-low { color: #1e40af; border-color: #bfdbfe; background: #eff6ff; }
-  .report-full-preview-body .pr-report .pr-dossier-no { margin-left: auto; font-size: 11px; font-weight: 400; color: #6b7280; }
-  .report-full-preview-body .pr-report .pr-dossier-notes { margin: 0 0 8px; font-size: 12px; line-height: 1.6; }
-  .report-full-preview-body .pr-report .pr-dossier-notes p { margin: 0 0 4px; }
-  .report-full-preview-body .pr-report .pr-dossier-notes p:last-child { margin-bottom: 0; }
-  .report-full-preview-body .pr-report .pr-dossier-cond {
-    margin: 0 0 8px; padding: 8px 12px; padding-left: 16px;
-    border-left: 3px solid #d1d5db; font-size: 12px; line-height: 1.6;
-    background: #f9fafb; border-radius: 0 8px 8px 0;
-  }
-  .report-full-preview-body .pr-report .pr-dossier-empty { margin: 0 0 8px; font-size: 12px; color: #6b7280; font-style: italic; }
-  .report-full-preview-body .pr-report .pr-dossier-facts {
-    margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #eef2f6;
-    font-size: 11.5px; line-height: 1.6; color: #6b7280; font-variant-numeric: tabular-nums;
-  }
-  .report-full-preview-body .pr-report .pr-dossier-source { margin: 6px 0 0; font-size: 11px; color: #9ca3af; }
-  /* Chart */
-  .report-full-preview-body .pr-report .mmpi-chart-wrap { min-width: 0; }
-  .report-full-preview-body .pr-report .mmpi-chart-legend { justify-content: flex-start; gap: 14px; margin-top: 6px; padding-top: 6px; font-size: 10px; }
-  /* Signature */
-  .report-full-preview-body .pr-report .pr-sign { margin: 28px 40px 0; break-inside: avoid; }
-  .report-full-preview-body .pr-report .pr-sign div {
-    display: flex; flex-direction: column; gap: 32px;
-    border-top: 1px solid #e5e7eb; padding-top: 16px; width: 60%;
-  }
-  .report-full-preview-body .pr-report .pr-sign span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280; }
-  .report-full-preview-body .pr-report .pr-sign b { font-size: 14px; color: #111827; }
-  .report-full-preview-body .pr-report .pr-sign i { font-style: normal; font-size: 11px; color: #6b7280; }
-  /* Footer */
-  .report-full-preview-body .pr-report .pr-foot {
-    margin: 20px 40px 0; border-top: 1px solid #e5e7eb; padding-top: 14px;
-    font-size: 11px; color: #9ca3af; line-height: 1.6;
-  }
-  /* Expert notes */
-  .report-full-preview-body .pr-report .pr-notes {
-    margin: 0; padding: 12px 16px; border: 1px solid #e5e7eb;
-    border-radius: 8px; font-size: 13px; line-height: 1.6;
-    white-space: pre-wrap; background: #f9fafb;
-  }
+
+  .report-full-preview-body .pr-revision { font-size: 12px; padding: 6px 10px; }
+  .report-full-preview-body .pr-head h1 { font-size: 25px; }
+  .report-full-preview-body .pr-head span,
+  .report-full-preview-body .pr-head-meta { font-size: 11.5px; }
+  /* Künye değerleri (tarih, rapor tarihi) satır sonunda ortadan kırılırsa
+     "yazılar kaymış" görüntüsü doğar; değer tek parça kalır. */
+  .report-full-preview-body .pr-head-meta span,
+  .report-full-preview-body .pr-head-meta b { white-space: nowrap; }
+  .report-full-preview-body .pr-block h2 { font-size: 15px; padding: 0 0 5px 9px; }
+  .report-full-preview-body .pr-block h3 { font-size: 12px; }
+  .report-full-preview-body .pr-context { font-size: 11px; }
+
+  .report-full-preview-body .pr-table th { font-size: 10.5px; padding: 5px 8px; }
+  .report-full-preview-body .pr-table td { font-size: 11.5px; padding: 6px 9px; }
+
+  .report-full-preview-body .pr-note { font-size: 11.5px; padding: 10px 12px; }
+  .report-full-preview-body .pr-note-head { font-size: 10.5px; }
+  .report-full-preview-body .pr-note-band { font-size: 10px; padding: 1px 5px; }
+  .report-full-preview-body .pr-note-body { font-size: 11.5px; }
+
+  .report-full-preview-body .pr-dossier-name,
+  .report-full-preview-body .pr-dossier-t { font-size: 12px; }
+  .report-full-preview-body .pr-dossier-pill { font-size: 10px; padding: 2px 6px; }
+  .report-full-preview-body .pr-dossier-no,
+  .report-full-preview-body .pr-dossier-facts { font-size: 10.5px; }
+  .report-full-preview-body .pr-dossier-notes,
+  .report-full-preview-body .pr-dossier-cond,
+  .report-full-preview-body .pr-dossier-empty { font-size: 11px; }
+  .report-full-preview-body .pr-dossier-source { font-size: 10px; }
+
+  .report-full-preview-body .pr-report .mmpi-chart-legend { font-size: 10.5px; }
+
+  .report-full-preview-body .pr-sign span,
+  .report-full-preview-body .pr-sign i { font-size: 11px; }
+  .report-full-preview-body .pr-sign b { font-size: 13px; }
+
+  .report-full-preview-body .pr-foot { font-size: 10.5px; padding: 10px 12px; }
+
+  /* Ekranda sistem yazı tipiyle 800 ağırlık sahte kalın üretir; belge
+     hiyerarşisi 700 ile aynı kalır (kâğıt kopyası 800'de basılmaya devam eder). */
+  .report-full-preview-body .pr-block h2,
+  .report-full-preview-body .pr-dossier-name { font-weight: 700; }
+  .report-full-preview-body .pr-notes { font-size: 12px; padding: 10px 12px; }
+}
 
   /* Legacy fallbacks kept for older selectors */
   .report-sample { max-width: none; }
 
 
 
-@media screen and (max-width: 980px) {
-    .report-choice-grid, .report-split { grid-template-columns: 1fr; }
+/* Split view needs ~1180px before BOTH panes are usable: the preview pane owns a
+   fixed 760px column, so between 981px and ~1240px the editor was squeezed to
+   ~200px (unusable). Below 1240px the editor and the A4 preview therefore share a
+   single column and are switched with the tabs below — the same pattern the phone
+   layout already uses — so the editor keeps the full width instead of collapsing. */
+@media screen and (max-width: 1240px) {
+    .report-split { grid-template-columns: minmax(0, 1fr); }
     .report-mobile-tabs { display: flex; gap: 10px; margin: 16px 0; }
     .report-mobile-tabs button {
       flex: 1;
@@ -1058,6 +998,10 @@
     .report-mobile-tabs [aria-pressed='true'] { background: var(--text); color: var(--white); border-color: var(--text); }
     .show-editor .report-preview-pane, .show-preview .report-edit-pane { display: none; }
     .report-preview-pane { position: static; max-height: none; padding: 12px; }
+}
+
+@media screen and (max-width: 980px) {
+    .report-choice-grid { grid-template-columns: 1fr; }
     .psych-paper { font-size: 11pt; }
     .psych-paper .apa-level-1, .psych-paper .apa-level-2, .psych-paper .apa-paragraph, .psych-paper .psych-field, .apa-table, .apa-running-head, .psych-draft-banner, .psych-letterhead, .psych-disclaimer, .psych-signature { margin-left: 22px; margin-right: 22px; }
     .apa-title-block { padding-left: 22px; padding-right: 22px; }

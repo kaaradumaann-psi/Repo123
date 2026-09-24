@@ -158,9 +158,9 @@ export function CameraCapture({ onCapture, disabled = false }: CameraCaptureProp
       {requesting && <span className="scan-camera-wait">Kamera izni / görüntü bekleniyor…</span>}
     </div>
     <div className="scan-actions">
-      {!active && !requesting && <button type="button" className="scan-primary" onClick={() => void start()} disabled={disabled}>Kamerayı başlat</button>}
-      {(active || requesting) && <button type="button" onClick={stop}>Kamerayı durdur</button>}
-      {active && <button type="button" className="scan-primary" disabled={!ready || disabled || requesting} onClick={() => void capture()}>Sayfayı çek ve oku</button>}
+      {!active && !requesting && <button type="button" className="btn-primary" onClick={() => void start()} disabled={disabled}>Kamerayı başlat</button>}
+      {(active || requesting) && <button type="button" className="btn-secondary" onClick={stop}>Kamerayı durdur</button>}
+      {active && <button type="button" className="btn-primary" disabled={!ready || disabled || requesting} onClick={() => void capture()}>Sayfayı çek ve oku</button>}
     </div>
     {error && <p className="scan-alert" role="alert">{error}</p>}
   </section>;
