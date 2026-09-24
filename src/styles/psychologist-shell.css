@@ -1,0 +1,513 @@
+/*
+   Psychologist-site visual shell
+   ------------------------------
+   The public psychologist site uses a quiet paper-white canvas, near-black
+   ink, hairline borders, pill controls and a small amount of Apple blue.
+   This layer applies that same language to the authenticated workspace without
+   changing routes, state, event handlers or any of the printable form rules.
+
+   Desktop intentionally turns the existing workspace header into a left rail.
+   The same buttons remain in the DOM, so keyboard navigation and every route
+   keep their existing behaviour. At 900px and below the existing mobile
+   navigation/overlay remains the source of truth.
+*/
+
+@media screen {
+  /* ========================================================================
+     Auth / sign-in — the same light editorial surface as the psychologist site
+     ======================================================================== */
+  .auth-page {
+    background: var(--bg-soft);
+    color: var(--text);
+  }
+
+  .auth-shell {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(10, 132, 255, 0.045), transparent 34%),
+      var(--bg-soft);
+    padding: clamp(28px, 7vh, 76px) 20px;
+  }
+
+  .auth-card-wrapper {
+    max-width: 424px;
+  }
+
+  .auth-card {
+    padding: 34px 34px 28px;
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 14px 38px rgba(13, 13, 13, 0.055);
+  }
+
+  .auth-brand {
+    gap: 11px;
+    margin-bottom: 32px;
+  }
+
+  .auth-brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--text);
+    color: var(--white);
+    box-shadow: none;
+  }
+
+  .auth-brand strong {
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .auth-brand small {
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+
+  .auth-heading {
+    margin-bottom: 26px;
+  }
+
+  .auth-heading h1 {
+    margin: 8px 0 8px;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: clamp(29px, 5vw, 35px);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .auth-heading p {
+    color: var(--soft);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  .auth-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 7px;
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .auth-eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .auth-form {
+    gap: 17px;
+  }
+
+  .form-group {
+    gap: 7px;
+  }
+
+  .form-group label {
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .form-group input,
+  .form-group select {
+    height: 46px;
+    padding: 9px 13px;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--text);
+    box-shadow: none;
+    font-size: 14px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .form-group input::placeholder {
+    color: #b1b1b5;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--text);
+    box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.07);
+  }
+
+  .auth-submit-btn {
+    min-height: 46px;
+    height: 46px;
+    margin-top: 7px;
+    padding: 11px 18px;
+    border-radius: var(--radius-full);
+    background: var(--text);
+    border: 1px solid var(--text);
+    box-shadow: none;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .auth-submit-btn:hover:not(:disabled) {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    box-shadow: none;
+    transform: translateY(-1px);
+  }
+
+  .auth-footer-help {
+    margin-top: 26px;
+    padding-top: 17px;
+    border-top: 1px solid var(--hairline);
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.6;
+  }
+
+  .auth-footer-help svg {
+    color: var(--soft);
+  }
+
+  .status-banner.error-banner,
+  .status-banner.info-banner {
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .auth-site-return {
+    color: var(--accent-ink, var(--soft));
+    border-color: var(--hairline);
+    border-radius: var(--radius-full);
+    background: var(--white);
+  }
+
+  .auth-site-return:hover {
+    border-color: var(--text);
+    background: var(--white);
+  }
+
+  .auth-card.auth-loading {
+    min-height: 172px;
+    color: var(--soft);
+    box-shadow: 0 14px 38px rgba(13, 13, 13, 0.055);
+  }
+
+  /* ========================================================================
+     Authenticated app — fixed left rail, inspired by the site's minimal nav
+     ======================================================================== */
+  @media (min-width: 901px) {
+    .portal-layout {
+      background: var(--bg-soft);
+    }
+
+    .app-header {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 40;
+      width: 248px;
+      height: 100vh;
+      height: 100dvh;
+      padding: 0;
+      overflow: hidden;
+      background: var(--white);
+      border-right: 1px solid var(--hairline);
+      border-bottom: 0;
+      box-shadow: none;
+    }
+
+    .header-inner {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      min-height: 0;
+      padding: 26px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline) transparent;
+    }
+
+    .header-left {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 34px;
+    }
+
+    .brand {
+      gap: 10px;
+      padding: 0 8px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      flex: none;
+      border-radius: 10px;
+      background: var(--text);
+      color: var(--white);
+      box-shadow: none;
+    }
+
+    .brand-mark svg {
+      width: 23px;
+      height: 23px;
+    }
+
+    .brand-title {
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 9.5px;
+      letter-spacing: 0.09em;
+    }
+
+    .workspace-tabs {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 3px;
+      width: 100%;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .workspace-tabs::before {
+      content: 'Çalışma alanı';
+      display: block;
+      margin: 0 10px 10px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.11em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .portal-tab {
+      width: 100%;
+      min-height: 42px;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--soft);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      text-align: left;
+    }
+
+    .portal-tab svg {
+      flex: none;
+      color: var(--muted);
+    }
+
+    .portal-tab:hover {
+      color: var(--text);
+      background: var(--bg-soft);
+    }
+
+    .portal-tab:hover svg {
+      color: var(--text);
+    }
+
+    .portal-tab.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--white);
+      font-weight: 500;
+      box-shadow: none;
+    }
+
+    .portal-tab.active svg {
+      color: var(--white);
+    }
+
+    .header-user {
+      width: 100%;
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 11px;
+    }
+
+    .home-site-link {
+      width: 100%;
+      justify-content: flex-start;
+      gap: 7px;
+      padding: 8px 10px;
+      color: var(--soft);
+      background: var(--white);
+      border: 1px solid var(--hairline);
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .home-site-link span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-profile-summary {
+      gap: 9px;
+      padding: 1px 8px;
+    }
+
+    .user-avatar-circle {
+      width: 34px;
+      height: 34px;
+      flex: none;
+      background: var(--bg-soft);
+      border: 1px solid var(--hairline);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .user-info-text {
+      min-width: 0;
+    }
+
+    .user-full-name {
+      overflow: hidden;
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-role-badge {
+      color: var(--accent-ink);
+      font-size: 9.5px;
+      letter-spacing: 0.1em;
+    }
+
+    .badge-admin {
+      color: var(--text);
+    }
+
+    .btn-logout {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 12px;
+      color: var(--soft);
+      background: var(--white);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .btn-logout:hover {
+      color: var(--danger);
+      background: var(--danger-tint);
+      border-color: var(--danger-border);
+    }
+
+    .app-main {
+      width: auto;
+      max-width: none;
+      min-height: calc(100vh - 1px);
+      min-height: calc(100dvh - 1px);
+      margin: 0 0 0 248px;
+      padding: 44px clamp(28px, 4vw, 64px) 64px;
+    }
+
+    .connectivity-banner {
+      width: auto;
+      max-width: none;
+      margin: 12px 28px 0 276px;
+    }
+
+    .portal-layout > .site-footer {
+      margin-left: 248px;
+    }
+
+    .portal-layout > .site-footer .site-footer-inner,
+    .portal-layout > .site-footer .site-footer-legal-inner {
+      max-width: none;
+    }
+  }
+
+  /* ========================================================================
+     Shared component polish — surfaces follow the reference site's hairlines
+     ======================================================================== */
+  .card-elevated,
+  .modern-table-card,
+  .preview-panel,
+  .form-sidebar-panel > *,
+  .metric-box,
+  .hero-account-badge,
+  .modal-container {
+    box-shadow: none;
+  }
+
+  .card-elevated,
+  .modern-table-card,
+  .metric-box,
+  .preview-panel,
+  .modal-container {
+    border-color: var(--hairline);
+  }
+
+  .dashboard-card-value,
+  .metric-value {
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .section-heading,
+  .inspection-title,
+  .guide-title {
+    color: var(--text);
+  }
+}
+
+@media screen and (max-width: 900px) {
+  /* Keep the same editorial auth screen on phones without altering the existing
+     full-screen mobile workspace menu. */
+  .auth-shell {
+    padding: 24px 16px;
+  }
+
+  .auth-card {
+    padding: 28px 22px 24px;
+    border-radius: 14px;
+  }
+
+  .auth-brand {
+    margin-bottom: 27px;
+  }
+}
