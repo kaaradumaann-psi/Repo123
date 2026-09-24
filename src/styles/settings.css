@@ -18,11 +18,55 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-width: 0;
   }
 
+  /* psikolog clinical.css ile aynı başlık ölçüleri (coherence katmanı renkleri
+     zaten --text/--soft/--accent-ink olarak verir). */
   .settings-page .clinical-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
     margin-bottom: 0;
-    align-items: flex-end;
+  }
+
+  .settings-page .clinical-title-wrap {
+    min-width: 0;
+  }
+
+  .settings-page .clinical-title-wrap h1 {
+    margin: 4px 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.5vw, 32px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .settings-page .clinical-title-wrap p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--soft);
+  }
+
+  .settings-page .clinical-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--soft);
+  }
+
+  .settings-page .clinical-kicker-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text);
   }
 
   .settings-page .clinical-actions {
@@ -172,49 +216,12 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Bulut · Psikolog hesabı                                            */
+  /*  Bulut durumu                                                       */
   /* ------------------------------------------------------------------ */
 
   .settings-page .settings-cloud {
     display: grid;
-    gap: 10px;
-  }
-
-  .settings-page .settings-accounts {
-    display: grid;
-    gap: 10px;
-    margin-top: 6px;
-    padding-top: 14px;
-    border-top: 1px solid var(--hairline);
-  }
-
-  .settings-page .settings-accounts > p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--soft);
-  }
-
-  .settings-page .settings-account-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-items: end;
-  }
-
-  .settings-page .settings-account-form .form-group:last-of-type {
-    grid-column: span 1;
-  }
-
-  .settings-page .settings-account-form button[type='submit'] {
-    justify-self: start;
-  }
-
-  .settings-page .settings-account-list {
-    margin: 0;
-    padding-left: 18px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text);
+    gap: 8px;
   }
 
   /* ------------------------------------------------------------------ */
@@ -226,17 +233,16 @@
     gap: 10px;
   }
 
-  .settings-page .settings-audit .client-table-wrap {
-    box-shadow: none;
-    border-radius: var(--radius-md);
+  .settings-page .settings-audit .table-responsive {
+    overflow-x: auto;
   }
 
-  .settings-page .settings-audit .client-table {
+  .settings-page .settings-audit .modern-data-table {
     width: 100%;
     font-size: 13px;
   }
 
-  .settings-page .settings-audit .client-table th {
+  .settings-page .settings-audit .modern-data-table th {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -244,9 +250,10 @@
     color: var(--soft);
   }
 
-  .settings-page .settings-audit .client-table td {
+  .settings-page .settings-audit .modern-data-table td {
     vertical-align: top;
     line-height: 1.5;
+    overflow-wrap: anywhere;
   }
 
   /* ------------------------------------------------------------------ */
@@ -348,9 +355,48 @@
   /* ------------------------------------------------------------------ */
 
   @media (max-width: 720px) {
-    .settings-page .form-row-2,
-    .settings-page .settings-account-form {
+    .settings-page .form-row-2 {
       grid-template-columns: 1fr;
+    }
+
+    /* Telefonda kart iç boşluğu: 18px + 12px çerçeve boşluğu satırı daraltmasın. */
+    .settings-page .modern-table-card,
+    .backup-block {
+      padding: 14px;
+    }
+
+    /* iOS Safari odak yakınlaşmasını önleyen taban: responsive.css kuralını
+       gölgelememek için alanlar telefonda 16px'e çıkar. */
+    .settings-page .form-group input,
+    .settings-page .form-group select,
+    .settings-page .form-group textarea {
+      font-size: 16px;
+    }
+
+    .settings-page .clinical-actions {
+      width: 100%;
+    }
+
+    .settings-page .clinical-actions > * {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+
+    .settings-page .settings-asset {
+      flex-wrap: wrap;
+    }
+
+    /* data-mobile-cards kartları: psikolog yüzeyiyle aynı düz kenarlık. */
+    .settings-page .settings-audit .modern-data-table[data-mobile-cards] tbody tr {
+      border-radius: var(--radius-md);
+    }
+
+    .settings-page .settings-audit .modern-data-table[data-mobile-cards] td {
+      font-size: 13px;
+    }
+
+    .settings-page .settings-asset img {
+      max-width: 100%;
     }
 
     .settings-page .settings-form-actions {

@@ -91,13 +91,12 @@ test('rol etiketi "Psikolog"; "Uzman Psikolog" ifadesi kaynakta kalmaz', () => {
   }
 });
 
-test('yan gezinme kartı yalnızca Ayarlar ve (psikologda) kayıt bağlantısını taşır', () => {
+test('yan gezinme kartında yalnızca "Ayarları aç" eylemi kalır', () => {
   const app = flat('src/App.tsx');
   assert.ok(app.includes('<a href="/ayarlar">Ayarları aç'), '"Ayarları aç" bağlantısı bulunmalı');
-  assert.ok(app.includes('{!canAdmin && <a href="/kayitlar">Kayıtları aç'), 'psikologda "Kayıtları aç" kalmalı');
+  assert.ok(!app.includes('Kayıtları aç'), 'kayıt bağlantısı kaldırılmalı');
   assert.ok(!app.includes('Yönetimi aç'), 'yönetici satırındaki "Yönetimi aç" kaldırılmalı');
-  const css = read('src/styles/workspace.css');
-  assert.match(css, /\.sidebar-privacy a \+ a/, 'iki bağlantı yan yana okunabilir aralıkla durmalı');
+  assert.equal((app.match(/className="sidebar-privacy"/g) ?? []).length, 1, 'kart tek kez basılmalı');
 });
 
 test('taslak kartı doğrudan düzenlemeye gider (?taslak=devam)', () => {
@@ -161,26 +160,21 @@ test('Bulut bölümü istenen metni birebir taşır', () => {
     page.includes('Supabase bağlı. Kurum verisi RLS ile ayrılır. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır.'),
     'Bulut açıklaması birebir yazılmalı',
   );
-  assert.match(read('src/settings/SettingsPage.tsx'), /canAdmin && supabaseConfig\.configured && <CloudAccountsPanel \/>/,
-    'hesap yönetimi yalnızca yöneticiye ve bağlı Supabase ile görünmeli');
+  assert.match(read('src/settings/SettingsPage.tsx'), /const \[backupOpen, setBackupOpen\]/,
+    'yedekleme penceresi bu ekrandan açılmalı');
 });
 
-test('"Psikolog hesabı" bloğu halka açık kaydın kapalı olduğunu söyler ve formu taşır', () => {
-  const panel = flat('src/settings/CloudAccountsPanel.tsx');
-  assert.ok(
-    panel.includes('Halka açık kayıt kapalıdır. Hesap yalnızca bu yönetim formundan, Edge Function ile açılır.'),
-    'hesap bloğu açıklaması birebir olmalı',
-  );
-  for (const label of ['Ad', 'Soyad', 'E-posta', 'Geçici parola']) {
-    assert.ok(panel.includes(label), `"${label}" alanı bulunmalı`);
-  }
-  assert.ok(panel.includes('Hesap oluştur'), '"Hesap oluştur" düğmesi bulunmalı');
-  assert.match(panel, /createPsychologist\(/, 'hesap açma Edge Function istemcisinden geçmeli');
-  // psikolog reposundaki gibi düz satır listesi: Ad Soyad · e-posta · ROL · aktif
-  assert.match(panel, /<ul className="settings-account-list">/, 'hesap listesi düz liste olmalı');
-  assert.match(panel, /profile\.role\} ·\{' '\}/, 'rol ham hâliyle (ADMIN/PSYCHOLOG) yazılmalı');
-  assert.ok(panel.includes("profile.active ? 'aktif' : 'pasif'"), 'durum aktif/pasif olarak yazılmalı');
-  assert.ok(!/settings-table|Yönetim paneli/.test(panel), 'tablo ve yönetim paneli düğmesi kaldırılmalı');
+test('Ayarlar hesap açma formu taşımaz; hesap işlemleri Yönetim panelindedir', () => {
+  const page = flat('src/settings/SettingsPage.tsx');
+  assert.ok(!/Hesap oluştur|Geçici parola|<h3>Psikolog hesabı/.test(page),
+    'Ayarlar ekranında hesap açma bölümü kalmamalı');
+  assert.ok(!/CloudAccountsPanel/.test(page), 'hesap paneli bağlanmamalı');
+  assert.ok(page.includes('Psikolog hesabı açma, rol verme ve hesabı kapatma <strong>Yönetim</strong> panelindedir.'),
+    'hesap işlemleri için Yönetim paneline yönlendirme olmalı');
+  assert.match(page, /Supabase bağlı\. Kurum verisi RLS ile ayrılır\. Yerel dosya yine bu cihazda kalır; bulut danışmanları|Supabase bağlı\. Kurum verisi RLS ile ayrılır\. Yerel dosya yine bu cihazda kalır; bulut danışanları ayrı şemadadır\./,
+    'Bulut durum metni korunmalı');
+  assert.equal(existsSync('src/settings/CloudAccountsPanel.tsx'), false, 'hesap paneli dosyası silinmiş olmalı');
+  assert.equal(existsSync('src/settings/cloudAccounts.ts'), false, 'profil listesi modülü silinmiş olmalı');
 });
 
 /* ------------------------------------------------------------------ */
@@ -400,7 +394,7 @@ test('settings.css ekran katmanıdır: !important yok, yazdırma hattına dokunm
   assert.ok(!/@media\s+print/.test(css), 'settings.css yazdırma hattına dokunmamalı');
   assert.match(css, /@media screen \{/, 'kurallar ekran medya sorgusu içinde olmalı');
   assert.ok(!/^\s*\.form-group/m.test(css), 'form kuralları .settings-page altında kapsanmalı');
-  for (const selector of ['.settings-page', '.settings-form', '.form-row-2', '.settings-accounts', '.settings-audit', '.backup-dialog']) {
+  for (const selector of ['.settings-page', '.settings-form', '.form-row-2', '.settings-cloud', '.settings-audit', '.backup-dialog']) {
     assert.ok(css.includes(selector), `${selector} kuralı bulunmalı`);
   }
 });
@@ -419,16 +413,40 @@ test('gezinme ikonu, ayarlar bileşenleri ve denetim sayfası depoda', () => {
   assert.match(icon, /settings: 'M[\d.\sA-Za-z-]+'/, 'settings ikon yolu tanımlı olmalı');
   for (const file of [
     'src/settings/SettingsPage.tsx',
-    'src/settings/CloudAccountsPanel.tsx',
     'src/settings/BackupDialog.tsx',
     'src/settings/AuditPage.tsx',
     'src/settings/auditTrail.ts',
     'src/settings/serverAudit.ts',
     'src/settings/backup.ts',
     'src/settings/backupRestore.ts',
-    'src/settings/cloudAccounts.ts',
     'src/styles/settings.css',
   ]) {
     assert.equal(existsSync(file), true, `${file} bulunmalı`);
   }
+});
+
+test('Ayarlar ve Denetim ekranları telefonda okunur kalır (≤720px sözleşmesi)', () => {
+  const css = read('src/styles/settings.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const mobile = /@media \(max-width: 720px\) \{([\s\S]*)\n  \}/.exec(css);
+  assert.ok(mobile, 'settings.css mobil katmanı bulunmalı');
+  const block = mobile![1]!;
+  assert.match(block, /\.settings-page \.form-row-2 \{[^}]*grid-template-columns: 1fr/,
+    'iki kolonlu form satırları telefonda tek kolona inmeli');
+  assert.match(block, /\.settings-page \.form-group input[\s\S]{0,200}font-size: 16px/,
+    'form alanları telefonda 16px olmalı (iOS odak yakınlaşması olmasın)');
+  assert.match(block, /\.backup-block \{[^}]*flex-direction: column/,
+    'yedekleme satırları telefonda alt alta inmeli');
+  assert.match(block, /\.settings-page \.clinical-actions[\s\S]{0,200}width: 100%/,
+    'başlık eylemleri telefonda tam satır olmalı');
+
+  const audit = read('src/settings/AuditPage.tsx');
+  assert.equal((audit.match(/<table className="modern-data-table" data-mobile-cards>/g) ?? []).length, 2,
+    'her iki denetim tablosu telefonda karta dönüşmeli (data-mobile-cards)');
+  assert.equal((audit.match(/className="table-responsive"/g) ?? []).length, 2,
+    'tablolar yatay kaydırma kabında olmalı');
+  assert.ok(!/className="client-table"/.test(audit), 'kart görünümü desteklemeyen eski tablo sınıfı kalmamalı');
+  assert.equal((audit.match(/data-label="Zaman"/g) ?? []).length, 2, 'her hücre etiketi taşımalı');
+
+  const settings = read('src/settings/SettingsPage.tsx');
+  assert.match(settings, /className="clinical-container settings-page"/, 'sayfa kabuğu tek sarmalayıcı olmalı');
 });

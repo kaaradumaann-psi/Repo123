@@ -10,7 +10,6 @@ import { safeReportImage } from '../reports/ReportPreview';
 import { navigate } from '../router';
 import { recordDeviceAudit } from './auditTrail';
 import { BackupDialog } from './BackupDialog';
-import { CloudAccountsPanel } from './CloudAccountsPanel';
 
 /**
  * Logo ve imza sınırı: yalnızca PNG/JPEG/WebP ve tek bir boyut sınırı.
@@ -47,7 +46,6 @@ function readAsset(file: File, onDone: (dataUrl: string) => void, onError: (mess
  * eylemleri, altta Bulut bölümü. Yeni raporlar buradaki uzman adını kullanır.
  */
 export function SettingsPage({ user }: { user: AuthenticatedUser }) {
-  const canAdmin = user.role === 'ADMIN';
   const [letterhead, setLetterhead] = useState<Letterhead>(EMPTY_LETTERHEAD);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -290,7 +288,10 @@ export function SettingsPage({ user }: { user: AuthenticatedUser }) {
             <code>.env</code> dosyasına yalnızca anon anahtar yazılır; hizmet rolü anahtarı tarayıcıya girmez.
           </p>
         )}
-        {canAdmin && supabaseConfig.configured && <CloudAccountsPanel />}
+        <p className="settings-note">
+          Psikolog hesabı açma, rol verme ve hesabı kapatma <strong>Yönetim</strong> panelindedir.
+        </p>
+        {/* Hesap açma/kapatma Yönetim panelindedir; burada yalnızca durum bilgisi verilir. */}
       </section>
 
       {backupOpen && <BackupDialog user={user} onClose={() => setBackupOpen(false)} />}

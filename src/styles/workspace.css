@@ -3916,8 +3916,6 @@
   .sidebar-privacy p { margin: 5px 0 12px; font-size: 11px; line-height: 1.55; color: var(--soft); }
   .sidebar-privacy a { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: 11px; font-weight: 700; }
   .sidebar-privacy a:hover { text-decoration: underline; text-underline-offset: 3px; }
-  /* "Kayıtları aç" / "Ayarları aç": SPA bağlantıları (link interceptor). */
-  .sidebar-privacy a + a { margin-left: 10px; }
   .sidebar-version { display: block; font-size: 9px; letter-spacing: .09em; }
 
   .workspace-content { min-width: 0; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }

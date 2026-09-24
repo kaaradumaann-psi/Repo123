@@ -235,8 +235,7 @@ function SignedInApp({ user, onLogout, flowOrigin }: SignedInAppProps) {
             <span className="sidebar-privacy-icon"><Icon name="shield" size={18} /></span>
             <strong>Bulut hesabı açık</strong>
             <p>Kayıtlar bulutta tutulur; taslak ve çevrimdışı kuyruk bu tarayıcıda saklanır.</p>
-            {/* Yönetici satırı yok: panodaki "Yönetim" sekmesi zaten erişilebilir. */}
-            {!canAdmin && <a href="/kayitlar">Kayıtları aç <Icon name="arrowRight" size={14} /></a>}
+            {/* Tek eylem: Ayarlar. Kayıt/yönetim bağlantıları yan gezinmede zaten var. */}
             <a href="/ayarlar">Ayarları aç <Icon name="arrowRight" size={14} /></a>
           </div>
           <span className="sidebar-version">MMPI-566 · UZMAN ÇALIŞMA ALANI</span>

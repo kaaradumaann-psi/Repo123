@@ -87,8 +87,9 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
           ) : serverEvents.length === 0 ? (
             <p className="settings-note">Kayıt yok. Test kaydı eklenip güncellendikçe burası dolar.</p>
           ) : (
-            <div className="client-table-wrap">
-              <table className="client-table">
+            /* Telefonda kart görünümü: repo standardı data-mobile-cards. */
+            <div className="table-responsive">
+              <table className="modern-data-table" data-mobile-cards>
                 <thead>
                   <tr>
                     <th>Zaman</th>
@@ -101,11 +102,11 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
                 <tbody>
                   {serverEvents.map(event => (
                     <tr key={event.id}>
-                      <td>{formatDeviceAuditTime(event.createdAt)}</td>
-                      <td>{event.actionLabel}</td>
-                      <td>{event.targetLabel}</td>
-                      <td className="mono-sub">{shortEntityId(event.targetId ?? '')}</td>
-                      <td>{event.actorName}</td>
+                      <td data-label="Zaman">{formatDeviceAuditTime(event.createdAt)}</td>
+                      <td data-label="İşlem">{event.actionLabel}</td>
+                      <td data-label="Varlık">{event.targetLabel}</td>
+                      <td data-label="Kayıt" className="mono-sub">{shortEntityId(event.targetId ?? '')}</td>
+                      <td data-label="Aktör">{event.actorName}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -127,8 +128,8 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
             <p>Kaydetme ve silme işlemleri burada görünür.</p>
           </div>
         ) : (
-          <div className="client-table-wrap">
-            <table className="client-table">
+          <div className="table-responsive">
+            <table className="modern-data-table" data-mobile-cards>
               <thead>
                 <tr>
                   <th>Zaman</th>
@@ -141,11 +142,11 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
               <tbody>
                 {deviceEvents.map(event => (
                   <tr key={event.id}>
-                    <td>{formatDeviceAuditTime(event.at)}</td>
-                    <td>{deviceAuditActionLabel(event.action)}</td>
-                    <td>{deviceAuditEntityLabel(event.entity)}</td>
-                    <td className="mono-sub">{shortEntityId(event.entityId)}</td>
-                    <td>{event.summary}</td>
+                    <td data-label="Zaman">{formatDeviceAuditTime(event.at)}</td>
+                    <td data-label="İşlem">{deviceAuditActionLabel(event.action)}</td>
+                    <td data-label="Varlık">{deviceAuditEntityLabel(event.entity)}</td>
+                    <td data-label="Kayıt" className="mono-sub">{shortEntityId(event.entityId)}</td>
+                    <td data-label="Özet">{event.summary}</td>
                   </tr>
                 ))}
               </tbody>
