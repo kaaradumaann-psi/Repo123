@@ -27,7 +27,7 @@ import pymupdf
 from rapidocr_onnxruntime import RapidOCR
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PDF = os.path.join(REPO, "docs", "MMPI Kitap (1) (1).pdf")
+PDF = os.path.join(REPO, "docs", "sources", "mmpi-kitap.pdf")
 OUT = os.path.join(REPO, ".audit", "items")
 
 # Ek 1: kitap s.215-233 → leaf = s+15

@@ -242,7 +242,7 @@ Evidence:
 - `src/components/SourcesPage.tsx:564` kullanıcıya gösterilen metinde dosya adını verir.
 
 Current state:
-`ls docs/` → yalnızca `MMPI Kitap (1) (1).pdf`. Dosya **mevcut değil**.
+`ls docs/` → yalnızca `MMPI Kitap (1) (1).pdf` (o tarihteki ad; şimdi `docs/sources/mmpi-kitap.pdf`). Dosya **mevcut değil**.
 
 Problem:
 Kaynakça sayfası, kullanıcıya "künye–bileşen eşleştirme tabloları depoda

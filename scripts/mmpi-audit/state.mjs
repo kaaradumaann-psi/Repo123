@@ -102,7 +102,7 @@ export function measureSource(rootDir = REPO_ROOT) {
     sourceIndexPresent: fs.existsSync(path.join(rootDir, 'docs/mmpi-audit/SOURCE_INDEX.md')),
     sourceFactsPresent: fs.existsSync(path.join(rootDir, 'docs/mmpi-audit/SOURCE_FACTS.md')),
     kaynakDenetimiPresent: fs.existsSync(path.join(rootDir, 'docs/kaynak-denetimi.md')),
-    sourcePdfPresent: fs.existsSync(path.join(rootDir, 'docs/MMPI Kitap (1) (1).pdf')),
+    sourcePdfPresent: fs.existsSync(path.join(rootDir, 'docs/sources/mmpi-kitap.pdf')),
   };
 }
 
@@ -393,7 +393,7 @@ Regenerate with the audit state command.
 | \`SOURCE_INDEX.md\` | \`${state.source.sourceIndexPresent ? 'Present' : 'Missing'}\` | Verified |
 | \`SOURCE_FACTS.md\` | \`${state.source.sourceFactsPresent ? 'Present' : 'Missing'}\` | Verified |
 | \`docs/kaynak-denetimi.md\` | \`${state.source.kaynakDenetimiPresent ? 'Present' : 'Missing'}\` | Verified |
-| Source PDF (\`docs/MMPI Kitap (1) (1).pdf\`) | \`${state.source.sourcePdfPresent ? 'Present' : 'Missing'}\` | Verified |
+| Source PDF (\`docs/sources/mmpi-kitap.pdf\`) | \`${state.source.sourcePdfPresent ? 'Present' : 'Missing'}\` | Verified |
 
 ---
 

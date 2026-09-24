@@ -56,7 +56,7 @@ Regenerate with the audit state command.
 | `SOURCE_INDEX.md` | `Present` | Verified |
 | `SOURCE_FACTS.md` | `Present` | Verified |
 | `docs/kaynak-denetimi.md` | `Present` | Verified |
-| Source PDF (`docs/MMPI Kitap (1) (1).pdf`) | `Present` | Verified |
+| Source PDF (`docs/sources/mmpi-kitap.pdf`) | `Present` | Verified |
 
 ---
 

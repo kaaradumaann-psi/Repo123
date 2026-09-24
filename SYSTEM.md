@@ -634,7 +634,7 @@ Checklist'teki `[ ]` maddeler, yerel testlerin başarısız olduğu anlamına ge
 
 - `src/components/FormPage.tsx` test/rendering twin olarak `formIdentity.test.ts` ve `printLayout.test.ts` tarafından kullanıldığı için korunur.
 - `FormKit`, `FormPage`, standalone `optik-form.html` ve gömülü doğrulanmış PDF farklı roller taşır (runtime, geometri testi, çevrimdışı teslim).
-- Ad-hoc `scripts/validation/`, `docs/TestGorselleri/` ve tarihsel kök raporlar teslimden çıkarıldı. Kaynak denetimi `docs/kaynak-denetimi.md` korunur.
+- Ad-hoc `scripts/validation/` ve `docs/TestGorselleri/` teslimden çıkarıldı. Tarihsel faz raporları `docs/reports/` altındadır. Kökte yalnızca giriş, yapılandırma ve izlenen teslim dosyaları durur (`README.md`, `SYSTEM.md`, `TROUBLESHOOTING.md`, `optik-form.html`, `MMPI-566-optik-cevap-formu.pdf`). Kaynak PDF’leri `docs/sources/`, denetim kaydı `docs/mmpi-audit/` ve `docs/kaynak-denetimi.md` altındadır.
 - Supabase migration, fixture ve config dosyaları “import grep” ile dead kabul edilmez.
 
 ## 14. Üretim senkronizasyonu
