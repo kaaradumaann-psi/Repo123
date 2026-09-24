@@ -29,7 +29,8 @@ export type IconName =
   | 'layers'
   | 'edit'
   | 'chevronDown'
-  | 'chevronUp';
+  | 'chevronUp'
+  | 'menu';
 
 const paths: Record<IconName, string> = {
   print: 'M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01',
@@ -58,6 +59,7 @@ const paths: Record<IconName, string> = {
   edit: 'M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z',
   chevronDown: 'm6 9 6 6 6-6',
   chevronUp: 'm18 15-6-6-6 6',
+  menu: 'M4 7h16M4 12h16M4 17h16',
   external: 'M7 17 17 7M9 7h8v8',
   pulse: 'M22 12h-4l-3 9L9 3l-3 9H2',
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',

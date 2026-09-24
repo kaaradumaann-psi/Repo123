@@ -693,7 +693,7 @@ function ScannerSession({
         return (
           <div className="status-banner warning-banner auto-resolve-banner" role="region" aria-label="İnceleme bekleyen cevaplar">
             <Icon name="alert" size={18} />
-            <div className="auto-resolve-body" style={{ flex: 1 }}>
+            <div className="auto-resolve-body">
               <strong>{unresolved.length} cevap inceleme bekliyor.</strong>
               <span>
                 {' '}Herbirini tek tek inceleyebilir ya da otomatik çözebilirsiniz: tek işaret görülen maddeler

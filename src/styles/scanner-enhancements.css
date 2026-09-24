@@ -312,6 +312,9 @@
 }
 .auto-resolve-body {
   min-width: 0;
+  /* Inline flex:1 (eski hâli) dar ekranda metni 85px'e sıkıştırıp taşıyordu;
+     240px taban, satır daraldığında gövdeyi kendi satırına sarar. */
+  flex: 1 1 240px;
   font-size: 13px;
   line-height: 1.55;
 }

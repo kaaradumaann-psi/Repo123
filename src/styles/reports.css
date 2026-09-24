@@ -497,11 +497,21 @@
     border: 1px solid var(--hairline);
     border-radius: var(--radius-lg);
     padding: 18px;
-    overflow: auto;
+    /* Kâğıdın kendi kaydırıcısı var (.report-preview-paper); pano yalnızca
+       çerçevedir — çift kaydırma çubuğu üretmemek için overflow bırakılır. */
+    overflow: visible;
     min-width: 0;
-    max-height: calc(100vh - 96px);
     position: sticky;
     top: 16px;
+  }
+
+  /* PaperViewport çerçevesi: kâğıdı taşıyan tek kaydırıcı. */
+  .report-preview-paper {
+    overflow: auto;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+    max-height: calc(100vh - 160px);
+    max-height: calc(100dvh - 160px);
   }
   .report-preview-label {
     display: flex;
@@ -997,44 +1007,14 @@
     }
     .report-mobile-tabs [aria-pressed='true'] { background: var(--text); color: var(--white); border-color: var(--text); }
     .show-editor .report-preview-pane, .show-preview .report-edit-pane { display: none; }
-    .report-preview-pane { position: static; max-height: none; padding: 12px; }
+    .report-preview-pane { position: static; padding: 12px; }
+    .report-preview-paper { max-height: 76vh; max-height: 76dvh; }
 }
 
 @media screen and (max-width: 980px) {
     .report-choice-grid { grid-template-columns: 1fr; }
-    .psych-paper { font-size: 11pt; }
-    .psych-paper .apa-level-1, .psych-paper .apa-level-2, .psych-paper .apa-paragraph, .psych-paper .psych-field, .apa-table, .apa-running-head, .psych-draft-banner, .psych-letterhead, .psych-disclaimer, .psych-signature { margin-left: 22px; margin-right: 22px; }
-    .apa-title-block { padding-left: 22px; padding-right: 22px; }
-    .apa-cover-title { font-size: 18pt; }
-    .psych-draft-watermark { font-size: 84px; }
-    .psych-field-label { flex-basis: 128px; max-width: 128px; }
     .report-settings-grid { grid-template-columns: 1fr; }
-    /* Tam rapor — responsive */
-    .report-full-preview-body .pr-report .pr-block { padding: 0 20px; }
-    .report-full-preview-body .pr-report .pr-head { padding: 18px 20px 12px; }
-    .report-full-preview-body .pr-report .pr-sign { margin-left: 20px; margin-right: 20px; }
-    .report-full-preview-body .pr-report .pr-foot { margin-left: 20px; margin-right: 20px; }
-    .report-full-preview-body .pr-report .pr-revision { margin-left: 20px; margin-right: 20px; }
-    .report-full-preview-body .pr-report .pr-client-grid { grid-template-columns: 1fr; gap: 4px; }
-    .report-full-preview-body .pr-report .pr-table { font-size: 11px; }
-    .report-full-preview-body .pr-report .pr-table th { font-size: 9px; }
-    .report-full-preview-body .pr-report .pr-table td { font-size: 11px; padding: 6px 8px; }
   }
-}
-@media screen and (max-width: 560px) {
-    .report-full-preview-body .pr-report { font-size: 12px; }
-    .report-full-preview-body .pr-report .pr-head h1 { font-size: 18px; }
-    .report-full-preview-body .pr-report .pr-block { padding: 0 14px; }
-    .report-full-preview-body .pr-report .pr-head { padding: 14px 14px 10px; }
-    .report-full-preview-body .pr-report .pr-sign { margin-left: 14px; margin-right: 14px; }
-    .report-full-preview-body .pr-report .pr-foot { margin-left: 14px; margin-right: 14px; }
-    .report-full-preview-body .pr-report .pr-revision { margin-left: 14px; margin-right: 14px; }
-    .report-full-preview-body .pr-report .pr-block h2 { font-size: 14px; }
-    .report-full-preview-body .pr-report .pr-note { font-size: 11.5px; padding: 8px 10px; }
-    .report-full-preview-body .pr-report .pr-dossier { padding: 10px 12px; }
-    .report-full-preview-body .pr-report .pr-dossier-name { font-size: 12px; }
-    .report-full-preview-body .pr-report .pr-sign div { width: 100%; }
-    .report-full-preview-body { padding: 10px; }
 }
 
 @page psych-report {

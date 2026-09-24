@@ -482,7 +482,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           {!loadingRecords && filteredRecords.length > 0 && (
             <div className="modern-table-card">
               <div className="table-responsive">
-                <table className="modern-data-table">
+                <table className="modern-data-table" data-mobile-cards>
                   <thead>
                     <tr>
                       <th>Danışan</th>
@@ -496,7 +496,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                   <tbody>
                     {filteredRecords.map(rec => (
                       <tr key={rec.id}>
-                        <td>
+                        <td data-label="">
                           <div className="table-user-cell">
                             <div className="user-initials-avatar">
                               {rec.firstName.charAt(0)}{rec.lastName.charAt(0)}
@@ -507,12 +507,12 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="Cinsiyet / Yaş">
                           <span className="text-secondary">
                             {rec.gender || '—'} {rec.age ? `(${rec.age})` : ''}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Uygulayan Psikolog">
                           {rec.psychologistName ? (
                             <div className="badge-psychologist">
                               <Icon name="user" size={13} />
@@ -522,10 +522,10 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             <span className="text-muted-sm">Psikolog</span>
                           )}
                         </td>
-                        <td>
+                        <td data-label="Uygulama Tarihi">
                           <span className="date-tag">{rec.applicationDate}</span>
                         </td>
-                        <td>
+                        <td data-label="Kayıt Tarihi">
                           <span className="text-muted-sm">
                             {new Date(rec.createdAt).toLocaleDateString('tr-TR', {
                               day: 'numeric',
@@ -536,7 +536,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             })}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="İşlemler">
                           <div className="table-row-actions">
                             <a
                               href={`/kayitlar/${rec.id}`}
@@ -654,7 +654,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
           {!loadingUsers && filteredUsers.length > 0 && (
             <div className="modern-table-card">
               <div className="table-responsive">
-                <table className="modern-data-table">
+                <table className="modern-data-table" data-mobile-cards>
                   <thead>
                     <tr>
                       <th>Psikolog</th>
@@ -667,7 +667,7 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                   <tbody>
                     {filteredUsers.map(u => (
                       <tr key={u.id} className={u.active ? '' : 'row-muted'}>
-                        <td>
+                        <td data-label="">
                           <div className="table-user-cell">
                             <div className={`user-initials-avatar ${!u.active ? 'avatar-inactive' : ''}`}>
                               {u.firstName.charAt(0)}{u.lastName.charAt(0)}
@@ -678,18 +678,18 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="E-posta">
                           <span className="mono-sub">{u.email}</span>
                         </td>
-                        <td>
+                        <td data-label="Yetki">
                           <span className="badge-chip badge-default">Psikolog</span>
                         </td>
-                        <td>
+                        <td data-label="Durum">
                           <span className={`status-pill ${u.active ? 'pill-active' : 'pill-inactive'}`}>
                             {u.active ? 'Aktif' : 'Pasif'}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="İşlemler">
                           <div className="table-row-actions">
                             <button
                               type="button"

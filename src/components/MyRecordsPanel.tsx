@@ -257,7 +257,7 @@ export function MyRecordsPanel() {
       {!loading && !error && records.length > 0 && !grouped && (
         <div className="modern-table-card">
           <div className="table-responsive">
-            <table className="modern-data-table">
+            <table className="modern-data-table" data-mobile-cards>
               <thead>
                 <tr>
                   <th>Danışan</th>
@@ -270,7 +270,7 @@ export function MyRecordsPanel() {
               <tbody>
                 {records.map(record => (
                   <tr key={record.id}>
-                    <td>
+                    <td data-label="">
                       <div className="table-user-cell">
                         <div className="user-initials-avatar">
                           {record.firstName.charAt(0)}{record.lastName.charAt(0)}
@@ -281,15 +281,15 @@ export function MyRecordsPanel() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Cinsiyet / Yaş">
                       <span className="text-secondary">
                         {record.gender || '—'} {record.age ? `(${record.age})` : ''}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Uygulama Tarihi">
                       <span className="date-tag">{record.applicationDate}</span>
                     </td>
-                    <td>
+                    <td data-label="Kayıt Tarihi">
                       <span className="text-muted-sm">
                         {new Date(record.createdAt).toLocaleDateString('tr-TR', {
                           day: 'numeric',
@@ -300,7 +300,7 @@ export function MyRecordsPanel() {
                         })}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="İşlemler">
                       <div className="table-row-actions">
                         <a href={`/kayitlar/${record.id}`} className="action-btn-primary">
                           <Icon name="eye" size={15} />

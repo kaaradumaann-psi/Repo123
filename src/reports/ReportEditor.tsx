@@ -20,6 +20,7 @@ import {
   type TextKind,
 } from './templateEngine';
 import { ReportBlockView, ReportPreview } from './ReportPreview';
+import { PaperViewport } from '../components/PaperViewport';
 import { loadReportContext } from './loadReportContext';
 import { pickChange, useReportAutosave } from './useReportAutosave';
 
@@ -578,7 +579,9 @@ export function ReportEditor({
                 </button>
               </span>
             </div>
-            <ReportPreview content={doc} source={source} title={title} status={status} date={generatedAt} />
+            <PaperViewport frameClassName="report-preview-paper" label="Canlı önizleme kâğıdı">
+              <ReportPreview content={doc} source={source} title={title} status={status} date={generatedAt} />
+            </PaperViewport>
           </section>
         </div>
         {versions && (
