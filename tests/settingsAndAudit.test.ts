@@ -448,6 +448,7 @@ test('Ayarlar ve Denetim ekranları telefonda okunur kalır (≤720px sözleşme
     'tablolar yatay kaydırma kabında olmalı');
   assert.ok(!/className="client-table"/.test(audit), 'kart görünümü desteklemeyen eski tablo sınıfı kalmamalı');
   assert.equal((audit.match(/data-label="Zaman"/g) ?? []).length, 2, 'her hücre etiketi taşımalı');
+  assert.equal((audit.match(/scope="col"/g) ?? []).length, 10, 'tablo başlıkları kapsam bildirmeli (scope="col")');
 
   const settings = read('src/settings/SettingsPage.tsx');
   assert.match(settings, /className="clinical-container settings-page"/, 'sayfa kabuğu tek sarmalayıcı olmalı');

@@ -92,11 +92,11 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
               <table className="modern-data-table" data-mobile-cards>
                 <thead>
                   <tr>
-                    <th>Zaman</th>
-                    <th>İşlem</th>
-                    <th>Varlık</th>
-                    <th>Kayıt</th>
-                    <th>Aktör</th>
+                    <th scope="col">Zaman</th>
+                    <th scope="col">İşlem</th>
+                    <th scope="col">Varlık</th>
+                    <th scope="col">Kayıt</th>
+                    <th scope="col">Aktör</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,11 +132,11 @@ export function AuditPage({ viewer }: { viewer: AuthenticatedUser }) {
             <table className="modern-data-table" data-mobile-cards>
               <thead>
                 <tr>
-                  <th>Zaman</th>
-                  <th>İşlem</th>
-                  <th>Varlık</th>
-                  <th>Kayıt</th>
-                  <th>Özet</th>
+                  <th scope="col">Zaman</th>
+                  <th scope="col">İşlem</th>
+                  <th scope="col">Varlık</th>
+                  <th scope="col">Kayıt</th>
+                  <th scope="col">Özet</th>
                 </tr>
               </thead>
               <tbody>
