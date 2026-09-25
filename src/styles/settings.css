@@ -1,0 +1,417 @@
+/* ==========================================================================
+   Ayarlar · Denetim kaydı · Yedek ve silme
+   --------------------------------------------------------------------------
+   Bu katman psikolog reposundaki "klinik" yüzeyin karşılığıdır: düz kartlar,
+   ince çizgili form alanları, renkli rozet yok. Değerler psikolog reposundaki
+   `clinical.css` / `ClinicalDialog` ölçüleriyle birebir aynıdır.
+
+   Tüm kurallar `@media screen` içindedir ve `!important` kullanmaz; kurallar
+   `.settings-page` altında kapsanır ki uygulamanın diğer ekranları aynı kalsın.
+   ========================================================================== */
+
+@media screen {
+  /* ------------------------------------------------------------------ */
+  /*  Sayfa kabuğu: clinical-container + clinical-header                 */
+  /* ------------------------------------------------------------------ */
+
+  .settings-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  /* psikolog clinical.css ile aynı başlık ölçüleri (coherence katmanı renkleri
+     zaten --text/--soft/--accent-ink olarak verir). */
+  .settings-page .clinical-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+
+  .settings-page .clinical-title-wrap {
+    min-width: 0;
+  }
+
+  .settings-page .clinical-title-wrap h1 {
+    margin: 4px 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.5vw, 32px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .settings-page .clinical-title-wrap p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--soft);
+  }
+
+  .settings-page .clinical-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--soft);
+  }
+
+  .settings-page .clinical-kicker-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text);
+  }
+
+  .settings-page .clinical-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Kartlar ve tipografi                                               */
+  /* ------------------------------------------------------------------ */
+
+  .settings-page .modern-table-card {
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    padding: 18px;
+  }
+
+  .settings-page .modern-table-card h2 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .settings-page .modern-table-card h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .settings-page .modern-table-card > p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .settings-page .settings-note {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .settings-page .settings-error {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--danger-ink);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Form: psikolog reposundaki düz alan ölçüleri                       */
+  /* ------------------------------------------------------------------ */
+
+  .settings-page .settings-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .settings-page .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .settings-page .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate-700);
+  }
+
+  .settings-page .form-group input,
+  .settings-page .form-group select,
+  .settings-page .form-group textarea {
+    height: auto;
+    padding: 9px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text);
+    box-shadow: none;
+  }
+
+  .settings-page .form-group input[type='file'] {
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+
+  .settings-page .form-group input:focus,
+  .settings-page .form-group select:focus,
+  .settings-page .form-group textarea:focus {
+    outline: none;
+    border-color: var(--text);
+    box-shadow: none;
+  }
+
+  .settings-page .form-group textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .settings-page .settings-assets {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .settings-page .settings-asset {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .settings-page .settings-asset img {
+    height: 48px;
+    max-width: 220px;
+    object-fit: contain;
+  }
+
+  .settings-page .settings-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .settings-page .settings-saved {
+    font-size: 13px;
+    color: var(--success);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Bulut durumu                                                       */
+  /* ------------------------------------------------------------------ */
+
+  .settings-page .settings-cloud {
+    display: grid;
+    gap: 8px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Denetim kaydı                                                      */
+  /* ------------------------------------------------------------------ */
+
+  .settings-page .settings-audit {
+    display: grid;
+    gap: 10px;
+  }
+
+  .settings-page .settings-audit .table-responsive {
+    overflow-x: auto;
+  }
+
+  .settings-page .settings-audit .modern-data-table {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .settings-page .settings-audit .modern-data-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--soft);
+  }
+
+  .settings-page .settings-audit .modern-data-table td {
+    vertical-align: top;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Yedek ve silme penceresi                                           */
+  /* ------------------------------------------------------------------ */
+
+  .backup-dialog {
+    width: min(560px, 100%);
+  }
+
+  .backup-body {
+    display: grid;
+    gap: 12px;
+  }
+
+  .backup-note {
+    margin: 0;
+    padding: 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .backup-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    box-shadow: none;
+  }
+
+  .backup-block-text {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .backup-block-text strong {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .backup-block-text span {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .backup-file {
+    font-size: 12px;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .backup-block-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+  }
+
+  .backup-file-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .backup-file-label input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .backup-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--soft);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Dar ekran                                                          */
+  /* ------------------------------------------------------------------ */
+
+  @media (max-width: 720px) {
+    .settings-page .form-row-2 {
+      grid-template-columns: 1fr;
+    }
+
+    /* Telefonda kart iç boşluğu: 18px + 12px çerçeve boşluğu satırı daraltmasın. */
+    .settings-page .modern-table-card,
+    .backup-block {
+      padding: 14px;
+    }
+
+    /* iOS Safari odak yakınlaşmasını önleyen taban: responsive.css kuralını
+       gölgelememek için alanlar telefonda 16px'e çıkar. */
+    .settings-page .form-group input,
+    .settings-page .form-group select,
+    .settings-page .form-group textarea {
+      font-size: 16px;
+    }
+
+    .settings-page .clinical-actions {
+      width: 100%;
+    }
+
+    .settings-page .clinical-actions > * {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+
+    .settings-page .settings-asset {
+      flex-wrap: wrap;
+    }
+
+    /* data-mobile-cards kartları: psikolog yüzeyiyle aynı düz kenarlık. */
+    .settings-page .settings-audit .modern-data-table[data-mobile-cards] tbody tr {
+      border-radius: var(--radius-md);
+    }
+
+    .settings-page .settings-audit .modern-data-table[data-mobile-cards] td {
+      font-size: 13px;
+    }
+
+    .settings-page .settings-asset img {
+      max-width: 100%;
+    }
+
+    .settings-page .settings-form-actions {
+      justify-content: stretch;
+    }
+
+    .settings-page .settings-form-actions .btn-primary {
+      width: 100%;
+    }
+
+    .backup-block {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .backup-block-actions {
+      justify-content: stretch;
+    }
+
+    .backup-block-actions > * {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+}

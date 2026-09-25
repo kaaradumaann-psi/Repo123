@@ -6,10 +6,12 @@ import type { PatientGroup } from '../records/patientGrouping';
 import { ConfirmDialog } from './ConfirmDialog';
 import { navigate } from '../router';
 import { Icon } from './Icon';
+import type { AuthenticatedUser } from '../auth/authTypes';
+import { recordDeviceAudit } from '../settings/auditTrail';
 
 const PAGE_SIZES = [25, 50, 100] as const;
 
-export function MyRecordsPanel() {
+export function MyRecordsPanel({ viewer }: { viewer: AuthenticatedUser }) {
   const [records, setRecords] = useState<RecordSummary[]>([]);
   const [count, setCount] = useState<number | null>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -82,6 +84,13 @@ export function MyRecordsPanel() {
     setDeletingId(record.id);
     try {
       await deleteRecord(record.id);
+      // Cihaz denetim izi: silme işlemi danışan adı yerine kayıt kimliğiyle kaydedilir.
+      recordDeviceAudit(viewer.id, {
+        action: 'delete',
+        entity: 'record',
+        entityId: record.id,
+        summary: 'Test kaydı silindi',
+      });
       setConfirmTarget(null);
       await fetchRecords();
     } catch (err) {

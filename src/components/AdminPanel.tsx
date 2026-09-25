@@ -16,6 +16,7 @@ import { displayName } from '../auth/userDisplay';
 import type { AuthenticatedUser } from '../auth/authTypes';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
+import { recordDeviceAudit } from '../settings/auditTrail';
 
 type AdminTab = 'records' | 'users' | 'new-user';
 
@@ -196,6 +197,12 @@ export function AdminPanel({ admin }: { admin: AuthenticatedUser }) {
     setDeletingRecordId(record.id);
     try {
       await deleteRecord(record.id);
+      recordDeviceAudit(admin.id, {
+        action: 'delete',
+        entity: 'record',
+        entityId: record.id,
+        summary: 'Test kaydı yönetici tarafından silindi',
+      });
       setRecords(prev => prev.filter(r => r.id !== record.id));
       setConfirmRecord(null);
       setMessage({ kind: 'success', text: `"${record.firstName} ${record.lastName}" kaydı silindi. Bu işlem geri alınamaz.` });

@@ -19,6 +19,11 @@ export type Letterhead = {
   phone: string;
   email: string;
   address: string;
+  /**
+   * Antet metni: kurumun resmî başlık notu. Raporda iletişim satırının üstüne
+   * basılır; boş bırakılırsa yalnızca diğer alanlar görünür.
+   */
+  letterhead: string;
   logo: string;
   signature: string;
 };
@@ -29,6 +34,7 @@ export const EMPTY_LETTERHEAD: Letterhead = {
   phone: '',
   email: '',
   address: '',
+  letterhead: '',
   logo: '',
   signature: '',
 };

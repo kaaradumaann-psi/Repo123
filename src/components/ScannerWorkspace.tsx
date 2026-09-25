@@ -777,7 +777,7 @@ function ScannerSession({
       )}
 
       {/* Psikolog Arşivi */}
-      {!embedded && actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} />}
+      {!embedded && actor.role === 'PSYCHOLOG' && <MyRecordsPanel key={recordsRefresh} viewer={actor} />}
     </div>
   );
 }

@@ -132,7 +132,7 @@ export function ReportPreview({
   status: string;
 }) {
   const h = content.letterhead;
-  const hasLetterhead = Boolean(h?.institution || h?.name || safeReportImage(h?.logo));
+  const hasLetterhead = Boolean(h?.institution || h?.name || h?.letterhead || safeReportImage(h?.logo));
   const isDraft = status === 'draft';
   const blocks = visibleBlocks(content, source);
   // Number dataTables sequentially for APA Table 1, 2...
@@ -160,6 +160,7 @@ export function ReportPreview({
             {(h?.name || h?.title) && (
               <div className="psych-letterhead-person">{[h?.name, h?.title].filter(Boolean).join(' · ')}</div>
             )}
+            {h?.letterhead && <div className="psych-letterhead-note">{h.letterhead}</div>}
             {(h?.phone || h?.email || h?.address) && (
               <div className="psych-letterhead-contact">
                 {[h?.phone, h?.email, h?.address].filter(Boolean).join(' · ')}

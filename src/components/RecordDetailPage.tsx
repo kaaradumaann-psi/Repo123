@@ -1,6 +1,7 @@
 import { ReportsSummary } from '../reports/ReportsPage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EXPERT_NOTES_MAX, getRecordDetail, updateExpertNotes } from '../records/supabaseRecords';
+import { recordDeviceAudit } from '../settings/auditTrail';
 import type { FullRecordDetail } from '../records/supabaseRecords';
 import { methodLabel, parseRecordPayload } from '../workspace/caseTypes';
 import { answersFromRecordPayload, profileFromRecord } from '../results/recordProfile';
@@ -237,6 +238,14 @@ export function RecordDetailPage({
       setNotesDraft(normalized);
       setRecord(prev => (prev ? { ...prev, expertNotes: normalized, notesUpdatedAt: updatedAt } : prev));
       setNotesMessage({ kind: 'success', text: 'Uzman notu kaydedildi; yazdırma raporuna eklenecek.' });
+      if (viewer) {
+        recordDeviceAudit(viewer.id, {
+          action: 'update',
+          entity: 'note',
+          entityId: record.id,
+          summary: 'Uzman notu güncellendi',
+        });
+      }
     } catch (cause) {
       setNotesMessage({ kind: 'error', text: cause instanceof Error ? cause.message : 'Uzman notu kaydedilemedi.' });
     } finally {

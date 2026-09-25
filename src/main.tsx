@@ -17,6 +17,8 @@ import './styles/coherence.css';
 // Current screen design layer: sidebar navigation, day-board, states and
 // interactive controls — plus the MMPI surfaces (ws-*, record page, dossier).
 import './styles/workspace.css';
+// Settings, audit trail and backup surfaces (Ayarlar / Denetim / Yedek).
+import './styles/settings.css';
 // Responsive foundation (viewport height units, safe areas, ≥44px touch targets,
 // 16px form controls, ≤430px small-phone tier) — imported LAST so it refines every
 // layer above without touching the printable A4 sheet (all rules are @media screen).

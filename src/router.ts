@@ -12,6 +12,8 @@ export type AppRoute =
   | { page: 'kayit'; id: string }
   | { page: 'raporlar'; id: string; reportId?: string }
   | { page: 'yonetim' }
+  | { page: 'ayarlar' }
+  | { page: 'denetim' }
   | { page: 'sss' }
   | { page: 'gizlilik' }
   | { page: 'kullanim' }
@@ -31,6 +33,8 @@ export function parseRoute(pathname: string): AppRoute {
   if (path === '/form') return { page: 'form' };
   if (path === '/kayitlar') return { page: 'kayitlar' };
   if (path === '/yonetim') return { page: 'yonetim' };
+  if (path === '/ayarlar') return { page: 'ayarlar' };
+  if (path === '/denetim') return { page: 'denetim' };
   if (path === '/sss') return { page: 'sss' };
   if (path === '/gizlilik') return { page: 'gizlilik' };
   if (path === '/kullanim') return { page: 'kullanim' };

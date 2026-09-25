@@ -44,6 +44,12 @@ export type RecordSummary = {
 
 export type FullRecordDetail = RecordSummary & {
   rawOmrAnswers: unknown[];
+  /**
+   * Kaydın istemci tarafından üretilen benzersiz anahtarı (`mmpi_records.idempotency_key`).
+   * Yedek/geri yükleme akışı kayıtları bu anahtarla eşler; migration öncesi
+   * kayıtlarda ya da eski yanıtlarda bulunmayabilir.
+   */
+  idempotencyKey?: string;
   /** Kayıt sonrası uzman değerlendirme notu (migration öncesi kayıtlarda boş). */
   expertNotes: string;
   /** Not son güncelleme zamanı (hiç not girilmediyse undefined). */
@@ -498,6 +504,7 @@ export async function getRecordDetail(recordId: string): Promise<FullRecordDetai
     requestedBy: typeof v.requested_by === 'string' ? v.requested_by : undefined,
     createdBy: typeof v.created_by === 'string' ? v.created_by : undefined,
     rawOmrAnswers: Array.isArray(v.raw_omr_answers) ? (v.raw_omr_answers as unknown[]) : [],
+    idempotencyKey: typeof v.idempotency_key === 'string' ? v.idempotency_key : undefined,
     expertNotes: typeof v.expert_notes === 'string' ? v.expert_notes : '',
     notesUpdatedAt: typeof v.notes_updated_at === 'string' ? v.notes_updated_at : undefined,
   };
