@@ -16,7 +16,8 @@
     "verify:pdf": "tsx scripts/verify-pdf.ts",
     "diagnose:supabase": "node scripts/diagnose-supabase.mjs",
     "verify:production-config": "node scripts/verify-production-config.mjs --repository-only",
-    "validate:live-security": "node scripts/run-live-security-matrix.mjs"
+    "validate:live-security": "node scripts/run-live-security-matrix.mjs",
+    "validate:production": "node scripts/production-validation/run-all.mjs"
   },
   "dependencies": {
     "@noble/hashes": "2.4.0",

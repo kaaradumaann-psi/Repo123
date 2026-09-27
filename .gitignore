@@ -48,3 +48,8 @@ preview-dist/
 
 # Yerel doğrulama overlay/ara çıktıları — commit edilmez
 /scripts/validation/
+
+# Production validation kanıt çıktıları (token/PII içermez ama yine de yereldir)
+/artifacts/
+# Live security matrix koşucusunun olası yerel çıktıları
+live-security-results-*.json
