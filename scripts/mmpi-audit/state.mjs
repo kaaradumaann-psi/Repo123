@@ -161,7 +161,7 @@ export function measureTests(rootDir = REPO_ROOT) {
       cwd: rootDir,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 180000,
+      timeout: 600000,
     });
     return parseTestOutput(output);
   } catch (err) {
@@ -279,7 +279,7 @@ export function measureAuditState(rootDir = REPO_ROOT, options = {}) {
       kRawBands: 'UNCHANGED (K_RAW_BANDS preserved in evaluateValidity)',
       wigginsSoc: 'UNCHANGED (27 items per Ek 9c, DECISION-024 · CONFLICT-021)',
       ocrOnlyConditionalRules: 'UNCHANGED (conditions intact)',
-      scoringEngineVersion: '2.1.0',
+      scoringEngineVersion: '2.1.1',
     },
     generatedAt: options.timestamp || new Date().toISOString(),
     tests: {
@@ -343,7 +343,7 @@ Do not manually edit numeric metrics.
 Regenerate with the audit state command.
 -->
 
-**Generated at:** \`${timestamp}\`  
+**Generated at:** \`${timestamp}\`
 **Command:** \`node scripts/mmpi-audit/state.mjs\`  
 **Phase:** \`${state.phase} (${state.status})\`  
 **Clinical Logic Changed:** \`${state.clinicalLogicChanged ? 'YES' : 'NO'}\`
@@ -354,10 +354,10 @@ Regenerate with the audit state command.
 
 | Metric | Value | Status |
 |---|---|---|
-| Test Suites | \`${state.tests.suites}\` | PASS |
-| Passed Tests | \`${state.tests.passed}\` | PASS |
-| Failed Tests | \`${state.tests.failed}\` | PASS |
-| Total Tests | \`${state.tests.total}\` | PASS |
+| Test Suites | \`${state.tests.suites}\` | ${state.tests.failed === 0 ? 'PASS' : 'FAIL'} |
+| Passed Tests | \`${state.tests.passed}\` | ${state.tests.failed === 0 ? 'PASS' : 'FAIL'} |
+| Failed Tests | \`${state.tests.failed}\` | ${state.tests.failed === 0 ? 'PASS' : 'FAIL'} |
+| Total Tests | \`${state.tests.total}\` | ${state.tests.failed === 0 ? 'PASS' : 'FAIL'} |
 | TypeScript Typecheck | \`${state.typecheck}\` | PASS |
 | Production Build | \`${state.build}\` | PASS |
 

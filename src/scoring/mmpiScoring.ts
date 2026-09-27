@@ -277,9 +277,10 @@ export function buildProfileFromRaw(rawInput: Record<ScaleId, number>, gender: G
 }
 
 /**
- * Geçerlik analizi — yorum rehberinin ham puan tablolarına (?) s.48-49,
- * L s.49, K s.49-51, F s.51-52) ve T puanı aralıklarına (L/F/K s.1-3)
- * birebir dayanır. Puanlama matematiğine dokunmaz; yalnızca ham/T
+ * Geçerlik analizi — ikincil ve künyesiz `mmpi-kaynak-1.pdf` belgesinin ham
+ * puan tablolarına (? s.48-49, L s.49, K s.49-51, F s.51-52) ve T puanı
+ * aralıklarına (L/F/K s.1-3) birebir dayanır. Kanıt statüsü SECONDARY_VERIFIED;
+ * bu kurallar birincil Ceyhun & Oral kitabına atfedilmez. Puanlama matematiğine dokunmaz; yalnızca ham/T
  * değerlerini kaynaktaki bantlarla eşleştirir.
  */
 function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: number, gender: Gender, scales: ScaleResult[]): ValidityAnalysis {

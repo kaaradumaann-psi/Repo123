@@ -142,6 +142,10 @@ export function MMPIValidityTab({ profile }: { profile: MMPIProfile }) {
           <h4 className="mv-step-title">Geçerlik Ölçekleri</h4>
           <span className="mv-step-note">?, L, F, K — ham puan ve T dönüşümü</span>
         </header>
+        <p className="mv-panel-note">
+          Kaynak statüsü: Ham puan bantları künyesiz ikincil derleme belgesinden doğrulanmıştır
+          (SECONDARY VERIFIED); birincil Ceyhun &amp; Oral kitabında aynı tablolar bulunamamıştır.
+        </p>
         <div className="mv-scale-grid">
           {findings.map(finding => (
             <ScaleCard key={finding.id} finding={finding} />

@@ -32,8 +32,8 @@ import type { ItemAnswer } from '../src/workspace/caseTypes';
 
 describe('PHASE 18, 19 & 20 — MMPI End-to-End Product & Clinical Validation', () => {
   describe('1. Scoring Engine Sürümü ve İzlenebilirlik (PHASE 18)', () => {
-    it('scoring engine sürümü 2.1.0 olarak tanımlıdır', () => {
-      assert.equal(SCORING_ENGINE_VERSION, '2.1.0');
+    it('scoring engine sürümü 2.1.1 olarak tanımlıdır', () => {
+      assert.equal(SCORING_ENGINE_VERSION, '2.1.1');
     });
 
     it('tüm klinik ölçekler (Hs..Si) ve geçerlik ölçekleri anahtar haritasında tanımlıdır', () => {

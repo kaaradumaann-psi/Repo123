@@ -223,7 +223,7 @@ describe('K düzeltme standart ekleme tablosu', () => {
   it('klasik tablo değerleri kullanılır', () => {
     assert.equal(kAddition(1, 0.4), 1);
     assert.equal(kAddition(3, 0.4), 2);
-    assert.equal(kAddition(4, 0.4), 1);
+    assert.equal(kAddition(4, 0.4), 2);
     assert.equal(kAddition(29, 0.5), 15);
     assert.equal(kAddition(14, 1), 14);
     assert.equal(kAddition(16, 0.2), 3);

@@ -39,8 +39,16 @@ export function findBand(bands: readonly Band[], value: number): Band {
 }
 
 /* ------------------------------------------------------------------ */
-/* Geçerlik ölçekleri — ham puan tabloları (klinik yorum rehberi s.48-52)        */
+/* Geçerlik ölçekleri — ham puan tabloları                            */
 /* ------------------------------------------------------------------ */
+/**
+ * KANIT STATÜSÜ: SECONDARY_VERIFIED.
+ * Bu bantlar `docs/sources/mmpi-kaynak-1.pdf` (künyesiz “KES-YAPIŞTIR”
+ * derlemesi), s.48-52 ile kod düzeyinde birebirdir; Ceyhun & Oral (2003)
+ * birincil kitabında aynı ham bant tabloları bulunamamıştır. Bu nedenle
+ * deterministik mevcut davranış korunur fakat PRIMARY_VERIFIED sayılmaz.
+ */
+export const VALIDITY_RAW_BANDS_EVIDENCE = 'SECONDARY_VERIFIED' as const;
 
 /** (?) “Hiç Bir Şey Diyemem” skalası — boş madde sayısı. */
 export const CANNOT_SAY_RAW_BANDS: Band[] = [
