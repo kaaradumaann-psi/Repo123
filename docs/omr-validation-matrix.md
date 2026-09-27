@@ -3,6 +3,14 @@
 > Tarih: 2026-09-23 — mimariyi koruma, üretim doğrulaması, psikolog hızlandırma, OMR güvenilirlik ölçümü
 > Tek doğruluk kaynağı: `src/form/layout.ts` FormDefinition (566 madde, 4 sayfa, OMR geometri), `src/scoring/*` (Savaşır 1981 Tablo 30), `src/omr/*`
 
+## Durum
+
+- Validation framework: **VALIDATION INFRASTRUCTURE READY**
+- Physical result: **REAL_WORLD_VALIDATION_PENDING / BLOCKED**
+- Corpus/manifest contract: [`omr-validation-corpus-spec.md`](./omr-validation-corpus-spec.md)
+
+No physical images or executed ground-truth results were supplied in Phase B; this matrix must not be cited as a real-world PASS.
+
 ## Amaç
 Sentetik raster ve depo PDF raster dışında **gerçek baskı + gerçek kalem + gerçek telefon kamerası** koşullarında OMR okuma doğruluğunu ölçmek. Sonuçlar sentetik başarıdan ayrı raporlanır; fotokopi kayması ve perspektif hatası kalibre edilene kadar üretimde **manuel inceleme (review) kapısı** zorunludur.
 

@@ -151,7 +151,7 @@ describe('Tablo 8-17 blokları SCORING_KEYS ile birebir', () => {
 describe('Kaynak gösterimi ve yasaklı kalıplar', () => {
   it('kart altlığı tek satırda künye + sayfa + Tablo + Savaşır taşır', () => {
     const line = dossierSourceLine('Hs');
-    assert.match(line, /^Kaynak: Graham \(1987\)/);
+    assert.match(line, /^Kanıt: PRIMARY_VERIFIED · Kaynak: Graham \(1987\)/);
     assert.match(line, /Ceyhun & Oral \(2003\), s\.64-67 \(Tablo 8\)/);
     assert.match(line, /Savaşır \(1981\)/);
     for (const id of CLINICAL_SCALE_ORDER) {

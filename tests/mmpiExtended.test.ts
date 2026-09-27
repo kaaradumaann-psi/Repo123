@@ -124,6 +124,10 @@ describe('geçerlik konfigürasyonları', () => {
     assert.ok(config);
     assert.match(config!.name, /Tersine V/);
   });
+  it('tümüne doğru kuralı kaynak eşiğini uygular: F yalnız 120 üstünde eşleşir', () => {
+    assert.notEqual(detectValidityConfig(30, 120, 30)?.id, 'all-true');
+    assert.equal(detectValidityConfig(30, 120.1, 30)?.id, 'all-true');
+  });
   it('hiçbiri uymazsa null döner', () => {
     assert.equal(detectValidityConfig(50, 55, 40), null);
   });
@@ -180,25 +184,27 @@ describe('kritik maddeler ve klinik izlenimler', () => {
     assert.ok(femaleHit.some(h => h.id === 74));
   });
 
-  it('intihar maddeleri (202/339) izlenim üretir', () => {
+  it('doğrulanmamış madde listesi otomatik risk izlenimi üretmez', () => {
     const impressions = clinicalImpressions({
       t: { D: 55, Pt: 50, Hs: 50, Hy: 50, Pd: 50, Pa: 50, Sc: 50, Ma: 50, L: 50, F: 50, K: 50 },
       lRaw: 5,
       kRaw: 12,
-      responses: responseMap({ 202: 1 }),
+      responses: responseMap({ 139: 1, 202: 1, 339: 1 }),
       gender: 'Erkek',
     });
-    assert.ok(impressions.some(i => i.title.includes('İntihar') && i.text.includes('Madde 202')));
+    assert.ok(!impressions.some(i => i.title.includes('Kritik Madde')));
+    assert.ok(!impressions.some(i => i.text.includes('Madde 202') || i.text.includes('Madde 139')));
   });
 
-  it('D ve Pt birlikte 70+ ise intihar riski uyarısı verilir', () => {
+  it('D ve Pt birlikte 70+ ise otomatik risk sonucu değil klinisyen görüşme kontrolü verir', () => {
     const impressions = clinicalImpressions({
       t: { D: 75, Pt: 72, Hs: 50, Hy: 50, Pd: 50, Pa: 50, Sc: 50, Ma: 50, L: 50, F: 50, K: 50 },
       lRaw: 5,
       kRaw: 12,
       gender: 'Erkek',
     });
-    assert.ok(impressions.some(i => i.tone === 'alert' && i.title.includes('İntihar')));
+    assert.ok(impressions.some(i => i.tone === 'watch' && i.title.includes('Klinisyen Görüşme Kontrolü')));
+    assert.ok(!impressions.some(i => i.title.includes('İntihar Riski') || i.text.includes('riskinin yüksek')));
   });
 
   it('K ham <= 15 tedaviye olumlu yanıt notu üretir', () => {

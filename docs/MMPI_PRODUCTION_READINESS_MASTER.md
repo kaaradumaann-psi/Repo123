@@ -99,7 +99,7 @@ Fixed regression:
 
 ## 9. T Score Audit
 
-Linear T, female Mf reversal, one-decimal rounding, and 20–120 clamp are deterministic. The formula is source-supported; the exact clamp remains a documented implementation convention and creates a source conflict with rules that refer to values above 120. This is **SOURCE_CONFLICT**, not silently “primary verified.”
+Linear T, female Mf reversal, and one-decimal rounding are deterministic. Final release closure removed the unsupported 20–120 clinical clamp: reported/used T now follows the cited linear formula, while chart coordinate clipping remains a separate visual concern. The source condition `F > 120` is therefore reachable without inventing a threshold. Status: **FIXED** (`SRC-T-CLAMP-001`).
 
 ## 10. Validity Audit
 
@@ -119,7 +119,7 @@ Ten scales, raw scoring, K applicability, Turkish norm lookup, and result transp
 
 ## 14. Mf Audit
 
-Male/female key directions, sex-specific norms, female reverse transformation, record/payload sex disagreement rejection, and clamp edge tests are present. Status: **PASS**.
+Male/female key directions, sex-specific norms, female reverse transformation, record/payload sex disagreement rejection, and unclamped linear-formula edge tests are present. Status: **PASS**.
 
 ## 15. Harris-Lingoes
 
@@ -167,7 +167,7 @@ Dossiers render source-based band information and warnings but were not wholly r
 | Validity raw bands | **SECONDARY_VERIFIED**, primary provenance open |
 | `?` pseudo plotting value | UI explicitly says not T; representation retained |
 | K>30 | Unsupported; now rejected |
-| T clamp vs source >120 wording | **SOURCE_CONFLICT**, open |
+| T clamp vs source >120 wording | **FIXED** — clinical T is unclamped; chart coordinates clip separately |
 | Derived/critical interpretation provenance | Mixed verification; conditional/unverified |
 
 ## 25. OMR
@@ -361,7 +361,7 @@ Payload size limits, request timeout/retry, pagination, idempotency keys, and du
 - `INT-CRITICAL-001`: critical list-level validation gap.
 - `INT-CODES-001`: full independent sentence-level code/dossier verification pending.
 - `SRC-L-BAND-001`: L 56/59 boundary conflict pending decision.
-- `SRC-T-CLAMP-001`: 20–120 clamp vs “above 120” source wording.
+- `SRC-T-CLAMP-001`: **FIXED in final closure** — unsupported clinical clamp removed; source `F > 120` rule restored.
 - `OMR-REAL-001`: real-world corpus pending.
 - `SEC-LIVE-001`: deployed RLS/IDOR matrix pending.
 - `CFG-PROD-001`: production secrets/CORS/CSP/provider/log review pending.
@@ -375,7 +375,7 @@ Payload size limits, request timeout/retry, pagination, idempotency keys, and du
 | 566 ITEM KEYS | PASS (derived visual-depth caveat documented) |
 | RAW SCORING | PASS |
 | K CORRECTION | PASS — 93/93 |
-| T SCORE | PASS arithmetic / CONDITIONAL clamp provenance |
+| T SCORE | PASS — source-linear value; unsupported clamp removed |
 | VALIDITY | CONDITIONAL |
 | CLINICAL SCALES | PASS arithmetic |
 | PROFILE CODES | CONDITIONAL |
@@ -419,3 +419,40 @@ Core MMPI-1 Turkish scoring is ready after the K-table correction: item keys, Tu
 3. Run real browser flow including PDF and second-user denial.
 4. Review production CORS/CSP, Auth signup, secrets, AI provider retention/region/logging.
 5. Resolve or formally accept the remaining source gaps; do not infer missing clinical rules.
+
+
+## 48. Final Release Closure Addendum — 27 Eylül 2026
+
+The subsequent audit-first release closure is recorded in:
+
+- `docs/FINAL_RELEASE_AUDIT_BEFORE_FIX.md`
+- `docs/FINAL_RELEASE_VALIDATION.md`
+
+Closure outcomes:
+
+| Finding | Final classification | Outcome |
+|---|---|---|
+| `SRC-VALIDITY-001` | CONDITIONAL | Runtime disclosure is `SECONDARY_VERIFIED`; primary provenance remains absent. |
+| `SRC-L-BAND-001` | SOURCE_CONFLICT | 59–63 restored; 56–58 is an explicit no-inference conflict band. |
+| `SRC-T-CLAMP-001` | FIXED | Unsupported clinical clamp removed; chart clipping remains presentation-only. |
+| `INT-CRITICAL-001` | UNVERIFIED / safety FIXED | Checklist remains unverified; automated item-risk conclusions removed and output relabelled. |
+| `INT-CODES-001` | CONDITIONAL | Evidence level/source is visible; unresolved codes remain blank; complete sentence mapping remains open. |
+| `OMR-REAL-001` | BLOCKED | No real paper/camera corpus. |
+| `SEC-LIVE-001` | BLOCKED | No live Supabase access; local tests cannot establish live RLS. |
+| `CFG-PROD-001` | BLOCKED | Deployment/auth/header/schema settings not observable. |
+
+Edge logging was additionally hardened so raw provider response bodies and raw operational error objects are not written to logs. Final gate: **732/732 tests, 109 suites, 0 failures**; typecheck/build PASS; PDF verifier PASS; dependency audit 0 vulnerabilities; key/norm/reference comparators PASS. The final release decision remains **BLOCKED**, independently of the green core regression gate.
+
+
+## 49. Phase B Closure Infrastructure
+
+Phase B closure evidence is canonicalized in `docs/FINAL_RELEASE_CLOSURE_REPORT.md`.
+
+- Validity findings now carry complete rule metadata and expose secondary-source status.
+- Interpretation code evidence is conservative: explicit page trace is required for `PRIMARY_VERIFIED`; otherwise `UNVERIFIED` remains.
+- Physical OMR and browser requirements have executable evidence formats/procedures but no fabricated execution results.
+- `run-live-security-matrix.mjs` records status and row counts for disposable credential-driven RLS/IDOR scenarios without retaining tokens or response records.
+- `verify-production-config.mjs` validates repository headers/CSP/frontend-secret separation and can probe deployed headers when a production URL is supplied.
+- No database migration was needed for unclamped T because clinical T is not stored in a dedicated database column; historical report snapshots remain immutable.
+
+The release verdict remains **BLOCKED** until physical OMR, live authorization/database, production TLS/configuration and real-browser gates pass.

@@ -48,7 +48,7 @@ const MALE_PROTOCOL: RawScores = {
 //   ?:  5 → T(boş) = 30 + 5·2   = 40
 const MALE_EXPECTED_T: Record<string, number> = {
   '?': 40, L: 41.1, F: 49.4, K: 26.4,
-  Hs: 34.8, D: 29.8, Hy: 30.2, Pd: 33.8, Mf: 20, Pa: 44.7, Pt: 21.6, Sc: 33.6, Ma: 20.5, Si: 30.1,
+  Hs: 34.8, D: 29.8, Hy: 30.2, Pd: 33.8, Mf: -5.5, Pa: 44.7, Pt: 21.6, Sc: 33.6, Ma: 20.5, Si: 30.1,
 };
 const MALE_EXPECTED_K_ADDED: Record<string, number | undefined> = {
   Hs: 2, Pd: 2, Pt: 3, Sc: 3, Ma: 1,
@@ -86,7 +86,7 @@ test('ham puan: erkek protokolü K düzeltmesi ve T dönüşümüyle uçtan uca 
   // Profil kodu: Mf/Si hariç en yüksek iki klinik ölçek → Pa(44.7)="6", Hs(34.8)="1".
   assert.equal(profile.profileCode, '61');
   assert.equal(profile.maxT, 49.4);
-  assert.equal(profile.minT, 20);
+  assert.equal(profile.minT, -5.5);
 });
 
 test('ham puan: T formülü cinsiyet normlarına göre bağımsız olarak da tutarlı (Kadın Mf ters işaret)', () => {
@@ -112,22 +112,21 @@ test('ham puan: T formülü cinsiyet normlarına göre bağımsız olarak da tut
       id === 'Mf'
         ? 50 + (10 * (norm.mean - corrected)) / norm.sd
         : 50 + (10 * (corrected - norm.mean)) / norm.sd;
-    const clamped = Math.max(20, Math.min(120, expected));
-    assert.equal(profileScale(profile, id).tScore, Math.round(clamped * 10) / 10, `Kadın ${id} T`);
+    assert.equal(profileScale(profile, id).tScore, Math.round(expected * 10) / 10, `Kadın ${id} T`);
   }
 });
 
-test('ham puan: T aralığı 20–120 arasında sıkıştırılır (uç ham değerler)', () => {
+test('ham puan: kaynak doğrusal T formülü uç değerlerde klinik değeri kırpmaz', () => {
   const zeroSc: RawScores = { ...MALE_PROTOCOL, Sc: 0, K: 0 };
   const highSc: RawScores = { ...MALE_PROTOCOL, Sc: 78, K: 30 };
 
   const low = buildProfileFromRawScoresObject(zeroSc, 'Erkek');
-  // K=0 → Sc düzeltilmiş 0 → 50 − 32.95 = 17.05 → 20'ye sıkışır.
-  assert.equal(profileScale(low, 'Sc').tScore, 20);
+  // K=0 → Sc düzeltilmiş 0 → 50 + 10·(0−29.82)/9.05 = 17.0.
+  assert.equal(profileScale(low, 'Sc').tScore, 17);
 
   const high = buildProfileFromRawScoresObject(highSc, 'Erkek');
-  // K=30 → Sc: 78+30=108 → 50 + 10·(108−29.82)/9.05 = 136.4 → 120'ye sıkışır.
-  assert.equal(profileScale(high, 'Sc').tScore, 120);
+  // K=30 → Sc: 78+30=108 → 50 + 10·(108−29.82)/9.05 = 136.4.
+  assert.equal(profileScale(high, 'Sc').tScore, 136.4);
   assert.equal(profileScale(high, 'Sc').kAdded, 30);
 });
 

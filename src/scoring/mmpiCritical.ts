@@ -1,6 +1,7 @@
 /**
- * Kritik maddeler ve klinik izlenimler.
+ * Klinik izlenimler ve doğrulanmamış klinisyen madde kontrol listesi.
  *
+ * EVIDENCE: UNVERIFIED_CLINICIAN_CHECKLIST
  * KAYNAK DURUMU (denetim kaydı): Kaynak kitapta "kritik madde" listesi YOKTUR
  * (Ek 1 madde metni, Ek 9 ölçek anahtarı, Ek 10 norm tabloları içerir).
  * Bu liste **kaynak dışı bir klinik derlemedir**; madde numaraları ve yönleri
@@ -8,14 +9,13 @@
  * (bkz. docs/mmpi-audit/CONFLICTS.md → CONFLICT-023, DECISION-026).
  * Etiketler tanı değil, uygulayıcı için kontrol listesi niteliğindedir.
  *
- * Kritik maddeler: klinik açıdan acil anlam taşıyan, yanıtı doğrudan
- * değerlendirilmesi gereken maddelerdir (intihar, kendine/başkasına zarar,
- * sanrısal yaşantılar vb.). Madde metinleri telifli olduğundan gösterilmez;
- * madde numarası, verilen yanıt ve klinik kategori raporlanır.
+ * Listedeki kayıtlar yalnız görüşmede ele alınabilecek içerik başlıklarıdır.
+ * Bir işaret otomatik risk, tehlike, acil durum veya tanı sonucu değildir.
+ * Madde metinleri telifli olduğundan gösterilmez; yalnız madde numarası, yanıt
+ * ve doğrulanmamış derleme etiketi raporlanır.
  *
- * Klinik izlenimler: profil ve kritik maddelerden türetilen yapılandırılmış
- * bulgulardır (intihar riski uyarıları, yardım çağrısı, tedaviye yanıt notu
- * gibi). Bunlar tanı değil, uygulayıcı uzman için kontrol listesi niteliğindedir.
+ * Klinik izlenimler ölçek profilinden türetilen görüşme başlıklarıdır. Bunlar
+ * tanı ya da güvenlik sınıflaması değil, uygulayıcı için kontrol listesidir.
  */
 
 import type { ResponseMap } from './mmpiScoring';
@@ -23,7 +23,7 @@ import type { Gender } from './mmpiKeys';
 
 export type CriticalItemDef = {
   id: number;
-  /** Beklenen (kritik sayılan) yanıt: 1 = D, 0 = Y. */
+  /** Derleme kaydını işaretleyen yanıt yönü: 1 = D, 0 = Y (liste UNVERIFIED). */
   expected: 1 | 0;
   label: string;
   /** Cinsiyete göre değişen kritik maddeler için. */
@@ -143,15 +143,15 @@ export function clinicalImpressions(input: ImpressionInput): ClinicalImpression[
   /* --- İntihar riski göstergeleri --- */
   if (D >= 70 && Pt >= 70) {
     out.push({
-      title: 'Klinik İntihar Riski Uyarısı (D & Pt Yükselmesi)',
-      text: 'Depresyon (D) ve Psikasteni (Pt) ölçeklerinin ikisinde birden 70 T üzerindeki yükselme, belirgin içsel gerilim ve çaresizlik hissiyle birlikte intihar riskinin arttığına işaret edebilir (Dahlstrom 1972). İntihar girişiminde bulunmuş bireyler her zaman açık depresyon veya anksiyete sergilemeyebilir; benlik değerinde ciddi düşüklük ve kendini cezalandırma eğilimi aranmalıdır. Yakın takip ve güvenlik önlemleri önerilir.',
-      tone: 'alert',
+      title: 'Klinisyen Görüşme Kontrolü (D & Pt Yükselmesi)',
+      text: 'D ve Pt ölçeklerinin birlikte yükselmesi, kaynakta kendine zarar düşüncelerinin doğrudan görüşmede ayrıca sorulması gereken bir profil bağlamı olarak ele alınır (Dahlstrom 1972). Bu otomatik çıktı risk, tehlike veya acil durum sınıflaması değildir; karar yalnız güncel klinik görüşme ve bağımsız güvenlik değerlendirmesiyle verilebilir.',
+      tone: 'watch',
     });
   } else if (D >= 70) {
     out.push({
-      title: 'Klinik İntihar Riski Uyarısı (Maskelenmiş Depresyon)',
-      text: 'Depresyon (D) ölçeğinin tek başına 70 T üzerinde yükselmesi durumunda, birey sözel olarak depresif düşünceleri ve çökkün duyguları inkâr etse dahi intihar riskinin yüksek olabileceği dikkate alınmalıdır. Maskelenmiş veya ajite depresyon durumunun klinik görüşmeyle derinlemesine incelenmesi önerilir.',
-      tone: 'alert',
+      title: 'Klinisyen Görüşme Kontrolü (D Yükselmesi)',
+      text: 'D ölçeğinin tek başına yükselmesi kaynakta görüşmeyle derinleştirilecek bir profil bağlamı olarak ele alınır. Bu otomatik çıktı depresyon, kendine zarar riski, tehlike veya acil durum sınıflaması değildir; güncel semptomlar ve güvenlik yalnız klinisyen tarafından doğrudan değerlendirilmelidir.',
+      tone: 'watch',
     });
   }
 
@@ -160,31 +160,20 @@ export function clinicalImpressions(input: ImpressionInput): ClinicalImpression[
   const [first, second] = sorted;
   if (((first === 'Pt' && second === 'Sc') || (first === 'Sc' && second === 'Pt')) && Hs >= 60 && D >= 60) {
     out.push({
-      title: 'Klinik İntihar Riski Uyarısı (78/87 Kod Tipi & Somatik Yükselme)',
-      text: 'Profilde 7 (Pt) ve 8 (Sc) yükselmesine (78/87 kod tipi) 1 (Hs) ve 2 (D) ölçeklerinin de eşlik etmesi, intihar girişimi riskinin anlamlı düzeyde yüksek olduğunu gösterir (Clopton & Baucom 1979). Dürtüsel davranış potansiyeli ve kendine zarar verme riski yönünden yakın gözlem gereklidir.',
-      tone: 'alert',
+      title: 'Klinisyen Görüşme Kontrolü (78/87 + Somatik Yükselme)',
+      text: 'Kaynak bu profil örüntüsünde kendine zarar öyküsü ve güncel düşüncelerin doğrudan görüşmede ayrıca değerlendirilmesini önerir (Clopton & Baucom 1979). Örüntü tek başına risk, dürtüsellik, tehlike veya acil durum sonucu üretmez; bağımsız klinik güvenlik değerlendirmesi gerekir.',
+      tone: 'watch',
     });
   }
 
-  /* --- Kritik madde bulguları --- */
-  if (responses) {
-    const suicideItem = responses[339] === 1 || responses[202] === 1;
-    const harmItem = responses[139] === 1;
-    if (suicideItem) {
-      out.push({
-        title: 'Kritik Madde Uyarısı (İntihar / Depresyon)',
-        text: 'İntihar riski veya depresyon ile ilişkili kritik maddelerden biri veya ikisi birden (Madde 202 veya Madde 339) doğrulanmıştır. Klinik değerlendirme ve yakın takip önerilir.',
-        tone: 'alert',
-      });
-    }
-    if (harmItem) {
-      out.push({
-        title: 'Kritik Madde Uyarısı (Kendine/Başkasına Zarar)',
-        text: 'Kendine veya başkasına zarar verme ile ilişkili kritik madde (Madde 139) doğrulanmıştır. Güvenlik önlemleri açısından klinik değerlendirme yapılması önerilir.',
-        tone: 'alert',
-      });
-    }
-  }
+  /*
+   * Madde 202/339/139 için otomatik risk sonucu ÜRETİLMEZ. Madde metinleri
+   * Ek 1'de doğrulanmış olsa da 39 maddelik listenin/listedeki yönlerin klinik
+   * bir "kritik madde" ölçeği olduğuna ilişkin liste düzeyinde kaynak yoktur.
+   * Yanıtlar yalnız UNVERIFIED_CLINICIAN_CHECKLIST olarak ayrı sunulur ve uzman
+   * doğrudan görüşmede içeriği doğrular (INT-CRITICAL-001).
+   */
+  void responses;
 
   /* --- Geçerlik ölçeklerine bağlı bulgular --- */
   if (lRaw >= 7) {

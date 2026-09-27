@@ -18,6 +18,8 @@ import {
 } from './mmpiSource';
 import type { ItemAnswer } from '../workspace/caseTypes';
 import type { RawScores } from '../workspace/caseTypes';
+import type { EvidenceLevel } from './mmpiEvidence';
+import { validityRuleEvidence, type ValidityRuleEvidence } from './mmpiValidityEvidence';
 
 export type ResponseMap = Record<number, 1 | 0 | -1 | undefined>; // 1=D, 0=Y, -1/undefined=blank
 
@@ -54,6 +56,10 @@ export type ValidityFinding = {
   /** Kaynağın T puanı aralık etiketi (yalnızca L, F, K). */
   tRange?: string;
   tone: Tone;
+  /** Rule-level provenance disclosure; never inferred from a green test. */
+  evidenceLevel: EvidenceLevel;
+  /** Complete metadata for the raw rule and, when applicable, T rule. */
+  evidence: { raw: ValidityRuleEvidence; t?: ValidityRuleEvidence };
 };
 
 /**
@@ -132,8 +138,11 @@ function computeT(rawOrCorrected: number, scale: Exclude<ScaleId, '?'>, gender: 
   } else {
     t = 50 + (10 * (rawOrCorrected - norm.mean)) / norm.sd;
   }
-  const clamped = Math.max(20, Math.min(120, t));
-  return Math.round(clamped * 10) / 10;
+  // Kaynak formülü doğrusal T'dir. Önceki [20,120] kırpması bir yazılım
+  // geleneğiydi ve kaynakta klinik kural olarak yer almıyordu; ayrıca Ceyhun &
+  // Oral s.49'daki F > 120 geçerlik koşulunu ulaşılamaz yapıyordu. Klinik değer
+  // bu nedenle kırpılmaz. Grafikler kendi görsel koordinatlarını ayrı sınırlar.
+  return Math.round(t * 10) / 10;
 }
 
 export function answersToResponseMap(answers: readonly ItemAnswer[]): ResponseMap {
@@ -303,21 +312,38 @@ function analyzeValidity(cannotSay: number, lRaw: number, fRaw: number, kRaw: nu
     {
       id: '?', fullName: SCALE_META['?'].full, raw: cannotSay, t: null,
       rawRange: qBand.rangeLabel, band: qBand.label, comment: qBand.text, tone: qBand.tone,
+      evidenceLevel: 'SECONDARY_VERIFIED',
+      evidence: { raw: validityRuleEvidence('raw', '?', qBand) },
     },
     {
       id: 'L', fullName: SCALE_META.L.full, raw: lRaw, t: lT,
       rawRange: lBand.rangeLabel, band: lBand.label, comment: lBand.text,
       tDetail: lTBand.text, tRange: lTBand.rangeLabel, tone: worseTone(lBand.tone, lTBand.tone),
+      evidenceLevel: lTBand.label === 'Kaynak Çatışması' ? 'SOURCE_CONFLICT' : 'SECONDARY_VERIFIED',
+      evidence: {
+        raw: validityRuleEvidence('raw', 'L', lBand),
+        t: validityRuleEvidence('t', 'L', lTBand),
+      },
     },
     {
       id: 'F', fullName: SCALE_META.F.full, raw: fRaw, t: fT,
       rawRange: fBand.rangeLabel, band: fBand.label, comment: fBand.text,
       tDetail: fTBand.text, tRange: fTBand.rangeLabel, tone: worseTone(fBand.tone, fTBand.tone),
+      evidenceLevel: 'SECONDARY_VERIFIED',
+      evidence: {
+        raw: validityRuleEvidence('raw', 'F', fBand),
+        t: validityRuleEvidence('t', 'F', fTBand),
+      },
     },
     {
       id: 'K', fullName: SCALE_META.K.full, raw: kRaw, t: kT,
       rawRange: kBand.rangeLabel, band: kBand.label, comment: kBand.text,
       tDetail: kTBand.text, tRange: kTBand.rangeLabel, tone: worseTone(kBand.tone, kTBand.tone),
+      evidenceLevel: 'SECONDARY_VERIFIED',
+      evidence: {
+        raw: validityRuleEvidence('raw', 'K', kBand),
+        t: validityRuleEvidence('t', 'K', kTBand),
+      },
     },
   ];
 

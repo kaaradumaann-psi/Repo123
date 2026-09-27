@@ -207,10 +207,11 @@ describe('MMPI Final Scoring Reconciliation Suite', () => {
       assert.equal(VALIDITY_CUTOFFS.fInvalid, 23);
       assert.equal(VALIDITY_CUTOFFS.cannotSayInvalid, 31);
 
-      // L_T_BANDS s.33 continuous mapping
+      // L_T_BANDS s.33: source bands plus explicit 56-58 source gap.
       assert.ok(L_T_BANDS.some(b => b.min === 69));
       assert.ok(L_T_BANDS.some(b => b.min === 64 && b.max === 68));
-      assert.ok(L_T_BANDS.some(b => b.min === 56 && b.max === 63));
+      assert.ok(L_T_BANDS.some(b => b.min === 59 && b.max === 63));
+      assert.ok(L_T_BANDS.some(b => b.min === 56 && b.max === 58 && b.label === 'Kaynak Çatışması'));
       assert.ok(L_T_BANDS.some(b => b.min === 36 && b.max === 55));
       assert.ok(L_T_BANDS.some(b => b.max === 35));
     });
@@ -343,11 +344,13 @@ describe('MMPI Final Scoring Reconciliation Suite', () => {
       assert.equal(p23.validityAnalysis.isValid, false);
     });
 
-    it('L T-puanı bant sınırları: 35 (Düşük), 36 (Normal), 55 (Normal), 56 (Orta Yüksek), 63 (Orta Yüksek), 64 (Yüksek), 68 (Yüksek), 69 (Çok Yüksek)', () => {
+    it('L T-puanı kaynak sınırları ve 56-58 çatışma bandı ayrıdır', () => {
       assert.equal(findBand(L_T_BANDS, 35)?.label, 'Düşük');
       assert.equal(findBand(L_T_BANDS, 36)?.label, 'Normal');
       assert.equal(findBand(L_T_BANDS, 55)?.label, 'Normal');
-      assert.equal(findBand(L_T_BANDS, 56)?.label, 'Orta Yüksek');
+      assert.equal(findBand(L_T_BANDS, 56)?.label, 'Kaynak Çatışması');
+      assert.equal(findBand(L_T_BANDS, 58)?.label, 'Kaynak Çatışması');
+      assert.equal(findBand(L_T_BANDS, 59)?.label, 'Orta Yüksek');
       assert.equal(findBand(L_T_BANDS, 63)?.label, 'Orta Yüksek');
       assert.equal(findBand(L_T_BANDS, 64)?.label, 'Yüksek');
       assert.equal(findBand(L_T_BANDS, 68)?.label, 'Yüksek');

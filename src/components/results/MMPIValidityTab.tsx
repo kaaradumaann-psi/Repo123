@@ -65,6 +65,15 @@ function ScaleCard({ finding }: { finding: ValidityFinding }) {
             {finding.tDetail}
           </p>
         )}
+        <p className="mmpi-summary-note">
+          Kaynak doğrulama seviyesi:{' '}
+          {finding.evidenceLevel === 'SECONDARY_VERIFIED'
+            ? 'İkincil kaynak'
+            : finding.evidenceLevel === 'SOURCE_CONFLICT'
+              ? 'Kaynak çatışması'
+              : finding.evidenceLevel}
+          {' '}· {finding.evidence.raw.source}, {finding.evidence.raw.page}
+        </p>
       </details>
     </article>
   );
