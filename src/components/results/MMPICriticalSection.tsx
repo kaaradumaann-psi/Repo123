@@ -7,10 +7,9 @@ import type { IconName } from '../Icon';
 const toneIcon: Record<ImpressionTone, IconName> = { ok: 'checkCircle', watch: 'info', alert: 'alert' };
 
 /**
- * Kritik Bulgular ve İzlenimler — profilden ve kritik maddelerden türetilen
- * yapılandırılmış uyarılar (intihar riski, yardım çağrısı, tedaviye yanıt
- * notu vb.) ile tetiklenen kritik maddelerin listesi. Tanı değil, uygulayıcı
- * uzman için kontrol listesidir.
+ * Klinik izlenimler ile UNVERIFIED_CLINICIAN_CHECKLIST maddelerini ayrı sunar.
+ * Doğrulanmamış madde listesi otomatik risk/tehlike/tanı üretmez; yalnız uzman
+ * görüşmesinde içerik kontrolü için gösterilir.
  */
 export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
   const itemLevel = profile.itemLevel;
@@ -68,7 +67,15 @@ export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
       </div>
 
       <div className="mmpi-section-block">
-        <h4 className="mmpi-section-title">Kritik Patolojik Maddeler</h4>
+        <h4 className="mmpi-section-title">Doğrulanmamış Klinisyen Madde Kontrol Listesi</h4>
+        <div className="mmpi-box info">
+          <Icon name="info" size={14} />
+          <span>
+            {' '}UNVERIFIED_CLINICIAN_CHECKLIST — Yerel kaynakta bu 39 kaydı doğrulayan liste düzeyinde bir kritik
+            madde ölçeği bulunmamıştır. İşaretler risk, tehlike veya tanı anlamına gelmez; içerik doğrudan klinik
+            görüşmede doğrulanmalıdır.
+          </span>
+        </div>
 
         {criticalItems.length === 0 ? (
           <div className="mmpi-box ok">
@@ -107,8 +114,9 @@ export function MMPICriticalSection({ profile }: { profile: MMPIProfile }) {
               </table>
             </div>
             <p className="mmpi-summary-note">
-              Madde metinleri telifli olduğu için gösterilmez; numaralar MMPI-566 formundaki sırayı izler. Kritik
-              maddeler tek başına tanı koydurmaz — içerikleri klinik görüşmede doğrudan sorulmalıdır.
+              Madde metinleri telifli olduğu için gösterilmez; numaralar MMPI-566 formundaki sırayı izler. Bu
+              kaynak düzeyi doğrulanmamış derleme otomatik risk sınıflaması veya tanı değildir; içerikleri klinik
+              görüşmede doğrudan sorulmalıdır.
             </p>
           </DisclosureCard>
         )}

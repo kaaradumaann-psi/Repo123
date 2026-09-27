@@ -141,23 +141,27 @@ export const K_CORRECTION: Partial<Record<Exclude<ScaleId, '?' | 'L' | 'F' | 'K'
 };
 
 /**
- * Klasik MMPI K düzeltmesi ekleme tablosu (K ham puanı 0-30).
- * Oranlar (Hs .5K, Pd .4K, Pt 1K, Sc 1K, Ma .2K) bu tablodan okunur;
- * basit yuvarlama yerine standardizasyonun öngördüğü değerler kullanılır.
- * 30'un üzerindeki K değerleri için oran yuvarlaması geri çekilme değeridir.
+ * Türk MMPI-1 K düzeltmesi ekleme tablosu (K ham puanı 0-30).
+ * Kaynak: Ceyhun & Oral (2003), s.26-27, K ekleme listesi.
+ * Oranlar (Hs .5K, Pd .4K, Pt 1K, Sc 1K, Ma .2K) bu ayrık tablodan okunur;
+ * basit yuvarlama kullanılmaz. Kaynak tablo 0-30 ile sınırlı olduğundan bu
+ * aralığın dışındaki veya tam sayı olmayan değerler sessizce ekstrapole edilmez.
  */
 export const K_ADDITION_TABLE: Record<'ratio5' | 'ratio4' | 'ratio2' | 'ratio10', number[]> = {
   ratio5: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15],
-  ratio4: [0, 1, 1, 2, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 10, 11, 11, 12, 12],
+  ratio4: [0, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 10, 11, 11, 12, 12],
   ratio2: [0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6],
   ratio10: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
 };
 
-/** K ham puanı ve orana göre eklenecek puanı tablodan verir. */
+/** K ham puanı ve desteklenen orana göre eklenecek puanı kaynak tablosundan verir. */
 export function kAddition(kRaw: number, ratio: number): number {
-  const key = ratio === 0.5 ? 'ratio5' : ratio === 0.4 ? 'ratio4' : ratio === 0.2 ? 'ratio2' : 'ratio10';
-  const clamped = Math.max(0, Math.min(30, Math.round(kRaw)));
-  return K_ADDITION_TABLE[key][clamped] ?? Math.round(kRaw * ratio);
+  if (!Number.isInteger(kRaw) || kRaw < 0 || kRaw > 30) {
+    throw new RangeError('K ham puanı kaynak tablonun desteklediği 0-30 tam sayı aralığında olmalıdır.');
+  }
+  const key = ratio === 0.5 ? 'ratio5' : ratio === 0.4 ? 'ratio4' : ratio === 0.2 ? 'ratio2' : ratio === 1 ? 'ratio10' : null;
+  if (!key) throw new RangeError('Desteklenmeyen K düzeltme oranı.');
+  return K_ADDITION_TABLE[key][kRaw]!;
 }
 
 export type Norm = { mean: number; sd: number };

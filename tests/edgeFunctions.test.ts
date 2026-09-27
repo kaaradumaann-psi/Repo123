@@ -34,8 +34,8 @@ for (const name of FUNCTIONS) {
     const code = source(name);
     assert.match(code, /Deno\.serve\(async request => \{\s*try \{/,
       'yakalanmayan istisna CORS başlıksız yanıt üretir; Deno.serve gövdesi try ile başlamalı');
-    assert.match(code, /\} catch \(error\) \{\s*console\.error\(/,
-      'beklenmeyen istisna sunucu tarafında loglanmalı');
+    assert.match(code, /(?:console\.error|logOperationalError|logInternalFailure)\('[^']*handler failed'/,
+      'en dış işleyici istisnası güvenli sınıflandırma ile sunucu tarafında loglanmalı');
     assert.match(code, /return response\(request, 500, \{ error: /,
       'beklenmeyen istisna istemciye JSON 500 olarak dönmeli');
   });
@@ -100,6 +100,8 @@ test('ai-interpretation: sağlayıcı hataları ayırt edilebilir mesajlara çev
   // Teşhis için sağlayıcı durum kodu + kısa özet sunucu günlüğüne yazılır (anahtar/gövde asla).
   assert.match(code, /console\.error\('ai-interpretation: sağlayıcı hatası'/);
   assert.match(code, /function logUpstreamFailure\(/);
+  assert.ok(!/snippet\s*:/.test(code), 'sağlayıcı yanıt gövdesi loga taşınmamalı');
+  assert.ok(!/logUpstreamFailure\([^\n]*raw\)/.test(code), 'ham sağlayıcı yanıtı loggera verilmemeli');
 });
 
 test('admin-users: doğrulama hataları 400, veritabanı kaynaklı hatalar 500 olarak sınıflanır', () => {

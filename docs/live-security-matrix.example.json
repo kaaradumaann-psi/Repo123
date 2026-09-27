@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "description": "Disposable-fixture live RLS/IDOR release matrix. No result is implied by this specification.",
+  "requiredEnvironment": [
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "ANON_JWT",
+    "USER_A_JWT",
+    "USER_B_JWT",
+    "ADMIN_JWT",
+    "INACTIVE_JWT",
+    "USER_A_ID",
+    "USER_B_ID",
+    "USER_A_RECORD_ID",
+    "USER_B_RECORD_ID",
+    "USER_A_REPORT_ID",
+    "USER_B_REPORT_ID",
+    "USER_A_VERSION_ID",
+    "USER_B_VERSION_ID",
+    "USER_A_TEMPLATE_ID",
+    "USER_B_TEMPLATE_ID"
+  ],
+  "scenarios": [
+    {
+      "id": "anon-profile-select",
+      "role": "anonymous",
+      "resource": "profile",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/profiles?select=id&limit=1",
+      "tokenEnv": "ANON_JWT",
+      "expectedStatus": [
+        401,
+        403
+      ]
+    },
+    {
+      "id": "anon-record-select",
+      "role": "anonymous",
+      "resource": "mmpi_record",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?select=id&limit=1",
+      "tokenEnv": "ANON_JWT",
+      "expectedStatus": [
+        401,
+        403
+      ]
+    },
+    {
+      "id": "anon-report-select",
+      "role": "anonymous",
+      "resource": "report",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?select=id&limit=1",
+      "tokenEnv": "ANON_JWT",
+      "expectedStatus": [
+        401,
+        403
+      ]
+    },
+    {
+      "id": "userA-profile-own-select",
+      "role": "userA",
+      "resource": "profile",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/profiles?id=eq.${USER_A_ID}&select=id,role,active",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-profile-userB-select",
+      "role": "userA",
+      "resource": "profile",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/profiles?id=eq.${USER_B_ID}&select=id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-record-own-select",
+      "role": "userA",
+      "resource": "mmpi_record",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_A_RECORD_ID}&select=id,created_by",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-record-userB-select",
+      "role": "userA",
+      "resource": "mmpi_record",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_B_RECORD_ID}&select=id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-record-userB-update",
+      "role": "userA",
+      "resource": "mmpi_record",
+      "operation": "UPDATE IDOR",
+      "method": "PATCH",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_B_RECORD_ID}",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "prefer": "return=representation",
+      "body": {
+        "expert_notes": "release-matrix-must-not-change-owner-record"
+      },
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-record-userB-delete",
+      "role": "userA",
+      "resource": "mmpi_record",
+      "operation": "DELETE IDOR",
+      "method": "DELETE",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_B_RECORD_ID}",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "prefer": "return=representation",
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-report-own-select",
+      "role": "userA",
+      "resource": "report",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_A_REPORT_ID}&select=id,created_by",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-report-userB-select",
+      "role": "userA",
+      "resource": "report",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_B_REPORT_ID}&select=id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-report-userB-update",
+      "role": "userA",
+      "resource": "report",
+      "operation": "UPDATE IDOR",
+      "method": "PATCH",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_B_REPORT_ID}",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "prefer": "return=representation",
+      "body": {
+        "title": "release-matrix-must-not-change-owner-report"
+      },
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-report-userB-delete",
+      "role": "userA",
+      "resource": "report",
+      "operation": "DELETE IDOR",
+      "method": "DELETE",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_B_REPORT_ID}",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "prefer": "return=representation",
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-version-own-select",
+      "role": "userA",
+      "resource": "report_version",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_report_versions?id=eq.${USER_A_VERSION_ID}&select=id,report_id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-version-userB-select",
+      "role": "userA",
+      "resource": "report_version",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_report_versions?id=eq.${USER_B_VERSION_ID}&select=id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-version-insert",
+      "role": "userA",
+      "resource": "report_version",
+      "operation": "INSERT",
+      "method": "POST",
+      "path": "/rest/v1/mmpi_report_versions",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": [
+        401,
+        403
+      ],
+      "body": {
+        "report_id": "${USER_A_REPORT_ID}",
+        "version_number": 99999,
+        "content": {},
+        "snapshot": {},
+        "reason": "forbidden-client-write"
+      }
+    },
+    {
+      "id": "userA-template-own-select",
+      "role": "userA",
+      "resource": "template",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_report_templates?id=eq.${USER_A_TEMPLATE_ID}&select=id,created_by",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-template-userB-select",
+      "role": "userA",
+      "resource": "template",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_report_templates?id=eq.${USER_B_TEMPLATE_ID}&select=id",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-settings-own-select",
+      "role": "userA",
+      "resource": "settings",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/psychologist_report_settings?created_by=eq.${USER_A_ID}&select=created_by",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userA-settings-userB-update",
+      "role": "userA",
+      "resource": "settings",
+      "operation": "UPDATE IDOR",
+      "method": "PATCH",
+      "path": "/rest/v1/psychologist_report_settings?created_by=eq.${USER_B_ID}",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "prefer": "return=representation",
+      "body": {
+        "letterhead": {}
+      },
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-audit-select",
+      "role": "userA",
+      "resource": "audit_log",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/audit_logs?select=id&limit=1",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userA-audit-insert",
+      "role": "userA",
+      "resource": "audit_log",
+      "operation": "INSERT",
+      "method": "POST",
+      "path": "/rest/v1/audit_logs",
+      "tokenEnv": "USER_A_JWT",
+      "expectedStatus": [
+        401,
+        403
+      ],
+      "body": {
+        "action": "forbidden-client-write",
+        "target_table": "mmpi_records",
+        "target_id": "${USER_A_RECORD_ID}"
+      }
+    },
+    {
+      "id": "inactive-record-select",
+      "role": "inactive",
+      "resource": "mmpi_record",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?select=id&limit=1",
+      "tokenEnv": "INACTIVE_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "inactive-report-select",
+      "role": "inactive",
+      "resource": "report",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?select=id&limit=1",
+      "tokenEnv": "INACTIVE_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "admin-record-userA-select",
+      "role": "admin",
+      "resource": "mmpi_record",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_A_RECORD_ID}&select=id",
+      "tokenEnv": "ADMIN_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "admin-report-userB-select",
+      "role": "admin",
+      "resource": "report",
+      "operation": "SELECT",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_B_REPORT_ID}&select=id",
+      "tokenEnv": "ADMIN_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 1
+    },
+    {
+      "id": "userB-record-userA-select",
+      "role": "userB",
+      "resource": "mmpi_record",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_records?id=eq.${USER_A_RECORD_ID}&select=id",
+      "tokenEnv": "USER_B_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userB-report-userA-select",
+      "role": "userB",
+      "resource": "report",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_reports?id=eq.${USER_A_REPORT_ID}&select=id",
+      "tokenEnv": "USER_B_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    },
+    {
+      "id": "userB-version-userA-select",
+      "role": "userB",
+      "resource": "report_version",
+      "operation": "SELECT IDOR",
+      "method": "GET",
+      "path": "/rest/v1/mmpi_report_versions?id=eq.${USER_A_VERSION_ID}&select=id",
+      "tokenEnv": "USER_B_JWT",
+      "expectedStatus": 200,
+      "expectedRows": 0
+    }
+  ],
+  "interpretation": "RLS-filtered IDOR SELECT/UPDATE/DELETE must return HTTP 200 with actualRows=0; own/admin fixture access must match expectedRows=1. INSERT denials must be 401/403. The harness stores only status and row counts, never response records or tokens."
+}

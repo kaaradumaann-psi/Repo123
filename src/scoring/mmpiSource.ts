@@ -39,8 +39,16 @@ export function findBand(bands: readonly Band[], value: number): Band {
 }
 
 /* ------------------------------------------------------------------ */
-/* Geçerlik ölçekleri — ham puan tabloları (klinik yorum rehberi s.48-52)        */
+/* Geçerlik ölçekleri — ham puan tabloları                            */
 /* ------------------------------------------------------------------ */
+/**
+ * KANIT STATÜSÜ: SECONDARY_VERIFIED.
+ * Bu bantlar `docs/sources/mmpi-kaynak-1.pdf` (künyesiz “KES-YAPIŞTIR”
+ * derlemesi), s.48-52 ile kod düzeyinde birebirdir; Ceyhun & Oral (2003)
+ * birincil kitabında aynı ham bant tabloları bulunamamıştır. Bu nedenle
+ * deterministik mevcut davranış korunur fakat PRIMARY_VERIFIED sayılmaz.
+ */
+export const VALIDITY_RAW_BANDS_EVIDENCE = 'SECONDARY_VERIFIED' as const;
 
 /** (?) “Hiç Bir Şey Diyemem” skalası — boş madde sayısı. */
 export const CANNOT_SAY_RAW_BANDS: Band[] = [
@@ -144,8 +152,14 @@ export const L_T_BANDS: Band[] = [
     text: 'Maddeleri gelişigüzel doldurma sonucu ortaya çıkabilir; diğer geçerlik testleri incelenmelidir. Kişinin kendindeki zayıflıkları inkar ettiğini gösterir; birey patolojik olarak kendini iyi göstermeye çalışmaktadır, represif (bastırılmış) ve savunucudur. Bu puanlar dini ve ahlaki inanç ve eğilimleri nedeniyle kendine aşırı kontrol koyan bireylerde görülebilir. Ufak hatalarını bile inkar etmeye eğilimli olanlar, eğitimsiz olup kendini çok iyi göstermeye çalışanlar, inkar mekanizmasını sıklıkla kullanan histerik ve hipokondriaklar ve azınlık grupları bu kategoriye girebilirler.',
   },
   {
-    min: 56, max: 63, rangeLabel: 'T 56-63', label: 'Orta Yüksek', tone: 'watch',
+    min: 59, max: 63, rangeLabel: 'T 59-63', label: 'Orta Yüksek', tone: 'watch',
     text: 'Bireyin iyi görünme çabası içinde olduğu düşünülmelidir. Bunlarda sosyal açıdan kabul gören yanıtlar verme eğilimi vardır. Birey aşırı geleneksel ve sosyal açıdan uyumludur.',
+  },
+  {
+    // Ceyhun & Oral s.33, 59-63 ile 36-55 arasında bu üç puanı açıklamaz.
+    // Klinik anlam uydurmak yerine kaynak boşluğu kullanıcıya açıkça gösterilir.
+    min: 56, max: 58, rangeLabel: 'T 56-58', label: 'Kaynak Çatışması', tone: 'watch',
+    text: 'Birincil yerel kaynak bu aralığa yorum atamamaktadır: yayımlanan bantlar T 59-63 ve T 36-55 olarak verilmiştir. Bu puan için otomatik klinik yorum yapılmamalı; kaynak boşluğu uzman tarafından dikkate alınmalıdır.',
   },
   {
     min: 36, max: 55, rangeLabel: 'T 36-55', label: 'Normal', tone: 'ok',

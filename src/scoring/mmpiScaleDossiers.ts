@@ -1067,7 +1067,7 @@ export function tabloDetail(id: ClinicalScaleId, gender: Gender): TabloDetail {
 /** Kart altlığı — sayfa referansı yalnız burada. */
 export function dossierSourceLine(id: ClinicalScaleId): string {
   const d = SCALE_DOSSIERS[id];
-  return `Kaynak: Graham (1987) · Ceyhun & Oral (2003), ${d.pages} (Tablo ${d.tablo.no}) · Savaşır (1981) normları.`;
+  return `Kanıt: PRIMARY_VERIFIED · Kaynak: Graham (1987) · Ceyhun & Oral (2003), ${d.pages} (Tablo ${d.tablo.no}) · Savaşır (1981) normları.`;
 }
 
 /**

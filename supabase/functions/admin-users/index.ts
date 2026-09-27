@@ -75,6 +75,18 @@ class ValidationError extends Error {
   }
 }
 
+/** Logs only operational classification; provider/database messages can contain email or schema data. */
+function logOperationalError(event: string, error: unknown): void {
+  const record = (typeof error === 'object' && error !== null ? error : {}) as {
+    name?: unknown; code?: unknown; status?: unknown;
+  };
+  console.error(event, {
+    name: typeof record.name === 'string' ? record.name : 'Error',
+    code: typeof record.code === 'string' || typeof record.code === 'number' ? record.code : undefined,
+    status: typeof record.status === 'number' ? record.status : undefined,
+  });
+}
+
 /**
  * Hatayı veritabanı kaynaklı olup olmadığına göre sınıflar. Auth tarafı hatalar
  * (geçersiz hedef, zaten silinmiş kullanıcı) 400 kalır; şema/RLS/trigger kaynaklı
@@ -173,7 +185,7 @@ Deno.serve(async request => {
           user_metadata: { first_name: firstName, last_name: lastName },
         });
         if (error || !data.user) {
-          console.error('Admin user creation failed', error);
+          logOperationalError('Admin user creation failed', error);
           // Supabase Auth kullanıcıyı `profiles` trigger'ı üzerinden yazar; şema eksikse
           // dönen hata GoTrue biçimindedir ve "geçersiz istek" gibi görünmemelidir.
           if (isDatabaseSideError(error)) {
@@ -186,16 +198,16 @@ Deno.serve(async request => {
         const { data: profileRow, error: profileError } = await adminClient.from('profiles')
           .select('id,email,first_name,last_name,role,active').eq('id', data.user.id).single();
         if (profileError || !profileRow) {
-          console.error('Profile read after creation failed', profileError);
+          logOperationalError('Profile read after creation failed', profileError);
           const { error: rollbackError } = await adminClient.auth.admin.deleteUser(data.user.id);
-          if (rollbackError) console.error('Rollback of created Auth user failed', rollbackError);
+          if (rollbackError) logOperationalError('Rollback of created Auth user failed', rollbackError);
           return response(request, 500, { error: 'Kullanıcı profili oluşturulamadı' });
         }
         try {
           return response(request, 200, { profile: safeProfile(profileRow) });
         } catch {
           const { error: rollbackError } = await adminClient.auth.admin.deleteUser(data.user.id);
-          if (rollbackError) console.error('Rollback of created Auth user failed', rollbackError);
+          if (rollbackError) logOperationalError('Rollback of created Auth user failed', rollbackError);
           return response(request, 500, { error: 'Kullanıcı profili oluşturulamadı' });
         }
       }
@@ -210,7 +222,7 @@ Deno.serve(async request => {
           ban_duration: body.active ? 'none' : '876000h',
         });
         if (authUpdateError) {
-          console.error('Auth ban update failed', authUpdateError);
+          logOperationalError('Auth ban update failed', authUpdateError);
           if (isDatabaseSideError(authUpdateError)) {
             return response(request, 500, {
               error: 'Hesap durumu güncellenemedi: canlı veritabanı şeması güncel değil. Yönetici supabase db push çalıştırmalı.',
@@ -226,7 +238,7 @@ Deno.serve(async request => {
           await adminClient.auth.admin.updateUserById(userId, {
             ban_duration: target.active ? 'none' : '876000h',
           });
-          console.error('Profile activation update failed', profileError);
+          logOperationalError('Profile activation update failed', profileError);
           return response(request, 500, {
             error: isDatabaseSideError(profileError)
               ? 'Hesap durumu güncellenemedi: canlı veritabanı şeması güncel değil. Yönetici supabase db push çalıştırmalı.'
@@ -247,7 +259,7 @@ Deno.serve(async request => {
         // before the credentials can be removed.
         const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(userId);
         if (deleteAuthError) {
-          console.error('Admin user deletion failed', deleteAuthError);
+          logOperationalError('Admin user deletion failed', deleteAuthError);
           // Auth silmesi, mmpi_records üzerindeki AFTER DELETE audit trigger'ını service-role
           // bağlamında (auth.uid() = NULL) çalıştırır. Canlı şema farklıysa (ör. denetim
           // tablosunun sözleşmesi güncel değilse) bu hata tüm silmeyi geri alır. Nedeni
@@ -267,7 +279,7 @@ Deno.serve(async request => {
       if (error instanceof ValidationError) return response(request, 400, { error: error.message });
       // Beklenmeyen istisna: ham mesaj istemciye taşınmaz (şema/tablo adı sızdırabilir),
       // sunucu tarafında loglanır ve teşhis komutuna yönlendirilir.
-      console.error('admin-users action failed', error);
+      logOperationalError('admin-users action failed', error);
       if (isDatabaseSideError(error)) {
         return response(request, 500, {
           error: 'İşlem tamamlanamadı: canlı veritabanı şeması güncel değil. Yönetici supabase db push çalıştırmalı.',
@@ -278,7 +290,7 @@ Deno.serve(async request => {
       });
     }
   } catch (error) {
-    console.error('admin-users handler failed', error);
+    logOperationalError('admin-users handler failed', error);
     return response(request, 500, { error: 'İstek işlenemedi; yönetici supabase functions logs admin-users çıktısını kontrol etmeli.' });
   }
 });

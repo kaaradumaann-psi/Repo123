@@ -435,10 +435,9 @@ describe('PHASE 4 batch 3 — konfigürasyon eşikleri kaynağa uyar', () => {
     assert.ok(!disi || !/Azalan/.test(disi.name), 'K=35 kaynağın 40-45 aralığı dışında');
   });
 
-  it('Konf. 7 kırpma farkındalığı: F = 120 (üst sınır) bu örüntüyü tetikler', () => {
-    // Kaynak F > 120 der; T puanı [20,120] kırpıldığı için tek temsil F = 120.
-    // End-to-end: 566 maddenin tamamına "Doğru" → L 26.5 / F 120 / K 22.1.
-    assert.match(detectValidityConfig(26.5, 120, 22.1)!.name, /Doğru/);
+  it('Konf. 7 kaynak sınırı: F yalnız 120 üzerinde örüntüyü tetikler', () => {
+    assert.equal(detectValidityConfig(26.5, 120, 22.1)?.id, undefined);
+    assert.match(detectValidityConfig(26.5, 120.1, 22.1)!.name, /Doğru/);
   });
 
   it('Konf. 12: kaynakta olmayan K üst sınırı kaldırıldı (K = 70 artık eşleşir)', () => {

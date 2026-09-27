@@ -65,10 +65,10 @@ const GROUPS: SourceGroup[] = [
     entries: [
       {
         citation:
-          'Ceyhun, A. A., & Oral, G. (2003). MMPI profillerini yorumlama el kitabı. Çizgi Tıp Yayınevi.',
+          'Ceyhun, B., & Oral, N. (2003). Minnesota Çok Yönlü Kişilik Envanteri Değerlendirme Kitabı (2. baskı). Çizgi Tıp Yayınevi. ISBN 975-92384-4-6.',
         isAp7: true,
         status: 'A',
-        role: 'Geçerlik ölçekleri (?, L, F, K) ham ve T bantları (Bölüm 3); Geçerlik konfigürasyonları (Bölüm 4, Şekil 8–22); Temel klinik ölçekler ve iki/üç noktalı kod tipleri (Bölüm 5, s.63–158); Profil örüntüleri (Bölüm 6, s.159–170, Şekil 23–32); Türetilmiş ve özel ölçekler (Bölüm 7, s.171–188); Wiggins normları (Tablo 20, s.183); Kritik maddeler (Ek 1, s.215–233); Türk yetişkin normları (Tablo 30, s.195).',
+        role: 'K ekleme listesi (s.26-27); geçerlik konfigürasyonları (Bölüm 4, Şekil 8–22); temel klinik ölçekler ve iki/üç noktalı kod tipleri (Bölüm 5, s.63–158); profil örüntüleri (Bölüm 6, s.159–170, Şekil 23–32); türetilmiş ve özel ölçekler (Bölüm 7, s.171–188); Wiggins normları (Tablo 20, s.183); Türk yetişkin normları (Tablo 30, s.195). Geçerlik ham bantları bu kaynağa atfedilmez.',
         usedIn: [
           'Klinik Ölçekler',
           'Geçerlik Analizleri',
@@ -83,6 +83,14 @@ const GROUPS: SourceGroup[] = [
         ],
         matchNote:
           'Tam metin ve basılı nüsha taranarak (docs/mmpi-audit/) tüm tablo, şekil, madde anahtarları ve kod yorumları birebir doğrulanmış ve sisteme aktarılmıştır.',
+      },
+      {
+        citation: 'MMPI (KES-YAPIŞTIR) [Künyesiz ikincil derleme]. (t.y.). Depo içi mmpi-kaynak-1.pdf.',
+        status: 'C',
+        role: '?, L, F ve K ham puan bantları ile geçersizlik kesimleri (s.48-52).',
+        usedIn: ['Geçerlik Analizleri', 'mmpiSource.ts · *_RAW_BANDS', 'mmpiSource.ts · VALIDITY_CUTOFFS'],
+        matchNote:
+          'Kod belgeyle birebirdir; ancak belgenin yazarı, baskısı ve nihai bibliyografik kökeni bilinmediği için statü SECONDARY VERIFIED olup birincil doğrulama değildir.',
       },
       {
         citation:
@@ -285,7 +293,7 @@ const GROUPS: SourceGroup[] = [
           'Künye bağımsız Türk akademik kaynakça listeleriyle doğrulandı; bildiri tam metni erişilemedi.',
       },
       {
-        citation: 'Ceyhun, B., & Oral, N. (1998). MMPI Değerlendirme Kitabı. Bilimsel Tıp Yayınevi.',
+        citation: 'Ceyhun, B., & Oral, N. (2003). Minnesota Çok Yönlü Kişilik Envanteri Değerlendirme Kitabı (2. baskı). Çizgi Tıp Yayınevi. ISBN 975-92384-4-6.',
         isAp7: true,
         status: 'B',
         role: 'Türkiye’de MAC, ICAS, SAP ve kişilik ölçeklerinin birlikte değerlendirildiği derleme kitap; türetilmiş ölçeklerin Türkçe yorum katmanının bağlam kaynağı.',

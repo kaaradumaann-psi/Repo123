@@ -135,7 +135,9 @@ function safeScale(value: unknown): AiScale | null {
   if (typeof v.id !== 'string' || !SCALE_IDS.has(v.id)) return null;
   if (typeof v.raw !== 'number' || !Number.isInteger(v.raw) || v.raw < 0 || v.raw > 600) return null;
   if (v.k !== null && v.k !== undefined && (typeof v.k !== 'number' || !Number.isInteger(v.k) || v.k < 0 || v.k > 600)) return null;
-  if (typeof v.t !== 'number' || !Number.isFinite(v.t) || v.t < 20 || v.t > 120) return null;
+  // Kaynak doğrusal T formülü klinik değeri [20,120]'ye kırpmaz. Geniş sınır
+  // yalnız kötü/şişirilmiş girdiyi reddeden taşıma güvenliği sınırıdır.
+  if (typeof v.t !== 'number' || !Number.isFinite(v.t) || v.t < -500 || v.t > 500) return null;
   if (!boundedString(v.level, 60)) return null;
   return { id: v.id, raw: v.raw, k: v.k ?? null, t: v.t, level: v.level };
 }
@@ -313,10 +315,16 @@ function upstreamFailure(provider: AiProvider, status: number): FunctionError {
   );
 }
 
-/** Sunucu günlüğü: sağlayıcı durum kodu + kısa hata özeti. Anahtar/gövde ASLA loglanmaz. */
-function logUpstreamFailure(provider: AiProvider, model: string, status: number, snippet: string): void {
-  console.error('ai-interpretation: sağlayıcı hatası', {
-    provider, model, status, snippet: snippet.slice(0, 500),
+/** Sunucu günlüğü: yalnız sağlayıcı/model/durum. Yanıt gövdesi, PII ve secret ASLA loglanmaz. */
+function logUpstreamFailure(provider: AiProvider, model: string, status: number): void {
+  console.error('ai-interpretation: sağlayıcı hatası', { provider, model, status });
+}
+
+function logInternalFailure(event: string, error: unknown): void {
+  const record = (typeof error === 'object' && error !== null ? error : {}) as { name?: unknown; code?: unknown };
+  console.error(event, {
+    name: typeof record.name === 'string' ? record.name : 'Error',
+    code: typeof record.code === 'string' || typeof record.code === 'number' ? record.code : undefined,
   });
 }
 
@@ -347,7 +355,7 @@ async function callGemini(summary: AiSummary): Promise<{ text: string; model: st
     });
     const raw = await upstream.text().catch(() => '');
     if (!upstream.ok) {
-      logUpstreamFailure('gemini', model, upstream.status, raw);
+      logUpstreamFailure('gemini', model, upstream.status);
       throw upstreamFailure('gemini', upstream.status);
     }
     let payload: {
@@ -418,7 +426,7 @@ async function callOpenAiCompatible(summary: AiSummary): Promise<{ text: string;
     });
     const raw = await upstream.text().catch(() => '');
     if (!upstream.ok) {
-      logUpstreamFailure('openai', model, upstream.status, raw);
+      logUpstreamFailure('openai', model, upstream.status);
       throw upstreamFailure('openai', upstream.status);
     }
     let payload: { choices?: { message?: { content?: unknown } }[] };
@@ -523,11 +531,11 @@ Deno.serve(async request => {
       });
     } catch (error) {
       if (error instanceof FunctionError) return response(request, error.code, { error: error.message });
-      console.error('ai-interpretation failed', error);
+      logInternalFailure('ai-interpretation failed', error);
       return response(request, 500, { error: 'Yapay zekâ yorumu üretilemedi; yöneticiniz fonksiyon günlüklerini kontrol etmeli.' });
     }
   } catch (error) {
-    console.error('ai-interpretation handler failed', error);
+    logInternalFailure('ai-interpretation handler failed', error);
     return response(request, 500, { error: 'İstek işlenemedi; yönetici supabase functions logs ai-interpretation çıktısını kontrol etmeli.' });
   }
 });

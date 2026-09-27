@@ -88,6 +88,9 @@ export function reportDataAdapter(
         tDetail: f.tDetail || null,
         tRange: f.tRange || null,
         rawRange: f.rawRange || null,
+        evidenceLevel: f.evidenceLevel,
+        evidenceSource: f.evidence.raw.source,
+        evidencePage: f.evidence.raw.page,
       };
     tables.validity = {
       label: 'Geçerlik ölçekleri',

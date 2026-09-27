@@ -1,6 +1,6 @@
 {
   "name": "mmpi-566-optik-formu",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -14,7 +14,9 @@
     "deploy": "npm run build && npx wrangler deploy",
     "pdf": "tsx scripts/generate-pdf.ts",
     "verify:pdf": "tsx scripts/verify-pdf.ts",
-    "diagnose:supabase": "node scripts/diagnose-supabase.mjs"
+    "diagnose:supabase": "node scripts/diagnose-supabase.mjs",
+    "verify:production-config": "node scripts/verify-production-config.mjs --repository-only",
+    "validate:live-security": "node scripts/run-live-security-matrix.mjs"
   },
   "dependencies": {
     "@noble/hashes": "2.4.0",

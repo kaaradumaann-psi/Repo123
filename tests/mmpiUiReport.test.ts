@@ -94,8 +94,9 @@ describe('PHASE 12 & 13 — UI ve Yazdırma Raporu (MMPIPrintReport & MMPICodeTa
 
   it('SourcesPage: Ceyhun & Oral (2003) Status A olarak künyelenmiştir ve docs/kaynak-denetimi.md atfı vardır', () => {
     const html = renderToStaticMarkup(createElement(SourcesPage));
-    assert.match(html, /Ceyhun, A\. A\., &amp; Oral, G\. \(2003\)/);
-    assert.match(html, /MMPI profillerini yorumlama el kitabı/);
+    assert.match(html, /Ceyhun, B\., &amp; Oral, N\. \(2003\)/);
+    assert.match(html, /Minnesota Çok Yönlü Kişilik Envanteri Değerlendirme Kitabı/);
+    assert.match(html, /ISBN 975-92384-4-6/);
     assert.match(html, /docs\/kaynak-denetimi\.md/);
     assert.match(html, /docs\/mmpi-audit\//);
   });
@@ -105,7 +106,8 @@ describe('PHASE 12 & 13 — UI ve Yazdırma Raporu (MMPIPrintReport & MMPICodeTa
     assert.ok(fs.existsSync(filePath), 'docs/kaynak-denetimi.md depoda bulunmalıdır');
     const content = fs.readFileSync(filePath, 'utf-8');
     assert.match(content, /MMPI Kaynak Denetimi ve Künye–Bileşen Eşleştirme Raporu/);
-    assert.match(content, /Ceyhun, A\. A\., & Oral, G\. \(2003\)/);
+    assert.match(content, /Ceyhun, B\., & Oral, N\. \(2003\)/);
+    assert.match(content, /ISBN 975-92384-4-6/);
     assert.match(content, /Savaşır, I\. \(1981\)/);
     assert.match(content, /docs\/mmpi-audit\//);
   });

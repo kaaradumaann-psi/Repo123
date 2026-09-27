@@ -486,7 +486,8 @@ describe('yeni analiz bölümleri uçtan uca render olur', () => {
 
     const critical = renderToStaticMarkup(createElement(MMPICriticalSection, { profile: p }));
     assert.match(critical, /Klinik İzlenimler/);
-    assert.match(critical, /Kritik Patolojik Maddeler/);
+    assert.match(critical, /Doğrulanmamış Klinisyen Madde Kontrol Listesi/);
+    assert.match(critical, /UNVERIFIED_CLINICIAN_CHECKLIST/);
     assert.match(critical, /İntihar Riski \/ Depresyon/);
     assert.match(critical, /Kendine\/Başkasına Zarar Verme/);
     assert.doesNotMatch(critical, /kaynak\.pdf/i);
@@ -534,8 +535,10 @@ describe('CHANGE-014 (DECISION-029/A) — kod sekmesi blok-yerel gövdeyi ve ko�
     const html = renderToStaticMarkup(createElement(MMPICodeTab, { profile: codeProfile({ Pd: 38, Sc: 48 }) }));
     assert.match(html, /Ko\u015fullu ek yorum/);
     assert.match(html, /8 alt testi de yükselmişse süreç daha kötü olur/);
-    // Metin içinde sayfa referansı gösterilmez (kullanıcı kuralı); kaynak veri katmanında kalır
-    assert.doesNotMatch(html, /s\.\d/);
+    // Sayfa yalnız ayrı kanıt satırında görünür; koşullu yorum metnine gömülmez.
+    assert.match(html, /PRIMARY_VERIFIED/);
+    assert.match(html, /s\.131/);
+    assert.doesNotMatch(html, /yükselmişse süreç daha kötü olur\. \(s\./);
   });
 
   it('yazdırma raporu da blok-yerel kaydı kullanır', async () => {

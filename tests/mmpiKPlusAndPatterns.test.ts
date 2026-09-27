@@ -155,13 +155,17 @@ describe('PHASE 16 & 17 — K+ Profili, K-İlişkili Örüntüler ve Eşik Doğr
   });
 
   describe('PHASE 17 — Eşik ve Bant Doğrulamaları', () => {
-    it('L T bantları (CONFLICT-003): 69+, 64-68, 56-63, 36-55, ≤35 sürekli aralık kapsar', () => {
-      assert.equal(L_T_BANDS.length, 5);
+    it('L T bantları kaynak sınırlarını korur ve 56-58 boşluğunu SOURCE_CONFLICT olarak açıklar', () => {
+      assert.equal(L_T_BANDS.length, 6);
       assert.equal(L_T_BANDS[0].min, 69);
       assert.equal(L_T_BANDS[1].min, 64);
+      assert.equal(L_T_BANDS[2].min, 59);
       assert.equal(L_T_BANDS[2].max, 63);
-      assert.equal(L_T_BANDS[3].min, 36);
-      assert.equal(L_T_BANDS[4].max, 35);
+      assert.equal(L_T_BANDS[3].min, 56);
+      assert.equal(L_T_BANDS[3].max, 58);
+      assert.equal(L_T_BANDS[3].label, 'Kaynak Çatışması');
+      assert.equal(L_T_BANDS[4].min, 36);
+      assert.equal(L_T_BANDS[5].max, 35);
     });
 
     it('F ham bantları ve geçerlik kesmeleri (CONFLICT-004): VALIDITY_CUTOFFS ile uyumludur', () => {

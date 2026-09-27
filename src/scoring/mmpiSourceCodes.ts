@@ -8,6 +8,8 @@
  * sadık özetleridir; olası tanılar kaynaktaki gibi listelenir.
  */
 
+import type { EvidenceLevel } from './mmpiEvidence';
+
 export type CodeInterpretation = {
   /** Kanonik kod etiketi, ör. "12/21". */
   code: string;
@@ -60,6 +62,37 @@ export type CodeCondition = {
   test?: (ctx: CodeConditionContext) => boolean;
   manual?: boolean;
 };
+
+export type CodeRuleEvidence = {
+  id: string;
+  scale: CodeScaleKey | null;
+  code: string;
+  rule: string;
+  source: string | null;
+  page: string | null;
+  evidenceLevel: EvidenceLevel;
+  status: 'VERIFIED' | 'NEEDS_SOURCE_TRACE';
+};
+
+/**
+ * Per-rule provenance. A green resolver test is not source evidence: records
+ * lacking an explicit page-bearing condition remain UNVERIFIED instead of being
+ * mass-promoted to PRIMARY_VERIFIED.
+ */
+export function codeRuleEvidence(entry: CodeInterpretation): CodeRuleEvidence {
+  const page = entry.conditions?.map(c => c.source).find(Boolean) ?? null;
+  const verified = page !== null;
+  return {
+    id: `code.${entry.block ?? 'general'}.${entry.rawCode ?? entry.code}`,
+    scale: entry.block ?? null,
+    code: entry.rawCode ?? entry.code,
+    rule: entry.text,
+    source: verified ? 'Ceyhun & Oral (2003), Minnesota Çok Yönlü Kişilik Envanteri' : null,
+    page,
+    evidenceLevel: verified ? 'PRIMARY_VERIFIED' : 'UNVERIFIED',
+    status: verified ? 'VERIFIED' : 'NEEDS_SOURCE_TRACE',
+  };
+}
 
 
 const CODES: Record<string, CodeInterpretation> = {

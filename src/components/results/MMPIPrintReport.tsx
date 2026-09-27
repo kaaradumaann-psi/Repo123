@@ -528,7 +528,11 @@ export function MMPIPrintReport({ profile, meta }: { profile: MMPIProfile; meta:
 
           {itemLevel.criticalItems.length > 0 && (
             <>
-              <h3>Kritik Patolojik Maddeler ({itemLevel.criticalItems.length})</h3>
+              <h3>Doğrulanmamış Klinisyen Madde Kontrol Listesi ({itemLevel.criticalItems.length})</h3>
+              <p className="pr-context">
+                UNVERIFIED_CLINICIAN_CHECKLIST — Liste düzeyinde yerel kaynak doğrulaması yoktur. İşaretler otomatik
+                risk, tehlike veya tanı anlamına gelmez; içerik klinik görüşmede doğrulanmalıdır.
+              </p>
               <table className="pr-table">
                 <thead>
                   <tr>

@@ -1,6 +1,7 @@
 import type { MMPIProfile } from '../../scoring/mmpiScoring';
 import { codeInterpretationForProfile, thirdHighestClinical } from '../../scoring/mmpiInterpretation';
 import { stripPageRefs } from '../../scoring/mmpiScaleDossiers';
+import { codeRuleEvidence } from '../../scoring/mmpiSourceCodes';
 import { Icon } from '../Icon';
 
 /**
@@ -14,6 +15,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
   // (eski davranış kodu iki haneye kırparak BAŞKA bir kodun yorumunu gösteriyordu).
   const resolved = codeInterpretationForProfile(code, profile);
   const entry = resolved?.entry;
+  const evidence = entry ? codeRuleEvidence(entry) : null;
   const blockName = entry?.block ? profile.clinical.find(x => x.id === entry.block)?.fullName : undefined;
   const codeDigits = (code ?? '').split('');
   const idByDigit: Record<string, string> = {
@@ -96,10 +98,14 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
           </h4>
           {entry ? (
             <>
+              <p className="mmpi-summary-note">
+                Kanıt: <b>{evidence?.evidenceLevel ?? 'UNVERIFIED'}</b>
+                {evidence?.source ? ` · ${evidence.source}, ${evidence.page}` : ' · Bu yorum için makinece izlenebilir sayfa kaydı yok'}
+              </p>
               <p className="clin-signal">{stripPageRefs(entry.text)}</p>
               {entry.diagnosis && entry.diagnosis.length > 0 && (
                 <div className="mmpi-box info">
-                  <b>Olası Tanı:</b>
+                  <b>Kaynakta Geçen Tanı Terimleri (otomatik tanı değildir):</b>
                   <ul>
                     {entry.diagnosis.map((d, i) => (
                       <li key={i}>
@@ -133,7 +139,7 @@ export function MMPICodeTab({ profile }: { profile: MMPIProfile }) {
                   <p className="clin-signal" style={{ marginTop: '0.35rem' }}>{stripPageRefs(multiResolved.entry.text)}</p>
                   {multiResolved.entry.diagnosis && multiResolved.entry.diagnosis.length > 0 && (
                     <div style={{ marginTop: '0.35rem' }}>
-                      <b>Olası Tanı ({multiResolved.entry.code}):</b>
+                      <b>Kaynakta Geçen Tanı Terimleri — Otomatik Tanı Değildir ({multiResolved.entry.code}):</b>
                       <ul>
                         {multiResolved.entry.diagnosis.map((d, i) => (
                           <li key={i}>

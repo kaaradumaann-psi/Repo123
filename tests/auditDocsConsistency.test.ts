@@ -130,7 +130,8 @@ describe('PHASE 15, 16 & 17 — MMPI Audit State & Document Consistency', () => 
       // AI katmanında sahte kaynak adı geçmez
       assert.doesNotMatch(aiFile, /klinik yorum rehberi/i);
       // SourcesPage yalnızca onaylı künyeyi (Ceyhun & Oral 2003 / Savaşır 1981) gösterir
-      assert.match(sourcesPage, /Ceyhun, A\. A\., & Oral, G\. \(2003\)/);
+      assert.match(sourcesPage, /Ceyhun, B\., & Oral, N\. \(2003\)/);
+      assert.match(sourcesPage, /ISBN 975-92384-4-6/);
     });
 
     it('mmpiSource.ts içerisindeki tarihsel FINDING-I-001 yorumları dokümantasyonla izole edilmiştir', () => {

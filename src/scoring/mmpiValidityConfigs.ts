@@ -87,13 +87,10 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
     id: 'all-true',
     name: 'Tümüne "Doğru" Yanıt Verme',
     // Kaynak s.49: "L ve K alt testinin 35 T puanını aşmasını, F alt testinin
-    // 120'nin üzerinde yer almasını gerektirir."
-    // ANCAK: T puanları [20, 120] aralığına kırpılır (mmpiScoring.ts), bu
-    // yüzden "F > 120" matematiksel olarak ULAŞILAMAZ ve örüntü hiç tespit
-    // edilemezdi. Kırpma altında "> 120"nin tek temsili tam üst sınırdır.
-    // Not: T kırpması kaldırılırsa bu koşul yeniden `> 120` olmalıdır.
-    rule: 'F, T 120 (kırpma üst sınırı) ve üzeri; L ve K, T 35\'i aşmaz (kaynak s.49)',
-    isMatch: v => v.F >= 120 && v.L <= 35 && v.K <= 35,
+    // 120'nin üzerinde yer almasını gerektirir." Klinik T değeri kaynak
+    // formülüne göre kırpılmadığı için koşul doğrudan uygulanır.
+    rule: 'F, T 120\'nin üzerinde; L ve K, T 35\'i aşmaz (kaynak s.49)',
+    isMatch: v => v.F > 120 && v.L <= 35 && v.K <= 35,
     interpretation:
       'Bireyin tüm maddelere "Doğru" yanıtı verdiği bir örüntüdür; profil klinik olarak yorumlanamaz. Testin yönergesi yeniden anlatılarak uygulama tekrarlanmalıdır.',
     validity: 'şüpheli',
@@ -193,7 +190,9 @@ export const VALIDITY_CONFIGS: readonly ConfigDef[] = [
 
 /** L/F/K T puanlarına uyan ilk konfigürasyonu döndürür; yoksa null. */
 export function detectValidityConfig(lT: number, fT: number, kT: number): ValidityConfig | null {
-  const v = { L: Math.round(lT), F: Math.round(fT), K: Math.round(kT) };
+  // Ölçek T'leri zaten bir ondalığa yuvarlanmıştır. Burada yeniden tam sayıya
+  // yuvarlamak F=120.1 değerini 120 yapıp kaynak `>120` sınırını bozuyordu.
+  const v = { L: lT, F: fT, K: kT };
   for (const config of VALIDITY_CONFIGS) {
     if (config.isMatch(v)) {
       const { isMatch: _drop, ...rest } = config;
