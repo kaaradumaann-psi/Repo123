@@ -7,7 +7,7 @@
  */
 import { spawn } from 'node:child_process';
 import { Collector, SEVERITY } from './lib/output.mjs';
-import { repoRoot } from './lib/env.mjs';
+import { repoRoot, validationChildEnv } from './lib/env.mjs';
 
 function spawnCapture(command, args, timeoutMs) {
   return new Promise((resolvePromise) => {
@@ -16,7 +16,7 @@ function spawnCapture(command, args, timeoutMs) {
       cwd: repoRoot(),
       shell: isWin,
       windowsHide: true,
-      env: { ...process.env, NO_COLOR: '1', CI: '1' },
+      env: validationChildEnv({ CI: '1' }),
     });
     let output = '';
     const timer = setTimeout(() => {
@@ -39,9 +39,9 @@ export async function run(ctx) {
   }
 
   // 1) Test paketi — tüm scoring invariantları burada kilitlidir.
-  const tests = await spawnCapture('npm', ['test'], 15 * 60_000);
-  const passMatch = /# pass (\d+)/.exec(tests.output);
-  const failMatch = /# fail (\d+)/.exec(tests.output);
+  const tests = await spawnCapture('npm', ['test', '--', '--test-reporter=tap'], 15 * 60_000);
+  const passMatch = /(?:^|\n)\s*(?:#|ℹ)\s*pass\s+(\d+)/.exec(tests.output);
+  const failMatch = /(?:^|\n)\s*(?:#|ℹ)\s*fail\s+(\d+)/.exec(tests.output);
   if (tests.code === null && !passMatch) {
     out.blocked('npm test', `test çalıştırıcısı başlatılamadı: ${tests.output.trim().slice(-160)}`, { expected: '732 pass / 0 fail', severity: SEVERITY.CRITICAL, action: 'npm install çalıştırıldı mı?' });
   } else {

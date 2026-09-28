@@ -62,6 +62,36 @@ export function destructiveConfirmed() {
   return process.env.PRODUCTION_VALIDATION_CONFIRM === 'YES' && writesAllowed();
 }
 
+function stripNodeTestReporterOptions(value) {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const tokens = value.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) ?? [];
+  const kept = [];
+  for (let i = 0; i < tokens.length; i += 1) {
+    const raw = tokens[i];
+    const token = raw.replace(/^(["'])(.*)\1$/, '$2');
+    if (token === '--test-reporter' || token === '--test-reporter-destination') {
+      i += 1;
+      continue;
+    }
+    if (token.startsWith('--test-reporter=') || token.startsWith('--test-reporter-destination=')) continue;
+    kept.push(raw);
+  }
+  return kept.join(' ').trim() || null;
+}
+
+/**
+ * Production validation test subprocesses must emit parseable TAP output.
+ * User machines may define NODE_OPTIONS=--test-reporter=spec/dot globally;
+ * keep unrelated NODE_OPTIONS, but remove inherited test reporter overrides.
+ */
+export function validationChildEnv(extra = {}) {
+  const env = { ...process.env, ...extra, NO_COLOR: '1' };
+  const cleanedNodeOptions = stripNodeTestReporterOptions(env.NODE_OPTIONS);
+  if (cleanedNodeOptions) env.NODE_OPTIONS = cleanedNodeOptions;
+  else delete env.NODE_OPTIONS;
+  return env;
+}
+
 export function repoRoot() {
   return ROOT;
 }
