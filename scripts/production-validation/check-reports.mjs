@@ -9,7 +9,7 @@ import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Collector, SEVERITY } from './lib/output.mjs';
-import { repoRoot, writesAllowed } from './lib/env.mjs';
+import { repoRoot, validationChildEnv, writesAllowed } from './lib/env.mjs';
 import { rest, describeResult } from './lib/supabase.mjs';
 import { request } from './lib/http.mjs';
 import { ensureSessions } from './lib/fixtures.mjs';
@@ -21,10 +21,10 @@ function isDeniedShape(result) {
 
 function runTsxTests(files, timeoutMs) {
   return new Promise((resolvePromise) => {
-    const child = spawn(process.execPath, ['--import', 'tsx', '--test', ...files], {
+    const child = spawn(process.execPath, ['--import', 'tsx', '--test', '--test-reporter=tap', ...files], {
       cwd: repoRoot(),
       windowsHide: true,
-      env: { ...process.env, NO_COLOR: '1' },
+      env: validationChildEnv(),
     });
     let output = '';
     const timer = setTimeout(() => { child.kill('SIGKILL'); resolvePromise({ code: null, output: `${output}\n[validation] timeout` }); }, timeoutMs);
@@ -67,8 +67,8 @@ export async function run(ctx) {
   }
 
   const result = await runTsxTests(['tests/reports.test.ts', 'tests/reportDatabase.test.ts'], 8 * 60_000);
-  const passMatch = /# pass (\d+)/.exec(result.output);
-  const failMatch = /# fail (\d+)/.exec(result.output);
+  const passMatch = /(?:^|\n)\s*(?:#|ℹ)\s*pass\s+(\d+)/.exec(result.output);
+  const failMatch = /(?:^|\n)\s*(?:#|ℹ)\s*fail\s+(\d+)/.exec(result.output);
   if (result.code === 0 && failMatch && Number(failMatch[1]) === 0) {
     out.pass('[REPOSITORY] rapor adapter + veritabanı davranış testleri', '0 fail', `${passMatch?.[1] ?? '?'} pass / 0 fail`, { severity: SEVERITY.HIGH, resource: 'tests/reports*.test.ts' });
   } else if (result.code === null && !passMatch) {
